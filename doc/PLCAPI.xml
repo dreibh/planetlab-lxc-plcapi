@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY Methods SYSTEM "Methods.xml">
+]>
+
+<book>
+  <bookinfo>
+    <title>PlanetLab Central API Documentation</title>
+    <authorgroup>
+      <author><firstname>Aaron</firstname><surname>Klingaman</surname></author>
+      <author><firstname>Mark</firstname><surname>Huang</surname></author>
+    </authorgroup>
+  </bookinfo>
+
+  <chapter id="Methods">
+    <title>PlanetLab API Methods</title>
+    <para></para>
+
+    &Methods;
+  </chapter>
+
+</book>

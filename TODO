@@ -1,0 +1,27 @@
+* Event logging
+  * In the current API, every call is logged and certain interesting
+    events are logged in the events table. I haven't implemented event
+    logging yet in the new API.
+
+* Tests
+  * With Shell.py, it should be easy to write a large set of tests. I've
+    thought about writing a SQLite DB backend so that MyPLC/PostgreSQL
+    doesn't have to be setup in order for the tests to be run. But there
+    are some technical limitations to SQLite. It would probably be best
+    to run the testsuite against MyPLC for now.
+
+* Authentication
+  * Need to implement node and certificate/federation authentication.
+  * Need to (re)implement "capability" (i.e. trusted host)
+    authentication. Maybe implement it in the same way as node
+    authentication.
+
+* Anonymous functions
+  * Implement anonymous functions for now for backward compatibility,
+    but get rid of them as soon as possible
+
+* Hierarchical layout
+  * Probably need to organize the functions inside PLC/Methods/
+
+* Deletion
+  * Need to come up with a sane, consistent principal deletion policy.
