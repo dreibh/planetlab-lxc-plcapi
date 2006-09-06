@@ -2,6 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
+from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
@@ -44,6 +45,13 @@ class AdmAddNode(Method):
 
         site = sites.values()[0]
 
+        # Get site node group information
+        nodegroups = NodeGroups(self.api, [site['nodegroup_id']])
+        if not nodegroups:
+            raise PLCAPIError, "Site %d does not have a nodegroup" % site['site_id']
+
+        nodegroup = nodegroups.values()[0]
+
         # Authenticated function
         assert self.caller is not None
 
@@ -59,13 +67,9 @@ class AdmAddNode(Method):
         node = Node(self.api, optional_vals)
         node['hostname'] = hostname
         node['boot_state'] = boot_state
-        node.flush()
+        node.flush(commit = False)
 
         # Now associate the node with the site
-        node_id = node['node_id']
-        nodegroup_id = site['nodegroup_id']
-        self.api.db.do("INSERT INTO nodegroup_nodes (nodegroup_id, node_id)" \
-                       " VALUES(%(nodegroup_id)d, %(node_id)d)",
-                       locals())
+        nodegroup.add_node(node, commit = True)
 
         return node['node_id']
