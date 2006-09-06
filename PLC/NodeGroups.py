@@ -4,13 +4,16 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: NodeGroups.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
+
+from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
+from PLC.Nodes import Node, Nodes
 
 class NodeGroup(Row):
     """
@@ -42,6 +45,24 @@ class NodeGroup(Row):
             if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup_id:
                 raise PLCInvalidArgument, "Node group name already in use"
 
+    def add_node(self, node, commit = True):
+        """
+        Add existing node to specified nodegroup.
+        """
+
+        assert 'nodegroup_id' in self
+        assert isinstance(node, Node)
+        assert 'node_id' in node
+
+        node_id = node['node_id']
+        nodegroup_id = self['nodegroup_id']
+        self.api.db.do("INSERT INTO nodegroup_nodes (nodegroup_id, node_id)" \
+                       " VALUES(%(nodegroup_id)d, %(node_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+        
     def flush(self, commit = True):
         """
         Flush changes back to the database.
@@ -128,7 +149,7 @@ class NodeGroups(Table):
                                    nodegroup_id_or_name_list)
             names = filter(lambda name: isinstance(name, StringTypes),
                            nodegroup_id_or_name_list)
-            sql += " AND (False"
+            sql += " WHERE (False"
             if nodegroup_ids:
                 sql += " OR nodegroup_id IN (%s)" % ", ".join(map(str, nodegroup_ids))
             if names:
