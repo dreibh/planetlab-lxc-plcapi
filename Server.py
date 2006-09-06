@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Server.py,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
 #
 
 import os
@@ -67,7 +67,7 @@ class PLCAPIServer(BaseHTTPServer.HTTPServer):
 # Defaults
 addr = "0.0.0.0"
 port = 8000
-config = "/etc/planetlab/plc_config.xml"
+config = "/etc/planetlab/plc_config"
 
 def usage():
     print "Usage: %s [OPTION]..." % sys.argv[0]
