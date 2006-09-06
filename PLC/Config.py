@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Config.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
 #
 
 import os
@@ -39,7 +39,7 @@ class Config:
             except:
                 raise PLCAPIError("Could not find plc_config in " + \
                                   file + ", " + \
-                                  myplc + "plc_config")
+                                  myplc + os.sep + "plc_config")
 
 class XMLConfig:
     """
@@ -64,7 +64,7 @@ class XMLConfig:
             except:
                 raise PLCAPIError("Could not find plc_config.xml in " + \
                                   file + ", " + \
-                                  myplc + "plc_config.xml")
+                                  myplc + os.sep + "plc_config.xml")
 
         for (category, variablelist) in cfg.variables().values():
             for variable in variablelist.values():
