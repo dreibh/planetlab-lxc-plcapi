@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: plcsh,v 1.3 2006/01/09 19:57:24 mlhuang Exp $
+# $Id: Shell.py,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
 #
 
 import os, sys
@@ -40,6 +40,11 @@ for (opt, optval) in opts:
         usage()
 
 api = PLCAPI(config)
+
+auth = {'AuthMethod': "capability",
+        'Username': api.config.PLC_API_MAINTENANCE_USER,
+        'AuthString': api.config.PLC_API_MAINTENANCE_PASSWORD,
+        'Role': "admin"}
 
 class Dummy:
     """
