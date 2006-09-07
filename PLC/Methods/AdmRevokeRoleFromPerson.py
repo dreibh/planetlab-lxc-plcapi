@@ -52,10 +52,6 @@ class AdmRevokeRoleFromPerson(Method):
             raise PLCPermissionDenied, "Not allowed to revoke that role"
 
         if role_id in person['role_ids']:
-            person_id = person['person_id']
-            self.api.db.do("DELETE FROM person_roles" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND role_id = %(role_id)d",
-                           locals())
+            person.remove_role(role_id)
 
         return 1
