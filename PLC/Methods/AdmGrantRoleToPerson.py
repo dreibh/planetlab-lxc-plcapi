@@ -52,9 +52,6 @@ class AdmGrantRoleToPerson(Method):
             raise PLCInvalidArgument, "Not allowed to grant that role"
 
         if role_id not in person['role_ids']:
-            person_id = person['person_id']
-            self.api.db.do("INSERT INTO person_roles (person_id, role_id)" \
-                           " VALUES(%(person_id)d, %(role_id)d)",
-                           locals())
+            person.add_role(role_id)
 
         return 1
