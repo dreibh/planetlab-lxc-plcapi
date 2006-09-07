@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.2 2006/09/06 16:03:24 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -47,7 +47,7 @@ class NodeGroup(Row):
 
     def add_node(self, node, commit = True):
         """
-        Add existing node to specified nodegroup.
+        Add node to existing nodegroup.
         """
 
         assert 'nodegroup_id' in self
@@ -62,7 +62,37 @@ class NodeGroup(Row):
 
         if commit:
             self.api.db.commit()
-        
+
+        if 'node_ids' in self and node_id not in self['node_ids']:
+            self['node_ids'].append(node_id)
+
+        if 'nodegroup_ids' in node and nodegroup_id not in node['nodegroup_ids']:
+            node['nodegroup_ids'].append(nodegroup_id)
+
+    def remove_node(self, node, commit = True):
+        """
+        Remove node from existing nodegroup.
+        """
+
+        assert 'nodegroup_id' in self
+        assert isinstance(node, Node)
+        assert 'node_id' in node
+
+        node_id = node['node_id']
+        nodegroup_id = self['nodegroup_id']
+        self.api.db.do("INSERT INTO nodegroup_nodes (nodegroup_id, node_id)" \
+                       " VALUES(%(nodegroup_id)d, %(node_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'node_ids' in self and node_id not in self['node_ids']:
+            self['node_ids'].append(node_id)
+
+        if 'nodegroup_ids' in node and nodegroup_id not in node['nodegroup_ids']:
+            node['nodegroup_ids'].append(nodegroup_id)
+
     def flush(self, commit = True):
         """
         Flush changes back to the database.
