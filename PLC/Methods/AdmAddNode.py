@@ -39,7 +39,7 @@ class AdmAddNode(Method):
             raise PLCInvalidArgument, "Invalid fields specified"
 
         # Get site information
-        sites = Sites(self.api, [site_id_or_login_base])
+        sites = Sites(self.api, [site_id_or_login_base], ['person_ids'])
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
