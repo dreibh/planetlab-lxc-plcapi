@@ -42,10 +42,6 @@ class AdmAddPersonToSite(Method):
         site = sites.values()[0]
 
         if site['site_id'] not in person['site_ids']:
-            person_id = person['person_id']
-            site_id = site['site_id']
-            self.api.db.do("INSERT INTO person_site (person_id, site_id)" \
-                           " VALUES(%(person_id)d, %(site_id)d)",
-                           locals())
+            site.add_person(person)
 
         return 1
