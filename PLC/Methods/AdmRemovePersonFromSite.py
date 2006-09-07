@@ -42,11 +42,6 @@ class AdmRemovePersonFromSite(Method):
         site = sites.values()[0]
 
         if site['site_id'] in person['site_ids']:
-            person_id = person['person_id']
-            site_id = site['site_id']
-            self.api.db.do("DELETE FROM person_site" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND site_id = %(site_id)d",
-                           locals())
+            site.remove_person(person)
 
         return 1
