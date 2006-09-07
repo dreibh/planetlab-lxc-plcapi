@@ -19,7 +19,7 @@ class AdmGetAllRoles(Method):
     accepts = [PasswordAuth()]
     returns = dict
 
-    def call(self, auth, person_id_or_email_list = None, return_fields = None):
+    def call(self, auth):
         roles = Roles(self.api)
 
         # Just the role_id: name mappings
