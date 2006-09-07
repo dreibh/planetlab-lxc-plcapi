@@ -5,9 +5,7 @@ from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
-from PLC.Methods.AdmGetPersons import AdmGetPersons
-
-class AdmGetPersonSites(AdmGetPersons):
+class AdmGetPersonSites(Method):
     """
     Returns the sites that the specified person is associated with as
     an array of site identifiers.
@@ -28,13 +26,24 @@ class AdmGetPersonSites(AdmGetPersons):
     returns = [Site.fields['site_id']]
 
     def call(self, auth, person_id_or_email):
-        persons = AdmGetPersons.call(self, auth, [person_id_or_email])
+        # Get account information
+        persons = Persons(self.api, [person_id_or_email])
+        if not persons:
+            raise PLCInvalidArgument, "No such account"
 
-        # AdmGetPersons() validates person_id_or_email
-        assert persons
-        person = persons[0]
+        person = persons.values()[0]
+
+        # Authenticated function
+        assert self.caller is not None
+
+        # Check if we can view this account
+        if not self.caller.can_view(person):
+            raise PLCPermissionDenied, "Not allowed to view specified account"
 
         # Filter out deleted sites
-        sites = Sites(self.api, persons['site_ids'])
+        # XXX This shouldn't be necessary once the join tables are cleaned up
+        if person['site_ids']:
+            sites = Sites(self.api, person['site_ids'])
+            return filter(lambda site_id: site_id in sites, person['site_ids'])
 
-        return [site['site_id'] for site in sites]
+        return person['site_ids']
