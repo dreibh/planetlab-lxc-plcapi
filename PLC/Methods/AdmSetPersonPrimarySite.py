@@ -51,14 +51,6 @@ class AdmSetPersonPrimarySite(Method):
         if site['site_id'] not in person['site_ids']:
             raise PLCInvalidArgument, "Not a member of the specified site"
 
-        person_id = person['person_id']
-        site_id = site['site_id']
-        self.api.db.do("UPDATE person_site SET is_primary = False" \
-                       " WHERE person_id = %(person_id)d",
-                       locals())
-        self.api.db.do("UPDATE person_site SET is_primary = True" \
-                       " WHERE person_id = %(person_id)d" \
-                       " AND site_id = %(site_id)d",
-                       locals())
+        person.set_primary_site(site)
 
         return 1
