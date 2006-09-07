@@ -5,11 +5,11 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.Persons import Person, Persons
 from PLC.Slices import Slice, Slices
 from PLC.PCUs import PCU, PCUs
 from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
+import PLC.Persons
 
 class Site(Row):
     """
@@ -120,6 +120,55 @@ class Site(Row):
 
         return nodegroup_id
 
+    def add_person(self, person, commit = True):
+        """
+        Add person to existing site.
+        """
+
+        assert 'site_id' in self
+        assert isinstance(person, PLC.Persons.Person)
+        assert 'person_id' in person
+
+        site_id = self['site_id']
+        person_id = person['person_id']
+        self.api.db.do("INSERT INTO person_site (person_id, site_id)" \
+                       " VALUES(%(person_id)d, %(site_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'person_ids' in self and person_id not in self['person_ids']:
+            self['person_ids'].append(person_id)
+
+        if 'site_ids' in person and site_id not in person['site_ids']:
+            person['site_ids'].append(site_id)
+
+    def remove_person(self, person, commit = True):
+        """
+        Remove person from existing site.
+        """
+
+        assert 'site_id' in self
+        assert isinstance(person, PLC.Persons.Person)
+        assert 'person_id' in person
+
+        site_id = self['site_id']
+        person_id = person['person_id']
+        self.api.db.do("DELETE FROM person_site" \
+                       " WHERE person_id = %(person_id)d" \
+                       " AND site_id = %(site_id)d",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'person_ids' in self and person_id in self['person_ids']:
+            self['person_ids'].remove(person_id)
+
+        if 'site_ids' in person and site_id in person['site_ids']:
+            person['site_ids'].remove(site_id)
+
     def flush(self, commit = True):
         """
         Flush changes back to the database.
@@ -155,7 +204,7 @@ class Site(Row):
             nodegroup_id = self['nodegroup_id']
             # XXX Needs a unique name because we cannot delete site node groups yet
             name = self['login_base'] + str(self['site_id'])
-            description = "Nodes at " + self['name']
+            description = "Nodes at " + self['login_base']
             is_custom = False
             self.api.db.do("INSERT INTO nodegroups (nodegroup_id, name, description, is_custom)" \
                            " VALUES (%(nodegroup_id)d, %(name)s, %(description)s, %(is_custom)s)",
@@ -216,7 +265,7 @@ class Site(Row):
 
         # Delete accounts of all people at the site who are not
         # members of at least one other non-deleted site.
-        persons = Persons(self.api, self['person_ids'])
+        persons = PLC.Persons.Persons(self.api, self['person_ids'])
         for person_id, person in persons.iteritems():
             delete = True
 
@@ -299,7 +348,7 @@ class Sites(Table):
         if extra_tables:
             sql += " LEFT JOIN " + " LEFT JOIN ".join(extra_tables)
 
-        sql += " WHERE deleted IS False"
+        sql += " WHERE sites.deleted IS False"
 
         if site_id_or_login_base_list:
             # Separate the list into integers and strings
