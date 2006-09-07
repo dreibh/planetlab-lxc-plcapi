@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Persons.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -22,6 +22,7 @@ from PLC.Roles import Roles
 from PLC.Addresses import Address, Addresses
 from PLC.Keys import Key, Keys
 from PLC import md5crypt
+import PLC.Sites
 
 class Person(Row):
     """
@@ -137,7 +138,7 @@ class Person(Row):
         Ensure that the specified site_ids are all valid.
         """
 
-        sites = Sites(self.api, site_ids)
+        sites = PLC.Sites.Sites(self.api, site_ids)
         for site_id in site_ids:
             if site_id not in sites:
                 raise PLCInvalidArgument, "No such site"
@@ -154,6 +155,8 @@ class Person(Row):
         3. We are a PI and the person is a user or tech or at
            one of our sites.
         """
+
+        assert isinstance(person, Person)
 
         if self['person_id'] == person['person_id']:
             return True
@@ -178,6 +181,8 @@ class Person(Row):
         3. We are a PI and the person is at one of our sites.
         """
 
+        assert isinstance(person, Person)
+
         if self.can_update(person):
             return True
 
@@ -187,6 +192,74 @@ class Person(Row):
                 return min(self['role_ids']) <= min(person['role_ids'])
 
         return False
+
+    def add_role(self, role_id, commit = True):
+        """
+        Add role to existing account.
+        """
+
+        assert 'person_id' in self
+
+        person_id = self['person_id']
+        self.api.db.do("INSERT INTO person_roles (person_id, role_id)" \
+                       " VALUES(%(person_id)d, %(role_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        assert 'role_ids' in self
+        if role_id not in self['role_ids']:
+            self['role_ids'].append(role_id)
+
+    def remove_role(self, role_id, commit = True):
+        """
+        Remove role from existing account.
+        """
+
+        assert 'person_id' in self
+
+        person_id = self['person_id']
+        self.api.db.do("DELETE FROM person_roles" \
+                       " WHERE person_id = %(person_id)d" \
+                       " AND role_id = %(role_id)d",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        assert 'role_ids' in self
+        if role_id in self['role_ids']:
+            self['role_ids'].remove(role_id)
+
+    def set_primary_site(self, site, commit = True):
+        """
+        Set the primary site for an existing account.
+        """
+
+        assert 'person_id' in self
+        assert isinstance(site, PLC.Sites.Site)
+        assert 'site_id' in site
+
+        person_id = self['person_id']
+        site_id = site['site_id']
+        self.api.db.do("UPDATE person_site SET is_primary = False" \
+                       " WHERE person_id = %(person_id)d",
+                       locals())
+        self.api.db.do("UPDATE person_site SET is_primary = True" \
+                       " WHERE person_id = %(person_id)d" \
+                       " AND site_id = %(site_id)d",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        assert 'site_ids' in self
+        assert site_id in self['site_ids']
+
+        # Make sure that the primary site is first in the list
+        self['site_ids'].remove(site_id)
+        self['site_ids'].insert(0, site_id)
 
     def flush(self, commit = True):
         """
@@ -313,10 +386,10 @@ class Persons(Table):
         sql += " WHERE (role_id IS NULL or role_id <= %(role_max)d)"
 
         if deleted is not None:
-            sql += " AND deleted IS %(deleted)s"
+            sql += " AND persons.deleted IS %(deleted)s"
 
         if enabled is not None:
-            sql += " AND enabled IS %(enabled)s"
+            sql += " AND persons.enabled IS %(enabled)s"
 
         if person_id_or_email_list:
             # Separate the list into integers and strings
