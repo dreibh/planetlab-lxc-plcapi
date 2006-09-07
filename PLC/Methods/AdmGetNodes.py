@@ -44,15 +44,17 @@ class AdmGetNodes(Method):
         # Authenticated function
         assert self.caller is not None
 
+        valid_fields = dict(self.return_fields)
+
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:
             for key in ['boot_nonce', 'key', 'session', 'root_person_ids']:
-                del self.return_fields[key]
+                del valid_fields[key]
 
         # Make sure that only valid fields are specified
         if return_fields is None:
-            return_fields = self.return_fields
-        elif filter(lambda field: field not in self.return_fields, return_fields):
+            return_fields = valid_fields
+        elif filter(lambda field: field not in valid_fields, return_fields):
             raise PLCInvalidArgument, "Invalid return field specified"
 
         # Get node information
