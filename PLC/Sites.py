@@ -20,13 +20,13 @@ class Site(Row):
 
     fields = {
         'site_id': Parameter(int, "Site identifier"),
-        'name': Parameter(str, "Full site name"),
-        'abbreviated_name': Parameter(str, "Abbreviated site name"),
-        'login_base': Parameter(str, "Site slice prefix"),
+        'name': Parameter(str, "Full site name", max = 254),
+        'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50),
+        'login_base': Parameter(str, "Site slice prefix", max = 20),
         'is_public': Parameter(bool, "Publicly viewable site"),
-        'latitude': Parameter(float, "Decimal latitude of the site"),
-        'longitude': Parameter(float, "Decimal longitude of the site"),
-        'url': Parameter(str, "URL of a page that describes the site"),
+        'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0),
+        'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0),
+        'url': Parameter(str, "URL of a page that describes the site", max = 254),
         'nodegroup_id': Parameter(int, "Identifier of the nodegroup containing the site's nodes"),
         'organization_id': Parameter(int, "Organizational identifier if the site is part of a larger organization"),
         'ext_consortium_id': Parameter(int, "Consortium identifier if the site is part of an external consortium"),
@@ -65,9 +65,6 @@ class Site(Row):
         self.api = api
 
     def validate_login_base(self, login_base):
-        if len(login_base) > 20:
-            raise PLCInvalidArgument, "Login base must be <= 20 characters"
-
         if not set(login_base).issubset(string.ascii_letters):
             raise PLCInvalidArgument, "Login base must consist only of ASCII letters"
 
@@ -80,9 +77,6 @@ class Site(Row):
         return login_base
 
     def validate_latitude(self, latitude):
-        if latitude < -90.0 or latitude > 90.0:
-            raise PLCInvalidArgument, "Invalid latitude value"
-
         if not self.has_key('longitude') or \
            self['longitude'] is None:
             raise PLCInvalidArgument, "Longitude must also be specified"
@@ -90,9 +84,6 @@ class Site(Row):
         return latitude
 
     def validate_longitude(self, longitude):
-        if longitude < -180.0 or longitude > 180.0:
-            raise PLCInvalidArgument, "Invalid longitude value"
-
         if not self.has_key('latitude') or \
            self['latitude'] is None:
             raise PLCInvalidArgument, "Latitude must also be specified"
