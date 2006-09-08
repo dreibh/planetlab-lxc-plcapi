@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Auth.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
 #
 
 import crypt
@@ -95,12 +95,13 @@ class PasswordAuth(Auth):
             if auth['AuthString'] != password:
                 raise PLCAuthenticationFailure, "Maintenance account password verification failed"
         else:
-            # Get encrypted password stored in the DB
+            # Compare encrypted plaintext against encrypted password stored in the DB
+            plaintext = auth['AuthString'].encode(method.api.encoding)
             password = person['password']
 
             # Protect against blank passwords in the DB
             if password is None or password[:12] == "" or \
-               crypt.crypt(auth['AuthString'], password[:12]) != password:
+               crypt.crypt(plaintext, password[:12]) != password:
                 raise PLCAuthenticationFailure, "Password verification failed"
 
         if auth['Role'] not in person['roles']:
