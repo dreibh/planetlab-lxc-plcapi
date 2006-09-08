@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id$
+# $Id: API.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
 #
 
 import sys
@@ -27,7 +27,9 @@ import PLC.Methods
 class PLCAPI:
     methods = PLC.Methods.methods
 
-    def __init__(self, config = "/etc/planetlab/plc_config"):
+    def __init__(self, config = "/etc/planetlab/plc_config", encoding = "utf-8"):
+        self.encoding = encoding
+
         # Better just be documenting the API
         if config is None:
             return
@@ -100,8 +102,8 @@ class PLCAPI:
         if interface == xmlrpclib:
             if not isinstance(result, PLCFault):
                 result = (result,)
-            data = xmlrpclib.dumps(result, methodresponse = True)
+            data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding)
         elif interface == SOAPpy:
-            data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}})
+            data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
 
         return data
