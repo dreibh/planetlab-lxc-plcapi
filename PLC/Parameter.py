@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Parameter.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
 
 class Parameter:
@@ -14,9 +14,9 @@ class Parameter:
     sub-parameters (i.e., dict fields).
     """
 
-    def __init__(self, type, doc = "", optional = True, default = None):
-        (self.type, self.doc, self.optional, self.default) = \
-                    (type, doc, optional, default)
+    def __init__(self, type, doc = "", min = None, max = None, optional = True, default = None):
+        (self.type, self.doc, self.min, self.max, self.optional, self.default) = \
+                    (type, doc, min, max, optional, default)
 
     def __repr__(self):
         return repr(self.type)
