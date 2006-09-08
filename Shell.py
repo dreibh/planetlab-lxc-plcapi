@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.2 2006/09/06 19:17:25 mlhuang Exp $
+# $Id: Shell.py,v 1.3 2006/09/08 00:29:34 mlhuang Exp $
 #
 
 import os, sys
@@ -40,19 +40,21 @@ def usage():
     print "     -u, --user=EMAIL        API user name"
     print "     -p, --password=STRING   API password"
     print "     -r, --role=ROLE         API role"
+    print "     -x, --xmlrpc            Use XML-RPC interface"
     print "     --help                  This message"
     sys.exit(1)
 
 # Get options
 try:
     (opts, argv) = getopt.getopt(sys.argv[1:],
-                                 "f:h:m:u:p:r:",
+                                 "f:h:m:u:p:r:x",
                                  ["config=", "cfg=", "file=",
                                   "host=",
                                   "method=",
                                   "username=", "user=",
                                   "password=", "pass=", "authstring=",
                                   "role=",
+                                  "xmlrpc",
                                   "help"])
 except getopt.GetoptError, err:
     print "Error: " + err.msg
@@ -75,7 +77,13 @@ for (opt, optval) in opts:
         usage()
 
 try:
-    # Try connecting directly to the DB
+    # If any XML-RPC options have been specified, do not try
+    # connecting directly to the DB.
+    if opts:
+        raise Exception
+        
+    # Otherwise, first try connecting directly to the DB. If this
+    # fails, try connecting to the API server via XML-RPC.
     api = PLCAPI(config)
     config = api.config
     server = None
@@ -90,7 +98,7 @@ except:
         else:
             url = "http://"
         url += config.PLC_API_HOST + \
-               ":8000" + str(config.PLC_API_PORT) + \
+               ":" + str(config.PLC_API_PORT) + \
                "/" + config.PLC_API_PATH + "/"
 
     server = xmlrpclib.ServerProxy(url)
@@ -146,14 +154,18 @@ class Callable:
         if method is not None:
             # Figure out if the function requires an authentication
             # structure as its first argument.
-            func = api.callable(method)
-            if func.accepts and \
-               (isinstance(func.accepts[0], Auth) or \
-                (isinstance(func.accepts[0], Mixed) and \
-                 filter(lambda param: isinstance(param, Auth), func.accepts[0]))):
-                self.auth = True
-            else:
-                self.auth = False
+            self.auth = False
+
+            try:
+                func = api.callable(method)
+                if func.accepts and \
+                   (isinstance(func.accepts[0], Auth) or \
+                    (isinstance(func.accepts[0], Mixed) and \
+                     filter(lambda param: isinstance(param, Auth), func.accepts[0]))):
+                    self.auth = True
+            except:
+                # XXX Ignore undefined methods for now
+                pass
 
             if server is not None:
                 self.func = getattr(server, method)
