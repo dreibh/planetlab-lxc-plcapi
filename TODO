@@ -25,3 +25,7 @@
 
 * Deletion
   * Need to come up with a sane, consistent principal deletion policy.
+
+* Validation
+  * Need to come up with a policy (truncation? fault?) for dealing with
+    variable length strings.
