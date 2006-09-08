@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.2 2006/09/06 19:17:25 mlhuang Exp $
+# $Id: Test.py,v 1.1 2006/09/08 00:29:56 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -28,16 +28,28 @@ def randint(min = 0, max = 1):
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-valid_xml_chars  = map(unichr, [0x9, 0xA, 0xD])
-valid_xml_chars += map(unichr, xrange(0x20, 0x7F - 1))
-valid_xml_chars += map(unichr, xrange(0x84 + 1, 0x86 - 1))
-valid_xml_chars += map(unichr, xrange(0x9F + 1, 0xD7FF))
+low_xml_chars  = map(unichr, [0x9, 0xA, 0xD])
+low_xml_chars += map(unichr, xrange(0x20, 0x7F - 1))
+low_xml_chars += map(unichr, xrange(0x84 + 1, 0x86 - 1))
+low_xml_chars += map(unichr, xrange(0x9F + 1, 0xFF))
+valid_xml_chars  = list(low_xml_chars)
+valid_xml_chars += map(unichr, xrange(0xFF + 1, 0xD7FF))
 valid_xml_chars += map(unichr, xrange(0xE000, 0xFDD0 - 1))
 valid_xml_chars += map(unichr, xrange(0xFDDF + 1, 0xFFFD))
 
-def randstr(length, pool = valid_xml_chars):
-    sample = random.sample(pool, length)
-    return u''.join(sample)
+def randstr(length, pool = valid_xml_chars, encoding = "utf-8"):
+    sample = random.sample(pool, min(length, len(pool)))
+    while True:
+        s = u''.join(sample)
+        bytes = len(s.encode(encoding))
+        if bytes > length:
+            sample.pop()
+        elif bytes < length:
+            sample += random.sample(pool, min(length - bytes, len(pool)))
+            random.shuffle(sample)
+        else:
+            break
+    return s
 
 def randhostname():
     # 1. Each part begins and ends with a letter or number.
@@ -81,9 +93,9 @@ tech = {'AuthMethod': "password",
 # Add sites
 site_ids = []
 for i in range(3):
-    name = randstr(50)
-    abbreviated_name = randstr(10)
-    login_base = randstr(10, letters).lower()
+    name = randstr(254)
+    abbreviated_name = randstr(50)
+    login_base = randstr(20, letters).lower()
     latitude = int(randfloat(-90.0, 90.0) * 1000) / 1000.0
     longitude = int(randfloat(-180.0, 180.0) * 1000) / 1000.0
 
@@ -116,18 +128,15 @@ print "=>", role_ids
 # Add users
 person_ids = []
 for auth in user, pi, tech:
-    # XXX Figure out what the actual maximum is if high characters are
-    # used.
-    first_name = randstr(10)
-    last_name = randstr(20)
-    email = randstr(10, letters + digits) + "@" + randhostname()
-    bio = randstr(50)
+    first_name = randstr(128)
+    last_name = randstr(128)
+    email = randstr(119, letters + digits) + "@" + randhostname()
+    bio = randstr(254)
     # Accounts are disabled by default
     enabled = False
 
     auth['Username'] = email
-    # XXX md5crypt cannot handle Unicode strings for some reason
-    auth['AuthString'] = str(randstr(16, letters))
+    auth['AuthString'] = randstr(254)
 
     print "AdmAddPerson(%s)" % email,
     person_id = AdmAddPerson(admin, first_name, last_name,
@@ -200,7 +209,7 @@ for site_id in site_ids:
     for i in range(3):
         hostname = randhostname()
         boot_state = 'inst'
-        model = randstr(32)
+        model = randstr(255)
 
         # Add node
         print "AdmAddNode(%s)" % hostname,
