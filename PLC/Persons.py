@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: Persons.py,v 1.2 2006/09/07 23:45:31 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -13,6 +13,7 @@ import md5
 import time
 from random import Random
 import re
+import crypt
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
@@ -21,7 +22,6 @@ from PLC.Table import Row, Table
 from PLC.Roles import Roles
 from PLC.Addresses import Address, Addresses
 from PLC.Keys import Key, Keys
-from PLC import md5crypt
 import PLC.Sites
 
 class Person(Row):
@@ -33,17 +33,17 @@ class Person(Row):
 
     fields = {
         'person_id': Parameter(int, "Account identifier"),
-        'first_name': Parameter(str, "Given name"),
-        'last_name': Parameter(str, "Surname"),
-        'title': Parameter(str, "Title"),
-        'email': Parameter(str, "Primary e-mail address"),
-        'phone': Parameter(str, "Telephone number"),
-        'url': Parameter(str, "Home page"),
-        'bio': Parameter(str, "Biography"),
+        'first_name': Parameter(str, "Given name", max = 128),
+        'last_name': Parameter(str, "Surname", max = 128),
+        'title': Parameter(str, "Title", max = 128),
+        'email': Parameter(str, "Primary e-mail address", max = 254),
+        'phone': Parameter(str, "Telephone number", max = 64),
+        'url': Parameter(str, "Home page", max = 254),
+        'bio': Parameter(str, "Biography", max = 254),
         'accepted_aup': Parameter(bool, "Has accepted the AUP"),
         'enabled': Parameter(bool, "Has been enabled"),
         'deleted': Parameter(bool, "Has been deleted"),
-        'password': Parameter(str, "Account password in crypt() form"),
+        'password': Parameter(str, "Account password in crypt() form", max = 254),
         'last_updated': Parameter(str, "Date and time of last update"),
         'date_created': Parameter(str, "Date and time when account was created"),
         }
@@ -112,14 +112,16 @@ class Person(Row):
         database.
         """
 
-        if len(password) > len(md5crypt.MAGIC) and \
-           password[0:len(md5crypt.MAGIC)] == md5crypt.MAGIC:
+        magic = "$1$"
+
+        if len(password) > len(magic) and \
+           password[0:len(magic)] == magic:
             return password
         else:
-            # Generate a somewhat unique 2 character salt string
+            # Generate a somewhat unique 8 character salt string
             salt = str(time.time()) + str(Random().random())
             salt = md5.md5(salt).hexdigest()[:8] 
-            return md5crypt.md5crypt(password, salt)
+            return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
 
     def validate_role_ids(self, role_ids):
         """
