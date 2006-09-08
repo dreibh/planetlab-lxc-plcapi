@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Method.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -198,7 +198,7 @@ class Method:
         
         return (min_args, max_args, defaults)
 
-    def type_check(self, name, value, expected):
+    def type_check(self, name, value, expected, min = None, max = None):
         """
         Checks the type of the named value against the expected type,
         which may be a Python type, a typed value, a Parameter, a
@@ -232,6 +232,8 @@ class Method:
 
         # Get actual expected type from within the Parameter structure
         elif isinstance(expected, Parameter):
+            min = expected.min
+            max = expected.max
             expected = expected.type
 
         expected_type = python_type(expected)
@@ -251,6 +253,20 @@ class Method:
                                      (xmlrpc_type(expected_type),
                                       xmlrpc_type(type(value))),
                                      name)
+
+        # If a minimum or maximum (length, value) has been specified
+        if expected_type in StringTypes:
+            if min is not None and \
+               len(value.encode(self.api.encoding)) < min:
+                raise PLCInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+            if max is not None and \
+               len(value.encode(self.api.encoding)) > max:
+                raise PLCInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+        else:
+            if min is not None and value < min:
+                raise PLCInvalidArgument, "%s must be > %s" % (name, str(min))
+            if max is not None and value > max:
+                raise PLCInvalidArgument, "%s must be < %s" % (name, str(max))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple)):
