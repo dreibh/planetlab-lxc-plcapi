@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.1 2006/09/08 00:29:56 mlhuang Exp $
+# $Id: Test.py,v 1.2 2006/09/08 19:47:51 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -235,6 +235,18 @@ nodes = AdmGetNodes(admin, node_ids)
 assert set(node_ids) == set([node['node_id'] for node in nodes])
 print "=>", node_ids
 
+
+#Get Site Nodes
+for site_id in site_ids:
+	print "AdmGetSiteNodes([%d])" % site_id,
+	assert AdmGetSiteNodes(admin, [site_id])
+	print "=> " , AdmGetSiteNodes(admin, [site_id])
+
+print "AdmGetSiteNodes(%s)" % site_ids,
+assert AdmGetSiteNodes(admin, site_ids)
+print "=> ", AdmGetSiteNodes(admin, site_ids)
+
+
 # Delete nodes
 for node_id in node_ids:
     print "AdmDeleteNode(%d)" % node_id,
@@ -300,3 +312,4 @@ for site_id in site_ids:
 print "AdmGetSites",
 assert not AdmGetSites(admin, site_ids)
 print "=> []"
+
