@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.2 2006/09/06 16:03:24 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.3 2006/09/07 23:44:49 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -40,10 +40,12 @@ class NodeGroup(Row):
         self.api = api
 
     def validate_name(self, name):
-        conflicts = NodeGroups(self.api, [name])
-        for nodegroup_id in conflicts:
+	conflicts = NodeGroups(self.api, [name])
+	for nodegroup_id in conflicts:
             if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup_id:
-                raise PLCInvalidArgument, "Node group name already in use"
+               raise PLCInvalidArgument, "Node group name already in use"
+	return name	
+	
 
     def add_node(self, node, commit = True):
         """
@@ -133,6 +135,7 @@ class NodeGroup(Row):
 
         if commit:
             self.api.db.commit()
+	    
 
     def delete(self, commit = True):
         """
@@ -166,7 +169,7 @@ class NodeGroups(Table):
     """
 
     def __init__(self, api, nodegroup_id_or_name_list = None):
-        self.api = api
+	self.api = api
 
         # N.B.: Node IDs returned may be deleted.
         sql = "SELECT nodegroups.*, nodegroup_nodes.node_id" \
