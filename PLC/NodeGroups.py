@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.3 2006/09/07 23:44:49 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.4 2006/09/12 16:08:50 tmack Exp $
 #
 
 from types import StringTypes
@@ -40,12 +40,30 @@ class NodeGroup(Row):
         self.api = api
 
     def validate_name(self, name):
+	#remove leading and trailing spaces
+	name = name.strip()
+
+	#make sure name is not blank after we removed the spaces
+        if not len(name) > 0:
+                raise PLCInvalidArgument, "Invalid Node Group Name"
+	
+	#make sure name doenst alredy exist
 	conflicts = NodeGroups(self.api, [name])
 	for nodegroup_id in conflicts:
             if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup_id:
                raise PLCInvalidArgument, "Node group name already in use"
-	return name	
+
+	return name
 	
+    def validate_description(self, description):
+	#remove trailing and leading spaces
+	description = description.strip()
+	
+	#make sure decription is not blank after we removed the spaces	
+	if not len(description) > 0:
+		raise PLCInvalidArgument, "Invalid Node Group Description"
+
+	return description
 
     def add_node(self, node, commit = True):
         """
