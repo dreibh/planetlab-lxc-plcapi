@@ -17,7 +17,8 @@ class AdmGetNodeGroupNodes(Method):
 
     accepts = [
         PasswordAuth(),
-        NodeGroup.fields['nodegroup_id']
+        Mixed(NodeGroup.fields['nodegroup_id'],
+	      NodeGroup.fields['name'])
         ]
 
     returns = [NodeGroup.join_fields['node_ids']]
@@ -27,12 +28,12 @@ class AdmGetNodeGroupNodes(Method):
         # Update documentation with list of default fields returned
         self.__doc__ += os.linesep.join(Site.default_fields.keys())
 
-    def call(self, auth, nodegroup_id):
+    def call(self, auth, nodegroup_id_or_name):
         # Authenticated function
         assert self.caller is not None
 
         # Get nodes in this nodegroup
-	nodegroup = NodeGroups(self.api, [nodegroup_id])	
+	nodegroup = NodeGroups(self.api, [nodegroup_id_or_name])	
 
 	# make sure sites are found
 	if not nodegroup:
