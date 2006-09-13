@@ -18,14 +18,15 @@ class AdmDeleteNodeGroup(Method):
 
     accepts = [
         PasswordAuth(),
-        NodeGroup.fields['nodegroup_id'],
+        Mixed(NodeGroup.fields['nodegroup_id'],
+	      NodeGroup.fields['name'])
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, node_group_id):
+    def call(self, auth, node_group_id_or_name):
         # Get account information
-        nodegroups = NodeGroups(self.api, [node_group_id])
+        nodegroups = NodeGroups(self.api, [node_group_id_or_name])
         if not nodegroups:
             raise PLCInvalidArgument, "No such node group"
 
