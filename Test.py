@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.2 2006/09/08 19:47:51 mlhuang Exp $
+# $Id: Test.py,v 1.3 2006/09/11 17:52:31 tmack Exp $
 #
 
 from pprint import pprint
@@ -230,6 +230,28 @@ for site_id in site_ids:
 
     # XXX AdmGetSiteNodes
 
+# Add Node Group
+node_group_name = ' tng '
+node_group_description = ' test node group ' 
+print "AdmAddNodeGroup(admin, %s, %s)" % (node_group_name, node_group_description),
+node_group_id = AdmAddNodeGroup(admin, node_group_name, node_group_description)
+print "=>", node_group_id
+
+# Update Node Group
+print "AdmUpdateNodeGroup"
+
+# Get Node Group
+print "AdmGetNodeGroupNodes(admin, %s)" % node_group_id,
+assert isinstance(AdmGetNodeGroupNodes(admin, node_group_id), list)
+print "=>", AdmGetNodeGroupNodes(admin, node_group_id)
+
+# Delet Node Group
+print "AdmDeleteNodeGroup(%d)" % node_group_id, 
+assert AdmDeleteNodeGroup(admin, node_group_id)
+print "=> OK"
+
+
+#Get Nodes
 print "AdmGetNodes",
 nodes = AdmGetNodes(admin, node_ids)
 assert set(node_ids) == set([node['node_id'] for node in nodes])
