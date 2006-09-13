@@ -1,0 +1,42 @@
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.Auth import PasswordAuth
+from PLC.Nodes import Node, Nodes
+from PLC.NodeGroups import NodeGroup, NodeGroups
+
+class AdmDeleteNodeGroup(Method):
+    """
+    Delete an existing Node Group.
+
+    Admins my delete any node group
+
+    Returns 1 if successful, faults otherwise.
+    """
+
+    roles = ['admin']
+
+    accepts = [
+        PasswordAuth(),
+        NodeGroup.fields['nodegroup_id'],
+        ]
+
+    returns = Parameter(int, '1 if successful')
+
+    def call(self, auth, node_group_id):
+        # Get account information
+        nodegroups = NodeGroups(self.api, [node_group_id])
+        if not nodegroups:
+            raise PLCInvalidArgument, "No such node group"
+
+        nodegroup = nodegroups.values()[0]
+
+        # If we are not an admin, make sure that the caller is a
+        # member of the site at which the node is located.
+        if 'admin' not in self.caller['roles']:
+            # Authenticated function
+            raise PLCPermissionDenied, "Not allowed to delete nodes groups"
+
+        nodegroup.delete()
+
+        return 1
