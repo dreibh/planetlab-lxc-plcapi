@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.4 2006/09/12 16:08:50 tmack Exp $
+# $Id: NodeGroups.py,v 1.5 2006/09/12 18:04:02 tmack Exp $
 #
 
 from types import StringTypes
@@ -161,7 +161,7 @@ class NodeGroup(Row):
         """
 
         assert 'nodegroup_id' in self
-
+	assert self is not {}
         # Delete ourself
         tables = ['nodegroup_nodes', 'override_bootscripts',
                   'conf_assoc', 'node_root_access']
@@ -174,8 +174,8 @@ class NodeGroup(Row):
 
         for table in tables:
             self.api.db.do("DELETE FROM %s" \
-                           " WHERE nodegroup_id = %(nodegroup_id)" % \
-                           table, self)
+                           " WHERE nodegroup_id = %d" % \
+                           (table, self['nodegroup_id']), self)
 
         if commit:
             self.api.db.commit()
