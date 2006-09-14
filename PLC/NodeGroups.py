@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.5 2006/09/12 18:04:02 tmack Exp $
+# $Id: NodeGroups.py,v 1.6 2006/09/13 15:40:26 tmack Exp $
 #
 
 from types import StringTypes
@@ -35,6 +35,7 @@ class NodeGroup(Row):
         'node_ids': Parameter([int], "List of nodes in this node group"),
         }
 
+    all_fields = dict(fields.items() + join_fields.items())
     def __init__(self, api, fields):
         Row.__init__(self, fields)
         self.api = api
