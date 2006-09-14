@@ -1,5 +1,3 @@
-# NodeGroup.validate_name() changes name to null. This causes database error
-
 
 from PLC.Faults import *
 from PLC.Method import Method
@@ -20,14 +18,13 @@ class AdmAddNodeGroup(Method):
     roles = ['admin']
 
     can_update = lambda (field, value): field in \
-                 ['model', 'version']
+                 ['name', 'description', 'is_custom']
     update_fields = dict(filter(can_update, NodeGroup.fields.items()))
-
+	
     accepts = [
         PasswordAuth(),
         NodeGroup.fields['name'],
         NodeGroup.fields['description'],
-        NodeGroup.fields['is_custom'],
         update_fields
         ]
 
