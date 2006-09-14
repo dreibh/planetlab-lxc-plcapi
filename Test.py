@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.3 2006/09/11 17:52:31 tmack Exp $
+# $Id: Test.py,v 1.4 2006/09/13 15:48:25 tmack Exp $
 #
 
 from pprint import pprint
@@ -231,21 +231,43 @@ for site_id in site_ids:
     # XXX AdmGetSiteNodes
 
 # Add Node Group
-node_group_name = ' tng '
-node_group_description = ' test node group ' 
+node_group_name = 'tng'
+node_group_description = 'test node group' 
 print "AdmAddNodeGroup(admin, %s, %s)" % (node_group_name, node_group_description),
 node_group_id = AdmAddNodeGroup(admin, node_group_name, node_group_description)
 print "=>", node_group_id
 
-# Update Node Group
-print "AdmUpdateNodeGroup"
+# Update Node Groupi
+node_group_name = node_group_name + randstr(5)
+node_group_description = node_group_description + randstr(5)
+print "AdmUpdateNodeGroup(admin, %d, %s, %s)" % (node_group_id, node_group_name,node_group_description ),
+assert AdmUpdateNodeGroup(admin, node_group_id, node_group_name, node_group_description)
+print "=> OK"
 
-# Get Node Group
+
+# Get Node Groups
+print "AdmGetNodeGroups(admin, %d)" % node_group_id,
+assert AdmGetNodeGroups(admin, [node_group_id])
+print "=> ", AdmGetNodeGroups(admin, [node_group_id])
+
+# Add node to node group
+new_node_id = AdmAddNode(admin, 1, randhostname(), 'inst')
+print "AdmAddNodeToNodeGroup(admin, %d, %d)" % (node_group_id, new_node_id),
+assert AdmAddNodeToNodeGroup(admin, node_group_id, new_node_id)
+print "=> OK"
+
+# Get Node Group Nodes
 print "AdmGetNodeGroupNodes(admin, %s)" % node_group_id,
 assert isinstance(AdmGetNodeGroupNodes(admin, node_group_id), list)
 print "=>", AdmGetNodeGroupNodes(admin, node_group_id)
 
-# Delet Node Group
+# Remove node from node group
+print "AdmRemoveNodeFromNodeGroup(admin, %d, %d)" % (node_group_id, new_node_id),
+assert AdmRemoveNodeFromNodeGroup(admin, node_group_id, new_node_id)
+print "=> OK"
+AdmDeleteNode(admin, new_node_id)
+
+# Delete Node Group
 print "AdmDeleteNodeGroup(%d)" % node_group_id, 
 assert AdmDeleteNodeGroup(admin, node_group_id)
 print "=> OK"
