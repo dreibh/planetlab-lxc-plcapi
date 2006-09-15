@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: NodeNetworks.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -60,6 +60,8 @@ class NodeNetwork(Row):
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
 
+    all_fields = dict(join_fields.items() + fields.items())
+
     methods = ['static', 'dhcp', 'proxy', 'tap', 'ipmi', 'unknown']
 
     types = ['ipv4']
@@ -77,10 +79,12 @@ class NodeNetwork(Row):
     def validate_method(self, method):
         if method not in self.methods:
             raise PLCInvalidArgument, "Invalid addressing method"
+	return method
 
     def validate_type(self, type):
         if type not in self.types:
             raise PLCInvalidArgument, "Invalid address type"
+	return type
 
     def validate_ip(self, ip):
         try:
@@ -116,6 +120,7 @@ class NodeNetwork(Row):
     def validate_bwlimit(self, bwlimit):
         if bwlimit not in self.bwlimits:
             raise PLCInvalidArgument, "Invalid bandwidth limit"
+	return bwlimit
 
     def validate_hostname(self, hostname):
         # Optional
