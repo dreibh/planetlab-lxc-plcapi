@@ -38,6 +38,13 @@ class AdmAddNodeToNodeGroup(Method):
             raise PLCInvalidArgument, "No such nodegroup"
 
         nodegroup = nodegroups.values()[0]
+	
+	# Authenticated function
+        assert self.caller is not None
+
+        # make sure we are 'admin'
+        if 'admin' not in self.caller['roles']:
+                raise PLCPermissionDenied, "Not allowed to add node groups"
 
 	# add node to nodegroup
         if node['node_id'] not in nodegroup['node_ids']:
