@@ -53,12 +53,12 @@ class AdmUpdateNode(Method):
 
         node = nodes.values()[0]
 
+        # Authenticated function
+        assert self.caller is not None
+
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
-            # Authenticated function
-            assert self.caller is not None
-
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
