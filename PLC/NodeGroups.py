@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.6 2006/09/13 15:40:26 tmack Exp $
+# $Id: NodeGroups.py,v 1.7 2006/09/14 15:45:24 tmack Exp $
 #
 
 from types import StringTypes
@@ -36,6 +36,7 @@ class NodeGroup(Row):
         }
 
     all_fields = dict(fields.items() + join_fields.items())
+
     def __init__(self, api, fields):
         Row.__init__(self, fields)
         self.api = api
@@ -144,7 +145,7 @@ class NodeGroup(Row):
             sql = "INSERT INTO nodegroups (%s) VALUES (%s)" % \
                   (", ".join(keys), ", ".join(values))
         else:
-            # Update existing row in sites table
+            # Update existing row in nodegroups table
             columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
             sql = "UPDATE nodegroups SET " + \
                   ", ".join(columns) + \
