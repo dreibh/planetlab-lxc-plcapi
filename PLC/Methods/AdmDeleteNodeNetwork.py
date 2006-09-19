@@ -20,10 +20,10 @@ class AdmDeleteNodeNetwork(Method):
 
     accepts = [
         PasswordAuth(),
-        Mixed(NodeNetwork.all_fields['node_id'],
-	      NodeNetwork.all_fields['hostname']),
-	Mixed(NodeNetwork.all_fields['nodenetwork_id'],
-	      NodeNetwork.all_fields['hostname'])
+        Mixed(Node.fields['node_id'],
+	      Node.fields['hostname']),
+	Mixed(NodeNetwork.fields['nodenetwork_id'],
+	      NodeNetwork.fields['hostname'])
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -42,18 +42,19 @@ class AdmDeleteNodeNetwork(Method):
 	node = nodes[0]
 
 	# Check if node network is associated with specified node
-	if not node['node_id'] ==  nodenetwork['node_id'] or nodenetwork['nodenetwork_id'] not in node['nodenetwork_ids']:
-		raise PLCInvalidArgument, "node network not assoicated with this node"
+	if node['node_id'] != nodenetwork['node_id'] or \
+           nodenetwork['nodenetwork_id'] not in node['nodenetwork_ids']:
+            raise PLCInvalidArgument, "Node network not associated with node"
 
+        # Authenticated functino
 	assert self.caller is not None
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
-        	if node['site_id'] not in self.caller['site_ids']:
-			raise PLCPermissionDenied, "Not allowed to delete node network at this node"
-		if 'tech' not in self.caller['roles']:
-                        raise PLCPermissionDenied, "Not allowed to add node network for specified node"
+            if node['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to delete this node network"
+
         nodenetwork.delete()
 
         return 1
