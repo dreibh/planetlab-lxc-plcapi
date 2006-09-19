@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.2 2006/09/15 20:31:59 tmack Exp $
 #
 
 from types import StringTypes
@@ -246,7 +246,7 @@ class NodeNetworks(Table):
             nodenetwork_ids = filter(lambda nodenetwork_id: isinstance(nodenetwork_id, (int, long)),
                                      nodenetwork_id_or_hostname_list)
             hostnames = filter(lambda hostname: isinstance(hostname, StringTypes),
-                           nodenetwork_id_or_hostname_list)
+                               nodenetwork_id_or_hostname_list)
             sql += " WHERE (False"
             if nodenetwork_ids:
                 sql += " OR nodenetwork_id IN (%s)" % ", ".join(map(str, nodenetwork_ids))
