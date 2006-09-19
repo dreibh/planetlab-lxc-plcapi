@@ -34,7 +34,7 @@ class AdmGetNodeGroups(Method):
         assert self.caller is not None
 
         # Get nodes in this nodegroup
-	nodegroups = NodeGroups(self.api, nodegroup_id_or_name_list)	
+	nodegroups = NodeGroups(self.api, nodegroup_id_or_name_list).values()	
 
 	# make sure sites are found
 	if not nodegroups:
@@ -44,4 +44,11 @@ class AdmGetNodeGroups(Method):
 	elif not len(nodegroups) == len(nodegroup_id_or_name_list):
 		raise PLCInvalidArgument, "at least one node group id is invalid"
 	
-        return nodegroups.values()
+	# Filter out undesired or None fields (XML-RPC cannot marshal
+        # None) and turn each node into a real dict.
+        valid_return_fields_only = lambda (key, value): \
+                                   key in NodeGroup.all_fields and value is not None
+        nodegroups = [dict(filter(valid_return_fields_only, nodegroup.items())) \
+                 for nodegroup in nodegroups]
+
+        return nodegroups
