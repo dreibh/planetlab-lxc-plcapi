@@ -3,17 +3,17 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
 class AdmAddNodeNetwork(Method):
     """
-    Adds a new newtwork for a node. Any values specified in optional_vals are used,
-    otherwise defaults are used. Acceptable values for method are dhcp, static, 
-    proxy, tap, and ipmi. Acceptable value for type is ipv4. If type is static, 
-    the parameter optional_vals must be present and ip, gateway, network, broadcast, 
-    netmask, and dns1 must all be specified. If type is dhcp, these parameters, even 
-    if specified, are ignored. Returns the new nodenetwork_id (>0) if successful.
+    Adds a new network for a node. Any values specified in
+    optional_vals are used, otherwise defaults are used. Acceptable
+    values for method are dhcp, static, proxy, tap, and
+    ipmi. Acceptable value for type is ipv4. If type is static, ip,
+    gateway, network, broadcast, netmask, and dns1 must all be
+    specified in optional_vals. If type is dhcp, these parameters,
+    even if specified, are ignored.
 
     PIs and techs may only add networks to their own nodes. Admins may
     add networks to any node.
@@ -23,36 +23,30 @@ class AdmAddNodeNetwork(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    cant_update = lambda (field, value): field not in \
-                 ['nodenetwork_id']
-    update_fields = dict(filter(cant_update, NodeNetwork.all_fields.items()))
+    can_update = lambda (field, value): field in \
+                 ['ip', 'mac', 'gateway', 'network', 'broadcast', 'netmask',
+                  'dns1', 'dns2', 'hostname', 'bwlimit', 'is_primary']
+    update_fields = dict(filter(can_update, NodeNetwork.all_fields.items()))
 
     accepts = [
         PasswordAuth(),
-        NodeNetwork.all_fields['node_id'],
-        NodeNetwork.all_fields['method'],
-        NodeNetwork.all_fields['type'],
+        Node.fields['node_id'],
+        NodeNetwork.fields['method'],
+        NodeNetwork.fields['type'],
         update_fields
         ]
 
-    returns = Parameter(int, '1 if successful')
+    returns = Parameter(int, 'New nodenetwork_id (> 0) if successful')
 
     def call(self, auth, node_id, method, type, optional_vals = {}):
         if filter(lambda field: field not in self.update_fields, optional_vals):
             raise PLCInvalidArgument, "Invalid fields specified"
 
-        # check if node exists
-        nodes = Nodes(self.api, [node_id], Node.extra_fields).values()
+        # Check if node exists
+        nodes = Nodes(self.api, [node_id]).values()
         if not nodes:
             raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
-	
-        # Make sure node network doesnt already exist
-        nodenetworks = NodeNetworks(self.api).values()
-	if nodenetworks:
-		for nodenetwork in nodenetworks:
-			if nodenetwork['node_id'] == node_id and nodenetwork['method'] == method and nodenetwork['type'] == type:
-				raise PLCInvalidArgument, "Node Network already exists"
 
         # Authenticated function
         assert self.caller is not None
@@ -60,17 +54,21 @@ class AdmAddNodeNetwork(Method):
         # If we are not an admin, make sure that the caller is a
         # member of the site where the node exists.
         if 'admin' not in self.caller['roles']:
-        	if node['site_id'] not in self.caller['site_ids']:
-            		raise PLCPermissionDenied, "Not allowed to add node network for specified node"
-		if 'tech' not in self.caller['roles']:
-			raise PLCPermissionDenied, "Not allowed to add node network for specified node"
-	
+            if node['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to add node network for specified node"
 
-        # add node network
+        # Add node network
 	nodenetwork = NodeNetwork(self.api, optional_vals)
-        nodenetwork['node_id'] = node_id
 	nodenetwork['method'] = method
         nodenetwork['type'] = type
-        nodenetwork.flush()
+        nodenetwork.flush(commit = False)
+
+        # Associate node network with node
+        node.add_node_network(nodenetwork, commit = False)
+
+        if 'is_primary' in optional_vals and optional_vals['is_primary']:
+            node.set_primary_node_network(nodenetwork, commit = False)
+
+        self.api.db.commit()
 
         return nodenetwork['nodenetwork_id']
