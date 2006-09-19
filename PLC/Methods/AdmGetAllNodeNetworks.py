@@ -22,7 +22,7 @@ class AdmGetAllNodeNetworks(Method):
                Node.fields['hostname'])
         ]
 
-    returns = [NodeNetwork.all_fields]
+    #returns = [NodeNetwork.all_fields]
 
     def call(self, auth, node_id_or_hostname):
         # Authenticated function
@@ -40,4 +40,12 @@ class AdmGetAllNodeNetworks(Method):
 		raise PLCInvalidArgument, "Node has no node networks"
 	nodenetworks = NodeNetworks(self.api, nodenetwork_ids).values()            
 
-        return nodenetworks
+	# Filter out undesired or None fields (XML-RPC cannot marshal
+        # None) and turn each node into a real dict.
+        valid_return_fields_only = lambda (key, value): \
+                                   key in NodeNetwork.all_fields and value is not None
+        nodenetworks = [dict(filter(valid_return_fields_only, nodenetwork.items())) \
+                 for nodenetwork in nodenetworks]	
+
+       	
+	return nodenetworks
