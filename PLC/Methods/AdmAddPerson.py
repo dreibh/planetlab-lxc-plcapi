@@ -28,7 +28,7 @@ class AdmAddPerson(Method):
         update_fields
         ]
 
-    returns = Parameter(int, '1 if successful')
+    returns = Parameter(int, 'New person_id (> 0) if successful')
 
     def call(self, auth, first_name, last_name, optional_vals = {}):
         if filter(lambda field: field not in self.update_fields, optional_vals):

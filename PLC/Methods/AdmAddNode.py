@@ -32,7 +32,7 @@ class AdmAddNode(Method):
         update_fields
         ]
 
-    returns = Parameter(int, '1 if successful')
+    returns = Parameter(int, 'New node_id (> 0) if successful')
 
     def call(self, auth, site_id_or_login_base, hostname, boot_state, optional_vals = {}):
         if filter(lambda field: field not in self.update_fields, optional_vals):

@@ -28,7 +28,7 @@ class AdmAddSite(Method):
         update_fields
         ]
 
-    returns = Parameter(int, '1 if successful')
+    returns = Parameter(int, 'New site_id (> 0) if successful')
 
     def call(self, auth, name, abbreviated_name, login_base, optional_vals = {}):
         if filter(lambda field: field not in self.update_fields, optional_vals):
