@@ -39,8 +39,6 @@ class AdmGetSitePersons(Method):
 	if 'admin' not in self.caller['roles']: 
                 if site['site_id'] not in self.caller['site_ids']:
                         raise PLCPermissionDenied, "Not allowed to update node network"
-                if 'pi' not in self.caller['roles']:
-                        raise PLCPermissionDenied, "User account not allowed to update node network"	
 	person_ids = site['person_ids']
        
 	return person_ids
