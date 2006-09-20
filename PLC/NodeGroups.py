@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.7 2006/09/14 15:45:24 tmack Exp $
+# $Id: NodeGroups.py,v 1.8 2006/09/19 19:08:24 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -206,7 +206,7 @@ class NodeGroups(Table):
             if nodegroup_ids:
                 sql += " OR nodegroup_id IN (%s)" % ", ".join(map(str, nodegroup_ids))
             if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names)).lower()
+                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
             sql += ")"
 
         rows = self.api.db.selectall(sql)
