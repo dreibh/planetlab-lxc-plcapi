@@ -1,5 +1,3 @@
-import os
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -11,7 +9,6 @@ class AdmGetAllNodeNetworks(Method):
     """
     Returns all the networks this node is connected to, as an array of
     structs.
-
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
@@ -29,23 +26,20 @@ class AdmGetAllNodeNetworks(Method):
         assert self.caller is not None
 
         # Get node information
-        nodes = Nodes(self.api, [node_id_or_hostname], NodeNetwork.all_fields).values()
+        nodes = Nodes(self.api, [node_id_or_hostname]).values()
 	if not nodes:
-		raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
-        
+
 	# Get node networks for this node
-	nodenetwork_ids = node['nodenetwork_ids']
-	if not nodenetwork_ids:
-		raise PLCInvalidArgument, "Node has no node networks"
-	nodenetworks = NodeNetworks(self.api, nodenetwork_ids).values()            
+	nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+	if not nodenetworks:
+            raise PLCInvalidArgument, "Node has no node networks"
 
 	# Filter out undesired or None fields (XML-RPC cannot marshal
         # None) and turn each node into a real dict.
-        valid_return_fields_only = lambda (key, value): \
-                                   key in NodeNetwork.all_fields and value is not None
+        valid_return_fields_only = lambda (key, value): value is not None
         nodenetworks = [dict(filter(valid_return_fields_only, nodenetwork.items())) \
-                 for nodenetwork in nodenetworks]	
-
+                        for nodenetwork in nodenetworks]
        	
 	return nodenetworks
