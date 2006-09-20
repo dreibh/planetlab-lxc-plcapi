@@ -1,5 +1,3 @@
-import os
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -10,35 +8,33 @@ class AdmGetSitePersons(Method):
     """
     Return a list of person_ids for the site specified.
 
-    Admins may retrieve person_ids at any site by not specifying
-    site_id_or_name or by specifying an empty list. PIs may only retrieve 
-    the person_ids at their site
-
+    PIs may only retrieve the person_ids of accounts at their
+    site. Admins may retrieve the person_ids of accounts at any site.
     """
 
     roles = ['admin', 'pi']
 
     accepts = [
         PasswordAuth(),
-        Site.fields['site_id']
+        Mixed(Site.fields['site_id'],
+              Site.fields['login_base'])
         ]
 
-    returns = [Site.all_fields['person_ids']]
+    returns = Site.all_fields['person_ids']
 
-    def call(self, auth, site_id):
+    def call(self, auth, site_id_or_login_base):
         # Authenticated function
         assert self.caller is not None
 
         # Get site information
-	sites = Sites(self.api, [site_id], ['person_ids']).values()	
-
-	# make sure sites are found
+	sites = Sites(self.api, [site_id_or_login_base], ['person_ids']).values()
 	if not sites:
-		raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument, "No such site"
+
 	site = sites[0]
+
 	if 'admin' not in self.caller['roles']: 
-                if site['site_id'] not in self.caller['site_ids']:
-                        raise PLCPermissionDenied, "Not allowed to update node network"
-	person_ids = site['person_ids']
-       
-	return person_ids
+            if site['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to view accounts at that site"
+
+	return site['person_ids']
