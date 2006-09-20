@@ -22,7 +22,7 @@ class AdmGetAllNodeNetworks(Method):
                Node.fields['hostname'])
         ]
 
-    #returns = [NodeNetwork.all_fields]
+    returns = [NodeNetwork.all_fields]
 
     def call(self, auth, node_id_or_hostname):
         # Authenticated function
