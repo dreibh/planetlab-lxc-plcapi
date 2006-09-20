@@ -29,6 +29,7 @@ class AdmRemoveNodeFromNodeGroup(Method):
 	nodes = Nodes(self.api, [node_id_or_hostname])
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
+
 	node = nodes.values()[0]
 
 	# Get nodegroup info
@@ -38,14 +39,7 @@ class AdmRemoveNodeFromNodeGroup(Method):
 
         nodegroup = nodegroups.values()[0]
 
-	# Authenticated function
-        assert self.caller is not None
-
-        # make sure we are 'admin'
-        if 'admin' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not allowed to remove node from nodegroup"
-
-	# add node to nodegroup
+	# Remove node from nodegroup
         if node['node_id'] in nodegroup['node_ids']:
             nodegroup.remove_node(node)
 
