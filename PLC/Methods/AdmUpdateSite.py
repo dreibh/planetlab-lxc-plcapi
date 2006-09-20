@@ -36,11 +36,6 @@ class AdmUpdateSite(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, site_id_or_abbrev_name, update_fields):
-	# Only admin can update max_slices
-	#if 'admin' not in self.caller['roles']:
-	#	if update_fields.has_key('max_slices '):
-	#		raise PLCInvalidArgument, "Only admins can update max_slices"
-	
 	# Check for invalid fields
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
@@ -65,9 +60,6 @@ class AdmUpdateSite(Method):
         if 'admin' not in self.caller['roles']:
             	if site['site_id'] not in self.caller['site_ids']:
                 	raise PLCPermissionDenied, "Not allowed to modify specified site"
-		if 'tech' not in self.caller['roles']:
-                        raise PLCPermissionDenied, "Not allowed to add node network for specified node"
-		
 	
         site.update(update_fields)
 	site.flush()
