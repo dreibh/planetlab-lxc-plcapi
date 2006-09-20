@@ -20,22 +20,25 @@ class AdmUpdateSite(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin', 'pi', 'tech']
+    roles = ['admin', 'pi']
 
-    cant_update = lambda (field, value): field not in \
-                 ['site_id', 'nodegroup_id', 'organization_id', 'ext_consortium_id', 'date_created']
-    update_fields = dict(filter(cant_update, Site.all_fields.items()))
+    can_update = lambda (field, value): field in \
+                 ['name', 'abbreviated_name',
+                  'is_public', 'latitude', 'longitude', 'url',
+                  'organization_id', 'ext_consortium_id',
+                  'max_slices', 'site_share']
+    update_fields = dict(filter(can_update, Site.all_fields.items()))
 
     accepts = [
         PasswordAuth(),
         Mixed(Site.fields['site_id'],
-              Site.fields['abbreviated_name']),
+              Site.fields['login_base']),
         update_fields
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, site_id_or_abbrev_name, update_fields):
+    def call(self, auth, site_id_or_login_base, update_fields):
 	# Check for invalid fields
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
@@ -44,25 +47,31 @@ class AdmUpdateSite(Method):
         # represent "unset".
         for key, value in update_fields.iteritems():
             if value == -1 or value == "null":
-                if key in ['name', 'abbreviated_name', 'login_base', 'is_public', 'max_slices']:
+                if key not in ['latitude', 'longitude', 'url',
+                               'organization_id', 'ext_consortium_id']:
                     raise PLCInvalidArgument, "%s cannot be unset" % key
                 update_fields[key] = None
 
         # Get site information
-        sites = Sites(self.api, [site_id_or_abbrev_name], Site.all_fields)
-        if not sites :
+        sites = Sites(self.api, [site_id_or_login_base])
+        if not sites:
             raise PLCInvalidArgument, "No such site"
 
         site = sites.values()[0]
 
+        # Authenticated function
+        assert self.caller is not None
+
         # If we are not an admin, make sure that the caller is a
-        # member of the site at which the node is located.
+        # member of the site.
         if 'admin' not in self.caller['roles']:
-            	if site['site_id'] not in self.caller['site_ids']:
-                	raise PLCPermissionDenied, "Not allowed to modify specified site"
-	
+            if site['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to modify specified site"
+
+            if 'max_slices' in update_fields:
+                raise PLCInvalidArgument, "Only admins can update max_slices"
+
         site.update(update_fields)
 	site.flush()
 	
 	return 1
-    
