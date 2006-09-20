@@ -48,14 +48,7 @@ class AdmUpdateNodeNetwork(Method):
 	if not nodenetworks:
 		raise PLCInvalidArgument, "No such node network"
 	nodenetwork = nodenetworks[0]
-
-	# Get Node using this node network
-	#nodes = Nodes(self.api, [nodenetwork['node_id']]).values()
-	#if not nodes:
-	#	raise PLCPermissionDenied, "Node network is not associated with a node"
-	#node = nodes[0]
-	
-	
+		
 	# If we are not an admin, make sure that the caller is a
         # member of the site where the node exists.
         if 'admin' not in self.caller['roles']:
@@ -65,8 +58,6 @@ class AdmUpdateNodeNetwork(Method):
         	node = nodes[0]
                 if node['site_id'] not in self.caller['site_ids']:
                         raise PLCPermissionDenied, "Not allowed to update node network"
-		if 'tech' not in self.caller['roles']:
-			raise PLCPermissionDenied, "User account not allowed to update node network"
 	
 	# Update node network
 	nodenetwork.update(optional_vals)
