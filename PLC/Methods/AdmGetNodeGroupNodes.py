@@ -23,10 +23,6 @@ class AdmGetNodeGroupNodes(Method):
 
     returns = [NodeGroup.join_fields['node_ids']]
 
-    def __init__(self, *args, **kwds):
-        Method.__init__(self, *args, **kwds)
-        # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(Site.default_fields.keys())
 
     def call(self, auth, nodegroup_id_or_name):
         # Authenticated function
@@ -35,9 +31,9 @@ class AdmGetNodeGroupNodes(Method):
         # Get nodes in this nodegroup
 	nodegroup = NodeGroups(self.api, [nodegroup_id_or_name])	
 
-	# make sure sites are found
+	# make sure nodegroup is found
 	if not nodegroup:
-		raise PLCInvalidArgument, "No such site"
+		raise PLCInvalidArgument, "No such nodegroup"
 	
 	#get the info for the node group specified
 	nodegroup_values = nodegroup.values()[0]
