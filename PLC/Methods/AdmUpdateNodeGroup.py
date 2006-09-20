@@ -15,7 +15,8 @@ class AdmUpdateNodeGroup(Method):
 
     accepts = [
         PasswordAuth(),
-	NodeGroup.fields['nodegroup_id'],
+        Mixed(NodeGroup.fields['nodegroup_id'],
+	      NodeGroup.fields['name']),
         NodeGroup.fields['name'],
      	NodeGroup.fields['description']
         ]
