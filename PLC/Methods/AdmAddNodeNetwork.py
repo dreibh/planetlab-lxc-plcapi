@@ -59,16 +59,9 @@ class AdmAddNodeNetwork(Method):
 
         # Add node network
 	nodenetwork = NodeNetwork(self.api, optional_vals)
+        nodenetwork['node_id'] = node_id
 	nodenetwork['method'] = method
         nodenetwork['type'] = type
-        nodenetwork.sync(commit = False)
-
-        # Associate node network with node
-        node.add_node_network(nodenetwork, commit = False)
-
-        if 'is_primary' in optional_vals and optional_vals['is_primary']:
-            node.set_primary_node_network(nodenetwork, commit = False)
-
-        self.api.db.commit()
+        nodenetwork.sync()
 
         return nodenetwork['nodenetwork_id']
