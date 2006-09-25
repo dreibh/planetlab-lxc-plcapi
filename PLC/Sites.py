@@ -204,6 +204,12 @@ class Site(Row):
         for node in nodes.values():
             node.delete(commit = False)
 
+        # Clean up miscellaneous join tables
+        for table in ['person_site']:
+            self.api.db.do("DELETE FROM %s" \
+                           " WHERE site_id = %d" % \
+                           (table, self['site_id']), self)
+
         # Mark as deleted
         self['deleted'] = True
         self.sync(commit)
