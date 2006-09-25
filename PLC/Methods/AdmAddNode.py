@@ -39,18 +39,11 @@ class AdmAddNode(Method):
             raise PLCInvalidArgument, "Invalid fields specified"
 
         # Get site information
-        sites = Sites(self.api, [site_id_or_login_base], ['person_ids'])
+        sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
         site = sites.values()[0]
-
-        # Get site node group information
-        nodegroups = NodeGroups(self.api, [site['nodegroup_id']])
-        if not nodegroups:
-            raise PLCAPIError, "Site %d does not have a nodegroup" % site['site_id']
-
-        nodegroup = nodegroups.values()[0]
 
         # Authenticated function
         assert self.caller is not None
@@ -67,9 +60,7 @@ class AdmAddNode(Method):
         node = Node(self.api, optional_vals)
         node['hostname'] = hostname
         node['boot_state'] = boot_state
-        node.flush(commit = False)
-
-        # Now associate the node with the site
-        nodegroup.add_node(node, commit = True)
+        node['site_id'] = site['site_id']
+        node.sync(commit = False)
 
         return node['node_id']
