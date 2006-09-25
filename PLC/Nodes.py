@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.3 2006/09/19 19:28:39 mlhuang Exp $
+# $Id: Nodes.py,v 1.4 2006/09/25 15:00:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -80,54 +80,6 @@ class Node(Row):
             raise PLCInvalidArgument, "Invalid boot state"
 
         return boot_state
-
-    def add_node_network(self, nodenetwork, commit = True):
-        """
-        Add node network to this node.
-        """
-
-        assert 'node_id' in self
-        assert isinstance(nodenetwork, NodeNetwork)
-        assert 'nodenetwork_id' in nodenetwork
-
-        nodenetwork_id = nodenetwork['nodenetwork_id']
-        nodenetwork['node_id'] = self['node_id']
-
-        self.api.db.do("INSERT INTO node_nodenetwork (node_id, nodenetwork_id, is_primary)" \
-                       " VALUES(%(node_id)d, %(nodenetwork_id)d, False)",
-                       nodenetwork)
-
-        if commit:
-            self.api.db.commit()
-
-        if 'nodenetwork_ids' in self and nodenetwork_id not in self['nodenetwork_ids']:
-            self['nodenetwork_ids'].append(nodenetwork_id)
-
-    def set_primary_node_network(self, nodenetwork, commit = True):
-        """
-        Remove node network from this node.
-        """
-
-        assert 'node_id' in self
-        assert isinstance(nodenetwork, NodeNetwork)
-        assert 'nodenetwork_id' in nodenetwork
-
-        node_id = self['node_id']
-        nodenetwork_id = nodenetwork['nodenetwork_id']
-
-        self.api.db.do("UPDATE node_nodenetwork SET is_primary = False" \
-                       " WHERE node_id = %(node_id)d",
-                       locals())
-
-        self.api.db.do("UPDATE node_nodenetwork SET is_primary = True" \
-                       " WHERE node_id = %(node_id)d" \
-                       " AND nodenetwork_id = %(nodenetwork_id)d",
-                       locals())
-
-        if commit:
-            self.api.db.commit()
-
-        nodenetwork['is_primary'] = True
 
     def sync(self, commit = True):
         """
