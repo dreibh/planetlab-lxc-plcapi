@@ -40,10 +40,4 @@ class AdmGetPersonSites(Method):
         if not self.caller.can_view(person):
             raise PLCPermissionDenied, "Not allowed to view specified account"
 
-        # Filter out deleted sites
-        # XXX This shouldn't be necessary once the join tables are cleaned up
-        if person['site_ids']:
-            sites = Sites(self.api, person['site_ids'])
-            return filter(lambda site_id: site_id in sites, person['site_ids'])
-
         return person['site_ids']
