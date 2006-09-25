@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: PostgreSQL.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
 
 import pgdb
@@ -133,3 +133,16 @@ class PostgreSQL:
             return dict([(row[key_field], row) for row in rows])
         else:
             return rows
+
+    def fields(self, table):
+        """
+        Return the names of the fields of the specified table.
+        """
+
+        rows = self.selectall("SELECT attname FROM pg_attribute, pg_class" \
+                              " WHERE pg_class.oid = attrelid" \
+                              " AND attnum > 0 AND relname = %(table)s",
+                              locals(),
+                              hashref = False)
+
+        return [row[0] for row in rows]
