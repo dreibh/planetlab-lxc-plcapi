@@ -9,15 +9,11 @@ from PLC.Auth import PasswordAuth
 class AdmGetNodes(Method):
     """
     Return an array of dictionaries containing details about the
-    specified accounts.
-
-    Admins may retrieve details about all accounts by not specifying
-    node_id_or_email_list or by specifying an empty list. Users and
-    techs may only retrieve details about themselves. PIs may retrieve
-    details about themselves and others at their sites.
+    specified nodes.
 
     If return_fields is specified, only the specified fields will be
-    returned, if set. Otherwise, the default set of fields returned is:
+    returned. Only admins may retrieve certain fields. Otherwise, the
+    default set of fields returned is:
 
     """
 
@@ -32,13 +28,13 @@ class AdmGetNodes(Method):
 
     # Filter out hidden fields
     can_return = lambda (field, value): field not in ['deleted']
-    return_fields = dict(filter(can_return, Node.all_fields.items()))
+    return_fields = dict(filter(can_return, Node.fields.items()))
     returns = [return_fields]
 
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
         # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(Node.default_fields.keys())
+        self.__doc__ += os.linesep.join(self.return_fields.keys())
 
     def call(self, auth, node_id_or_hostname_list = None, return_fields = None):
         # Authenticated function
