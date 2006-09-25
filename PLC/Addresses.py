@@ -1,8 +1,5 @@
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter
-from PLC.Debug import profile
 from PLC.Table import Row, Table
 
 class Address(Row):
@@ -13,8 +10,8 @@ class Address(Row):
 
     fields = {
         'address_id': Parameter(int, "Address type"),
-        'address_type_id': Parameter(int, "Address type identifier"),
-        'address_type': Parameter(str, "Address type name"),
+        'address_type_ids': Parameter([int], "Address type identifiers"),
+        'address_types': Parameter([str], "Address type names"),
         'line1': Parameter(str, "Address line 1"),
         'line2': Parameter(str, "Address line 2"),
         'line3': Parameter(str, "Address line 3"),
@@ -26,9 +23,9 @@ class Address(Row):
 
     def __init__(self, api, fields):
         self.api = api
-        dict.__init__(fields)
+        Row.__init__(fields)
 
-    def flush(self, commit = True):
+    def sync(self, commit = True):
         # XXX
         pass
 
