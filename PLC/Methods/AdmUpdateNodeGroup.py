@@ -38,6 +38,6 @@ class AdmUpdateNodeGroup(Method):
             }
 
 	nodegroup.update(update_fields)
-        nodegroup.flush()
+        nodegroup.sync()
 
         return 1

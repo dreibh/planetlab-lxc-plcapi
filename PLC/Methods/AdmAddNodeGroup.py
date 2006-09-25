@@ -25,6 +25,6 @@ class AdmAddNodeGroup(Method):
     def call(self, auth, name, description):
 	# Create node group
         nodegroup = NodeGroup(self.api, {'name': name, 'description': description})
-        nodegroup.flush()
+        nodegroup.sync()
 
         return nodegroup['nodegroup_id']

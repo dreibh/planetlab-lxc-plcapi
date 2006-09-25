@@ -27,13 +27,13 @@ class AdmGetSites(Method):
 
     # Filter out deleted fields
     can_return = lambda (field, value): field not in ['deleted']
-    return_fields = dict(filter(can_return, Site.all_fields.items()))
+    return_fields = dict(filter(can_return, Site.fields.items()))
     returns = [return_fields]
 
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
         # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(Site.default_fields.keys())
+        self.__doc__ += os.linesep.join(self.return_fields.keys())
 
     def call(self, auth, site_id_or_login_base_list = None, return_fields = None):
         # Make sure that only valid fields are specified

@@ -62,12 +62,7 @@ class AdmUpdateNode(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
-        # Check if we can update this account
-        node = nodes.values()[0]
-        if not self.caller.can_update(node):
-            raise PLCPermissionDenied, "Not allowed to update specified account"
-
         node.update(update_fields)
-        node.flush()
+        node.sync()
 
         return 1

@@ -25,9 +25,8 @@ class AdmUpdateSite(Method):
     can_update = lambda (field, value): field in \
                  ['name', 'abbreviated_name',
                   'is_public', 'latitude', 'longitude', 'url',
-                  'organization_id', 'ext_consortium_id',
-                  'max_slices', 'site_share']
-    update_fields = dict(filter(can_update, Site.all_fields.items()))
+                  'max_slices']
+    update_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
         PasswordAuth(),
@@ -72,6 +71,6 @@ class AdmUpdateSite(Method):
                 raise PLCInvalidArgument, "Only admins can update max_slices"
 
         site.update(update_fields)
-	site.flush()
+	site.sync()
 	
 	return 1

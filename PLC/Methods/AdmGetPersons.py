@@ -32,14 +32,13 @@ class AdmGetPersons(Method):
 
     # Filter out password and deleted fields
     can_return = lambda (field, value): field not in ['password', 'deleted']
-    default_fields = dict(filter(can_return, Person.default_fields.items()))
-    return_fields = dict(filter(can_return, Person.all_fields.items()))
+    return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
 
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
         # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(self.default_fields.keys())
+        self.__doc__ += os.linesep.join(self.return_fields.keys())
 
     def call(self, auth, person_id_or_email_list = None, return_fields = None):
         # Make sure that only valid fields are specified

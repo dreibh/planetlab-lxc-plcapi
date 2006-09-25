@@ -16,10 +16,10 @@ class AdmGetAllNodeNetworks(Method):
     accepts = [
         PasswordAuth(),
         Mixed(Node.fields['node_id'],
-               Node.fields['hostname'])
+              Node.fields['hostname'])
         ]
 
-    returns = [NodeNetwork.all_fields]
+    returns = [NodeNetwork.fields]
 
     def call(self, auth, node_id_or_hostname):
         # Authenticated function

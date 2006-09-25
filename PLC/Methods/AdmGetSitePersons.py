@@ -20,7 +20,7 @@ class AdmGetSitePersons(Method):
               Site.fields['login_base'])
         ]
 
-    returns = Site.all_fields['person_ids']
+    returns = Site.fields['person_ids']
 
     def call(self, auth, site_id_or_login_base):
         # Authenticated function

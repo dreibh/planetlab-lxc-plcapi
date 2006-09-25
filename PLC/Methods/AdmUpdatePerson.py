@@ -63,6 +63,6 @@ class AdmUpdatePerson(Method):
             raise PLCPermissionDenied, "Not allowed to update specified account"
 
         person.update(update_fields)
-        person.flush()
+        person.sync()
 
         return 1

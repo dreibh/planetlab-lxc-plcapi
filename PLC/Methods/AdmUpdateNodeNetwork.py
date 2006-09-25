@@ -71,6 +71,6 @@ class AdmUpdateNodeNetwork(Method):
 
 	# Update node network
 	nodenetwork.update(update_fields)
-        nodenetwork.flush()
+        nodenetwork.sync()
 	
         return 1

@@ -42,6 +42,6 @@ class AdmSetPersonEnabled(Method):
             raise PLCPermissionDenied, "Not allowed to enable specified account"
 
         person['enabled'] = enabled
-        person.flush()
+        person.sync()
 
         return 1

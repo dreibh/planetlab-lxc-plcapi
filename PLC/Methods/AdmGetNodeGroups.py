@@ -19,7 +19,7 @@ class AdmGetNodeGroups(Method):
 	       NodeGroup.fields['name'])]
         ]
 
-    returns = [NodeGroup.all_fields]
+    returns = [NodeGroup.fields]
   
     def call(self, auth, nodegroup_id_or_name_list = None):
         # Get node group details

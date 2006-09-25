@@ -38,6 +38,6 @@ class AdmAddSite(Method):
         site['name'] = name
         site['abbreviated_name'] = abbreviated_name
         site['login_base'] = login_base
-        site.flush()
+        site.sync()
 
         return site['site_id']

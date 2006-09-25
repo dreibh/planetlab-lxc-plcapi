@@ -26,7 +26,7 @@ class AdmAddNodeNetwork(Method):
     can_update = lambda (field, value): field in \
                  ['ip', 'mac', 'gateway', 'network', 'broadcast', 'netmask',
                   'dns1', 'dns2', 'hostname', 'bwlimit', 'is_primary']
-    update_fields = dict(filter(can_update, NodeNetwork.all_fields.items()))
+    update_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
         PasswordAuth(),
@@ -61,7 +61,7 @@ class AdmAddNodeNetwork(Method):
 	nodenetwork = NodeNetwork(self.api, optional_vals)
 	nodenetwork['method'] = method
         nodenetwork['type'] = type
-        nodenetwork.flush(commit = False)
+        nodenetwork.sync(commit = False)
 
         # Associate node network with node
         node.add_node_network(nodenetwork, commit = False)

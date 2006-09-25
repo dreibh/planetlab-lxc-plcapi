@@ -38,6 +38,6 @@ class AdmAddPerson(Method):
         person['first_name'] = first_name
         person['last_name'] = last_name
         person['enabled'] = False
-        person.flush()
+        person.sync()
 
         return person['person_id']
