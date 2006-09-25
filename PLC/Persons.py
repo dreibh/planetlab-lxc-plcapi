@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.2 2006/09/07 23:45:31 mlhuang Exp $
+# $Id: Persons.py,v 1.3 2006/09/08 19:45:46 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -28,7 +28,7 @@ class Person(Row):
     """
     Representation of a row in the persons table. To use, optionally
     instantiate with a dict of values. Update as you would a
-    dict. Commit to the database with flush().
+    dict. Commit to the database with sync().
     """
 
     fields = {
@@ -40,32 +40,18 @@ class Person(Row):
         'phone': Parameter(str, "Telephone number", max = 64),
         'url': Parameter(str, "Home page", max = 254),
         'bio': Parameter(str, "Biography", max = 254),
-        'accepted_aup': Parameter(bool, "Has accepted the AUP"),
         'enabled': Parameter(bool, "Has been enabled"),
         'deleted': Parameter(bool, "Has been deleted"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'last_updated': Parameter(str, "Date and time of last update"),
         'date_created': Parameter(str, "Date and time when account was created"),
-        }
-
-    # These fields are derived from join tables and are not actually
-    # in the persons table.
-    join_fields = {
         'role_ids': Parameter([int], "List of role identifiers"),
         'roles': Parameter([str], "List of roles"),
         'site_ids': Parameter([int], "List of site identifiers"),
-        }
-    
-    # These fields are derived from join tables and are not returned
-    # by default unless specified.
-    extra_fields = {
         'address_ids': Parameter([int], "List of address identifiers"),
         'key_ids': Parameter([int], "List of key identifiers"),
-        'slice_ids': Parameter([int], "List of slice identifiers"),
+        # 'slice_ids': Parameter([int], "List of slice identifiers"),
         }
-
-    default_fields = dict(fields.items() + join_fields.items())
-    all_fields = dict(default_fields.items() + extra_fields.items())
 
     def __init__(self, api, fields):
         Row.__init__(self, fields)
@@ -123,30 +109,6 @@ class Person(Row):
             salt = md5.md5(salt).hexdigest()[:8] 
             return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
 
-    def validate_role_ids(self, role_ids):
-        """
-        Ensure that the specified role_ids are all valid.
-        """
-
-        roles = Roles(self.api)
-        for role_id in role_ids:
-            if role_id not in roles:
-                raise PLCInvalidArgument, "No such role"
-
-        return role_ids
-
-    def validate_site_ids(self, site_ids):
-        """
-        Ensure that the specified site_ids are all valid.
-        """
-
-        sites = PLC.Sites.Sites(self.api, site_ids)
-        for site_id in site_ids:
-            if site_id not in sites:
-                raise PLCInvalidArgument, "No such site"
-
-        return site_ids
-
     def can_update(self, person):
         """
         Returns true if we can update the specified person. We can
@@ -203,7 +165,7 @@ class Person(Row):
         assert 'person_id' in self
 
         person_id = self['person_id']
-        self.api.db.do("INSERT INTO person_roles (person_id, role_id)" \
+        self.api.db.do("INSERT INTO person_role (person_id, role_id)" \
                        " VALUES(%(person_id)d, %(role_id)d)",
                        locals())
 
@@ -222,7 +184,7 @@ class Person(Row):
         assert 'person_id' in self
 
         person_id = self['person_id']
-        self.api.db.do("DELETE FROM person_roles" \
+        self.api.db.do("DELETE FROM person_role" \
                        " WHERE person_id = %(person_id)d" \
                        " AND role_id = %(role_id)d",
                        locals())
@@ -263,7 +225,7 @@ class Person(Row):
         self['site_ids'].remove(site_id)
         self['site_ids'].insert(0, site_id)
 
-    def flush(self, commit = True):
+    def sync(self, commit = True):
         """
         Commit changes back to the database.
         """
@@ -281,7 +243,8 @@ class Person(Row):
             insert = False
 
         # Filter out fields that cannot be set or updated directly
-        fields = dict(filter(lambda (key, value): key in self.fields,
+        persons_fields = self.api.db.fields('persons')
+        fields = dict(filter(lambda (key, value): key in persons_fields,
                              self.items()))
 
         # Parameterize for safety
@@ -309,14 +272,6 @@ class Person(Row):
         Delete existing account.
         """
 
-        assert 'person_id' in self
-
-        # Make sure extra fields are present
-        persons = Persons(self.api, [self['person_id']],
-                          ['address_ids', 'key_ids'])
-        assert persons
-        self.update(persons.values()[0])
-
         # Delete all addresses
         addresses = Addresses(self.api, self['address_ids'])
         for address in addresses.values():
@@ -328,15 +283,14 @@ class Person(Row):
             key.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['person_roles', 'person_capabilities', 'person_site',
-                      'node_root_access', 'dslice03_sliceuser']:
+        for table in ['person_role', 'person_site']:
             self.api.db.do("DELETE FROM %s" \
                            " WHERE person_id = %d" % \
                            (table, self['person_id']))
 
         # Mark as deleted
         self['deleted'] = True
-        self.flush(commit)
+        self.sync(commit)
 
 class Persons(Table):
     """
@@ -346,52 +300,17 @@ class Persons(Table):
     non-deleted accounts.
     """
 
-    def __init__(self, api, person_id_or_email_list = None, extra_fields = [], deleted = False, enabled = None):
+    def __init__(self, api, person_id_or_email_list = None, fields = Person.fields, deleted = False, enabled = None):
         self.api = api
 
-        role_max = Roles.role_max
-
-        # N.B.: Site IDs returned may be deleted. Persons returned are
-        # never deleted, but may not be enabled.
-        sql = "SELECT persons.*" \
-              ", roles.role_id, roles.name AS role" \
-              ", person_site.site_id" \
-
-        # N.B.: Joined IDs may be marked as deleted in their primary tables
-        join_tables = {
-            # extra_field: (extra_table, extra_column, join_using)
-            'address_ids': ('person_address', 'address_id', 'person_id'),
-            'key_ids': ('person_keys', 'key_id', 'person_id'),
-            'slice_ids': ('dslice03_sliceuser', 'slice_id', 'person_id'),
-            }
-
-        extra_fields = filter(join_tables.has_key, extra_fields)
-        extra_tables = ["%s USING (%s)" % \
-                        (join_tables[field][0], join_tables[field][2]) \
-                        for field in extra_fields]
-        extra_columns = ["%s.%s" % \
-                         (join_tables[field][0], join_tables[field][1]) \
-                         for field in extra_fields]
-
-        if extra_columns:
-            sql += ", " + ", ".join(extra_columns)
-
-        sql += " FROM persons" \
-               " LEFT JOIN person_roles USING (person_id)" \
-               " LEFT JOIN roles USING (role_id)" \
-               " LEFT JOIN person_site USING (person_id)"
-
-        if extra_tables:
-            sql += " LEFT JOIN " + " LEFT JOIN ".join(extra_tables)
-
-        # So that people with no roles have empty role_ids and roles values
-        sql += " WHERE (role_id IS NULL or role_id <= %(role_max)d)"
+        sql = "SELECT %s FROM view_persons WHERE TRUE" % \
+              ", ".join(fields)
 
         if deleted is not None:
-            sql += " AND persons.deleted IS %(deleted)s"
+            sql += " AND deleted IS %(deleted)s"
 
         if enabled is not None:
-            sql += " AND persons.enabled IS %(enabled)s"
+            sql += " AND enabled IS %(enabled)s"
 
         if person_id_or_email_list:
             # Separate the list into integers and strings
@@ -407,14 +326,16 @@ class Persons(Table):
                 sql += " OR lower(email) IN (%s)" % ", ".join(api.db.quote(emails)).lower()
             sql += ")"
 
-        # The first site_id in the site_ids list is the primary site
-        # of the user. See AdmGetPersonSites().
-        sql += " ORDER BY person_site.is_primary DESC"
-
         rows = self.api.db.selectall(sql, locals())
+
         for row in rows:
-            if self.has_key(row['person_id']):
-                person = self[row['person_id']]
-                person.update(row)
-            else:
-                self[row['person_id']] = Person(api, row)
+            self[row['person_id']] = person = Person(api, row)
+            for aggregate in 'role_ids', 'roles', 'site_ids', 'address_ids', 'key_ids':
+                if not person.has_key(aggregate) or person[aggregate] is None:
+                    person[aggregate] = []
+                else:
+                    elements = person[aggregate].split(',')
+                    try:
+                        person[aggregate] = map(int, elements)
+                    except ValueError:
+                        person[aggregate] = elements
