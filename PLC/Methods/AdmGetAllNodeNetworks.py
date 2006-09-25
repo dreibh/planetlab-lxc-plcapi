@@ -32,9 +32,10 @@ class AdmGetAllNodeNetworks(Method):
 	node = nodes[0]
 
 	# Get node networks for this node
-	nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
-	if not nodenetworks:
-            raise PLCInvalidArgument, "Node has no node networks"
+        if node['nodenetwork_ids']:
+            nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+        else:
+            nodenetworks = []
 
 	# Filter out undesired or None fields (XML-RPC cannot marshal
         # None) and turn each node into a real dict.
