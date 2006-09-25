@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id$
+-- $Id: planetlab4.sql,v 1.1 2006/09/25 14:40:16 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -409,7 +409,7 @@ LEFT JOIN site_nodes USING (site_id);
 INSERT INTO persons
 (first_name, last_name, email, password, enabled)
 VALUES
-('Maintenance', 'Account', 'maint@planet-lab.org', 'nopass', true);
+('Maintenance', 'Account', 'maint@localhost.localdomain', 'nopass', true);
 
 INSERT INTO person_role (person_id, role_id) VALUES (1, 10);
 INSERT INTO person_role (person_id, role_id) VALUES (1, 20);
