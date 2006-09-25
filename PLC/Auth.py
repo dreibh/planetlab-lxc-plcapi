@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
+# $Id: Auth.py,v 1.2 2006/09/08 19:44:12 mlhuang Exp $
 #
 
 import crypt
@@ -65,7 +65,6 @@ class PasswordAuth(Auth):
             'AuthMethod': Parameter(str, "Authentication method to use, typically 'password'", False),
             'Username': Parameter(str, "PlanetLab username, typically an e-mail address", False),
             'AuthString': Parameter(str, "Authentication string, typically a password", False),
-            'Role': Parameter(str, "Role to use for this call", False)
             })
 
     def check(self, method, auth, *args):
@@ -104,10 +103,7 @@ class PasswordAuth(Auth):
                crypt.crypt(plaintext, password[:12]) != password:
                 raise PLCAuthenticationFailure, "Password verification failed"
 
-        if auth['Role'] not in person['roles']:
-            raise PLCAuthenticationFailure, "Account does not have " + auth['Role'] + " role"
-
-        if method.roles and auth['Role'] not in method.roles:
-            raise PLCAuthenticationFailure, "Cannot call with " + auth['Role'] + "role"
+        if not set(person['roles']).intersection(method.roles):
+            raise PLCAuthenticationFailure, "Not allowed to call method"
 
         method.caller = person
