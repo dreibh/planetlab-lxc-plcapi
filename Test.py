@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.4 2006/09/13 15:48:25 tmack Exp $
+# $Id: Test.py,v 1.5 2006/09/14 15:47:27 tmack Exp $
 #
 
 from pprint import pprint
@@ -130,6 +130,7 @@ person_ids = []
 for auth in user, pi, tech:
     first_name = randstr(128)
     last_name = randstr(128)
+    # 119 + 1 + 64 + 64 + 6 = 254
     email = randstr(119, letters + digits) + "@" + randhostname()
     bio = randstr(254)
     # Accounts are disabled by default
@@ -203,6 +204,41 @@ persons = AdmGetPersons(admin, person_ids)
 assert set(person_ids) == set([person['person_id'] for person in persons])
 print "=>", person_ids
 
+# Add node groups
+nodegroup_ids = []
+for i in range(3):
+    name = randstr(50)
+    description = randstr(200)
+    print "AdmAddNodeGroup(%s)" % name,
+    nodegroup_id = AdmAddNodeGroup(admin, name, description)
+
+    # Should return a unique nodegroup_id
+    assert nodegroup_id not in nodegroup_ids
+    nodegroup_ids.append(nodegroup_id)
+    print "=>", nodegroup_id
+
+    # Check nodegroup
+    print "AdmGetNodeGroups(%d)" % nodegroup_id,
+    nodegroup = AdmGetNodeGroups(admin, [nodegroup_id])[0]
+    for key in 'name', 'description', 'nodegroup_id':
+        assert unicmp(nodegroup[key], locals()[key])
+    print "=> OK"
+
+    # Update node group
+    name = randstr(50)
+    description = randstr(200)
+    print "AdmUpdateNodeGroup(%s)" % name,
+    AdmUpdateNodeGroup(admin, nodegroup_id, name, description)
+    nodegroup = AdmGetNodeGroups(admin, [nodegroup_id])[0]
+    for key in 'name', 'description', 'nodegroup_id':
+        assert unicmp(nodegroup[key], locals()[key])
+    print "=> OK"
+
+print "AdmGetNodeGroups",
+nodegroups = AdmGetNodeGroups(admin, nodegroup_ids)
+assert set(nodegroup_ids) == set([nodegroup['nodegroup_id'] for nodegroup in nodegroups])
+print "=>", nodegroup_ids
+
 # Add nodes
 node_ids = []
 for site_id in site_ids:
@@ -228,71 +264,49 @@ for site_id in site_ids:
             assert unicmp(node[key], locals()[key])
         print "=> OK"
 
-    # XXX AdmGetSiteNodes
+        # Update node
+        hostname = randhostname()
+        model = randstr(255)
+        print "AdmUpdateNode(%s)" % hostname,
+        AdmUpdateNode(admin, node_id, {'hostname': hostname, 'model': model})
+        node = AdmGetNodes(admin, [node_id])[0]
+        for key in 'hostname', 'boot_state', 'model', 'node_id':
+            assert unicmp(node[key], locals()[key])
+        print "=> OK"
 
-# Add Node Group
-node_group_name = 'tng'
-node_group_description = 'test node group' 
-print "AdmAddNodeGroup(admin, %s, %s)" % (node_group_name, node_group_description),
-node_group_id = AdmAddNodeGroup(admin, node_group_name, node_group_description)
-print "=>", node_group_id
+        # Add to node groups
+        for nodegroup_id in nodegroup_ids:
+            print "AdmAddNodeToNodeGroup(%d, %d)" % (nodegroup_id, node_id),
+            AdmAddNodeToNodeGroup(admin, nodegroup_id, node_id)
+            print "=> OK"
 
-# Update Node Groupi
-node_group_name = node_group_name + randstr(5)
-node_group_description = node_group_description + randstr(5)
-print "AdmUpdateNodeGroup(admin, %d, %s, %s)" % (node_group_id, node_group_name,node_group_description ),
-assert AdmUpdateNodeGroup(admin, node_group_id, node_group_name, node_group_description)
-print "=> OK"
-
-
-# Get Node Groups
-print "AdmGetNodeGroups(admin, %d)" % node_group_id,
-assert AdmGetNodeGroups(admin, [node_group_id])
-print "=> ", AdmGetNodeGroups(admin, [node_group_id])
-
-# Add node to node group
-new_node_id = AdmAddNode(admin, 1, randhostname(), 'inst')
-print "AdmAddNodeToNodeGroup(admin, %d, %d)" % (node_group_id, new_node_id),
-assert AdmAddNodeToNodeGroup(admin, node_group_id, new_node_id)
-print "=> OK"
-
-# Get Node Group Nodes
-print "AdmGetNodeGroupNodes(admin, %s)" % node_group_id,
-assert isinstance(AdmGetNodeGroupNodes(admin, node_group_id), list)
-print "=>", AdmGetNodeGroupNodes(admin, node_group_id)
-
-# Remove node from node group
-print "AdmRemoveNodeFromNodeGroup(admin, %d, %d)" % (node_group_id, new_node_id),
-assert AdmRemoveNodeFromNodeGroup(admin, node_group_id, new_node_id)
-print "=> OK"
-AdmDeleteNode(admin, new_node_id)
-
-# Delete Node Group
-print "AdmDeleteNodeGroup(%d)" % node_group_id, 
-assert AdmDeleteNodeGroup(admin, node_group_id)
-print "=> OK"
-
-
-#Get Nodes
 print "AdmGetNodes",
 nodes = AdmGetNodes(admin, node_ids)
 assert set(node_ids) == set([node['node_id'] for node in nodes])
 print "=>", node_ids
 
+print "AdmGetSiteNodes" % site_ids,
+site_node_ids = AdmGetSiteNodes(admin, site_ids)
+assert set(node_ids) == set(reduce(lambda a, b: a + b, site_node_ids.values()))
+print "=>", site_node_ids
 
-#Get Site Nodes
-for site_id in site_ids:
-	print "AdmGetSiteNodes([%d])" % site_id,
-	assert AdmGetSiteNodes(admin, [site_id])
-	print "=> " , AdmGetSiteNodes(admin, [site_id])
-
-print "AdmGetSiteNodes(%s)" % site_ids,
-assert AdmGetSiteNodes(admin, site_ids)
-print "=> ", AdmGetSiteNodes(admin, site_ids)
-
+for nodegroup_id in nodegroup_ids:
+    print "AdmGetNodeGroupNodes(%d)" % nodegroup_id,
+    nodegroup_node_ids = AdmGetNodeGroupNodes(admin, nodegroup_id)
+    assert set(nodegroup_node_ids) == set(node_ids)
+    print "=>", nodegroup_node_ids
 
 # Delete nodes
 for node_id in node_ids:
+    # Remove from node groups
+    for nodegroup_id in nodegroup_ids:
+        print "AdmRemoveNodeFromNodeGroup(%d, %d)" % (nodegroup_id, node_id),
+        AdmRemoveNodeFromNodeGroup(admin, nodegroup_id, node_id)
+        # Make sure it really deleted it
+        assert node_id not in AdmGetNodeGroupNodes(nodegroup_id)
+        print "=> OK"
+
+    # Delete node
     print "AdmDeleteNode(%d)" % node_id,
     AdmDeleteNode(admin, node_id)
     assert not AdmGetNodes(admin, [node_id])
@@ -305,6 +319,11 @@ for node_id in node_ids:
 print "AdmGetNodes",
 assert not AdmGetNodes(admin, node_ids)
 print "=> []"
+
+for nodegroup_id in nodegroup_ids:
+    print "AdmGetNodeGroupNodes(%d)" % nodegroup_id,
+    assert not AdmGetNodeGroupNodes(nodegroup_id)
+    print "=> []"
 
 # Delete users
 for person_id in person_ids:
@@ -344,6 +363,17 @@ for person_id in person_ids:
 
 print "AdmGetPersons",
 assert not AdmGetPersons(admin, person_ids)
+print "=> []"
+
+# Delete node groups
+for nodegroup_id in nodegroup_ids:
+    print "AdmDeleteNodeGroup(%d)" % nodegroup_id,
+    AdmDeleteNodeGroup(admin, nodegroup_id)
+    assert not AdmGetNodeGroups(admin, [nodegroup_id])
+    print "=> OK"
+
+print "AdmGetNodeGroups",
+assert not AdmGetNodeGroups(admin, nodegroup_ids)
 print "=> []"
 
 # Delete sites
