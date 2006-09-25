@@ -5,16 +5,17 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.5 2006/09/14 15:47:27 tmack Exp $
+# $Id: Test.py,v 1.6 2006/09/25 15:32:53 mlhuang Exp $
 #
 
 from pprint import pprint
 from string import letters, digits, punctuation
+import re
+import socket
+import struct
 
 from random import Random
 random = Random()
-
-import re
 
 def randfloat(min = 0.0, max = 1.0):
     return float(min) + (random.random() * (float(max) - float(min)))
@@ -109,9 +110,23 @@ for i in range(3):
     site_ids.append(site_id)
     print "=>", site_id
 
+    # Check site
     print "AdmGetSites(%d)" % site_id,
     site = AdmGetSites(admin, [site_id])[0]
     for key in 'name', 'abbreviated_name', 'login_base', 'latitude', 'longitude', 'site_id':
+        assert unicmp(site[key], locals()[key])
+    print "=> OK"
+
+    # Update site
+    name = randstr(254)
+    abbreviated_name = randstr(50)
+    latitude = int(randfloat(-90.0, 90.0) * 1000) / 1000.0
+    longitude = int(randfloat(-180.0, 180.0) * 1000) / 1000.0
+    print "AdmUpdateSite(%s)" % login_base,
+    AdmUpdateSite(admin, site_id, {'name': name, 'abbreviated_name': abbreviated_name,
+                                   'latitude': latitude, 'longitude': longitude})
+    site = AdmGetSites(admin, [site_id])[0]
+    for key in 'name', 'abbreviated_name', 'latitude', 'longitude':
         assert unicmp(site[key], locals()[key])
     print "=> OK"
 
@@ -131,7 +146,7 @@ for auth in user, pi, tech:
     first_name = randstr(128)
     last_name = randstr(128)
     # 119 + 1 + 64 + 64 + 6 = 254
-    email = randstr(119, letters + digits) + "@" + randhostname()
+    email = (randstr(119, letters + digits) + "@" + randhostname()).lower()
     bio = randstr(254)
     # Accounts are disabled by default
     enabled = False
@@ -152,7 +167,20 @@ for auth in user, pi, tech:
     # Check account
     print "AdmGetPersons(%d)" % person_id,
     person = AdmGetPersons(admin, [person_id])[0]
-    for key in 'first_name', 'last_name', 'bio', 'person_id', 'enabled':
+    for key in 'first_name', 'last_name', 'email', 'bio', 'person_id', 'enabled':
+        assert unicmp(person[key], locals()[key])
+    print "=> OK"
+
+    # Update account
+    first_name = randstr(128)
+    last_name = randstr(128)
+    bio = randstr(254)
+    print "AdmUpdatePerson(%d)" % person_id,
+    AdmUpdatePerson(admin, person_id, {'first_name': first_name,
+                                       'last_name': last_name,
+                                       'bio': bio})
+    person = AdmGetPersons(admin, [person_id])[0]
+    for key in 'first_name', 'last_name', 'email', 'bio':
         assert unicmp(person[key], locals()[key])
     print "=> OK"
 
@@ -183,6 +211,11 @@ for auth in user, pi, tech:
         AdmAddPersonToSite(admin, person_id, site_id)
         print "=> OK"
 
+        print "AdmGetSitePersons(%d)" % site_id,
+        site_person_ids = AdmGetSitePersons(admin, site_id)
+        assert person_id in site_person_ids
+        print "=>", site_person_ids
+
     # Make sure it really did it
     print "AdmGetPersonSites(%d)" % person_id,
     person_site_ids = AdmGetPersonSites(auth, person_id)
@@ -199,17 +232,27 @@ for auth in user, pi, tech:
     assert person['site_ids'][0] == person_site_ids[1]
     print "=> OK"
 
+    # Check authentication
+    print "AdmAuthCheck(%s)" % auth['Username'],
+    assert AdmAuthCheck(auth)
+    print "=> OK"
+
 print "AdmGetPersons",
 persons = AdmGetPersons(admin, person_ids)
 assert set(person_ids) == set([person['person_id'] for person in persons])
 print "=>", person_ids
+
+# Verify PI role
+for person in persons:
+    if 'pi' in person['roles']:
+        assert AdmIsPersonInRole(admin, pi['Username'], roles['pi'])
 
 # Add node groups
 nodegroup_ids = []
 for i in range(3):
     name = randstr(50)
     description = randstr(200)
-    print "AdmAddNodeGroup(%s)" % name,
+    print "AdmAddNodeGroup",
     nodegroup_id = AdmAddNodeGroup(admin, name, description)
 
     # Should return a unique nodegroup_id
@@ -227,7 +270,7 @@ for i in range(3):
     # Update node group
     name = randstr(50)
     description = randstr(200)
-    print "AdmUpdateNodeGroup(%s)" % name,
+    print "AdmUpdateNodeGroup",
     AdmUpdateNodeGroup(admin, nodegroup_id, name, description)
     nodegroup = AdmGetNodeGroups(admin, [nodegroup_id])[0]
     for key in 'name', 'description', 'nodegroup_id':
@@ -295,6 +338,82 @@ for nodegroup_id in nodegroup_ids:
     nodegroup_node_ids = AdmGetNodeGroupNodes(admin, nodegroup_id)
     assert set(nodegroup_node_ids) == set(node_ids)
     print "=>", nodegroup_node_ids
+
+print "AdmGetAllNodeNetworkBandwidthLimits",
+bwlimits = AdmGetAllNodeNetworkBandwidthLimits(admin)
+print "=>", bwlimits
+
+# Add node networks
+nodenetwork_ids = []
+for node_id in node_ids:
+    ip = randint(0, 0xffffffff)
+    netmask = (0xffffffff << randint(2, 31)) & 0xffffffff
+    network = ip & netmask
+    broadcast = ((ip & netmask) | ~netmask) & 0xffffffff
+    gateway = randint(network + 1, broadcast - 1)
+    dns1 = randint(0, 0xffffffff)
+
+    for method in 'static', 'dhcp':
+        optional = {}
+        if method == 'static':
+            for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
+                optional[key] = socket.inet_ntoa(struct.pack('>L', locals()[key]))
+
+        print "AdmAddNodeNetwork(%s)" % method,
+        nodenetwork_id = AdmAddNodeNetwork(admin, node_id, method, 'ipv4', optional)
+
+        # Should return a unique nodenetwork_id
+        assert nodenetwork_id not in nodenetwork_ids
+        nodenetwork_ids.append(nodenetwork_id)
+        print "=>", nodenetwork_id
+
+    # Check node networks
+    print "AdmGetAllNodeNetworks(%d)" % node_id,
+    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
+    for nodenetwork in nodenetworks:
+        if nodenetwork['method'] == 'static':
+            for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
+                address = struct.unpack('>L', socket.inet_aton(nodenetwork[key]))[0]
+                assert address == locals()[key]
+    print "=>", [nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks]
+
+# Update node networks
+for node_id in node_ids:
+    ip = randint(0, 0xffffffff)
+    netmask = (0xffffffff << randint(2, 31)) & 0xffffffff
+    network = ip & netmask
+    broadcast = ((ip & netmask) | ~netmask) & 0xffffffff
+    gateway = randint(network + 1, broadcast - 1)
+    dns1 = randint(0, 0xffffffff)
+
+    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
+    for nodenetwork in nodenetworks:
+        # Update node network
+        optional = {}
+        if nodenetwork['method'] == 'static':
+            for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
+                optional[key] = socket.inet_ntoa(struct.pack('>L', locals()[key]))
+
+        print "AdmUpdateNodeNetwork(%s)" % nodenetwork['method'],
+        AdmUpdateNodeNetwork(admin, nodenetwork['nodenetwork_id'], optional)
+        print "=> OK"
+
+    # Check node network again
+    print "AdmGetAllNodeNetworks(%d)" % node_id,
+    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
+    for nodenetwork in nodenetworks:
+        if nodenetwork['method'] == 'static':
+            for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
+                address = struct.unpack('>L', socket.inet_aton(nodenetwork[key]))[0]
+                assert address == locals()[key]
+    print "=>", [nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks]
+
+    # Delete node network
+    for nodenetwork in nodenetworks:
+        print "AdmDeleteNodeNetwork(%d, %d)" % (node_id, nodenetwork['nodenetwork_id']),
+        AdmDeleteNodeNetwork(admin, node_id, nodenetwork['nodenetwork_id'])
+        print "=>", "OK"
+    assert not AdmGetAllNodeNetworks(admin, node_id)
 
 # Delete nodes
 for node_id in node_ids:
@@ -386,4 +505,3 @@ for site_id in site_ids:
 print "AdmGetSites",
 assert not AdmGetSites(admin, site_ids)
 print "=> []"
-
