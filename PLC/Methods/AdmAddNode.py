@@ -61,6 +61,6 @@ class AdmAddNode(Method):
         node['hostname'] = hostname
         node['boot_state'] = boot_state
         node['site_id'] = site['site_id']
-        node.sync(commit = False)
+        node.sync()
 
         return node['node_id']
