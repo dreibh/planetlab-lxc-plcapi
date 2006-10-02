@@ -30,7 +30,6 @@ class Site(Row):
         'url': Parameter(str, "URL of a page that describes the site", max = 254),
         'date_created': Parameter(int, "Date and time when site entry was created, in seconds since UNIX epoch"),
         'last_updated': Parameter(int, "Date and time when site entry was last updated, in seconds since UNIX epoch"),
-        'deleted': Parameter(bool, "Has been deleted"),
         'max_slices': Parameter(int, "Maximum number of slices that the site is able to create"),
         'max_slivers': Parameter(int, "Maximum number of slivers that the site is able to create"),
         'person_ids': Parameter([int], "List of account identifiers"),
@@ -51,7 +50,7 @@ class Site(Row):
         login_base = login_base.lower()
         conflicts = Sites(self.api, [login_base])
         for site_id, site in conflicts.iteritems():
-            if not site['deleted'] and ('site_id' not in self or self['site_id'] != site_id):
+            if 'site_id' not in self or self['site_id'] != site_id:
                 raise PLCInvalidArgument, "login_base already in use"
 
         return login_base
@@ -187,8 +186,7 @@ class Site(Row):
 
             person_sites = Sites(self.api, person['site_ids'])
             for person_site_id, person_site in person_sites.iteritems():
-                if person_site_id != self['site_id'] and \
-                   not person_site['deleted']:
+                if person_site_id != self['site_id']:
                     delete = False
                     break
 

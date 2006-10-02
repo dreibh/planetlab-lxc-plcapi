@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.5 2006/09/25 18:11:10 mlhuang Exp $
+# $Id: Nodes.py,v 1.6 2006/10/02 15:21:03 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -35,7 +35,6 @@ class Node(Row):
         'ssh_rsa_key': Parameter(str, "Last known SSH host key", max = 1024),
         'date_created': Parameter(str, "Date and time when node entry was created"),
         'last_updated': Parameter(str, "Date and time when node entry was created"),
-        'deleted': Parameter(bool, "Has been deleted"),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256),
         'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has"),
@@ -64,7 +63,7 @@ class Node(Row):
 
         conflicts = Nodes(self.api, [hostname])
         for node_id, node in conflicts.iteritems():
-            if not node['deleted'] and ('node_id' not in self or self['node_id'] != node_id):
+            if 'node_id' not in self or self['node_id'] != node_id:
                 raise PLCInvalidArgument, "Hostname already in use"
 
         # Check for conflicts with a nodenetwork hostname

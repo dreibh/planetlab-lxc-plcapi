@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.4 2006/09/25 15:10:00 mlhuang Exp $
+# $Id: Persons.py,v 1.5 2006/10/02 15:25:03 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -41,7 +41,6 @@ class Person(Row):
         'url': Parameter(str, "Home page", max = 254),
         'bio': Parameter(str, "Biography", max = 254),
         'enabled': Parameter(bool, "Has been enabled"),
-        'deleted': Parameter(bool, "Has been deleted"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'last_updated': Parameter(str, "Date and time of last update"),
         'date_created': Parameter(str, "Date and time when account was created"),
@@ -86,7 +85,7 @@ class Person(Row):
 
         conflicts = Persons(self.api, [email])
         for person_id, person in conflicts.iteritems():
-            if not person['deleted'] and ('person_id' not in self or self['person_id'] != person_id):
+            if 'person_id' not in self or self['person_id'] != person_id:
                 raise PLCInvalidArgument, "E-mail address already in use"
 
         return email
@@ -297,14 +296,11 @@ class Persons(Table):
     non-deleted accounts.
     """
 
-    def __init__(self, api, person_id_or_email_list = None, fields = Person.fields, deleted = False, enabled = None):
+    def __init__(self, api, person_id_or_email_list = None, fields = Person.fields, enabled = None):
         self.api = api
 
-        sql = "SELECT %s FROM view_persons WHERE TRUE" % \
+        sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
               ", ".join(fields)
-
-        if deleted is not None:
-            sql += " AND deleted IS %(deleted)s"
 
         if enabled is not None:
             sql += " AND enabled IS %(enabled)s"
