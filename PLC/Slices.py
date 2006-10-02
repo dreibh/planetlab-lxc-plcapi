@@ -25,11 +25,11 @@ class Slice(Row):
         'description': Parameter(str, "Slice description", max = 2048),
         'max_nodes': Parameter(int, "Maximum number of nodes that can be assigned to this slice"),
         'creator_person_id': Parameter(int, "Identifier of the account that created this slice"),
-        'created': Parameter(int, "Date and time when slice was created, in seconds since UNIX epoch"),
+        'created': Parameter(int, "Date and time when slice was created, in seconds since UNIX epoch", ro = True),
         'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
-        'node_ids': Parameter([int], "List of nodes in this slice"),
-        'person_ids': Parameter([int], "List of accounts that can use this slice"),
-        'attribute_ids': Parameter([int], "List of slice attributes"),
+        'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
+        'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
+        'attribute_ids': Parameter([int], "List of slice attributes", ro = True),
         }
 
     def __init__(self, api, fields):
@@ -69,6 +69,104 @@ class Slice(Row):
 
         return person_id
 
+    def add_person(self, person, commit = True):
+        """
+        Add person to existing slice.
+        """
+
+        assert 'slice_id' in self
+        assert isinstance(person, PLC.Persons.Person)
+        assert 'person_id' in person
+
+        slice_id = self['slice_id']
+        person_id = person['person_id']
+        self.api.db.do("INSERT INTO slice_person (person_id, slice_id)" \
+                       " VALUES(%(person_id)d, %(slice_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'person_ids' in self and person_id not in self['person_ids']:
+            self['person_ids'].append(person_id)
+
+        if 'slice_ids' in person and slice_id not in person['slice_ids']:
+            person['slice_ids'].append(slice_id)
+
+    def remove_person(self, person, commit = True):
+        """
+        Remove person from existing slice.
+        """
+
+        assert 'slice_id' in self
+        assert isinstance(person, PLC.Persons.Person)
+        assert 'person_id' in person
+
+        slice_id = self['slice_id']
+        person_id = person['person_id']
+        self.api.db.do("DELETE FROM slice_person" \
+                       " WHERE person_id = %(person_id)d" \
+                       " AND slice_id = %(slice_id)d",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'person_ids' in self and person_id in self['person_ids']:
+            self['person_ids'].remove(person_id)
+
+        if 'slice_ids' in person and slice_id in person['slice_ids']:
+            person['slice_ids'].remove(slice_id)
+
+    def add_node(self, node, commit = True):
+        """
+        Add node to existing slice.
+        """
+
+        assert 'slice_id' in self
+        assert isinstance(node, PLC.Nodes.Node)
+        assert 'node_id' in node
+
+        slice_id = self['slice_id']
+        node_id = node['node_id']
+        self.api.db.do("INSERT INTO slice_node (node_id, slice_id)" \
+                       " VALUES(%(node_id)d, %(slice_id)d)",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'node_ids' in self and node_id not in self['node_ids']:
+            self['node_ids'].append(node_id)
+
+        if 'slice_ids' in node and slice_id not in node['slice_ids']:
+            node['slice_ids'].append(slice_id)
+
+    def remove_node(self, node, commit = True):
+        """
+        Remove node from existing slice.
+        """
+
+        assert 'slice_id' in self
+        assert isinstance(node, PLC.Nodes.Node)
+        assert 'node_id' in node
+
+        slice_id = self['slice_id']
+        node_id = node['node_id']
+        self.api.db.do("DELETE FROM slice_node" \
+                       " WHERE node_id = %(node_id)d" \
+                       " AND slice_id = %(slice_id)d",
+                       locals())
+
+        if commit:
+            self.api.db.commit()
+
+        if 'node_ids' in self and node_id in self['node_ids']:
+            self['node_ids'].remove(node_id)
+
+        if 'slice_ids' in node and slice_id in node['slice_ids']:
+            node['slice_ids'].remove(slice_id)
+
     def sync(self, commit = True):
         """
         Flush changes back to the database.
@@ -96,11 +194,10 @@ class Slice(Row):
 
         # Filter out fields that cannot be set or updated directly
         slices_fields = self.api.db.fields('slices')
-        fields = dict(filter(lambda (key, value): key in slices_fields,
+        fields = dict(filter(lambda (key, value): \
+                             key in slices_fields and \
+                             (key not in self.fields or not self.fields[key].ro),
                              self.items()))
-        for ro_field in 'created',:
-            if ro_field in fields:
-                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()

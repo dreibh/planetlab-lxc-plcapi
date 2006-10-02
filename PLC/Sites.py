@@ -28,15 +28,15 @@ class Site(Row):
         'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0),
         'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0),
         'url': Parameter(str, "URL of a page that describes the site", max = 254),
-        'date_created': Parameter(int, "Date and time when site entry was created, in seconds since UNIX epoch"),
-        'last_updated': Parameter(int, "Date and time when site entry was last updated, in seconds since UNIX epoch"),
+        'date_created': Parameter(int, "Date and time when site entry was created, in seconds since UNIX epoch", ro = True),
+        'last_updated': Parameter(int, "Date and time when site entry was last updated, in seconds since UNIX epoch", ro = True),
         'max_slices': Parameter(int, "Maximum number of slices that the site is able to create"),
         'max_slivers': Parameter(int, "Maximum number of slivers that the site is able to create"),
-        'person_ids': Parameter([int], "List of account identifiers"),
-        'slice_ids': Parameter([int], "List of slice identifiers"),
-        'address_ids': Parameter([int], "List of address identifiers"),
-        # 'pcu_ids': Parameter([int], "List of PCU identifiers"),
-        'node_ids': Parameter([int], "List of site node identifiers"),
+        'person_ids': Parameter([int], "List of account identifiers", ro = True),
+        'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
+        'address_ids': Parameter([int], "List of address identifiers", ro = True),
+        # 'pcu_ids': Parameter([int], "List of PCU identifiers", ro = True),
+        'node_ids': Parameter([int], "List of site node identifiers", ro = True),
         }
 
     def __init__(self, api, fields):
@@ -145,11 +145,10 @@ class Site(Row):
 
         # Filter out fields that cannot be set or updated directly
         sites_fields = self.api.db.fields('sites')
-        fields = dict(filter(lambda (key, value): key in sites_fields,
+        fields = dict(filter(lambda (key, value): \
+                             key in sites_fields and \
+                             (key not in self.fields or not self.fields[key].ro),
                              self.items()))
-        for ro_field in 'date_created', 'last_updated':
-            if ro_field in fields:
-                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()

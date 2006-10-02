@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.5 2006/10/02 15:25:03 mlhuang Exp $
+# $Id: Persons.py,v 1.6 2006/10/02 16:04:22 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -42,13 +42,13 @@ class Person(Row):
         'bio': Parameter(str, "Biography", max = 254),
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
-        'last_updated': Parameter(str, "Date and time of last update"),
-        'date_created': Parameter(str, "Date and time when account was created"),
-        'role_ids': Parameter([int], "List of role identifiers"),
-        'roles': Parameter([str], "List of roles"),
-        'site_ids': Parameter([int], "List of site identifiers"),
-        'key_ids': Parameter([int], "List of key identifiers"),
-        'slice_ids': Parameter([int], "List of slice identifiers"),
+        'last_updated': Parameter(str, "Date and time of last update", ro = True),
+        'date_created': Parameter(str, "Date and time when account was created", ro = True),
+        'role_ids': Parameter([int], "List of role identifiers", ro = True),
+        'roles': Parameter([str], "List of roles", ro = True),
+        'site_ids': Parameter([int], "List of site identifiers", ro = True),
+        'key_ids': Parameter([int], "List of key identifiers", ro = True),
+        'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
         }
 
     def __init__(self, api, fields):
@@ -242,11 +242,10 @@ class Person(Row):
 
         # Filter out fields that cannot be set or updated directly
         persons_fields = self.api.db.fields('persons')
-        fields = dict(filter(lambda (key, value): key in persons_fields,
+        fields = dict(filter(lambda (key, value): \
+                             key in persons_fields and \
+                             (key not in self.fields or not self.fields[key].ro),
                              self.items()))
-        for ro_field in 'date_created', 'last_updated':
-            if ro_field in fields:
-                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()
