@@ -9,6 +9,7 @@ from PLC.Slices import Slice, Slices
 from PLC.PCUs import PCU, PCUs
 from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
+from PLC.Addresses import Address, Addresses
 import PLC.Persons
 
 class Site(Row):
@@ -27,12 +28,14 @@ class Site(Row):
         'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0),
         'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0),
         'url': Parameter(str, "URL of a page that describes the site", max = 254),
-        'date_created': Parameter(str, "Date and time when site entry was created"),        
-        'last_updated': Parameter(str, "Date and time when site entry was last updated"),        
+        'date_created': Parameter(int, "Date and time when site entry was created, in seconds since UNIX epoch"),
+        'last_updated': Parameter(int, "Date and time when site entry was last updated, in seconds since UNIX epoch"),
         'deleted': Parameter(bool, "Has been deleted"),
         'max_slices': Parameter(int, "Maximum number of slices that the site is able to create"),
+        'max_slivers': Parameter(int, "Maximum number of slivers that the site is able to create"),
         'person_ids': Parameter([int], "List of account identifiers"),
-        # 'slice_ids': Parameter([int], "List of slice identifiers"),
+        'slice_ids': Parameter([int], "List of slice identifiers"),
+        'address_ids': Parameter([int], "List of address identifiers"),
         # 'pcu_ids': Parameter([int], "List of PCU identifiers"),
         'node_ids': Parameter([int], "List of site node identifiers"),
         }
@@ -145,6 +148,9 @@ class Site(Row):
         sites_fields = self.api.db.fields('sites')
         fields = dict(filter(lambda (key, value): key in sites_fields,
                              self.items()))
+        for ro_field in 'date_created', 'last_updated':
+            if ro_field in fields:
+                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()
@@ -189,10 +195,15 @@ class Site(Row):
             if delete:
                 person.delete(commit = False)
 
+        # Delete all site addresses
+        addresses = Addresses(self.api, self['address_ids'])
+        for address in addresses.values():
+           address.delete(commit = False)
+
         # Delete all site slices
-        # slices = Slices(self.api, self['slice_ids'])
-        # for slice in slices.values():
-        #    slice.delete(commit = False)
+        slices = Slices(self.api, self['slice_ids'])
+        for slice in slices.values():
+           slice.delete(commit = False)
 
         # Delete all site PCUs
         # pcus = PCUs(self.api, self['pcu_ids'])
@@ -217,7 +228,7 @@ class Site(Row):
 class Sites(Table):
     """
     Representation of row(s) from the sites table in the
-    database. Specify extra_fields to be able to view and modify extra
+    database. Specify fields to limit columns to just the specified
     fields.
     """
 
@@ -244,8 +255,8 @@ class Sites(Table):
 
         for row in rows:
             self[row['site_id']] = site = Site(api, row)
-            for aggregate in ['person_ids', 'slice_ids',
-                              'defaultattribute_ids', 'pcu_ids', 'node_ids']:
+            for aggregate in ['person_ids', 'slice_ids', 'address_ids',
+                              'pcu_ids', 'node_ids']:
                 if not site.has_key(aggregate) or site[aggregate] is None:
                     site[aggregate] = []
                 else:
