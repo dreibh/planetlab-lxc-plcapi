@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.3 2006/09/08 19:45:46 mlhuang Exp $
+# $Id: Persons.py,v 1.4 2006/09/25 15:10:00 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -48,9 +48,8 @@ class Person(Row):
         'role_ids': Parameter([int], "List of role identifiers"),
         'roles': Parameter([str], "List of roles"),
         'site_ids': Parameter([int], "List of site identifiers"),
-        'address_ids': Parameter([int], "List of address identifiers"),
         'key_ids': Parameter([int], "List of key identifiers"),
-        # 'slice_ids': Parameter([int], "List of slice identifiers"),
+        'slice_ids': Parameter([int], "List of slice identifiers"),
         }
 
     def __init__(self, api, fields):
@@ -246,6 +245,9 @@ class Person(Row):
         persons_fields = self.api.db.fields('persons')
         fields = dict(filter(lambda (key, value): key in persons_fields,
                              self.items()))
+        for ro_field in 'date_created', 'last_updated':
+            if ro_field in fields:
+                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()
@@ -272,18 +274,13 @@ class Person(Row):
         Delete existing account.
         """
 
-        # Delete all addresses
-        addresses = Addresses(self.api, self['address_ids'])
-        for address in addresses.values():
-            address.delete(commit = False)
-
         # Delete all keys
         keys = Keys(self.api, self['key_ids'])
         for key in keys.values():
             key.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['person_role', 'person_site']:
+        for table in ['person_role', 'person_site', 'slice_person']:
             self.api.db.do("DELETE FROM %s" \
                            " WHERE person_id = %d" % \
                            (table, self['person_id']))
@@ -323,14 +320,14 @@ class Persons(Table):
                 sql += " OR person_id IN (%s)" % ", ".join(map(str, person_ids))
             if emails:
                 # Case insensitive e-mail address comparison
-                sql += " OR lower(email) IN (%s)" % ", ".join(api.db.quote(emails)).lower()
+                sql += " OR email IN (%s)" % ", ".join(api.db.quote(emails)).lower()
             sql += ")"
 
         rows = self.api.db.selectall(sql, locals())
 
         for row in rows:
             self[row['person_id']] = person = Person(api, row)
-            for aggregate in 'role_ids', 'roles', 'site_ids', 'address_ids', 'key_ids':
+            for aggregate in 'role_ids', 'roles', 'site_ids', 'key_ids', 'slice_ids':
                 if not person.has_key(aggregate) or person[aggregate] is None:
                     person[aggregate] = []
                 else:
