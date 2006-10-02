@@ -25,7 +25,7 @@ class AdmUpdateSite(Method):
     can_update = lambda (field, value): field in \
                  ['name', 'abbreviated_name',
                   'is_public', 'latitude', 'longitude', 'url',
-                  'max_slices']
+                  'max_slices', 'max_slivers']
     update_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
@@ -46,8 +46,7 @@ class AdmUpdateSite(Method):
         # represent "unset".
         for key, value in update_fields.iteritems():
             if value == -1 or value == "null":
-                if key not in ['latitude', 'longitude', 'url',
-                               'organization_id', 'ext_consortium_id']:
+                if key not in ['latitude', 'longitude', 'url']:
                     raise PLCInvalidArgument, "%s cannot be unset" % key
                 update_fields[key] = None
 
@@ -67,8 +66,8 @@ class AdmUpdateSite(Method):
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to modify specified site"
 
-            if 'max_slices' in update_fields:
-                raise PLCInvalidArgument, "Only admins can update max_slices"
+            if 'max_slices' or 'max_slivers' in update_fields:
+                raise PLCInvalidArgument, "Only admins can update max_slices and max_slivers"
 
         site.update(update_fields)
 	site.sync()
