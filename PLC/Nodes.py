@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.4 2006/09/25 15:00:55 mlhuang Exp $
+# $Id: Nodes.py,v 1.5 2006/09/25 18:11:10 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -42,7 +42,7 @@ class Node(Row):
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         # 'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
-        # 'slice_ids': Parameter([int], "List of slices on this node"),
+        'slice_ids': Parameter([int], "List of slices on this node"),
         # 'pcu_ids': Parameter([int], "List of PCUs that control this node"),
         }
 
@@ -102,6 +102,9 @@ class Node(Row):
         nodes_fields = self.api.db.fields('nodes')
         fields = dict(filter(lambda (key, value): key in nodes_fields,
                              self.items()))
+        for ro_field in 'date_created', 'last_updated':
+            if ro_field in fields:
+                del fields[ro_field]
 
         # Parameterize for safety
         keys = fields.keys()
@@ -136,7 +139,7 @@ class Node(Row):
             nodenetwork.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['nodegroup_node']:
+        for table in ['nodegroup_node', 'slice_node', 'slice_attribute']:
             self.api.db.do("DELETE FROM %s" \
                            " WHERE node_id = %d" % \
                            (table, self['node_id']))
