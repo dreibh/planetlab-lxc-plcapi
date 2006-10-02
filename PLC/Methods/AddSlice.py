@@ -1,0 +1,74 @@
+import re
+
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.Slices import Slice, Slices
+from PLC.Auth import PasswordAuth
+from PLC.Sites import Site, Sites
+
+class AddSlice(Method):
+    """
+    Adds a new slice. Any fields specified in optional_vals are used,
+    otherwise defaults are used.
+
+    Valid slice names are lowercase and begin with the login_base
+    (slice prefix) of a valid site, followed by a single
+    underscore. Thereafter, only letters, numbers, or additional
+    underscores may be used.
+
+    PIs may only add slices associated with their own sites (i.e.,
+    slice prefixes must always be the login_base of one of their
+    sites).
+
+    Returns the new slice_id (> 0) if successful, faults otherwise.
+    """
+
+    roles = ['admin', 'pi']
+
+    can_update = lambda (field, value): field in \
+                 ['instantiation', 'url', 'description', 'max_nodes']
+    update_fields = dict(filter(can_update, Slice.fields.items()))
+
+    accepts = [
+        PasswordAuth(),
+        Slice.fields['name'],
+        update_fields
+        ]
+
+    returns = Parameter(int, 'New slice_id (> 0) if successful')
+
+    def call(self, auth, name, optional_vals = {}):
+        if filter(lambda field: field not in self.update_fields, optional_vals):
+            raise PLCInvalidArgument, "Invalid field specified"
+
+        # 1. Lowercase.
+        # 2. Begins with login_base (only letters).
+        # 3. Then single underscore after login_base.
+        # 4. Then letters, numbers, or underscores.
+        good_name = r'^[a-z]+_[a-z0-9_]+$'
+        if not name or \
+           not re.match(good_name, name):
+            raise PLCInvalidArgument, "Invalid slice name"
+
+        # Get associated site details
+        login_base = name.split("_")[0]
+        sites = Sites(self.api, [login_base]).values()
+        if not sites:
+            raise PLCInvalidArgument, "Invalid slice prefix"
+        site = sites[0]
+
+        if 'admin' not in self.caller['roles']:
+            if site['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Slice prefix must be the same as the login_base of one of your sites"
+
+        if len(site['slice_ids']) >= site['max_slices']:
+            raise PLCInvalidArgument, "Site has reached its maximum allowable slice count"
+
+        slice = Slice(self.api, optional_vals)
+        slice['creator_person_id'] = self.caller['person_id']
+        slice['name'] = name
+        slice['site_id'] = site['site_id']
+        slice.sync()
+
+        return slice['slice_id']
