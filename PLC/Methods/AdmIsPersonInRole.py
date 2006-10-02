@@ -21,21 +21,30 @@ class AdmIsPersonInRole(Method):
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-        Roles.fields['role_id']
+        Mixed(Parameter(int, "Role identifier"),
+              Parameter(str, "Role name"))
         ]
 
     returns = Parameter(int, "1 if account has role, 0 otherwise")
 
     status = "useless"
 
-    def call(self, auth, person_id_or_email, role_id):
+    def call(self, auth, person_id_or_email, role_id_or_name):
         # This is a totally fucked up function. I have no idea why it
         # exists or who calls it, but here is how it is supposed to
         # work.
 
         # Only allow PI roles to be checked
         roles = Roles(self.api)
-        if not roles.has_key(role_id) or roles[role_id] != "pi":
+        if role_id_or_name not in roles:
+            raise PLCInvalidArgument, "Invalid role identifier or name"
+
+        if isinstance(role_id_or_name, int):
+            role_id = role_id_or_name
+        else:
+            role_id = roles[role_id_or_name]
+
+        if roles[role_id] != "pi":
             raise PLCInvalidArgument, "Only the PI role may be checked"
 
         # Get account information

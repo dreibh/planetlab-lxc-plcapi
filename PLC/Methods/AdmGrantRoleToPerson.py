@@ -21,16 +21,22 @@ class AdmGrantRoleToPerson(Method):
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-        Roles.fields['role_id']
+        Mixed(Parameter(int, "Role identifier"),
+              Parameter(str, "Role name"))
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, person_id_or_email, role_id):
+    def call(self, auth, person_id_or_email, role_id_or_name):
         # Get all roles
         roles = Roles(self.api)
-        if role_id not in roles:
-            raise PLCInvalidArgument, "Invalid role ID"
+        if role_id_or_name not in roles:
+            raise PLCInvalidArgument, "Invalid role identifier or name"
+
+        if isinstance(role_id_or_name, int):
+            role_id = role_id_or_name
+        else:
+            role_id = roles[role_id_or_name]
 
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
