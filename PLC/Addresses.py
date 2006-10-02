@@ -9,9 +9,7 @@ class Address(Row):
     """
 
     fields = {
-        'address_id': Parameter(int, "Address type"),
-        'address_type_ids': Parameter([int], "Address type identifiers"),
-        'address_types': Parameter([str], "Address type names"),
+        'address_id': Parameter(int, "Address identifier"),
         'line1': Parameter(str, "Address line 1"),
         'line2': Parameter(str, "Address line 2"),
         'line3': Parameter(str, "Address line 3"),
@@ -19,6 +17,7 @@ class Address(Row):
         'state': Parameter(str, "State or province"),
         'postalcode': Parameter(str, "Postal code"),
         'country': Parameter(str, "Country"),
+        'address_type': Parameter(str, "Address type"),
         }
 
     def __init__(self, api, fields):
