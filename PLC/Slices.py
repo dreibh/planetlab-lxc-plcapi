@@ -20,14 +20,13 @@ class Slice(Row):
         'slice_id': Parameter(int, "Slice type"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
         'name': Parameter(str, "Slice name", max = 32),
-        'state': Parameter(str, "Slice state"),
+        'instantiation': Parameter(str, "Slice instantiation state"),
         'url': Parameter(str, "URL further describing this slice", max = 254),
         'description': Parameter(str, "Slice description", max = 2048),
         'max_nodes': Parameter(int, "Maximum number of nodes that can be assigned to this slice"),
         'creator_person_id': Parameter(int, "Identifier of the account that created this slice"),
         'created': Parameter(int, "Date and time when slice was created, in seconds since UNIX epoch"),
         'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
-        'is_deleted': Parameter(bool, "Has been deleted"),
         'node_ids': Parameter([int], "List of nodes in this slice"),
         'person_ids': Parameter([int], "List of accounts that can use this slice"),
         'attribute_ids': Parameter([int], "List of slice attributes"),
@@ -43,7 +42,7 @@ class Slice(Row):
         # desired.
         conflicts = Slices(self.api, [name])
         for slice_id, slice in conflicts.iteritems():
-            if not slice['is_deleted'] and ('slice_id' not in self or self['slice_id'] != slice_id):
+            if 'slice_id' not in self or self['slice_id'] != slice_id:
                 raise PLCInvalidArgument, "Slice name already in use"
 
         return name
@@ -146,13 +145,11 @@ class Slices(Table):
     database.
     """
 
-    def __init__(self, api, slice_id_or_name_list = None, deleted = False):
+    def __init__(self, api, slice_id_or_name_list = None, fields = Slice.fields):
         self.api = api
 
-        sql = "SELECT * FROM view_slices WHERE TRUE"
-
-        if deleted is not None:
-            sql += " AND view_slices.is_deleted IS %(deleted)s"
+        sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
+              ", ".join(fields)
 
         if slice_id_or_name_list:
             # Separate the list into integers and strings
@@ -167,7 +164,7 @@ class Slices(Table):
                 sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
             sql += ")"
 
-        rows = self.api.db.selectall(sql, locals())
+        rows = self.api.db.selectall(sql)
 
         for row in rows:
             self[row['slice_id']] = slice = Slice(api, row)
