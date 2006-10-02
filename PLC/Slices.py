@@ -5,6 +5,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
+from PLC.SliceInstantiations import SliceInstantiations
 import PLC.Persons
 
 class Slice(Row):
