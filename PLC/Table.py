@@ -9,22 +9,6 @@ class Row(dict):
     # fields (e.g., joined fields) may be updated via sync().
     fields = {}
 
-    def __init__(self, fields):
-        self.update(fields)
-
-    def update(self, fields):
-        for key, value in fields.iteritems():
-            self.__setitem__(key, value)
-
-    def __setitem__(self, key, value):
-        """
-        Magically takes care of aggregating certain variables into
-        lists.
-        """
-
-        if key in self.fields:
-            dict.__setitem__(self, key, value)
-
     def validate(self):
         """
         Validates values. Will validate a value with a custom function
