@@ -4,20 +4,13 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Roles.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
 #
-
-from PLC.Parameter import Parameter
 
 class Roles(dict):
     """
     Representation of the roles table in the database.
     """
-
-    fields = {
-        'role_id': Parameter(int, "Role identifier"),
-        'name': Parameter(str, "Role name"),
-        }
 
     # Role IDs equal to or lower than this number are for use by real
     # accounts. Other role IDs are used internally.
