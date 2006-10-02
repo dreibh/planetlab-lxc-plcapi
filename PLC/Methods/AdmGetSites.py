@@ -25,21 +25,18 @@ class AdmGetSites(Method):
         Parameter([str], 'List of fields to return')
         ]
 
-    # Filter out deleted fields
-    can_return = lambda (field, value): field not in ['deleted']
-    return_fields = dict(filter(can_return, Site.fields.items()))
-    returns = [return_fields]
+    returns = [Site.fields]
 
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
         # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(self.return_fields.keys())
+        self.__doc__ += os.linesep.join(Site.fields.keys())
 
     def call(self, auth, site_id_or_login_base_list = None, return_fields = None):
         # Make sure that only valid fields are specified
         if return_fields is None:
-            return_fields = self.return_fields
-        elif filter(lambda field: field not in self.return_fields, return_fields):
+            return_fields = Site.fields
+        elif filter(lambda field: field not in Site.fields, return_fields):
             raise PLCInvalidArgument, "Invalid return field specified"
 
         # Get site information

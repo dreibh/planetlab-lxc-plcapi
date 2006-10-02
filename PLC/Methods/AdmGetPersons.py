@@ -30,8 +30,8 @@ class AdmGetPersons(Method):
         Parameter([str], 'List of fields to return')
         ]
 
-    # Filter out password and deleted fields
-    can_return = lambda (field, value): field not in ['password', 'deleted']
+    # Filter out password field
+    can_return = lambda (field, value): field not in ['password']
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
 

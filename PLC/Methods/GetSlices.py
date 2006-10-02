@@ -25,10 +25,7 @@ class GetSlices(Method):
         Parameter([str], 'List of fields to return')
         ]
 
-    # Filter out is_deleted field
-    can_return = lambda (field, value): field not in ['is_deleted']
-    return_fields = dict(filter(can_return, Slice.fields.items()))
-    returns = [return_fields]
+    returns = [Slice.fields]
 
     def call(self, auth, slice_id_or_name_list = None):
         # Get slice information
