@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.2 2006/09/25 18:34:48 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.3 2006/10/02 15:19:35 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ CREATE TABLE persons (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX persons_email_key ON persons (email);
+CREATE INDEX persons_email_key ON persons (email) WHERE deleted IS false;
 
 --------------------------------------------------------------------------------
 -- Sites
@@ -81,12 +81,12 @@ CREATE TABLE sites (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX sites_login_base_key ON sites (login_base);
+CREATE INDEX sites_login_base_key ON sites (login_base) WHERE deleted IS false;
 
 -- Account site membership
 CREATE TABLE person_site (
-    person_id integer REFERENCES persons, -- Account identifier
-    site_id integer REFERENCES sites, -- Site identifier
+    person_id integer REFERENCES persons NOT NULL, -- Account identifier
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary site for this account
     PRIMARY KEY (person_id, site_id)
 );
@@ -132,8 +132,8 @@ CREATE TABLE addresses (
 
 -- Site mailing addresses
 CREATE TABLE site_address (
-    site_id integer REFERENCES sites, -- Account identifier
-    address_id integer REFERENCES addresses, -- Address identifier
+    site_id integer REFERENCES sites NOT NULL, -- Account identifier
+    address_id integer REFERENCES addresses NOT NULL, -- Address identifier
     PRIMARY KEY (site_id, address_id)
 );
 CREATE INDEX site_address_site_id_key ON site_address (site_id);
@@ -158,15 +158,15 @@ INSERT INTO key_types (key_type) VALUES ('ssh');
 -- Authentication keys
 CREATE TABLE keys (
     key_id serial PRIMARY KEY, -- Key identifier
-    key_type text REFERENCES key_types, -- Key type
+    key_type text REFERENCES key_types NOT NULL, -- Key type
     key text NOT NULL, -- Key material
     is_blacklisted boolean NOT NULL DEFAULT false -- Has been blacklisted
 );
 
 -- Account authentication key(s)
 CREATE TABLE person_key (
-    person_id integer REFERENCES persons, -- Account identifier
-    key_id integer REFERENCES keys, -- Key identifier
+    person_id integer REFERENCES persons NOT NULL, -- Account identifier
+    key_id integer REFERENCES keys NOT NULL, -- Key identifier
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary key for this account
     PRIMARY KEY (person_id, key_id)
 );
@@ -196,8 +196,8 @@ INSERT INTO roles (role_id, name) VALUES (1000, 'node');
 INSERT INTO roles (role_id, name) VALUES (2000, 'anonymous');
 
 CREATE TABLE person_role (
-    person_id integer REFERENCES persons, -- Account identifier
-    role_id integer REFERENCES roles, -- Role identifier
+    person_id integer REFERENCES persons NOT NULL, -- Account identifier
+    role_id integer REFERENCES roles NOT NULL, -- Role identifier
     PRIMARY KEY (person_id, role_id)
 );
 CREATE INDEX person_role_person_id_key ON person_role (person_id);
@@ -231,8 +231,8 @@ CREATE TABLE nodes (
     -- Mandatory
     node_id serial PRIMARY KEY, -- Node identifier
     hostname text NOT NULL, -- Node hostname
-    site_id integer REFERENCES sites, -- At which site
-    boot_state text REFERENCES boot_states, -- Node boot state
+    site_id integer REFERENCES sites NOT NULL, -- At which site
+    boot_state text REFERENCES boot_states NOT NULL, -- Node boot state
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
 
     -- Optional
@@ -248,8 +248,8 @@ CREATE TABLE nodes (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX nodes_hostname_key ON nodes (hostname);
-CREATE INDEX nodes_site_id_key ON nodes (site_id);
+CREATE INDEX nodes_hostname_key ON nodes (hostname) WHERE deleted IS false;
+CREATE INDEX nodes_site_id_key ON nodes (site_id) WHERE deleted IS false;
 
 -- Nodes at each site
 CREATE VIEW site_nodes AS
@@ -271,8 +271,8 @@ CREATE TABLE nodegroups (
 
 -- Node group membership
 CREATE TABLE nodegroup_node (
-    nodegroup_id integer REFERENCES nodegroups, -- Group identifier
-    node_id integer REFERENCES nodes, -- Node identifier
+    nodegroup_id integer REFERENCES nodegroups NOT NULL, -- Group identifier
+    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
     PRIMARY KEY (nodegroup_id, node_id)
 );
 CREATE INDEX nodegroup_node_nodegroup_id_key ON nodegroup_node (nodegroup_id);
@@ -318,10 +318,10 @@ INSERT INTO nodenetwork_methods (method) VALUES ('unknown');
 CREATE TABLE nodenetworks (
     -- Mandatory
     nodenetwork_id serial PRIMARY KEY, -- Network interface identifier
-    node_id integer REFERENCES nodes, -- Which node
+    node_id integer REFERENCES nodes NOT NULL, -- Which node
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary interface for this node
-    type text REFERENCES nodenetwork_types, -- Addressing scheme
-    method text REFERENCES nodenetwork_methods, -- Configuration method
+    type text REFERENCES nodenetwork_types NOT NULL, -- Addressing scheme
+    method text REFERENCES nodenetwork_methods NOT NULL, -- Configuration method
 
     -- Optional, depending on type and method
     ip text, -- IP address
@@ -364,27 +364,27 @@ INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manual
 -- Slices
 CREATE TABLE slices (
     slice_id serial PRIMARY KEY, -- Slice identifier
-    site_id integer REFERENCES sites, -- Site identifier
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
     name text NOT NULL, -- Slice name
-    instantiation text REFERENCES slice_instantiations DEFAULT 'plc-instantiated', -- Slice state, e.g. plc-instantiated
+    instantiation text REFERENCES slice_instantiations NOT NULL DEFAULT 'plc-instantiated', -- Slice state, e.g. plc-instantiated
     url text, -- Project URL
     description text, -- Project description
 
     max_nodes integer NOT NULL DEFAULT 100, -- Maximum number of nodes that can be assigned to this slice
 
-    creator_person_id integer REFERENCES persons, -- Creator
+    creator_person_id integer REFERENCES persons NOT NULL, -- Creator
     created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Creation date
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
     is_deleted boolean NOT NULL DEFAULT false
 );
-CREATE INDEX slices_site_id_key ON slices (site_id);
-CREATE INDEX slices_name_key ON slices (name);
+CREATE INDEX slices_site_id_key ON slices (site_id) WHERE is_deleted IS false;
+CREATE INDEX slices_name_key ON slices (name) WHERE is_deleted IS false;
 
 -- Slivers
 CREATE TABLE slice_node (
-    slice_id integer REFERENCES slices, -- Slice identifier
-    node_id integer REFERENCES nodes -- Node identifier
+    slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
+    node_id integer REFERENCES nodes NOT NULL -- Node identifier
 );
 CREATE INDEX slice_node_slice_id_key ON slice_node (slice_id);
 CREATE INDEX slice_node_node_id_key ON slice_node (node_id);
@@ -416,8 +416,8 @@ GROUP BY site_id;
 
 -- Slice membership
 CREATE TABLE slice_person (
-    slice_id integer REFERENCES slices, -- Slice identifier
-    person_id integer REFERENCES persons, -- Account identifier
+    slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
+    person_id integer REFERENCES persons NOT NULL, -- Account identifier
     PRIMARY KEY (slice_id, person_id)
 );
 CREATE INDEX slice_person_slice_id_key ON slice_person (slice_id);
@@ -438,35 +438,48 @@ FROM slice_person
 GROUP BY person_id;
 
 --------------------------------------------------------------------------------
--- Slice attributes
+-- Attributes
 --------------------------------------------------------------------------------
 
+-- Generic attribute types
 CREATE TABLE attributes (
-    attribute_id serial PRIMARY KEY, -- Attribute identifier
+    attribute_id serial PRIMARY KEY, -- Attribute type identifier
     name text UNIQUE NOT NULL, -- Attribute name
     description text, -- Attribute description
-    min_role_id integer REFERENCES roles -- Minimum (least powerful) role that can set or change this attribute
+    min_role_id integer REFERENCES roles DEFAULT 10 -- If set, minimum (least powerful) role that can set or change this attribute
 );
 
 -- Slice/sliver attributes
 CREATE TABLE slice_attribute (
-    slice_id integer REFERENCES slices, -- Slice identifier
-    attribute_id integer REFERENCES attributes, -- Attribute identifier
-    node_id integer, -- Sliver attribute if set
-    value text,
-    PRIMARY KEY (slice_id, attribute_id, node_id)
+    slice_attribute_id serial PRIMARY KEY, -- Slice attribute identifier
+    slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
+    node_id integer REFERENCES nodes, -- Sliver attribute if set
+    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
+    value text
 );
 CREATE INDEX slice_attribute_slice_id_key ON slice_attribute (slice_id);
 CREATE INDEX slice_attribute_node_id_key ON slice_attribute (node_id);
 
 CREATE VIEW slice_attributes AS
 SELECT slice_id,
-array_to_string(array_accum(attribute_id), ',') AS attribute_ids
+array_to_string(array_accum(slice_attribute_id), ',') AS slice_attribute_ids
 FROM slice_attribute
-WHERE node_id IS NULL
 GROUP BY slice_id;
 
--- No sliver_attributes view since it by definition requires a conditional on node_id
+-- Node attributes
+CREATE TABLE node_attribute (
+    node_attribute_id serial PRIMARY KEY, -- Node attribute identifier
+    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
+    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
+    value text
+);
+CREATE INDEX node_attribute_node_id_key ON node_attribute (node_id);
+
+CREATE VIEW node_attributes AS
+SELECT node_id,
+array_to_string(array_accum(node_attribute_id), ',') AS node_attribute_ids
+FROM node_attribute
+GROUP BY node_id;
 
 --------------------------------------------------------------------------------
 -- Useful views
@@ -521,6 +534,18 @@ FROM nodes
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id);
+
+CREATE VIEW view_node_attributes AS
+SELECT
+node_attribute.node_attribute_id,
+node_attribute.node_id,
+attributes.attribute_id,
+attributes.name,
+attributes.description,
+attributes.min_role_id,
+node_attribute.value
+FROM node_attribute
+INNER JOIN attributes USING (attribute_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
@@ -586,11 +611,24 @@ CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
 slice_nodes.node_ids,
 slice_persons.person_ids,
-slice_attributes.attribute_ids
+slice_attributes.slice_attribute_ids
 FROM slices
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
 LEFT JOIN slice_attributes USING (slice_id);
+
+CREATE VIEW view_slice_attributes AS
+SELECT
+slice_attribute.slice_attribute_id,
+slice_attribute.slice_id,
+slice_attribute.node_id,
+attributes.attribute_id,
+attributes.name,
+attributes.description,
+attributes.min_role_id,
+slice_attribute.value
+FROM slice_attribute
+INNER JOIN attributes USING (attribute_id);
 
 --------------------------------------------------------------------------------
 -- Built-in maintenance account and default site
