@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
+# $Id: API.py,v 1.2 2006/09/08 19:43:31 mlhuang Exp $
 #
 
 import sys
@@ -102,7 +102,7 @@ class PLCAPI:
         if interface == xmlrpclib:
             if not isinstance(result, PLCFault):
                 result = (result,)
-            data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding)
+            data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
         elif interface == SOAPpy:
             data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
 
