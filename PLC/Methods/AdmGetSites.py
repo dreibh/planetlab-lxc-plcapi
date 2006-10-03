@@ -40,7 +40,7 @@ class AdmGetSites(Method):
             raise PLCInvalidArgument, "Invalid return field specified"
 
         # Get site information
-        sites = Sites(self.api, site_id_or_login_base_list, return_fields)
+        sites = Sites(self.api, site_id_or_login_base_list)
 
         # Filter out undesired or None fields (XML-RPC cannot marshal
         # None) and turn each site into a real dict.
