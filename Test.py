@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.6 2006/09/25 15:32:53 mlhuang Exp $
+# $Id: Test.py,v 1.7 2006/09/25 18:10:36 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -122,11 +122,13 @@ for i in range(3):
     abbreviated_name = randstr(50)
     latitude = int(randfloat(-90.0, 90.0) * 1000) / 1000.0
     longitude = int(randfloat(-180.0, 180.0) * 1000) / 1000.0
+    max_slices = 10
     print "AdmUpdateSite(%s)" % login_base,
     AdmUpdateSite(admin, site_id, {'name': name, 'abbreviated_name': abbreviated_name,
-                                   'latitude': latitude, 'longitude': longitude})
+                                   'latitude': latitude, 'longitude': longitude,
+                                   'max_slices': max_slices})
     site = AdmGetSites(admin, [site_id])[0]
-    for key in 'name', 'abbreviated_name', 'latitude', 'longitude':
+    for key in 'name', 'abbreviated_name', 'latitude', 'longitude', 'max_slices':
         assert unicmp(site[key], locals()[key])
     print "=> OK"
 
@@ -408,8 +410,165 @@ for node_id in node_ids:
                 assert address == locals()[key]
     print "=>", [nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks]
 
-    # Delete node network
+# Add attribute types
+attribute_ids = []
+for i in range(3):
+    name = randstr(100)
+    description = randstr(254)
+    min_role_id = random.sample(roles.values(), 1)[0]
+
+    # Add attribute
+    print "AddAttribute",
+    attribute_id = AddAttribute(admin, name,
+                                {'description': description,
+                                 'min_role_id': min_role_id})
+
+    # Should return a unique attribute_id
+    assert attribute_id not in attribute_ids
+    attribute_ids.append(attribute_id)
+    print "=>", attribute_id
+
+    # Check attribute
+    print "GetAttributes(%d)" % attribute_id,
+    attribute = GetAttributes(admin, [attribute_id])[0]
+    for key in 'min_role_id', 'description':
+        assert unicmp(attribute[key], locals()[key])
+    print "=> OK"
+
+    # Update attribute
+    description = randstr(254)
+    min_role_id = random.sample(roles.values(), 1)[0]
+    print "UpdateAttribute(%d)" % attribute_id,
+    UpdateAttribute(admin, attribute_id,
+                    {'description': description,
+                     'min_role_id': min_role_id})
+    attribute = GetAttributes(admin, [attribute_id])[0]
+    for key in 'min_role_id', 'description':
+        assert unicmp(attribute[key], locals()[key])
+    print "=> OK"
+
+# Add slices and slice attributes
+slice_ids = []
+slice_attribute_ids = []
+sites = AdmGetSites(admin, site_ids)
+for site in sites:
+    for i in range(10):
+        name = site['login_base'] + "_" + randstr(11, letters).lower()
+        url = "http://" + randhostname() + "/"
+        description = randstr(2048)
+
+        # Add slice
+        print "AddSlice(%s)" % name,
+        slice_id = AddSlice(admin, name, {'url': url, 'description': description})
+
+        # Should return a unique slice_id
+        assert slice_id not in slice_ids
+        slice_ids.append(slice_id)
+        print "=>", slice_id
+
+        # Check slice
+        print "GetSlices(%d)" % slice_id,
+        slice = GetSlices(admin, [slice_id])[0]
+        for key in 'name', 'url', 'description', 'slice_id':
+            assert unicmp(slice[key], locals()[key])
+        print "=> OK"
+
+        # Update slice
+        url = "http://" + randhostname() + "/"
+        description = randstr(2048)
+        print "UpdateSlice(%s)" % name,
+        UpdateSlice(admin, slice_id, {'url': url, 'description': description})
+        slice = GetSlices(admin, [slice_id])[0]
+        for key in 'name', 'url', 'description', 'slice_id':
+            assert unicmp(slice[key], locals()[key])
+        print "=> OK"
+
+        # XXX Add nodes to slice
+
+        # XXX Add people to slice
+        
+        # Set slice/sliver attributes
+        for attribute_id in attribute_ids:
+            value = randstr(254)
+            # Make it a sliver attribute with 50% probability
+            # node_id = random.sample(node_ids + [None] * len(node_ids), 1)[0]
+            node_id = None
+
+            # Add slice attribute
+            print "AddSliceAttribute(%s, %d)" % (name, attribute_id),
+            if node_id is None:
+                slice_attribute_id = AddSliceAttribute(admin, slice_id, attribute_id, value)
+            else:
+                slice_attribute_id = AddSliceAttribute(admin, slice_id, attribute_id, value, node_id)
+
+            # Should return a unique slice_attribute_id
+            assert slice_attribute_id not in slice_attribute_ids
+            slice_attribute_ids.append(slice_attribute_id)
+            print "=>", slice_attribute_id
+
+            # Check slice attribute
+            print "GetSliceAttributes(%d)" % slice_attribute_id,
+            slice_attribute = GetSliceAttributes(admin, slice_id, [slice_attribute_id])[0]
+            for key in 'attribute_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
+                assert unicmp(slice_attribute[key], locals()[key])
+            print "=> OK"
+
+            # Update slice attribute
+            url = "http://" + randhostname() + "/"
+            description = randstr(2048)
+            print "UpdateSliceAttribute(%s)" % name,
+            UpdateSliceAttribute(admin, slice_id, slice_attribute_id, value)
+            slice_attribute = GetSliceAttributes(admin, slice_id, [slice_attribute_id])[0]
+            for key in 'attribute_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
+                assert unicmp(slice_attribute[key], locals()[key])
+            print "=> OK"
+
+# Delete slices
+for slice_id in slice_ids:
+    # Delete slice attributes
+    slice = GetSlices(admin, [slice_id])[0]
+    for slice_attribute_id in slice['slice_attribute_ids']:
+        print "DeleteSliceAttribute(%s, %d)" % (slice['name'], slice_attribute_id),
+        DeleteSliceAttribute(admin, slice_id, slice_attribute_id)
+        print "=> OK"
+    slice = GetSlices(admin, [slice_id])[0]
+    assert not slice['slice_attribute_ids']
+
+    # Delete slice
+    print "DeleteSlice(%d)" % slice_id,
+    DeleteSlice(admin, slice_id)
+    assert not GetSlices(admin, [slice_id])
+
+    # Make sure it really deleted it
+    slices = GetSlices(admin, slice_ids)
+    assert slice_id not in [slice['slice_id'] for slice in slices]
+    print "=> OK"
+
+print "GetSlices",
+assert not GetSlices(admin, slice_ids)
+print "=> []"
+
+# Delete attributes
+for attribute_id in attribute_ids:
+    # Delete attribute
+    print "DeleteAttribute(%d)" % attribute_id,
+    DeleteAttribute(admin, attribute_id)
+    assert not GetAttributes(admin, [attribute_id])
+
+    # Make sure it really deleted it
+    attributes = GetAttributes(admin, attribute_ids)
+    assert attribute_id not in [attribute['attribute_id'] for attribute in attributes]
+    print "=> OK"
+
+print "GetAttributes",
+assert not GetAttributes(admin, attribute_ids)
+print "=> []"
+
+# Delete node networks
+for node_id in node_ids:
+    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
     for nodenetwork in nodenetworks:
+        # Delete node network
         print "AdmDeleteNodeNetwork(%d, %d)" % (node_id, nodenetwork['nodenetwork_id']),
         AdmDeleteNodeNetwork(admin, node_id, nodenetwork['nodenetwork_id'])
         print "=>", "OK"
