@@ -42,10 +42,4 @@ class GetSlices(Method):
                 can_view = member_of
             slices = filter(can_view, slices)
 
-        # Filter out undesired or None fields (XML-RPC cannot marshal
-        # None) and turn each slice into a real dict.
-        valid_return_fields_only = lambda (key, value): value is not None
-        slices = [dict(filter(valid_return_fields_only, slice.items())) \
-                 for slice in slices]
-
         return slices
