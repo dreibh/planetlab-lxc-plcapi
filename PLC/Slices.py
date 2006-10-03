@@ -1,11 +1,13 @@
 from types import StringTypes
 import time
+import re
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiations
+from PLC.Nodes import Node, Nodes
 import PLC.Persons
 
 class Slice(Row):
@@ -16,6 +18,8 @@ class Slice(Row):
     with a dict of values.
     """
 
+    table_name = 'slices'
+    primary_key = 'slice_id'
     fields = {
         'slice_id': Parameter(int, "Slice type"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
@@ -29,10 +33,10 @@ class Slice(Row):
         'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
         'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
         'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
-        'attribute_ids': Parameter([int], "List of slice attributes", ro = True),
+        'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
         }
 
-    def __init__(self, api, fields):
+    def __init__(self, api, fields = {}):
         Row.__init__(self, fields)
         self.api = api
 
@@ -40,6 +44,16 @@ class Slice(Row):
         # N.B.: Responsibility of the caller to ensure that login_base
         # portion of the slice name corresponds to a valid site, if
         # desired.
+
+        # 1. Lowercase.
+        # 2. Begins with login_base (only letters).
+        # 3. Then single underscore after login_base.
+        # 4. Then letters, numbers, or underscores.
+        good_name = r'^[a-z]+_[a-z0-9_]+$'
+        if not name or \
+           not re.match(good_name, name):
+            raise PLCInvalidArgument, "Invalid slice name"
+
         conflicts = Slices(self.api, [name])
         for slice_id, slice in conflicts.iteritems():
             if 'slice_id' not in self or self['slice_id'] != slice_id:
@@ -52,7 +66,7 @@ class Slice(Row):
         if instantiation not in instantiations:
             raise PLCInvalidArgument, "No such instantiation state"
 
-        return state
+        return instantiation
 
     def validate_expires(self, expires):
         # N.B.: Responsibility of the caller to ensure that expires is
@@ -124,7 +138,7 @@ class Slice(Row):
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, PLC.Nodes.Node)
+        assert isinstance(node, Node)
         assert 'node_id' in node
 
         slice_id = self['slice_id']
@@ -148,7 +162,7 @@ class Slice(Row):
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, PLC.Nodes.Node)
+        assert isinstance(node, Node)
         assert 'node_id' in node
 
         slice_id = self['slice_id']
@@ -166,58 +180,6 @@ class Slice(Row):
 
         if 'slice_ids' in node and slice_id in node['slice_ids']:
             node['slice_ids'].remove(slice_id)
-
-    def sync(self, commit = True):
-        """
-        Flush changes back to the database.
-        """
-
-        try:
-            if not self['name']:
-                raise KeyError
-        except KeyError:
-            raise PLCInvalidArgument, "Slice name must be specified"
-
-        self.validate()
-
-        # Fetch a new slice_id if necessary
-        if 'slice_id' not in self:
-            # N.B.: Responsibility of the caller to ensure that
-            # max_slices is not exceeded.
-            rows = self.api.db.selectall("SELECT NEXTVAL('slices_slice_id_seq') AS slice_id")
-            if not rows:
-                raise PLCDBError, "Unable to fetch new slice_id"
-            self['slice_id'] = rows[0]['slice_id']
-            insert = True
-        else:
-            insert = False
-
-        # Filter out fields that cannot be set or updated directly
-        slices_fields = self.api.db.fields('slices')
-        fields = dict(filter(lambda (key, value): \
-                             key in slices_fields and \
-                             (key not in self.fields or not self.fields[key].ro),
-                             self.items()))
-
-        # Parameterize for safety
-        keys = fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in fields.items()]
-
-        if insert:
-            # Insert new row in slices table
-            sql = "INSERT INTO slices (%s) VALUES (%s)" % \
-                  (", ".join(keys), ", ".join(values))
-        else:
-            # Update existing row in slices table
-            columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE slices SET " + \
-                  ", ".join(columns) + \
-                  " WHERE slice_id = %(slice_id)d"
-
-        self.api.db.do(sql, fields)
-
-        if commit:
-            self.api.db.commit()
 
     def delete(self, commit = True):
         """
@@ -242,11 +204,11 @@ class Slices(Table):
     database.
     """
 
-    def __init__(self, api, slice_id_or_name_list = None, fields = Slice.fields):
+    def __init__(self, api, slice_id_or_name_list = None):
         self.api = api
 
         sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
-              ", ".join(fields)
+              ", ".join(Slice.fields)
 
         if slice_id_or_name_list:
             # Separate the list into integers and strings
@@ -265,7 +227,7 @@ class Slices(Table):
 
         for row in rows:
             self[row['slice_id']] = slice = Slice(api, row)
-            for aggregate in 'person_ids', 'slice_ids', 'attribute_ids':
+            for aggregate in 'node_ids', 'person_ids', 'slice_attribute_ids':
                 if not slice.has_key(aggregate) or slice[aggregate] is None:
                     slice[aggregate] = []
                 else:
