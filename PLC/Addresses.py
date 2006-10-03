@@ -8,6 +8,8 @@ class Address(Row):
     with a dict of values.
     """
 
+    table_name = 'addresses'
+    primary_key = 'address_id'
     fields = {
         'address_id': Parameter(int, "Address identifier"),
         'line1': Parameter(str, "Address line 1"),
@@ -20,13 +22,9 @@ class Address(Row):
         'address_type': Parameter(str, "Address type"),
         }
 
-    def __init__(self, api, fields):
+    def __init__(self, api, fields = {}):
         self.api = api
-        Row.__init__(fields)
-
-    def sync(self, commit = True):
-        # XXX
-        pass
+        Row.__init__(self, fields)
 
     def delete(self, commit = True):
         # XXX

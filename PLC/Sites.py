@@ -19,6 +19,8 @@ class Site(Row):
     dict. Commit to the database with sync().
     """
 
+    table_name = 'sites'
+    primary_key = 'site_id'
     fields = {
         'site_id': Parameter(int, "Site identifier"),
         'name': Parameter(str, "Full site name", max = 254),
@@ -39,15 +41,28 @@ class Site(Row):
         'node_ids': Parameter([int], "List of site node identifiers", ro = True),
         }
 
-    def __init__(self, api, fields):
+    def __init__(self, api, fields = {}):
         Row.__init__(self, fields)
         self.api = api
 
+    def validate_name(self, name):
+        name = name.strip()
+        if not name:
+            raise PLCInvalidArgument, "Name must be specified"
+
+        return name
+
+    validate_abbreviated_name = validate_name
+
     def validate_login_base(self, login_base):
+        login_base = login_base.strip().lower()
+
+        if not login_base:
+            raise PLCInvalidArgument, "Login base must be specified"
+
         if not set(login_base).issubset(string.ascii_letters):
             raise PLCInvalidArgument, "Login base must consist only of ASCII letters"
 
-        login_base = login_base.lower()
         conflicts = Sites(self.api, [login_base])
         for site_id, site in conflicts.iteritems():
             if 'site_id' not in self or self['site_id'] != site_id:
@@ -118,58 +133,6 @@ class Site(Row):
         if 'site_ids' in person and site_id in person['site_ids']:
             person['site_ids'].remove(site_id)
 
-    def sync(self, commit = True):
-        """
-        Flush changes back to the database.
-        """
-
-        self.validate()
-
-        try:
-            if not self['name'] or \
-               not self['abbreviated_name'] or \
-               not self['login_base']:
-                raise KeyError
-        except KeyError:
-            raise PLCInvalidArgument, "name, abbreviated_name, and login_base must all be specified"
-
-        # Fetch a new site_id if necessary
-        if 'site_id' not in self:
-            rows = self.api.db.selectall("SELECT NEXTVAL('sites_site_id_seq') AS site_id")
-            if not rows:
-                raise PLCDBError, "Unable to fetch new site_id"
-            self['site_id'] = rows[0]['site_id']
-            insert = True
-        else:
-            insert = False
-
-        # Filter out fields that cannot be set or updated directly
-        sites_fields = self.api.db.fields('sites')
-        fields = dict(filter(lambda (key, value): \
-                             key in sites_fields and \
-                             (key not in self.fields or not self.fields[key].ro),
-                             self.items()))
-
-        # Parameterize for safety
-        keys = fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in fields.items()]
-
-        if insert:
-            # Insert new row in sites table
-            sql = "INSERT INTO sites (%s) VALUES (%s)" % \
-                  (", ".join(keys), ", ".join(values))
-        else:
-            # Update existing row in sites table
-            columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE sites SET " + \
-                  ", ".join(columns) + \
-                  " WHERE site_id = %(site_id)d"
-
-        self.api.db.do(sql, fields)
-
-        if commit:
-            self.api.db.commit()
-
     def delete(self, commit = True):
         """
         Delete existing site.
@@ -229,11 +192,11 @@ class Sites(Table):
     fields.
     """
 
-    def __init__(self, api, site_id_or_login_base_list = None, fields = Site.fields):
+    def __init__(self, api, site_id_or_login_base_list = None):
         self.api = api
 
         sql = "SELECT %s FROM view_sites WHERE deleted IS False" % \
-              ", ".join(fields)
+              ", ".join(Site.fields)
 
         if site_id_or_login_base_list:
             # Separate the list into integers and strings

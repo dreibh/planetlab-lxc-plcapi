@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.7 2006/10/02 16:04:42 mlhuang Exp $
+# $Id: Nodes.py,v 1.8 2006/10/02 18:32:31 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -24,6 +24,8 @@ class Node(Row):
     dict. Commit to the database with sync().
     """
 
+    table_name = 'nodes'
+    primary_key = 'node_id'
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
@@ -80,50 +82,6 @@ class Node(Row):
 
         return boot_state
 
-    def sync(self, commit = True):
-        """
-        Flush changes back to the database.
-        """
-
-        self.validate()
-
-        # Fetch a new node_id if necessary
-        if 'node_id' not in self:
-            rows = self.api.db.selectall("SELECT NEXTVAL('nodes_node_id_seq') AS node_id")
-            if not rows:
-                raise PLCDBError, "Unable to fetch new node_id"
-            self['node_id'] = rows[0]['node_id']
-            insert = True
-        else:
-            insert = False
-
-        # Filter out fields that cannot be set or updated directly
-        nodes_fields = self.api.db.fields('nodes')
-        fields = dict(filter(lambda (key, value): \
-                             key in nodes_fields and \
-                             (key not in self.fields or not self.fields[key].ro),
-                             self.items()))
-
-        # Parameterize for safety
-        keys = fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in fields.items()]
-
-        if insert:
-            # Insert new row in nodes table
-            sql = "INSERT INTO nodes (%s) VALUES (%s)" % \
-                  (", ".join(keys), ", ".join(values))
-        else:
-            # Update existing row in nodes table
-            columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE nodes SET " + \
-                  ", ".join(columns) + \
-                  " WHERE node_id = %(node_id)d"
-
-        self.api.db.do(sql, fields)
-
-        if commit:
-            self.api.db.commit()
-
     def delete(self, commit = True):
         """
         Delete existing node.
@@ -152,11 +110,11 @@ class Nodes(Table):
     database.
     """
 
-    def __init__(self, api, node_id_or_hostname_list = None, fields = Node.fields.keys()):
+    def __init__(self, api, node_id_or_hostname_list = None):
         self.api = api
 
         sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
-              ", ".join(fields)
+              ", ".join(Node.fields)
 
         if node_id_or_hostname_list:
             # Separate the list into integers and strings

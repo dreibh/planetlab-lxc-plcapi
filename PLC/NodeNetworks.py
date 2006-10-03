@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.3 2006/09/19 19:35:05 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.4 2006/09/25 14:55:43 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -36,6 +36,8 @@ class NodeNetwork(Row):
     dict. Commit to the database with sync().
     """
 
+    table_name = 'nodenetworks'
+    primary_key = 'nodenetwork_id'
     fields = {
         'nodenetwork_id': Parameter(int, "Node interface identifier"),
         'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')"),
@@ -65,7 +67,7 @@ class NodeNetwork(Row):
                 '10mbit', '20mbit', '50mbit',
                 '100mbit']
 
-    def __init__(self, api, fields):
+    def __init__(self, api, fields = {}):
         Row.__init__(self, fields)
         self.api = api
 
@@ -124,19 +126,16 @@ class NodeNetwork(Row):
         # Validate hostname, and check for conflicts with a node hostname
         return PLC.Nodes.Node.validate_hostname(self, hostname)
 
-    def sync(self, commit = True):
+    def validate(self):
         """
         Flush changes back to the database.
         """
 
-        # Validate all specified fields
-        self.validate()
+        # Basic validation
+        Row.validate(self)
 
-        try:
-            method = self['method']
-            self['type']
-        except KeyError:
-            raise PLCInvalidArgument, "method and type must both be specified"
+        assert 'method' in self
+        method = self['method']
 
         if method == "proxy" or method == "tap":
             if 'mac' in self and self['mac']:
@@ -169,41 +168,6 @@ class NodeNetwork(Row):
             if 'ip' not in self or not self['ip']:
                 raise PLCInvalidArgument, "For ipmi method, ip is required"
 
-        # Fetch a new nodenetwork_id if necessary
-        if 'nodenetwork_id' not in self:
-            rows = self.api.db.selectall("SELECT NEXTVAL('nodenetworks_nodenetwork_id_seq') AS nodenetwork_id")
-            if not rows:
-                raise PLCDBError("Unable to fetch new nodenetwork_id")
-            self['nodenetwork_id'] = rows[0]['nodenetwork_id']
-            insert = True
-        else:
-            insert = False
-
-        # Filter out fields that cannot be set or updated directly
-        nodenetworks_fields = self.api.db.fields('nodenetworks')
-        fields = dict(filter(lambda (key, value): key in nodenetworks_fields,
-                             self.items()))
-
-        # Parameterize for safety
-        keys = fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in fields.items()]
-
-        if insert:
-            # Insert new row in nodenetworks table
-            sql = "INSERT INTO nodenetworks (%s) VALUES (%s)" % \
-                  (", ".join(keys), ", ".join(values))
-        else:
-            # Update existing row in sites table
-            columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE nodenetworks SET " + \
-                  ", ".join(columns) + \
-                  " WHERE nodenetwork_id = %(nodenetwork_id)d"
-
-        self.api.db.do(sql, fields)
-
-        if commit:
-            self.api.db.commit()
-
     def delete(self, commit = True):
         """
         Delete existing nodenetwork.
@@ -228,8 +192,8 @@ class NodeNetworks(Table):
     def __init__(self, api, nodenetwork_id_or_hostname_list = None):
         self.api = api
 
-        # N.B.: Node IDs returned may be deleted.
-        sql = "SELECT * FROM nodenetworks"
+        sql = "SELECT %s FROM nodenetworks" % \
+              ", ".join(NodeNetwork.fields)
 
         if nodenetwork_id_or_hostname_list:
             # Separate the list into integers and strings

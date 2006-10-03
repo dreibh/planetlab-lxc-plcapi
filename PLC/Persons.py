@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.6 2006/10/02 16:04:22 mlhuang Exp $
+# $Id: Persons.py,v 1.7 2006/10/02 18:32:31 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -31,6 +31,8 @@ class Person(Row):
     dict. Commit to the database with sync().
     """
 
+    table_name = 'persons'
+    primary_key = 'person_id'
     fields = {
         'person_id': Parameter(int, "Account identifier"),
         'first_name': Parameter(str, "Given name", max = 128),
@@ -51,7 +53,7 @@ class Person(Row):
         'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
         }
 
-    def __init__(self, api, fields):
+    def __init__(self, api, fields = {}):
         Row.__init__(self, fields)
         self.api = api
 
@@ -223,50 +225,6 @@ class Person(Row):
         self['site_ids'].remove(site_id)
         self['site_ids'].insert(0, site_id)
 
-    def sync(self, commit = True):
-        """
-        Commit changes back to the database.
-        """
-
-        self.validate()
-
-        # Fetch a new person_id if necessary
-        if 'person_id' not in self:
-            rows = self.api.db.selectall("SELECT NEXTVAL('persons_person_id_seq') AS person_id")
-            if not rows:
-                raise PLCDBError, "Unable to fetch new person_id"
-            self['person_id'] = rows[0]['person_id']
-            insert = True
-        else:
-            insert = False
-
-        # Filter out fields that cannot be set or updated directly
-        persons_fields = self.api.db.fields('persons')
-        fields = dict(filter(lambda (key, value): \
-                             key in persons_fields and \
-                             (key not in self.fields or not self.fields[key].ro),
-                             self.items()))
-
-        # Parameterize for safety
-        keys = fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in fields.items()]
-
-        if insert:
-            # Insert new row in persons table
-            sql = "INSERT INTO persons (%s) VALUES (%s)" % \
-                  (", ".join(keys), ", ".join(values))
-        else:
-            # Update existing row in persons table
-            columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE persons SET " + \
-                  ", ".join(columns) + \
-                  " WHERE person_id = %(person_id)d"
-
-        self.api.db.do(sql, fields)
-
-        if commit:
-            self.api.db.commit()
-
     def delete(self, commit = True):
         """
         Delete existing account.
@@ -295,11 +253,11 @@ class Persons(Table):
     non-deleted accounts.
     """
 
-    def __init__(self, api, person_id_or_email_list = None, fields = Person.fields, enabled = None):
+    def __init__(self, api, person_id_or_email_list = None, enabled = None):
         self.api = api
 
         sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
-              ", ".join(fields)
+              ", ".join(Person.fields)
 
         if enabled is not None:
             sql += " AND enabled IS %(enabled)s"
