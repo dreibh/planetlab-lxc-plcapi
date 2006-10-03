@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.3 2006/09/08 00:29:34 mlhuang Exp $
+# $Id: Shell.py,v 1.4 2006/09/08 15:37:01 mlhuang Exp $
 #
 
 import os, sys
@@ -101,7 +101,7 @@ except:
                ":" + str(config.PLC_API_PORT) + \
                "/" + config.PLC_API_PATH + "/"
 
-    server = xmlrpclib.ServerProxy(url)
+    server = xmlrpclib.ServerProxy(url, allow_none = 1)
 
 # Default is to use capability authentication
 if (method, user, password) == (None, None, None):
