@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: SliceInstantiations.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: SliceInstantiations.py,v 1.1 2006/10/02 15:36:48 mlhuang Exp $
 #
 
 class SliceInstantiations(list):
@@ -13,7 +13,7 @@ class SliceInstantiations(list):
     """
 
     def __init__(self, api):
-        sql = "SELECT * FROM slice_instantiations"
+        sql = "SELECT instantiation FROM slice_instantiations"
 
         for row in api.db.selectall(sql):
-            self.append[row['instantiation']]
+            self.append(row['instantiation'])
