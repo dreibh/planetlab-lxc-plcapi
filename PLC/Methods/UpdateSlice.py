@@ -13,8 +13,8 @@ class UpdateSlice(Method):
     update_fields.
 
     Users may only update slices of which they are members. PIs may
-    update any of the slices at their slices. Admins may update any
-    slice.
+    update any of the slices at their sites, or any slices of which
+    they are members. Admins may update any slice.
 
     Only PIs and admins may update max_nodes. Slices cannot be renewed
     (by updating the expires parameter) more than 8 weeks into the

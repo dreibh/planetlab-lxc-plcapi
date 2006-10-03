@@ -9,8 +9,8 @@ class DeleteSlice(Method):
     Deletes the specified slice.
 
     Users may only delete slices of which they are members. PIs may
-    delete any of the slices at their sites. Admins may delete any
-    slice.
+    delete any of the slices at their sites, or any slices of which
+    they are members. Admins may delete any slice.
 
     Returns 1 if successful, faults otherwise.
     """
