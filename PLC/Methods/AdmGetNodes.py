@@ -51,7 +51,7 @@ class AdmGetNodes(Method):
             raise PLCInvalidArgument, "Invalid return field specified"
 
         # Get node information
-        nodes = Nodes(self.api, node_id_or_hostname_list, return_fields).values()
+        nodes = Nodes(self.api, node_id_or_hostname_list).values()
 
         # Filter out undesired or None fields (XML-RPC cannot marshal
         # None) and turn each node into a real dict.
