@@ -23,26 +23,23 @@ class DeleteSliceAttribute(Method):
 
     accepts = [
         PasswordAuth(),
-        Mixed(Slice.fields['slice_id'],
-              Slice.fields['name']),
         SliceAttribute.fields['slice_attribute_id']
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, slice_id_or_name, slice_attribute_id):
-        slices = Slices(self.api, [slice_id_or_name]).values()
-        if not slices:
-            raise PLCInvalidArgument, "No such slice"
-        slice = slices[0]
-
+    def call(self, auth, slice_attribute_id):
         slice_attributes = SliceAttributes(self.api, [slice_attribute_id]).values()
         if not slice_attributes:
             raise PLCInvalidArgument, "No such slice attribute"
         slice_attribute = slice_attributes[0]
 
-        if slice_attribute['slice_attribute_id'] not in slice['slice_attribute_ids']:
-            raise PLCInvalidArgument, "Invalid slice attribute ID"
+        slices = Slices(self.api, [slice_attribute['slice_id']]).values()
+        if not slices:
+            raise PLCInvalidArgument, "No such slice"
+        slice = slices[0]
+
+        assert slice_attribute['slice_attribute_id'] in slice['slice_attribute_ids']
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
