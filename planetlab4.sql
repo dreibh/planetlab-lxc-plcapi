@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.4 2006/10/03 19:24:15 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.5 2006/10/06 15:41:50 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -117,10 +117,20 @@ GROUP BY site_id;
 -- Mailing Addresses
 --------------------------------------------------------------------------------
 
+CREATE TABLE address_types (
+    address_type_id serial PRIMARY KEY, -- Address type identifier
+    name text UNIQUE NOT NULL, -- Address type
+    description text -- Address type description
+);
+INSERT INTO address_types (name) VALUES ('Personal');
+INSERT INTO address_types (name) VALUES ('Shipping');
+-- XXX Used to be Site
+INSERT INTO address_types (name) VALUES ('Billing');
+
 -- Mailing addresses
 CREATE TABLE addresses (
     address_id serial PRIMARY KEY, -- Address identifier
-    address_type text, -- Address type, e.g. shipping or billing
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
     line1 text NOT NULL, -- Address line 1
     line2 text, -- Address line 2
     line3 text, -- Address line 3
@@ -130,19 +140,24 @@ CREATE TABLE addresses (
     country text NOT NULL -- Country
 ) WITH OIDS;
 
--- Site mailing addresses
-CREATE TABLE site_address (
-    site_id integer REFERENCES sites NOT NULL, -- Account identifier
+-- Each mailing address can be one of several types
+CREATE TABLE address_address_type (
     address_id integer REFERENCES addresses NOT NULL, -- Address identifier
-    PRIMARY KEY (site_id, address_id)
+    address_type_id integer REFERENCES address_types NOT NULL -- Address type
 ) WITH OIDS;
-CREATE INDEX site_address_site_id_key ON site_address (site_id);
-CREATE INDEX site_address_address_id_key ON site_address (address_id);
+
+CREATE VIEW address_address_types AS
+SELECT address_id,
+array_to_string(array_accum(address_type_id), ',') AS address_type_ids,
+array_to_string(array_accum(address_types.name), ',') AS address_types
+FROM address_address_type
+LEFT JOIN address_types USING (address_type_id)
+GROUP BY address_id;
 
 CREATE VIEW site_addresses AS
 SELECT site_id,
 array_to_string(array_accum(address_id), ',') AS address_ids
-FROM site_address
+FROM addresses
 GROUP BY site_id;
 
 --------------------------------------------------------------------------------
@@ -584,7 +599,7 @@ LEFT JOIN site_slices USING (site_id);
 CREATE VIEW view_addresses AS
 SELECT
 addresses.address_id,
-addresses.address_type,
+addresses.site_id,
 addresses.line1,
 addresses.line2,
 addresses.line3,
@@ -592,9 +607,10 @@ addresses.city,
 addresses.state,
 addresses.postalcode,
 addresses.country,
-site_address.site_id
+address_address_types.address_type_ids,
+address_address_types.address_types
 FROM addresses
-LEFT JOIN site_address USING (address_id);
+LEFT JOIN address_address_types USING (address_id);
 
 CREATE VIEW view_slices AS
 SELECT
