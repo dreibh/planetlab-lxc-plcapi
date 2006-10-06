@@ -8,7 +8,7 @@ class AdmDeleteNodeGroup(Method):
     """
     Delete an existing Node Group.
 
-    Admins my delete any node group
+    Admins may delete any node group
 
     Returns 1 if successful, faults otherwise.
     """
