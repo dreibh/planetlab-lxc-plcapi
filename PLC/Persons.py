@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.7 2006/10/02 18:32:31 mlhuang Exp $
+# $Id: Persons.py,v 1.8 2006/10/03 19:25:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -165,15 +165,15 @@ class Person(Row):
         assert 'person_id' in self
 
         person_id = self['person_id']
-        self.api.db.do("INSERT INTO person_role (person_id, role_id)" \
-                       " VALUES(%(person_id)d, %(role_id)d)",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
-
-        assert 'role_ids' in self
         if role_id not in self['role_ids']:
+            self.api.db.do("INSERT INTO person_role (person_id, role_id)" \
+                           " VALUES(%(person_id)d, %(role_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['role_ids'].append(role_id)
 
     def remove_role(self, role_id, commit = True):
@@ -184,16 +184,16 @@ class Person(Row):
         assert 'person_id' in self
 
         person_id = self['person_id']
-        self.api.db.do("DELETE FROM person_role" \
-                       " WHERE person_id = %(person_id)d" \
-                       " AND role_id = %(role_id)d",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
-
-        assert 'role_ids' in self
         if role_id in self['role_ids']:
+            self.api.db.do("DELETE FROM person_role" \
+                           " WHERE person_id = %(person_id)d" \
+                           " AND role_id = %(role_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['role_ids'].remove(role_id)
 
     def set_primary_site(self, site, commit = True):
