@@ -95,17 +95,18 @@ class Site(Row):
 
         site_id = self['site_id']
         person_id = person['person_id']
-        self.api.db.do("INSERT INTO person_site (person_id, site_id)" \
-                       " VALUES(%(person_id)d, %(site_id)d)",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if person_id not in self['person_ids']:
+            assert site_id not in person['site_ids']
 
-        if 'person_ids' in self and person_id not in self['person_ids']:
+            self.api.db.do("INSERT INTO person_site (person_id, site_id)" \
+                           " VALUES(%(person_id)d, %(site_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['person_ids'].append(person_id)
-
-        if 'site_ids' in person and site_id not in person['site_ids']:
             person['site_ids'].append(site_id)
 
     def remove_person(self, person, commit = True):
@@ -119,18 +120,19 @@ class Site(Row):
 
         site_id = self['site_id']
         person_id = person['person_id']
-        self.api.db.do("DELETE FROM person_site" \
-                       " WHERE person_id = %(person_id)d" \
-                       " AND site_id = %(site_id)d",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if person_id in self['person_ids']:
+            assert site_id in person['site_ids']
 
-        if 'person_ids' in self and person_id in self['person_ids']:
+            self.api.db.do("DELETE FROM person_site" \
+                           " WHERE person_id = %(person_id)d" \
+                           " AND site_id = %(site_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['person_ids'].remove(person_id)
-
-        if 'site_ids' in person and site_id in person['site_ids']:
             person['site_ids'].remove(site_id)
 
     def delete(self, commit = True):
