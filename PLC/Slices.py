@@ -94,17 +94,18 @@ class Slice(Row):
 
         slice_id = self['slice_id']
         person_id = person['person_id']
-        self.api.db.do("INSERT INTO slice_person (person_id, slice_id)" \
-                       " VALUES(%(person_id)d, %(slice_id)d)",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if person_id not in self['person_ids']:
+            assert slice_id not in person['slice_ids']
 
-        if 'person_ids' in self and person_id not in self['person_ids']:
+            self.api.db.do("INSERT INTO slice_person (person_id, slice_id)" \
+                           " VALUES(%(person_id)d, %(slice_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['person_ids'].append(person_id)
-
-        if 'slice_ids' in person and slice_id not in person['slice_ids']:
             person['slice_ids'].append(slice_id)
 
     def remove_person(self, person, commit = True):
@@ -118,18 +119,19 @@ class Slice(Row):
 
         slice_id = self['slice_id']
         person_id = person['person_id']
-        self.api.db.do("DELETE FROM slice_person" \
-                       " WHERE person_id = %(person_id)d" \
-                       " AND slice_id = %(slice_id)d",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if person_id in self['person_ids']:
+            assert slice_id in person['slice_ids']
 
-        if 'person_ids' in self and person_id in self['person_ids']:
+            self.api.db.do("DELETE FROM slice_person" \
+                           " WHERE person_id = %(person_id)d" \
+                           " AND slice_id = %(slice_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['person_ids'].remove(person_id)
-
-        if 'slice_ids' in person and slice_id in person['slice_ids']:
             person['slice_ids'].remove(slice_id)
 
     def add_node(self, node, commit = True):
@@ -143,17 +145,18 @@ class Slice(Row):
 
         slice_id = self['slice_id']
         node_id = node['node_id']
-        self.api.db.do("INSERT INTO slice_node (node_id, slice_id)" \
-                       " VALUES(%(node_id)d, %(slice_id)d)",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if node_id not in self['node_ids']:
+            assert slice_id not in node['slice_ids']
 
-        if 'node_ids' in self and node_id not in self['node_ids']:
+            self.api.db.do("INSERT INTO slice_node (node_id, slice_id)" \
+                           " VALUES(%(node_id)d, %(slice_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['node_ids'].append(node_id)
-
-        if 'slice_ids' in node and slice_id not in node['slice_ids']:
             node['slice_ids'].append(slice_id)
 
     def remove_node(self, node, commit = True):
@@ -167,18 +170,19 @@ class Slice(Row):
 
         slice_id = self['slice_id']
         node_id = node['node_id']
-        self.api.db.do("DELETE FROM slice_node" \
-                       " WHERE node_id = %(node_id)d" \
-                       " AND slice_id = %(slice_id)d",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if node_id in self['node_ids']:
+            assert slice_id in node['slice_ids']
 
-        if 'node_ids' in self and node_id in self['node_ids']:
+            self.api.db.do("DELETE FROM slice_node" \
+                           " WHERE node_id = %(node_id)d" \
+                           " AND slice_id = %(slice_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['node_ids'].remove(node_id)
-
-        if 'slice_ids' in node and slice_id in node['slice_ids']:
             node['slice_ids'].remove(slice_id)
 
     def delete(self, commit = True):
