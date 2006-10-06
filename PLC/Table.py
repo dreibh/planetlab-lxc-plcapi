@@ -29,8 +29,8 @@ class Row(dict):
         # Warn about mandatory fields
         mandatory_fields = self.api.db.fields(self.table_name, notnull = True, hasdef = False)
         for field in mandatory_fields:
-            if not self.has_key(field):
-                raise PLCInvalidArgument, field + " must be specified"
+            if not self.has_key(field) or self[field] is None:
+                raise PLCInvalidArgument, field + " must be specified and cannot be unset"
 
         # Validate values before committing
         for key, value in self.iteritems():
@@ -76,6 +76,23 @@ class Row(dict):
 
         if not self.has_key(self.primary_key):
             self[self.primary_key] = self.api.db.last_insert_id(self.table_name, self.primary_key)
+
+        if commit:
+            self.api.db.commit()
+
+    def delete(self, commit = True):
+        """
+        Delete row from its primary table.
+        """
+
+        assert self.primary_key in self
+
+        sql = "DELETE FROM %s" % self.table_name + \
+              " WHERE %s = %s" % \
+              (self.primary_key,
+               self.api.db.param(self.primary_key, self[self.primary_key]))
+
+        self.api.db.do(sql, self)
 
         if commit:
             self.api.db.commit()
