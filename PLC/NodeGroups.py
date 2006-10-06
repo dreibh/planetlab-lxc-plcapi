@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.10 2006/09/25 14:52:01 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.11 2006/10/03 19:25:30 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -62,17 +62,18 @@ class NodeGroup(Row):
 
         node_id = node['node_id']
         nodegroup_id = self['nodegroup_id']
-        self.api.db.do("INSERT INTO nodegroup_node (nodegroup_id, node_id)" \
-                       " VALUES(%(nodegroup_id)d, %(node_id)d)",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if node_id not in self['node_ids']:
+            assert nodegroup_id not in node['nodegroup_ids']
 
-        if 'node_ids' in self and node_id not in self['node_ids']:
+            self.api.db.do("INSERT INTO nodegroup_node (nodegroup_id, node_id)" \
+                           " VALUES(%(nodegroup_id)d, %(node_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['node_ids'].append(node_id)
-
-        if 'nodegroup_ids' in node and nodegroup_id not in node['nodegroup_ids']:
             node['nodegroup_ids'].append(nodegroup_id)
 
     def remove_node(self, node, commit = True):
@@ -86,18 +87,19 @@ class NodeGroup(Row):
 
         node_id = node['node_id']
         nodegroup_id = self['nodegroup_id']
-        self.api.db.do("DELETE FROM nodegroup_node" \
-                       " WHERE nodegroup_id = %(nodegroup_id)d" \
-                       " AND node_id = %(node_id)d",
-                       locals())
 
-        if commit:
-            self.api.db.commit()
+        if node_id in self['node_ids']:
+            assert nodegroup_id in node['nodegroup_ids']
 
-        if 'node_ids' in self and node_id in self['node_ids']:
+            self.api.db.do("DELETE FROM nodegroup_node" \
+                           " WHERE nodegroup_id = %(nodegroup_id)d" \
+                           " AND node_id = %(node_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
             self['node_ids'].remove(node_id)
-
-        if 'nodegroup_ids' in node and nodegroup_id in node['nodegroup_ids']:
             node['nodegroup_ids'].remove(nodegroup_id)
 
     def delete(self, commit = True):
