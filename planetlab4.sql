@@ -1,4 +1,4 @@
---
+
 -- PlanetLab Central database schema
 -- Version 4, PostgreSQL
 --
@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.3 2006/10/02 15:19:35 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.4 2006/10/03 19:24:15 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ CREATE TABLE persons (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+) WITH OIDS;
 CREATE INDEX persons_email_key ON persons (email) WHERE deleted IS false;
 
 --------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ CREATE TABLE sites (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+) WITH OIDS;
 CREATE INDEX sites_login_base_key ON sites (login_base) WHERE deleted IS false;
 
 -- Account site membership
@@ -128,14 +128,14 @@ CREATE TABLE addresses (
     state text NOT NULL, -- State or province
     postalcode text NOT NULL, -- Postal code
     country text NOT NULL -- Country
-);
+) WITH OIDS;
 
 -- Site mailing addresses
 CREATE TABLE site_address (
     site_id integer REFERENCES sites NOT NULL, -- Account identifier
     address_id integer REFERENCES addresses NOT NULL, -- Address identifier
     PRIMARY KEY (site_id, address_id)
-);
+) WITH OIDS;
 CREATE INDEX site_address_site_id_key ON site_address (site_id);
 CREATE INDEX site_address_address_id_key ON site_address (address_id);
 
@@ -152,7 +152,7 @@ GROUP BY site_id;
 -- Valid key types
 CREATE TABLE key_types (
     key_type text PRIMARY KEY -- Key type
-);
+) WITH OIDS;
 INSERT INTO key_types (key_type) VALUES ('ssh');
 
 -- Authentication keys
@@ -161,7 +161,7 @@ CREATE TABLE keys (
     key_type text REFERENCES key_types NOT NULL, -- Key type
     key text NOT NULL, -- Key material
     is_blacklisted boolean NOT NULL DEFAULT false -- Has been blacklisted
-);
+) WITH OIDS;
 
 -- Account authentication key(s)
 CREATE TABLE person_key (
@@ -169,7 +169,7 @@ CREATE TABLE person_key (
     key_id integer REFERENCES keys NOT NULL, -- Key identifier
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary key for this account
     PRIMARY KEY (person_id, key_id)
-);
+) WITH OIDS;
 CREATE INDEX person_key_person_id_key ON person_key (person_id);
 CREATE INDEX person_key_key_id_key ON person_key (key_id);
 
@@ -187,7 +187,7 @@ GROUP BY person_id;
 CREATE TABLE roles (
     role_id integer PRIMARY KEY, -- Role identifier
     name text UNIQUE NOT NULL -- Role symbolic name
-);
+) WITH OIDS;
 INSERT INTO roles (role_id, name) VALUES (10, 'admin');
 INSERT INTO roles (role_id, name) VALUES (20, 'pi');
 INSERT INTO roles (role_id, name) VALUES (30, 'user');
@@ -199,7 +199,7 @@ CREATE TABLE person_role (
     person_id integer REFERENCES persons NOT NULL, -- Account identifier
     role_id integer REFERENCES roles NOT NULL, -- Role identifier
     PRIMARY KEY (person_id, role_id)
-);
+) WITH OIDS;
 CREATE INDEX person_role_person_id_key ON person_role (person_id);
 
 -- Account roles
@@ -218,7 +218,7 @@ GROUP BY person_id;
 -- Valid node boot states
 CREATE TABLE boot_states (
     boot_state text PRIMARY KEY
-);
+) WITH OIDS;
 INSERT INTO boot_states (boot_state) VALUES ('boot');
 INSERT INTO boot_states (boot_state) VALUES ('dbg');
 INSERT INTO boot_states (boot_state) VALUES ('inst');
@@ -247,7 +247,7 @@ CREATE TABLE nodes (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+) WITH OIDS;
 CREATE INDEX nodes_hostname_key ON nodes (hostname) WHERE deleted IS false;
 CREATE INDEX nodes_site_id_key ON nodes (site_id) WHERE deleted IS false;
 
@@ -267,14 +267,14 @@ CREATE TABLE nodegroups (
     nodegroup_id serial PRIMARY KEY, -- Group identifier
     name text UNIQUE NOT NULL, -- Group name
     description text -- Group description
-);
+) WITH OIDS;
 
 -- Node group membership
 CREATE TABLE nodegroup_node (
     nodegroup_id integer REFERENCES nodegroups NOT NULL, -- Group identifier
     node_id integer REFERENCES nodes NOT NULL, -- Node identifier
     PRIMARY KEY (nodegroup_id, node_id)
-);
+) WITH OIDS;
 CREATE INDEX nodegroup_node_nodegroup_id_key ON nodegroup_node (nodegroup_id);
 CREATE INDEX nodegroup_node_node_id_key ON nodegroup_node (node_id);
 
@@ -299,14 +299,14 @@ GROUP BY node_id;
 -- Valid network addressing schemes
 CREATE TABLE nodenetwork_types (
     type text PRIMARY KEY -- Addressing scheme
-);
+) WITH OIDS;
 INSERT INTO nodenetwork_types (type) VALUES ('ipv4');
 INSERT INTO nodenetwork_types (type) VALUES ('ipv6');
 
 -- Valid network configuration methods
 CREATE TABLE nodenetwork_methods (
     method text PRIMARY KEY -- Configuration method
-);
+) WITH OIDS;
 INSERT INTO nodenetwork_methods (method) VALUES ('static');
 INSERT INTO nodenetwork_methods (method) VALUES ('dhcp');
 INSERT INTO nodenetwork_methods (method) VALUES ('proxy');
@@ -334,7 +334,7 @@ CREATE TABLE nodenetworks (
     dns2 text, -- Secondary DNS server
     bwlimit integer, -- Bandwidth limit in bps
     hostname text -- Hostname of this interface
-);
+) WITH OIDS;
 CREATE INDEX nodenetworks_node_id_key ON nodenetworks (node_id);
 
 -- Ordered by primary interface first
@@ -356,7 +356,7 @@ GROUP BY node_id;
 
 CREATE TABLE slice_instantiations (
     instantiation text PRIMARY KEY
-);
+) WITH OIDS;
 INSERT INTO slice_instantiations (instantiation) VALUES ('not-instantiated'); -- Placeholder slice
 INSERT INTO slice_instantiations (instantiation) VALUES ('plc-instantiated'); -- Instantiated by Node Manager
 INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manually instantiated
@@ -377,7 +377,7 @@ CREATE TABLE slices (
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
     is_deleted boolean NOT NULL DEFAULT false
-);
+) WITH OIDS;
 CREATE INDEX slices_site_id_key ON slices (site_id) WHERE is_deleted IS false;
 CREATE INDEX slices_name_key ON slices (name) WHERE is_deleted IS false;
 
@@ -385,7 +385,7 @@ CREATE INDEX slices_name_key ON slices (name) WHERE is_deleted IS false;
 CREATE TABLE slice_node (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes NOT NULL -- Node identifier
-);
+) WITH OIDS;
 CREATE INDEX slice_node_slice_id_key ON slice_node (slice_id);
 CREATE INDEX slice_node_node_id_key ON slice_node (node_id);
 
@@ -419,7 +419,7 @@ CREATE TABLE slice_person (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     person_id integer REFERENCES persons NOT NULL, -- Account identifier
     PRIMARY KEY (slice_id, person_id)
-);
+) WITH OIDS;
 CREATE INDEX slice_person_slice_id_key ON slice_person (slice_id);
 CREATE INDEX slice_person_person_id_key ON slice_person (person_id);
 
@@ -447,7 +447,7 @@ CREATE TABLE attributes (
     name text UNIQUE NOT NULL, -- Attribute name
     description text, -- Attribute description
     min_role_id integer REFERENCES roles DEFAULT 10 -- If set, minimum (least powerful) role that can set or change this attribute
-);
+) WITH OIDS;
 
 -- Slice/sliver attributes
 CREATE TABLE slice_attribute (
@@ -456,7 +456,7 @@ CREATE TABLE slice_attribute (
     node_id integer REFERENCES nodes, -- Sliver attribute if set
     attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
     value text
-);
+) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_key ON slice_attribute (slice_id);
 CREATE INDEX slice_attribute_node_id_key ON slice_attribute (node_id);
 
@@ -472,7 +472,7 @@ CREATE TABLE node_attribute (
     node_id integer REFERENCES nodes NOT NULL, -- Node identifier
     attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
     value text
-);
+) WITH OIDS;
 CREATE INDEX node_attribute_node_id_key ON node_attribute (node_id);
 
 CREATE VIEW node_attributes AS
