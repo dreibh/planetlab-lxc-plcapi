@@ -5,9 +5,9 @@ from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
 from PLC.Roles import Roles
 
-class RemoveRoleFromPerson(Method):
+class DeleteRoleFromPerson(Method):
     """
-    Revokes the specified role from the person.
+    Deletes the specified role from the person.
     
     PIs can only revoke the tech and user roles from users and techs
     at their sites. ins can revoke any role from any user.
