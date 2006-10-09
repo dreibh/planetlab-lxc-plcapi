@@ -13,7 +13,7 @@ class AddPersonToSlice(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin']
+    roles = ['admin', 'pi']
 
     accepts = [
         PasswordAuth(),
@@ -40,7 +40,13 @@ class AddPersonToSlice(Method):
 
         slice = slices.values()[0]
 
-        if slice['slice_id'] not in person['slice_ids']:
+        # If we are not admin, make sure the caller is a pi
+        # of the site associated with the slice
+	if 'admin' not in self.caller['roles']:
+		if slice['site_id'] not in self.caller['site_ids']:
+			raise PLCPermissionDenied, "Not allowed to add users to this slice"
+
+	if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)
 
         return 1
