@@ -24,7 +24,8 @@ class UpdatePerson(Method):
 
     can_update = lambda (field, value): field in \
                  ['first_name', 'last_name', 'title', 'email',
-                  'password', 'phone', 'url', 'bio', 'accepted_aup']
+                  'password', 'phone', 'url', 'bio', 'accepted_aup',
+		  'enabled']
     update_fields = dict(filter(can_update, Person.fields.items()))
 
     accepts = [
@@ -37,7 +38,13 @@ class UpdatePerson(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, person_id_or_email, update_fields):
-        if filter(lambda field: field not in self.update_fields, update_fields):
+        valid_fields = self.update_fields
+	# Remove admin only fields
+	if 'admin' not in self.caller['roles']:
+                for key in ['enabled']:
+                        valid_fields.remove(key)
+
+	if filter(lambda field: field not in valid_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
 
         # Get account information
