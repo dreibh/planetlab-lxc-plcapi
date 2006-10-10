@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.4 2006/09/25 14:55:43 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.5 2006/10/03 19:25:37 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -15,6 +15,8 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
+from PLC.NetworkTypes import NetworkType, NetworkTypes
+from PLC.NetworkMethods import NetworkMethod, NetworkMethods
 import PLC.Nodes
 
 def in_same_network(address1, address2, netmask):
@@ -57,10 +59,6 @@ class NodeNetwork(Row):
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
 
-    methods = ['static', 'dhcp', 'proxy', 'tap', 'ipmi', 'unknown']
-
-    types = ['ipv4']
-
     bwlimits = ['-1',
                 '100kbit', '250kbit', '500kbit',
                 '1mbit', '2mbit', '5mbit',
@@ -72,12 +70,12 @@ class NodeNetwork(Row):
         self.api = api
 
     def validate_method(self, method):
-        if method not in self.methods:
+        if method not in NetworkMethods(self.api):
             raise PLCInvalidArgument, "Invalid addressing method"
 	return method
 
     def validate_type(self, type):
-        if type not in self.types:
+        if type not in NetworkTypes(self.api):
             raise PLCInvalidArgument, "Invalid address type"
 	return type
 
@@ -125,6 +123,33 @@ class NodeNetwork(Row):
 
         # Validate hostname, and check for conflicts with a node hostname
         return PLC.Nodes.Node.validate_hostname(self, hostname)
+
+    def validate_node_id(self, node_id):
+        nodes = PLC.Nodes.Nodes(self.api, [node_id])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node"
+
+        return node_id
+
+    def validate_is_primary(self, is_primary):
+        """
+        Set this interface to be the primary one.
+        """
+
+        if is_primary:
+            nodes = Nodes(self.api, [self['node_id']])
+            if not nodes:
+                raise PLCInvalidArgument, "No such node"
+            node = nodes[0]
+
+            if node['nodenetwork_ids']:
+                conflicts = NodeNetworks(self.api, node['nodenetwork_ids'])
+                for nodenetwork_id, nodenetwork in conflicts.iteritems():
+                    if ('nodenetwork_id' not in self or self['nodenetwork_id'] != nodenetwork_id) and \
+                       nodenetwork['is_primary']:
+                        raise PLCInvalidArgument, "Can only set one primary interface per node"
+
+        return is_primary
 
     def validate(self):
         """
