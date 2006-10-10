@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.5 2006/10/06 15:41:50 tmack Exp $
+-- $Id: planetlab4.sql,v 1.6 2006/10/06 18:19:07 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -312,22 +312,22 @@ GROUP BY node_id;
 --------------------------------------------------------------------------------
 
 -- Valid network addressing schemes
-CREATE TABLE nodenetwork_types (
+CREATE TABLE network_types (
     type text PRIMARY KEY -- Addressing scheme
 ) WITH OIDS;
-INSERT INTO nodenetwork_types (type) VALUES ('ipv4');
-INSERT INTO nodenetwork_types (type) VALUES ('ipv6');
+INSERT INTO network_types (type) VALUES ('ipv4');
+INSERT INTO network_types (type) VALUES ('ipv6');
 
 -- Valid network configuration methods
-CREATE TABLE nodenetwork_methods (
+CREATE TABLE network_methods (
     method text PRIMARY KEY -- Configuration method
 ) WITH OIDS;
-INSERT INTO nodenetwork_methods (method) VALUES ('static');
-INSERT INTO nodenetwork_methods (method) VALUES ('dhcp');
-INSERT INTO nodenetwork_methods (method) VALUES ('proxy');
-INSERT INTO nodenetwork_methods (method) VALUES ('tap');
-INSERT INTO nodenetwork_methods (method) VALUES ('ipmi');
-INSERT INTO nodenetwork_methods (method) VALUES ('unknown');
+INSERT INTO network_methods (method) VALUES ('static');
+INSERT INTO network_methods (method) VALUES ('dhcp');
+INSERT INTO network_methods (method) VALUES ('proxy');
+INSERT INTO network_methods (method) VALUES ('tap');
+INSERT INTO network_methods (method) VALUES ('ipmi');
+INSERT INTO network_methods (method) VALUES ('unknown');
 
 -- Node network interfaces
 CREATE TABLE nodenetworks (
@@ -335,8 +335,8 @@ CREATE TABLE nodenetworks (
     nodenetwork_id serial PRIMARY KEY, -- Network interface identifier
     node_id integer REFERENCES nodes NOT NULL, -- Which node
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary interface for this node
-    type text REFERENCES nodenetwork_types NOT NULL, -- Addressing scheme
-    method text REFERENCES nodenetwork_methods NOT NULL, -- Configuration method
+    type text REFERENCES network_types NOT NULL, -- Addressing scheme
+    method text REFERENCES network_methods NOT NULL, -- Configuration method
 
     -- Optional, depending on type and method
     ip text, -- IP address
@@ -364,6 +364,41 @@ SELECT node_id,
 array_to_string(array_accum(nodenetwork_id), ',') AS nodenetwork_ids
 FROM nodenetworks_ordered
 GROUP BY node_id;
+
+--------------------------------------------------------------------------------
+-- Power control units (PCUs)
+--------------------------------------------------------------------------------
+
+CREATE TABLE pcus (
+    -- Mandatory
+    pcu_id serial PRIMARY KEY, -- PCU identifier
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
+    hostname text NOT NULL, -- Hostname, not necessarily unique (multiple logical sites could use the same PCU)
+    ip text NOT NULL, -- IP, not necessarily unique
+
+    -- Optional
+    protocol text, -- Protocol, e.g. ssh or https or telnet
+    username text, -- Username, if applicable
+    "password" text, -- Password, if applicable
+    model text, -- Model, e.g. BayTech or iPal
+    notes text -- Random notes
+) WITH OIDS;
+
+CREATE TABLE pcu_node (
+    pcu_id integer REFERENCES pcus NOT NULL, -- PCU identifier
+    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
+    port integer NOT NULL, -- Port number
+    PRIMARY KEY (pcu_id, node_id)
+);
+CREATE INDEX pcu_node_pcu_id_key ON pcu_node (pcu_id);
+CREATE INDEX pcu_node_node_id_key ON pcu_node (node_id);
+
+CREATE VIEW pcu_nodes AS
+SELECT pcu_id,
+array_to_string(array_accum(node_id), ',') AS node_ids,
+array_to_string(array_accum(port), ',') AS ports
+FROM pcu_node
+GROUP BY pcu_id;
 
 --------------------------------------------------------------------------------
 -- Slices
