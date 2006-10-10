@@ -38,7 +38,7 @@ class Row(dict):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
 
-    def sync(self, commit = True):
+    def sync(self, commit = True, insert = None):
         """
         Flush changes back to the database.
         """
@@ -61,8 +61,10 @@ class Row(dict):
 
         # If the primary key (usually an auto-incrementing serial
         # identifier) has not been specified, or the primary key is the
-        # only field in the table.
-        if not self.has_key(self.primary_key) or all_fields == [self.primary_key]:
+        # only field in the table, or insert has been forced.
+        if not self.has_key(self.primary_key) or \
+           all_fields == [self.primary_key] or \
+           insert is True:
             # Insert new row
             sql = "INSERT INTO %s (%s) VALUES (%s);" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))
