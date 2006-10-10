@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.2 2006/10/06 18:19:41 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -38,7 +38,7 @@ class AddressType(Row):
         if not name:
             raise PLCInvalidArgument, "Address type must be specified"
 	
-	# Make sure node group does not alredy exist
+	# Make sure address type does not already exist
 	conflicts = AddressTypes(self.api, [name])
 	for address_type_id in conflicts:
             if 'address_type_id' not in self or self['address_type_id'] != address_type_id:
