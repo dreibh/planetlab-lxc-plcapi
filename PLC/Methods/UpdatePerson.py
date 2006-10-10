@@ -40,14 +40,6 @@ class UpdatePerson(Method):
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
 
-        # XML-RPC cannot marshal None, so we need special values to
-        # represent "unset".
-        for key, value in update_fields.iteritems():
-            if value == -1 or value == "null":
-                if key in ['first_name', 'last_name']:
-                    raise PLCInvalidArgument, "first_name and last_name cannot be unset"
-                update_fields[key] = None
-
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:

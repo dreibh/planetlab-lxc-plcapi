@@ -41,14 +41,6 @@ class UpdateNodeNetwork(Method):
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid fields specified"
 
-        # XML-RPC cannot marshal None, so we need special values to
-        # represent "unset".
-        for key, value in update_fields.iteritems():
-            if value == -1 or value == "null":
-                if key in ['method', 'type', 'mac', 'ip', 'bwlimit']:
-                    raise PLCInvalidArgument, "%s cannot be unset" % key
-                update_fields[key] = None
-
 	# Get node network information
 	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_hostname]).values()
 	if not nodenetworks:

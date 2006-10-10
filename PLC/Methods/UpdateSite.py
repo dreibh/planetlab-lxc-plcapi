@@ -42,14 +42,6 @@ class UpdateSite(Method):
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
 
-        # XML-RPC cannot marshal None, so we need special values to
-        # represent "unset".
-        for key, value in update_fields.iteritems():
-            if value == -1 or value == "null":
-                if key not in ['latitude', 'longitude', 'url']:
-                    raise PLCInvalidArgument, "%s cannot be unset" % key
-                update_fields[key] = None
-
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:

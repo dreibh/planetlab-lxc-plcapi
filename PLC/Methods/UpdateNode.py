@@ -38,14 +38,6 @@ class UpdateNode(Method):
         if filter(lambda field: field not in self.update_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
 
-        # XML-RPC cannot marshal None, so we need special values to
-        # represent "unset".
-        for key, value in update_fields.iteritems():
-            if value == -1 or value == "null":
-                if key in ['hostname', 'boot_state']:
-                    raise PLCInvalidArgument, "hostname and boot_state cannot be unset"
-                update_fields[key] = None
-
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
