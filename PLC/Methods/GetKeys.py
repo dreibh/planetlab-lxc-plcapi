@@ -33,5 +33,10 @@ class GetKeys(Method):
 			key_id_list = filter(valid_keys, key_id_list)
 		
 	keys = Keys(self.api, key_id_list).values()
-		
+	
+	# Filter out undesired or None fields (XML-RPC cannot marshal
+        # None) and turn each key into a real dict.
+	valid_return_fields_only = lambda (key, value): value is not None
+        keys = [dict(filter(valid_return_fields_only, key.items())) \
+                      for key in keys]		
         return keys
