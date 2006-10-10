@@ -1,1 +1,1 @@
-all = 'Addresses AddressTypes API Attributes Auth BootStates Config Debug Faults Keys Method NodeGroups NodeNetworks Nodes Parameter PCUs Persons PostgreSQL Roles Sites SliceAttributes SliceInstantiations Slices Table'.split()
+all = 'Addresses AddressTypes API Attributes Auth BootStates Config Debug Faults Keys Method NetworkMethods NetworkTypes NodeGroups NodeNetworks Nodes Parameter PCUs Persons PostgreSQL Roles Sites SliceAttributes SliceInstantiations Slices Table'.split()
