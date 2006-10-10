@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.8 2006/10/03 19:25:55 mlhuang Exp $
+# $Id: Persons.py,v 1.9 2006/10/06 19:06:06 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -19,8 +19,6 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.Roles import Roles
-from PLC.Addresses import Address, Addresses
 from PLC.Keys import Key, Keys
 import PLC.Sites
 
