@@ -1,0 +1,31 @@
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.NetworkMethods import NetworkMethod, NetworkMethods
+from PLC.Auth import PasswordAuth
+
+class DeleteNetworkMethod(Method):
+    """
+    Deletes a network method.
+
+    Returns 1 if successful, faults otherwise.
+    """
+
+    roles = ['admin']
+
+    accepts = [
+        PasswordAuth(),
+        NetworkMethod.fields['method']
+        ]
+
+    returns = Parameter(int, '1 if successful')
+
+    def call(self, auth, name):
+        network_methods = NetworkMethods(self.api, [name])
+        if not network_methods:
+            raise PLCInvalidArgument, "No such network method"
+        network_method = network_methods.values()[0]
+
+        network_method.delete()
+
+        return 1
