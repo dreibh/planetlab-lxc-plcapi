@@ -59,7 +59,10 @@ class Row(dict):
         keys = fields.keys()
         values = [self.api.db.param(key, value) for (key, value) in fields.items()]
 
-        if not self.has_key(self.primary_key):
+        # If the primary key (usually an auto-incrementing serial
+        # identifier) has not been specified, or the primary key is the
+        # only field in the table.
+        if not self.has_key(self.primary_key) or all_fields == [self.primary_key]:
             # Insert new row
             sql = "INSERT INTO %s (%s) VALUES (%s);" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))
