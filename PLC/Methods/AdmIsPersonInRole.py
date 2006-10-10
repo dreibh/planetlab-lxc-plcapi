@@ -5,7 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
-from PLC.Roles import Roles
+from PLC.Roles import Role, Roles
 
 class AdmIsPersonInRole(Method):
     """
@@ -35,7 +35,11 @@ class AdmIsPersonInRole(Method):
         # work.
 
         # Only allow PI roles to be checked
-        roles = Roles(self.api)
+        roles = {}
+        for role_id, role in Roles(self.api).iteritems():
+            roles[role_id] = role['name']
+            roles[role['name']] = role_id
+
         if role_id_or_name not in roles:
             raise PLCInvalidArgument, "Invalid role identifier or name"
 

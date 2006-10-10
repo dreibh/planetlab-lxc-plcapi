@@ -1,7 +1,7 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter
-from PLC.Roles import Roles
+from PLC.Roles import Role, Roles
 from PLC.Auth import PasswordAuth
 
 class AdmGetAllRoles(Method):
@@ -20,13 +20,11 @@ class AdmGetAllRoles(Method):
     returns = dict
 
     def call(self, auth):
-        roles = Roles(self.api)
+        roles_list = Roles(self.api).values()
 
-        # Just the role_id: name mappings
-        roles = dict(filter(lambda (role_id, name): isinstance(role_id, (int, long)), \
-                            roles.items()))
+        roles_dict = {}
+        for role in roles_list:
+            # Stringify the keys!
+            roles_dict[str(role['role_id'])] = role['name']
 
-        # Stringify the keys!
-        keys = map(str, roles.keys())
-
-        return dict(zip(keys, roles.values()))
+        return roles_dict

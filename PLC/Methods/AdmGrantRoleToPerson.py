@@ -29,7 +29,11 @@ class AdmGrantRoleToPerson(Method):
 
     def call(self, auth, person_id_or_email, role_id_or_name):
         # Get all roles
-        roles = Roles(self.api)
+        roles = {}
+        for role_id, role in Roles(self.api).iteritems():
+            roles[role_id] = role['name']
+            roles[role['name']] = role_id
+
         if role_id_or_name not in roles:
             raise PLCInvalidArgument, "Invalid role identifier or name"
 
