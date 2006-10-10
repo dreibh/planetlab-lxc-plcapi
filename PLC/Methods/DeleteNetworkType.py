@@ -8,6 +8,9 @@ class DeleteNetworkType(Method):
     """
     Deletes a network type.
 
+    WARNING: This will cause the deletion of all network interfaces
+    that use this type.
+
     Returns 1 if successful, faults otherwise.
     """
 
