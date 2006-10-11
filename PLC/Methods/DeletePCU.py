@@ -30,15 +30,14 @@ class DeletePCU(Method):
         pcu = pcus[0]
 
         if 'admin' not in self.caller['roles']:
-            if not pcu_ids:
-                ok = False
-                sites = Sites(self.api, self.caller['site_ids']).values()
-                for site in sites:
-                    if pcu['pcu_id'] in site['pcu_ids']:
-                        ok = True
-                        break
-                if not ok:
-                    raise PLCPermissionDenied, "Not allowed to delete that PCU"
+            ok = False
+            sites = Sites(self.api, self.caller['site_ids']).values()
+            for site in sites:
+                if pcu['pcu_id'] in site['pcu_ids']:
+                    ok = True
+                    break
+            if not ok:
+                raise PLCPermissionDenied, "Not allowed to delete that PCU"
 
         pcu.delete()
 
