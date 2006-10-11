@@ -1,4 +1,4 @@
-
+--
 -- PlanetLab Central database schema
 -- Version 4, PostgreSQL
 --
@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.6 2006/10/06 18:19:07 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.7 2006/10/10 20:22:24 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -182,7 +182,6 @@ CREATE TABLE keys (
 CREATE TABLE person_key (
     person_id integer REFERENCES persons NOT NULL, -- Account identifier
     key_id integer REFERENCES keys NOT NULL, -- Key identifier
-    is_primary boolean NOT NULL DEFAULT false, -- Is the primary key for this account
     PRIMARY KEY (person_id, key_id)
 ) WITH OIDS;
 CREATE INDEX person_key_person_id_key ON person_key (person_id);
@@ -491,7 +490,7 @@ GROUP BY person_id;
 -- Attributes
 --------------------------------------------------------------------------------
 
--- Generic attribute types
+-- Slice attribute types
 CREATE TABLE attributes (
     attribute_id serial PRIMARY KEY, -- Attribute type identifier
     name text UNIQUE NOT NULL, -- Attribute name
@@ -504,7 +503,7 @@ CREATE TABLE slice_attribute (
     slice_attribute_id serial PRIMARY KEY, -- Slice attribute identifier
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes, -- Sliver attribute if set
-    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
+    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute type identifier
     value text
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_key ON slice_attribute (slice_id);
@@ -515,21 +514,6 @@ SELECT slice_id,
 array_to_string(array_accum(slice_attribute_id), ',') AS slice_attribute_ids
 FROM slice_attribute
 GROUP BY slice_id;
-
--- Node attributes
-CREATE TABLE node_attribute (
-    node_attribute_id serial PRIMARY KEY, -- Node attribute identifier
-    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
-    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute identifier
-    value text
-) WITH OIDS;
-CREATE INDEX node_attribute_node_id_key ON node_attribute (node_id);
-
-CREATE VIEW node_attributes AS
-SELECT node_id,
-array_to_string(array_accum(node_attribute_id), ',') AS node_attribute_ids
-FROM node_attribute
-GROUP BY node_id;
 
 --------------------------------------------------------------------------------
 -- Useful views
@@ -584,18 +568,6 @@ FROM nodes
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id);
-
-CREATE VIEW view_node_attributes AS
-SELECT
-node_attribute.node_attribute_id,
-node_attribute.node_id,
-attributes.attribute_id,
-attributes.name,
-attributes.description,
-attributes.min_role_id,
-node_attribute.value
-FROM node_attribute
-INNER JOIN attributes USING (attribute_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
