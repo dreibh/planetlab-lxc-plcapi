@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.5 2006/10/03 19:25:37 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.6 2006/10/10 20:27:13 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -18,6 +18,13 @@ from PLC.Table import Row, Table
 from PLC.NetworkTypes import NetworkType, NetworkTypes
 from PLC.NetworkMethods import NetworkMethod, NetworkMethods
 import PLC.Nodes
+
+def valid_ip(ip):
+    try:
+        ip = socket.inet_ntoa(socket.inet_aton(ip))
+        return True
+    except socket.error:
+        return False
 
 def in_same_network(address1, address2, netmask):
     """
@@ -80,12 +87,8 @@ class NodeNetwork(Row):
 	return type
 
     def validate_ip(self, ip):
-        if ip:
-            try:
-                ip = socket.inet_ntoa(socket.inet_aton(ip))
-            except socket.error:
-                raise PLCInvalidArgument, "Invalid IP address " + ip
-
+        if ip and not valid_ip(ip):
+            raise PLCInvalidArgument, "Invalid IP address " + ip
         return ip
 
     def validate_mac(self, mac):
@@ -121,8 +124,21 @@ class NodeNetwork(Row):
         if not hostname:
             return hostname
 
-        # Validate hostname, and check for conflicts with a node hostname
-        return PLC.Nodes.Node.validate_hostname(self, hostname)
+        if not PLC.Nodes.valid_hostname(hostname):
+            raise PLCInvalidArgument, "Invalid hostname"
+
+        conflicts = NodeNetworks(self.api, [hostname])
+        for nodenetwork_id, nodenetwork in conflicts.iteritems():
+            if 'nodenetwork_id' not in self or self['nodenetwork_id'] != nodenetwork_id:
+                raise PLCInvalidArgument, "Hostname already in use"
+
+        # Check for conflicts with a node hostname
+        conflicts = PLC.Nodes.Nodes(self.api, [hostname])
+        for node_id in conflicts.iteritems():
+            if 'node_id' not in self or self['node_id'] != node_id:
+                raise PLCInvalidArgument, "Hostname already in use"
+
+        return hostname
 
     def validate_node_id(self, node_id):
         nodes = PLC.Nodes.Nodes(self.api, [node_id])
@@ -137,7 +153,7 @@ class NodeNetwork(Row):
         """
 
         if is_primary:
-            nodes = Nodes(self.api, [self['node_id']])
+            nodes = PLC.Nodes.Nodes(self.api, [self['node_id']]).values()
             if not nodes:
                 raise PLCInvalidArgument, "No such node"
             node = nodes[0]
