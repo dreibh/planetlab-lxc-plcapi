@@ -38,11 +38,12 @@ class UpdatePerson(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, person_id_or_email, update_fields):
-        valid_fields = self.update_fields
+        valid_fields = self.update_fields.keys()
+
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
-                for key in ['enabled']:
-                        valid_fields.remove(key)
+            for key in ['enabled']:
+                valid_fields.remove(key)
 
 	if filter(lambda field: field not in valid_fields, update_fields):
             raise PLCInvalidArgument, "Invalid field specified"
