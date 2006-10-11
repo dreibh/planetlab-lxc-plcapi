@@ -6,7 +6,7 @@ from PLC.Auth import PasswordAuth
 
 class DeleteKey(Method):
     """
-    Deletes a Key.
+    Deletes a key.
 
     Non-admins may only delete their own keys.
 
@@ -23,7 +23,7 @@ class DeleteKey(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, key_id):
-        # Get associated address details
+        # Get associated key details
         keys = Keys(self.api, [key_id]).values()
         if not keys:
             raise PLCInvalidArgument, "No such key"
@@ -31,7 +31,8 @@ class DeleteKey(Method):
 
         if 'admin' not in self.caller['roles']:
             if key['key_id'] not in self.caller['key_ids']:
-                raise PLCPermissionDenied, "Key must be associated with one your account"
+                raise PLCPermissionDenied, "Key must be associated with your account"
+            assert key['person_id'] == self.caller['person_id']
 
         key.delete()
 
