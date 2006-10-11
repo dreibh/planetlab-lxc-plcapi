@@ -37,7 +37,7 @@ class Site(Row):
         'person_ids': Parameter([int], "List of account identifiers", ro = True),
         'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
         'address_ids': Parameter([int], "List of address identifiers", ro = True),
-        # 'pcu_ids': Parameter([int], "List of PCU identifiers", ro = True),
+        'pcu_ids': Parameter([int], "List of PCU identifiers", ro = True),
         'node_ids': Parameter([int], "List of site node identifiers", ro = True),
         }
 
@@ -168,9 +168,9 @@ class Site(Row):
            slice.delete(commit = False)
 
         # Delete all site PCUs
-        # pcus = PCUs(self.api, self['pcu_ids'])
-        # for pcu in pcus.values():
-        #    pcu.delete(commit = False)
+        pcus = PCUs(self.api, self['pcu_ids'])
+        for pcu in pcus.values():
+           pcu.delete(commit = False)
 
         # Delete all site nodes
         nodes = Nodes(self.api, self['node_ids'])
