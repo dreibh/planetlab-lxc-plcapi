@@ -9,7 +9,7 @@ class UpdatePCU(Method):
     Updates the parameters of an existing PCU with the values in
     pcu_fields.
 
-    Non-admins may only update their own keys.
+    Non-admins may only update PCUs at their sites.
 
     Returns 1 if successful, faults otherwise.
     """
