@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.7 2006/09/25 18:10:36 mlhuang Exp $
+# $Id: Test.py,v 1.8 2006/10/03 19:33:16 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -517,7 +517,7 @@ for site in sites:
             url = "http://" + randhostname() + "/"
             description = randstr(2048)
             print "UpdateSliceAttribute(%s)" % name,
-            UpdateSliceAttribute(admin, slice_id, slice_attribute_id, value)
+            UpdateSliceAttribute(admin, slice_attribute_id, value)
             slice_attribute = GetSliceAttributes(admin, slice_id, [slice_attribute_id])[0]
             for key in 'attribute_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
                 assert unicmp(slice_attribute[key], locals()[key])
@@ -529,7 +529,7 @@ for slice_id in slice_ids:
     slice = GetSlices(admin, [slice_id])[0]
     for slice_attribute_id in slice['slice_attribute_ids']:
         print "DeleteSliceAttribute(%s, %d)" % (slice['name'], slice_attribute_id),
-        DeleteSliceAttribute(admin, slice_id, slice_attribute_id)
+        DeleteSliceAttribute(admin, slice_attribute_id)
         print "=> OK"
     slice = GetSlices(admin, [slice_id])[0]
     assert not slice['slice_attribute_ids']
