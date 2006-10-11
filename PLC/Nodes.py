@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.8 2006/10/02 18:32:31 mlhuang Exp $
+# $Id: Nodes.py,v 1.9 2006/10/03 19:25:43 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -16,6 +16,17 @@ from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.BootStates import BootStates
+
+def valid_hostname(hostname):
+    # 1. Each part begins and ends with a letter or number.
+    # 2. Each part except the last can contain letters, numbers, or hyphens.
+    # 3. Each part is between 1 and 64 characters, including the trailing dot.
+    # 4. At least two parts.
+    # 5. Last part can only contain between 2 and 6 letters.
+    good_hostname = r'^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+' \
+                    r'[a-z]{2,6}$'
+    return hostname and \
+           re.match(good_hostname, hostname, re.IGNORECASE)
 
 class Node(Row):
     """
@@ -52,15 +63,7 @@ class Node(Row):
         self.api = api
 
     def validate_hostname(self, hostname):
-        # 1. Each part begins and ends with a letter or number.
-        # 2. Each part except the last can contain letters, numbers, or hyphens.
-        # 3. Each part is between 1 and 64 characters, including the trailing dot.
-        # 4. At least two parts.
-        # 5. Last part can only contain between 2 and 6 letters.
-        good_hostname = r'^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+' \
-                        r'[a-z]{2,6}$'
-        if not hostname or \
-           not re.match(good_hostname, hostname, re.IGNORECASE):
+        if not valid_hostname(hostname):
             raise PLCInvalidArgument, "Invalid hostname"
 
         conflicts = Nodes(self.api, [hostname])
