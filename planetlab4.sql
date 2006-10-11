@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.8 2006/10/11 15:37:12 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.9 2006/10/11 19:53:42 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ CREATE TABLE persons (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
-CREATE INDEX persons_email_key ON persons (email) WHERE deleted IS false;
+CREATE INDEX persons_email_idx ON persons (email) WHERE deleted IS false;
 
 --------------------------------------------------------------------------------
 -- Sites
@@ -81,7 +81,7 @@ CREATE TABLE sites (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
-CREATE INDEX sites_login_base_key ON sites (login_base) WHERE deleted IS false;
+CREATE INDEX sites_login_base_idx ON sites (login_base) WHERE deleted IS false;
 
 -- Account site membership
 CREATE TABLE person_site (
@@ -90,8 +90,8 @@ CREATE TABLE person_site (
     is_primary boolean NOT NULL DEFAULT false, -- Is the primary site for this account
     PRIMARY KEY (person_id, site_id)
 );
-CREATE INDEX person_site_person_id_key ON person_site (person_id);
-CREATE INDEX person_site_site_id_key ON person_site (site_id);
+CREATE INDEX person_site_person_id_idx ON person_site (person_id);
+CREATE INDEX person_site_site_id_idx ON person_site (site_id);
 
 -- Ordered by primary site first
 CREATE VIEW person_site_ordered AS
@@ -184,8 +184,8 @@ CREATE TABLE person_key (
     key_id integer REFERENCES keys NOT NULL, -- Key identifier
     PRIMARY KEY (person_id, key_id)
 ) WITH OIDS;
-CREATE INDEX person_key_person_id_key ON person_key (person_id);
-CREATE INDEX person_key_key_id_key ON person_key (key_id);
+CREATE INDEX person_key_person_id_idx ON person_key (person_id);
+CREATE INDEX person_key_key_id_idx ON person_key (key_id);
 
 CREATE VIEW person_keys AS
 SELECT person_id,
@@ -214,7 +214,7 @@ CREATE TABLE person_role (
     role_id integer REFERENCES roles NOT NULL, -- Role identifier
     PRIMARY KEY (person_id, role_id)
 ) WITH OIDS;
-CREATE INDEX person_role_person_id_key ON person_role (person_id);
+CREATE INDEX person_role_person_id_idx ON person_role (person_id);
 
 -- Account roles
 CREATE VIEW person_roles AS
@@ -262,8 +262,8 @@ CREATE TABLE nodes (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
-CREATE INDEX nodes_hostname_key ON nodes (hostname) WHERE deleted IS false;
-CREATE INDEX nodes_site_id_key ON nodes (site_id) WHERE deleted IS false;
+CREATE INDEX nodes_hostname_idx ON nodes (hostname) WHERE deleted IS false;
+CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
 
 -- Nodes at each site
 CREATE VIEW site_nodes AS
@@ -289,8 +289,8 @@ CREATE TABLE nodegroup_node (
     node_id integer REFERENCES nodes NOT NULL, -- Node identifier
     PRIMARY KEY (nodegroup_id, node_id)
 ) WITH OIDS;
-CREATE INDEX nodegroup_node_nodegroup_id_key ON nodegroup_node (nodegroup_id);
-CREATE INDEX nodegroup_node_node_id_key ON nodegroup_node (node_id);
+CREATE INDEX nodegroup_node_nodegroup_id_idx ON nodegroup_node (nodegroup_id);
+CREATE INDEX nodegroup_node_node_id_idx ON nodegroup_node (node_id);
 
 -- Nodes in each node gruop
 CREATE VIEW nodegroup_nodes AS
@@ -349,7 +349,7 @@ CREATE TABLE nodenetworks (
     bwlimit integer, -- Bandwidth limit in bps
     hostname text -- Hostname of this interface
 ) WITH OIDS;
-CREATE INDEX nodenetworks_node_id_key ON nodenetworks (node_id);
+CREATE INDEX nodenetworks_node_id_idx ON nodenetworks (node_id);
 
 -- Ordered by primary interface first
 CREATE VIEW nodenetworks_ordered AS
@@ -382,7 +382,7 @@ CREATE TABLE pcus (
     model text, -- Model, e.g. BayTech or iPal
     notes text -- Random notes
 ) WITH OIDS;
-CREATE INDEX pcus_site_id_key ON pcus (site_id);
+CREATE INDEX pcus_site_id_idx ON pcus (site_id);
 
 CREATE VIEW site_pcus AS
 SELECT site_id,
@@ -394,10 +394,18 @@ CREATE TABLE pcu_node (
     pcu_id integer REFERENCES pcus NOT NULL, -- PCU identifier
     node_id integer REFERENCES nodes NOT NULL, -- Node identifier
     port integer NOT NULL, -- Port number
-    PRIMARY KEY (pcu_id, node_id)
+    PRIMARY KEY (pcu_id, node_id), -- The same node cannot be controlled by different ports
+    UNIQUE (pcu_id, port) -- The same port cannot control multiple nodes
 );
-CREATE INDEX pcu_node_pcu_id_key ON pcu_node (pcu_id);
-CREATE INDEX pcu_node_node_id_key ON pcu_node (node_id);
+CREATE INDEX pcu_node_pcu_id_idx ON pcu_node (pcu_id);
+CREATE INDEX pcu_node_node_id_idx ON pcu_node (node_id);
+
+CREATE VIEW node_pcus AS
+SELECT node_id,
+array_to_string(array_accum(pcu_id), ',') AS pcu_ids,
+array_to_string(array_accum(port), ',') AS ports
+FROM pcu_node
+GROUP BY node_id;
 
 CREATE VIEW pcu_nodes AS
 SELECT pcu_id,
@@ -434,16 +442,16 @@ CREATE TABLE slices (
 
     is_deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
-CREATE INDEX slices_site_id_key ON slices (site_id) WHERE is_deleted IS false;
-CREATE INDEX slices_name_key ON slices (name) WHERE is_deleted IS false;
+CREATE INDEX slices_site_id_idx ON slices (site_id) WHERE is_deleted IS false;
+CREATE INDEX slices_name_idx ON slices (name) WHERE is_deleted IS false;
 
 -- Slivers
 CREATE TABLE slice_node (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes NOT NULL -- Node identifier
 ) WITH OIDS;
-CREATE INDEX slice_node_slice_id_key ON slice_node (slice_id);
-CREATE INDEX slice_node_node_id_key ON slice_node (node_id);
+CREATE INDEX slice_node_slice_id_idx ON slice_node (slice_id);
+CREATE INDEX slice_node_node_id_idx ON slice_node (node_id);
 
 -- Synonym for slice_node
 CREATE VIEW slivers AS
@@ -476,8 +484,8 @@ CREATE TABLE slice_person (
     person_id integer REFERENCES persons NOT NULL, -- Account identifier
     PRIMARY KEY (slice_id, person_id)
 ) WITH OIDS;
-CREATE INDEX slice_person_slice_id_key ON slice_person (slice_id);
-CREATE INDEX slice_person_person_id_key ON slice_person (person_id);
+CREATE INDEX slice_person_slice_id_idx ON slice_person (slice_id);
+CREATE INDEX slice_person_person_id_idx ON slice_person (person_id);
 
 -- Members of the slice
 CREATE VIEW slice_persons AS
@@ -513,8 +521,8 @@ CREATE TABLE slice_attribute (
     attribute_id integer REFERENCES attributes NOT NULL, -- Attribute type identifier
     value text
 ) WITH OIDS;
-CREATE INDEX slice_attribute_slice_id_key ON slice_attribute (slice_id);
-CREATE INDEX slice_attribute_node_id_key ON slice_attribute (node_id);
+CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
+CREATE INDEX slice_attribute_node_id_idx ON slice_attribute (node_id);
 
 CREATE VIEW slice_attributes AS
 SELECT slice_id,
@@ -570,11 +578,14 @@ CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
 node_nodenetworks.nodenetwork_ids,
 node_nodegroups.nodegroup_ids,
-node_slices.slice_ids
+node_slices.slice_ids,
+node_pcus.pcu_ids,
+node_pcus.ports
 FROM nodes
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
-LEFT JOIN node_slices USING (node_id);
+LEFT JOIN node_slices USING (node_id)
+LEFT JOIN node_pcus USING (node_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
