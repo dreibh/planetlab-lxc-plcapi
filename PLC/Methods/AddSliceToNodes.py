@@ -13,7 +13,7 @@ class AddSliceToNodes(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin', 'pi']
+    roles = ['admin', 'pi', 'user']
 
     accepts = [
         PasswordAuth(),
@@ -26,7 +26,6 @@ class AddSliceToNodes(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, slice_id_or_name, node_id_or_hostname_list):
-
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
@@ -37,15 +36,17 @@ class AddSliceToNodes(Method):
 	 # Get specified nodes
         nodes = Nodes(self.api, node_id_or_hostname_list).values()
 
-        # If we are not admin, make sure the caller is a pi
-        # of the site associated with the slice
-	if 'admin' not in self.caller['roles']:
-		if slice['site_id'] not in self.caller['site_ids']:
-			raise PLCPermissionDenied, "Not allowed to add nodes to this slice"
+        if 'admin' not in self.caller['roles']:
+            if self.caller['person_id'] in slice['person_ids']:
+                pass
+            elif 'pi' not in self.caller['roles']:
+                raise PLCPermissionDenied, "Not a member of the specified slice"
+            elif slice['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
-	# add slice to all nodes found
+	# Add slice to all nodes found
 	for node in nodes:
-		if slice['slice_id'] not in node['slice_ids']:
-            		slice.add_node(node)
+            if slice['slice_id'] not in node['slice_ids']:
+                slice.add_node(node)
 
         return 1
