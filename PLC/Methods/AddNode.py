@@ -11,7 +11,7 @@ class AddNode(Method):
     Adds a new node. Any values specified in optional_vals are used,
     otherwise defaults are used.
 
-    PIs and techs may only add nodes to their own sites. ins may
+    PIs and techs may only add nodes to their own sites. Admins may
     add nodes to any site.
 
     Returns the new node_id (> 0) if successful, faults otherwise.
@@ -20,7 +20,7 @@ class AddNode(Method):
     roles = ['admin', 'pi', 'tech']
 
     can_update = lambda (field, value): field in \
-                 ['model', 'version']
+                 ['boot_state', 'model', 'version']
     update_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
@@ -28,13 +28,12 @@ class AddNode(Method):
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
         Node.fields['hostname'],
-        Node.fields['boot_state'],
         update_fields
         ]
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
 
-    def call(self, auth, site_id_or_login_base, hostname, boot_state, optional_vals = {}):
+    def call(self, auth, site_id_or_login_base, hostname, optional_vals = {}):
         if filter(lambda field: field not in self.update_fields, optional_vals):
             raise PLCInvalidArgument, "Invalid fields specified"
 
@@ -59,7 +58,6 @@ class AddNode(Method):
 
         node = Node(self.api, optional_vals)
         node['hostname'] = hostname
-        node['boot_state'] = boot_state
         node['site_id'] = site['site_id']
         node.sync()
 
