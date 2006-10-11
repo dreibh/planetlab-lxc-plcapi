@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: PCUs.py,v 1.2 2006/10/11 19:54:53 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -12,6 +12,7 @@ from PLC.Parameter import Parameter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import valid_ip, NodeNetwork, NodeNetworks
+from PLC.Nodes import Node, Nodes
 
 class PCU(Row):
     """
@@ -43,6 +44,57 @@ class PCU(Row):
         if not valid_ip(ip):
             raise PLCInvalidArgument, "Invalid IP address " + ip
         return ip
+
+    def add_node(self, node, port, commit = True):
+        """
+        Add node to existing PCU.
+        """
+
+        assert 'pcu_id' in self
+        assert isinstance(node, Node)
+        assert isinstance(port, (int, long))
+        assert 'node_id' in node
+
+        pcu_id = self['pcu_id']
+        node_id = node['node_id']
+
+        if node_id not in self['node_ids'] and port not in self['ports']:
+            self.api.db.do("INSERT INTO pcu_node (pcu_id, node_id, port)" \
+                           " VALUES(%(pcu_id)d, %(node_id)d, %(port)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['node_ids'].append(node_id)
+            self['ports'].append(port)
+
+    def remove_node(self, node, commit = True):
+        """
+        Remove node from existing PCU.
+        """
+
+        assert 'pcu_id' in self
+        assert isinstance(node, Node)
+        assert 'node_id' in node
+
+        pcu_id = self['pcu_id']
+        node_id = node['node_id']
+
+        if node_id in self['node_ids']:
+            i = self['node_ids'].index(node_id)
+            port = self['ports'][i]
+
+            self.api.db.do("DELETE FROM pcu_node" \
+                           " WHERE pcu_id = %(pcu_id)d" \
+                           " AND node_id = %(node_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['node_ids'].remove(node_id)
+            self['ports'].remove(port)
 
     def delete(self, commit = True):
         """
@@ -80,7 +132,7 @@ class PCUs(Table):
 
         for row in rows:
             self[row['pcu_id']] = pcu = PCU(api, row)
-            for aggregate in ['pcu_ids', 'ports']:
+            for aggregate in ['node_ids', 'ports']:
                 if not pcu.has_key(aggregate) or pcu[aggregate] is None:
                     pcu[aggregate] = []
                 else:

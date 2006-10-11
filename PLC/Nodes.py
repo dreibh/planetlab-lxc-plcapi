@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.9 2006/10/03 19:25:43 mlhuang Exp $
+# $Id: Nodes.py,v 1.10 2006/10/11 19:51:18 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -55,7 +55,8 @@ class Node(Row):
         # 'conf_file_ids': Parameter([int], "List of configuration files specific to this node", ro = True),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node", ro = True),
         'slice_ids': Parameter([int], "List of slices on this node", ro = True),
-        # 'pcu_ids': Parameter([int], "List of PCUs that control this node", ro = True),
+        'pcu_ids': Parameter([int], "List of PCUs that control this node", ro = True),
+        'ports': Parameter([int], "List of PCU ports that this node is connected to", ro = True),
         }
 
     def __init__(self, api, fields):
