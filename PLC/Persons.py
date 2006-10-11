@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.9 2006/10/06 19:06:06 mlhuang Exp $
+# $Id: Persons.py,v 1.10 2006/10/10 21:51:35 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -193,6 +193,51 @@ class Person(Row):
                 self.api.db.commit()
 
             self['role_ids'].remove(role_id)
+ 
+    def add_key(self, key, commit = True):
+        """
+        Add key to existing account.
+        """
+
+        assert 'person_id' in self
+        assert isinstance(key, Key)
+        assert 'key_id' in key
+
+        person_id = self['person_id']
+        key_id = key['key_id']
+
+        if key_id not in self['key_ids']:
+            self.api.db.do("INSERT INTO person_key (person_id, key_id)" \
+                           " VALUES(%(person_id)d, %(key_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['key_ids'].append(key_id)
+
+    def remove_key(self, key, commit = True):
+        """
+        Remove key from existing account.
+        """
+
+        assert 'person_id' in self
+        assert isinstance(key, Key)
+        assert 'key_id' in key
+
+        person_id = self['person_id']
+        key_id = key['key_id']
+
+        if key_id in self['key_ids']:
+            self.api.db.do("DELETE FROM person_key" \
+                           " WHERE person_id = %(person_id)d" \
+                           " AND key_id = %(key_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['key_ids'].remove(key_id)
 
     def set_primary_site(self, site, commit = True):
         """
