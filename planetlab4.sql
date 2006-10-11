@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.7 2006/10/10 20:22:24 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.8 2006/10/11 15:37:12 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ CREATE TABLE nodes (
     node_id serial PRIMARY KEY, -- Node identifier
     hostname text NOT NULL, -- Node hostname
     site_id integer REFERENCES sites NOT NULL, -- At which site
-    boot_state text REFERENCES boot_states NOT NULL, -- Node boot state
+    boot_state text REFERENCES boot_states NOT NULL DEFAULT 'inst', -- Node boot state
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
 
     -- Optional
@@ -372,7 +372,7 @@ CREATE TABLE pcus (
     -- Mandatory
     pcu_id serial PRIMARY KEY, -- PCU identifier
     site_id integer REFERENCES sites NOT NULL, -- Site identifier
-    hostname text NOT NULL, -- Hostname, not necessarily unique (multiple logical sites could use the same PCU)
+    hostname text, -- Hostname, not necessarily unique (multiple logical sites could use the same PCU)
     ip text NOT NULL, -- IP, not necessarily unique
 
     -- Optional
@@ -382,6 +382,13 @@ CREATE TABLE pcus (
     model text, -- Model, e.g. BayTech or iPal
     notes text -- Random notes
 ) WITH OIDS;
+CREATE INDEX pcus_site_id_key ON pcus (site_id);
+
+CREATE VIEW site_pcus AS
+SELECT site_id,
+array_to_string(array_accum(pcu_id), ',') AS pcu_ids
+FROM pcus
+GROUP BY site_id;
 
 CREATE TABLE pcu_node (
     pcu_id integer REFERENCES pcus NOT NULL, -- PCU identifier
@@ -578,6 +585,22 @@ nodegroup_nodes.node_ids
 FROM nodegroups
 LEFT JOIN nodegroup_nodes USING (nodegroup_id);
 
+CREATE VIEW view_pcus AS
+SELECT
+pcus.pcu_id,
+pcus.site_id,
+pcus.hostname,
+pcus.ip,
+pcus.protocol,
+pcus.username,
+pcus.password,
+pcus.model,
+pcus.notes,
+pcu_nodes.node_ids,
+pcu_nodes.ports
+FROM pcus
+LEFT JOIN pcu_nodes USING (pcu_id);
+
 CREATE VIEW view_sites AS
 SELECT
 sites.site_id,
@@ -596,12 +619,14 @@ CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
 site_persons.person_ids,
 site_nodes.node_ids,
 site_addresses.address_ids,
-site_slices.slice_ids
+site_slices.slice_ids,
+site_pcus.pcu_ids
 FROM sites
 LEFT JOIN site_persons USING (site_id)
 LEFT JOIN site_nodes USING (site_id)
 LEFT JOIN site_addresses USING (site_id)
-LEFT JOIN site_slices USING (site_id);
+LEFT JOIN site_slices USING (site_id)
+LEFT JOIN site_pcus USING (site_id);
 
 CREATE VIEW view_addresses AS
 SELECT
