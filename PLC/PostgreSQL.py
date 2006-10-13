@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.2 2006/09/25 15:12:20 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.3 2006/10/03 19:27:07 mlhuang Exp $
 #
 
 import pgdb
@@ -100,6 +100,7 @@ class PostgreSQL:
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
         except pgdb.DatabaseError, e:
+            cursor.close()
             self.rollback()
             uuid = commands.getoutput("uuidgen")
             print >> log, "Database error %s:" % uuid
