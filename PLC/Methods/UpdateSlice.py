@@ -56,7 +56,7 @@ class UpdateSlice(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
         # Renewing
-        if 'expires' in update_fields and update_fields['expires'] > slice['expires']:
+        if 'expires' in slice_fields and slice_fields['expires'] > slice['expires']:
             sites = Sites(self.api, [slice['site_id']]).values()
             assert sites
             site = sites[0]
@@ -68,15 +68,15 @@ class UpdateSlice(Method):
             # XXX Make this configurable
             max_expires = time.time() + (8 * 7 * 24 * 60 * 60)
 
-            if 'admin' not in self.caller['roles'] and update_fields['expires'] > max_expires:
+            if 'admin' not in self.caller['roles'] and slice_fields['expires'] > max_expires:
                 raise PLCInvalidArgument, "Cannot renew a slice beyond 8 weeks from now"
 
-        if 'max_nodes' in update_fields and update_fields['max_nodes'] != slice['max_nodes']:
+        if 'max_nodes' in slice_fields and slice_fields['max_nodes'] != slice['max_nodes']:
             if 'admin' not in self.caller['roles'] and \
                'pi' not in self.caller['roles']:
                 raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
 
-        slice.update(update_fields)
+        slice.update(slice_fields)
 
         # XXX Make this a configurable policy
         if slice['description'] is None or not slice['description'].strip() or \
