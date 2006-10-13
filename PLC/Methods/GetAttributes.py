@@ -23,5 +23,8 @@ class GetAttributes(Method):
     def call(self, auth, attribute_id_or_name_list = None):
         # Get slice attribute information
         attributes = Attributes(self.api, attribute_id_or_name_list).values()
+	
+	# Turn each attribute into a real dict.
+	attributes = [dict(attribute.items()) for attribute in attributes]
 
         return attributes
