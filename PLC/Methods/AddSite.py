@@ -4,6 +4,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['is_public', 'latitude', 'longitude', 'url',
+              'organization_id', 'ext_consortium_id']
+
 class AddSite(Method):
     """
     Adds a new site, and creates a node group for that site. Any
@@ -15,9 +19,6 @@ class AddSite(Method):
 
     roles = ['admin']
 
-    can_update = lambda (field, value): field in \
-                 ['is_public', 'latitude', 'longitude', 'url',
-                  'organization_id', 'ext_consortium_id']
     update_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
@@ -30,11 +31,9 @@ class AddSite(Method):
 
     returns = Parameter(int, 'New site_id (> 0) if successful')
 
-    def call(self, auth, name, abbreviated_name, login_base, optional_vals = {}):
-        if filter(lambda field: field not in self.update_fields, optional_vals):
-            raise PLCInvalidArgument, "Invalid field specified"
-
-        site = Site(self.api, optional_vals)
+    def call(self, auth, name, abbreviated_name, login_base, site_fields = {}):
+        site_fields = dict(filter(can_update, site_fields.items()))
+        site = Site(self.api, site_fields)
         site['name'] = name
         site['abbreviated_name'] = abbreviated_name
         site['login_base'] = login_base

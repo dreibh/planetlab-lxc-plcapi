@@ -6,9 +6,12 @@ from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['boot_state', 'model', 'version']
+
 class AddNode(Method):
     """
-    Adds a new node. Any values specified in optional_vals are used,
+    Adds a new node. Any values specified in node_fields are used,
     otherwise defaults are used.
 
     PIs and techs may only add nodes to their own sites. Admins may
@@ -19,8 +22,6 @@ class AddNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field in \
-                 ['boot_state', 'model', 'version']
     update_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
@@ -33,10 +34,9 @@ class AddNode(Method):
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
 
-    def call(self, auth, site_id_or_login_base, hostname, optional_vals = {}):
-        if filter(lambda field: field not in self.update_fields, optional_vals):
-            raise PLCInvalidArgument, "Invalid fields specified"
-
+    def call(self, auth, site_id_or_login_base, hostname, node_fields = {}):
+        node_fields = dict(filter(can_update, node_fields.items()))
+        
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
@@ -56,7 +56,7 @@ class AddNode(Method):
             else:
                 assert self.caller['person_id'] in site['person_ids']
 
-        node = Node(self.api, optional_vals)
+        node = Node(self.api, node_fields)
         node['hostname'] = hostname
         node['site_id'] = site['site_id']
         node.sync()

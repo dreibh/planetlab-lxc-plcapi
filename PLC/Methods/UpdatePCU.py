@@ -4,6 +4,9 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.PCUs import PCU, PCUs
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field not in \
+             ['pcu_id', 'site_id']
+
 class UpdatePCU(Method):
     """
     Updates the parameters of an existing PCU with the values in
@@ -16,8 +19,6 @@ class UpdatePCU(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field not in \
-                 ['pcu_id', 'site_id']
     update_fields = dict(filter(can_update, PCU.fields.items()))
 
     accepts = [
@@ -29,9 +30,7 @@ class UpdatePCU(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, pcu_id, pcu_fields):
-	# Make sure only valid fields are specified
-	if filter(lambda field: field not in self.update_fields, pcu_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+        pcu_fields = dict(filter(can_update, pcu_fields.items()))
 
         # Get associated PCU details
         pcus = PCUs(self.api, [pcu_id]).values()

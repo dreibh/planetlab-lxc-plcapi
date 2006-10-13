@@ -5,6 +5,10 @@ from PLC.Addresses import Address, Addresses
 from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
+can_update = lambda (field, value): field in \
+             ['line1', 'line2', 'line3',
+              'city', 'state', 'postalcode', 'country']
+
 class AddAddress(Method):
     """
     Adds a new address to a site. Fields specified in
@@ -17,9 +21,6 @@ class AddAddress(Method):
 
     roles = ['admin', 'pi']
 
-    can_update = lambda (field, value): field in \
-                 ['line1', 'line2', 'line3',
-                  'city', 'state', 'postalcode', 'country']
     update_fields = dict(filter(can_update, Address.fields.items()))
 
     accepts = [
@@ -32,8 +33,7 @@ class AddAddress(Method):
     returns = Parameter(int, 'New address_id (> 0) if successful')
 
     def call(self, auth, site_id_or_login_base, address_fields = {}):
-        if filter(lambda field: field not in self.update_fields, address_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+        address_fields = dict(filter(can_update, address_fields.items()))
 
         # Get associated site details
         sites = Sites(self.api, [site_id_or_login_base]).values()

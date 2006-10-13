@@ -4,6 +4,8 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.AddressTypes import AddressType, AddressTypes
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in ['description']
+
 class AddAddressType(Method):
     """
     Adds a new address type. Fields specified in address_type_fields
@@ -14,7 +16,6 @@ class AddAddressType(Method):
 
     roles = ['admin']
 
-    can_update = lambda (field, value): field in ['description']
     update_fields = dict(filter(can_update, AddressType.fields.items()))
 
     accepts = [
@@ -26,6 +27,7 @@ class AddAddressType(Method):
     returns = Parameter(int, 'New address_type_id (> 0) if successful')
 
     def call(self, auth, name, address_type_fields = {}):
+        address_type_fields = dict(filter(can_update, address_type_fields.items()))
         address_type = AddressType(self.api, address_type_fields)
         address_type['name'] = name
         address_type.sync()

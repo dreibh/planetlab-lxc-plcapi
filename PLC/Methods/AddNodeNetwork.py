@@ -5,14 +5,18 @@ from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['ip', 'mac', 'gateway', 'network', 'broadcast', 'netmask',
+              'dns1', 'dns2', 'hostname', 'bwlimit', 'is_primary']
+
 class AddNodeNetwork(Method):
     """
     Adds a new network for a node. Any values specified in
-    optional_vals are used, otherwise defaults are used. Acceptable
+    nodenetwork_fields are used, otherwise defaults are used. Acceptable
     values for method are dhcp, static, proxy, tap, and
     ipmi. Acceptable value for type is ipv4. If type is static, ip,
     gateway, network, broadcast, netmask, and dns1 must all be
-    specified in optional_vals. If type is dhcp, these parameters,
+    specified in nodenetwork_fields. If type is dhcp, these parameters,
     even if specified, are ignored.
 
     PIs and techs may only add networks to their own nodes. ins may
@@ -23,9 +27,6 @@ class AddNodeNetwork(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field in \
-                 ['ip', 'mac', 'gateway', 'network', 'broadcast', 'netmask',
-                  'dns1', 'dns2', 'hostname', 'bwlimit', 'is_primary']
     update_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
@@ -38,9 +39,8 @@ class AddNodeNetwork(Method):
 
     returns = Parameter(int, 'New nodenetwork_id (> 0) if successful')
 
-    def call(self, auth, node_id, method, type, optional_vals = {}):
-        if filter(lambda field: field not in self.update_fields, optional_vals):
-            raise PLCInvalidArgument, "Invalid fields specified"
+    def call(self, auth, node_id, method, type, nodenetwork_fields = {}):
+        nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
         # Check if node exists
         nodes = Nodes(self.api, [node_id]).values()
@@ -58,7 +58,7 @@ class AddNodeNetwork(Method):
                 raise PLCPermissionDenied, "Not allowed to add node network for specified node"
 
         # Add node network
-	nodenetwork = NodeNetwork(self.api, optional_vals)
+	nodenetwork = NodeNetwork(self.api, nodenetwork_fields)
         nodenetwork['node_id'] = node_id
 	nodenetwork['method'] = method
         nodenetwork['type'] = type

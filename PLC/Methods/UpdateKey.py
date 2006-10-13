@@ -4,6 +4,9 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Keys import Key, Keys
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['key_type', 'key']
+
 class UpdateKey(Method):
     """
     Updates the parameters of an existing key with the values in
@@ -16,8 +19,6 @@ class UpdateKey(Method):
 
     roles = ['admin', 'pi', 'tech', 'user']
 
-    can_update = lambda (field, value): field in \
-                 ['key_type', 'key']
     update_fields = dict(filter(can_update, Key.fields.items()))
 
     accepts = [
@@ -29,9 +30,7 @@ class UpdateKey(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, key_id, key_fields):
-	# Make sure only valid fields are specified
-	if filter(lambda field: field not in self.update_fields, key_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+        key_fields = dict(filter(can_update, key_fields.items()))
 
         # Get key information
         keys = Keys(self.api, [key_id]).values()

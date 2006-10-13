@@ -5,10 +5,15 @@ from PLC.PCUs import PCU, PCUs
 from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
+can_update = lambda (field, value): field in \
+             ['hostname', 'ip', 'protocol',
+              'username', 'password',
+              'model', 'notes']
+
 class AddPCU(Method):
     """
     Adds a new power control unit (PCU) to the specified site. Any
-    fields specified in optional_vals are used, otherwise defaults are
+    fields specified in pcu_fields are used, otherwise defaults are
     used.
 
     PIs and technical contacts may only add PCUs to their own sites.
@@ -18,10 +23,6 @@ class AddPCU(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field in \
-                 ['hostname', 'ip', 'protocol',
-                  'username', 'password',
-                  'model', 'notes']
     update_fields = dict(filter(can_update, PCU.fields.items()))
 
     accepts = [
@@ -33,9 +34,8 @@ class AddPCU(Method):
 
     returns = Parameter(int, 'New pcu_id (> 0) if successful')
 
-    def call(self, auth, site_id_or_login_base, optional_vals = {}):
-        if filter(lambda field: field not in self.update_fields, optional_vals):
-            raise PLCInvalidArgument, "Invalid field specified"
+    def call(self, auth, site_id_or_login_base, pcu_fields = {}):
+        pcu_fields = dict(filter(can_update, pcu_fields.items()))
 
         # Get associated site details
         sites = Sites(self.api, [site_id_or_login_base]).values()
@@ -47,7 +47,7 @@ class AddPCU(Method):
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to add a PCU to that site"
 
-        pcu = PCU(self.api, optional_vals)
+        pcu = PCU(self.api, pcu_fields)
         pcu['site_id'] = site['site_id']
         pcu.sync()
 

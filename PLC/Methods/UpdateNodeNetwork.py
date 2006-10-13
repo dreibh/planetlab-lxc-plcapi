@@ -1,10 +1,12 @@
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.Auth import PasswordAuth
+
+can_update = lambda (field, value): field not in \
+             ['nodenetwork_id']
 
 class UpdateNodeNetwork(Method):
     """
@@ -23,8 +25,6 @@ class UpdateNodeNetwork(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field not in \
-                 ['nodenetwork_id']
     update_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
@@ -36,10 +36,8 @@ class UpdateNodeNetwork(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodenetwork_id_or_hostname, update_fields):
-        # Check for invalid fields
-        if filter(lambda field: field not in self.update_fields, update_fields):
-            raise PLCInvalidArgument, "Invalid fields specified"
+    def call(self, auth, nodenetwork_id_or_hostname, nodenetwork_fields):
+        nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
 	# Get node network information
 	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_hostname]).values()
@@ -62,7 +60,7 @@ class UpdateNodeNetwork(Method):
                 raise PLCPermissionDenied, "Not allowed to update node network"
 
 	# Update node network
-	nodenetwork.update(update_fields)
+	nodenetwork.update(nodenetwork_fields)
         nodenetwork.sync()
 	
         return 1

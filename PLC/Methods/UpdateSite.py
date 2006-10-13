@@ -4,6 +4,11 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['name', 'abbreviated_name',
+              'is_public', 'latitude', 'longitude', 'url',
+              'max_slices', 'max_slivers']
+
 class UpdateSite(Method):
     """
     Updates a site. Only the fields specified in update_fields are
@@ -22,10 +27,6 @@ class UpdateSite(Method):
 
     roles = ['admin', 'pi']
 
-    can_update = lambda (field, value): field in \
-                 ['name', 'abbreviated_name',
-                  'is_public', 'latitude', 'longitude', 'url',
-                  'max_slices', 'max_slivers']
     update_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
@@ -37,10 +38,8 @@ class UpdateSite(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, site_id_or_login_base, update_fields):
-	# Check for invalid fields
-        if filter(lambda field: field not in self.update_fields, update_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+    def call(self, auth, site_id_or_login_base, site_fields):
+        site_fields = dict(filter(can_update, site_fields.items()))
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
@@ -58,10 +57,10 @@ class UpdateSite(Method):
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to modify specified site"
 
-            if 'max_slices' or 'max_slivers' in update_fields:
+            if 'max_slices' or 'max_slivers' in site_fields:
                 raise PLCInvalidArgument, "Only admins can update max_slices and max_slivers"
 
-        site.update(update_fields)
+        site.update(site_fields)
 	site.sync()
 	
 	return 1

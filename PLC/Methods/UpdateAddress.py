@@ -4,6 +4,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Addresses import Address, Addresses
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['line1', 'line2', 'line3',
+              'city', 'state', 'postalcode', 'country']
+
 class UpdateAddress(Method):
     """
     Updates the parameters of an existing address with the values in
@@ -16,9 +20,6 @@ class UpdateAddress(Method):
 
     roles = ['admin', 'pi']
 
-    can_update = lambda (field, value): field in \
-                 ['line1', 'line2', 'line3',
-                  'city', 'state', 'postalcode', 'country']
     update_fields = dict(filter(can_update, Address.fields.items()))
 
     accepts = [
@@ -30,8 +31,7 @@ class UpdateAddress(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, address_id, address_fields):
-        if filter(lambda field: field not in self.update_fields, address_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+        address_fields = dict(filter(can_update, address_fields.items()))
 
         # Get associated address details
         addresses = Addresses(self.api, [address_id]).values()

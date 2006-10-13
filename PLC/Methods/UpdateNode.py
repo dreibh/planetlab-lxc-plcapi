@@ -4,9 +4,12 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['hostname', 'boot_state', 'model', 'version']
+
 class UpdateNode(Method):
     """
-    Updates a node. Only the fields specified in update_fields are
+    Updates a node. Only the fields specified in node_fields are
     updated, all other fields are left untouched.
 
     To remove a value without setting a new one in its place (for
@@ -21,8 +24,6 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    can_update = lambda (field, value): field in \
-                 ['hostname', 'boot_state', 'model', 'version']
     update_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
@@ -34,9 +35,8 @@ class UpdateNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, node_id_or_hostname, update_fields):
-        if filter(lambda field: field not in self.update_fields, update_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+    def call(self, auth, node_id_or_hostname, node_fields):
+        node_fields = dict(filter(can_update, node_fields.items()))
 
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
@@ -54,7 +54,7 @@ class UpdateNode(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
-        node.update(update_fields)
+        node.update(node_fields)
         node.sync()
 
         return 1
