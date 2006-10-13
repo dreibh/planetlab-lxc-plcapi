@@ -11,7 +11,7 @@ can_update = lambda (field, value): field in \
 class AddSite(Method):
     """
     Adds a new site, and creates a node group for that site. Any
-    fields specified in optional_vals are used, otherwise defaults are
+    fields specified in site_fields are used, otherwise defaults are
     used.
 
     Returns the new site_id (> 0) if successful, faults otherwise.
