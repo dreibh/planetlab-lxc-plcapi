@@ -37,5 +37,8 @@ class GetAddresses(Method):
                 raise PLCInvalidArgument, "Invalid address ID(s)"
 
         addresses = Addresses(self.api, address_id_list).values()
+	
+	# Turn each address into a real dict
+	addresses = [dict(address.items) for address in addresses]
 
         return addresses
