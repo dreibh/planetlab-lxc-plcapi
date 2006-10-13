@@ -25,10 +25,7 @@ class GetNodeGroups(Method):
         # Get node group details
 	nodegroups = NodeGroups(self.api, nodegroup_id_or_name_list).values()
 
-	# Filter out undesired or None fields (XML-RPC cannot marshal
-        # None) and turn each nodegroup into a real dict.
-        valid_return_fields_only = lambda (key, value): value is not None
-        nodegroups = [dict(filter(valid_return_fields_only, nodegroup.items())) \
-                      for nodegroup in nodegroups]
+	# Turn each nodegroup into a real dict.
+        nodegroups = [dict(nodegroup.items()) for nodegroup in nodegroups]
 
         return nodegroups
