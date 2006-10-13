@@ -7,9 +7,12 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
+can_update = lambda (field, value): field in \
+             ['instantiation', 'url', 'description', 'max_nodes']
+
 class AddSlice(Method):
     """
-    Adds a new slice. Any fields specified in optional_vals are used,
+    Adds a new slice. Any fields specified in slice_fields are used,
     otherwise defaults are used.
 
     Valid slice names are lowercase and begin with the login_base
@@ -26,8 +29,6 @@ class AddSlice(Method):
 
     roles = ['admin', 'pi']
 
-    can_update = lambda (field, value): field in \
-                 ['instantiation', 'url', 'description', 'max_nodes']
     update_fields = dict(filter(can_update, Slice.fields.items()))
 
     accepts = [
@@ -38,9 +39,8 @@ class AddSlice(Method):
 
     returns = Parameter(int, 'New slice_id (> 0) if successful')
 
-    def call(self, auth, name, optional_vals = {}):
-        if filter(lambda field: field not in self.update_fields, optional_vals):
-            raise PLCInvalidArgument, "Invalid field specified"
+    def call(self, auth, name, slice_fields = {}):
+        slice_fields = dict(filter(can_update, slice_fields.items()))
 
         # 1. Lowercase.
         # 2. Begins with login_base (only letters).

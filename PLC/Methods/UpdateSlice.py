@@ -7,10 +7,13 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
+can_update = lambda (field, value): field in \
+             ['instantiation', 'url', 'description', 'max_nodes', 'expires']
+
 class UpdateSlice(Method):
     """
     Updates the parameters of an existing slice with the values in
-    update_fields.
+    slice_fields.
 
     Users may only update slices of which they are members. PIs may
     update any of the slices at their sites, or any slices of which
@@ -25,8 +28,6 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    can_update = lambda (field, value): field in \
-                 ['instantiation', 'url', 'description', 'max_nodes', 'expires']
     update_fields = dict(filter(can_update, Slice.fields.items()))
 
     accepts = [
@@ -38,9 +39,8 @@ class UpdateSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, slice_id_or_name, update_fields):
-        if filter(lambda field: field not in self.update_fields, update_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+    def call(self, auth, slice_id_or_name, slice_fields):
+        slice_fields = dict(filter(can_update, slice_fields.items()))
 
         slices = Slices(self.api, [slice_id_or_name]).values()
         if not slices:
