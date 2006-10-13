@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.2 2006/09/08 19:43:31 mlhuang Exp $
+# $Id: API.py,v 1.3 2006/10/03 19:24:31 mlhuang Exp $
 #
 
 import sys
@@ -13,11 +13,14 @@ import traceback
 
 import xmlrpclib
 
-import SOAPpy
-from SOAPpy.Parser import parseSOAPRPC
-from SOAPpy.Types import faultType
-from SOAPpy.NS import NS
-from SOAPpy.SOAPBuilder import buildSOAP
+try:
+    import SOAPpy
+    from SOAPpy.Parser import parseSOAPRPC
+    from SOAPpy.Types import faultType
+    from SOAPpy.NS import NS
+    from SOAPpy.SOAPBuilder import buildSOAP
+except ImportError:
+    SOAPpy = None
 
 from PLC.Config import Config
 from PLC.PostgreSQL import PostgreSQL
@@ -80,12 +83,15 @@ class PLCAPI:
             interface = xmlrpclib
             (args, method) = xmlrpclib.loads(data)
             methodresponse = True
-        except:
-            interface = SOAPpy
-            (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
-            method = r._name
-            args = r._aslist()
-            # XXX Support named arguments
+        except Exception, e:
+            if SOAPpy is not None:
+                interface = SOAPpy
+                (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
+                method = r._name
+                args = r._aslist()
+                # XXX Support named arguments
+            else:
+                raise e
 
         try:
             result = self.call(source, method, *args)
