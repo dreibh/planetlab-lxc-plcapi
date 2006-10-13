@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.9 2006/10/11 19:53:42 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.10 2006/10/11 20:49:39 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -530,6 +530,70 @@ array_to_string(array_accum(slice_attribute_id), ',') AS slice_attribute_ids
 FROM slice_attribute
 GROUP BY slice_id;
 
+--------------------------------------------------------------------------------
+-- Events
+--------------------------------------------------------------------------------
+
+CREATE TABLE event_types (
+	event_type text PRIMARY KEY -- Event type
+
+) WITH OIDS;
+
+INSERT INTO event_types (event_type) VALUES ('Add');
+INSERT INTO event_types (event_type) VALUES ('Get');
+INSERT INTO event_types (event_type) VALUES ('Update');
+INSERT INTO event_types (event_type) VALUES ('Delete');
+INSERT INTO event_types (event_type) VALUES ('Unknown');
+
+
+CREATE TABLE object_types (
+	object_type text PRIMARY KEY -- Object type 
+
+) WITH OIDS;
+
+INSERT INTO object_types (object_type) VALUES ('Person');
+INSERT INTO object_types (object_type) VALUES ('Site');
+INSERT INTO object_types (object_type) VALUES ('Node');
+INSERT INTO object_types (object_type) VALUES ('Slice');
+INSERT INTO object_types (object_type) VALUES ('Address');
+INSERT INTO object_types (object_type) VALUES ('Attribute');
+INSERT INTO object_types (object_type) VALUES ('Key');
+INSERT INTO object_types (object_type) VALUES ('Nodegroup');
+INSERT INTO object_types (object_type) VALUES ('Unknown');
+
+
+CREATE TABLE fault_types (
+	fault_code integer PRIMARY KEY, -- Fault identifier
+	fault_type text UNIQUE NOT NULL -- Fault type
+
+) WITH OIDS;
+
+INSERT INTO fault_types (fault_code, fault_type) VALUES (0, 'Success');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (100, 'PLCInvalidAPIMethod');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (101, 'PLCInvalidArgumentCount');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (102, 'PLCInvalidArgument');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (103, 'PLCAuthenticationFailure');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (109, 'PLCNotImplemented');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (106, 'PLCDBError');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (108, 'PLCPermissionDenied');
+INSERT INTO fault_types (fault_code, fault_type) VALUES (111, 'PLCAPIError');
+
+
+CREATE TABLE events (
+	event_id serial PRIMARY KEY,  -- Event identifier
+	person_id integer REFERENCES persons NOT NULL, -- person responsible for event
+	event_type text REFERENCES  event_types NOT NULL DEFAULT 'Unknown', -- Event type 
+	object_type text REFERENCES object_types NOT NULL DEFAULT 'Unknown', -- Object type associated with event
+	fault_code integer REFERENCES fault_types NOT NULL DEFAULT 0, -- did this event result in error
+        call text NOT NULL, -- Call name
+	
+	-- Optional
+	runtime float,  -- Event run time
+
+	-- Timestamps
+	time timestamp without time zone  NOT NULL DEFAULT CURRENT_TIMESTAMP
+   
+) WITH OIDS;
 --------------------------------------------------------------------------------
 -- Useful views
 --------------------------------------------------------------------------------
