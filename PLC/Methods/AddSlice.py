@@ -65,7 +65,7 @@ class AddSlice(Method):
         if len(site['slice_ids']) >= site['max_slices']:
             raise PLCInvalidArgument, "Site has reached its maximum allowable slice count"
 
-        slice = Slice(self.api, optional_vals)
+        slice = Slice(self.api, slice_fields)
         slice['creator_person_id'] = self.caller['person_id']
         slice['name'] = name
         slice['site_id'] = site['site_id']
