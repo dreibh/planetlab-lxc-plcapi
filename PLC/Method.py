@@ -4,17 +4,19 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.1 2006/09/06 15:36:07 mlhuang Exp $
+# $Id: Method.py,v 1.2 2006/09/08 19:44:31 mlhuang Exp $
 #
 
 import xmlrpclib
 from types import *
 import textwrap
 import os
+import time
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
+from PLC.Debug import profile, log
 
 class Method:
     """
@@ -46,7 +48,7 @@ class Method:
     returns = bool
     status = "current"
 
-    def call(self):
+    def call(self, *args):
         """
         Method body for all PLCAPI functions. Must override.
         """
@@ -63,7 +65,9 @@ class Method:
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
+	self.__call__ = self.log(self.__call__) 
 
+    	
     def __call__(self, *args):
         """
         Main entry point for all PLCAPI functions. Type checks
@@ -72,14 +76,14 @@ class Method:
 
         try:
             (min_args, max_args, defaults) = self.args()
-
-            # Check that the right number of arguments were passed in
+	        		
+	    # Check that the right number of arguments were passed in
             if len(args) < len(min_args) or len(args) > len(max_args):
                 raise PLCInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
             for name, value, expected in zip(max_args, args, self.accepts):
                 self.type_check(name, value, expected)
-
+	
             # The first argument to all methods that require
             # authentication, should be an Auth structure. The rest of the
             # arguments to the call may also be used in the authentication
@@ -98,12 +102,70 @@ class Method:
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
 
-            return self.call(*args)
+	    	
+	    return self.call(*args)
 
         except PLCFault, fault:
             # Prepend method name to expected faults
             fault.faultString = self.name + ": " + fault.faultString
             raise fault
+
+
+    def log(self, callable):
+        """
+        Log the transaction 
+        """
+	def __log__(vars):
+		"""
+		Commit the transaction 
+		"""
+
+		# Do not log listMethods call
+		if vars['call_name'] in ['listMethods']:
+			return False
+	 
+		sql = "INSERT INTO events " \
+                        " (person_id, event_type, object_type, fault_code, call, runtime)" \
+                        " VALUES (%d, '%s', '%s', %d, '%s', %f)" %  \
+                        (vars['person_id'], vars['event_type'], vars['object_type'], 
+			vars['fault_code'], vars['call'], vars['runtime'])
+                self.api.db.do(sql)
+                self.api.db.commit()
+			
+
+        def wrapper(*args, **kwds):
+		
+		fault_code = 0
+		# XX Get real person_id
+		person_id = 1
+		event_type = 'Unknown'
+		object_type = 'Unknown'
+		call_name = callable.im_class.__module__.split('.')[-1:][0]
+		call_args = ", ".join([str(arg) for arg in list(args)[1:]]).replace('\'', '\\\'')
+		call = "%s(%s)" % (call_name, call_args)
+		
+		if hasattr(self, 'event_type'):
+			event_type = self.event_type
+		
+                if hasattr(self, 'object_type'):
+			object_type = self.object_type
+	        
+		start = time.time()
+			
+	        try:
+                	result =  callable(*args, **kwds)
+			runtime =  time.time() - start
+			__log__(locals())			
+			return result
+				                                       
+                except PLCFault, fault:
+                	fault_code = fault.faultCode
+                	runtime =  time.time() - start
+			__log__(locals())
+			print fault
+			
+    	return wrapper
+	
 
     def help(self, indent = "  "):
         """
