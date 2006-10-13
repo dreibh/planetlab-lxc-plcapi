@@ -42,4 +42,7 @@ class GetSlices(Method):
                 can_view = member_of
             slices = filter(can_view, slices)
 
+	# turn each slice into a real dict
+	slices = [dict(slice.items()) for slice in slices]
+
         return slices
