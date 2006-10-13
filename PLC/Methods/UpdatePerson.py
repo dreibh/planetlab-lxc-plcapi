@@ -4,9 +4,14 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['first_name', 'last_name', 'title', 'email',
+              'password', 'phone', 'url', 'bio', 'accepted_aup',
+              'enabled']
+
 class UpdatePerson(Method):
     """
-    Updates a person. Only the fields specified in update_fields are
+    Updates a person. Only the fields specified in person_fields are
     updated, all other fields are left untouched.
 
     To remove a value without setting a new one in its place (for
@@ -22,10 +27,6 @@ class UpdatePerson(Method):
 
     roles = ['admin', 'pi', 'user', 'tech']
 
-    can_update = lambda (field, value): field in \
-                 ['first_name', 'last_name', 'title', 'email',
-                  'password', 'phone', 'url', 'bio', 'accepted_aup',
-		  'enabled']
     update_fields = dict(filter(can_update, Person.fields.items()))
 
     accepts = [
@@ -37,16 +38,13 @@ class UpdatePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, person_id_or_email, update_fields):
-        valid_fields = self.update_fields.keys()
+    def call(self, auth, person_id_or_email, person_fields):
+        person_fields = dict(filter(can_update, person_fields.items()))
 
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
             for key in ['enabled']:
-                valid_fields.remove(key)
-
-	if filter(lambda field: field not in valid_fields, update_fields):
-            raise PLCInvalidArgument, "Invalid field specified"
+                del person_fields[key]
 
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -62,7 +60,7 @@ class UpdatePerson(Method):
         if not self.caller.can_update(person):
             raise PLCPermissionDenied, "Not allowed to update specified account"
 
-        person.update(update_fields)
+        person.update(person_fields)
         person.sync()
 
         return 1
