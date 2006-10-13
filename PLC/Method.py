@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.2 2006/09/08 19:44:31 mlhuang Exp $
+# $Id: Method.py,v 1.3 2006/10/13 15:11:31 tmack Exp $
 #
 
 import xmlrpclib
@@ -101,8 +101,7 @@ class Method:
                             break
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
-
-	    	
+		    	
 	    return self.call(*args)
 
         except PLCFault, fault:
@@ -120,8 +119,8 @@ class Method:
 		Commit the transaction 
 		"""
 
-		# Do not log listMethods call
-		if vars['call_name'] in ['listMethods']:
+		# only log api calls
+		if vars['call_name'] in ['listMethods', 'methodSignature']:
 			return False
 	 
 		sql = "INSERT INTO events " \
@@ -135,9 +134,9 @@ class Method:
 
         def wrapper(*args, **kwds):
 		
+		# Gather necessary logging vars 
 		fault_code = 0
-		# XX Get real person_id
-		person_id = 1
+		person_id = 0
 		event_type = 'Unknown'
 		object_type = 'Unknown'
 		call_name = callable.im_class.__module__.split('.')[-1:][0]
@@ -146,9 +145,10 @@ class Method:
 		
 		if hasattr(self, 'event_type'):
 			event_type = self.event_type
-		
                 if hasattr(self, 'object_type'):
 			object_type = self.object_type
+		if self.caller:
+			person_id = self.caller['person_id']
 	        
 		start = time.time()
 			
@@ -162,7 +162,7 @@ class Method:
                 	fault_code = fault.faultCode
                 	runtime =  time.time() - start
 			__log__(locals())
-			print fault
+			raise fault
 			
     	return wrapper
 	
