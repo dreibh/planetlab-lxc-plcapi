@@ -61,11 +61,7 @@ class GetPersons(Method):
         # Filter out accounts that are not viewable and turn into list
         persons = filter(self.caller.can_view, persons.values())
 
-        # Filter out undesired or None fields (XML-RPC cannot marshal
-        # None) and turn each person into a real dict.
-        valid_return_fields_only = lambda (key, value): \
-                                   key in return_fields and value is not None
-        persons = [dict(filter(valid_return_fields_only, person.items())) \
-                   for person in persons]
+        # Turn each person into a real dict.
+        persons = [dict(person.items()) for person in persons]
                     
         return persons

@@ -33,14 +33,11 @@ class GetNodeNetworks(Method):
 
 	# Get node networks for this node
         if node['nodenetwork_ids']:
-            nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+        	nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
         else:
-            nodenetworks = []
+        	nodenetworks = []
 
-	# Filter out undesired or None fields (XML-RPC cannot marshal
-        # None) and turn each node into a real dict.
-        valid_return_fields_only = lambda (key, value): value is not None
-        nodenetworks = [dict(filter(valid_return_fields_only, nodenetwork.items())) \
-                        for nodenetwork in nodenetworks]
+	# Turn each node into a real dict.
+        nodenetworks = [dict(nodenetwork.items()) for nodenetwork in nodenetworks]
        	
 	return nodenetworks
