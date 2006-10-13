@@ -31,4 +31,9 @@ class GetPCUs(Method):
                 for site in sites:
                     pcu_ids = set(pcu_ids).union(site['pcu_ids'])
 
-        return PCUs(self.api, pcu_ids).values()
+        pcus = PCUs(self.api, pcu_ids).values()
+
+	# turn each pcu into a real dict
+	pcus = [dict(pcu.items()) for pcu in pcus]
+
+	return PCUs(self.api, pcu_ids).values()
