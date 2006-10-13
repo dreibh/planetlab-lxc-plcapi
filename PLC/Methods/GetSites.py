@@ -21,32 +21,25 @@ class GetSites(Method):
     accepts = [
         PasswordAuth(),
         [Mixed(Site.fields['site_id'],
-               Site.fields['login_base'])],
-        Parameter([str], 'List of fields to return')
+               Site.fields['login_base'])]
         ]
 
     returns = [Site.fields]
 
+    event_type = 'Get'
+    object_type = 'Site'
+	
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
         # Update documentation with list of default fields returned
         self.__doc__ += os.linesep.join(Site.fields.keys())
 
-    def call(self, auth, site_id_or_login_base_list = None, return_fields = None):
-        # Make sure that only valid fields are specified
-        if return_fields is None:
-            return_fields = Site.fields
-        elif filter(lambda field: field not in Site.fields, return_fields):
-            raise PLCInvalidArgument, "Invalid return field specified"
-
+    def call(self, auth, site_id_or_login_base_list = None):
+        
         # Get site information
         sites = Sites(self.api, site_id_or_login_base_list)
 
-        # Filter out undesired or None fields (XML-RPC cannot marshal
-        # None) and turn each site into a real dict.
-        valid_return_fields_only = lambda (key, value): \
-                                   key in return_fields and value is not None
-        sites = [dict(filter(valid_return_fields_only, site.items())) \
-                 for site in sites.values()]
-
+        # turn each site into a real dict.
+        sites = [dict(site.items()) for site in sites.values()]
+	
         return sites
