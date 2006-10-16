@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.3 2006/10/13 15:11:31 tmack Exp $
+# $Id: Method.py,v 1.4 2006/10/13 21:42:25 tmack Exp $
 #
 
 import xmlrpclib
@@ -65,7 +65,6 @@ class Method:
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
-	self.__call__ = self.log(self.__call__) 
 
     	
     def __call__(self, *args):
@@ -101,70 +100,62 @@ class Method:
                             break
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
-		    	
+    
+	    if self.api.config.PLC_API_DEBUG:
+		self.log(0, *args)
+	    	
 	    return self.call(*args)
 
         except PLCFault, fault:
             # Prepend method name to expected faults
             fault.faultString = self.name + ": " + fault.faultString
+	    self.log(fault.faultCode, *args)
             raise fault
 
 
-    def log(self, callable):
+    def log(self, fault_code, *args):
         """
         Log the transaction 
-        """
-	def __log__(vars):
-		"""
-		Commit the transaction 
-		"""
-
-		# only log api calls
-		if vars['call_name'] in ['listMethods', 'methodSignature']:
-			return False
-	 
-		sql = "INSERT INTO events " \
-                        " (person_id, event_type, object_type, fault_code, call, runtime)" \
-                        " VALUES (%d, '%s', '%s', %d, '%s', %f)" %  \
-                        (vars['person_id'], vars['event_type'], vars['object_type'], 
-			vars['fault_code'], vars['call'], vars['runtime'])
-                self.api.db.do(sql)
-                self.api.db.commit()
-			
-
-        def wrapper(*args, **kwds):
+        """	
+	# Gather necessary logging variables
+	event_type = 'Unknown'
+	object_type = 'Unknown'
+	person_id = 0
+	object_ids = []
+	call_name = self.name
+	call_args = ", ".join([unicode(arg) for arg in list(args)[1:]]).replace('\'', '\\\'')
+	call = "%s(%s)" % (call_name, call_args)
 		
-		# Gather necessary logging vars 
-		fault_code = 0
-		person_id = 0
-		event_type = 'Unknown'
-		object_type = 'Unknown'
-		call_name = callable.im_class.__module__.split('.')[-1:][0]
-		call_args = ", ".join([str(arg) for arg in list(args)[1:]]).replace('\'', '\\\'')
-		call = "%s(%s)" % (call_name, call_args)
-		
-		if hasattr(self, 'event_type'):
-			event_type = self.event_type
-                if hasattr(self, 'object_type'):
-			object_type = self.object_type
-		if self.caller:
-			person_id = self.caller['person_id']
-	        
-		start = time.time()
-			
-	        try:
-                	result =  callable(*args, **kwds)
-			runtime =  time.time() - start
-			__log__(locals())			
-			return result
-				                                       
-                except PLCFault, fault:
-                	fault_code = fault.faultCode
-                	runtime =  time.time() - start
-			__log__(locals())
-			raise fault
-			
-    	return wrapper
+	if hasattr(self, 'event_type'):
+		event_type = self.event_type
+        if hasattr(self, 'object_type'):
+		object_type = self.object_type
+	if self.caller:
+		person_id = self.caller['person_id']
+	if hasattr(self, 'object_ids'):
+		object_ids = self.object_ids 
+
+	# make sure this is an api call
+        if call_name in ['system.listMethods', 'system.methodHelp', 'system.multicall', 'system.methodSignature']:
+        	return False
+
+	sql_event = "INSERT INTO events " \
+              " (person_id, event_type, object_type, fault_code, call) VALUES" \
+              " (%(person_id)d, '%(event_type)s', '%(object_type)s', %(fault_code)d, '%(call)s')" %  \
+              (locals())
+
+	# XX get real event id
+	event_id = 1	
+	# log objects affected
+	# XX this probably wont work (we only know objects affected after call is made. Find another way
+	if object_ids:
+		affected_id_list = zip([event_id for object in object_ids], object_ids)
+		affected_ids = ", ".join(map(str,affected_id_list))
+		sql_objects = "INSERT INTO event_objects (event_id, object_id) VALUES" \
+			" %s " % affected_ids
+ 
+        self.api.db.do(sql_event)
+        self.api.db.commit()		
 	
 
     def help(self, indent = "  "):
