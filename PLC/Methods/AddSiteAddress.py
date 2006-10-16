@@ -9,7 +9,7 @@ can_update = lambda (field, value): field in \
              ['line1', 'line2', 'line3',
               'city', 'state', 'postalcode', 'country']
 
-class AddAddress(Method):
+class AddSiteAddress(Method):
     """
     Adds a new address to a site. Fields specified in
     address_fields are used; some are not optional.
