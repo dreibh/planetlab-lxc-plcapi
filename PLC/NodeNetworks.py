@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.6 2006/10/10 20:27:13 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.7 2006/10/11 19:51:09 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -59,18 +59,11 @@ class NodeNetwork(Row):
         'netmask': Parameter(str, "Subnet mask"),
         'dns1': Parameter(str, "IP address of primary DNS server"),
         'dns2': Parameter(str, "IP address of secondary DNS server"),
-        # XXX Should be an int (bps)
-        'bwlimit': Parameter(str, "Bandwidth limit"),
+        'bwlimit': Parameter(int, "Bandwidth limit", min = 0),
         'hostname': Parameter(str, "(Optional) Hostname"),
         'node_id': Parameter(int, "Node associated with this interface (if any)"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
-
-    bwlimits = ['-1',
-                '100kbit', '250kbit', '500kbit',
-                '1mbit', '2mbit', '5mbit',
-                '10mbit', '20mbit', '50mbit',
-                '100mbit']
 
     def __init__(self, api, fields = {}):
         Row.__init__(self, fields)
@@ -113,11 +106,6 @@ class NodeNetwork(Row):
     validate_netmask = validate_ip
     validate_dns1 = validate_ip
     validate_dns2 = validate_ip
-
-    def validate_bwlimit(self, bwlimit):
-        if bwlimit not in self.bwlimits:
-            raise PLCInvalidArgument, "Invalid bandwidth limit"
-	return bwlimit
 
     def validate_hostname(self, hostname):
         # Optional
