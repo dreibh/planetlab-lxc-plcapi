@@ -5,19 +5,16 @@ from PLC.Nodes import Node, Nodes
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['hostname', 'boot_state', 'model', 'version']
+             ['hostname', 'boot_state', 'model', 'version',
+              'key', 'session']
 
 class UpdateNode(Method):
     """
     Updates a node. Only the fields specified in node_fields are
     updated, all other fields are left untouched.
-
-    To remove a value without setting a new one in its place (for
-    example, to remove an address from the node), specify -1 for int
-    and double fields and 'null' for string fields. hostname and
-    boot_state cannot be unset.
     
-    PIs and techs can only update the nodes at their sites.
+    PIs and techs can update only the nodes at their sites. Only
+    admins can update the key and session fields.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -37,6 +34,11 @@ class UpdateNode(Method):
 
     def call(self, auth, node_id_or_hostname, node_fields):
         node_fields = dict(filter(can_update, node_fields.items()))
+
+	# Remove admin only fields
+	if 'admin' not in self.caller['roles']:
+            for key in 'key', 'session':
+                del node_fields[key]
 
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
