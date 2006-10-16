@@ -3,7 +3,7 @@ from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table
-from PLC.Attributes import Attribute, Attributes
+from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 
 class SliceAttribute(Row):
     """
@@ -17,10 +17,10 @@ class SliceAttribute(Row):
         'slice_attribute_id': Parameter(int, "Slice attribute identifier"),
         'slice_id': Parameter(int, "Slice identifier"),
         'node_id': Parameter(int, "Node identifier, if a sliver attribute"),
-        'attribute_id': Attribute.fields['attribute_id'],
-        'name': Attribute.fields['name'],
-        'description': Attribute.fields['description'],
-        'min_role_id': Attribute.fields['min_role_id'],
+        'attribute_type_id': SliceAttributeType.fields['attribute_type_id'],
+        'name': SliceAttributeType.fields['name'],
+        'description': SliceAttributeType.fields['description'],
+        'min_role_id': SliceAttributeType.fields['min_role_id'],
         # XXX Arbitrary max, make configurable
         'value': Parameter(str, "Slice attribute value", max = 254),
         }
@@ -57,7 +57,8 @@ class SliceAttributes(dict):
         sql = "SELECT %s FROM view_slice_attributes" % \
               ", ".join(SliceAttribute.fields)
 
-        sql += " WHERE slice_attribute_id IN (%s)" % ", ".join(map(str, slice_attribute_id_list))
+        if slice_attribute_id_list:
+            sql += " WHERE slice_attribute_id IN (%s)" % ", ".join(map(str, slice_attribute_id_list))
 
         rows = self.api.db.selectall(sql)
  

@@ -1,7 +1,7 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Attributes import Attribute, Attributes
+from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
@@ -28,7 +28,7 @@ class AddSliceAttribute(Method):
         PasswordAuth(),
         Mixed(SliceAttribute.fields['slice_id'],
               SliceAttribute.fields['name']),
-        Mixed(SliceAttribute.fields['attribute_id'],
+        Mixed(SliceAttribute.fields['attribute_type_id'],
               SliceAttribute.fields['name']),
         SliceAttribute.fields['value'],
         Mixed(Node.fields['node_id'],
@@ -37,16 +37,16 @@ class AddSliceAttribute(Method):
 
     returns = Parameter(int, 'New slice_attribute_id (> 0) if successful')
 
-    def call(self, auth, slice_id_or_name, attribute_id_or_name, value, node_id_or_hostname = None):
+    def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None):
         slices = Slices(self.api, [slice_id_or_name]).values()
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
 
-        attributes = Attributes(self.api, [attribute_id_or_name]).values()
-        if not attributes:
-            raise PLCInvalidArgument, "No such attribute"
-        attribute = attributes[0]
+        attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name]).values()
+        if not attribute_types:
+            raise PLCInvalidArgument, "No such slice attribute type"
+        attribute_type = attribute_types[0]
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
@@ -56,13 +56,13 @@ class AddSliceAttribute(Method):
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
-            if attribute['min_role_id'] is not None and \
-               min(self.caller['role_ids']) > attribute['min_role_id']:
-                raise PLCPermissionDenied, "Not allowed to set the specified attribute"
+            if attribute_type['min_role_id'] is not None and \
+               min(self.caller['role_ids']) > attribute_type['min_role_id']:
+                raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
 
         slice_attribute = SliceAttribute(self.api)
         slice_attribute['slice_id'] = slice['slice_id']
-        slice_attribute['attribute_id'] = attribute['attribute_id']
+        slice_attribute['attribute_type_id'] = attribute_type['attribute_type_id']
         slice_attribute['value'] = value
 
         # Sliver attribute if node is specified

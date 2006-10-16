@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.2 2006/10/06 18:19:41 mlhuang Exp $
+# $Id: Roles.py,v 1.3 2006/10/10 21:54:59 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -61,7 +61,7 @@ class Role(Row):
                            " WHERE role_id = %d" % \
                            (table, self['role_id']), self)
 
-        self.api.db.do("DELETE FROM attributes WHERE min_role_id = %d" % \
+        self.api.db.do("DELETE FROM slice_attribute_types WHERE min_role_id = %d" % \
                        self['role_id'])
 
         if commit:

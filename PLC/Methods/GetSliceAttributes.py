@@ -2,6 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import PasswordAuth
@@ -23,37 +24,26 @@ class GetSliceAttributes(Method):
 
     accepts = [
         PasswordAuth(),
-        Mixed(Slice.fields['slice_id'],
-              Slice.fields['name']),
         [SliceAttribute.fields['slice_attribute_id']],
         ]
 
     returns = [SliceAttribute.fields]
 
-    def call(self, auth, slice_id_or_name, slice_attribute_id_list = None):
-        slices = Slices(self.api, [slice_id_or_name]).values()
-        if not slices:
-            raise PLCInvalidArgument, "No such slice"
-        slice = slices[0]
-
+    def call(self, auth, slice_attribute_ids = None):
+	# If we are not admin, make sure to only return our own slice
+	# and sliver attributes.
         if 'admin' not in self.caller['roles']:
-            if self.caller['person_id'] in slice['person_ids']:
-                pass
-            elif 'pi' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not a member of the specified slice"
-            elif slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
+            if not slice_attribute_ids:
+                slice_attribute_ids = []
+                slices = Slices(self.api, self.caller['slice_ids']).values()
+                if 'pi' in self.caller['roles']:
+                    sites = Sites(self.api, self.caller['site_ids']).values()
+                    slices += Slices(self.api, sites['slice_ids']).values()
+                for slice in slices:
+                    slice_attribute_ids = set(slice_attribute_ids).union(slice['slice_attribute_ids'])
 
-        if slice_attribute_id_list is None:
-            slice_attribute_id_list = slice['slice_attribute_ids']
-        else:
-            if set(slice_attribute_id_list).intersection(slice['slice_attribute_ids']) != \
-               set(slice_attribute_id_list):
-                raise PLCInvalidArgument, "Invalid slice attribute ID(s)"
+        slice_attributes = SliceAttributes(self.api, slice_attribute_ids).values()
 
-        slice_attributes = SliceAttributes(self.api, slice_attribute_id_list).values()
-	# turn each slice attribute into a real dict
-	slice_attributes = [dict(slice_attribute) \
-			   for slice_attribute in slice_attributes]
+	slice_attributes = [dict(slice_attribute) for slice_attribute in slice_attributes]
 	
         return slice_attributes

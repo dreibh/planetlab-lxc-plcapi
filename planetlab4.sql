@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.10 2006/10/11 20:49:39 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.11 2006/10/13 15:07:24 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -506,8 +506,8 @@ GROUP BY person_id;
 --------------------------------------------------------------------------------
 
 -- Slice attribute types
-CREATE TABLE attributes (
-    attribute_id serial PRIMARY KEY, -- Attribute type identifier
+CREATE TABLE slice_attribute_types (
+    attribute_type_id serial PRIMARY KEY, -- Attribute type identifier
     name text UNIQUE NOT NULL, -- Attribute name
     description text, -- Attribute description
     min_role_id integer REFERENCES roles DEFAULT 10 -- If set, minimum (least powerful) role that can set or change this attribute
@@ -518,7 +518,7 @@ CREATE TABLE slice_attribute (
     slice_attribute_id serial PRIMARY KEY, -- Slice attribute identifier
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes, -- Sliver attribute if set
-    attribute_id integer REFERENCES attributes NOT NULL, -- Attribute type identifier
+    attribute_type_id integer REFERENCES slice_attribute_types NOT NULL, -- Attribute type identifier
     value text
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
@@ -745,13 +745,13 @@ SELECT
 slice_attribute.slice_attribute_id,
 slice_attribute.slice_id,
 slice_attribute.node_id,
-attributes.attribute_id,
-attributes.name,
-attributes.description,
-attributes.min_role_id,
+slice_attribute_types.attribute_type_id,
+slice_attribute_types.name,
+slice_attribute_types.description,
+slice_attribute_types.min_role_id,
 slice_attribute.value
 FROM slice_attribute
-INNER JOIN attributes USING (attribute_id);
+INNER JOIN slice_attribute_types USING (attribute_type_id);
 
 --------------------------------------------------------------------------------
 -- Built-in maintenance account and default site
