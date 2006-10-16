@@ -34,13 +34,4 @@ class AdmGetAllNodeNetworks(GetNodeNetworks):
             raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
 
-	# Get node networks for this node
-        if node['nodenetwork_ids']:
-            nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
-        else:
-            nodenetworks = []
-
-        # Cast from NodeNetwork to real dict
-        nodenetworks = [dict(nodenetwork) for nodenetwork in nodenetworks]
-        	
- 	return nodenetworks
+        return GetNodeNetworks.call(self, auth, node['nodenetwork_ids'])
