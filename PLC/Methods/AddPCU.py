@@ -6,7 +6,7 @@ from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
 can_update = lambda (field, value): field in \
-             ['hostname', 'ip', 'protocol',
+             ['hostname', 'protocol',
               'username', 'password',
               'model', 'notes']
 
@@ -29,12 +29,13 @@ class AddPCU(Method):
         PasswordAuth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
+        PCU.fields['ip'],
         update_fields
         ]
 
     returns = Parameter(int, 'New pcu_id (> 0) if successful')
 
-    def call(self, auth, site_id_or_login_base, pcu_fields = {}):
+    def call(self, auth, site_id_or_login_base, ip, pcu_fields = {}):
         pcu_fields = dict(filter(can_update, pcu_fields.items()))
 
         # Get associated site details
@@ -49,6 +50,7 @@ class AddPCU(Method):
 
         pcu = PCU(self.api, pcu_fields)
         pcu['site_id'] = site['site_id']
+        pcu['ip'] = ip
         pcu.sync()
 
         return pcu['pcu_id']
