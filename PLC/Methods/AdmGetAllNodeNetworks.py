@@ -25,13 +25,13 @@ class AdmGetAllNodeNetworks(GetNodeNetworks):
     returns = [NodeNetwork.fields]
 
     def call(self, auth, node_id_or_hostname):
-        # Authenticated function
-        assert self.caller is not None
-
         # Get node information
         nodes = Nodes(self.api, [node_id_or_hostname]).values()
 	if not nodes:
             raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
+
+        if not node['nodenetwork_ids']:
+            return []
 
         return GetNodeNetworks.call(self, auth, node['nodenetwork_ids'])

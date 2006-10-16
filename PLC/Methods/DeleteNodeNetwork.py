@@ -20,15 +20,13 @@ class DeleteNodeNetwork(Method):
 
     accepts = [
         PasswordAuth(),
-        Mixed(Node.fields['node_id'],
-	      Node.fields['hostname']),
 	Mixed(NodeNetwork.fields['nodenetwork_id'],
 	      NodeNetwork.fields['hostname'])
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, node_id_or_hostname, nodenetwork_id_or_hostname):
+    def call(self, auth, nodenetwork_id_or_hostname):
         # Get node network information
         nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_hostname]).values()
         if not nodenetworks:
@@ -36,15 +34,10 @@ class DeleteNodeNetwork(Method):
 	nodenetwork = nodenetworks[0]
 	
 	# Get node information
-	nodes = Nodes(self.api, [node_id_or_hostname]).values()
+	nodes = Nodes(self.api, [nodenetwork['node_id']]).values()
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
-
-	# Check if node network is associated with specified node
-	if node['node_id'] != nodenetwork['node_id'] or \
-           nodenetwork['nodenetwork_id'] not in node['nodenetwork_ids']:
-            raise PLCInvalidArgument, "Node network not associated with node"
 
         # Authenticated functino
 	assert self.caller is not None
