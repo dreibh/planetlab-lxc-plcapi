@@ -4,3 +4,5 @@ class AdmUpdateNodeGroup(UpdateNodeGroup):
     """
     Deprecated. See UpdateNodeGroup.
     """
+
+    status = "deprecated"
