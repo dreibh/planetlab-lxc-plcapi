@@ -5,8 +5,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['is_public', 'latitude', 'longitude', 'url',
-              'organization_id', 'ext_consortium_id']
+             ['is_public', 'latitude', 'longitude', 'url']
 
 class AddSite(Method):
     """
