@@ -6,6 +6,8 @@ from PLC.Auth import PasswordAuth
 
 class AdmGetSiteNodes(Method):
     """
+    Deprecated. See GetSites.
+
     Return a dictionary containing a list of node_ids for each of the
     sites specified.
 
@@ -14,6 +16,8 @@ class AdmGetSiteNodes(Method):
     techs may only retrieve details about themselves. PIs may retrieve
     details about themselves and others at their sites.
     """
+
+    status = "deprecated"
 
     roles = ['admin', 'pi', 'user', 'tech']
 

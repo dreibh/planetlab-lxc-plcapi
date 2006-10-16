@@ -6,8 +6,12 @@ from PLC.NodeGroups import NodeGroup, NodeGroups
 
 class AdmGetNodeGroupNodes(Method):
     """
+    Deprecated. See GetNodeGroups.
+
     Returns a list of node_ids for the node group specified.
     """
+
+    status = "deprecated"
 
     roles = ['admin', 'pi', 'user', 'tech']
 

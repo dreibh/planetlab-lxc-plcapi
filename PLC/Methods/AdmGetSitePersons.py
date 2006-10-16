@@ -6,11 +6,15 @@ from PLC.Auth import PasswordAuth
 
 class AdmGetSitePersons(Method):
     """
+    Deprecated. See GetSites.
+
     Return a list of person_ids for the site specified.
 
     PIs may only retrieve the person_ids of accounts at their
     site. Admins may retrieve the person_ids of accounts at any site.
     """
+
+    status = "deprecated"
 
     roles = ['admin', 'pi']
 

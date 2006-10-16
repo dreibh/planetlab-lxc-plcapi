@@ -1,16 +1,8 @@
-from PLC.Method import Method
-from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Methods.AuthCheck import AuthCheck
 
-class AdmAuthCheck(Method):
+class AdmAuthCheck(AuthCheck):
     """
-    Returns 1 if the user authenticated successfully, faults
-    otherwise.
+    Deprecated. See AuthCheck.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
-    accepts = [PasswordAuth()]
-    returns = Parameter(int, '1 if successful')
-
-    def call(self, auth):
-        return 1
+    status = "deprecated"
