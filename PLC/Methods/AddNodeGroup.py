@@ -4,27 +4,33 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field in \
+             ['description']
+
 class AddNodeGroup(Method):
     """
-    Adds a new node group. Any values specified in optional_vals are used,
-    otherwise defaults are used.
+    Adds a new node group. Any values specified in nodegroup_fields
+    are used, otherwise defaults are used.
 
     Returns the new nodegroup_id (> 0) if successful, faults otherwise.
     """
 
     roles = ['admin']
 
+    update_fields = dict(filter(can_update, NodeGroup.fields.items()))
+
     accepts = [
         PasswordAuth(),
         NodeGroup.fields['name'],
-        NodeGroup.fields['description']
+        update_fields
         ]
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
 
-    def call(self, auth, name, description):
-	# Create node group
-        nodegroup = NodeGroup(self.api, {'name': name, 'description': description})
+    def call(self, auth, name, nodegroup_fields = {}):
+        nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
+        nodegroup = NodeGroup(self.api, nodegroup_fields)
+        nodegroup['name'] = name
         nodegroup.sync()
 
         return nodegroup['nodegroup_id']
