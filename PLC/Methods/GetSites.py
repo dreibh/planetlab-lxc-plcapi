@@ -40,6 +40,6 @@ class GetSites(Method):
         sites = Sites(self.api, site_id_or_login_base_list)
 
         # turn each site into a real dict.
-        sites = [dict(site.items()) for site in sites.values()]
+        sites = [dict(site) for site in sites.values()]
 	
         return sites

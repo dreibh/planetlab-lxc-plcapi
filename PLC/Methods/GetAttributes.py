@@ -25,6 +25,6 @@ class GetAttributes(Method):
         attributes = Attributes(self.api, attribute_id_or_name_list).values()
 	
 	# Turn each attribute into a real dict.
-	attributes = [dict(attribute.items()) for attribute in attributes]
+	attributes = [dict(attribute) for attribute in attributes]
 
         return attributes

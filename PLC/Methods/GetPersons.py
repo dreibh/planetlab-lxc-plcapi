@@ -62,6 +62,6 @@ class GetPersons(Method):
         persons = filter(self.caller.can_view, persons.values())
 
         # Turn each person into a real dict.
-        persons = [dict(person.items()) for person in persons]
+        persons = [dict(person) for person in persons]
                     
         return persons

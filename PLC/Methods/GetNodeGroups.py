@@ -26,6 +26,6 @@ class GetNodeGroups(Method):
 	nodegroups = NodeGroups(self.api, nodegroup_id_or_name_list).values()
 
 	# Turn each nodegroup into a real dict.
-        nodegroups = [dict(nodegroup.items()) for nodegroup in nodegroups]
+        nodegroups = [dict(nodegroup) for nodegroup in nodegroups]
 
         return nodegroups

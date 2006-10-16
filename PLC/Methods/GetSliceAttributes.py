@@ -53,7 +53,7 @@ class GetSliceAttributes(Method):
 
         slice_attributes = SliceAttributes(self.api, slice_attribute_id_list).values()
 	# turn each slice attribute into a real dict
-	slice_attributes = [dict(slice_attribute.items()) \
+	slice_attributes = [dict(slice_attribute) \
 			   for slice_attribute in slice_attributes]
 	
         return slice_attributes

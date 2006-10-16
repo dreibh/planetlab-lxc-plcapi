@@ -47,6 +47,6 @@ class GetNodes(Method):
         nodes = Nodes(self.api, node_id_or_hostname_list).values()
 
         # turn each node into a real dict.
-        nodes = [dict(node.items()) for node in nodes]
+        nodes = [dict(node) for node in nodes]
                     
         return nodes

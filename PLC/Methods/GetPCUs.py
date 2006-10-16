@@ -34,6 +34,6 @@ class GetPCUs(Method):
         pcus = PCUs(self.api, pcu_ids).values()
 
 	# turn each pcu into a real dict
-	pcus = [dict(pcu.items()) for pcu in pcus]
+	pcus = [dict(pcu) for pcu in pcus]
 
 	return pcus

@@ -34,6 +34,6 @@ class GetKeys(Method):
 	keys = Keys(self.api, key_id_list).values()
 	
 	# Turn each key into a real dict
-	keys = [dict(key.items()) for key in keys]
+	keys = [dict(key) for key in keys]
 		
         return keys

@@ -22,6 +22,6 @@ class GetRoles(Method):
 	roles = Roles(self.api).values()
 
 	#turn each role into a real dict
-	roles = [dict(role.items()) for role in roles]
+	roles = [dict(role) for role in roles]
 
 	return roles
