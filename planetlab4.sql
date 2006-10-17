@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.11 2006/10/13 15:07:24 tmack Exp $
+-- $Id: planetlab4.sql,v 1.12 2006/10/16 21:57:17 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -534,6 +534,7 @@ GROUP BY slice_id;
 -- Events
 --------------------------------------------------------------------------------
 
+-- event types
 CREATE TABLE event_types (
 	event_type text PRIMARY KEY -- Event type
 
@@ -545,7 +546,7 @@ INSERT INTO event_types (event_type) VALUES ('Update');
 INSERT INTO event_types (event_type) VALUES ('Delete');
 INSERT INTO event_types (event_type) VALUES ('Unknown');
 
-
+-- object types
 CREATE TABLE object_types (
 	object_type text PRIMARY KEY -- Object type 
 
@@ -561,7 +562,7 @@ INSERT INTO object_types (object_type) VALUES ('Key');
 INSERT INTO object_types (object_type) VALUES ('Nodegroup');
 INSERT INTO object_types (object_type) VALUES ('Unknown');
 
-
+-- fault types
 CREATE TABLE fault_types (
 	fault_code integer PRIMARY KEY, -- Fault identifier
 	fault_type text UNIQUE NOT NULL -- Fault type
@@ -579,6 +580,7 @@ INSERT INTO fault_types (fault_code, fault_type) VALUES (108, 'PLCPermissionDeni
 INSERT INTO fault_types (fault_code, fault_type) VALUES (111, 'PLCAPIError');
 
 
+-- events
 CREATE TABLE events (
 	event_id serial PRIMARY KEY,  -- Event identifier
 	person_id integer REFERENCES persons NOT NULL, -- person responsible for event
@@ -594,6 +596,14 @@ CREATE TABLE events (
 	time timestamp without time zone  NOT NULL DEFAULT CURRENT_TIMESTAMP
    
 ) WITH OIDS;
+
+-- event objects
+CREATE TABLE event_objects (
+        event_id integer REFERENCES events NOT NULL, -- Event identifier
+        object_id integer NOT NULL -- Object identifier
+
+) WITH OIDS;
+
 --------------------------------------------------------------------------------
 -- Useful views
 --------------------------------------------------------------------------------
