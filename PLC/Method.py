@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.4 2006/10/13 21:42:25 tmack Exp $
+# $Id: Method.py,v 1.5 2006/10/16 20:41:02 tmack Exp $
 #
 
 import xmlrpclib
@@ -101,10 +101,12 @@ class Method:
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
     
+	    result = self.call(*args)
+
 	    if self.api.config.PLC_API_DEBUG:
 		self.log(0, *args)
 	    	
-	    return self.call(*args)
+	    return result
 
         except PLCFault, fault:
             # Prepend method name to expected faults
@@ -139,22 +141,24 @@ class Method:
         if call_name in ['system.listMethods', 'system.methodHelp', 'system.multicall', 'system.methodSignature']:
         	return False
 
-	sql_event = "INSERT INTO events " \
-              " (person_id, event_type, object_type, fault_code, call) VALUES" \
-              " (%(person_id)d, '%(event_type)s', '%(object_type)s', %(fault_code)d, '%(call)s')" %  \
-              (locals())
-
+	# get next event_id
 	# XX get real event id
-	event_id = 1	
+	     
+	rows = self.api.db.selectall("SELECT nextval('events_event_id_seq')", hashref = False)
+	event_id =  rows[0][0]
+	
+	sql_event = "INSERT INTO events " \
+              " (event_id, person_id, event_type, object_type, fault_code, call) VALUES" \
+              " (%(event_id)d, %(person_id)d, '%(event_type)s', '%(object_type)s', %(fault_code)d, '%(call)s')" %  \
+              (locals())
+	self.api.db.do(sql_event)
+			
 	# log objects affected
-	# XX this probably wont work (we only know objects affected after call is made. Find another way
-	if object_ids:
-		affected_id_list = zip([event_id for object in object_ids], object_ids)
-		affected_ids = ", ".join(map(str,affected_id_list))
+	for object_id in object_ids:
 		sql_objects = "INSERT INTO event_objects (event_id, object_id) VALUES" \
-			" %s " % affected_ids
- 
-        self.api.db.do(sql_event)
+                        " (%(event_id)d, %(object_id)d) "  % (locals()) 
+		self.api.db.do(sql_objects)
+		 	
         self.api.db.commit()		
 	
 
