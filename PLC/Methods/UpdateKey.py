@@ -41,7 +41,6 @@ class UpdateKey(Method):
         if 'admin' not in self.caller['roles']:
             if key['key_id'] not in self.caller['key_ids']:
                 raise PLCPermissionDenied, "Key must be associated with one of your accounts"
-            assert key['person_id'] == self.caller['person_id']
 
         key.update(key_fields)
         key.sync()
