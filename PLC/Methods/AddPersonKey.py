@@ -5,7 +5,7 @@ from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
 
-class AddKey(Method):
+class AddPersonKey(Method):
     """
     Adds a new key to the specified account.
 
