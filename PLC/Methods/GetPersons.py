@@ -8,13 +8,11 @@ from PLC.Auth import PasswordAuth
 
 class GetPersons(Method):
     """
-    Return an array of dictionaries containing details about the
-    specified accounts.
+    Return an array of structs containing details about accounts.
 
-    ins may retrieve details about all accounts by not specifying
-    person_id_or_email_list or by specifying an empty list. Users and
-    techs may only retrieve details about themselves. PIs may retrieve
-    details about themselves and others at their sites.
+    Users and techs may only retrieve details about themselves. PIs
+    may retrieve details about themselves and others at their
+    sites. Admins may retrieve details about all accounts.
 
     If return_fields is specified, only the specified fields will be
     returned, if set. Otherwise, the default set of fields returned is:
