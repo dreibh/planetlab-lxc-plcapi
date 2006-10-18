@@ -1,21 +1,11 @@
-from PLC.Faults import *
-from PLC.Method import Method
-from PLC.Parameter import Parameter, Mixed
-from PLC.Persons import Person, Persons
-from PLC.Auth import PasswordAuth
+from PLC.Methods.UpdatePerson import UpdatePerson
 
-class AdmSetPersonEnabled(Method):
+class AdmSetPersonEnabled(UpdatePerson):
     """
-    Enables or disables a person.
-
-    Users and techs can only update themselves. PIs can only update
-    themselves and other non-PIs at their sites. Admins can update
-    anyone.
-
-    Returns 1 if successful, faults otherwise.
+    Deprecated. See UpdatePerson.
     """
 
-    roles = ['admin', 'pi']
+    status = "deprecated"
 
     accepts = [
         PasswordAuth(),
@@ -24,24 +14,5 @@ class AdmSetPersonEnabled(Method):
         Person.fields['enabled']
         ]
 
-    returns = Parameter(int, '1 if successful')
-
     def call(self, auth, person_id_or_email, enabled):
-        # Get account information
-        persons = Persons(self.api, [person_id_or_email])
-        if not persons:
-            raise PLCInvalidArgument, "No such account"
-
-        person = persons.values()[0]
-
-        # Authenticated function
-        assert self.caller is not None
-
-        # Check if we can update this account
-        if not self.caller.can_update(person):
-            raise PLCPermissionDenied, "Not allowed to enable specified account"
-
-        person['enabled'] = enabled
-        person.sync()
-
-        return 1
+        return UpdatePerson.call(self, auth, person_id_or_email, {'enabled': enabled})

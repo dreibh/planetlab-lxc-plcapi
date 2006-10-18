@@ -1,5 +1,3 @@
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -9,11 +7,15 @@ from PLC.Roles import Role, Roles
 
 class AdmIsPersonInRole(Method):
     """
+    Deprecated. Functionality can be implemented with GetPersons.
+
     Returns 1 if the specified account has the specified role, 0
     otherwise. This function differs from AdmGetPersonRoles() in that
     any authorized user can call it. It is currently restricted to
     verifying PI roles.
     """
+
+    status = "deprecated"
 
     roles = ['admin', 'pi', 'user', 'tech']
 
@@ -26,8 +28,6 @@ class AdmIsPersonInRole(Method):
         ]
 
     returns = Parameter(int, "1 if account has role, 0 otherwise")
-
-    status = "useless"
 
     def call(self, auth, person_id_or_email, role_id_or_name):
         # This is a totally fucked up function. I have no idea why it

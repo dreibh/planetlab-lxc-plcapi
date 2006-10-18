@@ -6,6 +6,8 @@ from PLC.Auth import PasswordAuth
 
 class AdmGetPersonRoles(Method):
     """
+    Deprecated. See GetPersons.
+
     Return the roles that the specified person has as a struct:
 
     {'10': 'admin', '30': 'user', '20': 'pi', '40': 'tech'}
@@ -19,6 +21,8 @@ class AdmGetPersonRoles(Method):
     identifiers.
     """
 
+    status = "deprecated"
+
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
@@ -28,10 +32,6 @@ class AdmGetPersonRoles(Method):
         ]
 
     returns = dict
-
-    # Stupid return type, and can get now roles through
-    # AdmGetPersons().
-    status = "useless"
 
     def call(self, auth, person_id_or_email):
         # Get account information

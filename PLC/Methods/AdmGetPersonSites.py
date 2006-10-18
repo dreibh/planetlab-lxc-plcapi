@@ -7,6 +7,8 @@ from PLC.Auth import PasswordAuth
 
 class AdmGetPersonSites(Method):
     """
+    Deprecated. See GetPersons.
+
     Returns the sites that the specified person is associated with as
     an array of site identifiers.
 
@@ -15,15 +17,13 @@ class AdmGetPersonSites(Method):
     themselves and others at their sites.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
-
     accepts = [
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email'])
         ]
 
-    returns = [Site.fields['site_id']]
+    returns = Person.fields['site_ids']
 
     def call(self, auth, person_id_or_email):
         # Get account information

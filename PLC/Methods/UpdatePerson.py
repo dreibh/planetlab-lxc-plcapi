@@ -41,11 +41,6 @@ class UpdatePerson(Method):
     def call(self, auth, person_id_or_email, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
 
-	# Remove admin only fields
-	if 'admin' not in self.caller['roles']:
-            for key in ['enabled']:
-                del person_fields[key]
-
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
