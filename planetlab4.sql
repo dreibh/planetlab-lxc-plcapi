@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.12 2006/10/16 21:57:17 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.13 2006/10/17 15:27:38 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -562,23 +562,6 @@ INSERT INTO object_types (object_type) VALUES ('Key');
 INSERT INTO object_types (object_type) VALUES ('Nodegroup');
 INSERT INTO object_types (object_type) VALUES ('Unknown');
 
--- fault types
-CREATE TABLE fault_types (
-	fault_code integer PRIMARY KEY, -- Fault identifier
-	fault_type text UNIQUE NOT NULL -- Fault type
-
-) WITH OIDS;
-
-INSERT INTO fault_types (fault_code, fault_type) VALUES (0, 'Success');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (100, 'PLCInvalidAPIMethod');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (101, 'PLCInvalidArgumentCount');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (102, 'PLCInvalidArgument');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (103, 'PLCAuthenticationFailure');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (109, 'PLCNotImplemented');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (106, 'PLCDBError');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (108, 'PLCPermissionDenied');
-INSERT INTO fault_types (fault_code, fault_type) VALUES (111, 'PLCAPIError');
-
 
 -- events
 CREATE TABLE events (
@@ -586,11 +569,9 @@ CREATE TABLE events (
 	person_id integer REFERENCES persons NOT NULL, -- person responsible for event
 	event_type text REFERENCES  event_types NOT NULL DEFAULT 'Unknown', -- Event type 
 	object_type text REFERENCES object_types NOT NULL DEFAULT 'Unknown', -- Object type associated with event
-	fault_code integer REFERENCES fault_types NOT NULL DEFAULT 0, -- did this event result in error
-        call text NOT NULL, -- Call name
-	
-	-- Optional
-	runtime float,  -- Event run time
+	fault_code integer NOT NULL DEFAULT 0, -- did this event result in error
+        call text NOT NULL, -- call responsible for this event
+	runtime float, -- Event run time
 
 	-- Timestamps
 	time timestamp without time zone  NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -598,16 +579,39 @@ CREATE TABLE events (
 ) WITH OIDS;
 
 -- event objects
-CREATE TABLE event_objects (
+CREATE TABLE event_object (
         event_id integer REFERENCES events NOT NULL, -- Event identifier
         object_id integer NOT NULL -- Object identifier
 
 ) WITH OIDS;
 
+CREATE INDEX event_object_event_id_idx ON event_object (event_id);
+CREATE INDEX event_object_object_id_idx ON event_object (object_id);
+
+CREATE VIEW event_objects AS
+SELECT event_id,
+array_to_string(array_accum(object_id), ',') AS object_ids
+FROM event_object
+GROUP BY event_id;
 --------------------------------------------------------------------------------
 -- Useful views
 --------------------------------------------------------------------------------
 
+--view_events
+CREATE VIEW view_events AS
+SELECT
+events.event_id,
+events.person_id,
+event_objects.object_ids,
+events.event_type,
+events.object_type,
+events.fault_code,
+events.call,
+events.time
+From events
+LEFT JOIN event_objects USING (event_id);
+
+-- view_persons
 CREATE VIEW view_persons AS
 SELECT
 persons.person_id,
