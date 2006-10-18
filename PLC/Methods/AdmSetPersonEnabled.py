@@ -1,3 +1,8 @@
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.Persons import Person, Persons
+from PLC.Auth import PasswordAuth
 from PLC.Methods.UpdatePerson import UpdatePerson
 
 class AdmSetPersonEnabled(UpdatePerson):
