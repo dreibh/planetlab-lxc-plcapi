@@ -4,6 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
+from PLC.Methods.AddPersonKey import AddPersonKey
 
 class AdmAddPersonKey(AddPersonKey):
     """
