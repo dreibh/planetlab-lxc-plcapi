@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.13 2006/10/17 15:27:38 tmack Exp $
+-- $Id: planetlab4.sql,v 1.14 2006/10/18 19:41:11 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -121,7 +121,8 @@ CREATE TABLE address_types (
     address_type_id serial PRIMARY KEY, -- Address type identifier
     name text UNIQUE NOT NULL, -- Address type
     description text -- Address type description
-);
+) WITH OIDS;
+
 INSERT INTO address_types (name) VALUES ('Personal');
 INSERT INTO address_types (name) VALUES ('Shipping');
 -- XXX Used to be Site
@@ -557,8 +558,10 @@ INSERT INTO object_types (object_type) VALUES ('Site');
 INSERT INTO object_types (object_type) VALUES ('Node');
 INSERT INTO object_types (object_type) VALUES ('Slice');
 INSERT INTO object_types (object_type) VALUES ('Address');
+INSERT INTO object_types (object_type) VALUES ('AddressType');
 INSERT INTO object_types (object_type) VALUES ('Attribute');
 INSERT INTO object_types (object_type) VALUES ('Key');
+INSERT INTO object_types (object_type) VALUES ('KeyType');
 INSERT INTO object_types (object_type) VALUES ('Nodegroup');
 INSERT INTO object_types (object_type) VALUES ('Unknown');
 
