@@ -33,14 +33,20 @@ class GetSliceAttributes(Method):
 	# If we are not admin, make sure to only return our own slice
 	# and sliver attributes.
         if 'admin' not in self.caller['roles']:
+            # Get list of slices that we are able to view
+            slices = Slices(self.api, self.caller['slice_ids']).values()
+            if 'pi' in self.caller['roles']:
+                sites = Sites(self.api, self.caller['site_ids']).values()
+                slices += Slices(self.api, sites['slice_ids']).values()
+
+            valid_slice_attribute_ids = set()
+            for slice in slices:
+                valid_slice_attribute_ids = valid_slice_attribute_ids.union(slice['slice_attribute_ids'])
+
             if not slice_attribute_ids:
-                slice_attribute_ids = []
-                slices = Slices(self.api, self.caller['slice_ids']).values()
-                if 'pi' in self.caller['roles']:
-                    sites = Sites(self.api, self.caller['site_ids']).values()
-                    slices += Slices(self.api, sites['slice_ids']).values()
-                for slice in slices:
-                    slice_attribute_ids = set(slice_attribute_ids).union(slice['slice_attribute_ids'])
+                slice_attribute_ids = valid_slice_attribute_ids
+            else:
+                slice_attribute_ids = valid_slice_attribute_ids.intersection(slice_attribute_ids)
 
         slice_attributes = SliceAttributes(self.api, slice_attribute_ids).values()
 
