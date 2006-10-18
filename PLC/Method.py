@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.5 2006/10/16 20:41:02 tmack Exp $
+# $Id: Method.py,v 1.6 2006/10/17 15:28:39 tmack Exp $
 #
 
 import xmlrpclib
@@ -67,7 +67,7 @@ class Method:
         self.source = None
 
     	
-    def __call__(self, *args):
+    def __call__(self, *args, **kwds):
         """
         Main entry point for all PLCAPI functions. Type checks
         arguments, authenticates, and executes call().
@@ -100,22 +100,25 @@ class Method:
                             break
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
-    
-	    result = self.call(*args)
+
+   	    start = time.time() 
+	    result = self.call(*args, **kwds)
+	    runtime = time.time() - start
 
 	    if self.api.config.PLC_API_DEBUG:
-		self.log(0, *args)
+		self.log(0, runtime, *args)
 	    	
 	    return result
 
         except PLCFault, fault:
             # Prepend method name to expected faults
             fault.faultString = self.name + ": " + fault.faultString
-	    self.log(fault.faultCode, *args)
+	    runtime = time.time() - start
+	    self.log(fault.faultCode, runtime, *args)
             raise fault
 
 
-    def log(self, fault_code, *args):
+    def log(self, fault_code, runtime, *args):
         """
         Log the transaction 
         """	
@@ -137,25 +140,27 @@ class Method:
 	if hasattr(self, 'object_ids'):
 		object_ids = self.object_ids 
 
-	# make sure this is an api call
-        if call_name in ['system.listMethods', 'system.methodHelp', 'system.multicall', 'system.methodSignature']:
+	# do not log system calls
+        if call_name.startswith('system'):
         	return False
+	# do not log get calls
+	if call_name.startswith('Get'):
+		return False
 
 	# get next event_id
-	# XX get real event id
-	     
 	rows = self.api.db.selectall("SELECT nextval('events_event_id_seq')", hashref = False)
 	event_id =  rows[0][0]
 	
 	sql_event = "INSERT INTO events " \
-              " (event_id, person_id, event_type, object_type, fault_code, call) VALUES" \
-              " (%(event_id)d, %(person_id)d, '%(event_type)s', '%(object_type)s', %(fault_code)d, '%(call)s')" %  \
+              " (event_id, person_id, event_type, object_type, fault_code, call, runtime) VALUES" \
+              " (%(event_id)d, %(person_id)d, '%(event_type)s', '%(object_type)s'," \
+	      "  %(fault_code)d, '%(call)s', %(runtime)f)" %  \
               (locals())
 	self.api.db.do(sql_event)
 			
 	# log objects affected
 	for object_id in object_ids:
-		sql_objects = "INSERT INTO event_objects (event_id, object_id) VALUES" \
+		sql_objects = "INSERT INTO event_object (event_id, object_id) VALUES" \
                         " (%(event_id)d, %(object_id)d) "  % (locals()) 
 		self.api.db.do(sql_objects)
 		 	

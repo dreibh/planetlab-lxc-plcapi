@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.4 2006/09/08 15:37:01 mlhuang Exp $
+# $Id: Shell.py,v 1.5 2006/10/03 19:34:05 mlhuang Exp $
 #
 
 import os, sys
@@ -155,9 +155,10 @@ class Callable:
             # Figure out if the function requires an authentication
             # structure as its first argument.
             self.auth = False
-
-            try:
-                func = api.callable(method)
+	    func = api.callable(method)
+            
+	    try:
+                #func = api.callable(method)
                 if func.accepts and \
                    (isinstance(func.accepts[0], Auth) or \
                     (isinstance(func.accepts[0], Mixed) and \
@@ -172,7 +173,7 @@ class Callable:
             else:
                 self.func = func
 
-    def __call__(self, *args):
+    def __call__(self, *args, **kwds):
         """
         Automagically add the authentication structure if the function
         requires it and it has not been specified.
@@ -180,7 +181,7 @@ class Callable:
 
         if self.auth and \
            (not args or not isinstance(args[0], dict) or not args[0].has_key('AuthMethod')):
-            return self.func(auth, *args)
+            return self.func(auth, *args, **kwds)
         else:
             return self.func(*args)
 
