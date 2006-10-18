@@ -32,7 +32,6 @@ class DeleteKey(Method):
         if 'admin' not in self.caller['roles']:
             if key['key_id'] not in self.caller['key_ids']:
                 raise PLCPermissionDenied, "Key must be associated with your account"
-            assert key['person_id'] == self.caller['person_id']
 
         key.delete()
 
