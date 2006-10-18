@@ -22,16 +22,15 @@ class GetKeys(Method):
 
     returns = [Key.fields]
 
-    def call(self, auth, key_id_list = None):
+    def call(self, auth, key_ids = None):
 	# If we are not admin, make sure to only return our own keys       
         if 'admin' not in self.caller['roles']:
-            if not key_id_list:
-                key_id_list = self.caller['key_ids']
+            if not key_ids:
+                key_ids = self.caller['key_ids']
             else:
-                valid_keys = lambda x: x in self.caller['key_ids']
-                key_id_list = filter(valid_keys, key_id_list)
+                key_ids = set(self.caller['key_ids']).intersection(key_ids)
 		
-	keys = Keys(self.api, key_id_list).values()
+	keys = Keys(self.api, key_ids).values()
 	
 	# Turn each key into a real dict
 	keys = [dict(key) for key in keys]
