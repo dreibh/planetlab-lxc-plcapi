@@ -25,15 +25,20 @@ class GetPCUs(Method):
     def call(self, auth, pcu_ids = None):
 	# If we are not admin, make sure to only return our own PCUs
         if 'admin' not in self.caller['roles']:
+            # Get list of PCUs that we are able to view
+            sites = Sites(self.api, self.caller['site_ids']).values()
+
+            valid_pcu_ids = set()
+            for site in sites:
+                valid_pcu_ids = valid_pcu_ids.union(site['pcu_ids'])
+
             if not pcu_ids:
-                pcu_ids = []
-                sites = Sites(self.api, self.caller['site_ids']).values()
-                for site in sites:
-                    pcu_ids = set(pcu_ids).union(site['pcu_ids'])
+                pcu_ids = valid_pcu_ids
+            else:
+                pcu_ids = valid_pcu_ids.intersection(pcu_ids)
 
         pcus = PCUs(self.api, pcu_ids).values()
 
-	# turn each pcu into a real dict
 	pcus = [dict(pcu) for pcu in pcus]
 
 	return pcus
