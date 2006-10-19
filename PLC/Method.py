@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.7 2006/10/18 19:42:46 tmack Exp $
+# $Id: Method.py,v 1.9 2006/10/19 17:02:42 tmack Exp $
 #
 
 import xmlrpclib
@@ -125,7 +125,7 @@ class Method:
 	# Gather necessary logging variables
 	event_type = 'Unknown'
 	object_type = 'Unknown'
-	person_id = 'Null'
+	person_id = None
 	object_ids = []
 	call_name = self.name
 	call_args = ", ".join([unicode(arg) for arg in list(args)[1:]])
@@ -149,9 +149,9 @@ class Method:
 	
 	sql_event = "INSERT INTO events " \
               " (person_id, event_type, object_type, fault_code, call, runtime) VALUES" \
-              " (%(person_id)s, '%(event_type)s', '%(object_type)s'," \
-	      "  %(fault_code)d, '%(call)s', %(runtime)f)" 
-	self.api.db.do(sql_event % locals())	
+              " (%(person_id)s, %(event_type)s, %(object_type)s," \
+	      "  %(fault_code)d, %(call)s, %(runtime)f)" 
+	self.api.db.do(sql_event, locals())	
 
 	# log objects affected
 	for object_id in object_ids:
