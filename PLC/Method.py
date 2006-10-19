@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.9 2006/10/19 17:02:42 tmack Exp $
+# $Id: Method.py,v 1.10 2006/10/19 19:32:48 tmack Exp $
 #
 
 import xmlrpclib
@@ -154,11 +154,11 @@ class Method:
 	self.api.db.do(sql_event, locals())	
 
 	# log objects affected
+	event_id =  self.api.db.last_insert_id('events', 'event_id')
 	for object_id in object_ids:
-		event_id =  self.api.db.last_insert_id('events', 'event_id')
 		sql_objects = "INSERT INTO event_object (event_id, object_id) VALUES" \
-                        " (%(event_id)d, %(object_id)d) "  % (locals()) 
-		self.api.db.do(sql_objects)
+                        " (%(event_id)d, %(object_id)d) " 
+		self.api.db.do(sql_objects, locals())
 		 	
         self.api.db.commit()		
 	
