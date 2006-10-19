@@ -153,7 +153,6 @@ class Method:
 	      "  %(fault_code)d, '%(call)s', %(runtime)f)" 
 	self.api.db.do(sql_event % locals())	
 
-	print self.api.db.last_insert_id('events', 'event_id')	
 	# log objects affected
 	for object_id in object_ids:
 		event_id =  self.api.db.last_insert_id('events', 'event_id')
