@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.14 2006/10/18 19:41:11 tmack Exp $
+-- $Id: planetlab4.sql,v 1.15 2006/10/18 20:54:28 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -569,7 +569,7 @@ INSERT INTO object_types (object_type) VALUES ('Unknown');
 -- events
 CREATE TABLE events (
 	event_id serial PRIMARY KEY,  -- Event identifier
-	person_id integer REFERENCES persons NOT NULL, -- person responsible for event
+	person_id integer REFERENCES persons, -- person responsible for event
 	event_type text REFERENCES  event_types NOT NULL DEFAULT 'Unknown', -- Event type 
 	object_type text REFERENCES object_types NOT NULL DEFAULT 'Unknown', -- Object type associated with event
 	fault_code integer NOT NULL DEFAULT 0, -- did this event result in error
