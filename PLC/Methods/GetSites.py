@@ -11,9 +11,6 @@ class GetSites(Method):
     site_id_list is specified, only the specified sites will be
     queried.
 
-    If return_fields is specified, only the specified fields will be
-    returned, if set. Otherwise, the default set of fields returned is:
-
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
@@ -28,6 +25,7 @@ class GetSites(Method):
 
     event_type = 'Get'
     object_type = 'Site'
+    object_ids = []
 	
     def __init__(self, *args, **kwds):
         Method.__init__(self, *args, **kwds)
@@ -38,6 +36,9 @@ class GetSites(Method):
         
         # Get site information
         sites = Sites(self.api, site_id_or_login_base_list)
+	
+	# get id of objects affected by this call
+	self.object_ids = sites.keys()
 
         # turn each site into a real dict.
         sites = [dict(site) for site in sites.values()]
