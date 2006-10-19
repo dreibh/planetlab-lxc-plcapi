@@ -542,6 +542,7 @@ CREATE TABLE event_types (
 ) WITH OIDS;
 
 INSERT INTO event_types (event_type) VALUES ('Add');
+INSERT INTO event_types (event_type) VALUES ('AddTo');
 INSERT INTO event_types (event_type) VALUES ('Get');
 INSERT INTO event_types (event_type) VALUES ('Update');
 INSERT INTO event_types (event_type) VALUES ('Delete');
@@ -553,23 +554,30 @@ CREATE TABLE object_types (
 
 ) WITH OIDS;
 
-INSERT INTO object_types (object_type) VALUES ('Person');
-INSERT INTO object_types (object_type) VALUES ('Site');
-INSERT INTO object_types (object_type) VALUES ('Node');
-INSERT INTO object_types (object_type) VALUES ('Slice');
-INSERT INTO object_types (object_type) VALUES ('Address');
 INSERT INTO object_types (object_type) VALUES ('AddressType');
-INSERT INTO object_types (object_type) VALUES ('Attribute');
-INSERT INTO object_types (object_type) VALUES ('Key');
+INSERT INTO object_types (object_type) VALUES ('Address');
+INSERT INTO object_types (object_type) VALUES ('BootState');
 INSERT INTO object_types (object_type) VALUES ('KeyType');
-INSERT INTO object_types (object_type) VALUES ('Nodegroup');
+INSERT INTO object_types (object_type) VALUES ('Key');
+INSERT INTO object_types (object_type) VALUES ('NetworkMethod');
+INSERT INTO object_types (object_type) VALUES ('NetworkType');
+INSERT INTO object_types (object_type) VALUES ('Network');
+INSERT INTO object_types (object_type) VALUES ('NodeGroup');
+INSERT INTO object_types (object_type) VALUES ('NodeNetwork');
+INSERT INTO object_types (object_type) VALUES ('Node');
+INSERT INTO object_types (object_type) VALUES ('PCU');
+INSERT INTO object_types (object_type) VALUES ('Person');
+INSERT INTO object_types (object_type) VALUES ('Role');
+INSERT INTO object_types (object_type) VALUES ('Site');
+INSERT INTO object_types (object_type) VALUES ('SliceAttributeType');
+INSERT INTO object_types (object_type) VALUES ('SliceAttribute');
+INSERT INTO object_types (object_type) VALUES ('Slice');
 INSERT INTO object_types (object_type) VALUES ('Unknown');
-
 
 -- events
 CREATE TABLE events (
 	event_id serial PRIMARY KEY,  -- Event identifier
-	person_id integer REFERENCES persons, -- person responsible for event
+	person_id  integer REFERENCES persons, -- person responsible for event
 	event_type text REFERENCES  event_types NOT NULL DEFAULT 'Unknown', -- Event type 
 	object_type text REFERENCES object_types NOT NULL DEFAULT 'Unknown', -- Object type associated with event
 	fault_code integer NOT NULL DEFAULT 0, -- did this event result in error
