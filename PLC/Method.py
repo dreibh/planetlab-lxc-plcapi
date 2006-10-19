@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.6 2006/10/17 15:28:39 tmack Exp $
+# $Id: Method.py,v 1.7 2006/10/18 19:42:46 tmack Exp $
 #
 
 import xmlrpclib
@@ -74,6 +74,7 @@ class Method:
         """
 
         try:
+	    start = time.time()
             (min_args, max_args, defaults) = self.args()
 	        		
 	    # Check that the right number of arguments were passed in
@@ -100,8 +101,7 @@ class Method:
                             break
                 if isinstance(auth, Auth):
                     auth.check(self, *args)
-
-   	    start = time.time() 
+   	   
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
 
@@ -125,10 +125,10 @@ class Method:
 	# Gather necessary logging variables
 	event_type = 'Unknown'
 	object_type = 'Unknown'
-	person_id = 0
+	person_id = 'Null'
 	object_ids = []
 	call_name = self.name
-	call_args = ", ".join([unicode(arg) for arg in list(args)[1:]]).replace('\'', '\\\'')
+	call_args = ", ".join([unicode(arg) for arg in list(args)[1:]])
 	call = "%s(%s)" % (call_name, call_args)
 		
 	if hasattr(self, 'event_type'):
@@ -146,20 +146,17 @@ class Method:
 	# do not log get calls
 	if call_name.startswith('Get'):
 		return False
-
-	# get next event_id
-	rows = self.api.db.selectall("SELECT nextval('events_event_id_seq')", hashref = False)
-	event_id =  rows[0][0]
 	
 	sql_event = "INSERT INTO events " \
-              " (event_id, person_id, event_type, object_type, fault_code, call, runtime) VALUES" \
-              " (%(event_id)d, %(person_id)d, '%(event_type)s', '%(object_type)s'," \
-	      "  %(fault_code)d, '%(call)s', %(runtime)f)" %  \
-              (locals())
-	self.api.db.do(sql_event)
-			
+              " (person_id, event_type, object_type, fault_code, call, runtime) VALUES" \
+              " (%(person_id)s, '%(event_type)s', '%(object_type)s'," \
+	      "  %(fault_code)d, '%(call)s', %(runtime)f)" 
+	self.api.db.do(sql_event % locals())	
+
+	print self.api.db.last_insert_id('events', 'event_id')	
 	# log objects affected
 	for object_id in object_ids:
+		event_id =  self.api.db.last_insert_id('events', 'event_id')
 		sql_objects = "INSERT INTO event_object (event_id, object_id) VALUES" \
                         " (%(event_id)d, %(object_id)d) "  % (locals()) 
 		self.api.db.do(sql_objects)
