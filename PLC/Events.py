@@ -43,7 +43,7 @@ class Events(Table):
 		     object_types = None, object_ids = None, fault_codes = None):
 	
 		self.api = api
-			
+	
 		sql = "SELECT %s from view_events WHERE True" % ", ".join(Event.fields)
 		
 		if event_ids:
@@ -60,9 +60,12 @@ class Events(Table):
 
 		if object_types:
 			sql += " AND object_type in (%s)" % ", ".join(api.db.quote(object_types))
-
+		
+		if fault_codes:
+			sql += " And fault_code in (%s)" % ", ".join(map(str, fault_codes))
+	
 		rows = self.api.db.selectall(sql)
-			
+	
 		for row in rows:
 			self[row['event_id']] = event = Event(api, row)
 			for aggregate in ['object_ids']:
