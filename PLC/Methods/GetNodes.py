@@ -1,5 +1,3 @@
-import os
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -8,13 +6,11 @@ from PLC.Auth import PasswordAuth
 
 class GetNodes(Method):
     """
-    Return an array of dictionaries containing details about the
-    specified nodes.
+    Return an array of structs containing details about nodes. If
+    node_id_or_hostname_list is specified, only the specified nodes
+    will be queried.
 
-    If return_fields is specified, only the specified fields will be
-    returned. Only admins may retrieve certain fields. Otherwise, the
-    default set of fields returned is:
-
+    Some fields may only be viewed by admins.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
@@ -27,11 +23,6 @@ class GetNodes(Method):
 
     returns = [Node.fields]
 
-    def __init__(self, *args, **kwds):
-        Method.__init__(self, *args, **kwds)
-        # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(Node.fields.keys())
-
     def call(self, auth, node_id_or_hostname_list = None):
         # Authenticated function
         assert self.caller is not None
@@ -41,12 +32,13 @@ class GetNodes(Method):
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:
             for key in ['boot_nonce', 'key', 'session', 'root_person_ids']:
-                valid_fields.remove(key)
+                if key in valid_fields:
+                    valid_fields.remove(key)
 
         # Get node information
         nodes = Nodes(self.api, node_id_or_hostname_list).values()
 
-        # turn each node into a real dict.
+        # Turn each node into a real dict
         nodes = [dict(node) for node in nodes]
                     
         return nodes
