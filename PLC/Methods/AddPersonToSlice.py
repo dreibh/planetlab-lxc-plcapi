@@ -40,11 +40,11 @@ class AddPersonToSlice(Method):
 
         slice = slices.values()[0]
 
-        # If we are not admin, make sure the caller is a pi
+        # If we are not admin, make sure the caller is a PI
         # of the site associated with the slice
 	if 'admin' not in self.caller['roles']:
-		if slice['site_id'] not in self.caller['site_ids']:
-			raise PLCPermissionDenied, "Not allowed to add users to this slice"
+            if slice['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to add users to this slice"
 
 	if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)
