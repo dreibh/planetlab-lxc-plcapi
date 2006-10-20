@@ -15,6 +15,8 @@ class AdmGetPowerControlUnitNodes(Method):
     their sites.
     """
 
+    status = "deprecated"
+
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
