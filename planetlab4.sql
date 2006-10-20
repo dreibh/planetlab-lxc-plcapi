@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.17 2006/10/19 21:36:54 tmack Exp $
+-- $Id: planetlab4.sql,v 1.18 2006/10/20 17:56:23 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -620,6 +620,7 @@ CREATE TABLE object_types (
 INSERT INTO object_types (object_type) VALUES ('AddressType');
 INSERT INTO object_types (object_type) VALUES ('Address');
 INSERT INTO object_types (object_type) VALUES ('BootState');
+INSERT INTO object_types (object_type) VALUES ('ConfFile');
 INSERT INTO object_types (object_type) VALUES ('KeyType');
 INSERT INTO object_types (object_type) VALUES ('Key');
 INSERT INTO object_types (object_type) VALUES ('NetworkMethod');
