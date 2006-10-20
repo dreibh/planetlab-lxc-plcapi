@@ -11,13 +11,15 @@ class AdmDeleteNodeNetwork(DeleteNodeNetwork):
     Deprecated. See DeleteNodeNetwork.
     """
 
+    status = "deprecated"
+
     accepts = [
         PasswordAuth(),
         Mixed(Node.fields['node_id'],
 	      Node.fields['hostname']),
 	Mixed(NodeNetwork.fields['nodenetwork_id'],
-	      NodeNetwork.fields['hostname'])
+	      NodeNetwork.fields['ip'])
         ]
 
-    def call(self, auth, node_id_or_hostname, nodenetwork_id_or_hostname):
-        return DeleteNodeNetwork.call(self, auth, nodenetwork_id_or_hostname)
+    def call(self, auth, node_id_or_hostname, nodenetwork_id_or_ip):
+        return DeleteNodeNetwork.call(self, auth, nodenetwork_id_or_ip)
