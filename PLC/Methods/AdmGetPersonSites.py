@@ -17,6 +17,10 @@ class AdmGetPersonSites(Method):
     themselves and others at their sites.
     """
 
+    status = "deprecated"
+
+    roles = ['admin', 'pi', 'user', 'tech']
+
     accepts = [
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
