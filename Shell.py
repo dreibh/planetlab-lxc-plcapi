@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.6 2006/10/18 19:42:46 tmack Exp $
+# $Id: Shell.py,v 1.7 2006/10/19 19:58:50 mlhuang Exp $
 #
 
 import os, sys
@@ -120,10 +120,6 @@ elif method is None:
 if role == "anonymous" or method == "anonymous":
     auth = {'AuthMethod': "anonymous"}
 else:
-    if role is None:
-        print "Error: must specify a role with -r"
-        usage()
-
     if user is None:
         print "Error: must specify a username with -u"
         usage()
@@ -137,8 +133,10 @@ else:
 
     auth = {'AuthMethod': method,
             'Username': user,
-            'AuthString': password,
-            'Role': role}
+            'AuthString': password}
+
+    if role is not None:
+        auth['Role'] = role
 
 class Callable:
     """
@@ -240,9 +238,9 @@ elif auth['AuthMethod'] == "anonymous":
     prompt = "[anonymous]"
     print "Connected anonymously"
 else:
-    prompt = "[%s %s]" % (auth['Username'], auth['Role'])
-    print "%s connected as %s using %s authentication" % \
-          (auth['Username'], auth['Role'], auth['AuthMethod'])
+    prompt = "[%s]" % auth['Username']
+    print "%s connected using %s authentication" % \
+          (auth['Username'], auth['AuthMethod'])
 print 'Type "system.listMethods()" or "help(method)" for more information.'
 
 # Readline and tab completion support
