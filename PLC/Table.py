@@ -16,9 +16,17 @@ class Row(dict):
     # sync() is called.
     primary_key = None
 
+    # Set this to the names of tables that reference this table's
+    # primary key.
+    join_tables = []
+
     # Set this to a dict of the valid fields of this object. Not all
     # fields (e.g., joined fields) may be updated via sync().
     fields = {}
+
+    def __init__(self, api, fields = {}):
+        dict.__init__(self, fields)
+        self.api = api
 
     def validate(self):
         """
@@ -87,15 +95,22 @@ class Row(dict):
 
     def delete(self, commit = True):
         """
-        Delete row from its primary table.
+        Delete row from its primary table, and from any tables that
+        reference it.
         """
 
         assert self.primary_key in self
 
-        sql = "DELETE FROM %s" % self.table_name + \
-              " WHERE %s = %s" % \
-              (self.primary_key,
-               self.api.db.param(self.primary_key, self[self.primary_key]))
+        for table in self.join_tables + [self.table_name]:
+            if isinstance(table, tuple):
+                key = table[1]
+                table = table[0]
+            else:
+                key = self.primary_key
+
+            sql = "DELETE FROM %s WHERE %s = %s" % \
+                  (table, key,
+                   self.api.db.param(self.primary_key, self[self.primary_key]))
 
         self.api.db.do(sql, self)
 
