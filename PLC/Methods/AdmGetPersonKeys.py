@@ -1,3 +1,9 @@
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.Persons import Person, Persons
+from PLC.Keys import Key, Keys
+from PLC.Auth import PasswordAuth
 from PLC.Methods.GetKeys import GetKeys
 
 class AdmGetPersonKeys(GetKeys):
