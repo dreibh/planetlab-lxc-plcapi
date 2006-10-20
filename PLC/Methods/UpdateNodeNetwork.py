@@ -30,17 +30,17 @@ class UpdateNodeNetwork(Method):
     accepts = [
         PasswordAuth(),
 	Mixed(NodeNetwork.fields['nodenetwork_id'],
-	      NodeNetwork.fields['hostname']),
+	      NodeNetwork.fields['ip']),
      	update_fields
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodenetwork_id_or_hostname, nodenetwork_fields):
+    def call(self, auth, nodenetwork_id_or_ip, nodenetwork_fields):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
 	# Get node network information
-	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_hostname]).values()
+	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip]).values()
 	if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 
