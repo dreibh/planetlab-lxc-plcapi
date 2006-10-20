@@ -25,6 +25,10 @@ class AddSliceToNodes(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'AddTo'
+    object_type = 'Node'
+    object_ids = []
+
     def call(self, auth, slice_id_or_name, node_id_or_hostname_list):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
@@ -48,5 +52,7 @@ class AddSliceToNodes(Method):
 	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node)
+		 
+	self.object_ids = [node['node_id'] for node in nodes]
 
         return 1

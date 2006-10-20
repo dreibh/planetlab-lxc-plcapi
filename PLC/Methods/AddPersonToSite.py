@@ -25,6 +25,9 @@ class AddPersonToSite(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+    event_type = 'AddTo'
+    object_type = 'Site'
+    object_ids = []
 
     def call(self, auth, person_id_or_email, site_id_or_login_base):
         # Get account information
@@ -43,5 +46,6 @@ class AddPersonToSite(Method):
 
         if site['site_id'] not in person['site_ids']:
             site.add_person(person)
-
+	self.object_ids = [site['site_id']]
+	
         return 1

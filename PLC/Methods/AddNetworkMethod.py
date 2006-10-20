@@ -20,6 +20,9 @@ class AddNetworkMethod(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Add'
+    object_type = 'NetworkMethod'
+
     def call(self, auth, name):
         network_method = NetworkMethod(self.api)
         network_method['method'] = name

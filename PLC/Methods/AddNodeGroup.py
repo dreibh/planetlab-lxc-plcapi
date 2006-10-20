@@ -27,10 +27,15 @@ class AddNodeGroup(Method):
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'NodeGroup'
+    object_ids = []
+
     def call(self, auth, name, nodegroup_fields = {}):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup['name'] = name
         nodegroup.sync()
+	self.object_ids = [nodegroup['nodegroup_id']]
 
         return nodegroup['nodegroup_id']

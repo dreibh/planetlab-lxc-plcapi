@@ -31,6 +31,10 @@ class AddPerson(Method):
 
     returns = Parameter(int, 'New person_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Person'
+    object_ids = []
+
     def call(self, auth, first_name, last_name, person_fields = {}):
         person_fields = dict(filter(can_update, person_fields.items()))
         person = Person(self.api, person_fields)
@@ -38,5 +42,6 @@ class AddPerson(Method):
         person['last_name'] = last_name
         person['enabled'] = False
         person.sync()
+	self.object_ids = [person['person']]
 
         return person['person_id']

@@ -32,6 +32,10 @@ class AddSiteAddress(Method):
 
     returns = Parameter(int, 'New address_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Address'
+    object_ids = []
+
     def call(self, auth, site_id_or_login_base, address_fields = {}):
         address_fields = dict(filter(can_update, address_fields.items()))
 
@@ -48,5 +52,6 @@ class AddSiteAddress(Method):
         address = Address(self.api, address_fields)
         address['site_id'] = site['site_id']
         address.sync()
+	self.object_ids = [address['address_id']]
 
         return address['address_id']

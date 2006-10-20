@@ -26,6 +26,9 @@ class AddNodeToPCU(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+    event_type = 'AddTo'
+    object_type = 'PCU'
+    object_ids = []
 
     def call(self, auth, node_id_or_hostname, pcu_id, port):
 	 # Get node
@@ -60,5 +63,6 @@ class AddNodeToPCU(Method):
             raise PLCInvalidArgument, "PCU port already in use"
 
         pcu.add_node(node, port)
+	self.object_ids = [pcu['pcu_id']]
 
         return 1

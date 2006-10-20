@@ -34,6 +34,10 @@ class AddPCU(Method):
         ]
 
     returns = Parameter(int, 'New pcu_id (> 0) if successful')
+    
+    event_type = 'Add'
+    object_type = 'PCU'
+    object_ids = []
 
     def call(self, auth, site_id_or_login_base, ip, pcu_fields = {}):
         pcu_fields = dict(filter(can_update, pcu_fields.items()))
@@ -52,5 +56,6 @@ class AddPCU(Method):
         pcu['site_id'] = site['site_id']
         pcu['ip'] = ip
         pcu.sync()
+	self.object_ids = [pcu['pcu_id']]	
 
         return pcu['pcu_id']

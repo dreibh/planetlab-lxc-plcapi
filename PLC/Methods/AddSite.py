@@ -30,6 +30,10 @@ class AddSite(Method):
 
     returns = Parameter(int, 'New site_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Site'
+    object_ids = []
+
     def call(self, auth, name, abbreviated_name, login_base, site_fields = {}):
         site_fields = dict(filter(can_update, site_fields.items()))
         site = Site(self.api, site_fields)
@@ -37,5 +41,6 @@ class AddSite(Method):
         site['abbreviated_name'] = abbreviated_name
         site['login_base'] = login_base
         site.sync()
-
-        return site['site_id']
+	self.object_ids = [site['site_id']]
+        
+	return site['site_id']

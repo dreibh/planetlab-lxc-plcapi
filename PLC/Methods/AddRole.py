@@ -21,10 +21,15 @@ class AddRole(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Add'
+    object_type = 'Role'
+    object_ids = []
+
     def call(self, auth, role_id, name):
         role = Role(self.api)
         role['role_id'] = role_id
         role['name'] = name
         role.sync(insert = True)
+	self.object_ids = [role['role_id']]
 
         return 1

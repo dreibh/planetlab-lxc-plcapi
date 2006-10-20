@@ -34,6 +34,10 @@ class AddNode(Method):
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Node'
+    object_ids = []
+
     def call(self, auth, site_id_or_login_base, hostname, node_fields = {}):
         node_fields = dict(filter(can_update, node_fields.items()))
         
@@ -60,5 +64,6 @@ class AddNode(Method):
         node['hostname'] = hostname
         node['site_id'] = site['site_id']
         node.sync()
+	self.object_ids = [node['node_id']]	
 
         return node['node_id']

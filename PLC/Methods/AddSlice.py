@@ -39,6 +39,10 @@ class AddSlice(Method):
 
     returns = Parameter(int, 'New slice_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Slice'
+    object_ids = []
+
     def call(self, auth, name, slice_fields = {}):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 
@@ -70,5 +74,6 @@ class AddSlice(Method):
         slice['name'] = name
         slice['site_id'] = site['site_id']
         slice.sync()
+	self.object_ids = [slice['slice_id']]
 
         return slice['slice_id']

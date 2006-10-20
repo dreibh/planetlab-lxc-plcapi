@@ -39,6 +39,10 @@ class AddNodeNetwork(Method):
 
     returns = Parameter(int, 'New nodenetwork_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'NodeNetwork'
+    object_ids = []
+
     def call(self, auth, node_id, method, type, nodenetwork_fields = {}):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
@@ -63,5 +67,6 @@ class AddNodeNetwork(Method):
 	nodenetwork['method'] = method
         nodenetwork['type'] = type
         nodenetwork.sync()
+	self.object_ids = [nodenetwork['nodenetwork_id']]	
 
         return nodenetwork['nodenetwork_id']

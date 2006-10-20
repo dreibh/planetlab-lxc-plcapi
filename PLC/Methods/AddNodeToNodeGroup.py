@@ -25,6 +25,10 @@ class AddNodeToNodeGroup(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'AddTo'
+    object_type = 'NodeGroup'
+    object_ids = []
+
     def call(self, auth, nodegroup_id_or_name, node_id_or_hostname):
         # Get node info
 	nodes = Nodes(self.api, [node_id_or_hostname])
@@ -42,5 +46,6 @@ class AddNodeToNodeGroup(Method):
 	# add node to nodegroup
         if node['node_id'] not in nodegroup['node_ids']:
             nodegroup.add_node(node)
+	self.object_ids = [nodegroup['nodegroup_id']]
 
         return 1

@@ -26,6 +26,10 @@ class AddPersonKey(Method):
 
     returns = Parameter(int, 'New key_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'Key'
+    object_ids = []
+
     def call(self, auth, person_id_or_email, key_type, key_value):
         # Get account details
         persons = Persons(self.api, [person_id_or_email]).values()
@@ -43,7 +47,7 @@ class AddPersonKey(Method):
         key['key_type'] = key_type
         key['key'] = key_value
         key.sync(commit = False)
-
         person.add_key(key, commit = True)
-        
+        self.object_ids = [key['key_id']]
+
         return key['key_id']

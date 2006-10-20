@@ -27,6 +27,10 @@ class AddRoleToPerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'AddTo'
+    object_type = 'Person'
+    object_ids = []
+
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get all roles
         roles = {}
@@ -63,5 +67,7 @@ class AddRoleToPerson(Method):
 
         if role_id not in person['role_ids']:
             person.add_role(role_id)
+
+	self.object_ids = [person['person_id']]
 
         return 1

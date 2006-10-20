@@ -25,11 +25,16 @@ class AddAddressType(Method):
         ]
 
     returns = Parameter(int, 'New address_type_id (> 0) if successful')
+        
+    event_type = 'Add'    
+    object_type = 'AddressType'
+    object_ids = []
 
     def call(self, auth, name, address_type_fields = {}):
         address_type_fields = dict(filter(can_update, address_type_fields.items()))
         address_type = AddressType(self.api, address_type_fields)
         address_type['name'] = name
         address_type.sync()
-
-        return address_type['address_type_id']
+	self.object_ids = [address_type['address_type_id']]
+        
+	return address_type['address_type_id']

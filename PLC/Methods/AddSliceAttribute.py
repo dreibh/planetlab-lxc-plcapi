@@ -37,6 +37,10 @@ class AddSliceAttribute(Method):
 
     returns = Parameter(int, 'New slice_attribute_id (> 0) if successful')
 
+    event_type = 'Add'
+    object_type = 'SliceAttribute'
+    object_ids = []
+
     def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None):
         slices = Slices(self.api, [slice_id_or_name]).values()
         if not slices:
@@ -78,5 +82,6 @@ class AddSliceAttribute(Method):
             slice_attribute['node_id'] = node['node_id']
 
         slice_attribute.sync()
+	self.object_ids = [slice_attribute['slice_attribute_id']]
 
         return slice_attribute['slice_attribute_id']

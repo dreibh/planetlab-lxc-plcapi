@@ -24,6 +24,9 @@ class AddPersonToSlice(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+    event_type = 'AddTo'
+    object_type = 'Slice'
+    object_ids = []
 
     def call(self, auth, person_id_or_email, slice_id_or_name):
         # Get account information
@@ -48,5 +51,6 @@ class AddPersonToSlice(Method):
 
 	if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)
+	self.object_ids = [slice['slice_id']]
 
         return 1
