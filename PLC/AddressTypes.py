@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.2 2006/10/06 18:19:41 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.3 2006/10/10 21:52:08 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -20,15 +20,12 @@ class AddressType(Row):
 
     table_name = 'address_types'
     primary_key = 'address_type_id'
+    join_tables = ['address_address_type']
     fields = {
         'address_type_id': Parameter(int, "Address type identifier"),
         'name': Parameter(str, "Address type", max = 20),
         'description': Parameter(str, "Address type description", max = 254),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_name(self, name):
 	# Remove leading and trailing spaces
@@ -46,18 +43,6 @@ class AddressType(Row):
 
 	return name
 
-    def delete(self, commit = True):
-        assert 'address_type_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['address_address_type', 'address_types']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE address_type_id = %d" % \
-                           (table, self['address_type_id']), self)
-
-        if commit:
-            self.api.db.commit()
-        
 class AddressTypes(Table):
     """
     Representation of the address_types table in the database.

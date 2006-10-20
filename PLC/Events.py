@@ -28,12 +28,6 @@ class Event(Row):
 		'object_ids': Parameter([int], "Ids of objects affected by this event")
 	}	
 	
-	def __init__(self, api, fields = {}):
-		Row.__init__(self, fields)
-		self.api = api
-
-	
-
 class Events(Table):
 	"""
 	Representation of row(s) from the events table in the database. 

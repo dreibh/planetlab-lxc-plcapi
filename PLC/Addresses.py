@@ -11,6 +11,7 @@ class Address(Row):
 
     table_name = 'addresses'
     primary_key = 'address_id'
+    join_tables = ['address_address_type']
     fields = {
         'address_id': Parameter(int, "Address identifier"),
         'line1': Parameter(str, "Address line 1", max = 254, optional = False),
@@ -24,10 +25,6 @@ class Address(Row):
         'address_type_ids': Parameter([int], "Address type identifiers", ro = True),
         'address_types': Parameter([str], "Address types", ro = True),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def add_address_type(self, address_type, commit = True):
         """
@@ -79,22 +76,6 @@ class Address(Row):
 
             self['address_type_ids'].remove(address_type_id)
             self['address_types'].remove(address_type['name'])
-
-    def delete(self, commit = True):
-        """
-        Delete existing address from the database.
-        """
-
-        assert 'address_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['address_address_type', 'addresses']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE address_id = %d" % \
-                           (table, self['address_id']), self)
-
-        if commit:
-            self.api.db.commit()
 
 class Addresses(Table):
     """

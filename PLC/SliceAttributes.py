@@ -25,26 +25,6 @@ class SliceAttribute(Row):
         'value': Parameter(str, "Slice attribute value", max = 254),
         }
 
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
-
-    def delete(self, commit = True):
-        """
-        Delete existing slice attribute.
-        """
-
-        assert 'slice_attribute_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in 'slice_attribute',:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE slice_attribute_id = %d" % \
-                           (table, self['slice_attribute_id']), self)
-
-        if commit:
-            self.api.db.commit()
-
 class SliceAttributes(dict):
     """
     Representation of row(s) from the slice_attribute table in the

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.3 2006/10/10 21:54:59 mlhuang Exp $
+# $Id: Roles.py,v 1.4 2006/10/16 21:57:05 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -20,14 +20,11 @@ class Role(Row):
 
     table_name = 'roles'
     primary_key = 'role_id'
+    join_tables = ['person_role', ('slice_attribute_types', 'min_role_id')]
     fields = {
         'role_id': Parameter(int, "Role identifier"),
         'name': Parameter(str, "Role", max = 100),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_role_id(self, role_id):
 	# Make sure role does not already exist
@@ -52,21 +49,6 @@ class Role(Row):
 
 	return name
 
-    def delete(self, commit = True):
-        assert 'role_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['person_role', 'roles']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE role_id = %d" % \
-                           (table, self['role_id']), self)
-
-        self.api.db.do("DELETE FROM slice_attribute_types WHERE min_role_id = %d" % \
-                       self['role_id'])
-
-        if commit:
-            self.api.db.commit()
-        
 class Roles(Table):
     """
     Representation of the roles table in the database.

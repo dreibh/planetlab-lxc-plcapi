@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkTypes.py,v 1.2 2006/10/06 18:19:41 mlhuang Exp $
+# $Id: NetworkTypes.py,v 1.1 2006/10/10 20:24:06 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -19,13 +19,10 @@ class NetworkType(Row):
 
     table_name = 'network_types'
     primary_key = 'type'
+    join_tables = ['nodenetworks']
     fields = {
         'type': Parameter(str, "Network type", max = 20),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_type(self, name):
 	# Remove leading and trailing spaces
@@ -42,18 +39,6 @@ class NetworkType(Row):
 
 	return name
 
-    def delete(self, commit = True):
-        assert 'type' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['nodenetworks', 'network_types']:
-            self.api.db.do("DELETE FROM " + table + \
-                           " WHERE type = %(type)s",
-                           self)
-
-        if commit:
-            self.api.db.commit()
-        
 class NetworkTypes(Table):
     """
     Representation of the network_types table in the database.

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.10 2006/10/10 21:51:35 mlhuang Exp $
+# $Id: Persons.py,v 1.11 2006/10/11 15:40:25 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -50,10 +50,6 @@ class Person(Row):
         'key_ids': Parameter([int], "List of key identifiers", ro = True),
         'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_email(self, email):
         """

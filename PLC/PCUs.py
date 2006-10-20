@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.2 2006/10/11 19:54:53 mlhuang Exp $
+# $Id: PCUs.py,v 1.3 2006/10/11 20:48:58 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -22,6 +22,7 @@ class PCU(Row):
 
     table_name = 'pcus'
     primary_key = 'pcu_id'
+    join_tables = ['pcu_node']
     fields = {
         'pcu_id': Parameter(int, "PCU identifier"),
         'site_id': Parameter(int, "Identifier of site where PCU is located"),
@@ -35,10 +36,6 @@ class PCU(Row):
         'node_ids': Parameter([int], "List of nodes that this PCU controls", ro = True),
         'ports': Parameter([int], "List of the port numbers that each node is connected to", ro = True),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_ip(self, ip):
         if not valid_ip(ip):
@@ -95,22 +92,6 @@ class PCU(Row):
 
             self['node_ids'].remove(node_id)
             self['ports'].remove(port)
-
-    def delete(self, commit = True):
-        """
-        Delete existing PCU.
-        """
-
-        assert 'pcu_id' in self
-
-        # Clean up various join tables
-        for table in ['pcu_node', 'pcus']:
-            self.api.db.do("DELETE FROM " + table +
-                           " WHERE pcu_id = %(pcu_id)d",
-                           self)
-
-        if commit:
-            self.api.db.commit()
 
 class PCUs(Table):
     """

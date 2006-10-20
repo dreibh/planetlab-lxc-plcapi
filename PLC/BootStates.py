@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: BootStates.py,v 1.1 2006/10/10 20:24:06 mlhuang Exp $
+# $Id: BootStates.py,v 1.4 2006/10/10 21:54:20 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -19,13 +19,10 @@ class BootState(Row):
 
     table_name = 'boot_states'
     primary_key = 'boot_state'
+    join_tables = ['nodes']
     fields = {
         'boot_state': Parameter(str, "Boot state", max = 20),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_boot_state(self, name):
 	# Remove leading and trailing spaces
@@ -42,18 +39,6 @@ class BootState(Row):
 
 	return name
 
-    def delete(self, commit = True):
-        assert 'boot_state' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['nodes', 'boot_states']:
-            self.api.db.do("DELETE FROM " + table + \
-                           " WHERE boot_state = %(boot_state)s",
-                           self)
-
-        if commit:
-            self.api.db.commit()
-        
 class BootStates(Table):
     """
     Representation of the boot_states table in the database.

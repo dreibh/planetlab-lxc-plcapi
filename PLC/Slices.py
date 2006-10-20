@@ -36,10 +36,6 @@ class Slice(Row):
         'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
         }
 
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
-
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base
         # portion of the slice name corresponds to a valid site, if

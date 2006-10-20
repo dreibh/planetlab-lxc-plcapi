@@ -41,10 +41,6 @@ class Site(Row):
         'node_ids': Parameter([int], "List of site node identifiers", ro = True),
         }
 
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
-
     def validate_name(self, name):
         name = name.strip()
         if not name:

@@ -13,16 +13,13 @@ class SliceAttributeType(Row):
 
     table_name = 'slice_attribute_types'
     primary_key = 'attribute_type_id'
+    join_tables = ['slice_attribute']
     fields = {
         'attribute_type_id': Parameter(int, "Slice attribute type identifier"),
         'name': Parameter(str, "Slice attribute type name", max = 100),
         'description': Parameter(str, "Slice attribute type description", max = 254),
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_name(self, name):
         name = name.strip()
@@ -43,22 +40,6 @@ class SliceAttributeType(Row):
             raise PLCInvalidArgument, "Invalid role"
 
         return role_id
-
-    def delete(self, commit = True):
-        """
-        Delete existing slice attribute type.
-        """
-
-        assert 'attribute_type_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['slice_attribute_types', 'slice_attribute']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE attribute_type_id = %d" % \
-                           (table, self['attribute_type_id']), self)
-
-        if commit:
-            self.api.db.commit()
 
 class SliceAttributeTypes(Table):
     """

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkMethods.py,v 1.2 2006/10/06 18:19:41 mlhuang Exp $
+# $Id: NetworkMethods.py,v 1.1 2006/10/10 20:23:49 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -19,13 +19,10 @@ class NetworkMethod(Row):
 
     table_name = 'network_methods'
     primary_key = 'method'
+    join_tables = ['nodenetworks']
     fields = {
         'method': Parameter(str, "Network method", max = 20),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_method(self, name):
 	# Remove leading and trailing spaces
@@ -42,18 +39,6 @@ class NetworkMethod(Row):
 
 	return name
 
-    def delete(self, commit = True):
-        assert 'method' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['nodenetworks', 'network_methods']:
-            self.api.db.do("DELETE FROM " + table + \
-                           " WHERE method = %(method)s",
-                           self)
-
-        if commit:
-            self.api.db.commit()
-        
 class NetworkMethods(Table):
     """
     Representation of the network_methods table in the database.

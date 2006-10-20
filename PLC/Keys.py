@@ -15,15 +15,12 @@ class Key(Row):
 
     table_name = 'keys'
     primary_key = 'key_id'
+    join_tables = ['person_key']
     fields = {
         'key_id': Parameter(int, "Key identifier"),
         'key_type': Parameter(str, "Key type"),
         'key': Parameter(str, "Key value", max = 4096),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-	self.api = api
 
     def validate_key_type(self, key_type):
         if key_type not in KeyTypes(self.api):
@@ -92,20 +89,6 @@ class Key(Row):
             self.api.db.do("DELETE FROM %s WHERE key_id IN (%s)" % \
                            (table, ", ".join(map(str, key_ids))))
 
-        if commit:
-            self.api.db.commit()
-
-    def delete(self, commit = True):
-        """
-        Delete key from the database.
-        """
-
-	assert 'key_id' in self
-	
-	for table in ['person_key', 'keys']:
-            self.api.db.do("DELETE FROM %s WHERE key_id = %d" % \
-                           (table, self['key_id']))
-        
         if commit:
             self.api.db.commit()
 

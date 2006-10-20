@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: KeyTypes.py,v 1.1 2006/10/10 20:24:06 mlhuang Exp $
+# $Id: KeyTypes.py,v 1.1 2006/10/10 22:09:31 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -19,13 +19,10 @@ class KeyType(Row):
 
     table_name = 'key_types'
     primary_key = 'key_type'
+    join_tables = ['keys']
     fields = {
         'key_type': Parameter(str, "Key type", max = 20),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_key_type(self, name):
 	# Remove leading and trailing spaces
@@ -41,18 +38,6 @@ class KeyType(Row):
             raise PLCInvalidArgument, "Key type name already in use"
 
 	return name
-
-    def delete(self, commit = True):
-        assert 'key_type' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['keys', 'key_types']:
-            self.api.db.do("DELETE FROM " + table + \
-                           " WHERE key_type = %(key_type)s",
-                           self)
-
-        if commit:
-            self.api.db.commit()
         
 class KeyTypes(Table):
     """
