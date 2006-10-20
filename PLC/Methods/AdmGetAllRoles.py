@@ -1,11 +1,13 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter
-from PLC.Roles import Role, Roles
 from PLC.Auth import PasswordAuth
+from PLC.Methods.GetRoles import GetRoles
 
-class AdmGetAllRoles(Method):
+class AdmGetAllRoles(GetRoles):
     """
+    Deprecated. See GetRoles.
+
     Return all possible roles as a struct:
 
     {'10': 'admin', '20': 'pi', '30': 'user', '40': 'tech'}
@@ -15,12 +17,12 @@ class AdmGetAllRoles(Method):
     identifiers.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
-    accepts = [PasswordAuth()]
+    status = "deprecated"
+
     returns = dict
 
     def call(self, auth):
-        roles_list = Roles(self.api).values()
+        roles_list = GetRoles.call(self, auth)
 
         roles_dict = {}
         for role in roles_list:
