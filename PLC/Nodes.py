@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.10 2006/10/11 19:51:18 mlhuang Exp $
+# $Id: Nodes.py,v 1.11 2006/10/11 20:48:58 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -52,16 +52,12 @@ class Node(Row):
         'session': Parameter(str, "(Admin only) Node session value", max = 256),
         'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has", ro = True),
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in", ro = True),
-        # 'conf_file_ids': Parameter([int], "List of configuration files specific to this node", ro = True),
+        'conf_file_ids': Parameter([int], "List of configuration files specific to this node", ro = True),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node", ro = True),
         'slice_ids': Parameter([int], "List of slices on this node", ro = True),
         'pcu_ids': Parameter([int], "List of PCUs that control this node", ro = True),
         'ports': Parameter([int], "List of PCU ports that this node is connected to", ro = True),
         }
-
-    def __init__(self, api, fields):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):
@@ -70,12 +66,6 @@ class Node(Row):
         conflicts = Nodes(self.api, [hostname])
         for node_id, node in conflicts.iteritems():
             if 'node_id' not in self or self['node_id'] != node_id:
-                raise PLCInvalidArgument, "Hostname already in use"
-
-        # Check for conflicts with a nodenetwork hostname
-        conflicts = NodeNetworks(self.api, [hostname])
-        for nodenetwork_id in conflicts:
-            if 'nodenetwork_ids' not in self or nodenetwork_id not in self['nodenetwork_ids']:
                 raise PLCInvalidArgument, "Hostname already in use"
 
         return hostname
