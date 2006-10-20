@@ -16,7 +16,7 @@ class GetSlices(Method):
     returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user']
 
     accepts = [
         PasswordAuth(),
@@ -28,21 +28,30 @@ class GetSlices(Method):
     returns = [Slice.fields]
 
     def call(self, auth, slice_id_or_name_list = None):
-        # Get slice information
+	# If we are not admin, make sure to return only viewable
+	# slices.
+        if 'admin' not in self.caller['roles']:
+            # Get slices that we are able to view
+            valid_slice_ids = self.caller['slice_ids']
+            if 'pi' in self.caller['roles'] and self.caller['site_ids']:
+                sites = Sites(self.api, self.caller['site_ids']).values()
+                for site in sites:
+                    valid_slice_ids += site['slice_ids']
+
+            if not valid_slice_ids:
+                return []
+
+            if not slice_id_or_name_list:
+                slice_id_or_name_list = valid_slice_ids
+
         slices = Slices(self.api, slice_id_or_name_list).values()
 
         # Filter out slices that are not viewable
         if 'admin' not in self.caller['roles']:
-            member_of = lambda slice: self.caller['person_id'] in slice['person_ids']
-            if 'pi' in self.caller['roles']:
-                can_view = lambda slice: \
-                           member_of(slice) or \
-                           slice['site_id'] in self.caller['site_ids']
-            else:
-                can_view = member_of
+            can_view = lambda slice: slice['slice_id'] in valid_slice_ids
             slices = filter(can_view, slices)
 
-	# turn each slice into a real dict
+	# Turn each slice into a real dict
 	slices = [dict(slice) for slice in slices]
 
         return slices
