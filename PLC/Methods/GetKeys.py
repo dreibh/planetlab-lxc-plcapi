@@ -25,11 +25,10 @@ class GetKeys(Method):
     def call(self, auth, key_ids = None):
 	# If we are not admin, make sure to only return our own keys       
         if 'admin' not in self.caller['roles']:
+            key_ids = set(key_ids).intersection(self.caller['key_ids'])
             if not key_ids:
-                key_ids = self.caller['key_ids']
-            else:
-                key_ids = set(self.caller['key_ids']).intersection(key_ids)
-		
+                return []
+
 	keys = Keys(self.api, key_ids).values()
 	
 	# Turn each key into a real dict
