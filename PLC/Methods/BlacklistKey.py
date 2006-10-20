@@ -36,6 +36,6 @@ class BlacklistKey(Method):
         key = keys[0]
 
         key.blacklist()
-	object_ids = [key['key_id']]
+	self.object_ids = [key['key_id']]
 
         return 1
