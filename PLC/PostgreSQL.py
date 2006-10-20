@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.4 2006/10/13 20:00:37 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.5 2006/10/16 21:56:11 mlhuang Exp $
 #
 
 import pgdb
@@ -25,7 +25,7 @@ class PostgreSQL:
         self.db = pgdb.connect(user = api.config.PLC_DB_USER,
                                password = api.config.PLC_DB_PASSWORD,
                                host = "%s:%d" % (api.config.PLC_DB_HOST, api.config.PLC_DB_PORT),
-                               database = api.config.PLC_DB_NAME)
+                               database = "planetlab4") # XXX api.config.PLC_DB_NAME)
         self.cursor = self.db.cursor()
 
         (self.rowcount, self.description, self.lastrowid) = \
