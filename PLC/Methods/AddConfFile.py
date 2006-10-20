@@ -1,0 +1,38 @@
+from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Parameter import Parameter, Mixed
+from PLC.ConfFiles import ConfFile, ConfFiles
+from PLC.Auth import PasswordAuth
+
+can_update = lambda (field, value): field not in \
+             ['conf_file_id', 'source', 'dest', 'node_ids', 'nodegroup_ids']
+
+class AddConfFile(Method):
+    """
+    Adds a new node configuration file. Any fields specified in
+    conf_file_fields are used, otherwise defaults are used.
+
+    Returns 1 if successful, faults otherwise.
+    """
+
+    roles = ['admin']
+
+    update_fields = dict(filter(can_update, ConfFile.fields.items()))
+
+    accepts = [
+        PasswordAuth(),
+        ConfFile.fields['source'],
+        ConfFile.fields['dest'],
+        update_fields
+        ]
+
+    returns = Parameter(int, '1 if successful')
+
+    def call(self, auth, source, dest, conf_file_fields = {}):
+        conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
+        conf_file = ConfFile(self.api, conf_file_fields)
+        conf_file['source'] = source
+        conf_file['dest'] = dest
+        conf_file.sync()
+
+        return 1
