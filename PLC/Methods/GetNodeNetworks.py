@@ -7,7 +7,7 @@ from PLC.Auth import PasswordAuth
 class GetNodeNetworks(Method):
     """
     Return an array of structs contain details about node network
-    interfaces. If nodenetwork_id_or_hostname_list is specified, only
+    interfaces. If nodenetwork_id_or_ip_list is specified, only
     the specified node network interfaces will be queried.
     """
 
@@ -16,13 +16,13 @@ class GetNodeNetworks(Method):
     accepts = [
         PasswordAuth(),
         [Mixed(NodeNetwork.fields['nodenetwork_id'],
-               NodeNetwork.fields['hostname'])]
+               NodeNetwork.fields['ip'])]
         ]
 
     returns = [NodeNetwork.fields]
 
-    def call(self, auth, nodenetwork_id_or_hostname_list = None):
-        nodenetworks = NodeNetworks(self.api, nodenetwork_id_or_hostname_list).values()
+    def call(self, auth, nodenetwork_id_or_ip_list = None):
+        nodenetworks = NodeNetworks(self.api, nodenetwork_id_or_ip_list).values()
 
         # Cast from NodeNetwork to real dict
         nodenetworks = [dict(nodenetwork) for nodenetwork in nodenetworks]

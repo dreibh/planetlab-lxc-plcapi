@@ -21,14 +21,14 @@ class DeleteNodeNetwork(Method):
     accepts = [
         PasswordAuth(),
 	Mixed(NodeNetwork.fields['nodenetwork_id'],
-	      NodeNetwork.fields['hostname'])
+	      NodeNetwork.fields['ip'])
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodenetwork_id_or_hostname):
+    def call(self, auth, nodenetwork_id_or_ip):
         # Get node network information
-        nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_hostname]).values()
+        nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip]).values()
         if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 	nodenetwork = nodenetworks[0]
