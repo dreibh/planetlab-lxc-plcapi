@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
-from PLC.Roles import Roles
+from PLC.Roles import Role, Roles
 
 class DeleteRoleFromPerson(Method):
     """
@@ -19,15 +19,15 @@ class DeleteRoleFromPerson(Method):
 
     accepts = [
         PasswordAuth(),
+        Mixed(Role.fields['role_id'],
+              Role.fields['name']),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-        Mixed(Parameter(int, "Role identifier"),
-              Parameter(str, "Role name"))
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, person_id_or_email, role_id_or_name):
+    def call(self, auth, role_id_or_name, person_id_or_email):
         # Get all roles
         roles = {}
         for role_id, role in Roles(self.api).iteritems():
