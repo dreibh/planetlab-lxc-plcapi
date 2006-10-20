@@ -6,3 +6,6 @@ class AdmGrantRoleToPerson(AddRoleToPerson):
     """
 
     status = "deprecated"
+
+    def call(self, auth, person_id_or_email, role_id_or_name):
+        return AddRoleToPerson.call(self, auth, role_id_or_name, person_id_or_email)
