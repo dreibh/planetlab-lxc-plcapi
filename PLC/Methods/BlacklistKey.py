@@ -23,6 +23,10 @@ class BlacklistKey(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+   
+    event_type = 'Update'
+    object_type = 'Key'
+    object_ids = []
 
     def call(self, auth, key_id):
         # Get associated key details
@@ -32,5 +36,6 @@ class BlacklistKey(Method):
         key = keys[0]
 
         key.blacklist()
+	object_ids = [key['key_id']]
 
         return 1

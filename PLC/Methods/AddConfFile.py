@@ -28,11 +28,16 @@ class AddConfFile(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Add'
+    object_type = 'ConfFile'
+    object_ids = []
+
     def call(self, auth, source, dest, conf_file_fields = {}):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
         conf_file = ConfFile(self.api, conf_file_fields)
         conf_file['source'] = source
         conf_file['dest'] = dest
         conf_file.sync()
+	self.object_ids = [conf_file['conf_file_id']]
 
         return 1
