@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.7 2006/10/11 19:51:09 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.8 2006/10/16 18:23:53 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -65,10 +65,6 @@ class NodeNetwork(Row):
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
 
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
-
     def validate_method(self, method):
         if method not in NetworkMethods(self.api):
             raise PLCInvalidArgument, "Invalid addressing method"
@@ -114,17 +110,6 @@ class NodeNetwork(Row):
 
         if not PLC.Nodes.valid_hostname(hostname):
             raise PLCInvalidArgument, "Invalid hostname"
-
-        conflicts = NodeNetworks(self.api, [hostname])
-        for nodenetwork_id, nodenetwork in conflicts.iteritems():
-            if 'nodenetwork_id' not in self or self['nodenetwork_id'] != nodenetwork_id:
-                raise PLCInvalidArgument, "Hostname already in use"
-
-        # Check for conflicts with a node hostname
-        conflicts = PLC.Nodes.Nodes(self.api, [hostname])
-        for node_id in conflicts.iteritems():
-            if 'node_id' not in self or self['node_id'] != node_id:
-                raise PLCInvalidArgument, "Hostname already in use"
 
         return hostname
 
@@ -197,44 +182,29 @@ class NodeNetwork(Row):
             if 'ip' not in self or not self['ip']:
                 raise PLCInvalidArgument, "For ipmi method, ip is required"
 
-    def delete(self, commit = True):
-        """
-        Delete existing nodenetwork.
-        """
-
-        assert 'nodenetwork_id' in self
-
-        # Delete ourself
-        self.api.db.do("DELETE FROM nodenetworks" \
-                       " WHERE nodenetwork_id = %d" % \
-                       self['nodenetwork_id'])
-        
-        if commit:
-            self.api.db.commit()
-
 class NodeNetworks(Table):
     """
     Representation of row(s) from the nodenetworks table in the
     database.
     """
 
-    def __init__(self, api, nodenetwork_id_or_hostname_list = None):
+    def __init__(self, api, nodenetwork_id_or_ip_list = None):
         self.api = api
 
         sql = "SELECT %s FROM nodenetworks" % \
               ", ".join(NodeNetwork.fields)
 
-        if nodenetwork_id_or_hostname_list:
+        if nodenetwork_id_or_ip_list:
             # Separate the list into integers and strings
             nodenetwork_ids = filter(lambda nodenetwork_id: isinstance(nodenetwork_id, (int, long)),
-                                     nodenetwork_id_or_hostname_list)
-            hostnames = filter(lambda hostname: isinstance(hostname, StringTypes),
-                               nodenetwork_id_or_hostname_list)
+                                     nodenetwork_id_or_ip_list)
+            ips = filter(lambda ip: isinstance(ip, StringTypes),
+                               nodenetwork_id_or_ip_list)
             sql += " WHERE (False"
             if nodenetwork_ids:
                 sql += " OR nodenetwork_id IN (%s)" % ", ".join(map(str, nodenetwork_ids))
-            if hostnames:
-                sql += " OR hostname IN (%s)" % ", ".join(api.db.quote(hostnames)).lower()
+            if ips:
+                sql += " OR ip IN (%s)" % ", ".join(api.db.quote(ips)).lower()
             sql += ")"
 
         rows = self.api.db.selectall(sql)
