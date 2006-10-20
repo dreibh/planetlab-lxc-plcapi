@@ -1,5 +1,3 @@
-import os
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -8,15 +6,13 @@ from PLC.Auth import PasswordAuth
 
 class GetPersons(Method):
     """
-    Return an array of structs containing details about accounts.
+    Return an array of structs containing details about accounts. If
+    person_id_or_email_list is specified, only the specified accounts
+    will be queried.
 
     Users and techs may only retrieve details about themselves. PIs
     may retrieve details about themselves and others at their
     sites. Admins may retrieve details about all accounts.
-
-    If return_fields is specified, only the specified fields will be
-    returned, if set. Otherwise, the default set of fields returned is:
-
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
@@ -33,33 +29,29 @@ class GetPersons(Method):
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
 
-    def __init__(self, *args, **kwds):
-        Method.__init__(self, *args, **kwds)
-        # Update documentation with list of default fields returned
-        self.__doc__ += os.linesep.join(self.return_fields.keys())
+    def call(self, auth, person_id_or_email_list = None):
+	# If we are not admin, make sure to only return viewable accounts
+        if 'admin' not in self.caller['roles']:
+            # Get accounts that we are able to view
+            valid_person_ids = [self.caller['person_id']]
+            if 'pi' in self.caller['roles'] and self.caller['site_ids']:
+                sites = Sites(self.api, self.caller['site_ids']).values()
+                for site in sites:
+                    valid_person_ids += site['person_ids']
 
-    def call(self, auth, person_id_or_email_list = None, return_fields = None):
-        # Make sure that only valid fields are specified
-        if return_fields is None:
-            return_fields = self.return_fields
-        elif filter(lambda field: field not in self.return_fields, return_fields):
-            raise PLCInvalidArgument, "Invalid return field specified"
+            if not valid_person_ids:
+                return []
 
-        # Authenticated function
-        assert self.caller is not None
+            if not person_id_or_email_list:
+                person_id_or_email_list = valid_person_ids
 
-        # Only admins can not specify person_id_or_email_list or
-        # specify an empty list.
-        if not person_id_or_email_list and 'admin' not in self.caller['roles']:
-            raise PLCInvalidArgument, "List of accounts to retrieve not specified"
+        persons = Persons(self.api, person_id_or_email_list).values()
 
-        # Get account information
-        persons = Persons(self.api, person_id_or_email_list)
+        # Filter out accounts that are not viewable
+        if 'admin' not in self.caller['roles']:
+            persons = filter(self.caller.can_view, persons)
 
-        # Filter out accounts that are not viewable and turn into list
-        persons = filter(self.caller.can_view, persons.values())
-
-        # Turn each person into a real dict.
+        # Turn each account into a real dict
         persons = [dict(person) for person in persons]
-                    
+
         return persons
