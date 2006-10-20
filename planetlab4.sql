@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.15 2006/10/18 20:54:28 tmack Exp $
+-- $Id: planetlab4.sql,v 1.17 2006/10/19 21:36:54 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -308,6 +308,69 @@ FROM nodegroup_node
 GROUP BY node_id;
 
 --------------------------------------------------------------------------------
+-- Node configuration files
+--------------------------------------------------------------------------------
+
+CREATE TABLE conf_files (
+    conf_file_id serial PRIMARY KEY, -- Configuration file identifier
+    enabled bool NOT NULL DEFAULT true, -- Configuration file is active
+    source text NOT NULL, -- Relative path on the boot server where file can be downloaded
+    dest text NOT NULL, -- Absolute path where file should be installed
+    file_permissions text NOT NULL DEFAULT '0644', -- chmod(1) permissions
+    file_owner text NOT NULL DEFAULT 'root', -- chown(1) owner
+    file_group text NOT NULL DEFAULT 'root', -- chgrp(1) owner
+    preinstall_cmd text, -- Shell command to execute prior to installing
+    postinstall_cmd text, -- Shell command to execute after installing
+    error_cmd text, -- Shell command to execute if any error occurs
+    ignore_cmd_errors bool NOT NULL DEFAULT false, -- Install file anyway even if an error occurs
+    always_update bool NOT NULL DEFAULT false -- Always attempt to install file even if unchanged
+);
+
+CREATE TABLE conf_file_node (
+    conf_file_id integer REFERENCES conf_files NOT NULL, -- Configuration file identifier
+    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
+    PRIMARY KEY (conf_file_id, node_id)
+);
+CREATE INDEX conf_file_node_conf_file_id_idx ON conf_file_node (conf_file_id);
+CREATE INDEX conf_file_node_node_id_idx ON conf_file_node (node_id);
+
+-- Nodes linked to each configuration file
+CREATE VIEW conf_file_nodes AS
+SELECT conf_file_id,
+array_to_string(array_accum(node_id), ',') AS node_ids
+FROM conf_file_node
+GROUP BY conf_file_id;
+
+-- Configuration files linked to each node
+CREATE VIEW node_conf_files AS
+SELECT node_id,
+array_to_string(array_accum(conf_file_id), ',') AS conf_file_ids
+FROM conf_file_node
+GROUP BY node_id;
+
+CREATE TABLE conf_file_nodegroup (
+    conf_file_id integer REFERENCES conf_files NOT NULL, -- Configuration file identifier
+    nodegroup_id integer REFERENCES nodegroups NOT NULL, -- Node group identifier
+    PRIMARY KEY (conf_file_id, nodegroup_id)
+);
+CREATE INDEX conf_file_nodegroup_conf_file_id_idx ON conf_file_nodegroup (conf_file_id);
+CREATE INDEX conf_file_nodegroup_nodegroup_id_idx ON conf_file_nodegroup (nodegroup_id);
+
+-- Node groups linked to each configuration file
+CREATE VIEW conf_file_nodegroups AS
+SELECT conf_file_id,
+array_to_string(array_accum(nodegroup_id), ',') AS nodegroup_ids
+FROM conf_file_nodegroup
+GROUP BY conf_file_id;
+
+-- Configuration files linked to each node group
+CREATE VIEW nodegroup_conf_files AS
+SELECT nodegroup_id,
+array_to_string(array_accum(conf_file_id), ',') AS conf_file_ids
+FROM conf_file_nodegroup
+GROUP BY nodegroup_id;
+
+--------------------------------------------------------------------------------
 -- Node network interfaces
 --------------------------------------------------------------------------------
 
@@ -503,7 +566,7 @@ FROM slice_person
 GROUP BY person_id;
 
 --------------------------------------------------------------------------------
--- Attributes
+-- Slice attributes
 --------------------------------------------------------------------------------
 
 -- Slice attribute types
@@ -669,21 +732,45 @@ node_nodenetworks.nodenetwork_ids,
 node_nodegroups.nodegroup_ids,
 node_slices.slice_ids,
 node_pcus.pcu_ids,
-node_pcus.ports
+node_pcus.ports,
+node_conf_files.conf_file_ids
 FROM nodes
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id)
-LEFT JOIN node_pcus USING (node_id);
+LEFT JOIN node_pcus USING (node_id)
+LEFT JOIN node_conf_files USING (node_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
 nodegroups.nodegroup_id,
 nodegroups.name,
 nodegroups.description,
-nodegroup_nodes.node_ids
+nodegroup_nodes.node_ids,
+nodegroup_conf_files.conf_file_ids
 FROM nodegroups
-LEFT JOIN nodegroup_nodes USING (nodegroup_id);
+LEFT JOIN nodegroup_nodes USING (nodegroup_id)
+LEFT JOIN nodegroup_conf_files USING (nodegroup_id);
+
+CREATE VIEW view_conf_files AS
+SELECT
+conf_files.conf_file_id,
+conf_files.enabled,
+conf_files.source,
+conf_files.dest,
+conf_files.file_permissions,
+conf_files.file_owner,
+conf_files.file_group,
+conf_files.preinstall_cmd,
+conf_files.postinstall_cmd,
+conf_files.error_cmd,
+conf_files.ignore_cmd_errors,
+conf_files.always_update,
+conf_file_nodes.node_ids,
+conf_file_nodegroups.nodegroup_ids
+FROM conf_files
+LEFT JOIN conf_file_nodes USING (conf_file_id)
+LEFT JOIN conf_file_nodegroups USING (conf_file_id);
 
 CREATE VIEW view_pcus AS
 SELECT
