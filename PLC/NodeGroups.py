@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.11 2006/10/03 19:25:30 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.12 2006/10/06 19:05:31 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -24,16 +24,14 @@ class NodeGroup(Row):
 
     table_name = 'nodegroups'
     primary_key = 'nodegroup_id'
+    join_tables = ['nodegroup_node', 'conf_file_nodegroup']
     fields = {
         'nodegroup_id': Parameter(int, "Node group identifier"),
         'name': Parameter(str, "Node group name", max = 50),
         'description': Parameter(str, "Node group description", max = 200),
         'node_ids': Parameter([int], "List of nodes in this node group"),
+        'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
         }
-
-    def __init__(self, api, fields = {}):
-        Row.__init__(self, fields)
-        self.api = api
 
     def validate_name(self, name):
 	# Remove leading and trailing spaces
@@ -102,22 +100,6 @@ class NodeGroup(Row):
             self['node_ids'].remove(node_id)
             node['nodegroup_ids'].remove(nodegroup_id)
 
-    def delete(self, commit = True):
-        """
-        Delete existing nodegroup from the database.
-        """
-
-        assert 'nodegroup_id' in self
-
-        # Clean up miscellaneous join tables
-        for table in ['nodegroup_node', 'nodegroups']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE nodegroup_id = %d" % \
-                           (table, self['nodegroup_id']), self)
-
-        if commit:
-            self.api.db.commit()
-
 class NodeGroups(Table):
     """
     Representation of row(s) from the nodegroups table in the
@@ -147,7 +129,7 @@ class NodeGroups(Table):
 
         for row in rows:
             self[row['nodegroup_id']] = nodegroup = NodeGroup(api, row)
-            for aggregate in ['node_ids']:
+            for aggregate in ['node_ids', 'conf_file_ids']:
                 if not nodegroup.has_key(aggregate) or nodegroup[aggregate] is None:
                     nodegroup[aggregate] = []
                 else:
