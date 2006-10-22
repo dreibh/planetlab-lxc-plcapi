@@ -21,8 +21,7 @@ class GetSlices(Method):
     accepts = [
         PasswordAuth(),
         [Mixed(Slice.fields['slice_id'],
-               Slice.fields['name'])],
-        Parameter([str], 'List of fields to return')
+               Slice.fields['name'])]
         ]
 
     returns = [Slice.fields]
