@@ -4,12 +4,14 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.4 2006/10/10 21:54:20 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.1 2006/10/20 17:44:09 mlhuang Exp $
 #
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table
+from PLC.Nodes import Node, Nodes
+from PLC.NodeGroups import NodeGroup, NodeGroups
 
 class ConfFile(Row):
     """
@@ -36,6 +38,100 @@ class ConfFile(Row):
         'node_ids': Parameter(int, "List of nodes linked to this file", ro = True),
         'nodegroup_ids': Parameter(int, "List of node groups linked to this file", ro = True),
         }
+
+    def add_node(self, node, commit = True):
+        """
+        Add configuration file to node.
+        """
+
+        assert 'conf_file_id' in self
+        assert isinstance(node, Node)
+        assert 'node_id' in node
+
+        conf_file_id = self['pcu_id']
+        node_id = node['node_id']
+
+        if node_id not in self['node_ids']:
+            self.api.db.do("INSERT INTO conf_file_node (conf_file_id, node_id)" \
+                           " VALUES(%(conf_file_id)d, %(node_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['node_ids'].append(node_id)
+            node['conf_file_ids'].append(conf_file_id)
+
+    def remove_node(self, node, commit = True):
+        """
+        Remove configuration file from node.
+        """
+
+        assert 'conf_file_id' in self
+        assert isinstance(node, Node)
+        assert 'node_id' in node
+
+        conf_file_id = self['conf_file_id']
+        node_id = node['node_id']
+
+        if node_id in self['node_ids']:
+            self.api.db.do("DELETE FROM conf_file_node" \
+                           " WHERE conf_file_id = %(conf_file_id)d" \
+                           " AND node_id = %(node_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['node_ids'].remove(node_id)
+            node['conf_file_ids'].remove(conf_file_id)
+
+    def add_nodegroup(self, nodegroup, commit = True):
+        """
+        Add configuration file to node group.
+        """
+
+        assert 'conf_file_id' in self
+        assert isinstance(nodegroup, NodeGroup)
+        assert 'nodegroup_id' in nodegroup
+
+        conf_file_id = self['pcu_id']
+        nodegroup_id = nodegroup['nodegroup_id']
+
+        if nodegroup_id not in self['nodegroup_ids']:
+            self.api.db.do("INSERT INTO conf_file_nodegroup (conf_file_id, nodegroup_id)" \
+                           " VALUES(%(conf_file_id)d, %(nodegroup_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['nodegroup_ids'].append(nodegroup_id)
+            nodegroup['conf_file_ids'].append(conf_file_id)
+
+    def remove_nodegroup(self, nodegroup, commit = True):
+        """
+        Remove configuration file from node group.
+        """
+
+        assert 'conf_file_id' in self
+        assert isinstance(nodegroup, NodeGroup)
+        assert 'nodegroup_id' in nodegroup
+
+        conf_file_id = self['conf_file_id']
+        nodegroup_id = nodegroup['nodegroup_id']
+
+        if nodegroup_id in self['nodegroup_ids']:
+            self.api.db.do("DELETE FROM conf_file_nodegroup" \
+                           " WHERE conf_file_id = %(conf_file_id)d" \
+                           " AND nodegroup_id = %(nodegroup_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['nodegroup_ids'].remove(nodegroup_id)
+            nodegroup['conf_file_ids'].remove(conf_file_id)
 
 class ConfFiles(Table):
     """
