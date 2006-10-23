@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.9 2006/10/11 15:46:09 mlhuang Exp $
+# $Id: Test.py,v 1.10 2006/10/16 21:57:28 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -101,9 +101,9 @@ for i in range(3):
     longitude = int(randfloat(-180.0, 180.0) * 1000) / 1000.0
 
     # Add site
-    print "AdmAddSite(%s)" % login_base,
-    site_id = AdmAddSite(admin, name, abbreviated_name, login_base,
-                         {'latitude': latitude, 'longitude': longitude})
+    print "AddSite(%s)" % login_base,
+    site_id = AddSite(admin, name, abbreviated_name, login_base,
+                      {'latitude': latitude, 'longitude': longitude})
 
     # Should return a unique site_id
     assert site_id not in site_ids
@@ -111,8 +111,8 @@ for i in range(3):
     print "=>", site_id
 
     # Check site
-    print "AdmGetSites(%d)" % site_id,
-    site = AdmGetSites(admin, [site_id])[0]
+    print "GetSites(%d)" % site_id,
+    site = GetSites(admin, [site_id])[0]
     for key in 'name', 'abbreviated_name', 'login_base', 'latitude', 'longitude', 'site_id':
         assert unicmp(site[key], locals()[key])
     print "=> OK"
@@ -123,23 +123,25 @@ for i in range(3):
     latitude = int(randfloat(-90.0, 90.0) * 1000) / 1000.0
     longitude = int(randfloat(-180.0, 180.0) * 1000) / 1000.0
     max_slices = 10
-    print "AdmUpdateSite(%s)" % login_base,
-    AdmUpdateSite(admin, site_id, {'name': name, 'abbreviated_name': abbreviated_name,
-                                   'latitude': latitude, 'longitude': longitude,
-                                   'max_slices': max_slices})
-    site = AdmGetSites(admin, [site_id])[0]
+    print "UpdateSite(%s)" % login_base,
+    UpdateSite(admin, site_id, {'name': name, 'abbreviated_name': abbreviated_name,
+                                'latitude': latitude, 'longitude': longitude,
+                                'max_slices': max_slices})
+    site = GetSites(admin, [site_id])[0]
     for key in 'name', 'abbreviated_name', 'latitude', 'longitude', 'max_slices':
         assert unicmp(site[key], locals()[key])
     print "=> OK"
 
-print "AdmGetSites",
-sites = AdmGetSites(admin, site_ids)
+print "GetSites",
+sites = GetSites(admin, site_ids)
 assert set(site_ids) == set([site['site_id'] for site in sites])
 print "=>", site_ids
 
-print "AdmGetAllRoles",
-role_ids = AdmGetAllRoles(admin)
-roles = dict(zip(role_ids.values(), map(int, role_ids.keys())))
+print "GetRoles",
+roles = GetRoles(admin)
+role_ids = [role['role_id'] for role in roles]
+roles = [role['name'] for role in roles]
+roles = dict(zip(roles, role_ids))
 print "=>", role_ids
 
 # Add users
@@ -156,10 +158,11 @@ for auth in user, pi, tech:
     auth['Username'] = email
     auth['AuthString'] = randstr(254)
 
-    print "AdmAddPerson(%s)" % email,
-    person_id = AdmAddPerson(admin, first_name, last_name,
-                             {'email': email, 'bio': bio,
-                              'password': auth['AuthString']})
+    # Add account
+    print "AddPerson(%s)" % email,
+    person_id = AddPerson(admin, first_name, last_name,
+                          {'email': email, 'bio': bio,
+                           'password': auth['AuthString']})
 
     # Should return a unique person_id
     assert person_id not in person_ids
@@ -167,8 +170,8 @@ for auth in user, pi, tech:
     print "=>", person_id
 
     # Check account
-    print "AdmGetPersons(%d)" % person_id,
-    person = AdmGetPersons(admin, [person_id])[0]
+    print "GetPersons(%d)" % person_id,
+    person = GetPersons(admin, [person_id])[0]
     for key in 'first_name', 'last_name', 'email', 'bio', 'person_id', 'enabled':
         assert unicmp(person[key], locals()[key])
     print "=> OK"
@@ -177,110 +180,98 @@ for auth in user, pi, tech:
     first_name = randstr(128)
     last_name = randstr(128)
     bio = randstr(254)
-    print "AdmUpdatePerson(%d)" % person_id,
-    AdmUpdatePerson(admin, person_id, {'first_name': first_name,
-                                       'last_name': last_name,
-                                       'bio': bio})
-    person = AdmGetPersons(admin, [person_id])[0]
-    for key in 'first_name', 'last_name', 'email', 'bio':
-        assert unicmp(person[key], locals()[key])
+    print "UpdatePerson(%d)" % person_id,
+    UpdatePerson(admin, person_id, {'first_name': first_name,
+                                    'last_name': last_name,
+                                    'bio': bio})
     print "=> OK"
 
-    # Enable account
-    print "AdmSetPersonEnabled(%d, True)" % person_id,
-    AdmSetPersonEnabled(admin, person_id, True)
-    person = AdmGetPersons(admin, [person_id])[0]
-    assert person['enabled']
-    print "=> OK"
+    # Check account again
+    person = GetPersons(admin, [person_id])[0]
+    for key in 'first_name', 'last_name', 'email', 'bio':
+        assert unicmp(person[key], locals()[key])
+
+    # Check that account is really disabled
+    try:
+        assert not AuthCheck(auth)
+    except:
+        pass
 
     # Add role
     role_id = roles[auth['Role']]
-    print "AdmGrantRoleToPerson(%d, %d)" % (person_id, role_id),
-    AdmGrantRoleToPerson(admin, person_id, role_id)
+    print "AddRoleToPerson(%d, %d)" % (role_id, person_id),
+    AddRoleToPerson(admin, role_id, person_id)
+    person = GetPersons(admin, [person_id])[0]
+    assert [role_id] == person['role_ids']
     print "=> OK"
 
-    print "AdmGetPersonRoles(%d)" % person_id,
-    person_roles = AdmGetPersonRoles(admin, person_id)
-    person_role_ids = map(int, person_roles.keys())
-    assert [role_id] == person_role_ids
-    person = AdmGetPersons(admin, [person_id])[0]
-    assert [role_id] == person['role_ids']
-    print "=>", person_role_ids
+    # Enable account
+    UpdatePerson(admin, person_id, {'enabled': True})
+
+    # Check authentication
+    print "AuthCheck(%s)" % auth['Username'],
+    assert AuthCheck(auth)
+    print "=> OK"
 
     # Associate account with each site
     for site_id in site_ids:
-        print "AdmAddPersonToSite(%d, %d)" % (person_id, site_id),
-        AdmAddPersonToSite(admin, person_id, site_id)
+        print "AddPersonToSite(%d, %d)" % (person_id, site_id),
+        AddPersonToSite(admin, person_id, site_id)
         print "=> OK"
 
-        print "AdmGetSitePersons(%d)" % site_id,
-        site_person_ids = AdmGetSitePersons(admin, site_id)
-        assert person_id in site_person_ids
-        print "=>", site_person_ids
-
     # Make sure it really did it
-    print "AdmGetPersonSites(%d)" % person_id,
-    person_site_ids = AdmGetPersonSites(auth, person_id)
-    assert set(site_ids) == set(person_site_ids)
-    person = AdmGetPersons(admin, [person_id])[0]
+    person = GetPersons(admin, [person_id])[0]
+    person_site_ids = person['site_ids']
     assert set(site_ids) == set(person['site_ids'])
-    print "=>", person_site_ids
 
     # First site should be the primary site
-    print "AdmSetPersonPrimarySite(%d, %d)" % (person_id, person_site_ids[1]),
-    AdmSetPersonPrimarySite(auth, person_id, person_site_ids[1])
-    assert AdmGetPersonSites(auth, person_id)[0] == person_site_ids[1]
-    person = AdmGetPersons(admin, [person_id])[0]
+    print "SetPersonPrimarySite(%d, %d)" % (person_id, person_site_ids[1]),
+    SetPersonPrimarySite(auth, person_id, person_site_ids[1])
+    person = GetPersons(admin, [person_id])[0]
     assert person['site_ids'][0] == person_site_ids[1]
     print "=> OK"
 
-    # Check authentication
-    print "AdmAuthCheck(%s)" % auth['Username'],
-    assert AdmAuthCheck(auth)
-    print "=> OK"
-
-print "AdmGetPersons",
-persons = AdmGetPersons(admin, person_ids)
+print "GetPersons",
+persons = GetPersons(admin, person_ids)
 assert set(person_ids) == set([person['person_id'] for person in persons])
 print "=>", person_ids
-
-# Verify PI role
-for person in persons:
-    if 'pi' in person['roles']:
-        assert AdmIsPersonInRole(admin, pi['Username'], roles['pi'])
 
 # Add node groups
 nodegroup_ids = []
 for i in range(3):
     name = randstr(50)
     description = randstr(200)
-    print "AdmAddNodeGroup",
-    nodegroup_id = AdmAddNodeGroup(admin, name, description)
+
+    # Add node group
+    print "AddNodeGroup",
+    nodegroup_id = AddNodeGroup(admin, name, {'description': description})
 
     # Should return a unique nodegroup_id
     assert nodegroup_id not in nodegroup_ids
     nodegroup_ids.append(nodegroup_id)
     print "=>", nodegroup_id
 
-    # Check nodegroup
-    print "AdmGetNodeGroups(%d)" % nodegroup_id,
-    nodegroup = AdmGetNodeGroups(admin, [nodegroup_id])[0]
+    # Check node group
+    print "GetNodeGroups(%d)" % nodegroup_id,
+    nodegroup = GetNodeGroups(admin, [nodegroup_id])[0]
     for key in 'name', 'description', 'nodegroup_id':
         assert unicmp(nodegroup[key], locals()[key])
     print "=> OK"
 
     # Update node group
-    name = randstr(50)
+    name = randstr(16, letters + ' ' + digits)
     description = randstr(200)
-    print "AdmUpdateNodeGroup",
-    AdmUpdateNodeGroup(admin, nodegroup_id, name, description)
-    nodegroup = AdmGetNodeGroups(admin, [nodegroup_id])[0]
-    for key in 'name', 'description', 'nodegroup_id':
-        assert unicmp(nodegroup[key], locals()[key])
+    print "UpdateNodeGroup",
+    UpdateNodeGroup(admin, nodegroup_id, {'name': name, 'description': description})
     print "=> OK"
 
-print "AdmGetNodeGroups",
-nodegroups = AdmGetNodeGroups(admin, nodegroup_ids)
+    # Check node group again
+    nodegroup = GetNodeGroups(admin, [nodegroup_id])[0]
+    for key in 'name', 'description', 'nodegroup_id':
+        assert unicmp(nodegroup[key], locals()[key])
+
+print "GetNodeGroups",
+nodegroups = GetNodeGroups(admin, nodegroup_ids)
 assert set(nodegroup_ids) == set([nodegroup['nodegroup_id'] for nodegroup in nodegroups])
 print "=>", nodegroup_ids
 
@@ -293,9 +284,9 @@ for site_id in site_ids:
         model = randstr(255)
 
         # Add node
-        print "AdmAddNode(%s)" % hostname,
-        node_id = AdmAddNode(admin, site_id, hostname, boot_state,
-                             {'model': model})
+        print "AddNode(%s)" % hostname,
+        node_id = AddNode(admin, site_id, hostname,
+                          {'boot_state': boot_state, 'model': model})
 
         # Should return a unique node_id
         assert node_id not in node_ids
@@ -303,8 +294,8 @@ for site_id in site_ids:
         print "=>", node_id
 
         # Check node
-        print "AdmGetNodes(%d)" % node_id,
-        node = AdmGetNodes(admin, [node_id])[0]
+        print "GetNodes(%d)" % node_id,
+        node = GetNodes(admin, [node_id])[0]
         for key in 'hostname', 'boot_state', 'model', 'node_id':
             assert unicmp(node[key], locals()[key])
         print "=> OK"
@@ -312,34 +303,31 @@ for site_id in site_ids:
         # Update node
         hostname = randhostname()
         model = randstr(255)
-        print "AdmUpdateNode(%s)" % hostname,
-        AdmUpdateNode(admin, node_id, {'hostname': hostname, 'model': model})
-        node = AdmGetNodes(admin, [node_id])[0]
+        print "UpdateNode(%d)" % node_id,
+        UpdateNode(admin, node_id, {'hostname': hostname, 'model': model})
+        print "=> OK"
+
+        # Check node again
+        node = GetNodes(admin, [node_id])[0]
         for key in 'hostname', 'boot_state', 'model', 'node_id':
             assert unicmp(node[key], locals()[key])
-        print "=> OK"
 
         # Add to node groups
         for nodegroup_id in nodegroup_ids:
-            print "AdmAddNodeToNodeGroup(%d, %d)" % (nodegroup_id, node_id),
-            AdmAddNodeToNodeGroup(admin, nodegroup_id, node_id)
+            print "AddNodeToNodeGroup(%d, %d)" % (nodegroup_id, node_id),
+            AddNodeToNodeGroup(admin, nodegroup_id, node_id)
             print "=> OK"
-
-print "AdmGetNodes",
-nodes = AdmGetNodes(admin, node_ids)
+        
+print "GetNodes",
+nodes = GetNodes(admin, node_ids)
 assert set(node_ids) == set([node['node_id'] for node in nodes])
 print "=>", node_ids
 
-print "AdmGetSiteNodes" % site_ids,
-site_node_ids = AdmGetSiteNodes(admin, site_ids)
-assert set(node_ids) == set(reduce(lambda a, b: a + b, site_node_ids.values()))
-print "=>", site_node_ids
-
-for nodegroup_id in nodegroup_ids:
-    print "AdmGetNodeGroupNodes(%d)" % nodegroup_id,
-    nodegroup_node_ids = AdmGetNodeGroupNodes(admin, nodegroup_id)
-    assert set(nodegroup_node_ids) == set(node_ids)
-    print "=>", nodegroup_node_ids
+print "GetNodeGroups",
+nodegroups = GetNodeGroups(admin, nodegroup_ids)
+for nodegroup in nodegroups:
+    assert set(nodegroup['node_ids']) == set(node_ids)
+print "=> OK"
 
 # Add node networks
 nodenetwork_ids = []
@@ -350,63 +338,55 @@ for node_id in node_ids:
     broadcast = ((ip & netmask) | ~netmask) & 0xffffffff
     gateway = randint(network + 1, broadcast - 1)
     dns1 = randint(0, 0xffffffff)
+    bwlimit = randint(500000, 10000000)
 
     for method in 'static', 'dhcp':
-        optional = {}
+        optional = {'bwlimit': bwlimit}
         if method == 'static':
             for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
                 optional[key] = socket.inet_ntoa(struct.pack('>L', locals()[key]))
 
-        print "AdmAddNodeNetwork(%s)" % method,
-        nodenetwork_id = AdmAddNodeNetwork(admin, node_id, method, 'ipv4', optional)
+        # Add node network
+        print "AddNodeNetwork(%s)" % method,
+        nodenetwork_id = AddNodeNetwork(admin, node_id, method, 'ipv4', optional)
 
         # Should return a unique nodenetwork_id
         assert nodenetwork_id not in nodenetwork_ids
         nodenetwork_ids.append(nodenetwork_id)
         print "=>", nodenetwork_id
 
-    # Check node networks
-    print "AdmGetAllNodeNetworks(%d)" % node_id,
-    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
-    for nodenetwork in nodenetworks:
-        if nodenetwork['method'] == 'static':
+        # Check node network
+        print "GetNodeNetworks(%d)" % nodenetwork_id,
+        nodenetwork = GetNodeNetworks(admin, [nodenetwork_id])[0]
+        if method == 'static':
             for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
                 address = struct.unpack('>L', socket.inet_aton(nodenetwork[key]))[0]
                 assert address == locals()[key]
-    print "=>", [nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks]
+        print "=> OK"
 
-# Update node networks
-for node_id in node_ids:
-    ip = randint(0, 0xffffffff)
-    netmask = (0xffffffff << randint(2, 31)) & 0xffffffff
-    network = ip & netmask
-    broadcast = ((ip & netmask) | ~netmask) & 0xffffffff
-    gateway = randint(network + 1, broadcast - 1)
-    dns1 = randint(0, 0xffffffff)
-
-    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
-    for nodenetwork in nodenetworks:
         # Update node network
-        optional = {}
+        optional = {'bwlimit': bwlimit}
         if nodenetwork['method'] == 'static':
             for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
                 optional[key] = socket.inet_ntoa(struct.pack('>L', locals()[key]))
 
-        print "AdmUpdateNodeNetwork(%s)" % nodenetwork['method'],
-        AdmUpdateNodeNetwork(admin, nodenetwork['nodenetwork_id'], optional)
+        print "UpdateNodeNetwork(%d)" % nodenetwork_id,
+        UpdateNodeNetwork(admin, nodenetwork['nodenetwork_id'], optional)
         print "=> OK"
 
-    # Check node network again
-    print "AdmGetAllNodeNetworks(%d)" % node_id,
-    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
-    for nodenetwork in nodenetworks:
+        # Check node network again
+        nodenetwork = GetNodeNetworks(admin, [nodenetwork_id])[0]
         if nodenetwork['method'] == 'static':
             for key in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
                 address = struct.unpack('>L', socket.inet_aton(nodenetwork[key]))[0]
                 assert address == locals()[key]
-    print "=>", [nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks]
 
-# Add node attribute types
+print "GetNodeNetworks",
+nodenetworks = GetNodeNetworks(admin, nodenetwork_ids)
+assert set(nodenetwork_ids) == set([nodenetwork['nodenetwork_id'] for nodenetwork in nodenetworks])
+print "=>", nodenetwork_ids
+
+# Add slice attribute types
 attribute_type_ids = []
 for i in range(3):
     name = randstr(100)
@@ -427,26 +407,27 @@ for i in range(3):
     # Check slice attribute type
     print "GetSliceAttributeTypes(%d)" % attribute_type_id,
     attribute_type = GetSliceAttributeTypes(admin, [attribute_type_id])[0]
-    for key in 'min_role_id', 'description':
+    for key in 'name', 'min_role_id', 'description':
         assert unicmp(attribute_type[key], locals()[key])
     print "=> OK"
 
     # Update slice attribute type
+    name = "attribute_" + randstr(10, letters + '_')
     description = randstr(254)
     min_role_id = random.sample(roles.values(), 1)[0]
     print "UpdateSliceAttributeType(%d)" % attribute_type_id,
     UpdateSliceAttributeType(admin, attribute_type_id,
-                             {'description': description,
+                             {'name': name,
+                              'description': description,
                               'min_role_id': min_role_id})
     attribute_type = GetSliceAttributeTypes(admin, [attribute_type_id])[0]
-    for key in 'min_role_id', 'description':
+    for key in 'name', 'min_role_id', 'description':
         assert unicmp(attribute_type[key], locals()[key])
     print "=> OK"
 
 # Add slices and slice attributes
 slice_ids = []
 slice_attribute_ids = []
-sites = AdmGetSites(admin, site_ids)
 for site in sites:
     for i in range(10):
         name = site['login_base'] + "_" + randstr(11, letters).lower()
@@ -472,26 +453,36 @@ for site in sites:
         # Update slice
         url = "http://" + randhostname() + "/"
         description = randstr(2048)
-        print "UpdateSlice(%s)" % name,
+        print "UpdateSlice(%d)" % slice_id,
         UpdateSlice(admin, slice_id, {'url': url, 'description': description})
         slice = GetSlices(admin, [slice_id])[0]
         for key in 'name', 'url', 'description', 'slice_id':
             assert unicmp(slice[key], locals()[key])
         print "=> OK"
 
-        # XXX Add nodes to slice
+        # Add slice to all nodes
+        print "AddSliceToNodes(%d, %s)" % (slice_id, str(node_ids)),
+        AddSliceToNodes(admin, name, node_ids)
+        slice = GetSlices(admin, [slice_id])[0]
+        assert set(node_ids) == set(slice['node_ids'])
+        print "=> OK"
 
-        # XXX Add people to slice
-        
+        # Add users to slice
+        for person_id in person_ids:
+            print "AddPersonToSlice(%d, %d)" % (person_id, slice_id),
+            AddPersonToSlice(admin, person_id, slice_id)
+            print "=> OK" 
+        slice = GetSlices(admin, [slice_id])[0]
+        assert set(person_ids) == set(slice['person_ids'])
+
         # Set slice/sliver attributes
         for attribute_type_id in attribute_type_ids:
-            value = randstr(254)
+            value = randstr(16, letters + '_' + digits)
             # Make it a sliver attribute with 50% probability
-            # node_id = random.sample(node_ids + [None] * len(node_ids), 1)[0]
-            node_id = None
+            node_id = random.sample(node_ids + [None] * len(node_ids), 1)[0]
 
             # Add slice attribute
-            print "AddSliceAttribute(%s, %d)" % (name, attribute_type_id),
+            print "AddSliceAttribute(%d, %d)" % (slice_id, attribute_type_id),
             if node_id is None:
                 slice_attribute_id = AddSliceAttribute(admin, slice_id, attribute_type_id, value)
             else:
@@ -512,7 +503,7 @@ for site in sites:
             # Update slice attribute
             url = "http://" + randhostname() + "/"
             description = randstr(2048)
-            print "UpdateSliceAttribute(%s)" % name,
+            print "UpdateSliceAttribute(%d)" % slice_attribute_id,
             UpdateSliceAttribute(admin, slice_attribute_id, value)
             slice_attribute = GetSliceAttributes(admin, [slice_attribute_id])[0]
             for key in 'attribute_type_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
@@ -524,11 +515,26 @@ for slice_id in slice_ids:
     # Delete slice attributes
     slice = GetSlices(admin, [slice_id])[0]
     for slice_attribute_id in slice['slice_attribute_ids']:
-        print "DeleteSliceAttribute(%s, %d)" % (slice['name'], slice_attribute_id),
+        print "DeleteSliceAttribute(%d, %d)" % (slice_id, slice_attribute_id),
         DeleteSliceAttribute(admin, slice_attribute_id)
         print "=> OK"
     slice = GetSlices(admin, [slice_id])[0]
     assert not slice['slice_attribute_ids']
+
+    # Delete users from slice
+    for person_id in person_ids:
+        print "DeletePersonFromSlice(%d, %d)" % (person_id, slice_id),
+        DeletePersonFromSlice(admin, person_id, slice_id)
+        print "=> OK"
+    slice = GetSlices(admin, [slice_id])[0]
+    assert not slice['person_ids']
+
+    # Delete nodes from slice
+    print "DeleteSliceFromNodes(%d, %s)" % (slice_id, node_ids),
+    DeleteSliceFromNodes(admin, slice_id, node_ids)
+    print "=> OK"
+    slice = GetSlices(admin, [slice_id])[0]
+    assert not slice['node_ids']
 
     # Delete slice
     print "DeleteSlice(%d)" % slice_id,
@@ -546,8 +552,8 @@ print "=> []"
 
 # Delete slice attribute types
 for attribute_type_id in attribute_type_ids:
-    # Delete attribute
-    print "DeleteAttribute(%d)" % attribute_type_id,
+    # Delete slice attribute type
+    print "DeleteSliceAttributeType(%d)" % attribute_type_id,
     DeleteSliceAttributeType(admin, attribute_type_id)
     assert not GetSliceAttributeTypes(admin, [attribute_type_id])
 
@@ -556,107 +562,100 @@ for attribute_type_id in attribute_type_ids:
     assert attribute_type_id not in [attribute_type['attribute_type_id'] for attribute_type in attribute_types]
     print "=> OK"
 
-print "GetAttributes",
+print "GetSliceAttributeTypes",
 assert not GetSliceAttributeTypes(admin, attribute_type_ids)
 print "=> []"
 
 # Delete node networks
-for node_id in node_ids:
-    nodenetworks = AdmGetAllNodeNetworks(admin, node_id)
-    for nodenetwork in nodenetworks:
-        # Delete node network
-        print "AdmDeleteNodeNetwork(%d, %d)" % (node_id, nodenetwork['nodenetwork_id']),
-        AdmDeleteNodeNetwork(admin, node_id, nodenetwork['nodenetwork_id'])
-        print "=>", "OK"
-    assert not AdmGetAllNodeNetworks(admin, node_id)
+for nodenetwork_id in nodenetwork_ids:
+    print "DeleteNodeNetwork(%d)" % nodenetwork_id,
+    DeleteNodeNetwork(admin, nodenetwork_id)
+    print "=>", "OK"
+
+print "GetNodeNetworks",
+assert not GetNodeNetworks(admin, nodenetwork_ids)
+print "=> []"
 
 # Delete nodes
 for node_id in node_ids:
     # Remove from node groups
     for nodegroup_id in nodegroup_ids:
-        print "AdmRemoveNodeFromNodeGroup(%d, %d)" % (nodegroup_id, node_id),
-        AdmRemoveNodeFromNodeGroup(admin, nodegroup_id, node_id)
-        # Make sure it really deleted it
-        assert node_id not in AdmGetNodeGroupNodes(nodegroup_id)
+        print "DeleteNodeFromNodeGroup(%d, %d)" % (nodegroup_id, node_id),
+        DeleteNodeFromNodeGroup(admin, nodegroup_id, node_id)
         print "=> OK"
+    node = GetNodes(admin, [node_id])[0]
+    assert not node['nodegroup_ids']
 
     # Delete node
-    print "AdmDeleteNode(%d)" % node_id,
-    AdmDeleteNode(admin, node_id)
-    assert not AdmGetNodes(admin, [node_id])
+    print "DeleteNode(%d)" % node_id,
+    DeleteNode(admin, node_id)
+    assert not GetNodes(admin, [node_id])
 
     # Make sure it really deleted it
-    nodes = AdmGetNodes(admin, node_ids)
+    nodes = GetNodes(admin, node_ids)
     assert node_id not in [node['node_id'] for node in nodes]
     print "=> OK"
 
-print "AdmGetNodes",
-assert not AdmGetNodes(admin, node_ids)
+print "GetNodes",
+assert not GetNodes(admin, node_ids)
 print "=> []"
 
-for nodegroup_id in nodegroup_ids:
-    print "AdmGetNodeGroupNodes(%d)" % nodegroup_id,
-    assert not AdmGetNodeGroupNodes(nodegroup_id)
-    print "=> []"
+nodegroups = GetNodeGroups(admin, nodegroup_ids)
+for nodegroup in nodegroups:
+    assert not set(node_ids).intersection(nodegroup['node_ids'])
 
 # Delete users
 for person_id in person_ids:
     # Remove from each site
     for site_id in site_ids:
-        print "AdmRemovePersonFromSite(%d, %d)" % (person_id, site_id),
-        AdmRemovePersonFromSite(admin, person_id, site_id)
-        assert site_id not in AdmGetPersonSites(admin, person_id)
-        person = AdmGetPersons(admin, [person_id])[0]
-        assert site_id not in person['site_ids']
+        print "DeletePersonFromSite(%d, %d)" % (person_id, site_id),
+        DeletePersonFromSite(admin, person_id, site_id)
         print "=> OK"
-
-    assert not AdmGetPersonSites(admin, person_id)
+    person = GetPersons(admin, [person_id])[0]
+    assert not person['site_ids']
 
     # Revoke role
-    person_roles = AdmGetPersonRoles(admin, person_id)
-    role_id = int(person_roles.keys()[0])
-    print "AdmRevokeRoleFromPerson(%d, %d)" % (person_id, role_id),
-    AdmRevokeRoleFromPerson(admin, person_id, role_id)
-    assert not AdmGetPersonRoles(admin, person_id)
-    person = AdmGetPersons(admin, [person_id])[0]
+    person = GetPersons(admin, [person_id])[0]
+    for role_id in person['role_ids']:
+        print "DeleteRoleFromPerson(%d, %d)" % (role_id, person_id),
+        DeleteRoleFromPerson(admin, role_id, person_id)
+        print "=> OK"
+    person = GetPersons(admin, [person_id])[0]
     assert not person['role_ids']
-    print "=> OK"
 
     # Disable account
-    print "AdmSetPersonEnabled(%d, False)" % person_id,
-    AdmSetPersonEnabled(admin, person_id, False)
-    person = AdmGetPersons(admin, [person_id])[0]
+    UpdatePerson(admin, person_id, {'enabled': False})
+    person = GetPersons(admin, [person_id])[0]
     assert not person['enabled']
-    print "=> OK"
 
     # Delete account
-    print "AdmDeletePerson(%d)" % person_id,
-    AdmDeletePerson(admin, person_id)
-    assert not AdmGetPersons(admin, [person_id])                         
+    print "DeletePerson(%d)" % person_id,
+    DeletePerson(admin, person_id)
+    assert not GetPersons(admin, [person_id])                         
     print "=> OK"
 
-print "AdmGetPersons",
-assert not AdmGetPersons(admin, person_ids)
+print "GetPersons",
+assert not GetPersons(admin, person_ids)
 print "=> []"
 
 # Delete node groups
 for nodegroup_id in nodegroup_ids:
-    print "AdmDeleteNodeGroup(%d)" % nodegroup_id,
-    AdmDeleteNodeGroup(admin, nodegroup_id)
-    assert not AdmGetNodeGroups(admin, [nodegroup_id])
+    print "DeleteNodeGroup(%d)" % nodegroup_id,
+    DeleteNodeGroup(admin, nodegroup_id)
+    assert not GetNodeGroups(admin, [nodegroup_id])
     print "=> OK"
 
-print "AdmGetNodeGroups",
-assert not AdmGetNodeGroups(admin, nodegroup_ids)
+print "GetNodeGroups",
+assert not GetNodeGroups(admin, nodegroup_ids)
 print "=> []"
 
 # Delete sites
 for site_id in site_ids:
-    print "AdmDeleteSite(%d)" % site_id,
-    AdmDeleteSite(admin, site_id)
-    assert not AdmGetSites(admin, [site_id])
+    print "DeleteSite(%d)" % site_id,
+    DeleteSite(admin, site_id)
+    assert not GetSites(admin, [site_id])
     print "=> OK"
 
-print "AdmGetSites",
-assert not AdmGetSites(admin, site_ids)
+print "GetSites",
+assert not GetSites(admin, site_ids)
 print "=> []"
