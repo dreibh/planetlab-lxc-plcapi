@@ -5,7 +5,7 @@ from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['description', 'min_role_id']
+             ['name', 'description', 'min_role_id']
 
 class UpdateSliceAttributeType(Method):
     """
