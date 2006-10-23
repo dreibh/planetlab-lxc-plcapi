@@ -42,6 +42,6 @@ class AddPerson(Method):
         person['last_name'] = last_name
         person['enabled'] = False
         person.sync()
-	self.object_ids = [person['person']]
+	self.object_ids = [person['person_id']]
 
         return person['person_id']
