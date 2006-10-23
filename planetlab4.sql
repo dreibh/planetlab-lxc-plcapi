@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.18 2006/10/20 17:56:23 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.19 2006/10/20 19:00:41 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -609,6 +609,7 @@ INSERT INTO event_types (event_type) VALUES ('AddTo');
 INSERT INTO event_types (event_type) VALUES ('Get');
 INSERT INTO event_types (event_type) VALUES ('Update');
 INSERT INTO event_types (event_type) VALUES ('Delete');
+INSERT INTO event_types (event_type) VALUES ('DeleteFrom');
 INSERT INTO event_types (event_type) VALUES ('Unknown');
 
 -- object types
