@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.19 2006/10/20 19:00:41 tmack Exp $
+-- $Id: planetlab4.sql,v 1.20 2006/10/23 16:25:46 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -683,6 +683,7 @@ events.event_type,
 events.object_type,
 events.fault_code,
 events.call,
+events.runtime,
 events.time
 From events
 LEFT JOIN event_objects USING (event_id);
