@@ -21,7 +21,7 @@ class Slice(Row):
     table_name = 'slices'
     primary_key = 'slice_id'
     fields = {
-        'slice_id': Parameter(int, "Slice type"),
+        'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
         'name': Parameter(str, "Slice name", max = 32),
         'instantiation': Parameter(str, "Slice instantiation state"),
@@ -181,6 +181,19 @@ class Slice(Row):
             self['node_ids'].remove(node_id)
             node['slice_ids'].remove(slice_id)
 
+    def sync(self, commit = True):
+        """
+        Add or update a slice.
+        """
+
+        # Before a new slice is added, delete expired slices
+        if 'slice_id' not in self:
+            expired = Slices(self.api, expires = -int(time.time())).values()
+            for slice in expired:
+                slice.delete(commit)
+
+        Row.sync(self, commit)
+
     def delete(self, commit = True):
         """
         Delete existing slice.
@@ -204,11 +217,18 @@ class Slices(Table):
     database.
     """
 
-    def __init__(self, api, slice_id_or_name_list = None):
+    def __init__(self, api, slice_id_or_name_list = None, expires = int(time.time())):
         self.api = api
 
         sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
               ", ".join(Slice.fields)
+
+        if expires is not None:
+            if expires >= 0:
+                sql += " AND expires > %(expires)d"
+            else:
+                expires = -expires
+                sql += " AND expires < %(expires)d"
 
         if slice_id_or_name_list:
             # Separate the list into integers and strings
@@ -223,7 +243,7 @@ class Slices(Table):
                 sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
             sql += ")"
 
-        rows = self.api.db.selectall(sql)
+        rows = self.api.db.selectall(sql, locals())
 
         for row in rows:
             self[row['slice_id']] = slice = Slice(api, row)
