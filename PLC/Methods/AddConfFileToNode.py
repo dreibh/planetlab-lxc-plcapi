@@ -2,7 +2,6 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.ConfFiles import ConfFile, ConfFiles
-from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import PasswordAuth
 
