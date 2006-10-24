@@ -32,9 +32,4 @@ class AdmGetSitePowerControlUnits(Method):
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to view the PCUs at that site"
 
-        pcus = PCUs(self.api, site['pcu_ids']).values()
-
-	# turn each pcu into a real dict
-	pcus = [dict(pcu) for pcu in pcus]
-
-        return pcus
+        return PCUs(self.api, site['pcu_ids']).values()

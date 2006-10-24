@@ -53,8 +53,4 @@ class GetSliceAttributes(Method):
             if not slice_attribute_ids:
                 return []
 
-        slice_attributes = SliceAttributes(self.api, slice_attribute_ids).values()
-
-	slice_attributes = [dict(slice_attribute) for slice_attribute in slice_attributes]
-	
-        return slice_attributes
+        return SliceAttributes(self.api, slice_attribute_ids).values()

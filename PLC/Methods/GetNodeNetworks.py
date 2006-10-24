@@ -22,9 +22,4 @@ class GetNodeNetworks(Method):
     returns = [NodeNetwork.fields]
 
     def call(self, auth, nodenetwork_id_or_ip_list = None):
-        nodenetworks = NodeNetworks(self.api, nodenetwork_id_or_ip_list).values()
-
-        # Cast from NodeNetwork to real dict
-        nodenetworks = [dict(nodenetwork) for nodenetwork in nodenetworks]
-       	
-	return nodenetworks
+        return NodeNetworks(self.api, nodenetwork_id_or_ip_list).values()

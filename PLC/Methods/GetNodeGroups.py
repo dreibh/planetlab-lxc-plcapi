@@ -22,10 +22,4 @@ class GetNodeGroups(Method):
     returns = [NodeGroup.fields]
   
     def call(self, auth, nodegroup_id_or_name_list = None):
-        # Get node group details
-	nodegroups = NodeGroups(self.api, nodegroup_id_or_name_list).values()
-
-	# Turn each nodegroup into a real dict.
-        nodegroups = [dict(nodegroup) for nodegroup in nodegroups]
-
-        return nodegroups
+	return NodeGroups(self.api, nodegroup_id_or_name_list).values()

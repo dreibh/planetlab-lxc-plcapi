@@ -50,7 +50,4 @@ class GetSlices(Method):
             can_view = lambda slice: slice['slice_id'] in valid_slice_ids
             slices = filter(can_view, slices)
 
-	# Turn each slice into a real dict
-	slices = [dict(slice) for slice in slices]
-
         return slices

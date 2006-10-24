@@ -21,10 +21,4 @@ class GetSliceAttributeTypes(Method):
     returns = [SliceAttributeType.fields]
 
     def call(self, auth, attribute_type_id_or_name_list = None):
-        # Get slice attribute type information
-        attribute_types = SliceAttributeTypes(self.api, attribute_type_id_or_name_list).values()
-	
-	# Turn each attribute into a real dict.
-	attribute_types = [dict(attribute_type) for attribute_type in attribute_types]
-
-        return attribute_types
+        return SliceAttributeTypes(self.api, attribute_type_id_or_name_list).values()

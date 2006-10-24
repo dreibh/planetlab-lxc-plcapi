@@ -51,7 +51,4 @@ class GetPersons(Method):
         if 'admin' not in self.caller['roles']:
             persons = filter(self.caller.can_view, persons)
 
-        # Turn each account into a real dict
-        persons = [dict(person) for person in persons]
-
         return persons

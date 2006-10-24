@@ -21,9 +21,4 @@ class GetAddresses(Method):
     returns = [Address.fields]
 
     def call(self, auth, address_id_list = None):
-        addresses = Addresses(self.api, address_id_list).values()
-	
-	# Turn each address into a real dict
-	addresses = [dict(address) for address in addresses]
-
-        return addresses
+        return Addresses(self.api, address_id_list).values()

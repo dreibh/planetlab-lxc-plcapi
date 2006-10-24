@@ -29,9 +29,4 @@ class GetKeys(Method):
             if not key_ids:
                 return []
 
-	keys = Keys(self.api, key_ids).values()
-	
-	# Turn each key into a real dict
-	keys = [dict(key) for key in keys]
-		
-        return keys
+	return Keys(self.api, key_ids).values()

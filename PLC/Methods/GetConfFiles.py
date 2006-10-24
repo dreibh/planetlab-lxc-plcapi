@@ -21,6 +21,4 @@ class GetConfFiles(Method):
     returns = [ConfFile.fields]
 
     def call(self, auth, conf_file_ids = None):
-        conf_files = ConfFiles(self.api, conf_file_ids).values()
-        conf_files = [dict(conf_file) for conf_file in conf_files]
-        return conf_files
+        return ConfFiles(self.api, conf_file_ids).values()

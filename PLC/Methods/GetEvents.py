@@ -65,10 +65,5 @@ class GetEvents(Method):
 			raise PLCInvalidArgument, "Cannot specify multiple object types when object_ids are specified"
 	
         # Get node information
-        events = Events(self.api, event_id_list, person_id_list, event_type_list, \
+        return Events(self.api, event_id_list, person_id_list, event_type_list, \
 		        object_type_list, object_id_list, fault_code_list).values()
-
-        # turn each node into a real dict.
-        events = [dict(event) for event in events]
-                    
-        return events

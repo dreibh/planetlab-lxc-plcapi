@@ -18,10 +18,4 @@ class GetRoles(Method):
     returns = [Role.fields]
 
     def call(self, auth):
-        
-	roles = Roles(self.api).values()
-
-	#turn each role into a real dict
-	roles = [dict(role) for role in roles]
-
-	return roles
+	return Roles(self.api).values()
