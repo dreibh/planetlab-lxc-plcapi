@@ -16,15 +16,13 @@ class SliceAttributeType(Row):
     join_tables = ['slice_attribute']
     fields = {
         'attribute_type_id': Parameter(int, "Slice attribute type identifier"),
-        'name': Parameter(str, "Slice attribute type name", max = 100),
+        'name': Parameter(str, "Slice attribute type name", max = 100, optional = False),
         'description': Parameter(str, "Slice attribute type description", max = 254),
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }
 
     def validate_name(self, name):
-        name = name.strip()
-
-        if not name:
+        if not len(name):
             raise PLCInvalidArgument, "Slice attribute type name must be set"
 
         conflicts = SliceAttributeTypes(self.api, [name])

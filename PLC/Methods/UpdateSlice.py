@@ -28,13 +28,15 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    update_fields = dict(filter(can_update, Slice.fields.items()))
+    slice_fields = dict(filter(can_update, Slice.fields.items()))
+    for field in slice_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-        update_fields
+        slice_fields
         ]
 
     returns = Parameter(int, '1 if successful')

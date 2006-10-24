@@ -5,7 +5,7 @@ from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['description', 'min_role_id']
+             ['name', 'description', 'min_role_id']
 
 class AddSliceAttributeType(Method):
     """
@@ -18,12 +18,11 @@ class AddSliceAttributeType(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
+    attribute_type_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        SliceAttributeType.fields['name'],
-        update_fields
+        attribute_type_fields
         ]
 
     returns = Parameter(int, 'New attribute_id (> 0) if successful')
@@ -32,11 +31,11 @@ class AddSliceAttributeType(Method):
     object_type = 'SliceAttributeType'
     object_ids = []
 
-    def call(self, auth, name, attribute_type_fields = {}):
+    def call(self, auth, attribute_type_fields = {}):
         attribute_type_fields = dict(filter(can_update, attribute_type_fields.items()))
         attribute_type = SliceAttributeType(self.api, attribute_type_fields)
-        attribute_type['name'] = name
         attribute_type.sync()
+
 	self.object_ids = [attribute_type['attribute_type_id']]
 
         return attribute_type['attribute_type_id']

@@ -7,7 +7,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['boot_state', 'model', 'version']
+             ['hostname', 'site_id', 'boot_state', 'model', 'version']
 
 class AddNode(Method):
     """
@@ -22,14 +22,11 @@ class AddNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    update_fields = dict(filter(can_update, Node.fields.items()))
+    node_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        Mixed(Site.fields['site_id'],
-              Site.fields['login_base']),
-        Node.fields['hostname'],
-        update_fields
+        node_fields
         ]
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
@@ -38,11 +35,11 @@ class AddNode(Method):
     object_type = 'Node'
     object_ids = []
 
-    def call(self, auth, site_id_or_login_base, hostname, node_fields = {}):
+    def call(self, auth, node_fields = {}):
         node_fields = dict(filter(can_update, node_fields.items()))
         
         # Get site information
-        sites = Sites(self.api, [site_id_or_login_base])
+        sites = Sites(self.api, [node_fields['site_id']])
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
@@ -61,9 +58,8 @@ class AddNode(Method):
                 assert self.caller['person_id'] in site['person_ids']
 
         node = Node(self.api, node_fields)
-        node['hostname'] = hostname
-        node['site_id'] = site['site_id']
         node.sync()
-	self.object_ids = [node['node_id']]	
+
+	self.object_ids = [site['site_id'], node['node_id']]	
 
         return node['node_id']

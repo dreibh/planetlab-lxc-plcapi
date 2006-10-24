@@ -17,13 +17,15 @@ class UpdateSliceAttributeType(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
+    attribute_type_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
+    for field in attribute_type_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(SliceAttributeType.fields['attribute_type_id'],
               SliceAttributeType.fields['name']),
-        update_fields
+        attribute_type_fields
         ]
 
     returns = Parameter(int, '1 if successful')

@@ -27,13 +27,15 @@ class UpdatePerson(Method):
 
     roles = ['admin', 'pi', 'user', 'tech']
 
-    update_fields = dict(filter(can_update, Person.fields.items()))
+    person_fields = dict(filter(can_update, Person.fields.items()))
+    for field in person_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-        update_fields
+        person_fields
         ]
 
     returns = Parameter(int, '1 if successful')

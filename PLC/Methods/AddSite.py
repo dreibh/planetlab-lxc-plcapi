@@ -5,7 +5,8 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['is_public', 'latitude', 'longitude', 'url']
+             ['name', 'abbreviated_name', 'login_base',
+              'is_public', 'latitude', 'longitude', 'url']
 
 class AddSite(Method):
     """
@@ -18,14 +19,11 @@ class AddSite(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, Site.fields.items()))
+    site_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        Site.fields['name'],
-        Site.fields['abbreviated_name'],
-        Site.fields['login_base'],
-        update_fields
+        site_fields
         ]
 
     returns = Parameter(int, 'New site_id (> 0) if successful')
@@ -34,13 +32,11 @@ class AddSite(Method):
     object_type = 'Site'
     object_ids = []
 
-    def call(self, auth, name, abbreviated_name, login_base, site_fields = {}):
+    def call(self, auth, site_fields):
         site_fields = dict(filter(can_update, site_fields.items()))
         site = Site(self.api, site_fields)
-        site['name'] = name
-        site['abbreviated_name'] = abbreviated_name
-        site['login_base'] = login_base
         site.sync()
+
 	self.object_ids = [site['site_id']]
         
 	return site['site_id']

@@ -5,7 +5,7 @@ from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['description']
+             ['name', 'description']
 
 class AddNodeGroup(Method):
     """
@@ -17,12 +17,11 @@ class AddNodeGroup(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        NodeGroup.fields['name'],
-        update_fields
+        nodegroup_fields
         ]
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
@@ -31,11 +30,11 @@ class AddNodeGroup(Method):
     object_type = 'NodeGroup'
     object_ids = []
 
-    def call(self, auth, name, nodegroup_fields = {}):
+    def call(self, auth, nodegroup_fields = {}):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
         nodegroup = NodeGroup(self.api, nodegroup_fields)
-        nodegroup['name'] = name
         nodegroup.sync()
+
 	self.object_ids = [nodegroup['nodegroup_id']]
 
         return nodegroup['nodegroup_id']

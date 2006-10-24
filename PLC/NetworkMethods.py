@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkMethods.py,v 1.1 2006/10/10 20:23:49 mlhuang Exp $
+# $Id: NetworkMethods.py,v 1.2 2006/10/20 17:46:02 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,11 +25,8 @@ class NetworkMethod(Row):
         }
 
     def validate_method(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Network method must be specified"
 	
 	# Make sure network method does not alredy exist

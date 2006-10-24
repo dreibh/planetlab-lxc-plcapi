@@ -19,12 +19,14 @@ class UpdateKey(Method):
 
     roles = ['admin', 'pi', 'tech', 'user']
 
-    update_fields = dict(filter(can_update, Key.fields.items()))
+    key_fields = dict(filter(can_update, Key.fields.items()))
+    for field in key_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Key.fields['key_id'],
-        update_fields
+        key_fields
         ]
 
     returns = Parameter(int, '1 if successful')

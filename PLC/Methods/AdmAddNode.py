@@ -6,6 +6,9 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 from PLC.Methods.AddNode import AddNode
 
+can_update = lambda (field, value): field in \
+             ['model', 'version']
+
 class AdmAddNode(AddNode):
     """
     Deprecated. See AddNode.
@@ -13,15 +16,18 @@ class AdmAddNode(AddNode):
 
     status = "deprecated"
 
+    node_fields = dict(filter(can_update, Node.fields.items()))
+
     accepts = [
         PasswordAuth(),
-        Mixed(Site.fields['site_id'],
-              Site.fields['login_base']),
+        Site.fields['site_id'],
         Node.fields['hostname'],
         Node.fields['boot_state'],
-        AddNode.update_fields
+        node_fields
         ]
 
-    def call(self, auth, site_id_or_login_base, hostname, boot_state, node_fields = {}):
+    def call(self, auth, site_id, hostname, boot_state, node_fields = {}):
+        node_fields['site_id'] = site_id
+        node_fields['hostname'] = hostname
         node_fields['boot_state'] = boot_state
-        return AddNode.call(self, auth, site_id_or_login_base, hostname, node_fields)
+        return AddNode.call(self, auth, node_fields)

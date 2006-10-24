@@ -5,6 +5,8 @@ from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
 
+can_update = lambda (field, value): field not in ['key_id']
+
 class AddPersonKey(Method):
     """
     Adds a new key to the specified account.
@@ -16,12 +18,13 @@ class AddPersonKey(Method):
 
     roles = ['admin', 'pi', 'tech', 'user']
 
+    key_fields = dict(filter(can_update, Key.fields.items()))
+
     accepts = [
         PasswordAuth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-        Key.fields['key_type'],
-        Key.fields['key']
+        key_fields
         ]
 
     returns = Parameter(int, 'New key_id (> 0) if successful')
@@ -30,7 +33,9 @@ class AddPersonKey(Method):
     object_type = 'Key'
     object_ids = []
 
-    def call(self, auth, person_id_or_email, key_type, key_value):
+    def call(self, auth, person_id_or_email, key_fields):
+        key_fields = dict(filter(can_update, key_fields.items()))
+
         # Get account details
         persons = Persons(self.api, [person_id_or_email]).values()
         if not persons:
@@ -42,12 +47,10 @@ class AddPersonKey(Method):
             if person['person_id'] != self.caller['person_id']:
                 raise PLCPermissionDenied, "You may only modify your own keys"
 
-        key = Key(self.api)
-        key['person_id'] = person['person_id']
-        key['key_type'] = key_type
-        key['key'] = key_value
+        key = Key(self.api, key_fields)
         key.sync(commit = False)
         person.add_key(key, commit = True)
-        self.object_ids = [key['key_id']]
+
+        self.object_ids = [person['person_id'], key['key_id']]
 
         return key['key_id']

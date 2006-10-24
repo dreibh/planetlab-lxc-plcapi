@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.4 2006/10/16 21:57:05 mlhuang Exp $
+# $Id: Roles.py,v 1.5 2006/10/20 17:53:54 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -35,11 +35,8 @@ class Role(Row):
         return role_id
 
     def validate_name(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Role must be specified"
 	
 	# Make sure role does not already exist

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.2 2006/10/23 20:39:16 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.3 2006/10/24 13:46:43 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,8 +25,8 @@ class ConfFile(Row):
     fields = {
         'conf_file_id': Parameter(int, "Configuration file identifier"),
         'enabled': Parameter(bool, "Configuration file is active"),
-        'source': Parameter(str, "Relative path on the boot server where file can be downloaded", max = 255),
-        'dest': Parameter(str, "Absolute path where file should be installed", max = 255),
+        'source': Parameter(str, "Relative path on the boot server where file can be downloaded", max = 255, optional = False),
+        'dest': Parameter(str, "Absolute path where file should be installed", max = 255, optional = False),
         'file_permissions': Parameter(str, "chmod(1) permissions", max = 20),
         'file_owner': Parameter(str, "chown(1) owner", max = 50),
         'file_group': Parameter(str, "chgrp(1) owner", max = 50),

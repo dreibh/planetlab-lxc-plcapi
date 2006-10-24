@@ -19,4 +19,4 @@ class AdmAddNodeGroup(AddNodeGroup):
         ]
 
     def call(self, auth, name, description):
-        return AddNodeGroup.call(self, auth, name, {'description': description})
+        return AddNodeGroup.call(self, auth, {'name': name, 'description': description})

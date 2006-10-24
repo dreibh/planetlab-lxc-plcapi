@@ -27,13 +27,15 @@ class UpdateSite(Method):
 
     roles = ['admin', 'pi']
 
-    update_fields = dict(filter(can_update, Site.fields.items()))
+    site_fields = dict(filter(can_update, Site.fields.items()))
+    for field in site_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
-        update_fields
+        site_fields
         ]
 
     returns = Parameter(int, '1 if successful')

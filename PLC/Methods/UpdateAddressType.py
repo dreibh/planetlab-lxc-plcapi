@@ -16,13 +16,15 @@ class UpdateAddressType(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, AddressType.fields.items()))
+    address_type_fields = dict(filter(can_update, AddressType.fields.items()))
+    for field in address_type_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(AddressType.fields['address_type_id'],
               AddressType.fields['name']),
-        update_fields
+        address_type_fields
         ]
 
     returns = Parameter(int, '1 if successful')

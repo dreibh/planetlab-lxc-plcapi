@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkTypes.py,v 1.1 2006/10/10 20:24:06 mlhuang Exp $
+# $Id: NetworkTypes.py,v 1.2 2006/10/20 17:47:34 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,11 +25,8 @@ class NetworkType(Row):
         }
 
     def validate_type(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Network type must be specified"
 	
 	# Make sure network type does not alredy exist

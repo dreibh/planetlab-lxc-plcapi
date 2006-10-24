@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: BootStates.py,v 1.4 2006/10/10 21:54:20 mlhuang Exp $
+# $Id: BootStates.py,v 1.5 2006/10/20 17:43:55 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,11 +25,8 @@ class BootState(Row):
         }
 
     def validate_boot_state(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Boot state must be specified"
 	
 	# Make sure boot state does not alredy exist

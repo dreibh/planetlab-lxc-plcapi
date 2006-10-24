@@ -16,13 +16,15 @@ class UpdateNodeGroup(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    for field in nodegroup_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(NodeGroup.fields['nodegroup_id'],
 	      NodeGroup.fields['name']),
-        update_fields
+        nodegroup_fields
         ]
 
     returns = Parameter(int, '1 if successful')

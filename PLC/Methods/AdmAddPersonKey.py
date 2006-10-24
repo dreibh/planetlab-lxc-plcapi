@@ -24,4 +24,5 @@ class AdmAddPersonKey(AddPersonKey):
         ]
 
     def call(self, auth, person_id_or_email, key_type, key_value, is_primary):
-        return AddPersonKey.call(self, auth, person_id_or_email, key_type, key_value)
+        key_fields = {'key_type': key_type, 'key_value': key_value}
+        return AddPersonKey.call(self, auth, person_id_or_email, key_fields)

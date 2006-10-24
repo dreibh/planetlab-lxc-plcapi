@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: KeyTypes.py,v 1.1 2006/10/10 22:09:31 mlhuang Exp $
+# $Id: KeyTypes.py,v 1.2 2006/10/20 17:44:57 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,11 +25,8 @@ class KeyType(Row):
         }
 
     def validate_key_type(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Key type must be specified"
 	
 	# Make sure key type does not alredy exist

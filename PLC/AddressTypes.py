@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.3 2006/10/10 21:52:08 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.4 2006/10/20 17:43:30 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -23,16 +23,13 @@ class AddressType(Row):
     join_tables = ['address_address_type']
     fields = {
         'address_type_id': Parameter(int, "Address type identifier"),
-        'name': Parameter(str, "Address type", max = 20),
+        'name': Parameter(str, "Address type", max = 20, optional = False),
         'description': Parameter(str, "Address type description", max = 254),
         }
 
     def validate_name(self, name):
-	# Remove leading and trailing spaces
-	name = name.strip()
-
-	# Make sure name is not blank after we removed the spaces
-        if not name:
+	# Make sure name is not blank
+        if not len(name):
             raise PLCInvalidArgument, "Address type must be specified"
 	
 	# Make sure address type does not already exist

@@ -21,13 +21,15 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    update_fields = dict(filter(can_update, Node.fields.items()))
+    node_fields = dict(filter(can_update, Node.fields.items()))
+    for field in node_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
-        update_fields
+        node_fields
         ]
 
     returns = Parameter(int, '1 if successful')

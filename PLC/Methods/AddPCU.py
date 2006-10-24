@@ -6,7 +6,8 @@ from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
 can_update = lambda (field, value): field in \
-             ['hostname', 'protocol',
+             ['site_id',
+              'ip', 'hostname', 'protocol',
               'username', 'password',
               'model', 'notes']
 
@@ -23,14 +24,11 @@ class AddPCU(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    update_fields = dict(filter(can_update, PCU.fields.items()))
+    pcu_fields = dict(filter(can_update, PCU.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        Mixed(Site.fields['site_id'],
-              Site.fields['login_base']),
-        PCU.fields['ip'],
-        update_fields
+        pcu_fields
         ]
 
     returns = Parameter(int, 'New pcu_id (> 0) if successful')
@@ -39,11 +37,11 @@ class AddPCU(Method):
     object_type = 'PCU'
     object_ids = []
 
-    def call(self, auth, site_id_or_login_base, ip, pcu_fields = {}):
+    def call(self, auth, pcu_fields = {}):
         pcu_fields = dict(filter(can_update, pcu_fields.items()))
 
         # Get associated site details
-        sites = Sites(self.api, [site_id_or_login_base]).values()
+        sites = Sites(self.api, [pcu_fields['site_id']]).values()
         if not sites:
             raise PLCInvalidArgument, "No such site"
         site = sites[0]
@@ -53,9 +51,8 @@ class AddPCU(Method):
                 raise PLCPermissionDenied, "Not allowed to add a PCU to that site"
 
         pcu = PCU(self.api, pcu_fields)
-        pcu['site_id'] = site['site_id']
-        pcu['ip'] = ip
         pcu.sync()
-	self.object_ids = [pcu['pcu_id']]	
+
+	self.object_ids = [site['site_id'], pcu['pcu_id']]
 
         return pcu['pcu_id']

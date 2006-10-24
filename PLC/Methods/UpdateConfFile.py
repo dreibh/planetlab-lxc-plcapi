@@ -17,12 +17,14 @@ class UpdateConfFile(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, ConfFile.fields.items()))
+    conf_file_fields = dict(filter(can_update, ConfFile.fields.items()))
+    for field in conf_file_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         ConfFile.fields['conf_file_id'],
-        update_fields
+        conf_file_fields
         ]
 
     returns = Parameter(int, '1 if successful')

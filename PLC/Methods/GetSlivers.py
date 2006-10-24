@@ -35,7 +35,7 @@ class GetSlivers(Method):
 
     returns = [{
         'timestamp': Parameter(int, "Timestamp of this call, in seconds since UNIX epoch"),
-        'id': Node.fields['node_id'],
+        'node_id': Node.fields['node_id'],
         'hostname': Node.fields['hostname'],
         'boot_state': Node.fields['boot_state'],
         'networks': [NodeNetwork.fields],
@@ -43,7 +43,7 @@ class GetSlivers(Method):
         'conf_files': [ConfFile.fields],
         'slivers': [{
             'name': Slice.fields['name'],
-            'id': Slice.fields['slice_id'],
+            'slice_id': Slice.fields['slice_id'],
             'instantiation': Slice.fields['instantiation'],
             'expires': Slice.fields['expires'],
             'keys': [{
@@ -167,7 +167,7 @@ class GetSlivers(Method):
 
             nodes.append({
                 'timestamp': timestamp,
-                'id': node['node_id'],
+                'node_id': node['node_id'],
                 'hostname': node['hostname'],
                 'networks': networks,
                 'groups': groups,

@@ -25,13 +25,15 @@ class UpdateNodeNetwork(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    update_fields = dict(filter(can_update, NodeNetwork.fields.items()))
+    nodenetwork_fields = dict(filter(can_update, NodeNetwork.fields.items()))
+    for field in nodenetwork_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
 	Mixed(NodeNetwork.fields['nodenetwork_id'],
 	      NodeNetwork.fields['ip']),
-     	update_fields
+     	nodenetwork_fields
         ]
 
     returns = Parameter(int, '1 if successful')

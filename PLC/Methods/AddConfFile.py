@@ -17,13 +17,11 @@ class AddConfFile(Method):
 
     roles = ['admin']
 
-    update_fields = dict(filter(can_update, ConfFile.fields.items()))
+    conf_file_fields = dict(filter(can_update, ConfFile.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        ConfFile.fields['source'],
-        ConfFile.fields['dest'],
-        update_fields
+        conf_file_fields
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -32,12 +30,11 @@ class AddConfFile(Method):
     object_type = 'ConfFile'
     object_ids = []
 
-    def call(self, auth, source, dest, conf_file_fields = {}):
+    def call(self, auth, conf_file_fields = {}):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
         conf_file = ConfFile(self.api, conf_file_fields)
-        conf_file['source'] = source
-        conf_file['dest'] = dest
         conf_file.sync()
+
 	self.object_ids = [conf_file['conf_file_id']]
 
         return 1

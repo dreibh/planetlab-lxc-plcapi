@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.11 2006/10/11 15:40:25 mlhuang Exp $
+# $Id: Persons.py,v 1.12 2006/10/20 17:52:24 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -33,15 +33,15 @@ class Person(Row):
     primary_key = 'person_id'
     fields = {
         'person_id': Parameter(int, "Account identifier"),
-        'first_name': Parameter(str, "Given name", max = 128),
-        'last_name': Parameter(str, "Surname", max = 128),
+        'first_name': Parameter(str, "Given name", max = 128, optional = False),
+        'last_name': Parameter(str, "Surname", max = 128, optional = False),
         'title': Parameter(str, "Title", max = 128),
-        'email': Parameter(str, "Primary e-mail address", max = 254),
+        'email': Parameter(str, "Primary e-mail address", max = 254, optional = False),
         'phone': Parameter(str, "Telephone number", max = 64),
         'url': Parameter(str, "Home page", max = 254),
         'bio': Parameter(str, "Biography", max = 254),
         'enabled': Parameter(bool, "Has been enabled"),
-        'password': Parameter(str, "Account password in crypt() form", max = 254),
+        'password': Parameter(str, "Account password in crypt() form", max = 254, optional = False),
         'last_updated': Parameter(str, "Date and time of last update", ro = True),
         'date_created': Parameter(str, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers", ro = True),

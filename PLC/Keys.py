@@ -28,8 +28,6 @@ class Key(Row):
 	return key_type
 
     def validate_key(self, key):
-        key = key.strip()
-
 	# Key must not be blacklisted
 	rows = self.api.db.selectall("SELECT 1 from keys" \
 				     " WHERE key = %(key)s" \

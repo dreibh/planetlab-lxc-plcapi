@@ -20,12 +20,14 @@ class UpdateAddress(Method):
 
     roles = ['admin', 'pi']
 
-    update_fields = dict(filter(can_update, Address.fields.items()))
+    address_fields = dict(filter(can_update, Address.fields.items()))
+    for field in address_fields.values():
+        field.optional = True
 
     accepts = [
         PasswordAuth(),
         Address.fields['address_id'],
-        update_fields
+        address_fields
         ]
 
     returns = Parameter(int, '1 if successful')

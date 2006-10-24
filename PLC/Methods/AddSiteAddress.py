@@ -21,13 +21,13 @@ class AddSiteAddress(Method):
 
     roles = ['admin', 'pi']
 
-    update_fields = dict(filter(can_update, Address.fields.items()))
+    address_fields = dict(filter(can_update, Address.fields.items()))
 
     accepts = [
         PasswordAuth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
-        update_fields
+        address_fields
         ]
 
     returns = Parameter(int, 'New address_id (> 0) if successful')
@@ -50,8 +50,9 @@ class AddSiteAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address = Address(self.api, address_fields)
-        address['site_id'] = site['site_id']
-        address.sync()
-	self.object_ids = [address['address_id']]
+        address.sync(commit = False)
+        site.add_address(address, commit = True)
+
+	self.object_ids = [site['site_id'], address['address_id']]
 
         return address['address_id']

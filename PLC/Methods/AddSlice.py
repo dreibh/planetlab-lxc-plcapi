@@ -8,7 +8,7 @@ from PLC.Auth import PasswordAuth
 from PLC.Sites import Site, Sites
 
 can_update = lambda (field, value): field in \
-             ['instantiation', 'url', 'description', 'max_nodes']
+             ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
 class AddSlice(Method):
     """
@@ -29,12 +29,11 @@ class AddSlice(Method):
 
     roles = ['admin', 'pi']
 
-    update_fields = dict(filter(can_update, Slice.fields.items()))
+    slice_fields = dict(filter(can_update, Slice.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        Slice.fields['name'],
-        update_fields
+        slice_fields
         ]
 
     returns = Parameter(int, 'New slice_id (> 0) if successful')
@@ -43,13 +42,14 @@ class AddSlice(Method):
     object_type = 'Slice'
     object_ids = []
 
-    def call(self, auth, name, slice_fields = {}):
+    def call(self, auth, slice_fields = {}):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 
         # 1. Lowercase.
         # 2. Begins with login_base (only letters).
         # 3. Then single underscore after login_base.
         # 4. Then letters, numbers, or underscores.
+        name = slice_fields['name']
         good_name = r'^[a-z]+_[a-z0-9_]+$'
         if not name or \
            not re.match(good_name, name):
@@ -71,9 +71,9 @@ class AddSlice(Method):
 
         slice = Slice(self.api, slice_fields)
         slice['creator_person_id'] = self.caller['person_id']
-        slice['name'] = name
         slice['site_id'] = site['site_id']
         slice.sync()
+
 	self.object_ids = [slice['slice_id']]
 
         return slice['slice_id']

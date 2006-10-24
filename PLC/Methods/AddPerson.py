@@ -5,7 +5,8 @@ from PLC.Persons import Person, Persons
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['title', 'email', 'password', 'phone', 'url', 'bio']
+             ['first_name', 'last_name', 'title',
+              'email', 'password', 'phone', 'url', 'bio']
 
 class AddPerson(Method):
     """
@@ -20,13 +21,11 @@ class AddPerson(Method):
 
     roles = ['admin', 'pi']
 
-    update_fields = dict(filter(can_update, Person.fields.items()))
+    person_fields = dict(filter(can_update, Person.fields.items()))
 
     accepts = [
         PasswordAuth(),
-        Person.fields['first_name'],
-        Person.fields['last_name'],
-        update_fields
+        person_fields
         ]
 
     returns = Parameter(int, 'New person_id (> 0) if successful')
@@ -35,13 +34,11 @@ class AddPerson(Method):
     object_type = 'Person'
     object_ids = []
 
-    def call(self, auth, first_name, last_name, person_fields = {}):
+    def call(self, auth, person_fields = {}):
         person_fields = dict(filter(can_update, person_fields.items()))
         person = Person(self.api, person_fields)
-        person['first_name'] = first_name
-        person['last_name'] = last_name
-        person['enabled'] = False
         person.sync()
+
 	self.object_ids = [person['person_id']]
 
         return person['person_id']
