@@ -11,7 +11,7 @@ class Address(Row):
 
     table_name = 'addresses'
     primary_key = 'address_id'
-    join_tables = ['address_address_type']
+    join_tables = ['address_address_type', 'site_address']
     fields = {
         'address_id': Parameter(int, "Address identifier"),
         'line1': Parameter(str, "Address line 1", max = 254, optional = False),
@@ -21,7 +21,6 @@ class Address(Row):
         'state': Parameter(str, "State or province", max = 254, optional = False),
         'postalcode': Parameter(str, "Postal code", max = 64, optional = False),
         'country': Parameter(str, "Country", max = 128, optional = False),
-        'site_id': Parameter(str, "Site identifier"),
         'address_type_ids': Parameter([int], "Address type identifiers", ro = True),
         'address_types': Parameter([str], "Address types", ro = True),
         }
