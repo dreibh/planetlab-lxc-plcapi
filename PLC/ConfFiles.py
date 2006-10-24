@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.1 2006/10/20 17:44:09 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.2 2006/10/23 20:39:16 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -48,7 +48,7 @@ class ConfFile(Row):
         assert isinstance(node, Node)
         assert 'node_id' in node
 
-        conf_file_id = self['pcu_id']
+        conf_file_id = self['conf_file_id']
         node_id = node['node_id']
 
         if node_id not in self['node_ids']:
@@ -95,7 +95,7 @@ class ConfFile(Row):
         assert isinstance(nodegroup, NodeGroup)
         assert 'nodegroup_id' in nodegroup
 
-        conf_file_id = self['pcu_id']
+        conf_file_id = self['conf_file_id']
         nodegroup_id = nodegroup['nodegroup_id']
 
         if nodegroup_id not in self['nodegroup_ids']:
