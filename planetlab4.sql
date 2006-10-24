@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.20 2006/10/23 16:25:46 tmack Exp $
+-- $Id: planetlab4.sql,v 1.21 2006/10/23 20:44:16 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -131,7 +131,6 @@ INSERT INTO address_types (name) VALUES ('Billing');
 -- Mailing addresses
 CREATE TABLE addresses (
     address_id serial PRIMARY KEY, -- Address identifier
-    site_id integer REFERENCES sites NOT NULL, -- Site identifier
     line1 text NOT NULL, -- Address line 1
     line2 text, -- Address line 2
     line3 text, -- Address line 3
@@ -144,8 +143,11 @@ CREATE TABLE addresses (
 -- Each mailing address can be one of several types
 CREATE TABLE address_address_type (
     address_id integer REFERENCES addresses NOT NULL, -- Address identifier
-    address_type_id integer REFERENCES address_types NOT NULL -- Address type
+    address_type_id integer REFERENCES address_types NOT NULL, -- Address type
+    PRIMARY KEY (address_id, address_type_id)
 ) WITH OIDS;
+CREATE INDEX address_address_type_address_id_idx ON address_address_type (address_id);
+CREATE INDEX address_address_type_address_type_id_idx ON address_address_type (address_type_id);
 
 CREATE VIEW address_address_types AS
 SELECT address_id,
@@ -155,10 +157,18 @@ FROM address_address_type
 LEFT JOIN address_types USING (address_type_id)
 GROUP BY address_id;
 
+CREATE TABLE site_address (
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
+    address_id integer REFERENCES addresses NOT NULL, -- Address identifier
+    PRIMARY KEY (site_id, address_id)
+) WITH OIDS;
+CREATE INDEX site_address_site_id_idx ON site_address (site_id);
+CREATE INDEX site_address_address_id_idx ON site_address (address_id);
+
 CREATE VIEW site_addresses AS
 SELECT site_id,
 array_to_string(array_accum(address_id), ',') AS address_ids
-FROM addresses
+FROM site_address
 GROUP BY site_id;
 
 --------------------------------------------------------------------------------
@@ -512,7 +522,8 @@ CREATE INDEX slices_name_idx ON slices (name) WHERE is_deleted IS false;
 -- Slivers
 CREATE TABLE slice_node (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
-    node_id integer REFERENCES nodes NOT NULL -- Node identifier
+    node_id integer REFERENCES nodes NOT NULL, -- Node identifier
+    PRIMARY KEY (slice_id, node_id)
 ) WITH OIDS;
 CREATE INDEX slice_node_slice_id_idx ON slice_node (slice_id);
 CREATE INDEX slice_node_node_id_idx ON slice_node (node_id);
@@ -821,7 +832,6 @@ LEFT JOIN site_pcus USING (site_id);
 CREATE VIEW view_addresses AS
 SELECT
 addresses.address_id,
-addresses.site_id,
 addresses.line1,
 addresses.line2,
 addresses.line3,
