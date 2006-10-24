@@ -112,7 +112,7 @@ class Row(dict):
                   (table, key,
                    self.api.db.param(self.primary_key, self[self.primary_key]))
 
-        self.api.db.do(sql, self)
+            self.api.db.do(sql, self)
 
         if commit:
             self.api.db.commit()
