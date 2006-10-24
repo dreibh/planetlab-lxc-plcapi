@@ -23,9 +23,9 @@ class Site(Row):
     primary_key = 'site_id'
     fields = {
         'site_id': Parameter(int, "Site identifier"),
-        'name': Parameter(str, "Full site name", max = 254),
-        'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50),
-        'login_base': Parameter(str, "Site slice prefix", max = 20),
+        'name': Parameter(str, "Full site name", max = 254, optional = False),
+        'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50, optional = False),
+        'login_base': Parameter(str, "Site slice prefix", max = 20, optional = False),
         'is_public': Parameter(bool, "Publicly viewable site"),
         'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0),
         'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0),
@@ -42,8 +42,7 @@ class Site(Row):
         }
 
     def validate_name(self, name):
-        name = name.strip()
-        if not name:
+        if not len(name):
             raise PLCInvalidArgument, "Name must be specified"
 
         return name
@@ -51,13 +50,11 @@ class Site(Row):
     validate_abbreviated_name = validate_name
 
     def validate_login_base(self, login_base):
-        login_base = login_base.strip().lower()
-
-        if not login_base:
+        if not len(login_base):
             raise PLCInvalidArgument, "Login base must be specified"
 
-        if not set(login_base).issubset(string.ascii_letters):
-            raise PLCInvalidArgument, "Login base must consist only of ASCII letters"
+        if not set(login_base).issubset(string.ascii_letters.lower()):
+            raise PLCInvalidArgument, "Login base must consist only of lowercase ASCII letters"
 
         conflicts = Sites(self.api, [login_base])
         for site_id, site in conflicts.iteritems():
@@ -130,6 +127,51 @@ class Site(Row):
 
             self['person_ids'].remove(person_id)
             person['site_ids'].remove(site_id)
+
+    def add_address(self, address, commit = True):
+        """
+        Add address to existing site.
+        """
+
+        assert 'site_id' in self
+        assert isinstance(address, Address)
+        assert 'address_id' in address
+
+        site_id = self['site_id']
+        address_id = address['address_id']
+
+        if address_id not in self['address_ids']:
+            self.api.db.do("INSERT INTO site_address (address_id, site_id)" \
+                           " VALUES(%(address_id)d, %(site_id)d)",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['address_ids'].append(address_id)
+
+    def remove_address(self, address, commit = True):
+        """
+        Remove address from existing site.
+        """
+
+        assert 'site_id' in self
+        assert isinstance(address, Address)
+        assert 'address_id' in address
+
+        site_id = self['site_id']
+        address_id = address['address_id']
+
+        if address_id in self['address_ids']:
+            self.api.db.do("DELETE FROM site_address" \
+                           " WHERE address_id = %(address_id)d" \
+                           " AND site_id = %(site_id)d",
+                           locals())
+
+            if commit:
+                self.api.db.commit()
+
+            self['address_ids'].remove(address_id)
 
     def delete(self, commit = True):
         """
