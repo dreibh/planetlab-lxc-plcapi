@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.5 2006/10/16 21:56:11 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.6 2006/10/20 17:53:42 mlhuang Exp $
 #
 
 import pgdb
@@ -39,7 +39,7 @@ class PostgreSQL:
         # pgdb._quote functions are good enough for general SQL quoting
         if hasattr(params, 'has_key'):
             params = pgdb._quoteitem(params)
-        elif isinstance(params, list) or isinstance(params, tuple):
+        elif isinstance(params, list) or isinstance(params, tuple) or isinstance(params, set):
             params = map(pgdb._quote, params)
         else:
             params = pgdb._quote(params)
