@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.3 2006/10/03 19:24:31 mlhuang Exp $
+# $Id: API.py,v 1.4 2006/10/13 20:00:21 mlhuang Exp $
 #
 
 import sys
@@ -13,6 +13,31 @@ import traceback
 
 import xmlrpclib
 
+def dump(self, value, write):
+    """
+    xmlrpclib cannot marshal instances of subclasses of built-in
+    types. This function overrides xmlrpclib.Marshaller.__dump so that
+    any value that is an instance of one of its acceptable types is
+    marshalled as that type.
+    """
+
+    try:
+        # Try for an exact match first
+        f = self.dispatch[type(value)]
+    except KeyError:
+        # Try for an isinstance() match
+        for Type, f in self.dispatch.iteritems():
+            if isinstance(value, Type):
+                f(self, value, write)
+                return
+        raise TypeError, "cannot marshal %s objects" % type(value)
+    else:
+        f(self, value, write)        
+
+# You can't hide from me!
+xmlrpclib.Marshaller._Marshaller__dump = dump
+
+# SOAP support is optional
 try:
     import SOAPpy
     from SOAPpy.Parser import parseSOAPRPC
