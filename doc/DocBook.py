@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: DocBook.py,v 1.1 2006/09/06 15:34:41 mlhuang Exp $
+# $Id: DocBook.py,v 1.2 2006/10/25 14:32:01 mlhuang Exp $
 #
 
 import xml.dom.minidom
@@ -214,5 +214,22 @@ for method in api.methods:
         blockquote.appendChild(informaltable)
     else:
         blockquote.appendChild(paraElement("None"))
+
+    para = paraElement('Returns:')
+    blockquote = blockquoteElement()
+    para.appendChild(blockquote)
+    section.appendChild(para)
+
+    head = rowElement(['Name', 'Type', 'Optional', 'Description'])
+    if isinstance(func.returns, Parameter):
+        doc = func.returns.doc
+    else:
+        doc = ""
+    indent = "  "
+    rows = parameters(func.returns, "", None, doc, "", indent)
+    informaltable = informaltableElement(head, rows)
+    informaltable.setAttribute('frame', "none")
+    informaltable.setAttribute('rules', "rows")
+    blockquote.appendChild(informaltable)
 
     print section.toprettyxml(encoding = "UTF-8")
