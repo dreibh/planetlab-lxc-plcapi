@@ -4,14 +4,17 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.2 2006/09/08 19:44:12 mlhuang Exp $
+# $Id: Auth.py,v 1.3 2006/09/25 14:47:32 mlhuang Exp $
 #
 
 import crypt
+import sha
+import hmac
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Persons
+from PLC.Nodes import Node, Nodes
 
 class Auth(Parameter, dict):
     """
@@ -19,27 +22,108 @@ class Auth(Parameter, dict):
     """
 
     def __init__(self, auth):
-        Parameter.__init__(self, auth, "API authentication structure", False)
+        Parameter.__init__(self, auth, "API authentication structure")
         dict.__init__(auth)
 
-class NodeAuth(Auth):
+class BootAuth(Auth):
     """
     PlanetLab version 3.x node authentication structure. Used by the
     Boot Manager to make authenticated calls to the API based on a
     unique node key or boot nonce value.
+
+    The original parameter serialization code did not define the byte
+    encoding of strings, or the string encoding of all other types. We
+    define the byte encoding to be UTF-8, and the string encoding of
+    all other types to be however Python version 2.3 unicode() encodes
+    them.
     """
 
     def __init__(self):
         Auth.__init__(self, {
-            'AuthMethod': Parameter(str, "Authentication method to use, always 'hmac'", False),
-            'node_id': Parameter(str, "Node identifier", False),
-            'node_ip': Parameter(str, "Node primary IP address", False),
-            'value': Parameter(str, "HMAC of node key and method call", False)
+            'AuthMethod': Parameter(str, "Authentication method to use, always 'hmac'", optional = False),
+            'node_id': Parameter(int, "Node identifier", optional = False),
+            'value': Parameter(str, "HMAC of node key and method call", optional = False)
             })
 
+    def canonicalize(self, args):
+        values = []
+
+        for arg in args:
+            if isinstance(arg, list) or isinstance(arg, tuple):
+                # The old implementation did not recursively handle
+                # lists of lists. But neither did the old API itself.
+                values += self.canonicalize(arg)
+            elif isinstance(arg, dict):
+                # Yes, the comments in the old implementation are
+                # misleading. Keys of dicts are not included in the
+                # hash.
+                values += self.canonicalize(arg.values())
+            else:
+                # We use unicode() instead of str().
+                values.append(unicode(arg))
+
+        return values
+
     def check(self, method, auth, *args):
-        # XXX Do HMAC checking
-        return True
+        # Method.type_check() should have checked that all of the
+        # mandatory fields were present.
+        assert auth.has_key('node_id')
+
+        try:
+            nodes = Nodes(method.api, [auth['node_id']]).values()
+            if not nodes:
+                raise PLCAuthenticationFailure, "No such node"
+            node = nodes[0]
+
+            if node['key']:
+                key = node['key']
+            elif node['boot_nonce']:
+                # Allow very old nodes that do not have a node key in
+                # their configuration files to use their "boot nonce"
+                # instead. The boot nonce is a random value generated
+                # by the node itself and POSTed by the Boot CD when it
+                # requests the Boot Manager. This is obviously not
+                # very secure, so we only allow it to be used if the
+                # requestor IP is the same as the IP address we have
+                # on record for the node.
+                key = node['boot_nonce']
+
+                nodenetwork = None
+                if node['nodenetwork_ids']:
+                    nodenetworks = NodeNetworks(method.api, node['nodenetwork_ids']).values()
+                    for nodenetwork in nodenetworks:
+                        if nodenetwork['is_primary']:
+                            break
+            
+                if not nodenetwork or not nodenetwork['is_primary']:
+                    raise PLCAuthenticationFailure, "No primary network interface on record"
+            
+                if method.source is None:
+                    raise PLCAuthenticationFailure, "Cannot determine IP address of requestor"
+
+                if nodenetwork['ip'] != method.source[0]:
+                    raise PLCAuthenticationFailure, "Requestor IP %s does not mach node IP %s" % \
+                          (method.source[0], nodenetwork['ip'])
+            else:
+                raise PLCAuthenticationFailure, "No node key or boot nonce"
+
+            # Yes, this is the "canonicalization" method used.
+            args = self.canonicalize(args)
+            args.sort()
+            msg = "[" + "".join(args) + "]"
+
+            # We encode in UTF-8 before calculating the HMAC, which is
+            # an 8-bit algorithm.
+            digest = hmac.new(key, msg.encode('utf-8'), sha).hexdigest()
+
+            if digest != auth['value']:
+                raise PLCAuthenticationFailure, "Call could not be authenticated"
+
+            method.caller = node
+
+        except PLCAuthenticationFailure, fault:
+            # XXX Send e-mail
+            raise fault
 
 class AnonymousAuth(Auth):
     """
@@ -62,9 +146,9 @@ class PasswordAuth(Auth):
 
     def __init__(self):
         Auth.__init__(self, {
-            'AuthMethod': Parameter(str, "Authentication method to use, typically 'password'", False),
-            'Username': Parameter(str, "PlanetLab username, typically an e-mail address", False),
-            'AuthString': Parameter(str, "Authentication string, typically a password", False),
+            'AuthMethod': Parameter(str, "Authentication method to use, typically 'password'", optional = False),
+            'Username': Parameter(str, "PlanetLab username, typically an e-mail address", optional = False),
+            'AuthString': Parameter(str, "Authentication string, typically a password", optional = False),
             })
 
     def check(self, method, auth, *args):
