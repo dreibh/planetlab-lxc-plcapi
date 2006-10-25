@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.10 2006/10/19 19:32:48 tmack Exp $
+# $Id: Method.py,v 1.11 2006/10/19 21:38:08 tmack Exp $
 #
 
 import xmlrpclib
@@ -82,26 +82,8 @@ class Method:
                 raise PLCInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
             for name, value, expected in zip(max_args, args, self.accepts):
-                self.type_check(name, value, expected)
+                self.type_check(name, value, expected, args)
 	
-            # The first argument to all methods that require
-            # authentication, should be an Auth structure. The rest of the
-            # arguments to the call may also be used in the authentication
-            # check. For example, calls made by the Boot Manager are
-            # verified by comparing a hash of the message parameters to
-            # the value in the authentication structure.        
-
-            if len(self.accepts):
-                auth = None
-                if isinstance(self.accepts[0], Auth):
-                    auth = self.accepts[0]
-                elif isinstance(self.accepts[0], Mixed):
-                    for auth in self.accepts[0]:
-                        if isinstance(auth, Auth):
-                            break
-                if isinstance(auth, Auth):
-                    auth.check(self, *args)
-   	   
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
 
@@ -256,7 +238,7 @@ class Method:
         
         return (min_args, max_args, defaults)
 
-    def type_check(self, name, value, expected, min = None, max = None):
+    def type_check(self, name, value, expected, args):
         """
         Checks the type of the named value against the expected type,
         which may be a Python type, a typed value, a Parameter, a
@@ -276,23 +258,31 @@ class Method:
         if isinstance(expected, Mixed):
             for item in expected:
                 try:
-                    self.type_check(name, value, item)
-                    expected = item
-                    break
+                    self.type_check(name, value, item, args)
+                    return
                 except PLCInvalidArgument, fault:
                     pass
-            if expected != item:
-                xmlrpc_types = [xmlrpc_type(item) for item in expected]
-                raise PLCInvalidArgument("expected %s, got %s" % \
-                                         (" or ".join(xmlrpc_types),
-                                          xmlrpc_type(type(value))),
-                                         name)
+            xmlrpc_types = [xmlrpc_type(item) for item in expected]
+            raise PLCInvalidArgument("expected %s, got %s" % \
+                                     (" or ".join(xmlrpc_types),
+                                      xmlrpc_type(type(value))),
+                                     name)
+
+        # If an authentication structure is expected, save it and
+        # authenticate after basic type checking is done.
+        if isinstance(expected, Auth):
+            auth = expected
+        else:
+            auth = None
 
         # Get actual expected type from within the Parameter structure
-        elif isinstance(expected, Parameter):
+        if isinstance(expected, Parameter):
             min = expected.min
             max = expected.max
             expected = expected.type
+        else:
+            min = None
+            max = None
 
         expected_type = python_type(expected)
 
@@ -331,18 +321,22 @@ class Method:
             for i in range(len(value)):
                 if i >= len(expected):
                     i = len(expected) - 1
-                self.type_check(name + "[]", value[i], expected[i])
+                self.type_check(name + "[]", value[i], expected[i], args)
 
         # If a struct with particular (or required) types of items is
         # expected.
         elif isinstance(expected, dict):
             for key in value.keys():
                 if key in expected:
-                    self.type_check(name + "['%s']" % key, value[key], expected[key])
+                    self.type_check(name + "['%s']" % key, value[key], expected[key], args)
             for key, subparam in expected.iteritems():
                 if isinstance(subparam, Parameter) and \
+                   subparam.optional is not None and \
                    not subparam.optional and key not in value.keys():
                     raise PLCInvalidArgument("'%s' not specified" % key, name)
+
+        if auth is not None:
+            auth.check(self, *args)
 
 def python_type(arg):
     """
