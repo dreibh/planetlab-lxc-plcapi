@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.12 2006/10/20 17:52:24 mlhuang Exp $
+# $Id: Persons.py,v 1.13 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -33,17 +33,17 @@ class Person(Row):
     primary_key = 'person_id'
     fields = {
         'person_id': Parameter(int, "Account identifier"),
-        'first_name': Parameter(str, "Given name", max = 128, optional = False),
-        'last_name': Parameter(str, "Surname", max = 128, optional = False),
+        'first_name': Parameter(str, "Given name", max = 128),
+        'last_name': Parameter(str, "Surname", max = 128),
         'title': Parameter(str, "Title", max = 128),
-        'email': Parameter(str, "Primary e-mail address", max = 254, optional = False),
+        'email': Parameter(str, "Primary e-mail address", max = 254),
         'phone': Parameter(str, "Telephone number", max = 64),
         'url': Parameter(str, "Home page", max = 254),
         'bio': Parameter(str, "Biography", max = 254),
         'enabled': Parameter(bool, "Has been enabled"),
-        'password': Parameter(str, "Account password in crypt() form", max = 254, optional = False),
-        'last_updated': Parameter(str, "Date and time of last update", ro = True),
-        'date_created': Parameter(str, "Date and time when account was created", ro = True),
+        'password': Parameter(str, "Account password in crypt() form", max = 254),
+        'last_updated': Parameter(int, "Date and time of last update", ro = True),
+        'date_created': Parameter(int, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers", ro = True),
         'roles': Parameter([str], "List of roles", ro = True),
         'site_ids': Parameter([int], "List of site identifiers", ro = True),

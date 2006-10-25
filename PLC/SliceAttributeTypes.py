@@ -16,7 +16,7 @@ class SliceAttributeType(Row):
     join_tables = ['slice_attribute']
     fields = {
         'attribute_type_id': Parameter(int, "Slice attribute type identifier"),
-        'name': Parameter(str, "Slice attribute type name", max = 100, optional = False),
+        'name': Parameter(str, "Slice attribute type name", max = 100),
         'description': Parameter(str, "Slice attribute type description", max = 254),
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }

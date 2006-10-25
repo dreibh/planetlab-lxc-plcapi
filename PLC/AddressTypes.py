@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.4 2006/10/20 17:43:30 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.5 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -23,7 +23,7 @@ class AddressType(Row):
     join_tables = ['address_address_type']
     fields = {
         'address_type_id': Parameter(int, "Address type identifier"),
-        'name': Parameter(str, "Address type", max = 20, optional = False),
+        'name': Parameter(str, "Address type", max = 20),
         'description': Parameter(str, "Address type description", max = 254),
         }
 

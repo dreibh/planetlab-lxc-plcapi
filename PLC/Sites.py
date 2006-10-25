@@ -23,9 +23,9 @@ class Site(Row):
     primary_key = 'site_id'
     fields = {
         'site_id': Parameter(int, "Site identifier"),
-        'name': Parameter(str, "Full site name", max = 254, optional = False),
-        'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50, optional = False),
-        'login_base': Parameter(str, "Site slice prefix", max = 20, optional = False),
+        'name': Parameter(str, "Full site name", max = 254),
+        'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50),
+        'login_base': Parameter(str, "Site slice prefix", max = 20),
         'is_public': Parameter(bool, "Publicly viewable site"),
         'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0),
         'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0),

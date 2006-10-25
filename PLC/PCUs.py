@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.4 2006/10/20 17:56:36 mlhuang Exp $
+# $Id: PCUs.py,v 1.5 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -25,9 +25,9 @@ class PCU(Row):
     join_tables = ['pcu_node']
     fields = {
         'pcu_id': Parameter(int, "PCU identifier"),
-        'site_id': Parameter(int, "Identifier of site where PCU is located", optional = False),
+        'site_id': Parameter(int, "Identifier of site where PCU is located"),
         'hostname': Parameter(str, "PCU hostname", max = 254),
-        'ip': Parameter(str, "PCU IP address", max = 254, optional = False),
+        'ip': Parameter(str, "PCU IP address", max = 254),
         'protocol': Parameter(str, "PCU protocol, e.g. ssh, https, telnet", max = 16),
         'username': Parameter(str, "PCU username", max = 254),
         'password': Parameter(str, "PCU username", max = 254),

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.9 2006/10/20 17:51:08 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.10 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -49,8 +49,8 @@ class NodeNetwork(Row):
     primary_key = 'nodenetwork_id'
     fields = {
         'nodenetwork_id': Parameter(int, "Node interface identifier"),
-        'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')", optional = False),
-        'type': Parameter(str, "Address type (e.g., 'ipv4')", optional = False),
+        'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')"),
+        'type': Parameter(str, "Address type (e.g., 'ipv4')"),
         'ip': Parameter(str, "IP address"),
         'mac': Parameter(str, "MAC address"),
         'gateway': Parameter(str, "IP address of primary gateway"),
@@ -61,7 +61,7 @@ class NodeNetwork(Row):
         'dns2': Parameter(str, "IP address of secondary DNS server"),
         'bwlimit': Parameter(int, "Bandwidth limit", min = 0),
         'hostname': Parameter(str, "(Optional) Hostname"),
-        'node_id': Parameter(int, "Node associated with this interface", optional = False),
+        'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
 

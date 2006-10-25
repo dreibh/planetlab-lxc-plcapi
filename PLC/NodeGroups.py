@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.13 2006/10/20 17:50:33 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.14 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -27,7 +27,7 @@ class NodeGroup(Row):
     join_tables = ['nodegroup_node', 'conf_file_nodegroup']
     fields = {
         'nodegroup_id': Parameter(int, "Node group identifier"),
-        'name': Parameter(str, "Node group name", max = 50, optional = False),
+        'name': Parameter(str, "Node group name", max = 50),
         'description': Parameter(str, "Node group description", max = 200),
         'node_ids': Parameter([int], "List of nodes in this node group"),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
