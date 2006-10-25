@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id$
+# $Id: ModPython.py,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
 #
 
 import sys
@@ -47,6 +47,7 @@ def handler(req):
 
         # Write response
         req.content_type = "text/xml"
+        req.headers_out.add("Content-type", "text/xml")
         req.headers_out.add("Content-length", str(len(response)))
         req.send_http_header()
         req.write(response)
