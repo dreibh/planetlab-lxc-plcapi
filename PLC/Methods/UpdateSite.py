@@ -14,11 +14,6 @@ class UpdateSite(Method):
     Updates a site. Only the fields specified in update_fields are
     updated, all other fields are left untouched.
 
-    To remove a value without setting a new one in its place (for
-    example, to remove an address from the node), specify -1 for int
-    and double fields and 'null' for string fields. hostname and
-    boot_state cannot be unset.
-    
     PIs can only update sites they are a member of. Only admins can 
     update max_slices.
 
@@ -28,8 +23,6 @@ class UpdateSite(Method):
     roles = ['admin', 'pi']
 
     site_fields = dict(filter(can_update, Site.fields.items()))
-    for field in site_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

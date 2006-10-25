@@ -22,8 +22,6 @@ class UpdateNode(Method):
     roles = ['admin', 'pi', 'tech']
 
     node_fields = dict(filter(can_update, Node.fields.items()))
-    for field in node_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

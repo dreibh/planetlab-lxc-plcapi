@@ -18,8 +18,6 @@ class UpdateSliceAttributeType(Method):
     roles = ['admin']
 
     attribute_type_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
-    for field in attribute_type_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),
@@ -39,7 +37,6 @@ class UpdateSliceAttributeType(Method):
         attribute_type = attribute_types[0]
 
         attribute_type.update(attribute_type_fields)
-
         attribute_type.sync()
 
         return 1

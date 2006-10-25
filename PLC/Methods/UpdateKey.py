@@ -20,8 +20,6 @@ class UpdateKey(Method):
     roles = ['admin', 'pi', 'tech', 'user']
 
     key_fields = dict(filter(can_update, Key.fields.items()))
-    for field in key_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

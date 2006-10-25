@@ -17,8 +17,6 @@ class UpdateAddressType(Method):
     roles = ['admin']
 
     address_type_fields = dict(filter(can_update, AddressType.fields.items()))
-    for field in address_type_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

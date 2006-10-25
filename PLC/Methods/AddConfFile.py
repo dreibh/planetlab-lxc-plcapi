@@ -30,7 +30,7 @@ class AddConfFile(Method):
     object_type = 'ConfFile'
     object_ids = []
 
-    def call(self, auth, conf_file_fields = {}):
+    def call(self, auth, conf_file_fields):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
         conf_file = ConfFile(self.api, conf_file_fields)
         conf_file.sync()

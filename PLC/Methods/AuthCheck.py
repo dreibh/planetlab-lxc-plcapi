@@ -1,15 +1,15 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import PasswordAuth, BootAuth
 
 class AuthCheck(Method):
     """
-    Returns 1 if the user authenticated successfully, faults
+    Returns 1 if the user or node authenticated successfully, faults
     otherwise.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
-    accepts = [PasswordAuth()]
+    accepts = [Mixed(PasswordAuth(), BootAuth())]
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth):

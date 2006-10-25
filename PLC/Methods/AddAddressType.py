@@ -29,7 +29,7 @@ class AddAddressType(Method):
     object_type = 'AddressType'
     object_ids = []
 
-    def call(self, auth, address_type_fields = {}):
+    def call(self, auth, address_type_fields):
         address_type_fields = dict(filter(can_update, address_type_fields.items()))
         address_type = AddressType(self.api, address_type_fields)
         address_type.sync()

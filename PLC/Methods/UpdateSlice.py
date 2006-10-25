@@ -29,8 +29,6 @@ class UpdateSlice(Method):
     roles = ['admin', 'pi', 'user']
 
     slice_fields = dict(filter(can_update, Slice.fields.items()))
-    for field in slice_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

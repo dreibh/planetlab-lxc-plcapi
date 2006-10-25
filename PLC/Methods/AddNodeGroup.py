@@ -30,7 +30,7 @@ class AddNodeGroup(Method):
     object_type = 'NodeGroup'
     object_ids = []
 
-    def call(self, auth, nodegroup_fields = {}):
+    def call(self, auth, nodegroup_fields):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup.sync()

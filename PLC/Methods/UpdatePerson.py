@@ -13,11 +13,6 @@ class UpdatePerson(Method):
     """
     Updates a person. Only the fields specified in person_fields are
     updated, all other fields are left untouched.
-
-    To remove a value without setting a new one in its place (for
-    example, to remove an address from the person), specify -1 for int
-    and double fields and 'null' for string fields. first_name and
-    last_name cannot be unset.
     
     Users and techs can only update themselves. PIs can only update
     themselves and other non-PIs at their sites.
@@ -28,8 +23,6 @@ class UpdatePerson(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     person_fields = dict(filter(can_update, Person.fields.items()))
-    for field in person_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),

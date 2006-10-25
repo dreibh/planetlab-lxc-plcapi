@@ -7,7 +7,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field in \
-             ['hostname', 'site_id', 'boot_state', 'model', 'version']
+             ['hostname', 'boot_state', 'model', 'version']
 
 class AddNode(Method):
     """
@@ -26,6 +26,8 @@ class AddNode(Method):
 
     accepts = [
         PasswordAuth(),
+        Mixed(Site.fields['site_id'],
+              Site.fields['login_base']),
         node_fields
         ]
 
@@ -35,11 +37,11 @@ class AddNode(Method):
     object_type = 'Node'
     object_ids = []
 
-    def call(self, auth, node_fields = {}):
+    def call(self, auth, site_id_or_login_base, node_fields):
         node_fields = dict(filter(can_update, node_fields.items()))
-        
+
         # Get site information
-        sites = Sites(self.api, [node_fields['site_id']])
+        sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
@@ -58,6 +60,7 @@ class AddNode(Method):
                 assert self.caller['person_id'] in site['person_ids']
 
         node = Node(self.api, node_fields)
+        node['site_id'] = site['site_id']
         node.sync()
 
 	self.object_ids = [site['site_id'], node['node_id']]	

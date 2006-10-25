@@ -17,8 +17,6 @@ class UpdateNodeGroup(Method):
     roles = ['admin']
 
     nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
-    for field in nodegroup_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),
@@ -29,7 +27,7 @@ class UpdateNodeGroup(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodegroup_id_or_name, nodegroup_fields = {}):
+    def call(self, auth, nodegroup_id_or_name, nodegroup_fields):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
 
 	# Get nodegroup information

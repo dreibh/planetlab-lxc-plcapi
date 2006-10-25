@@ -31,7 +31,7 @@ class AddSliceAttributeType(Method):
     object_type = 'SliceAttributeType'
     object_ids = []
 
-    def call(self, auth, attribute_type_fields = {}):
+    def call(self, auth, attribute_type_fields):
         attribute_type_fields = dict(filter(can_update, attribute_type_fields.items()))
         attribute_type = SliceAttributeType(self.api, attribute_type_fields)
         attribute_type.sync()

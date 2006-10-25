@@ -34,7 +34,7 @@ class AddPerson(Method):
     object_type = 'Person'
     object_ids = []
 
-    def call(self, auth, person_fields = {}):
+    def call(self, auth, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
         person = Person(self.api, person_fields)
         person.sync()

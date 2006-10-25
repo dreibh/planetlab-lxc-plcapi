@@ -18,8 +18,6 @@ class UpdateConfFile(Method):
     roles = ['admin']
 
     conf_file_fields = dict(filter(can_update, ConfFile.fields.items()))
-    for field in conf_file_fields.values():
-        field.optional = True
 
     accepts = [
         PasswordAuth(),
