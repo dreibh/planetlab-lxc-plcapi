@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.11 2006/10/19 21:38:08 tmack Exp $
+# $Id: Method.py,v 1.12 2006/10/25 14:26:08 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -320,8 +320,10 @@ class Method:
         if isinstance(expected, (list, tuple)):
             for i in range(len(value)):
                 if i >= len(expected):
-                    i = len(expected) - 1
-                self.type_check(name + "[]", value[i], expected[i], args)
+                    j = len(expected) - 1
+                else:
+                    j = i
+                self.type_check(name + "[]", value[i], expected[j], args)
 
         # If a struct with particular (or required) types of items is
         # expected.
