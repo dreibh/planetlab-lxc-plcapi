@@ -59,10 +59,14 @@ class AddNodeToPCU(Method):
         if node['node_id'] in pcu['node_ids']:
             raise PLCInvalidArgument, "Node already controlled by PCU"
 
+        if node['site_id'] != pcu['site_id']:
+            raise PLCInvalidArgument, "Node is at a different site than this PCU"
+
         if port in pcu['ports']:
             raise PLCInvalidArgument, "PCU port already in use"
 
         pcu.add_node(node, port)
-	self.object_ids = [pcu['pcu_id']]
+
+	self.object_ids = [node['node_id'], pcu['pcu_id']]
 
         return 1
