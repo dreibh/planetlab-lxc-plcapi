@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Server.py,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
+# $Id: Server.py,v 1.2 2006/09/06 19:15:35 mlhuang Exp $
 #
 
 import os
@@ -31,9 +31,12 @@ class PLCAPIRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             # Write response
             self.send_response(200)
+            self.send_header("Content-type", "text/xml")
+            self.send_header("Content-length", str(len(response)))
+            self.end_headers()
             self.wfile.write(response)
-            self.wfile.flush()
 
+            self.wfile.flush()
             self.connection.shutdown(1)
 
         except Exception, e:
