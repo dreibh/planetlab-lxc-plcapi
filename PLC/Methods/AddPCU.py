@@ -38,7 +38,7 @@ class AddPCU(Method):
     object_type = 'PCU'
     object_ids = []
 
-    def call(self, auth, site_id_or_login_base, pcu_fields = {}):
+    def call(self, auth, site_id_or_login_base, pcu_fields):
         pcu_fields = dict(filter(can_update, pcu_fields.items()))
 
         # Get associated site details
