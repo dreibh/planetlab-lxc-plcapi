@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: DocBook.py,v 1.1 2006/09/06 15:34:41 mlhuang Exp $
 #
 
 import xml.dom.minidom
@@ -125,7 +125,7 @@ class informaltableElement(Element):
             cols = len(thead.childNodes[0].childNodes)
             tgroup.setAttribute('cols', str(cols))
 
-def parameters(param, name, optional, default, doc, indent, step):
+def parameters(param, name, optional, doc, indent, step):
     """Format a parameter into parameter row(s)."""
 
     rows = []
@@ -143,13 +143,10 @@ def parameters(param, name, optional, default, doc, indent, step):
     row.appendChild(entryElement(xmlrpc_type(param_type)))
 
     # Whether parameter is optional
-    row.appendChild(entryElement(str(bool(optional))))
-
-    # Parameter default
-    if optional and default is not None:
-        row.appendChild(entryElement(unicode(default)))
+    if optional is not None:
+        row.appendChild(entryElement(str(bool(optional))))
     else:
-        row.appendChild(entryElement())
+        row.appendChild(entryElement(""))
 
     # Parameter documentation
     row.appendChild(entryElement(doc))
@@ -165,11 +162,10 @@ def parameters(param, name, optional, default, doc, indent, step):
 
     for name, subparam in subparams:
         if isinstance(subparam, Parameter):
-            (optional, default, doc) = (subparam.optional, subparam.default, subparam.doc)
+            (optional, doc) = (subparam.optional, subparam.doc)
         else:
-            # All named sub-parameters are optional if not otherwise specified
-            (optional, default, doc) = (True, None, "")
-        rows += parameters(subparam, name, optional, default, doc, indent + step, step)
+            (optional, doc) = (None, "")
+        rows += parameters(subparam, name, optional, doc, indent + step, step)
 
     return rows
 
@@ -199,7 +195,7 @@ for method in api.methods:
     para.appendChild(blockquote)
     section.appendChild(para)
 
-    head = rowElement(['Name', 'Type', 'Optional', 'Default', 'Description'])
+    head = rowElement(['Name', 'Type', 'Optional', 'Description'])
     rows = []
 
     indent = "  "
@@ -209,7 +205,7 @@ for method in api.methods:
             doc = param.doc
         else:
             doc = ""
-        rows += parameters(param, name, optional, default, doc, "", indent)
+        rows += parameters(param, name, optional, doc, "", indent)
 
     if rows:
         informaltable = informaltableElement(head, rows)
