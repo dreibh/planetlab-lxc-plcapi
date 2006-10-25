@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py,v 1.2 2006/09/08 19:45:04 mlhuang Exp $
+# $Id: Parameter.py,v 1.3 2006/10/02 18:32:31 mlhuang Exp $
 #
 
 class Parameter:
@@ -16,7 +16,7 @@ class Parameter:
 
     def __init__(self, type, doc = "",
                  min = None, max = None,
-                 optional = True, default = None,
+                 optional = None,
                  ro = False):
         # Basic type of the parameter. May be a builtin type or Mixed.
         self.type = type
@@ -30,10 +30,9 @@ class Parameter:
         self.min = min
         self.max = max
 
-        # Whether the sub-parameter is optional or not. If optional,
-        # the default for the sub-parameter if not specified.
+        # Whether the sub-parameter is optional or not. If None,
+        # unknown whether it is optional.
         self.optional = optional
-        self.default = default
 
         # Whether the DB field is read-only.
         self.ro = ro
