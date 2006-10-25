@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.21 2006/10/23 20:44:16 tmack Exp $
+-- $Id: planetlab4.sql,v 1.22 2006/10/24 19:54:38 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -389,7 +389,6 @@ CREATE TABLE network_types (
     type text PRIMARY KEY -- Addressing scheme
 ) WITH OIDS;
 INSERT INTO network_types (type) VALUES ('ipv4');
-INSERT INTO network_types (type) VALUES ('ipv6');
 
 -- Valid network configuration methods
 CREATE TABLE network_methods (
