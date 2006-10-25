@@ -8,8 +8,9 @@ class AdmGetSiteNodes(Method):
     """
     Deprecated. See GetSites.
 
-    Return a dictionary containing a list of node_ids for each of the
-    sites specified.
+    Return a struct containing an array of node_ids for each of the
+    sites specified. Note that the keys of the struct are strings, not
+    integers, because of XML-RPC marshalling limitations.
 
     Admins may retrieve details about all nodes on a site by not specifying
     site_id_or_name or by specifying an empty list. Users and
@@ -27,7 +28,7 @@ class AdmGetSiteNodes(Method):
                Site.fields['name'])],
         ]
 
-    returns = { Site.fields['site_id']: Site.fields['node_ids'] }
+    returns = dict
 
     def call(self, auth, site_id_or_name_list = None):
         # Get site information
