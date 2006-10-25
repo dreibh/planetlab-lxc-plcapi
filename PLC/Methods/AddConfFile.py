@@ -5,14 +5,14 @@ from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Auth import PasswordAuth
 
 can_update = lambda (field, value): field not in \
-             ['conf_file_id', 'source', 'dest', 'node_ids', 'nodegroup_ids']
+             ['conf_file_id', 'node_ids', 'nodegroup_ids']
 
 class AddConfFile(Method):
     """
     Adds a new node configuration file. Any fields specified in
     conf_file_fields are used, otherwise defaults are used.
 
-    Returns 1 if successful, faults otherwise.
+    Returns the new conf_file_id (> 0) if successful, faults otherwise.
     """
 
     roles = ['admin']
@@ -24,7 +24,7 @@ class AddConfFile(Method):
         conf_file_fields
         ]
 
-    returns = Parameter(int, '1 if successful')
+    returns = Parameter(int, 'New conf_file_id (> 0) if successful')
 
     event_type = 'Add'
     object_type = 'ConfFile'
@@ -37,4 +37,4 @@ class AddConfFile(Method):
 
 	self.object_ids = [conf_file['conf_file_id']]
 
-        return 1
+        return conf_file['conf_file_id']
