@@ -25,13 +25,13 @@ class SliceAttribute(Row):
         'value': Parameter(str, "Slice attribute value", max = 254),
         }
 
-class SliceAttributes(dict):
+class SliceAttributes(Table):
     """
     Representation of row(s) from the slice_attribute table in the
     database.
     """
 
-    def __init__(self, api, slice_attribute_id_list):
+    def __init__(self, api, slice_attribute_id_list = None):
 	self.api = api
 
         sql = "SELECT %s FROM view_slice_attributes" % \
