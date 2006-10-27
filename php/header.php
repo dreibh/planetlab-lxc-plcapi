@@ -8,7 +8,7 @@
 // Mark Huang <mlhuang@cs.princeton.edu>
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
-// $Id: gen_php_api.py,v 1.13 2006/03/23 04:29:08 mlhuang Exp $
+// $Id: header.php,v 1.1 2006/10/25 20:32:44 mlhuang Exp $
 //
 //
 
@@ -25,11 +25,11 @@ class PLCAPI
   var $calls;
   var $multicall;
 
-  function PLCAPI ($auth,
-		   $server = PLC_API_HOST,
-		   $port = 8000, # PLC_API_PORT,
-		   $path = PLC_API_PATH,
-		   $cainfo = NULL)
+  function PLCAPI($auth = NULL,
+		  $server = PLC_API_HOST,
+		  $port = PLC_API_PORT,
+		  $path = PLC_API_PATH,
+		  $cainfo = NULL)
   {
     $this->auth = $auth;
     $this->server = $server;
@@ -38,7 +38,7 @@ class PLCAPI
     $this->cainfo = $cainfo;
     $this->errors = array();
     $this->trace = array();
-    $this->calls = array ();
+    $this->calls = array();
     $this->multicall = false;
   }
 
@@ -52,7 +52,7 @@ class PLCAPI
     error_log(end($this->errors));
   }
 
-  function error ()
+  function error()
   {
     if (empty($this->trace)) {
       return NULL;
@@ -62,7 +62,7 @@ class PLCAPI
     }
   }
 
-  function trace ()
+  function trace()
   {
     return $this->trace;
   }
@@ -76,15 +76,15 @@ class PLCAPI
   function call($method, $args = NULL)
   {
     if ($this->multicall) {
-	$this->calls[] = array ('methodName' => $method,
+      $this->calls[] = array ('methodName' => $method,
 				'params' => $args);
-	return NULL;
+      return NULL;
     } else {
-	return $this->internal_call ($method, $args, 3);
+      return $this->internal_call ($method, $args, 3);
     }
   }
 
-  function internal_call ($method, $args = NULL, $backtrace_level = 2)
+  function internal_call($method, $args = NULL, $backtrace_level = 2)
   {
     $curl = curl_init();
 
@@ -156,7 +156,7 @@ class PLCAPI
     $this->multicall = true;
   }
 
-  function commit ()
+  function commit()
   {
     if (!empty ($this->calls)) {
       $ret = array();
@@ -178,7 +178,7 @@ class PLCAPI
       $ret = NULL;
     }
 
-    $this->calls = array ();
+    $this->calls = array();
     $this->multicall = false;
 
     return $ret;
