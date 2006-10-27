@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.13 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: Persons.py,v 1.14 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -275,7 +275,7 @@ class Person(Row):
             key.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['person_role', 'person_site', 'slice_person']:
+        for table in ['person_role', 'person_site', 'slice_person', 'person_session']:
             self.api.db.do("DELETE FROM %s" \
                            " WHERE person_id = %d" % \
                            (table, self['person_id']))
