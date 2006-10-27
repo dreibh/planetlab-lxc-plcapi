@@ -36,6 +36,7 @@ rm -rf $RPM_BUILD_ROOT
 # Install in /usr/share/plc_api
 %{__python} setup.py install \
     --install-purelib=$RPM_BUILD_ROOT/%{_datadir}/plc_api \
+    --install-scripts=$RPM_BUILD_ROOT/%{_datadir}/plc_api \
     --install-data=$RPM_BUILD_ROOT/%{_datadir}/plc_api
 
 # Install shell symlink
@@ -49,7 +50,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc doc/PLCAPI.xml doc/PLCAPI.pdf doc/PLCAPI.html
 %dir %{_datadir}/plc_api
-%{_datadir}/plc_api
+%{_datadir}/plc_api/*
 %{_bindir}/plcsh
 
 %changelog
