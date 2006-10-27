@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.7 2006/10/19 19:58:50 mlhuang Exp $
+# $Id: Shell.py,v 1.8 2006/10/20 18:25:39 mlhuang Exp $
 #
 
 import os, sys
@@ -15,6 +15,9 @@ import pydoc
 import pg
 import xmlrpclib
 import getpass
+
+# Append PLC to the system path
+sys.path.append(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 from PLC.API import PLCAPI
 from PLC.Parameter import Mixed
@@ -178,7 +181,9 @@ class Callable:
         """
 
         if self.auth and \
-           (not args or not isinstance(args[0], dict) or not args[0].has_key('AuthMethod')):
+           (not args or not isinstance(args[0], dict) or \
+            (not args[0].has_key('AuthMethod') and \
+             not args[0].has_key('session'))):
             return self.func(auth, *args, **kwds)
         else:
             return self.func(*args, **kwds)
