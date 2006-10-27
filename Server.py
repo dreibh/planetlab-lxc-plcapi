@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Server.py,v 1.2 2006/09/06 19:15:35 mlhuang Exp $
+# $Id: Server.py,v 1.3 2006/10/25 20:33:07 mlhuang Exp $
 #
 
 import os
@@ -13,6 +13,9 @@ import sys
 import getopt
 import traceback
 import BaseHTTPServer
+
+# Append PLC to the system path
+sys.path.append(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 from PLC.API import PLCAPI
 
