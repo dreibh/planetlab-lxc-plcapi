@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.13 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: Nodes.py,v 1.14 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -49,7 +49,7 @@ class Node(Row):
         'date_created': Parameter(int, "Date and time when node entry was created", ro = True),
         'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
-        'session': Parameter(str, "(Admin only) Node session value", max = 256),
+        'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
         'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has", ro = True),
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in", ro = True),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node", ro = True),
@@ -89,7 +89,7 @@ class Node(Row):
             nodenetwork.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['nodegroup_node', 'slice_node', 'slice_attribute']:
+        for table in ['nodegroup_node', 'slice_node', 'slice_attribute', 'node_session']:
             self.api.db.do("DELETE FROM %s" \
                            " WHERE node_id = %d" % \
                            (table, self['node_id']))
