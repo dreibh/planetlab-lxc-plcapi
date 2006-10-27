@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.4 2006/10/13 20:00:21 mlhuang Exp $
+# $Id: API.py,v 1.5 2006/10/24 13:47:35 mlhuang Exp $
 #
 
 import sys
@@ -48,7 +48,6 @@ except ImportError:
     SOAPpy = None
 
 from PLC.Config import Config
-from PLC.PostgreSQL import PostgreSQL
 from PLC.Faults import *
 import PLC.Methods
 
@@ -67,6 +66,7 @@ class PLCAPI:
 
         # Initialize database connection
         if self.config.PLC_DB_TYPE == "postgresql":
+            from PLC.PostgreSQL import PostgreSQL
             self.db = PostgreSQL(self)
         else:
             raise PLCAPIError, "Unsupported database type " + config.PLC_DB_TYPE
