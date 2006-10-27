@@ -8,6 +8,8 @@ URL: http://cvs.planet-lab.org/cvs/new_plc_api
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
+Obsoletes: plcapilib
+
 BuildRequires: docbook-dtds, docbook-utils-pdf
 
 Requires: postgresql-server, SOAPpy
