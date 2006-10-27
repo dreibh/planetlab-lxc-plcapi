@@ -1,6 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth, BootAuth
+from PLC.Auth import Auth, BootAuth
 
 class AuthCheck(Method):
     """
@@ -8,8 +8,8 @@ class AuthCheck(Method):
     otherwise.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
-    accepts = [Mixed(PasswordAuth(), BootAuth())]
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
+    accepts = [Mixed(Auth(), BootAuth())]
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth):
