@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.3 2006/09/25 14:47:32 mlhuang Exp $
+# $Id: Auth.py,v 1.4 2006/10/25 14:22:14 mlhuang Exp $
 #
 
 import crypt
@@ -15,15 +15,74 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
+from PLC.Sessions import Session, Sessions
 
 class Auth(Parameter, dict):
     """
-    Base class for all API authentication methods.
+    Base class for all API authentication methods, as well as a class
+    that can be used to represent Mixed(SessionAuth(), PasswordAuth()),
+    i.e. the two principal API authentication methods.
     """
 
-    def __init__(self, auth):
+    def __init__(self, auth = {}):
         Parameter.__init__(self, auth, "API authentication structure")
         dict.__init__(auth)
+
+    def check(self, method, auth, *args):
+        method.type_check("auth", auth,
+                          Mixed(SessionAuth(), PasswordAuth()),
+                          (auth,) + args)
+
+class SessionAuth(Auth):
+    """
+    Proposed PlanetLab federation authentication structure.
+    """
+
+    def __init__(self):
+        Auth.__init__(self, {
+            'session': Parameter(str, "Session key", optional = False)
+            })
+
+    def check(self, method, auth, *args):
+        # Method.type_check() should have checked that all of the
+        # mandatory fields were present.
+        assert auth.has_key('session')
+
+        # Get session record
+        sessions = Sessions(method.api, [auth['session']]).values()
+        if not sessions:
+            raise PLCAuthenticationFailure, "No such session"
+        session = sessions[0]
+
+        try:
+            if session['node_id'] is not None:
+                nodes = Nodes(method.api, [session['node_id']]).values()
+                if not nodes:
+                    raise PLCAuthenticationFailure, "No such node"
+                node = nodes[0]
+
+                if 'node' not in method.roles:
+                    raise PLCAuthenticationFailure, "Not allowed to call method"
+
+                method.caller = node
+
+            elif session['person_id'] is not None:
+                persons = Persons(method.api, [session['person_id']], enabled = True).values()
+                if not persons:
+                    raise PLCAuthenticationFailure, "No such account"
+                person = persons[0]
+
+                if not set(person['roles']).intersection(method.roles):
+                    raise PLCAuthenticationFailure, "Not allowed to call method"
+
+                method.caller = persons[0]
+
+            else:
+                raise PLCAuthenticationFailure, "Invalid session"
+
+        except PLCAuthenticationFailure, fault:
+            session.delete()
+            raise fault
 
 class BootAuth(Auth):
     """
