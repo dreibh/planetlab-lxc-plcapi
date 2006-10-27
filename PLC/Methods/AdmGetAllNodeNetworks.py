@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.GetNodeNetworks import GetNodeNetworks
 
 class AdmGetAllNodeNetworks(GetNodeNetworks):
@@ -17,7 +17,7 @@ class AdmGetAllNodeNetworks(GetNodeNetworks):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])
         ]

@@ -5,7 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.POD import udp_pod
 
 class RebootNode(Method):
@@ -23,7 +23,7 @@ class RebootNode(Method):
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])
         ]

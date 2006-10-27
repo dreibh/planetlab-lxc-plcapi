@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteSliceAttributeType(Method):
     """
@@ -14,7 +14,7 @@ class DeleteSliceAttributeType(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(SliceAttributeType.fields['attribute_type_id'],
               SliceAttributeType.fields['name']),
         ]

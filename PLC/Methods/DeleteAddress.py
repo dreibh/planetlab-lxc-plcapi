@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Addresses import Address, Addresses
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteAddress(Method):
     """
@@ -16,7 +16,7 @@ class DeleteAddress(Method):
     roles = ['admin', 'pi']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Address.fields['address_id'],
         ]
 

@@ -5,7 +5,7 @@ from PLC.Sites import Site, Sites
 from PLC.Persons import Person, Persons
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteSite(Method):
     """
@@ -20,7 +20,7 @@ class DeleteSite(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base'])
         ]

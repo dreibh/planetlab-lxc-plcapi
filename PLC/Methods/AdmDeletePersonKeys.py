@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmDeletePersonKeys(Method):
     """
@@ -21,7 +21,7 @@ class AdmDeletePersonKeys(Method):
     roles = ['admin', 'pi', 'tech', 'user']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
         [Key.fields['key_id']]

@@ -6,7 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.PCUs import PCU, PCUs
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks, valid_ip
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmQueryPowerControlUnit(Method):
     """
@@ -19,7 +19,7 @@ class AdmQueryPowerControlUnit(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         {'pcu_hostname': PCU.fields['hostname'],
          'pcu_ip': PCU.fields['ip'],
          'node_hostname': Node.fields['hostname'],

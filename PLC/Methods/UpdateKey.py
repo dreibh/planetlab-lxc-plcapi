@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Keys import Key, Keys
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['key_type', 'key']
@@ -22,7 +22,7 @@ class UpdateKey(Method):
     key_fields = dict(filter(can_update, Key.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Key.fields['key_id'],
         key_fields
         ]

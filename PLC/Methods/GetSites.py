@@ -1,6 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
 class GetSites(Method):
@@ -13,7 +13,7 @@ class GetSites(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(Site.fields['site_id'],
                Site.fields['login_base'])]
         ]

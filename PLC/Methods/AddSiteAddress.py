@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Addresses import Address, Addresses
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
 can_update = lambda (field, value): field in \
@@ -24,7 +24,7 @@ class AddSiteAddress(Method):
     address_fields = dict(filter(can_update, Address.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
         address_fields

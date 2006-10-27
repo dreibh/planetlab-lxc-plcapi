@@ -1,7 +1,7 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 
 class DeleteNode(Method):
@@ -17,7 +17,7 @@ class DeleteNode(Method):
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])
         ]

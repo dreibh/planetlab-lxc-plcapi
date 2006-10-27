@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['name', 'description']
@@ -19,7 +19,7 @@ class UpdateNodeGroup(Method):
     nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(NodeGroup.fields['nodegroup_id'],
 	      NodeGroup.fields['name']),
         nodegroup_fields

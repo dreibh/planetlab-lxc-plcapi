@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.NodeGroups import NodeGroup, NodeGroups
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteConfFileFromNodeGroup(Method):
     """
@@ -16,7 +16,7 @@ class DeleteConfFileFromNodeGroup(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         ConfFile.fields['conf_file_id'],
         Mixed(NodeGroup.fields['nodegroup_id'],
               NodeGroup.fields['name'])

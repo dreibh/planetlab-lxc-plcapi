@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.DeleteNodeFromPCU import DeleteNodeFromPCU
 
 class AdmDisassociatePowerControlUnitPort(DeleteNodeFromPCU):
@@ -16,7 +16,7 @@ class AdmDisassociatePowerControlUnitPort(DeleteNodeFromPCU):
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         PCU.fields['pcu_id'],
         Parameter(int, 'PCU port number'),
         ]

@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.NetworkMethods import NetworkMethod, NetworkMethods
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetNetworkMethods(Method):
     """
@@ -12,7 +12,7 @@ class GetNetworkMethods(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth()
+        Auth()
         ]
 
     returns = [NetworkMethod.fields['method']]

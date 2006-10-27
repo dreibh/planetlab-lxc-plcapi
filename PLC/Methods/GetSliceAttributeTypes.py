@@ -1,6 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 
 class GetSliceAttributeTypes(Method):
@@ -13,7 +13,7 @@ class GetSliceAttributeTypes(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(SliceAttributeType.fields['attribute_type_id'],
                SliceAttributeType.fields['name'])],
         ]

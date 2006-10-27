@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteSliceAttribute(Method):
     """
@@ -22,7 +22,7 @@ class DeleteSliceAttribute(Method):
     roles = ['admin', 'pi', 'user']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         SliceAttribute.fields['slice_attribute_id']
         ]
 

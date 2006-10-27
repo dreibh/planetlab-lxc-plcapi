@@ -6,7 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks, valid_ip
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmQuerySite(Method):
     """
@@ -19,7 +19,7 @@ class AdmQuerySite(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         {'site_name': Site.fields['name'],
          'site_abbreviatedname': Site.fields['abbreviated_name'],
          'site_loginbase': Site.fields['login_base'],

@@ -1,7 +1,7 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.GetRoles import GetRoles
 
 class AdmGetAllRoles(GetRoles):

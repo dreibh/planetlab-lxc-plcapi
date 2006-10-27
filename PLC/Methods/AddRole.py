@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Roles import Role, Roles
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AddRole(Method):
     """
@@ -14,7 +14,7 @@ class AddRole(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Role.fields['role_id'],
         Role.fields['name']
         ]

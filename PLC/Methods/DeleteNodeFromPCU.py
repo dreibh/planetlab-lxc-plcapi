@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteNodeFromPCU(Method):
     """
@@ -17,7 +17,7 @@ class DeleteNodeFromPCU(Method):
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
 	Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
         PCU.fields['pcu_id']

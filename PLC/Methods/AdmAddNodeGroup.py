@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.AddNodeGroup import AddNodeGroup
 
 class AdmAddNodeGroup(AddNodeGroup):
@@ -13,7 +13,7 @@ class AdmAddNodeGroup(AddNodeGroup):
     status = "deprecated"
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         NodeGroup.fields['name'],
         NodeGroup.fields['description']
         ]

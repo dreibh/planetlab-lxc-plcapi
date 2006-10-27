@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field not in ['nodenetwork_id', 'node_id']
 
@@ -31,7 +31,7 @@ class AddNodeNetwork(Method):
     nodenetwork_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
         nodenetwork_fields

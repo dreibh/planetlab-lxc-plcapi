@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteNodeFromNodeGroup(Method):
     """
@@ -15,7 +15,7 @@ class DeleteNodeFromNodeGroup(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(NodeGroup.fields['nodegroup_id'],
 	      NodeGroup.fields['name']),
 	Mixed(Node.fields['node_id'],

@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['hostname', 'boot_state', 'model', 'version',
@@ -24,7 +24,7 @@ class UpdateNode(Method):
     node_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
         node_fields

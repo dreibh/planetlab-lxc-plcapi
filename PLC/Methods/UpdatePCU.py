@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.PCUs import PCU, PCUs
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field not in \
              ['pcu_id', 'site_id']
@@ -22,7 +22,7 @@ class UpdatePCU(Method):
     update_fields = dict(filter(can_update, PCU.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         PCU.fields['pcu_id'],
         update_fields
         ]

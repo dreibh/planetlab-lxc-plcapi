@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['first_name', 'last_name', 'title', 'email',
@@ -25,7 +25,7 @@ class UpdatePerson(Method):
     person_fields = dict(filter(can_update, Person.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
         person_fields

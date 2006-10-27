@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.ConfFiles import ConfFile, ConfFiles
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmQueryConfFile(Method):
     """
@@ -15,7 +15,7 @@ class AdmQueryConfFile(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         {'node_id': Node.fields['node_id']}
         ]
 

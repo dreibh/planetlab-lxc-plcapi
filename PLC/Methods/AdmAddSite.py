@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.AddSite import AddSite
 
 can_update = lambda (field, value): field in \
@@ -18,7 +18,7 @@ class AdmAddSite(AddSite):
     site_fields = dict(filter(can_update, Site.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Site.fields['name'],
         Site.fields['abbreviated_name'],
         Site.fields['login_base'],

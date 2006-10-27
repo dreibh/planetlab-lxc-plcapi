@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.AddressTypes import AddressType, AddressTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field not in ['address_type_id']
 
@@ -19,7 +19,7 @@ class AddAddressType(Method):
     address_type_fields = dict(filter(can_update, AddressType.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         address_type_fields
         ]
 

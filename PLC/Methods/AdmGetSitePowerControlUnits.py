@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.PCUs import PCU, PCUs
 from PLC.Sites import Site, Sites
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmGetSitePowerControlUnits(Method):
     """
@@ -15,7 +15,7 @@ class AdmGetSitePowerControlUnits(Method):
     roles = ['admin', 'pi', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base'])
         ]

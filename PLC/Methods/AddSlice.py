@@ -4,7 +4,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Slices import Slice, Slices
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
 can_update = lambda (field, value): field in \
@@ -32,7 +32,7 @@ class AddSlice(Method):
     slice_fields = dict(filter(can_update, Slice.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         slice_fields
         ]
 

@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmGetSiteNodes(Method):
     """
@@ -23,7 +23,7 @@ class AdmGetSiteNodes(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(Site.fields['site_id'],
                Site.fields['name'])],
         ]

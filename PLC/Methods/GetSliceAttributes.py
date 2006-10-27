@@ -5,7 +5,7 @@ from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetSliceAttributes(Method):
     """
@@ -23,7 +23,7 @@ class GetSliceAttributes(Method):
     roles = ['admin', 'pi', 'user']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [SliceAttribute.fields['slice_attribute_id']],
         ]
 

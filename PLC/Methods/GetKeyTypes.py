@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.KeyTypes import KeyType, KeyTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetKeyTypes(Method):
     """
@@ -12,7 +12,7 @@ class GetKeyTypes(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth()
+        Auth()
         ]
 
     returns = [KeyType.fields['key_type']]

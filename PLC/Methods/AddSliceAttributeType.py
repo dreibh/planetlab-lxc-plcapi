@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['name', 'description', 'min_role_id']
@@ -21,7 +21,7 @@ class AddSliceAttributeType(Method):
     attribute_type_fields = dict(filter(can_update, SliceAttributeType.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         attribute_type_fields
         ]
 

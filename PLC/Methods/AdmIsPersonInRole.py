@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Roles import Role, Roles
 
 class AdmIsPersonInRole(Method):
@@ -20,7 +20,7 @@ class AdmIsPersonInRole(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
         Mixed(Parameter(int, "Role identifier"),

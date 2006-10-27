@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.BootStates import BootState, BootStates
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetBootStates(Method):
     """
@@ -12,7 +12,7 @@ class GetBootStates(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth()
+        Auth()
         ]
 
     returns = [BootState.fields['boot_state']]

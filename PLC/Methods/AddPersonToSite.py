@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AddPersonToSite(Method):
     """
@@ -17,7 +17,7 @@ class AddPersonToSite(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
         Mixed(Site.fields['site_id'],

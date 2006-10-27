@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.NetworkTypes import NetworkType, NetworkTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetNetworkTypes(Method):
     """
@@ -12,7 +12,7 @@ class GetNetworkTypes(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth()
+        Auth()
         ]
 
     returns = [NetworkType.fields['type']]

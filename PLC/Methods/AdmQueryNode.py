@@ -5,7 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks, valid_ip
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmQueryNode(Method):
     """
@@ -18,7 +18,7 @@ class AdmQueryNode(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         {'node_hostname': Node.fields['hostname'],
          'nodenetwork_ip': NodeNetwork.fields['ip'],
          'nodenetwork_mac': NodeNetwork.fields['mac'],

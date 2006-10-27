@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.KeyTypes import KeyType, KeyTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteKeyType(Method):
     """
@@ -16,7 +16,7 @@ class DeleteKeyType(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         KeyType.fields['key_type']
         ]
 

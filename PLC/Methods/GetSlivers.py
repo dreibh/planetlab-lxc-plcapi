@@ -3,7 +3,7 @@ import time
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
@@ -28,7 +28,7 @@ class GetSlivers(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(Node.fields['node_id'],
                Node.fields['hostname'])]
         ]

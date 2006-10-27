@@ -1,6 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
 
 class GetSlices(Method):
@@ -19,7 +19,7 @@ class GetSlices(Method):
     roles = ['admin', 'pi', 'user']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(Slice.fields['slice_id'],
                Slice.fields['name'])]
         ]

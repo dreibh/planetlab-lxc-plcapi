@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.AddressTypes import AddressType, AddressTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetAddressTypes(Method):
     """
@@ -14,7 +14,7 @@ class GetAddressTypes(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Mixed(AddressType.fields['address_type_id'],
                AddressType.fields['name'])]
         ]

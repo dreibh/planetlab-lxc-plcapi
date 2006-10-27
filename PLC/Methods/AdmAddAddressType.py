@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.AddressTypes import AddressType, AddressTypes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.AddAddressType import AddAddressType
 
 class AdmAddAddressType(AddAddressType):
@@ -13,7 +13,7 @@ class AdmAddAddressType(AddAddressType):
     status = "deprecated"
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         AddressType.fields['name']
         ]
 

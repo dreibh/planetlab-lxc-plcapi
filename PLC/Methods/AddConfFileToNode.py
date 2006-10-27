@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AddConfFileToNode(Method):
     """
@@ -16,7 +16,7 @@ class AddConfFileToNode(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         ConfFile.fields['conf_file_id'],
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])

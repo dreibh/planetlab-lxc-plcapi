@@ -4,7 +4,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Events import Event, Events
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class GetEvents(Method):
     """
@@ -18,7 +18,7 @@ class GetEvents(Method):
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         [Event.fields['event_id']],
 	[Event.fields['person_id']],
 	Event.fields['object_ids'],

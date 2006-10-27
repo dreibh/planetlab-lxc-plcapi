@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Slices import Slice, Slices
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class DeleteSlice(Method):
     """
@@ -18,7 +18,7 @@ class DeleteSlice(Method):
     roles = ['admin', 'pi', 'user']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
         ]

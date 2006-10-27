@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.Sites import Site, Sites
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 from PLC.Methods.AddNode import AddNode
 
 can_update = lambda (field, value): field in \
@@ -19,7 +19,7 @@ class AdmAddNode(AddNode):
     node_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Site.fields['site_id'],
         Node.fields['hostname'],
         Node.fields['boot_state'],

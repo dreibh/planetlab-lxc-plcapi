@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 can_update = lambda (field, value): field not in ['key_id']
 
@@ -21,7 +21,7 @@ class AddPersonKey(Method):
     key_fields = dict(filter(can_update, Key.fields.items()))
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
         key_fields

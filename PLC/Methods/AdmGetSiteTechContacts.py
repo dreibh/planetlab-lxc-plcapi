@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Persons import Person, Persons
-from PLC.Auth import PasswordAuth
+from PLC.Auth import Auth
 
 class AdmGetSiteTechContacts(Method):
     """
@@ -19,7 +19,7 @@ class AdmGetSiteTechContacts(Method):
     roles = ['admin']
 
     accepts = [
-        PasswordAuth(),
+        Auth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base'])
         ]
