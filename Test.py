@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.12 2006/10/25 14:32:31 mlhuang Exp $
+# $Id$
 #
 
 from pprint import pprint
@@ -509,8 +509,8 @@ for site_id in site_ids:
 
         # Add to node groups
         for nodegroup_id in nodegroup_ids:
-            print "AddNodeToNodeGroup(%d, %d)" % (nodegroup_id, node_id),
-            AddNodeToNodeGroup(admin, nodegroup_id, node_id)
+            print "AddNodeToNodeGroup(%d, %d)" % (node_id, nodegroup_id),
+            AddNodeToNodeGroup(admin, node_id, nodegroup_id)
             print "=> OK"
         
 print "GetNodes",
@@ -948,8 +948,8 @@ print "=> []"
 for node_id in node_ids:
     # Remove from node groups
     for nodegroup_id in nodegroup_ids:
-        print "DeleteNodeFromNodeGroup(%d, %d)" % (nodegroup_id, node_id),
-        DeleteNodeFromNodeGroup(admin, nodegroup_id, node_id)
+        print "DeleteNodeFromNodeGroup(%d, %d)" % (node_id, nodegroup_id),
+        DeleteNodeFromNodeGroup(admin, node_id, nodegroup_id)
         print "=> OK"
     node = GetNodes(admin, [node_id])[0]
     assert not node['nodegroup_ids']

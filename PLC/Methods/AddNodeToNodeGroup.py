@@ -17,10 +17,10 @@ class AddNodeToNodeGroup(Method):
 
     accepts = [
         Auth(),
+	Mixed(Node.fields['node_id'],
+	      Node.fields['hostname']),
         Mixed(NodeGroup.fields['nodegroup_id'],
 	      NodeGroup.fields['name']),
-	Mixed(Node.fields['node_id'],
-	      Node.fields['hostname'])
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -29,7 +29,7 @@ class AddNodeToNodeGroup(Method):
     object_type = 'NodeGroup'
     object_ids = []
 
-    def call(self, auth, nodegroup_id_or_name, node_id_or_hostname):
+    def call(self, auth, node_id_or_hostname, nodegroup_id_or_name):
         # Get node info
 	nodes = Nodes(self.api, [node_id_or_hostname])
 	if not nodes:
