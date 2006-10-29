@@ -10,7 +10,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Obsoletes: plcapilib
 
-BuildRequires: docbook-dtds, docbook-utils-pdf
+# OpenJade does not honor XML catalog files and tries to access
+# www.oasis-open.org even if DTDs are locally installed. Disable
+# documentation generation for now.
+# BuildRequires: docbook-dtds, docbook-utils-pdf
 
 Requires: postgresql-server, SOAPpy
 
@@ -24,8 +27,9 @@ through Apache mod_python.
 %setup -q
 
 %build
-# Build __init__.py metafiles, documentation, and PHP API
-%{__make} %{?_smp_mflags}
+# Build __init__.py metafiles and PHP API. Do not build documentation
+# for now.
+%{__make} %{?_smp_mflags} SUBDIRS=php
 
 # Byte compile
 %{__python} setup.py build
