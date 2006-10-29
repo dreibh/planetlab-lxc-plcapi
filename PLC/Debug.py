@@ -46,8 +46,9 @@ def profile(callable):
     return wrapper
 
 if __name__ == "__main__":
-    @profile
     def sleep(seconds = 1):
         time.sleep(seconds)
+
+    sleep = profile(sleep)
 
     sleep(1)
