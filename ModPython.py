@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: ModPython.py,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
+# $Id: ModPython.py,v 1.2 2006/10/25 21:05:05 mlhuang Exp $
 #
 
 import sys
@@ -46,9 +46,7 @@ def handler(req):
         response = api.handle(remote_addr, request)
 
         # Write response
-        req.content_type = "text/xml"
-        req.headers_out.add("Content-type", "text/xml")
-        req.headers_out.add("Content-length", str(len(response)))
+        req.content_type = "text/xml; charset=" + api.encoding
         req.send_http_header()
         req.write(response)
 
