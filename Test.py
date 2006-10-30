@@ -82,20 +82,6 @@ def randkey(bits = 2048):
                      base64.b64encode(''.join(randstr(bits / 8).encode("utf-8"))),
                      randemail()])
 
-def unicmp(a, b, encoding = "utf-8"):
-    """
-    When connected directly to the DB, values are returned as raw
-    8-bit strings that may need to be decoded (as UTF-8 by default) in
-    order to compare them against expected Python Unicode strings.
-    """
-    
-    is8bit = re.compile("[\x80-\xff]").search
-    if isinstance(a, str) and is8bit(a):
-        a = unicode(a, encoding)
-    if isinstance(b, str) and is8bit(b):
-        b = unicode(b, encoding)
-    return a == b
-
 admin = {'AuthMethod': "capability",
          'Username': config.PLC_API_MAINTENANCE_USER,
          'AuthString': config.PLC_API_MAINTENANCE_PASSWORD,
@@ -136,12 +122,12 @@ for i in range(3):
     print "GetSites(%d)" % site_id,
     site = GetSites(admin, [site_id])[0]
     for field in site_fields:
-        assert unicmp(site[field], site_fields[field])
+        assert site[field] == site_fields[field]
     print "=> OK"
 
     # Update site
     site_fields = random_site()
-    # Currently cannot change login_base
+    # XXX Currently cannot change login_base
     del site_fields['login_base']
     site_fields['max_slices'] = randint(1, 10)
     print "UpdateSite(%d)" % site_id,
@@ -151,8 +137,7 @@ for i in range(3):
     # Check site again
     site = GetSites(admin, [site_id])[0]
     for field in site_fields:
-        if field != 'login_base':
-            assert unicmp(site[field], site_fields[field])
+        assert site[field] == site_fields[field]
 
 print "GetSites",
 sites = GetSites(admin, site_ids)
@@ -181,7 +166,7 @@ for i in range(3):
     print "GetAddressTypes(%d)" % address_type_id,
     address_type = GetAddressTypes(admin, [address_type_id])[0]
     for field in 'name', 'description':
-        assert unicmp(address_type[field], address_type_fields[field])
+        assert address_type[field] == address_type_fields[field]
     print "=> OK"
 
     # Update address type
@@ -193,7 +178,7 @@ for i in range(3):
     # Check address type again
     address_type = GetAddressTypes(admin, [address_type_id])[0]
     for field in 'name', 'description':
-        assert unicmp(address_type[field], address_type_fields[field])
+        assert address_type[field] == address_type_fields[field]
 
 print "GetAddressTypes",
 address_types = GetAddressTypes(admin, address_type_ids)
@@ -228,7 +213,7 @@ for site_id in site_ids:
         print "GetAddresses(%d)" % address_id,
         address = GetAddresses(admin, [address_id])[0]
         for field in address_fields:
-            assert unicmp(address[field], address_fields[field])
+            assert address[field] == address_fields[field]
         print "=> OK"
 
         # Update address
@@ -240,7 +225,7 @@ for site_id in site_ids:
         # Check address again
         address = GetAddresses(admin, [address_id])[0]
         for field in address_fields:
-            assert unicmp(address[field], address_fields[field])
+            assert address[field] == address_fields[field]
 
         # Add address types
         for address_type_id in address_type_ids:
@@ -303,7 +288,7 @@ for auth in user, pi, tech:
     person = GetPersons(admin, [person_id])[0]
     for field in person_fields:
         if field != 'password':
-            assert unicmp(person[field], person_fields[field])
+            assert person[field] == person_fields[field]
     print "=> OK"
 
     # Update account
@@ -316,7 +301,7 @@ for auth in user, pi, tech:
     person = GetPersons(admin, [person_id])[0]
     for field in person_fields:
         if field != 'password':
-            assert unicmp(person[field], person_fields[field])
+            assert person[field] == person_fields[field]
 
     # Check that account is really disabled
     try:
@@ -380,7 +365,7 @@ for auth in user, pi, tech:
         print "GetKeys(%d)" % key_id,
         key = GetKeys(admin, [key_id])[0]
         for field in key_fields:
-            assert unicmp(key[field], key_fields[field])
+            assert key[field] == key_fields[field]
         print "=> OK"
 
         # Update key
@@ -389,7 +374,7 @@ for auth in user, pi, tech:
         UpdateKey(admin, key_id, key_fields)
         key = GetKeys(admin, [key_id])[0]
         for field in key_fields:
-            assert unicmp(key[field], key_fields[field])
+            assert key[field] == key_fields[field]
         print "=> OK"
 
     # Add and immediately blacklist a key
@@ -443,7 +428,7 @@ for i in range(3):
     print "GetNodeGroups(%d)" % nodegroup_id,
     nodegroup = GetNodeGroups(admin, [nodegroup_id])[0]
     for field in nodegroup_fields:
-        assert unicmp(nodegroup[field], nodegroup_fields[field])
+        assert nodegroup[field] == nodegroup_fields[field]
     print "=> OK"
 
     # Update node group, with a readable name
@@ -456,7 +441,7 @@ for i in range(3):
     # Check node group again
     nodegroup = GetNodeGroups(admin, [nodegroup_id])[0]
     for field in nodegroup_fields:
-        assert unicmp(nodegroup[field], nodegroup_fields[field])
+        assert nodegroup[field] == nodegroup_fields[field]
 
 print "GetNodeGroups",
 nodegroups = GetNodeGroups(admin, nodegroup_ids)
@@ -493,7 +478,7 @@ for site_id in site_ids:
         print "GetNodes(%d)" % node_id,
         node = GetNodes(admin, [node_id])[0]
         for field in node_fields:
-            assert unicmp(node[field], node_fields[field])
+            assert node[field] == node_fields[field]
         print "=> OK"
 
         # Update node
@@ -505,7 +490,7 @@ for site_id in site_ids:
         # Check node again
         node = GetNodes(admin, [node_id])[0]
         for field in node_fields:
-            assert unicmp(node[field], node_fields[field])
+            assert node[field] == node_fields[field]
 
         # Add to node groups
         for nodegroup_id in nodegroup_ids:
@@ -571,7 +556,7 @@ for node_id in node_ids:
             print "GetNodeNetworks(%d)" % nodenetwork_id,
             nodenetwork = GetNodeNetworks(admin, [nodenetwork_id])[0]
             for field in nodenetwork_fields:
-                assert unicmp(nodenetwork[field], nodenetwork_fields[field])
+                assert nodenetwork[field] == nodenetwork_fields[field]
             print "=> OK"
 
             # Update node network
@@ -583,7 +568,7 @@ for node_id in node_ids:
             # Check node network again
             nodenetwork = GetNodeNetworks(admin, [nodenetwork_id])[0]
             for field in nodenetwork_fields:
-                assert unicmp(nodenetwork[field], nodenetwork_fields[field])
+                assert nodenetwork[field] == nodenetwork_fields[field]
 
 print "GetNodeNetworks",
 nodenetworks = GetNodeNetworks(admin, nodenetwork_ids)
@@ -618,7 +603,7 @@ for site_id in site_ids:
     print "GetPCUs(%d)" % pcu_id,
     pcu = GetPCUs(admin, [pcu_id])[0]
     for field in pcu_fields:
-        assert unicmp(pcu[field], pcu_fields[field])
+        assert pcu[field] == pcu_fields[field]
     print "=> OK"
 
     # Update PCU
@@ -630,7 +615,7 @@ for site_id in site_ids:
     # Check PCU again
     pcu = GetPCUs(admin, [pcu_id])[0]
     for field in pcu_fields:
-        assert unicmp(pcu[field], pcu_fields[field])
+        assert pcu[field] == pcu_fields[field]
 
     # Add each node at this site to a different port on this PCU
     site = GetSites(admin, [site_id])[0]
@@ -678,7 +663,7 @@ for nodegroup_id in nodegroup_ids:
     print "GetConfFiles(%d)" % conf_file_id,
     conf_file = GetConfFiles(admin, [conf_file_id])[0]
     for field in conf_file_fields:
-        assert unicmp(conf_file[field], conf_file_fields[field])
+        assert conf_file[field] == conf_file_fields[field]
     print "=> OK"
 
     # Update configuration file
@@ -690,7 +675,7 @@ for nodegroup_id in nodegroup_ids:
     # Check configuration file
     conf_file = GetConfFiles(admin, [conf_file_id])[0]
     for field in conf_file_fields:
-        assert unicmp(conf_file[field], conf_file_fields[field])
+        assert conf_file[field] == conf_file_fields[field]
 
     # Add to all node groups
     for nodegroup_id in nodegroup_ids:
@@ -736,7 +721,7 @@ for i in range(3):
     print "GetSliceAttributeTypes(%d)" % attribute_type_id,
     attribute_type = GetSliceAttributeTypes(admin, [attribute_type_id])[0]
     for field in attribute_type_fields:
-        assert unicmp(attribute_type[field], attribute_type_fields[field])
+        assert attribute_type[field] == attribute_type_fields[field]
     print "=> OK"
 
     # Update slice attribute type
@@ -748,7 +733,7 @@ for i in range(3):
     # Check slice attribute type again
     attribute_type = GetSliceAttributeTypes(admin, [attribute_type_id])[0]
     for field in attribute_type_fields:
-        assert unicmp(attribute_type[field], attribute_type_fields[field])
+        assert attribute_type[field] == attribute_type_fields[field]
 
 # Add slices and slice attributes
 slice_ids = []
@@ -776,7 +761,7 @@ for site in sites:
         print "GetSlices(%d)" % slice_id,
         slice = GetSlices(admin, [slice_id])[0]
         for field in slice_fields:
-            assert unicmp(slice[field], slice_fields[field])
+            assert slice[field] == slice_fields[field]
         print "=> OK"
 
         # Update slice
@@ -787,7 +772,7 @@ for site in sites:
         UpdateSlice(admin, slice_id, slice_fields)
         slice = GetSlices(admin, [slice_id])[0]
         for field in slice_fields:
-            assert unicmp(slice[field], slice_fields[field])
+            assert slice[field] == slice_fields[field]
         print "=> OK"
 
         # Add slice to all nodes
@@ -827,7 +812,7 @@ for site in sites:
             print "GetSliceAttributes(%d)" % slice_attribute_id,
             slice_attribute = GetSliceAttributes(admin, [slice_attribute_id])[0]
             for field in 'attribute_type_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
-                assert unicmp(slice_attribute[field], locals()[field])
+                assert slice_attribute[field] == locals()[field]
             print "=> OK"
 
             # Update slice attribute
@@ -836,7 +821,7 @@ for site in sites:
             UpdateSliceAttribute(admin, slice_attribute_id, value)
             slice_attribute = GetSliceAttributes(admin, [slice_attribute_id])[0]
             for field in 'attribute_type_id', 'slice_id', 'node_id', 'slice_attribute_id', 'value':
-                assert unicmp(slice_attribute[field], locals()[field])
+                assert slice_attribute[field] == locals()[field]
             print "=> OK"
 
 # Delete slices
