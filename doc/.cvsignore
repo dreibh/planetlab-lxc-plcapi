@@ -1,8 +1,6 @@
 *.dvi
-# *.html
 *.man
 *.ps
-# *.pdf
 *.rtf
 *.tex
 *.texi
