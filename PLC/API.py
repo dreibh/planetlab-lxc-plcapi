@@ -5,21 +5,54 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.5 2006/10/24 13:47:35 mlhuang Exp $
+# $Id: API.py,v 1.6 2006/10/27 18:57:32 mlhuang Exp $
 #
 
 import sys
 import traceback
+import string
 
 import xmlrpclib
 
-def dump(self, value, write):
+# See "2.2 Characters" in the XML specification:
+#
+# #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
+# avoiding
+# [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
+
+invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
+xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
+
+def xmlrpclib_escape(s, replace = string.replace):
+    """
+    xmlrpclib does not handle invalid 7-bit control characters. This
+    function augments xmlrpclib.escape, which by default only replaces
+    '&', '<', and '>' with entities.
+    """
+
+    # This is the standard xmlrpclib.escape function
+    s = replace(s, "&", "&amp;")
+    s = replace(s, "<", "&lt;")
+    s = replace(s, ">", "&gt;",)
+
+    # Replace invalid 7-bit control characters with '?'
+    return s.translate(xml_escape_table)
+
+def xmlrpclib_dump(self, value, write):
     """
     xmlrpclib cannot marshal instances of subclasses of built-in
     types. This function overrides xmlrpclib.Marshaller.__dump so that
     any value that is an instance of one of its acceptable types is
     marshalled as that type.
+
+    xmlrpclib also cannot handle invalid 7-bit control characters. See
+    above.
     """
+
+    # Use our escape function
+    args = [self, value, write]
+    if isinstance(value, (str, unicode)):
+        args.append(xmlrpclib_escape)
 
     try:
         # Try for an exact match first
@@ -28,14 +61,14 @@ def dump(self, value, write):
         # Try for an isinstance() match
         for Type, f in self.dispatch.iteritems():
             if isinstance(value, Type):
-                f(self, value, write)
+                f(*args)
                 return
         raise TypeError, "cannot marshal %s objects" % type(value)
     else:
-        f(self, value, write)        
+        f(*args)
 
 # You can't hide from me!
-xmlrpclib.Marshaller._Marshaller__dump = dump
+xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 # SOAP support is optional
 try:
