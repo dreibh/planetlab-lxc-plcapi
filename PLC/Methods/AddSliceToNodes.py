@@ -51,8 +51,10 @@ class AddSliceToNodes(Method):
 	# Add slice to all nodes found
 	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
-                slice.add_node(node)
-		 
+                slice.add_node(node, commit = False)
+
+        slice.sync()
+
 	self.object_ids = [node['node_id'] for node in nodes]
 
         return 1
