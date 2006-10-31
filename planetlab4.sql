@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.23 2006/10/25 14:13:14 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.24 2006/10/27 15:31:28 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -703,22 +703,21 @@ GROUP BY event_id;
 -- Useful views
 --------------------------------------------------------------------------------
 
---view_events
 CREATE VIEW view_events AS
 SELECT
 events.event_id,
 events.person_id,
+events.node_id,
 event_objects.object_ids,
 events.event_type,
 events.object_type,
 events.fault_code,
 events.call,
 events.runtime,
-events.time
-From events
+CAST(date_part('epoch', events.time) AS bigint) AS time
+FROM events
 LEFT JOIN event_objects USING (event_id);
 
--- view_persons
 CREATE VIEW view_persons AS
 SELECT
 persons.person_id,
