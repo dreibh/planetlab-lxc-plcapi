@@ -4,12 +4,13 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.4 2006/10/25 14:22:14 mlhuang Exp $
+# $Id: Auth.py,v 1.5 2006/10/27 15:32:29 mlhuang Exp $
 #
 
 import crypt
 import sha
 import hmac
+import time
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
@@ -49,7 +50,7 @@ class SessionAuth(Auth):
         assert auth.has_key('session')
 
         # Get session record
-        sessions = Sessions(method.api, [auth['session']]).values()
+        sessions = Sessions(method.api, [auth['session']], expires = None).values()
         if not sessions:
             raise PLCAuthenticationFailure, "No such session"
         session = sessions[0]
@@ -66,7 +67,7 @@ class SessionAuth(Auth):
 
                 method.caller = node
 
-            elif session['person_id'] is not None:
+            elif session['person_id'] is not None and session['expires'] > time.time():
                 persons = Persons(method.api, [session['person_id']], enabled = True).values()
                 if not persons:
                     raise PLCAuthenticationFailure, "No such account"
