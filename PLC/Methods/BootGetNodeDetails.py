@@ -20,7 +20,7 @@ class BootGetNodeDetails(Method):
         'session': Session.fields['session_id'],
         }
 
-    def call(self, auth, update_fields):
+    def call(self, auth):
         details = {
             'hostname': self.caller['hostname'],
             'boot_state': self.caller['boot_state'],
