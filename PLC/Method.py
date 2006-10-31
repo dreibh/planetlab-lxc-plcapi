@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.12 2006/10/25 14:26:08 mlhuang Exp $
+# $Id: Method.py,v 1.13 2006/10/25 19:33:52 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -12,11 +12,15 @@ from types import *
 import textwrap
 import os
 import time
+import pprint
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 from PLC.Debug import profile, log
+from PLC.Events import Event, Events
+from PLC.Nodes import Node, Nodes
+from PLC.Persons import Person, Persons
 
 class Method:
     """
@@ -65,7 +69,6 @@ class Method:
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
-
     	
     def __call__(self, *args, **kwds):
         """
@@ -87,7 +90,7 @@ class Method:
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
 
-	    if self.api.config.PLC_API_DEBUG:
+            if self.api.config.PLC_API_DEBUG:
 		self.log(0, runtime, *args)
 	    	
 	    return result
@@ -99,51 +102,47 @@ class Method:
 	    self.log(fault.faultCode, runtime, *args)
             raise fault
 
-
     def log(self, fault_code, runtime, *args):
         """
         Log the transaction 
         """	
-	# Gather necessary logging variables
-	event_type = 'Unknown'
-	object_type = 'Unknown'
-	person_id = None
-	object_ids = []
-	call_name = self.name
-	call_args = ", ".join([unicode(arg) for arg in list(args)[1:]])
-	call = "%s(%s)" % (call_name, call_args)
-		
-	if hasattr(self, 'event_type'):
-		event_type = self.event_type
-        if hasattr(self, 'object_type'):
-		object_type = self.object_type
-	if self.caller:
-		person_id = self.caller['person_id']
-	if hasattr(self, 'object_ids'):
-		object_ids = self.object_ids 
 
-	# do not log system calls
-        if call_name.startswith('system'):
-        	return False
-	# do not log get calls
-	if call_name.startswith('Get'):
-		return False
-	
-	sql_event = "INSERT INTO events " \
-              " (person_id, event_type, object_type, fault_code, call, runtime) VALUES" \
-              " (%(person_id)s, %(event_type)s, %(object_type)s," \
-	      "  %(fault_code)d, %(call)s, %(runtime)f)" 
-	self.api.db.do(sql_event, locals())	
+	# Do not log system or Get calls
+        if self.name.startswith('system') or self.name.startswith('Get'):
+            return False
 
-	# log objects affected
-	event_id =  self.api.db.last_insert_id('events', 'event_id')
-	for object_id in object_ids:
-		sql_objects = "INSERT INTO event_object (event_id, object_id) VALUES" \
-                        " (%(event_id)d, %(object_id)d) " 
-		self.api.db.do(sql_objects, locals())
-		 	
-        self.api.db.commit()		
-	
+        # Create a new event
+        event = Event(self.api)
+        event['fault_code'] = fault_code
+        event['runtime'] = runtime
+
+        # Redact passwords and sessions
+        if args and isinstance(args[0], dict):
+            for password in 'AuthString', 'session':
+                if args[0].has_key(password):
+                    auth = args[0].copy()
+                    auth[password] = "Removed by API"
+                    args = (auth,) + args[1:]
+
+        # Log call representation
+        # XXX Truncate to avoid DoS
+        event['call'] = self.name + pprint.saferepr(args)
+
+        # Both users and nodes can call some methods
+        if isinstance(self.caller, Person):
+            event['person_id'] = self.caller['person_id']
+        elif isinstance(self.caller, Node):
+            event['node_id'] = self.caller['node_id']
+
+        event.sync(commit = False)
+
+        # XXX object_ids is currently defined as a class variable
+        if hasattr(self, 'object_ids'):
+            for object_id in self.object_ids:
+                event.add_object(object_id, commit = False)
+
+        # Commit
+        event.sync(commit = True)
 
     def help(self, indent = "  "):
         """
