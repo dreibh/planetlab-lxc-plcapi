@@ -25,7 +25,7 @@ class GetSlivers(Method):
     Federation Manager.
     """
 
-    roles = ['admin']
+    roles = ['admin', 'node']
 
     accepts = [
         Auth(),
