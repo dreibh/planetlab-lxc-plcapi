@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
-# $Id: Config.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
+# $Id: Config.py,v 1.2 2006/09/06 19:15:59 mlhuang Exp $
 #
 
 import os
@@ -35,7 +35,7 @@ class Config:
         except:
             # Try myplc directory
             try:
-                execfile(file, self.__dict__)
+                execfile(myplc + os.sep + "plc_config", self.__dict__)
             except:
                 raise PLCAPIError("Could not find plc_config in " + \
                                   file + ", " + \
