@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.10 2006/11/02 15:05:07 mlhuang Exp $
+# $Id: Shell.py,v 1.11 2006/11/02 15:31:02 mlhuang Exp $
 #
 
 import os, sys
@@ -34,10 +34,8 @@ user = None
 password = None
 role = None
 
-if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
     # Parse options if called interactively
-    script = sys.argv[1]
-
     def usage():
         print "Usage: %s [OPTION]..." % sys.argv[0]
         print "Options:"
