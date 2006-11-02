@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.8 2006/10/20 18:25:39 mlhuang Exp $
+# $Id: Shell.py,v 1.9 2006/10/27 15:26:44 mlhuang Exp $
 #
 
 import os, sys
@@ -34,50 +34,56 @@ user = None
 password = None
 role = None
 
-def usage():
-    print "Usage: %s [OPTION]..." % sys.argv[0]
-    print "Options:"
-    print "     -f, --config=FILE       PLC configuration file"
-    print "     -h, --url=URL           API URL"
-    print "     -m, --method=METHOD     API authentication method"
-    print "     -u, --user=EMAIL        API user name"
-    print "     -p, --password=STRING   API password"
-    print "     -r, --role=ROLE         API role"
-    print "     -x, --xmlrpc            Use XML-RPC interface"
-    print "     --help                  This message"
-    sys.exit(1)
+if not os.path.exists(sys.argv[1]):
+    # Parse options if called interactively
+    script = sys.argv[1]
 
-# Get options
-try:
-    (opts, argv) = getopt.getopt(sys.argv[1:],
-                                 "f:h:m:u:p:r:x",
-                                 ["config=", "cfg=", "file=",
-                                  "host=",
-                                  "method=",
-                                  "username=", "user=",
-                                  "password=", "pass=", "authstring=",
-                                  "role=",
-                                  "xmlrpc",
-                                  "help"])
-except getopt.GetoptError, err:
-    print "Error: " + err.msg
-    usage()
+    def usage():
+        print "Usage: %s [OPTION]..." % sys.argv[0]
+        print "Options:"
+        print "     -f, --config=FILE       PLC configuration file"
+        print "     -h, --url=URL           API URL"
+        print "     -m, --method=METHOD     API authentication method"
+        print "     -u, --user=EMAIL        API user name"
+        print "     -p, --password=STRING   API password"
+        print "     -r, --role=ROLE         API role"
+        print "     -x, --xmlrpc            Use XML-RPC interface"
+        print "     --help                  This message"
+        sys.exit(1)
 
-for (opt, optval) in opts:
-    if opt == "-f" or opt == "--config" or opt == "--cfg" or opt == "--file":
-        config = optval
-    elif opt == "-h" or opt == "--host" or opt == "--url":
-        url = optval
-    elif opt == "-m" or opt == "--method":
-        method = optval
-    elif opt == "-u" or opt == "--username" or opt == "--user":
-        user = optval
-    elif opt == "-p" or opt == "--password" or opt == "--pass" or opt == "--authstring":
-        password = optval
-    elif opt == "-r" or opt == "--role":
-        role = optval
-    elif opt == "--help":
+    try:
+        (opts, argv) = getopt.getopt(sys.argv[1:],
+                                     "f:h:m:u:p:r:x",
+                                     ["config=", "cfg=", "file=",
+                                      "host=",
+                                      "method=",
+                                      "username=", "user=",
+                                      "password=", "pass=", "authstring=",
+                                      "role=",
+                                      "xmlrpc",
+                                      "help"])
+    except getopt.GetoptError, err:
+        print "Error: ", err.msg
         usage()
+
+    for (opt, optval) in opts:
+        if opt == "-f" or opt == "--config" or opt == "--cfg" or opt == "--file":
+            config = optval
+        elif opt == "-h" or opt == "--host" or opt == "--url":
+            url = optval
+        elif opt == "-m" or opt == "--method":
+            method = optval
+        elif opt == "-u" or opt == "--username" or opt == "--user":
+            user = optval
+        elif opt == "-p" or opt == "--password" or opt == "--pass" or opt == "--authstring":
+            password = optval
+        elif opt == "-r" or opt == "--role":
+            role = optval
+        elif opt == "--help":
+            usage()
+else:
+    # Do not parse options if called by a script
+    opts = None
 
 try:
     # If any XML-RPC options have been specified, do not try
@@ -188,13 +194,8 @@ class Callable:
         else:
             return self.func(*args, **kwds)
 
-if server is not None:
-    methods = server.system.listMethods()
-else:
-    methods = api.call(None, "system.listMethods")
-
 # Define all methods in the global namespace to support tab completion
-for method in methods:
+for method in PLC.Methods.methods:
     paths = method.split(".")
     if len(paths) > 1:
         first = paths.pop(0)
@@ -229,9 +230,11 @@ def help(thing):
     # help(...)
     pyhelp(thing)
 
-# If a file is specified
-if argv:
-    execfile(argv[0])
+# If called by a script
+if os.path.exists(sys.argv[1]):
+    # Pop us off the argument stack
+    sys.argv.pop(0)
+    execfile(sys.argv[0])
     sys.exit(0)
 
 # Otherwise, create an interactive shell environment
