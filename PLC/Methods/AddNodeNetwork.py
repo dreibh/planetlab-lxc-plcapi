@@ -64,6 +64,9 @@ class AddNodeNetwork(Method):
         # Add node network
 	nodenetwork = NodeNetwork(self.api, nodenetwork_fields)
         nodenetwork['node_id'] = node['node_id']
+	# if this is the first node network, make it primary
+	if not node['nodenetwork_ids']:
+		nodenetwork['is_primary'] = True
         nodenetwork.sync()
 
 	self.object_ids = [node['node_id'], nodenetwork['nodenetwork_id']]	
