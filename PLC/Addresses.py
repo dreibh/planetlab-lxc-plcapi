@@ -15,8 +15,8 @@ class Address(Row):
     fields = {
         'address_id': Parameter(int, "Address identifier"),
         'line1': Parameter(str, "Address line 1", max = 254),
-        'line2': Parameter(str, "Address line 2", max = 254),
-        'line3': Parameter(str, "Address line 3", max = 254),
+        'line2': Parameter(str, "Address line 2", max = 254, nullok = True),
+        'line3': Parameter(str, "Address line 3", max = 254, nullok = True),
         'city': Parameter(str, "City", max = 254),
         'state': Parameter(str, "State or province", max = 254),
         'postalcode': Parameter(str, "Postal code", max = 64),

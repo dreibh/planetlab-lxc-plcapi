@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.14 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: Persons.py,v 1.15 2006/10/27 15:32:56 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -35,11 +35,11 @@ class Person(Row):
         'person_id': Parameter(int, "Account identifier"),
         'first_name': Parameter(str, "Given name", max = 128),
         'last_name': Parameter(str, "Surname", max = 128),
-        'title': Parameter(str, "Title", max = 128),
+        'title': Parameter(str, "Title", max = 128, nullok = True),
         'email': Parameter(str, "Primary e-mail address", max = 254),
-        'phone': Parameter(str, "Telephone number", max = 64),
-        'url': Parameter(str, "Home page", max = 254),
-        'bio': Parameter(str, "Biography", max = 254),
+        'phone': Parameter(str, "Telephone number", max = 64, nullok = True),
+        'url': Parameter(str, "Home page", max = 254, nullok = True),
+        'bio': Parameter(str, "Biography", max = 254, nullok = True),
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'last_updated': Parameter(int, "Date and time of last update", ro = True),

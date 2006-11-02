@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.13 2006/10/25 19:33:52 mlhuang Exp $
+# $Id: Method.py,v 1.14 2006/10/31 21:47:21 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -278,12 +278,18 @@ class Method:
         if isinstance(expected, Parameter):
             min = expected.min
             max = expected.max
+            nullok = expected.nullok
             expected = expected.type
         else:
             min = None
             max = None
+            nullok = False
 
         expected_type = python_type(expected)
+
+        # If value can be NULL
+        if value is None and nullok:
+            return
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.

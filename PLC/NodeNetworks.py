@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.10 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.11 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -51,16 +51,16 @@ class NodeNetwork(Row):
         'nodenetwork_id': Parameter(int, "Node interface identifier"),
         'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')"),
         'type': Parameter(str, "Address type (e.g., 'ipv4')"),
-        'ip': Parameter(str, "IP address"),
-        'mac': Parameter(str, "MAC address"),
-        'gateway': Parameter(str, "IP address of primary gateway"),
-        'network': Parameter(str, "Subnet address"),
-        'broadcast': Parameter(str, "Network broadcast address"),
-        'netmask': Parameter(str, "Subnet mask"),
-        'dns1': Parameter(str, "IP address of primary DNS server"),
-        'dns2': Parameter(str, "IP address of secondary DNS server"),
-        'bwlimit': Parameter(int, "Bandwidth limit", min = 0),
-        'hostname': Parameter(str, "(Optional) Hostname"),
+        'ip': Parameter(str, "IP address", nullok = True),
+        'mac': Parameter(str, "MAC address", nullok = True),
+        'gateway': Parameter(str, "IP address of primary gateway", nullok = True),
+        'network': Parameter(str, "Subnet address", nullok = True),
+        'broadcast': Parameter(str, "Network broadcast address", nullok = True),
+        'netmask': Parameter(str, "Subnet mask", nullok = True),
+        'dns1': Parameter(str, "IP address of primary DNS server", nullok = True),
+        'dns2': Parameter(str, "IP address of secondary DNS server", nullok = True),
+        'bwlimit': Parameter(int, "Bandwidth limit", min = 0, nullok = True),
+        'hostname': Parameter(str, "(Optional) Hostname", nullok = True),
         'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         }
@@ -81,6 +81,9 @@ class NodeNetwork(Row):
         return ip
 
     def validate_mac(self, mac):
+        if not mac:
+            return mac
+
         try:
             bytes = mac.split(":")
             if len(bytes) < 6:

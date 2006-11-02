@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.5 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: PCUs.py,v 1.6 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -28,11 +28,11 @@ class PCU(Row):
         'site_id': Parameter(int, "Identifier of site where PCU is located"),
         'hostname': Parameter(str, "PCU hostname", max = 254),
         'ip': Parameter(str, "PCU IP address", max = 254),
-        'protocol': Parameter(str, "PCU protocol, e.g. ssh, https, telnet", max = 16),
-        'username': Parameter(str, "PCU username", max = 254),
-        'password': Parameter(str, "PCU username", max = 254),
-        'notes': Parameter(str, "Miscellaneous notes", max = 254),
-        'model': Parameter(str, "PCU model string", max = 32),
+        'protocol': Parameter(str, "PCU protocol, e.g. ssh, https, telnet", max = 16, nullok = True),
+        'username': Parameter(str, "PCU username", max = 254, nullok = True),
+        'password': Parameter(str, "PCU username", max = 254, nullok = True),
+        'notes': Parameter(str, "Miscellaneous notes", max = 254, nullok = True),
+        'model': Parameter(str, "PCU model string", max = 32, nullok = True),
         'node_ids': Parameter([int], "List of nodes that this PCU controls", ro = True),
         'ports': Parameter([int], "List of the port numbers that each node is connected to", ro = True),
         }

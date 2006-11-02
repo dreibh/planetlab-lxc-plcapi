@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py,v 1.3 2006/10/02 18:32:31 mlhuang Exp $
+# $Id: Parameter.py,v 1.4 2006/10/25 14:27:12 mlhuang Exp $
 #
 
 class Parameter:
@@ -17,7 +17,8 @@ class Parameter:
     def __init__(self, type, doc = "",
                  min = None, max = None,
                  optional = None,
-                 ro = False):
+                 ro = False,
+                 nullok = False):
         # Basic type of the parameter. May be a builtin type or Mixed.
         self.type = type
 
@@ -36,6 +37,9 @@ class Parameter:
 
         # Whether the DB field is read-only.
         self.ro = ro
+
+        # Whether the DB field can be NULL.
+        self.nullok = nullok
 
     def __repr__(self):
         return repr(self.type)

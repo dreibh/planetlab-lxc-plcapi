@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.4 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.5 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -30,9 +30,9 @@ class ConfFile(Row):
         'file_permissions': Parameter(str, "chmod(1) permissions", max = 20),
         'file_owner': Parameter(str, "chown(1) owner", max = 50),
         'file_group': Parameter(str, "chgrp(1) owner", max = 50),
-        'preinstall_cmd': Parameter(str, "Shell command to execute prior to installing", max = 1024),
-        'postinstall_cmd': Parameter(str, "Shell command to execute after installing", max = 1024),
-        'error_cmd': Parameter(str, "Shell command to execute if any error occurs", max = 1024),
+        'preinstall_cmd': Parameter(str, "Shell command to execute prior to installing", max = 1024, nullok = True),
+        'postinstall_cmd': Parameter(str, "Shell command to execute after installing", max = 1024, nullok = True),
+        'error_cmd': Parameter(str, "Shell command to execute if any error occurs", max = 1024, nullok = True),
         'ignore_cmd_errors': Parameter(bool, "Install file anyway even if an error occurs"),
         'always_update': Parameter(bool, "Always attempt to install file even if unchanged"),
         'node_ids': Parameter(int, "List of nodes linked to this file", ro = True),
