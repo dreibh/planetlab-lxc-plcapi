@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.9 2006/10/27 15:26:44 mlhuang Exp $
+# $Id: Shell.py,v 1.10 2006/11/02 15:05:07 mlhuang Exp $
 #
 
 import os, sys
@@ -34,7 +34,7 @@ user = None
 password = None
 role = None
 
-if not os.path.exists(sys.argv[1]):
+if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
     # Parse options if called interactively
     script = sys.argv[1]
 
@@ -147,6 +147,40 @@ else:
     if role is not None:
         auth['Role'] = role
 
+# More convenient multicall support
+multi = False
+calls = []
+
+def begin():
+    global multi, calls
+
+    if calls:
+        raise Exception, "multicall already in progress"
+
+    multi = True
+
+def commit():
+    global multi, calls
+
+    if calls:
+        ret = []
+        multi = False
+        results = system.multicall(calls)
+        for result in results:
+            if type(result) == type({}):
+                raise xmlrpclib.Fault(item['faultCode'], item['faultString'])
+            elif type(result) == type([]):
+                ret.append(result[0])
+            else:
+                raise ValueError, "unexpected type in multicall result"
+    else:
+        ret = None
+
+    calls = []
+    multi = False
+
+    return ret
+
 class Callable:
     """
     Wrapper to call a method either directly or remotely. Initialize
@@ -186,11 +220,17 @@ class Callable:
         requires it and it has not been specified.
         """
 
+        global multi, calls
+
         if self.auth and \
            (not args or not isinstance(args[0], dict) or \
             (not args[0].has_key('AuthMethod') and \
              not args[0].has_key('session'))):
-            return self.func(auth, *args, **kwds)
+            args = (auth,) + args
+
+        if multi:
+            calls.append({'methodName': self.name, 'params': list(args)})
+            return None
         else:
             return self.func(*args, **kwds)
 
@@ -231,7 +271,7 @@ def help(thing):
     pyhelp(thing)
 
 # If called by a script
-if os.path.exists(sys.argv[1]):
+if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
     # Pop us off the argument stack
     sys.argv.pop(0)
     execfile(sys.argv[0])
