@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.11 2006/11/02 15:31:02 mlhuang Exp $
+# $Id: Shell.py,v 1.12 2006/11/02 22:07:22 mlhuang Exp $
 #
 
 import os, sys
@@ -33,6 +33,7 @@ method = None
 user = None
 password = None
 role = None
+xmlrpc = False
 
 if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
     # Parse options if called interactively
@@ -77,16 +78,16 @@ if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
             password = optval
         elif opt == "-r" or opt == "--role":
             role = optval
+        elif opt == "-x" or opt == "--xmlrpc":
+            xmlrpc = True
         elif opt == "--help":
             usage()
-else:
-    # Do not parse options if called by a script
-    opts = None
 
 try:
     # If any XML-RPC options have been specified, do not try
     # connecting directly to the DB.
-    if opts:
+    if (url, method, user, password, role, xmlrpc) != \
+       (None, None, None, None, None, False):
         raise Exception
         
     # Otherwise, first try connecting directly to the DB. If this
