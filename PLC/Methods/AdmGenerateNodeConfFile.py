@@ -90,7 +90,7 @@ class AdmGenerateNodeConfFile(Method):
             file += 'IP_NETADDR="%s"\n' % primary['network']
             file += 'IP_BROADCASTADDR="%s"\n' % primary['broadcast']
             file += 'IP_DNS1="%s"\n' % primary['dns1']
-            file += 'IP_DNS2="%s"\n' % primary['dns2']
+            file += 'IP_DNS2="%s"\n' % (primary['dns2'] or "")
 
         file += 'HOST_NAME="%s"\n' % host
         file += 'DOMAIN_NAME="%s"\n' % domain
