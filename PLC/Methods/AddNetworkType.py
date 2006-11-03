@@ -26,6 +26,6 @@ class AddNetworkType(Method):
     def call(self, auth, name):
         network_type = NetworkType(self.api)
         network_type['type'] = name
-        network_type.sync()
+        network_type.sync(insert = True)
 
         return 1

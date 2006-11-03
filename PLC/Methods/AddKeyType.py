@@ -26,6 +26,6 @@ class AddKeyType(Method):
     def call(self, auth, name):
         key_type = KeyType(self.api)
         key_type['key_type'] = name
-        key_type.sync()
+        key_type.sync(insert = True)
 
         return 1

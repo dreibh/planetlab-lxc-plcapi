@@ -26,6 +26,6 @@ class AddNetworkMethod(Method):
     def call(self, auth, name):
         network_method = NetworkMethod(self.api)
         network_method['method'] = name
-        network_method.sync()
+        network_method.sync(insert = True)
 
         return 1

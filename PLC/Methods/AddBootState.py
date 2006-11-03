@@ -27,6 +27,6 @@ class AddBootState(Method):
     def call(self, auth, name):
         boot_state = BootState(self.api)
         boot_state['boot_state'] = name
-        boot_state.sync()
+        boot_state.sync(insert = True)
 
         return 1
