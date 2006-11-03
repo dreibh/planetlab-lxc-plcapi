@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.15 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: Method.py,v 1.16 2006/11/03 20:36:05 thierry Exp $
 #
 
 import xmlrpclib
@@ -263,11 +263,7 @@ class Method:
                     return
                 except PLCInvalidArgument, fault:
                     pass
-            xmlrpc_types = [xmlrpc_type(item) for item in expected]
-            raise PLCInvalidArgument("expected %s, got %s" % \
-                                     (" or ".join(xmlrpc_types),
-                                      xmlrpc_type(type(value))),
-                                     name)
+            raise fault
 
         # If an authentication structure is expected, save it and
         # authenticate after basic type checking is done.
