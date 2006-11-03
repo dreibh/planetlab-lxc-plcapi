@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.25 2006/10/31 21:45:45 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.26 2006/11/03 16:05:20 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ CREATE TABLE nodegroup_node (
 CREATE INDEX nodegroup_node_nodegroup_id_idx ON nodegroup_node (nodegroup_id);
 CREATE INDEX nodegroup_node_node_id_idx ON nodegroup_node (node_id);
 
--- Nodes in each node gruop
+-- Nodes in each node group
 CREATE VIEW nodegroup_nodes AS
 SELECT nodegroup_id,
 array_to_string(array_accum(node_id), ',') AS node_ids
@@ -935,3 +935,37 @@ INSERT INTO sites
 (login_base, name, abbreviated_name, max_slices)
 VALUES
 ('pl', 'PlanetLab Central', 'PLC', 100);
+
+-- federation stuff starting here
+INSERT INTO roles (role_id, name) VALUES (3000, 'peer');
+
+CREATE TABLE peers (
+     peer_id  serial PRIMARY KEY, -- identifier
+     peername text NOT NULL,      -- free text
+     peer_url text NOT NULL,      -- the url of that peer's API
+     person_id integer REFERENCES persons NOT NULL, -- the account we use for logging in
+       
+     deleted boolean NOT NULL DEFAULT false
+) WITH OIDS;
+
+CREATE TABLE foreign_nodes (
+     foreign_node_id serial PRIMARY KEY, -- identifier
+     hostname text NOT NULL, 
+     boot_state text NOT NULL,
+     peer_id integer REFERENCES peers NOT NULL,
+       
+     deleted boolean NOT NULL DEFAULT false
+) WITH OIDS;
+
+CREATE VIEW peer_foreign_nodes AS
+SELECT peer_id,
+array_to_string(array_accum(foreign_node_id), ',') AS foreign_node_ids
+FROM foreign_nodes
+GROUP BY peer_id;
+
+CREATE VIEW view_peers AS
+SELECT 
+peers.*, 
+peer_foreign_nodes.foreign_node_ids 
+FROM peers
+LEFT JOIN peer_foreign_nodes USING (peer_id);

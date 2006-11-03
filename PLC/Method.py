@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.14 2006/10/31 21:47:21 mlhuang Exp $
+# $Id: Method.py,v 1.15 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -13,6 +13,8 @@ import textwrap
 import os
 import time
 import pprint
+
+from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed

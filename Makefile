@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.1 2006/09/06 15:33:59 mlhuang Exp $
+# $Id: Makefile,v 1.2 2006/10/25 21:05:40 mlhuang Exp $
 #
 
 # Metafiles
@@ -19,9 +19,11 @@ $(SUBDIRS): %:
 	$(MAKE) -C $@
 
 clean:
-	find . -name '*.pyc' -execdir rm -f {} +
+	find . -name '*.pyc' -execdir rm -f {} \;
 	rm -f $(INIT)
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
+
+index: PLC/__init__.py PLC/Methods/__init__.py
 
 # All .py files in PLC/
 PLC := $(filter-out %/__init__.py, $(wildcard PLC/*.py))
