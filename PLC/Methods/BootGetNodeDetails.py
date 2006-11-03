@@ -11,7 +11,10 @@ class BootGetNodeDetails(Method):
     node session value.
     """
 
+    roles = ['node']
+
     accepts = [BootAuth()]
+
     returns = {
         'hostname': Node.fields['hostname'],
         'boot_state': Node.fields['boot_state'],
