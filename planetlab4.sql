@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.24 2006/10/27 15:31:28 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.25 2006/10/31 21:45:45 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -628,6 +628,16 @@ CREATE TABLE node_session (
     session_id text REFERENCES sessions NOT NULL, -- Session identifier
     UNIQUE (node_id), -- Nodes can have only one session
     UNIQUE (session_id) -- Sessions are unique
+) WITH OIDS;
+
+--------------------------------------------------------------------------------
+-- Message templates
+--------------------------------------------------------------------------------
+
+CREATE TABLE messages (
+    message_id text PRIMARY KEY, -- Message name
+    template text, -- Message template
+    enabled bool NOT NULL DEFAULT true -- Whether message is enabled
 ) WITH OIDS;
 
 --------------------------------------------------------------------------------
