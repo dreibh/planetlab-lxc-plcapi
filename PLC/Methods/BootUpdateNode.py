@@ -17,6 +17,8 @@ class BootUpdateNode(Method):
     Returns 1 if updated successfully.
     """
 
+    roles = ['node']
+
     nodenetwork_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
@@ -25,6 +27,7 @@ class BootUpdateNode(Method):
          'primary_network': nodenetwork_fields,
          'ssh_host_key': Node.fields['ssh_rsa_key']}
         ]
+
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, node_fields):
