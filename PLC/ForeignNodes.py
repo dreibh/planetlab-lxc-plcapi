@@ -1,7 +1,5 @@
 #
-# the nodes standing on peer plc's
-#
-# Thierry Parmentelat
+# Thierry Parmentelat - INRIA
 # 
 
 from types import StringTypes
@@ -31,27 +29,25 @@ class ForeignNode (Row) :
 
 class ForeignNodes (Table):
 
-    def __init__ (self, api, foreign_node_id_or_peername_list=None):
+    def __init__ (self, api, foreign_node_id_or_hostname_list=None):
 
 	self.api=api
 
-	# must qualify fields because peer_id otherwise gets ambiguous
-	fields = ["foreign_nodes.%s"%x for x in ForeignNode.fields]
-		  
 	sql =""
-	sql += "SELECT %s FROM foreign_nodes, peers " % ", ".join(fields)
-	sql += "WHERE foreign_nodes.peer_id=peers.peer_id "
-	sql += "AND foreign_nodes.deleted IS False " 
+	sql += "SELECT %s FROM foreign_nodes " % ", ".join(ForeignNode.fields)
+	sql += "WHERE foreign_nodes.deleted IS False " 
 
-	if foreign_node_id_or_peername_list:
-	    foreign_node_id_list = [ x for x in foreign_node_id_or_peername_list if isinstance(x, (int,long))]
-	    peername_list = [ x for x in foreign_node_id_or_peername_list if isinstance(x, StringTypes)]
+	if foreign_node_id_or_hostname_list:
+	    foreign_node_id_list = [ str(x) for x in foreign_node_id_or_hostname_list 
+				     if isinstance(x, (int,long))]
+	    hostname_list = [ x for x in foreign_node_id_or_hostname_list
+			      if isinstance(x, StringTypes)]
 	    sql += " AND (False"
 	    if foreign_node_id_list:
-		sql += " OR foreign_node_id in (%s)" % ", ".join([str(i) for i in foreign_node_id_list])
-	    if peername_list:
-		## figure how to retrieve peer_id from the peername(s)
-		sql += " OR peername IN (%s)" % ", ".join(api.db.quote(peername_list))
+		sql += " OR foreign_node_id in (%s)" % ", ".join(foreign_node_id_list)
+	    if hostname_list:
+		## figure how to retrieve peer_id from the hostname(s)
+		sql += " OR hostname IN (%s)" % ", ".join(api.db.quote(hostname_list))
 	    sql += ")"
 
 	rows = self.api.db.selectall (sql)

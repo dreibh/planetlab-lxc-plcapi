@@ -1,3 +1,7 @@
+#
+# Thierry Parmentelat - INRIA
+# 
+
 import re
 
 from types import StringTypes

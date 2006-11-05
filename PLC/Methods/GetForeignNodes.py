@@ -1,3 +1,7 @@
+#
+# Thierry Parmentelat - INRIA
+# 
+
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -19,7 +23,7 @@ class GetForeignNodes (Method):
     
     returns = [ ForeignNode.fields]
 
-    def call (self, auth, foreign_id_or_peername_list = None):
+    def call (self, auth, foreign_id_or_hostname_list = None):
 
-	return ForeignNodes (self.api, foreign_id_or_peername_list).values()
+	return ForeignNodes (self.api, foreign_id_or_hostname_list).values()
 	

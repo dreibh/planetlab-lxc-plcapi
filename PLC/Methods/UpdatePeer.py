@@ -1,3 +1,7 @@
+#
+# Thierry Parmentelat - INRIA
+# 
+
 import xmlrpclib
 
 from PLC.Faults import *
