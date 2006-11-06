@@ -69,6 +69,8 @@ class AdmGenerateNodeConfFile(Method):
         bytes = random.sample(xrange(0, 256), 32)
         # Base64 encode their string representation
         node['key'] = base64.b64encode("".join(map(chr, bytes)))
+        # XXX Boot Manager cannot handle = in the key
+        node['key'] = node['key'].replace("=", "")
         # Save it
         node.sync()
 
