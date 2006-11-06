@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.5 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.6 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -138,15 +138,18 @@ class ConfFiles(Table):
     Representation of the conf_files table in the database.
     """
 
-    def __init__(self, api, conf_file_ids = None):
-        sql = "SELECT %s FROM view_conf_files" % \
+    def __init__(self, api, conf_file_ids = None, enabled = None):
+        sql = "SELECT %s FROM view_conf_files WHERE True" % \
               ", ".join(ConfFile.fields)
         
         if conf_file_ids:
             # Separate the list into integers and strings
-            sql += " WHERE conf_file_id IN (%s)" % ", ".join(map(str, api.db.quote(conf_file_ids)))
+            sql += " AND conf_file_id IN (%s)" % ", ".join(map(str, api.db.quote(conf_file_ids)))
 
-        rows = api.db.selectall(sql)
+        if enabled is not None:
+            sql += " AND enabled = %(enabled)s"
+
+        rows = api.db.selectall(sql, locals())
 
         for row in rows:
             self[row['conf_file_id']] = ConfFile(api, row)
