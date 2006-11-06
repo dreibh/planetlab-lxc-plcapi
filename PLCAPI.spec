@@ -31,17 +31,9 @@ through Apache mod_python.
 # for now.
 %{__make} %{?_smp_mflags} SUBDIRS=php
 
-# Byte compile
-%{__python} setup.py build
-
 %install
 rm -rf $RPM_BUILD_ROOT
-
-# Install in /usr/share/plc_api
-%{__python} setup.py install \
-    --install-purelib=$RPM_BUILD_ROOT/%{_datadir}/plc_api \
-    --install-scripts=$RPM_BUILD_ROOT/%{_datadir}/plc_api \
-    --install-data=$RPM_BUILD_ROOT/%{_datadir}/plc_api
+%{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}"
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
