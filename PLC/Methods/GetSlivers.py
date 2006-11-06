@@ -64,12 +64,10 @@ class GetSlivers(Method):
 
         nodenetwork_ids = set()
         nodegroup_ids = set()
-        conf_file_ids = set()
         slice_ids = set()
         for node_id, node in all_nodes.iteritems():
             nodenetwork_ids.update(node['nodenetwork_ids'])
             nodegroup_ids.update(node['nodegroup_ids'])
-            conf_file_ids.update(node['conf_file_ids'])
             slice_ids.update(node['slice_ids'])
 
         # Get nodenetwork information
@@ -81,17 +79,11 @@ class GetSlivers(Method):
         # Get node group information
         if nodegroup_ids:
             all_nodegroups = NodeGroups(self.api, nodegroup_ids)
-
-            for nodegroup_id, nodegroup in all_nodegroups.iteritems():
-                conf_file_ids.update(nodegroup['conf_file_ids'])
         else:
             all_nodegroups = {}
 
         # Get configuration files
-        if conf_file_ids:
-            all_conf_files = ConfFiles(self.api, conf_file_ids)
-        else:
-            all_conf_files = {}
+        all_conf_files = ConfFiles(self.api, enabled = True)
 
         if slice_ids:
             # Get slices
@@ -121,11 +113,11 @@ class GetSlivers(Method):
             networks = [all_nodenetworks[nodenetwork_id] for nodenetwork_id in node['nodenetwork_ids']]
             nodegroups = [all_nodegroups[nodegroup_id] for nodegroup_id in node['nodegroup_ids']]
             groups = [nodegroup['name'] for nodegroup in nodegroups]
+            conf_files = dict([(conf_file['dest'], conf_file) for conf_file in all_conf_files.values()])
 
             # If a node belongs to multiple node
             # groups for which the same configuration file is defined,
             # it is undefined which one takes precedence.
-            conf_files = {}
             for nodegroup in nodegroups:
                 for conf_file in map(lambda id: all_conf_files[id], nodegroup['conf_file_ids']):
                     conf_files[conf_file['dest']] = conf_file
