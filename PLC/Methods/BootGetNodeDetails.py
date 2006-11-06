@@ -27,7 +27,8 @@ class BootGetNodeDetails(Method):
         details = {
             'hostname': self.caller['hostname'],
             'boot_state': self.caller['boot_state'],
-            'model': self.caller['model'],
+            # XXX Boot Manager cannot unmarshal None
+            'model': self.caller['model'] or "",
             }
 
         # Generate a new session value
@@ -39,6 +40,14 @@ class BootGetNodeDetails(Method):
 
         if self.caller['nodenetwork_ids']:
             details['networks'] = NodeNetworks(self.api, self.caller['nodenetwork_ids']).values()
+            # XXX Boot Manager cannot unmarshal None
+            for network in details['networks']:
+                for field in network:
+                    if network[field] is None:
+                        if isinstance(network[field], (int, long)):
+                            network[field] = -1
+                        else:
+                            network[field] = ""
 
         return details
 
