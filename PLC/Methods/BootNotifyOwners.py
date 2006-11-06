@@ -19,9 +19,9 @@ class BootNotifyOwners(Method):
     accepts = [
         BootAuth(),
         Message.fields['message_id'],
-        Parameter(bool, "Notify PIs"),
-        Parameter(bool, "Notify technical contacts"),
-        Parameter(bool, "Notify support")
+        Parameter(int, "Notify PIs"),
+        Parameter(int, "Notify technical contacts"),
+        Parameter(int, "Notify support")
         ]
 
     returns = Parameter(int, '1 if successful')
