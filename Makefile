@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.2 2006/10/25 21:05:40 mlhuang Exp $
+# $Id: Makefile,v 1.3 2006/11/03 20:36:05 thierry Exp $
 #
 
 # Metafiles
@@ -13,7 +13,19 @@ INIT := PLC/__init__.py PLC/Methods/__init__.py
 # Other stuff
 SUBDIRS := doc php
 
+# autoconf compatible variables
+DESTDIR := /plc/root
+datadir := /usr/share
+bindir := /usr/bin
+
 all: $(INIT) $(SUBDIRS)
+	python setup.py build
+
+install:
+	python setup.py install \
+	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
+	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
+	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 
 $(SUBDIRS): %:
 	$(MAKE) -C $@
@@ -22,6 +34,7 @@ clean:
 	find . -name '*.pyc' -execdir rm -f {} \;
 	rm -f $(INIT)
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
+	rm -rf build
 
 index: PLC/__init__.py PLC/Methods/__init__.py
 
@@ -49,4 +62,4 @@ endif
 
 force:
 
-.PHONY: force clean $(SUBDIRS)
+.PHONY: all install force clean $(SUBDIRS)
