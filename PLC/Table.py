@@ -20,8 +20,9 @@ class Row(dict):
     # primary key.
     join_tables = []
 
-    # Set this to a dict of the valid fields of this object. Not all
-    # fields (e.g., joined fields) may be updated via sync().
+    # Set this to a dict of the valid fields of this object and their
+    # types. Not all fields (e.g., joined fields) may be updated via
+    # sync().
     fields = {}
 
     def __init__(self, api, fields = {}):
@@ -74,7 +75,7 @@ class Row(dict):
            all_fields == [self.primary_key] or \
            insert is True:
             # Insert new row
-            sql = "INSERT INTO %s (%s) VALUES (%s);" % \
+            sql = "INSERT INTO %s (%s) VALUES (%s)" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))
         else:
             # Update existing row
@@ -122,6 +123,10 @@ class Table(dict):
     Representation of row(s) in a database table.
     """
 
+    def __init__(self, api, row):
+        self.api = api
+        self.row = row
+
     def sync(self, commit = True):
         """
         Flush changes back to the database.
@@ -129,3 +134,13 @@ class Table(dict):
 
         for row in self.values():
             row.sync(commit)
+
+    def fill(self, rows):
+        """
+        Given a list of rows from the database, fill ourselves with
+        Row objects keyed on the primary key defined by the Row class
+        we were initialized with.
+        """
+
+        for row in rows:
+            self[row[self.row.primary_key]] = self.row(self.api, row)
