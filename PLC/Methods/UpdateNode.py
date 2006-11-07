@@ -6,7 +6,7 @@ from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
              ['hostname', 'boot_state', 'model', 'version',
-              'key', 'session']
+              'key', 'session', 'boot_nonce']
 
 class UpdateNode(Method):
     """
@@ -14,7 +14,7 @@ class UpdateNode(Method):
     updated, all other fields are left untouched.
     
     PIs and techs can update only the nodes at their sites. Only
-    admins can update the key and session fields.
+    admins can update the key, session, and boot_nonce fields.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -37,7 +37,7 @@ class UpdateNode(Method):
 
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
-            for key in 'key', 'session':
+            for key in 'key', 'session', 'boot_nonce':
                 del node_fields[key]
 
         # Get account information
