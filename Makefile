@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.4 2006/11/06 22:04:58 mlhuang Exp $
+# $Id: Makefile,v 1.5 2006/11/07 11:06:11 thierry Exp $
 #
 
 # Metafiles
@@ -18,14 +18,22 @@ DESTDIR := /plc/root
 datadir := /usr/share
 bindir := /usr/bin
 
+PWD := $(shell pwd)
+
 all: $(INIT) $(SUBDIRS)
 	python setup.py build
+        # Install in the current directory so that we can import it
+	cd psycopg2 && \
+	python setup.py build && \
+	python setup.py install --install-lib=$(PWD)
 
 install:
 	python setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
+	(cd psycopg2 && \
+	 python setup.py install --install-lib=$(DESTDIR)/$(datadir)/plc_api)
 
 $(SUBDIRS): %:
 	$(MAKE) -C $@
@@ -34,7 +42,8 @@ clean:
 	find . -name '*.pyc' | xargs rm -f
 	rm -f $(INIT)
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
-	rm -rf build
+	python setup.py build && rm -rf build
+	cd psycopg2 && python setup.py clean && rm -rf build
 
 index: $(INIT)
 
