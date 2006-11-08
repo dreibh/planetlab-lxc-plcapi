@@ -4,6 +4,7 @@ import re
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiations
@@ -72,13 +73,6 @@ class Slice(Row):
             raise PLCInvalidArgument, "Expiration date must be in the future"
 
         return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
-
-    def validate_creator_person_id(self, person_id):
-        persons = PLC.Persons.Persons(self.api, [person_id])
-        if not persons:
-            raise PLCInvalidArgument, "Invalid creator"
-
-        return person_id
 
     def add_person(self, person, commit = True):
         """
@@ -221,8 +215,8 @@ class Slices(Table):
     database.
     """
 
-    def __init__(self, api, slice_id_or_name_list = None, expires = int(time.time())):
-        self.api = api
+    def __init__(self, api, slice_filter = None, expires = int(time.time())):
+        Table.__init__(self, api, Slice)
 
         sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
               ", ".join(Slice.fields)
@@ -234,25 +228,15 @@ class Slices(Table):
                 expires = -expires
                 sql += " AND expires < %(expires)d"
 
-        if slice_id_or_name_list:
-            # Separate the list into integers and strings
-            slice_ids = filter(lambda slice_id: isinstance(slice_id, (int, long)),
-                               slice_id_or_name_list)
-            names = filter(lambda name: isinstance(name, StringTypes),
-                           slice_id_or_name_list)
-            sql += " AND (False"
-            if slice_ids:
-                sql += " OR slice_id IN (%s)" % ", ".join(map(str, slice_ids))
-            if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
-            sql += ")"
+        if slice_filter is not None:
+            if isinstance(slice_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), slice_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), slice_filter)
+                slice_filter = Filter(Slice.fields, {'slice_id': ints, 'name': strs})
+                sql += " AND (%s)" % slice_filter.sql(api, "OR")
+            elif isinstance(slice_filter, dict):
+                slice_filter = Filter(Slice.fields, slice_filter)
+                sql += " AND (%s)" % slice_filter.sql(api, "AND")
 
-        rows = self.api.db.selectall(sql, locals())
-
-        for row in rows:
-            self[row['slice_id']] = slice = Slice(api, row)
-            for aggregate in 'node_ids', 'person_ids', 'slice_attribute_ids':
-                if not slice.has_key(aggregate) or slice[aggregate] is None:
-                    slice[aggregate] = []
-                else:
-                    slice[aggregate] = map(int, slice[aggregate].split(','))
+        self.selectall(sql, locals())
