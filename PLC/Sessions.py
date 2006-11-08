@@ -98,13 +98,13 @@ class Sessions(Table):
     """
 
     def __init__(self, api, session_ids = None, expires = int(time.time())):
-	self.api = api
+	Table.__init__(self, api, Session)
 
         sql = "SELECT %s FROM view_sessions WHERE True" % \
               ", ".join(Session.fields)
 
         if session_ids:
-            sql += " AND session_id IN (%s)" % ", ".join(api.db.quote(session_ids))
+            sql += " AND session_id IN (%s)" % ", ".join(map(api.db.quote, session_ids))
 
         if expires is not None:
             if expires >= 0:
@@ -113,7 +113,4 @@ class Sessions(Table):
                 expires = -expires
                 sql += " AND expires < %(expires)d"
 
-        rows = self.api.db.selectall(sql, locals())
- 
-        for row in rows:
-            self[row['session_id']] = Session(api, row)
+        self.selectall(sql, locals())

@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Messages.py,v 1.4 2006/10/31 21:46:14 mlhuang Exp $
+# $Id: Messages.py,v 1.1 2006/11/03 16:11:42 mlhuang Exp $
 #
 
 from PLC.Parameter import Parameter
@@ -29,14 +29,15 @@ class Messages(Table):
     """
 
     def __init__(self, api, message_ids, enabled = None):
-        self.api = api
+        Table.__init__(self, api, Message)
     
-        sql = "SELECT %s from messages" % ", ".join(Message.fields)
+        sql = "SELECT %s from messages WHERE True" % \
+              ", ".join(Message.fields)
+
+	if message_ids:
+            sql += " AND message_id IN (%s)" %  ", ".join(map(str, message_ids))
 
         if enabled is not None:
-            sql += " WHERE enabled IS %(enabled)s"
+            sql += " AND enabled IS %s" % enabled
 
-        rows = self.api.db.selectall(sql, locals())
-
-        for row in rows:
-            self[row['message_id']] = Message(api, row)
+        self.selectall(sql)

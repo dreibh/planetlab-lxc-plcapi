@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkTypes.py,v 1.2 2006/10/20 17:47:34 mlhuang Exp $
+# $Id: NetworkTypes.py,v 1.3 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -41,15 +41,13 @@ class NetworkTypes(Table):
     Representation of the network_types table in the database.
     """
 
-    def __init__(self, api, names = None):
+    def __init__(self, api, types = None):
+        Table.__init__(self, api, NetworkType)
+
         sql = "SELECT %s FROM network_types" % \
               ", ".join(NetworkType.fields)
         
-        if names:
-            # Separate the list into integers and strings
-            sql += " WHERE type IN (%s)" % ", ".join(api.db.quote(names))
+        if types:
+            sql += " WHERE type IN (%s)" % ", ".join(map(api.db.quote, types))
 
-        rows = api.db.selectall(sql)
-
-        for row in rows:
-            self[row['type']] = NetworkType(api, row)
+        self.selectall(sql)

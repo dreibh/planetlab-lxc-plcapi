@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkMethods.py,v 1.2 2006/10/20 17:46:02 mlhuang Exp $
+# $Id: NetworkMethods.py,v 1.3 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -41,15 +41,13 @@ class NetworkMethods(Table):
     Representation of the network_methods table in the database.
     """
 
-    def __init__(self, api, names = None):
+    def __init__(self, api, methods = None):
+        Table.__init__(self, api, NetworkMethod)
+
         sql = "SELECT %s FROM network_methods" % \
               ", ".join(NetworkMethod.fields)
         
-        if names:
-            # Separate the list into integers and strings
-            sql += " WHERE method IN (%s)" % ", ".join(api.db.quote(names))
+        if methods:
+            sql += " WHERE method IN (%s)" % ", ".join(map(api.db.quote, methods))
 
-        rows = api.db.selectall(sql)
-
-        for row in rows:
-            self[row['method']] = NetworkMethod(api, row)
+        self.selectall(sql)

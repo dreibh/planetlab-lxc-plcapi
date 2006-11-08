@@ -96,19 +96,13 @@ class Keys(Table):
     database.
     """
 
-    def __init__(self, api, key_id_list = None, is_blacklisted = False):
-        self.api = api
+    def __init__(self, api, key_ids = None, is_blacklisted = False):
+        Table.__init__(self, api, Key)
 	
-	sql = "SELECT %s FROM keys WHERE True" % \
+	sql = "SELECT %s FROM keys WHERE is_blacklisted IS False" % \
               ", ".join(Key.fields)
 
-        if is_blacklisted is not None:
-            sql += " AND is_blacklisted IS %(is_blacklisted)s"            
+	if key_ids:
+            sql += " AND key_id IN (%s)" %  ", ".join(map(str, key_ids))
 
-	if key_id_list:
-            sql += " AND key_id IN (%s)" %  ", ".join(map(str, key_id_list))
-
-	rows = self.api.db.selectall(sql, locals())
-	
-	for row in rows:	
-            self[row['key_id']] = Key(api, row)
+	self.selectall(sql)

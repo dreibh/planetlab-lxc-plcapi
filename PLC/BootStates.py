@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: BootStates.py,v 1.5 2006/10/20 17:43:55 mlhuang Exp $
+# $Id: BootStates.py,v 1.6 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -41,15 +41,13 @@ class BootStates(Table):
     Representation of the boot_states table in the database.
     """
 
-    def __init__(self, api, names = None):
+    def __init__(self, api, boot_states = None):
+        Table.__init__(self, api, BootState)
+
         sql = "SELECT %s FROM boot_states" % \
               ", ".join(BootState.fields)
         
-        if names:
-            # Separate the list into integers and strings
-            sql += " WHERE boot_state IN (%s)" % ", ".join(api.db.quote(names))
+        if boot_states:
+            sql += " WHERE boot_state IN (%s)" % ", ".join(map(api.db.quote, boot_states))
 
-        rows = api.db.selectall(sql)
-
-        for row in rows:
-            self[row['boot_state']] = BootState(api, row)
+        self.selectall(sql)

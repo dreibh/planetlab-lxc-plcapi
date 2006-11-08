@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: KeyTypes.py,v 1.2 2006/10/20 17:44:57 mlhuang Exp $
+# $Id: KeyTypes.py,v 1.3 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -41,15 +41,13 @@ class KeyTypes(Table):
     Representation of the key_types table in the database.
     """
 
-    def __init__(self, api, names = None):
+    def __init__(self, api, key_types = None):
+        Table.__init__(self, api, KeyType)
+
         sql = "SELECT %s FROM key_types" % \
               ", ".join(KeyType.fields)
         
-        if names:
-            # Separate the list into integers and strings
-            sql += " WHERE key_type IN (%s)" % ", ".join(api.db.quote(names))
+        if key_types:
+            sql += " WHERE key_type IN (%s)" % ", ".join(map(api.db.quote, key_types))
 
-        rows = api.db.selectall(sql)
-
-        for row in rows:
-            self[row['key_type']] = KeyType(api, row)
+        self.selectall(sql)
