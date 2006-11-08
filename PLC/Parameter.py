@@ -4,8 +4,10 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py,v 1.4 2006/10/25 14:27:12 mlhuang Exp $
+# $Id: Parameter.py,v 1.5 2006/11/02 18:32:55 mlhuang Exp $
 #
+
+from types import *
 
 class Parameter:
     """
@@ -19,7 +21,8 @@ class Parameter:
                  optional = None,
                  ro = False,
                  nullok = False):
-        # Basic type of the parameter. May be a builtin type or Mixed.
+        # Basic type of the parameter. Must be a builtin type
+        # that can be marshalled by XML-RPC.
         self.type = type
 
         # Documentation string for the parameter
@@ -41,6 +44,9 @@ class Parameter:
         # Whether the DB field can be NULL.
         self.nullok = nullok
 
+    def type(self):
+        return self.type
+
     def __repr__(self):
         return repr(self.type)
 
@@ -52,3 +58,47 @@ class Mixed(tuple):
 
     def __new__(cls, *types):
         return tuple.__new__(cls, types)
+
+
+def python_type(arg):
+    """
+    Returns the Python type of the specified argument, which may be a
+    Python type, a typed value, or a Parameter.
+    """
+
+    if isinstance(arg, Parameter):
+        arg = arg.type
+
+    if isinstance(arg, type):
+        return arg
+    else:
+        return type(arg)
+
+def xmlrpc_type(arg):
+    """
+    Returns the XML-RPC type of the specified argument, which may be a
+    Python type, a typed value, or a Parameter.
+    """
+
+    arg_type = python_type(arg)
+
+    if arg_type == NoneType:
+        return "nil"
+    elif arg_type == IntType or arg_type == LongType:
+        return "int"
+    elif arg_type == bool:
+        return "boolean"
+    elif arg_type == FloatType:
+        return "double"
+    elif arg_type in StringTypes:
+        return "string"
+    elif arg_type == ListType or arg_type == TupleType:
+        return "array"
+    elif arg_type == DictType:
+        return "struct"
+    elif arg_type == Mixed:
+        # Not really an XML-RPC type but return "mixed" for
+        # documentation purposes.
+        return "mixed"
+    else:
+        raise PLCAPIError, "XML-RPC cannot marshal %s objects" % arg_type
