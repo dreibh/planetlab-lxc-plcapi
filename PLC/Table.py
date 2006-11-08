@@ -135,12 +135,12 @@ class Table(dict):
         for row in self.values():
             row.sync(commit)
 
-    def fill(self, rows):
+    def selectall(self, sql, params = None):
         """
         Given a list of rows from the database, fill ourselves with
         Row objects keyed on the primary key defined by the Row class
         we were initialized with.
         """
 
-        for row in rows:
+        for row in self.api.db.selectall(sql, params):
             self[row[self.row.primary_key]] = self.row(self.api, row)
