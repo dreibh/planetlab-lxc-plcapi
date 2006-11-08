@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.16 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: Nodes.py,v 1.17 2006/11/08 17:34:07 thierry Exp $
 #
 
 from types import StringTypes
@@ -12,6 +12,7 @@ import re
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
@@ -37,6 +38,7 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
+    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session']
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
@@ -50,13 +52,13 @@ class Node(Row):
         'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
-        'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has", ro = True),
-        'nodegroup_ids': Parameter([int], "List of node groups that this node is in", ro = True),
-        'conf_file_ids': Parameter([int], "List of configuration files specific to this node", ro = True),
-        # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node", ro = True),
-        'slice_ids': Parameter([int], "List of slices on this node", ro = True),
-        'pcu_ids': Parameter([int], "List of PCUs that control this node", ro = True),
-        'ports': Parameter([int], "List of PCU ports that this node is connected to", ro = True),
+        'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has"),
+        'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
+        'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
+        # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
+        'slice_ids': Parameter([int], "List of slices on this node"),
+        'pcu_ids': Parameter([int], "List of PCUs that control this node"),
+        'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         }
 
     def validate_hostname(self, hostname):
@@ -83,15 +85,9 @@ class Node(Row):
 
         assert 'node_id' in self
 
-        # Delete all nodenetworks
-        nodenetworks = NodeNetworks(self.api, self['nodenetwork_ids'])
-        for nodenetwork in nodenetworks.values():
-            nodenetwork.delete(commit = False)
-
         # Clean up miscellaneous join tables
-        for table in ['nodegroup_node', 'slice_node', 'slice_attribute', 'node_session']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE node_id = %d" % \
+        for table in self.join_tables:
+            self.api.db.do("DELETE FROM %s WHERE node_id = %d" % \
                            (table, self['node_id']))
 
         # Mark as deleted
@@ -104,34 +100,21 @@ class Nodes(Table):
     database.
     """
 
-    def __init__(self, api, node_id_or_hostname_list = None):
-        self.api = api
+    def __init__(self, api, node_filter = None):
+        Table.__init__(self, api, Node)
 
-        sql =  ""
-        sql += "SELECT %s FROM view_nodes " %  ", ".join(Node.fields)
-        sql += "WHERE deleted IS False"
+        sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
+              ", ".join(Node.fields)
 
-        if node_id_or_hostname_list:
-            # Separate the list into integers and strings
-            node_ids = filter(lambda node_id: isinstance(node_id, (int, long)),
-                              node_id_or_hostname_list)
-            hostnames = filter(lambda hostname: isinstance(hostname, StringTypes),
-                               node_id_or_hostname_list)
-            sql += " AND (False"
-            if node_ids:
-                sql += " OR node_id IN (%s)" % ", ".join(map(str, node_ids))
-            if hostnames:
-                sql += " OR hostname IN (%s)" % ", ".join(api.db.quote(hostnames)).lower()
-            sql += ")"
+        if node_filter is not None:
+            if isinstance(node_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), node_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), node_filter)
+                node_filter = Filter(Node.fields, {'node_id': ints, 'hostname': strs})
+                sql += " AND (%s)" % node_filter.sql(api, "OR")
+            elif isinstance(node_filter, dict):
+                node_filter = Filter(Node.fields, node_filter)
+                sql += " AND (%s)" % node_filter.sql(api, "AND")
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['node_id']] = node = Node(api, row)
-            for aggregate in ['nodenetwork_ids', 'nodegroup_ids',
-                              'conf_file_ids', 'root_person_ids', 'slice_ids',
-                              'pcu_ids']:
-                if not node.has_key(aggregate) or node[aggregate] is None:
-                    node[aggregate] = []
-                else:
-                    node[aggregate] = map(int, node[aggregate].split(','))
+        self.selectall(sql)
