@@ -4,16 +4,50 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: SliceInstantiations.py,v 1.1 2006/10/02 15:36:48 mlhuang Exp $
+# $Id: SliceInstantiations.py,v 1.2 2006/10/03 19:27:28 mlhuang Exp $
 #
 
-class SliceInstantiations(list):
+from PLC.Faults import *
+from PLC.Parameter import Parameter
+from PLC.Table import Row, Table
+
+class SliceInstantiation(Row):
+    """
+    Representation of a row in the slice_instantiations table. To use,
+    instantiate with a dict of values.
+    """
+
+    table_name = 'slice_instantiations'
+    primary_key = 'instantiation'
+    join_tables = ['slices']
+    fields = {
+        'instantiation': Parameter(str, "Slice instantiation state", max = 100),
+        }
+
+    def validate_instantiation(self, instantiation):
+	# Make sure name is not blank
+        if not len(instantiation):
+            raise PLCInvalidArgument, "Slice instantiation state name must be specified"
+	
+	# Make sure slice instantiation does not alredy exist
+	conflicts = SliceInstantiations(self.api, [instantiation])
+        if conflicts:
+            raise PLCInvalidArgument, "Slice instantiation state name already in use"
+
+	return instantiation
+        
+class SliceInstantiations(Table):
     """
     Representation of the slice_instantiations table in the database.
     """
 
-    def __init__(self, api):
-        sql = "SELECT instantiation FROM slice_instantiations"
+    def __init__(self, api, instantiations = None):
+        Table.__init__(self, api, SliceInstantiation)
 
-        for row in api.db.selectall(sql):
-            self.append(row['instantiation'])
+        sql = "SELECT %s FROM slice_instantiations" % \
+              ", ".join(SliceInstantiation.fields)
+        
+        if instantiations:
+            sql += " WHERE instantiation IN (%s)" % ", ".join(map(api.db.quote, instantiations))
+
+        self.selectall(sql)
