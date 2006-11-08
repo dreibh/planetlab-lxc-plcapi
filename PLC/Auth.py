@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.5 2006/10/27 15:32:29 mlhuang Exp $
+# $Id: Auth.py,v 1.6 2006/10/31 23:07:43 mlhuang Exp $
 #
 
 import crypt
@@ -18,7 +18,7 @@ from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
 from PLC.Sessions import Session, Sessions
 
-class Auth(Parameter, dict):
+class Auth(Parameter):
     """
     Base class for all API authentication methods, as well as a class
     that can be used to represent Mixed(SessionAuth(), PasswordAuth()),
@@ -27,7 +27,6 @@ class Auth(Parameter, dict):
 
     def __init__(self, auth = {}):
         Parameter.__init__(self, auth, "API authentication structure")
-        dict.__init__(auth)
 
     def check(self, method, auth, *args):
         method.type_check("auth", auth,
@@ -68,7 +67,7 @@ class SessionAuth(Auth):
                 method.caller = node
 
             elif session['person_id'] is not None and session['expires'] > time.time():
-                persons = Persons(method.api, [session['person_id']], enabled = True).values()
+                persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True}).values()
                 if not persons:
                     raise PLCAuthenticationFailure, "No such account"
                 person = persons[0]
@@ -217,7 +216,7 @@ class PasswordAuth(Auth):
         assert auth.has_key('Username')
 
         # Get record (must be enabled)
-        persons = Persons(method.api, [auth['Username']], enabled = True)
+        persons = Persons(method.api, {'email': auth['Username'], 'enabled': True})
         if len(persons) != 1:
             raise PLCAuthenticationFailure, "No such account"
 
