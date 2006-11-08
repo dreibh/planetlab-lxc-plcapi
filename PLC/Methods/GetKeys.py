@@ -6,8 +6,8 @@ from PLC.Auth import Auth
 
 class GetKeys(Method):
     """
-    Return an array of structs containing details about keys. If
-    key_id_list is specified, only the specified keys will be queried.
+    Returns an array of structs containing details about keys. If
+    key_ids is specified, only the specified keys will be queried.
 
     Admin may query all keys. Non-admins may only query their own
     keys.

@@ -1,10 +1,10 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
-from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
 
 class GetSliceAttributes(Method):
@@ -24,12 +24,13 @@ class GetSliceAttributes(Method):
 
     accepts = [
         Auth(),
-        [SliceAttribute.fields['slice_attribute_id']],
+        Mixed([SliceAttribute.fields['slice_attribute_id']],
+              Filter(SliceAttribute.fields))
         ]
 
     returns = [SliceAttribute.fields]
 
-    def call(self, auth, slice_attribute_ids = None):
+    def call(self, auth, slice_attribute_filter = None):
 	# If we are not admin, make sure to only return our own slice
 	# and sliver attributes.
         if 'admin' not in self.caller['roles']:
@@ -49,8 +50,18 @@ class GetSliceAttributes(Method):
             for slice in slices:
                 valid_slice_attribute_ids += slice['slice_attribute_ids']
 
-            slice_attribute_ids = set(slice_attribute_ids).intersection(valid_slice_attribute_ids)
-            if not slice_attribute_ids:
+            if not valid_slice_attribute_ids:
                 return []
 
-        return SliceAttributes(self.api, slice_attribute_ids).values()
+            if slice_attribute_filter is None:
+                slice_attribute_filter = valid_slice_attribute_ids
+
+        slice_attributes = SliceAttributes(self.api, slice_attribute_filter).values()
+
+        # Filter out slice attributes that are not viewable
+        if 'admin' not in self.caller['roles']:
+            slice_attributes = filter(lambda slice_attribute: \
+                                      slice_attribute['slice_attribute_id'] in valid_slice_attribute_ids,
+                                      slice_attributes)
+
+        return slice_attributes

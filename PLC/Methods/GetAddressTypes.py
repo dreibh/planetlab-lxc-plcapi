@@ -1,27 +1,28 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.AddressTypes import AddressType, AddressTypes
 from PLC.Auth import Auth
 
 class GetAddressTypes(Method):
     """
-    Get an array of structs containing details about valid address
-    types. If address_type_id_or_name_list is specified, only the
-    specified address types will be queried.
+    Returns an array of structs containing details about address
+    types.  If address_type_filter is specified and is an array of
+    address type identifiers, or a struct of address type attributes,
+    only address types matching the filter will be returned.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
         Auth(),
-        [Mixed(AddressType.fields['address_type_id'],
-               AddressType.fields['name'])]
+        Mixed([Mixed(AddressType.fields['address_type_id'],
+                     AddressType.fields['name'])],
+              Filter(AddressType.fields))
         ]
 
     returns = [AddressType.fields]
 
-    def call(self, auth, address_type_id_or_name_list = None):
-        address_types = AddressTypes(self.api, address_type_id_or_name_list).values()
-
-        return address_types
+    def call(self, auth, address_type_filter = None):
+        return AddressTypes(self.api, address_type_filter).values()

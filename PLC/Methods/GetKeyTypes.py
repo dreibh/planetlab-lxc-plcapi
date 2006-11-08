@@ -6,7 +6,7 @@ from PLC.Auth import Auth
 
 class GetKeyTypes(Method):
     """
-    Returns a list of all valid key types.
+    Returns an array of all valid key types.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']

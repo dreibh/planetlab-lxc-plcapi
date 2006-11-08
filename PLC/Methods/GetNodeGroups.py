@@ -1,25 +1,28 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.NodeGroups import NodeGroup, NodeGroups
 
 class GetNodeGroups(Method):
     """
-    Returns an array of structs containing details about all node
-    groups. If nodegroup_id_or_name_list is specified, only the
-    specified node groups will be queried.
+    Returns an array of structs containing details about node groups.
+    If nodegroup_filter is specified and is an array of node group
+    identifiers or names, or a struct of node group attributes, only
+    node groups matching the filter will be returned.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
         Auth(),
-        [Mixed(NodeGroup.fields['nodegroup_id'],
-	       NodeGroup.fields['name'])]
+        Mixed([Mixed(NodeGroup.fields['nodegroup_id'],
+                     NodeGroup.fields['name'])],
+              Filter(NodeGroup.fields))
         ]
 
     returns = [NodeGroup.fields]
   
-    def call(self, auth, nodegroup_id_or_name_list = None):
-	return NodeGroups(self.api, nodegroup_id_or_name_list).values()
+    def call(self, auth, nodegroup_filter = None):
+	return NodeGroups(self.api, nodegroup_filter).values()

@@ -1,25 +1,28 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.Auth import Auth
 
 class GetNodeNetworks(Method):
     """
-    Return an array of structs contain details about node network
-    interfaces. If nodenetwork_id_or_ip_list is specified, only
-    the specified node network interfaces will be queried.
+    Returns an array of structs containing details about node network
+    interfacess. If nodenetworks_filter is specified and is an array
+    of node network identifiers, or a struct of node network
+    attributes, only node network interfaces matching the filter will
+    be returned.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
         Auth(),
-        [Mixed(NodeNetwork.fields['nodenetwork_id'],
-               NodeNetwork.fields['ip'])]
+        Mixed([NodeNetwork.fields['nodenetwork_id']],
+              Filter(NodeNetwork.fields))
         ]
 
     returns = [NodeNetwork.fields]
 
-    def call(self, auth, nodenetwork_id_or_ip_list = None):
-        return NodeNetworks(self.api, nodenetwork_id_or_ip_list).values()
+    def call(self, auth, nodenetwork_filter = None):
+        return NodeNetworks(self.api, nodenetwork_filter).values()

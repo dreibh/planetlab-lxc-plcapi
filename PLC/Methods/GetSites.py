@@ -1,5 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
@@ -14,8 +15,9 @@ class GetSites(Method):
 
     accepts = [
         Auth(),
-        [Mixed(Site.fields['site_id'],
-               Site.fields['login_base'])]
+        Mixed([Mixed(Site.fields['site_id'],
+                     Site.fields['login_base'])],
+              Filter(Site.fields))
         ]
 
     returns = [Site.fields]
@@ -24,5 +26,5 @@ class GetSites(Method):
     object_type = 'Site'
     object_ids = []
 	
-    def call(self, auth, site_id_or_login_base_list = None):
-        return Sites(self.api, site_id_or_login_base_list).values()
+    def call(self, auth, site_filter = None):
+        return Sites(self.api, site_filter).values()

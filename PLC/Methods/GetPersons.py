@@ -1,14 +1,16 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
 class GetPersons(Method):
     """
-    Return an array of structs containing details about accounts. If
-    person_id_or_email_list is specified, only the specified accounts
-    will be queried.
+    Returns an array of structs containing details about users. If
+    person_filter is specified and is an array of user identifiers or
+    usernames, or a struct of user attributes, only users matching the
+    filter will be returned.
 
     Users and techs may only retrieve details about themselves. PIs
     may retrieve details about themselves and others at their
@@ -19,9 +21,9 @@ class GetPersons(Method):
 
     accepts = [
         Auth(),
-        [Mixed(Person.fields['person_id'],
-               Person.fields['email'])],
-        Parameter([str], 'List of fields to return')
+        Mixed([Mixed(Person.fields['person_id'],
+                     Person.fields['email'])],
+              Filter(Person.fields))
         ]
 
     # Filter out password field
@@ -29,7 +31,7 @@ class GetPersons(Method):
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
 
-    def call(self, auth, person_id_or_email_list = None):
+    def call(self, auth, person_filter = None):
 	# If we are not admin, make sure to only return viewable accounts
         if 'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
@@ -42,10 +44,10 @@ class GetPersons(Method):
             if not valid_person_ids:
                 return []
 
-            if not person_id_or_email_list:
-                person_id_or_email_list = valid_person_ids
+            if person_filter is None:
+                person_filter = valid_person_ids
 
-        persons = Persons(self.api, person_id_or_email_list).values()
+        persons = Persons(self.api, person_filter).values()
 
         # Filter out accounts that are not viewable
         if 'admin' not in self.caller['roles']:

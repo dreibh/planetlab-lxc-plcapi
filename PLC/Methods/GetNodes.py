@@ -1,14 +1,16 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
 
 class GetNodes(Method):
     """
-    Return an array of structs containing details about nodes. If
-    node_id_or_hostname_list is specified, only the specified nodes
-    will be queried.
+    Returns an array of structs containing details about nodes. If
+    node_filter is specified and is an array of node identifiers or
+    hostnames, or a struct of node attributes, only nodes matching the
+    filter will be returned.
 
     Some fields may only be viewed by admins.
     """
@@ -17,15 +19,16 @@ class GetNodes(Method):
 
     accepts = [
         Auth(),
-        [Mixed(Node.fields['node_id'],
-               Node.fields['hostname'])],
+        Mixed([Mixed(Node.fields['node_id'],
+                     Node.fields['hostname'])],
+              Filter(Node.fields))
         ]
 
     returns = [Node.fields]
 
-    def call(self, auth, node_id_or_hostname_list = None):
+    def call(self, auth, node_filter = None):
         # Get node information
-        nodes = Nodes(self.api, node_id_or_hostname_list).values()
+        nodes = Nodes(self.api, node_filter).values()
 
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:

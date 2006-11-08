@@ -6,7 +6,7 @@ from PLC.Auth import Auth
 
 class GetBootStates(Method):
     """
-    Returns a list of all valid node boot states.
+    Returns an array of all valid node boot states.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']

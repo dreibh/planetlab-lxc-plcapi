@@ -1,13 +1,16 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.PCUs import PCU, PCUs
 from PLC.Auth import Auth
 
 class GetPCUs(Method):
     """
-    Return an array of structs containing details about PCUs. If
-    pcu_id_list is specified, only the specified PCUs will be queried.
+    Returns an array of structs containing details about power control
+    units (PCUs). If pcu_filter is specified and is an array of PCU
+    identifiers, or a struct of PCU attributes, only PCUs matching the
+    filter will be returned.
 
     Admin may query all PCUs. Non-admins may only query the PCUs at
     their sites.
@@ -17,12 +20,13 @@ class GetPCUs(Method):
 
     accepts = [
         Auth(),
-        [PCU.fields['pcu_id']]
+        Mixed([PCU.fields['pcu_id']],
+              Filter(PCU.fields))
         ]
 
     returns = [PCU.fields]
 
-    def call(self, auth, pcu_ids = None):
+    def call(self, auth, pcu_filter = None):
 	# If we are not admin, make sure to only return our own PCUs
         if 'admin' not in self.caller['roles']:
             # Get list of PCUs that we are able to view
@@ -32,8 +36,16 @@ class GetPCUs(Method):
                 for site in sites:
                     valid_pcu_ids += site['pcu_ids']
 
-            pcu_ids = set(pcu_ids).intersection(valid_pcu_ids)
-            if not pcu_ids:
+            if not valid_pcu_ids:
                 return []
 
-        return PCUs(self.api, pcu_ids).values()
+            if pcu_filter is None:
+                pcu_filter = valid_pcu_ids
+
+        pcus = PCUs(self.api, pcu_filter).values()
+
+        # Filter out PCUs that are not viewable
+        if 'admin' not in self.caller['roles']:
+            pcus = filter(lambda pcu: pcu['pcu_id'] in valid_pcu_ids, pcus)
+
+        return pcus

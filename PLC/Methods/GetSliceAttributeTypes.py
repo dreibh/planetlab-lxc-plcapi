@@ -1,5 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 
@@ -14,11 +15,12 @@ class GetSliceAttributeTypes(Method):
 
     accepts = [
         Auth(),
-        [Mixed(SliceAttributeType.fields['attribute_type_id'],
-               SliceAttributeType.fields['name'])],
+        Mixed([Mixed(SliceAttributeType.fields['attribute_type_id'],
+                     SliceAttributeType.fields['name'])],
+              Filter(SliceAttributeType.fields))
         ]
 
     returns = [SliceAttributeType.fields]
 
-    def call(self, auth, attribute_type_id_or_name_list = None):
-        return SliceAttributeTypes(self.api, attribute_type_id_or_name_list).values()
+    def call(self, auth, attribute_type_filter = None):
+        return SliceAttributeTypes(self.api, attribute_type_filter).values()
