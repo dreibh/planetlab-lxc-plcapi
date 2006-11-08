@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.27 2006/11/03 20:36:05 thierry Exp $
+-- $Id: planetlab4.sql,v 1.28 2006/11/08 17:34:07 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -102,14 +102,14 @@ ORDER BY is_primary DESC;
 -- Sites that each person is a member of
 CREATE VIEW person_sites AS
 SELECT person_id,
-array_to_string(array_accum(site_id), ',') AS site_ids
+array_accum(site_id) AS site_ids
 FROM person_site_ordered
 GROUP BY person_id;
 
 -- Accounts at each site
 CREATE VIEW site_persons AS
 SELECT site_id,
-array_to_string(array_accum(person_id), ',') AS person_ids
+array_accum(person_id) AS person_ids
 FROM person_site
 GROUP BY site_id;
 
@@ -151,8 +151,8 @@ CREATE INDEX address_address_type_address_type_id_idx ON address_address_type (a
 
 CREATE VIEW address_address_types AS
 SELECT address_id,
-array_to_string(array_accum(address_type_id), ',') AS address_type_ids,
-array_to_string(array_accum(address_types.name), ',') AS address_types
+array_accum(address_type_id) AS address_type_ids,
+array_accum(address_types.name) AS address_types
 FROM address_address_type
 LEFT JOIN address_types USING (address_type_id)
 GROUP BY address_id;
@@ -167,7 +167,7 @@ CREATE INDEX site_address_address_id_idx ON site_address (address_id);
 
 CREATE VIEW site_addresses AS
 SELECT site_id,
-array_to_string(array_accum(address_id), ',') AS address_ids
+array_accum(address_id) AS address_ids
 FROM site_address
 GROUP BY site_id;
 
@@ -200,7 +200,7 @@ CREATE INDEX person_key_key_id_idx ON person_key (key_id);
 
 CREATE VIEW person_keys AS
 SELECT person_id,
-array_to_string(array_accum(key_id), ',') AS key_ids
+array_accum(key_id) AS key_ids
 FROM person_key
 GROUP BY person_id;
 
@@ -232,8 +232,8 @@ CREATE INDEX person_role_person_id_idx ON person_role (person_id);
 -- Account roles
 CREATE VIEW person_roles AS
 SELECT person_id,
-array_to_string(array_accum(role_id), ',') AS role_ids,
-array_to_string(array_accum(roles.name), ',') AS roles
+array_accum(role_id) AS role_ids,
+array_accum(roles.name) AS roles
 FROM person_role
 LEFT JOIN roles USING (role_id)
 GROUP BY person_id;
@@ -293,7 +293,7 @@ CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
 -- Nodes at each site
 CREATE VIEW site_nodes AS
 SELECT site_id,
-array_to_string(array_accum(node_id), ',') AS node_ids
+array_accum(node_id) AS node_ids
 FROM nodes
 GROUP BY site_id;
 
@@ -334,14 +334,14 @@ CREATE INDEX nodegroup_node_node_id_idx ON nodegroup_node (node_id);
 -- Nodes in each node group
 CREATE VIEW nodegroup_nodes AS
 SELECT nodegroup_id,
-array_to_string(array_accum(node_id), ',') AS node_ids
+array_accum(node_id) AS node_ids
 FROM nodegroup_node
 GROUP BY nodegroup_id;
 
 -- Node groups that each node is a member of
 CREATE VIEW node_nodegroups AS
 SELECT node_id,
-array_to_string(array_accum(nodegroup_id), ',') AS nodegroup_ids
+array_accum(nodegroup_id) AS nodegroup_ids
 FROM nodegroup_node
 GROUP BY node_id;
 
@@ -375,14 +375,14 @@ CREATE INDEX conf_file_node_node_id_idx ON conf_file_node (node_id);
 -- Nodes linked to each configuration file
 CREATE VIEW conf_file_nodes AS
 SELECT conf_file_id,
-array_to_string(array_accum(node_id), ',') AS node_ids
+array_accum(node_id) AS node_ids
 FROM conf_file_node
 GROUP BY conf_file_id;
 
 -- Configuration files linked to each node
 CREATE VIEW node_conf_files AS
 SELECT node_id,
-array_to_string(array_accum(conf_file_id), ',') AS conf_file_ids
+array_accum(conf_file_id) AS conf_file_ids
 FROM conf_file_node
 GROUP BY node_id;
 
@@ -397,14 +397,14 @@ CREATE INDEX conf_file_nodegroup_nodegroup_id_idx ON conf_file_nodegroup (nodegr
 -- Node groups linked to each configuration file
 CREATE VIEW conf_file_nodegroups AS
 SELECT conf_file_id,
-array_to_string(array_accum(nodegroup_id), ',') AS nodegroup_ids
+array_accum(nodegroup_id) AS nodegroup_ids
 FROM conf_file_nodegroup
 GROUP BY conf_file_id;
 
 -- Configuration files linked to each node group
 CREATE VIEW nodegroup_conf_files AS
 SELECT nodegroup_id,
-array_to_string(array_accum(conf_file_id), ',') AS conf_file_ids
+array_accum(conf_file_id) AS conf_file_ids
 FROM conf_file_nodegroup
 GROUP BY nodegroup_id;
 
@@ -461,7 +461,7 @@ ORDER BY is_primary DESC;
 -- Network interfaces on each node
 CREATE VIEW node_nodenetworks AS
 SELECT node_id,
-array_to_string(array_accum(nodenetwork_id), ',') AS nodenetwork_ids
+array_accum(nodenetwork_id) AS nodenetwork_ids
 FROM nodenetworks_ordered
 GROUP BY node_id;
 
@@ -487,7 +487,7 @@ CREATE INDEX pcus_site_id_idx ON pcus (site_id);
 
 CREATE VIEW site_pcus AS
 SELECT site_id,
-array_to_string(array_accum(pcu_id), ',') AS pcu_ids
+array_accum(pcu_id) AS pcu_ids
 FROM pcus
 GROUP BY site_id;
 
@@ -503,15 +503,15 @@ CREATE INDEX pcu_node_node_id_idx ON pcu_node (node_id);
 
 CREATE VIEW node_pcus AS
 SELECT node_id,
-array_to_string(array_accum(pcu_id), ',') AS pcu_ids,
-array_to_string(array_accum(port), ',') AS ports
+array_accum(pcu_id) AS pcu_ids,
+array_accum(port) AS ports
 FROM pcu_node
 GROUP BY node_id;
 
 CREATE VIEW pcu_nodes AS
 SELECT pcu_id,
-array_to_string(array_accum(node_id), ',') AS node_ids,
-array_to_string(array_accum(port), ',') AS ports
+array_accum(node_id) AS node_ids,
+array_accum(port) AS ports
 FROM pcu_node
 GROUP BY pcu_id;
 
@@ -562,21 +562,21 @@ SELECT * FROM slice_node;
 -- Nodes in each slice
 CREATE VIEW slice_nodes AS
 SELECT slice_id,
-array_to_string(array_accum(node_id), ',') AS node_ids
+array_accum(node_id) AS node_ids
 FROM slice_node
 GROUP BY slice_id;
 
 -- Slices on each node
 CREATE VIEW node_slices AS
 SELECT node_id,
-array_to_string(array_accum(slice_id), ',') AS slice_ids
+array_accum(slice_id) AS slice_ids
 FROM slice_node
 GROUP BY node_id;
 
 -- Slices at each site
 CREATE VIEW site_slices AS
 SELECT site_id,
-array_to_string(array_accum(slice_id), ',') AS slice_ids
+array_accum(slice_id) AS slice_ids
 FROM slices
 GROUP BY site_id;
 
@@ -592,14 +592,14 @@ CREATE INDEX slice_person_person_id_idx ON slice_person (person_id);
 -- Members of the slice
 CREATE VIEW slice_persons AS
 SELECT slice_id,
-array_to_string(array_accum(person_id), ',') AS person_ids
+array_accum(person_id) AS person_ids
 FROM slice_person
 GROUP BY slice_id;
 
 -- Slices of which each person is a member
 CREATE VIEW person_slices AS
 SELECT person_id,
-array_to_string(array_accum(slice_id), ',') AS slice_ids
+array_accum(slice_id) AS slice_ids
 FROM slice_person
 GROUP BY person_id;
 
@@ -628,7 +628,7 @@ CREATE INDEX slice_attribute_node_id_idx ON slice_attribute (node_id);
 
 CREATE VIEW slice_attributes AS
 SELECT slice_id,
-array_to_string(array_accum(slice_attribute_id), ',') AS slice_attribute_ids
+array_accum(slice_attribute_id) AS slice_attribute_ids
 FROM slice_attribute
 GROUP BY slice_id;
 
@@ -734,7 +734,7 @@ CREATE INDEX event_object_object_id_idx ON event_object (object_id);
 
 CREATE VIEW event_objects AS
 SELECT event_id,
-array_to_string(array_accum(object_id), ',') AS object_ids
+array_accum(object_id) AS object_ids
 FROM event_object
 GROUP BY event_id;
 
@@ -747,13 +747,13 @@ SELECT
 events.event_id,
 events.person_id,
 events.node_id,
-event_objects.object_ids,
 events.event_type,
 events.object_type,
 events.fault_code,
 events.call,
 events.runtime,
-CAST(date_part('epoch', events.time) AS bigint) AS time
+CAST(date_part('epoch', events.time) AS bigint) AS time,
+COALESCE(event_objects.object_ids, '{}') AS object_ids
 FROM events
 LEFT JOIN event_objects USING (event_id);
 
@@ -774,10 +774,11 @@ persons.url,
 persons.bio,
 CAST(date_part('epoch', persons.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', persons.last_updated) AS bigint) AS last_updated,
-person_roles.role_ids, person_roles.roles,
-person_sites.site_ids,
-person_keys.key_ids,
-person_slices.slice_ids
+COALESCE(person_roles.role_ids, '{}') AS role_ids,
+COALESCE(person_roles.roles, '{}') AS roles,
+COALESCE(person_sites.site_ids, '{}') AS site_ids,
+COALESCE(person_keys.key_ids, '{}') AS key_ids,
+COALESCE(person_slices.slice_ids, '{}') AS slice_ids
 FROM persons
 LEFT JOIN person_roles USING (person_id)
 LEFT JOIN person_sites USING (person_id)
@@ -790,6 +791,7 @@ nodes.node_id,
 nodes.hostname,
 nodes.site_id,
 nodes.boot_state,
+nodes.deleted,
 nodes.model,
 nodes.boot_nonce,
 nodes.version,
@@ -797,14 +799,13 @@ nodes.ssh_rsa_key,
 nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
-node_nodenetworks.nodenetwork_ids,
-node_nodegroups.nodegroup_ids,
-node_slices.slice_ids,
-node_pcus.pcu_ids,
-node_pcus.ports,
-node_conf_files.conf_file_ids,
-node_session.session_id AS session,
-nodes.deleted
+COALESCE(node_nodenetworks.nodenetwork_ids, '{}') AS nodenetwork_ids,
+COALESCE(node_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids,
+COALESCE(node_slices.slice_ids, '{}') AS slice_ids,
+COALESCE(node_pcus.pcu_ids, '{}') AS pcu_ids,
+COALESCE(node_pcus.ports, '{}') AS ports,
+COALESCE(node_conf_files.conf_file_ids, '{}') AS conf_file_ids,
+node_session.session_id AS session
 FROM nodes
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
@@ -835,8 +836,8 @@ SELECT
 nodegroups.nodegroup_id,
 nodegroups.name,
 nodegroups.description,
-nodegroup_nodes.node_ids,
-nodegroup_conf_files.conf_file_ids
+COALESCE(nodegroup_nodes.node_ids, '{}') AS node_ids,
+COALESCE(nodegroup_conf_files.conf_file_ids, '{}') AS conf_file_ids
 FROM nodegroups
 LEFT JOIN nodegroup_nodes USING (nodegroup_id)
 LEFT JOIN nodegroup_conf_files USING (nodegroup_id);
@@ -855,8 +856,8 @@ conf_files.postinstall_cmd,
 conf_files.error_cmd,
 conf_files.ignore_cmd_errors,
 conf_files.always_update,
-conf_file_nodes.node_ids,
-conf_file_nodegroups.nodegroup_ids
+COALESCE(conf_file_nodes.node_ids, '{}') AS node_ids,
+COALESCE(conf_file_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids
 FROM conf_files
 LEFT JOIN conf_file_nodes USING (conf_file_id)
 LEFT JOIN conf_file_nodegroups USING (conf_file_id);
@@ -872,8 +873,8 @@ pcus.username,
 pcus.password,
 pcus.model,
 pcus.notes,
-pcu_nodes.node_ids,
-pcu_nodes.ports
+COALESCE(pcu_nodes.node_ids, '{}') AS node_ids,
+COALESCE(pcu_nodes.ports, '{}') AS ports
 FROM pcus
 LEFT JOIN pcu_nodes USING (pcu_id);
 
@@ -892,11 +893,11 @@ sites.longitude,
 sites.url,
 CAST(date_part('epoch', sites.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
-site_persons.person_ids,
-site_nodes.node_ids,
-site_addresses.address_ids,
-site_slices.slice_ids,
-site_pcus.pcu_ids
+COALESCE(site_persons.person_ids, '{}') AS person_ids,
+COALESCE(site_nodes.node_ids, '{}') AS node_ids,
+COALESCE(site_addresses.address_ids, '{}') AS address_ids,
+COALESCE(site_slices.slice_ids, '{}') AS slice_ids,
+COALESCE(site_pcus.pcu_ids, '{}') AS pcu_ids
 FROM sites
 LEFT JOIN site_persons USING (site_id)
 LEFT JOIN site_nodes USING (site_id)
@@ -914,8 +915,8 @@ addresses.city,
 addresses.state,
 addresses.postalcode,
 addresses.country,
-address_address_types.address_type_ids,
-address_address_types.address_types
+COALESCE(address_address_types.address_type_ids, '{}') AS address_type_ids,
+COALESCE(address_address_types.address_types, '{}') AS address_types
 FROM addresses
 LEFT JOIN address_address_types USING (address_id);
 
@@ -932,9 +933,9 @@ slices.creator_person_id,
 slices.is_deleted,
 CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
-slice_nodes.node_ids,
-slice_persons.person_ids,
-slice_attributes.slice_attribute_ids
+COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
+COALESCE(slice_persons.person_ids, '{}') AS person_ids,
+COALESCE(slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids
 FROM slices
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
