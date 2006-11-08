@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.15 2006/10/27 15:32:56 mlhuang Exp $
+# $Id: Persons.py,v 1.16 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -17,7 +17,7 @@ import crypt
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
-from PLC.Debug import profile
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Keys import Key, Keys
 import PLC.Sites
@@ -31,6 +31,7 @@ class Person(Row):
 
     table_name = 'persons'
     primary_key = 'person_id'
+    join_tables = ['person_role', 'person_site', 'slice_person', 'person_session']
     fields = {
         'person_id': Parameter(int, "Account identifier"),
         'first_name': Parameter(str, "Given name", max = 128),
@@ -44,11 +45,11 @@ class Person(Row):
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'last_updated': Parameter(int, "Date and time of last update", ro = True),
         'date_created': Parameter(int, "Date and time when account was created", ro = True),
-        'role_ids': Parameter([int], "List of role identifiers", ro = True),
-        'roles': Parameter([str], "List of roles", ro = True),
-        'site_ids': Parameter([int], "List of site identifiers", ro = True),
-        'key_ids': Parameter([int], "List of key identifiers", ro = True),
-        'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
+        'role_ids': Parameter([int], "List of role identifiers"),
+        'roles': Parameter([str], "List of roles"),
+        'site_ids': Parameter([int], "List of site identifiers"),
+        'key_ids': Parameter([int], "List of key identifiers"),
+        'slice_ids': Parameter([int], "List of slice identifiers"),
         }
 
     def validate_email(self, email):
@@ -275,9 +276,8 @@ class Person(Row):
             key.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['person_role', 'person_site', 'slice_person', 'person_session']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE person_id = %d" % \
+        for table in self.join_tables:
+            self.api.db.do("DELETE FROM %s WHERE person_id = %d" % \
                            (table, self['person_id']))
 
         # Mark as deleted
@@ -287,44 +287,24 @@ class Person(Row):
 class Persons(Table):
     """
     Representation of row(s) from the persons table in the
-    database. Specify deleted and/or enabled to force a match on
-    whether a person is deleted and/or enabled. Default is to match on
-    non-deleted accounts.
+    database.
     """
 
-    def __init__(self, api, person_id_or_email_list = None, enabled = None):
-        self.api = api
+    def __init__(self, api, person_filter = None):
+        Table.__init__(self, api, Person)
 
         sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
               ", ".join(Person.fields)
 
-        if enabled is not None:
-            sql += " AND enabled IS %(enabled)s"
+        if person_filter is not None:
+            if isinstance(person_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), person_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), person_filter)
+                person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
+                sql += " AND (%s)" % person_filter.sql(api, "OR")
+            elif isinstance(person_filter, dict):
+                person_filter = Filter(Person.fields, person_filter)
+                sql += " AND (%s)" % person_filter.sql(api, "AND")
 
-        if person_id_or_email_list:
-            # Separate the list into integers and strings
-            person_ids = filter(lambda person_id: isinstance(person_id, (int, long)),
-                                person_id_or_email_list)
-            emails = filter(lambda email: isinstance(email, StringTypes),
-                            person_id_or_email_list)
-            sql += " AND (False"
-            if person_ids:
-                sql += " OR person_id IN (%s)" % ", ".join(map(str, person_ids))
-            if emails:
-                # Case insensitive e-mail address comparison
-                sql += " OR email IN (%s)" % ", ".join(api.db.quote(emails)).lower()
-            sql += ")"
-
-        rows = self.api.db.selectall(sql, locals())
-
-        for row in rows:
-            self[row['person_id']] = person = Person(api, row)
-            for aggregate in 'role_ids', 'roles', 'site_ids', 'key_ids', 'slice_ids':
-                if not person.has_key(aggregate) or person[aggregate] is None:
-                    person[aggregate] = []
-                else:
-                    elements = person[aggregate].split(',')
-                    try:
-                        person[aggregate] = map(int, elements)
-                    except ValueError:
-                        person[aggregate] = elements
+        self.selectall(sql)
