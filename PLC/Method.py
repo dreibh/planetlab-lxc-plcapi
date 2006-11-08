@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.16 2006/11/03 20:36:05 thierry Exp $
+# $Id: Method.py,v 1.17 2006/11/03 23:44:51 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -17,7 +17,7 @@ import pprint
 from types import StringTypes
 
 from PLC.Faults import *
-from PLC.Parameter import Parameter, Mixed
+from PLC.Parameter import Parameter, Mixed, python_type, xmlrpc_type
 from PLC.Auth import Auth
 from PLC.Debug import profile, log
 from PLC.Events import Event, Events
@@ -201,7 +201,7 @@ class Method:
             elif isinstance(param, Mixed):
                 for subparam in param:
                     text += param_text(name, subparam, indent + step, step)
-            elif isinstance(param, (list, tuple)):
+            elif isinstance(param, (list, tuple, set)):
                 for subparam in param:
                     text += param_text("", subparam, indent + step, step)
 
@@ -313,6 +313,11 @@ class Method:
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
                 raise PLCInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+        elif expected_type in (list, tuple, set):
+            if min is not None and len(value) < min:
+                raise PLCInvalidArgument, "%s must contain at least %d items" % (name, min)
+            if max is not None and len(value) > max:
+                raise PLCInvalidArgument, "%s must contain at most %d items" % (name, max)
         else:
             if min is not None and value < min:
                 raise PLCInvalidArgument, "%s must be > %s" % (name, str(min))
@@ -320,7 +325,7 @@ class Method:
                 raise PLCInvalidArgument, "%s must be < %s" % (name, str(max))
 
         # If a list with particular types of items is expected
-        if isinstance(expected, (list, tuple)):
+        if isinstance(expected, (list, tuple, set)):
             for i in range(len(value)):
                 if i >= len(expected):
                     j = len(expected) - 1
@@ -342,46 +347,3 @@ class Method:
 
         if auth is not None:
             auth.check(self, *args)
-
-def python_type(arg):
-    """
-    Returns the Python type of the specified argument, which may be a
-    Python type, a typed value, or a Parameter.
-    """
-
-    if isinstance(arg, Parameter):
-        arg = arg.type
-
-    if isinstance(arg, type):
-        return arg
-    else:
-        return type(arg)
-
-def xmlrpc_type(arg):
-    """
-    Returns the XML-RPC type of the specified argument, which may be a
-    Python type, a typed value, or a Parameter.
-    """
-
-    arg_type = python_type(arg)
-
-    if arg_type == NoneType:
-        return "nil"
-    elif arg_type == IntType or arg_type == LongType:
-        return "int"
-    elif arg_type == bool:
-        return "boolean"
-    elif arg_type == FloatType:
-        return "double"
-    elif arg_type in StringTypes:
-        return "string"
-    elif arg_type == ListType or arg_type == TupleType:
-        return "array"
-    elif arg_type == DictType:
-        return "struct"
-    elif arg_type == Mixed:
-        # Not really an XML-RPC type but return "mixed" for
-        # documentation purposes.
-        return "mixed"
-    else:
-        raise PLCAPIError, "XML-RPC cannot marshal %s objects" % arg_type
