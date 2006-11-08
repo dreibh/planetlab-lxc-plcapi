@@ -5,8 +5,12 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.7 2006/10/24 13:47:05 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.8 2006/10/30 16:37:49 mlhuang Exp $
 #
+
+import psycopg2
+import psycopg2.extensions
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 import pgdb
 from types import StringTypes, NoneType
@@ -18,57 +22,71 @@ from pprint import pformat
 from PLC.Debug import profile, log
 from PLC.Faults import *
 
-is8bit = re.compile("[\x80-\xff]").search
+if not psycopg2:
+    is8bit = re.compile("[\x80-\xff]").search
 
-def unicast(typecast):
-    """
-    pgdb returns raw UTF-8 strings. This function casts strings that
-    appear to contain non-ASCII characters to unicode objects.
-    """
+    def unicast(typecast):
+        """
+        pgdb returns raw UTF-8 strings. This function casts strings that
+        appear to contain non-ASCII characters to unicode objects.
+        """
     
-    def wrapper(*args, **kwds):
-        value = typecast(*args, **kwds)
+        def wrapper(*args, **kwds):
+            value = typecast(*args, **kwds)
 
-        # pgdb always encodes unicode objects as UTF-8 regardless of
-        # the DB encoding (and gives you no option for overriding
-        # the encoding), so always decode 8-bit objects as UTF-8.
-        if isinstance(value, str) and is8bit(value):
-            value = unicode(value, "utf-8")
+            # pgdb always encodes unicode objects as UTF-8 regardless of
+            # the DB encoding (and gives you no option for overriding
+            # the encoding), so always decode 8-bit objects as UTF-8.
+            if isinstance(value, str) and is8bit(value):
+                value = unicode(value, "utf-8")
 
-        return value
+            return value
 
-    return wrapper
+        return wrapper
 
-pgdb.pgdbTypeCache.typecast = unicast(pgdb.pgdbTypeCache.typecast)
+    pgdb.pgdbTypeCache.typecast = unicast(pgdb.pgdbTypeCache.typecast)
 
 class PostgreSQL:
     def __init__(self, api):
         self.api = api
 
         # Initialize database connection
-        self.db = pgdb.connect(user = api.config.PLC_DB_USER,
-                               password = api.config.PLC_DB_PASSWORD,
-                               host = "%s:%d" % (api.config.PLC_DB_HOST, api.config.PLC_DB_PORT),
-                               database = api.config.PLC_DB_NAME)
+        if psycopg2:
+            try:
+                # Try UNIX socket first
+                self.db = psycopg2.connect(user = api.config.PLC_DB_USER,
+                                           password = api.config.PLC_DB_PASSWORD,
+                                           database = api.config.PLC_DB_NAME)
+            except psycopg2.OperationalError:
+                # Fall back on TCP
+                self.db = psycopg2.connect(user = api.config.PLC_DB_USER,
+                                           password = api.config.PLC_DB_PASSWORD,
+                                           database = api.config.PLC_DB_NAME,
+                                           host = api.config.PLC_DB_HOST,
+                                           port = api.config.PLC_DB_PORT)
+            self.db.set_client_encoding("UNICODE")
+        else:
+            self.db = pgdb.connect(user = api.config.PLC_DB_USER,
+                                   password = api.config.PLC_DB_PASSWORD,
+                                   host = "%s:%d" % (api.config.PLC_DB_HOST, api.config.PLC_DB_PORT),
+                                   database = api.config.PLC_DB_NAME)
+
         self.cursor = self.db.cursor()
 
         (self.rowcount, self.description, self.lastrowid) = \
                         (None, None, None)
 
-    def quote(self, params):
+    def quote(self, value):
         """
-        Returns quoted version(s) of the specified parameter(s).
+        Returns quoted version of the specified value.
         """
 
-        # pgdb._quote functions are good enough for general SQL quoting
-        if hasattr(params, 'has_key'):
-            params = pgdb._quoteitem(params)
-        elif isinstance(params, list) or isinstance(params, tuple) or isinstance(params, set):
-            params = map(pgdb._quote, params)
+        # The pgdb._quote function is good enough for general SQL
+        # quoting, except for array types.
+        if isinstance(value, (list, tuple, set)):
+            return "ARRAY[%s]" % ", ".join(map, self.quote, value)
         else:
-            params = pgdb._quote(params)
-
-        return params
+            return pgdb._quote(value)
 
     quote = classmethod(quote)
 
@@ -120,10 +138,15 @@ class PostgreSQL:
     def execute_array(self, query, param_seq):
         cursor = self.cursor
         try:
+            # psycopg2 requires %()s format for all parameters,
+            # regardless of type.
+            if psycopg2:
+                query = re.sub(r'(%\([^)]*\)|%)[df]', r'\1s', query)
+
             cursor.executemany(query, param_seq)
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
-        except pgdb.DatabaseError, e:
+        except Exception, e:
             try:
                 self.rollback()
             except:
