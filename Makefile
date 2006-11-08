@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.5 2006/11/07 11:06:11 thierry Exp $
+# $Id: Makefile,v 1.6 2006/11/08 21:56:32 mlhuang Exp $
 #
 
 # Metafiles
@@ -42,7 +42,7 @@ clean:
 	find . -name '*.pyc' | xargs rm -f
 	rm -f $(INIT)
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
-	python setup.py build && rm -rf build
+	python setup.py clean && rm -rf build
 	cd psycopg2 && python setup.py clean && rm -rf build
 
 index: $(INIT)
