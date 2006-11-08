@@ -15,9 +15,11 @@ from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 
 class GetSlivers(Method):
     """
-    Returns an array of structs representing slivers (slices bound to
-    nodes). If node_id_or_hostname_list is specified, only slivers
-    bound to the specified nodes are queried.
+    Returns an array of structs representing nodes and their slivers
+    (slices bound to nodes). If node_hostnames is specified, only
+    information about the specified nodes will be returned. If not
+    specified and called by a node, only information about the caller
+    will be returned.
 
     All of the information returned by this call can be gathered from
     other calls, e.g. GetNodes, GetNodeNetworks, GetSlices, etc. This
@@ -29,8 +31,7 @@ class GetSlivers(Method):
 
     accepts = [
         Auth(),
-        [Mixed(Node.fields['node_id'],
-               Node.fields['hostname'])]
+        [Node.fields['hostname']]
         ]
 
     returns = [{
@@ -57,10 +58,14 @@ class GetSlivers(Method):
         }]
     }]
 
-    def call(self, auth, node_id_or_hostname_list = None):
+    def call(self, auth, node_hostnames = None):
         timestamp = int(time.time())
 
-        all_nodes = Nodes(self.api, node_id_or_hostname_list)
+        if node_hostnames is None and isinstance(self.caller, Node):
+            all_nodes = {self.caller['node_id']: self.caller}
+        else:
+            all_nodes = Nodes(self.api, node_hostnames)
+            # XXX Add foreign nodes
 
         nodenetwork_ids = set()
         nodegroup_ids = set()
@@ -83,7 +88,7 @@ class GetSlivers(Method):
             all_nodegroups = {}
 
         # Get configuration files
-        all_conf_files = ConfFiles(self.api, enabled = True)
+        all_conf_files = ConfFiles(self.api, {'enabled': True})
 
         if slice_ids:
             # Get slices
