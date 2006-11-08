@@ -1,6 +1,7 @@
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table
+from PLC.Filter import Filter
 from PLC.AddressTypes import AddressType, AddressTypes
 
 class Address(Row):
@@ -21,8 +22,8 @@ class Address(Row):
         'state': Parameter(str, "State or province", max = 254),
         'postalcode': Parameter(str, "Postal code", max = 64),
         'country': Parameter(str, "Country", max = 128),
-        'address_type_ids': Parameter([int], "Address type identifiers", ro = True),
-        'address_types': Parameter([str], "Address types", ro = True),
+        'address_type_ids': Parameter([int], "Address type identifiers"),
+        'address_types': Parameter([str], "Address types"),
         }
 
     def add_address_type(self, address_type, commit = True):
@@ -82,25 +83,17 @@ class Addresses(Table):
     database.
     """
 
-    def __init__(self, api, address_id_list = None):
-	self.api = api
+    def __init__(self, api, address_filter = None):
+	Table.__init__(self, api, Address)
 
-        sql = "SELECT %s FROM view_addresses" % \
+        sql = "SELECT %s FROM view_addresses WHERE True" % \
               ", ".join(Address.fields)
 
-        if address_id_list:
-            sql += " WHERE address_id IN (%s)" % ", ".join(map(str, address_id_list))
+        if address_filter is not None:
+            if isinstance(address_filter, list):
+                address_filter = Filter(Address.fields, {'address_id': address_filter})
+            elif isinstance(address_filter, dict):
+                address_filter = Filter(Address.fields, address_filter)
+            sql += " AND (%s)" % address_filter.sql(api)
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['address_id']] = address = Address(api, row)
-            for aggregate in 'address_type_ids', 'address_types':
-                if not address.has_key(aggregate) or address[aggregate] is None:
-                    address[aggregate] = []
-                else:
-                    elements = address[aggregate].split(',')
-                    try:
-                        address[aggregate] = map(int, elements)
-                    except ValueError:
-                        address[aggregate] = elements
+        self.selectall(sql)
