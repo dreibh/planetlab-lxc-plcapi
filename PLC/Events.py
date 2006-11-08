@@ -4,11 +4,12 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: Events.py,v 1.4 2006/10/31 21:46:14 mlhuang Exp $
 #
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 
@@ -28,7 +29,7 @@ class Event(Row):
         'fault_code': Parameter(int, "Event fault code"),
         'call': Parameter(str, "Call responsible for this event"),
         'runtime': Parameter(float, "Runtime of event"),
-        'time': Parameter(int, "Date and time that the event took place, in seconds since UNIX epoch"),
+        'time': Parameter(int, "Date and time that the event took place, in seconds since UNIX epoch", ro = True),
         'object_ids': Parameter([int], "IDs of objects affected by this event")
 	}    
 
@@ -59,48 +60,17 @@ class Events(Table):
     Representation of row(s) from the events table in the database. 
     """
 
-    def __init__(self, api,
-                 event_ids = None,
-                 person_ids = None, node_ids = None,
-                 event_types = None,
-                 object_types = None, object_ids = None,
-                 fault_codes = None):
-        self.api = api
-    
-        sql = "SELECT %s from view_events WHERE True" % \
+    def __init__(self, api, event_filter):
+        Table.__init__(self, api, Event)
+
+        sql = "SELECT %s FROM view_events WHERE True" % \
               ", ".join(Event.fields)
-        
-        if event_ids:
-            sql += " AND event_id IN (%s)" % ", ".join(map(str, event_ids))
 
-        if person_ids:
-            sql += " AND person_id IN (%s)" % ", ".join(map(str, person_ids))
+        if event_filter is not None:
+            if isinstance(event_filter, list):
+                event_filter = Filter(Event.fields, {'event_id': event_filter})
+            elif isinstance(event_filter, dict):
+                event_filter = Filter(Event.fields, event_filter)
+            sql += " AND (%s)" % event_filter.sql(api)
 
-        if node_ids:
-            sql += " AND node_id IN (%s)" % ", ".join(map(str, node_ids))
-
-        if object_ids:
-            sql += " AND object_ids in (%s)" % ", ".join(map(str, object_ids))    
-
-        if event_types:
-            sql += " AND event_type in (%s)" % ", ".join(api.db.quote(event_types))
-
-        if object_types:
-            sql += " AND object_type in (%s)" % ", ".join(api.db.quote(object_types))
-        
-        if fault_codes:
-            sql += " And fault_code in (%s)" % ", ".join(map(str, fault_codes))
-    
-        rows = self.api.db.selectall(sql)
-    
-        for row in rows:
-            self[row['event_id']] = event = Event(api, row)
-            for aggregate in ['object_ids']:
-                if not event.has_key(aggregate) or event[aggregate] is None:
-                    event[aggregate] = []
-                else:
-                    elements = event[aggregate].split(',')
-                    try:
-                        event[aggregate] = map(int, elements)
-                    except ValueError:
-                        event[aggregate] = elements
+        self.selectall(sql)
