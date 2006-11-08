@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>psycopg2.psycopg1.cursor</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+<script type="text/javascript">
+<!--
+function setFrame(url1, url2){
+    parent.frames[1].location.href = url1;
+    parent.frames[2].location.href = url2;
+}
+-->
+</script>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="psycopg2-module.html">Package&nbsp;psycopg2</a> ::
+        <a href="psycopg2.psycopg1-module.html">Module&nbsp;psycopg1</a> ::
+        Class&nbsp;cursor
+      </span><br />
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><span class="options">[<a href="../private/psycopg2.psycopg1.cursor-class.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</span></td></tr>
+      <tr><td align="right"><span class="options">[<a href="frames.html" target="_top">frames</a>&nbsp;|&nbsp;<a href="psycopg2.psycopg1.cursor-class.html" target="_top">no&nbsp;frames</a>]</span></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type cursor</h2>
+
+<pre class="base-tree">
+<a href="__builtin__.object-class.html"><code>object</code></a> --+    
+         |    
+    <a href="../private/psycopg2._psycopg.cursor-class.html"><code>cursor</code></a> --+
+             |
+            <strong class="uidshort">cursor</strong>
+</pre><br />
+
+<hr/>
+
+<p>psycopg 1.1.x cursor.</p>
+<p>Note that this cursor implements the exact procedure used by psycopg 1 to
+build dictionaries out of result rows. The DictCursor in the
+psycopg.extras modules implements a much better and faster algorithm.</p>
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="dictfetchall"></a><span class="summary-sig"><span class="summary-sig-name">dictfetchall</span>(<span class="summary-sig-arg">self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="dictfetchmany"></a><span class="summary-sig"><span class="summary-sig-name">dictfetchmany</span>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">size</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="dictfetchone"></a><span class="summary-sig"><span class="summary-sig-name">dictfetchone</span>(<span class="summary-sig-arg">self</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return hash(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="dictfetchall"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">dictfetchall</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="dictfetchmany"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">dictfetchmany</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">size</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="dictfetchone"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">dictfetchone</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc 2.1 on Sat Jan 14 01:42:33 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

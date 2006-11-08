@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.9: http://docutils.sourceforge.net/" />
+<title>psycopg 2 extensions to the DBAPI 2.0</title>
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="psycopg-2-extensions-to-the-dbapi-2-0">
+<h1 class="title">psycopg 2 extensions to the DBAPI 2.0</h1>
+<p>This document is a short summary of the extensions built in psycopg 2.0.x over
+the standard <a class="reference" href="http://www.python.org/peps/pep-0249.html">Python Database API Specification 2.0</a>, usually called simply
+DBAPI-2.0 or even PEP-249.  Before reading on this document please make sure
+you already know how to program in Python using a DBAPI-2.0 compliant driver:
+basic concepts like opening a connection, executing queries and commiting or
+rolling back a transaction will not be explained but just used.</p>
+<p>Many objects and extension functions are defined in the <a class="reference" href="api/public/psycopg2.extensions-module.html"><tt class="docutils literal"><span class="pre">psycopg2.extensions</span></tt></a>
+module.</p>
+<div class="section" id="connection-and-cursor-factories">
+<h1><a name="connection-and-cursor-factories">Connection and cursor factories</a></h1>
+<p>psycopg 2 exposes two new-style classes that can be sub-classed and expanded to
+adapt them to the needs of the programmer: <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html"><tt class="docutils literal"><span class="pre">cursor</span></tt></a> and <a class="reference" href="api/private/psycopg2._psycopg.connection-class.html"><tt class="docutils literal"><span class="pre">connection</span></tt></a>.  The
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html"><tt class="docutils literal"><span class="pre">connection</span></tt></a> class is usually sub-classed only to provide a . <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html"><tt class="docutils literal"><span class="pre">cursor</span></tt></a> is much
+more interesting, because it is the class where query building, execution and
+result type-casting into Python variables happens.</p>
+<div class="section" id="row-factories">
+<h2><a name="row-factories">Row factories</a></h2>
+</div>
+<div class="section" id="tzinfo-factories">
+<h2><a name="tzinfo-factories">tzinfo factories</a></h2>
+</div>
+</div>
+<div class="section" id="setting-transaction-isolation-levels">
+<h1><a name="setting-transaction-isolation-levels">Setting transaction isolation levels</a></h1>
+<p>psycopg2 connection objects hold informations about the PostgreSQL <a class="reference" href="http://www.postgresql.org/docs/8.1/static/transaction-iso.html">transaction
+isolation level</a>.  The current transaction level can be read from the
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#isolation_level"><tt class="docutils literal"><span class="pre">.isolation_level</span></tt></a> attribute.  The default isolation level is <tt class="docutils literal"><span class="pre">READ</span>
+<span class="pre">COMMITTED</span></tt>.  A different isolation level con be set through the
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#set_isolation_level"><tt class="docutils literal"><span class="pre">.set_isolation_level()</span></tt></a> method.  The level can be set to one of the following
+constants, defined in <a class="reference" href="api/public/psycopg2.extensions-module.html"><tt class="docutils literal"><span class="pre">psycopg2.extensions</span></tt></a>:</p>
+<dl class="docutils">
+<dt><a class="reference" href="api/public/psycopg2.extensions-module.html#ISOLATION_LEVEL_AUTOCOMMIT"><tt class="docutils literal"><span class="pre">ISOLATION_LEVEL_AUTOCOMMIT</span></tt></a></dt>
+<dd>No transaction is started when command are issued and no
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#commit"><tt class="docutils literal"><span class="pre">.commit()</span></tt></a>/<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#rollback"><tt class="docutils literal"><span class="pre">.rollback()</span></tt></a> is required.  Some PostgreSQL command such as
+<tt class="docutils literal"><span class="pre">CREATE</span> <span class="pre">DATABASE</span></tt> can't run into a transaction: to run such command use
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#set_isolation_level"><tt class="docutils literal"><span class="pre">.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)</span></tt></a>.</dd>
+<dt><a href="#id2" name="id3"><span class="problematic" id="id3">`ISOLATION_LEVEL_READ_COMMITTED`</span></a></dt>
+<dd><div class="first system-message" id="id2">
+<p class="system-message-title">System Message: <a name="id2">ERROR/3</a> (<tt class="docutils">../doc/extensions.rst</tt>, line 54); <em><a href="#id3">backlink</a></em></p>
+Can't find 'ISOLATION_LEVEL_READ_COMMITTED' in any provided module.</div>
+<p class="last">This is the default value.  A new transaction is started at the first
+<a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a> command on a cursor and at each new <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a> after a
+<a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#commit"><tt class="docutils literal"><span class="pre">.commit()</span></tt></a> or a <a class="reference" href="api/private/psycopg2._psycopg.connection-class.html#rollback"><tt class="docutils literal"><span class="pre">.rollback()</span></tt></a>.  The transaction runs in the PostgreSQL
+<tt class="docutils literal"><span class="pre">READ</span> <span class="pre">COMMITTED</span></tt> isolation level.</p>
+</dd>
+<dt><a class="reference" href="api/public/psycopg2.extensions-module.html#ISOLATION_LEVEL_SERIALIZABLE"><tt class="docutils literal"><span class="pre">ISOLATION_LEVEL_SERIALIZABLE</span></tt></a></dt>
+<dd>Transactions are run at a <tt class="docutils literal"><span class="pre">SERIALIZABLE</span></tt> isolation level.</dd>
+</dl>
+</div>
+<div class="section" id="adaptation-of-python-values-to-sql-types">
+<h1><a name="adaptation-of-python-values-to-sql-types">Adaptation of Python values to SQL types</a></h1>
+<p>psycopg2 casts Python variables to SQL literals by type.  Standard Python types
+are already adapted to the proper SQL literal.</p>
+<p>Example: the Python function:</p>
+<pre class="literal-block">
+curs.execute(&quot;&quot;&quot;INSERT INTO atable (anint, adate, astring)
+                 VALUES (%s, %s, %s)&quot;&quot;&quot;,
+             (10, datetime.date(2005, 11, 18), &quot;O'Reilly&quot;))
+</pre>
+<p>is converted into the SQL command:</p>
+<pre class="literal-block">
+INSERT INTO atable (anint, adate, astring)
+ VALUES (10, '2005-11-18', 'O''Reilly');
+</pre>
+<p>Named arguments are supported too with <tt class="docutils literal"><span class="pre">%(name)s</span></tt> placeholders. Notice that:</p>
+<blockquote>
+<ul class="simple">
+<li>The Python string operator <tt class="docutils literal"><span class="pre">%</span></tt> is not used: the <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a> function
+accepts the values tuple or dictionary as second parameter.</li>
+<li>The variables placeholder must always be a <tt class="docutils literal"><span class="pre">%s</span></tt>, even if a different
+placeholder (such as a <tt class="docutils literal"><span class="pre">%d</span></tt> for an integer) may look more appropriate.</li>
+<li>For positional variables binding, the second argument must always be a
+tuple, even if it contains a single variable.</li>
+<li>Only variable values should be bound via this method: it shouldn't be used
+to set table or field names. For these elements, ordinary string formatting
+should be used before running <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a>.</li>
+</ul>
+</blockquote>
+<div class="section" id="adapting-new-types">
+<h2><a name="adapting-new-types">Adapting new types</a></h2>
+<p>Any Python class or type can be adapted to an SQL string.  Adaptation mechanism
+is similar to the Object Adaptation proposed in the <a class="reference" href="http://www.python.org/peps/pep-0246.html">PEP-246</a> and is exposed
+by the <a class="reference" href="api/private/psycopg2._psycopg-module.html#adapt"><tt class="docutils literal"><span class="pre">adapt()</span></tt></a> function.</p>
+<p>psycopg2 <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a> method adapts its <tt class="docutils literal"><span class="pre">vars</span></tt> arguments to the <a class="reference" href="api/private/psycopg2._psycopg.ISQLQuote-class.html"><tt class="docutils literal"><span class="pre">ISQLQuote</span></tt></a>
+protocol.  Objects that conform to this protocol expose a <tt class="docutils literal"><span class="pre">getquoted()</span></tt> method
+returning the SQL representation of the object as a string.</p>
+<p>The easiest way to adapt an object to an SQL string is to register an adapter
+function via the <a class="reference" href="api/public/psycopg2.extensions-module.html#register_adapter"><tt class="docutils literal"><span class="pre">register_adapter()</span></tt></a> function.  The adapter function must take
+the value to be adapted as argument and return a conform object.  A convenient
+object is the <a class="reference" href="api/private/psycopg2._psycopg-module.html#AsIs"><tt class="docutils literal"><span class="pre">AsIs</span></tt></a> wrapper, whose <tt class="docutils literal"><span class="pre">getquoted()</span></tt> result is simply the
+<tt class="docutils literal"><span class="pre">str()</span></tt>ingification of the wrapped object.</p>
+<p>Example: mapping of a <tt class="docutils literal"><span class="pre">Point</span></tt> class into the <tt class="docutils literal"><span class="pre">point</span></tt> PostgreSQL geometric
+type:</p>
+<pre class="literal-block">
+from psycopg2.extensions import adapt, register_adapter, AsIs
+
+class Point(object):
+    def __init__(self, x=0.0, y=0.0):
+        self.x = x
+        self.y = y
+
+def adapt_point(point):
+    return AsIs(&quot;'(%s,%s)'&quot; % (adapt(point.x), adapt(point.y)))
+    
+register_adapter(Point, adapt_point)
+
+curs.execute(&quot;INSERT INTO atable (apoint) VALUES (%s)&quot;, 
+             (Point(1.23, 4.56),))
+</pre>
+<p>The above function call results in the SQL command:</p>
+<pre class="literal-block">
+INSERT INTO atable (apoint) VALUES ((1.23, 4.56));
+</pre>
+</div>
+</div>
+<div class="section" id="type-casting-of-sql-types-into-python-values">
+<h1><a name="type-casting-of-sql-types-into-python-values">Type casting of SQL types into Python values</a></h1>
+<p>PostgreSQL objects read from the database can be adapted to Python objects
+through an user-defined adapting function.  An adapter function takes two
+argments: the object string representation as returned by PostgreSQL and the
+cursor currently being read, and should return a new Python object.  For
+example, the following function parses a PostgreSQL <tt class="docutils literal"><span class="pre">point</span></tt> into the
+previously defined <tt class="docutils literal"><span class="pre">Point</span></tt> class:</p>
+<pre class="literal-block">
+def cast_point(value, curs):
+    if value is not None:
+            # Convert from (f1, f2) syntax using a regular expression.
+        m = re.match(&quot;\((.*),(.*)\)&quot;, value) 
+        if m:
+            return Point(float(m.group(1)), float(m.group(2)))
+</pre>
+<p>To create a mapping from the PostgreSQL type (either standard or user-defined),
+its <tt class="docutils literal"><span class="pre">oid</span></tt> must be known. It can be retrieved either by the second column of
+the cursor description:</p>
+<pre class="literal-block">
+curs.execute(&quot;SELECT NULL::point&quot;)
+point_oid = curs.description[0][1]   # usually returns 600
+</pre>
+<p>or by querying the system catalogs for the type name and namespace (the
+namespace for system objects is <tt class="docutils literal"><span class="pre">pg_catalog</span></tt>):</p>
+<pre class="literal-block">
+curs.execute(&quot;&quot;&quot;
+    SELECT pg_type.oid
+      FROM pg_type JOIN pg_namespace
+             ON typnamespace = pg_namespace.oid
+     WHERE typname = %(typename)s
+       AND nspname = %(namespace)s&quot;&quot;&quot;,
+            {'typename': 'point', 'namespace': 'pg_catalog'})
+    
+point_oid = curs.fetchone()[0]
+</pre>
+<p>After you know the object <tt class="docutils literal"><span class="pre">oid</span></tt>, you must can and register the new type:</p>
+<pre class="literal-block">
+POINT = psycopg2.extensions.new_type((point_oid,), &quot;POINT&quot;, cast_point)
+psycopg2.extensions.register_type(POINT)
+</pre>
+<p>The <a class="reference" href="api/private/psycopg2._psycopg-module.html#new_type"><tt class="docutils literal"><span class="pre">new_type()</span></tt></a> function binds the object oids (more than one can be
+specified) to the adapter function.  <a class="reference" href="api/private/psycopg2._psycopg-module.html#register_type"><tt class="docutils literal"><span class="pre">register_type()</span></tt></a> completes the spell.
+Conversion is automatically performed when a column whose type is a registered
+<tt class="docutils literal"><span class="pre">oid</span></tt> is read:</p>
+<pre class="literal-block">
+curs.execute(&quot;SELECT '(10.2,20.3)'::point&quot;)
+point = curs.fetchone()[0]
+print type(point), point.x, point.y
+# Prints: &quot;&lt;class '__main__.Point'&gt; 10.2 20.3&quot;
+</pre>
+</div>
+<div class="section" id="working-with-times-and-dates">
+<h1><a name="working-with-times-and-dates">Working with times and dates</a></h1>
+</div>
+<div class="section" id="receiving-notifys">
+<h1><a name="receiving-notifys">Receiving NOTIFYs</a></h1>
+</div>
+<div class="section" id="using-copy-to-and-copy-from">
+<h1><a name="using-copy-to-and-copy-from">Using COPY TO and COPY FROM</a></h1>
+<p>psycopg2 <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html"><tt class="docutils literal"><span class="pre">cursor</span></tt></a> object provides an interface to the efficient <a class="reference" href="http://www.postgresql.org/docs/8.1/static/sql-copy.html">PostgreSQL
+COPY command</a> to move data from files to tables and back.</p>
+<p>The <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#copy_to"><tt class="docutils literal"><span class="pre">.copy_to(file,</span> <span class="pre">table)</span></tt></a> method writes the content of the table
+named <tt class="docutils literal"><span class="pre">table</span></tt> <em>to</em> the file-like object <tt class="docutils literal"><span class="pre">file</span></tt>. <tt class="docutils literal"><span class="pre">file</span></tt> must have a
+<tt class="docutils literal"><span class="pre">write()</span></tt> method.</p>
+<p>The <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#copy_from"><tt class="docutils literal"><span class="pre">.copy_from(file,</span> <span class="pre">table)</span></tt></a> reads data <em>from</em> the file-like object
+<tt class="docutils literal"><span class="pre">file</span></tt> appending them to the table named <tt class="docutils literal"><span class="pre">table</span></tt>. <tt class="docutils literal"><span class="pre">file</span></tt> must have both
+<tt class="docutils literal"><span class="pre">read()</span></tt> and <tt class="docutils literal"><span class="pre">readline()</span></tt> method.</p>
+<p>Both methods accept two optional arguments: <tt class="docutils literal"><span class="pre">sep</span></tt> (defaulting to a tab) is
+the columns separator and <tt class="docutils literal"><span class="pre">null</span></tt> (defaulting to <tt class="docutils literal"><span class="pre">\N</span></tt>) represents <tt class="docutils literal"><span class="pre">NULL</span></tt>
+values in the file.</p>
+</div>
+<div class="section" id="postgresql-status-message-and-executed-query">
+<h1><a name="postgresql-status-message-and-executed-query">PostgreSQL status message and executed query</a></h1>
+<p><a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html"><tt class="docutils literal"><span class="pre">cursor</span></tt></a> objects have two special fields related to the last executed query:</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#query"><tt class="docutils literal"><span class="pre">.query</span></tt></a> is the textual representation (str or unicode, depending on what
+was passed to <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#execute"><tt class="docutils literal"><span class="pre">.execute()</span></tt></a> as first argument) of the query <em>after</em> argument
+binding and mogrification has been applied. To put it another way, <a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#query"><tt class="docutils literal"><span class="pre">.query</span></tt></a>
+is the <em>exact</em> query that was sent to the PostgreSQL backend.</li>
+<li><a class="reference" href="api/private/psycopg2._psycopg.cursor-class.html#statusmessage"><tt class="docutils literal"><span class="pre">.statusmessage</span></tt></a> is the status message that the backend sent upon query
+execution. It usually contains the basic type of the query (SELECT,
+INSERT, UPDATE, ...) and some additional information like the number of
+rows updated and so on. Refer to the PostgreSQL manual for more
+information.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+</body>
+</html>

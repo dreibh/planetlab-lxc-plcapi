@@ -1,0 +1,1072 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>psycopg2._psycopg</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+<script type="text/javascript">
+<!--
+function setFrame(url1, url2){
+    parent.frames[1].location.href = url1;
+    parent.frames[2].location.href = url2;
+}
+-->
+</script>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="psycopg2-module.html">Package&nbsp;psycopg2</a> ::
+        Module&nbsp;_psycopg
+      </span><br />
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><span class="options">[<strong>show&nbsp;private</strong>&nbsp;|&nbsp;hide&nbsp;private]</span></td></tr>
+      <tr><td align="right"><span class="options">[<a href="frames.html" target="_top">frames</a>&nbsp;|&nbsp;<a href="../private/psycopg2._psycopg-module.html" target="_top">no&nbsp;frames</a>]</span></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF MODULE DESCRIPTION =========== -->
+<h2 class="module">Module psycopg2._psycopg</h2>
+
+<p>psycopg PostgreSQL driver</p>
+<hr/>
+
+<!-- =========== START OF CLASSES =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Classes</th></tr>
+<tr><td width="15%">
+  <strong><a href="../private/psycopg2._psycopg.connection-class.html"><code>connection</code></a></strong></td>
+  <td>connection(dsn, ...) -&gt; new connection object</td></tr>
+<tr><td width="15%">
+  <strong><a href="../private/psycopg2._psycopg.cursor-class.html"><code>cursor</code></a></strong></td>
+  <td>A database cursor.</td></tr>
+<tr><td width="15%">
+  <strong><a href="../private/psycopg2._psycopg.ISQLQuote-class.html"><code>ISQLQuote</code></a></strong></td>
+  <td>Abstract ISQLQuote protocol</td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Function Summary</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">new quoted list</td>
+  <td><code><a name="List"></a><span class="summary-sig"><span class="summary-sig-name">List</span>(<span class="summary-sig-arg">list</span>,
+          <span class="summary-sig-arg">enc</span>)</span></code>
+</td></tr>
+</table><br />
+
+
+<!-- =========== START OF VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>str</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#__version__"><code>__version__</code></a></strong> = <span title="'2.0b7 (dt ext pq3)'"><code><span class="variable-quote">'</span>2.0b7&nbsp;(dt&nbsp;ext&nbsp;pq3)<span class="variable-quote">'</span>                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>PyCObject</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#_C_API"><code>_C_API</code></a></strong> = <span title="&lt;PyCObject object at 0x0076A320&gt;"><code>&lt;PyCObject&nbsp;object&nbsp;at&nbsp;0x0076A320&gt;                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>dict</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#adapters"><code>adapters</code></a></strong> = <span title="{(&lt;type 'bool'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Boolean'&gt;, (&lt;type 'list'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.List'&gt;, (&lt;type 'datetime.datetime'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function TimestampFromPy&gt;, (&lt;type 'buffer'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Binary'&gt;, (&lt;type 'unicode'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.QuotedString'&gt;, (&lt;type 'datetime.date'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function DateFromPy&gt;, (&lt;type 'datetime.time'&gt;, ..."><code>{(&lt;type&nbsp;'bool'&gt;,&nbsp;&lt;type&nbsp;'psycopg2._psycopg.ISQ<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>str</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#apilevel"><code>apilevel</code></a></strong> = <span title="'2.0'"><code><span class="variable-quote">'</span>2.0<span class="variable-quote">'</span>                                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#BINARY"><code>BINARY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847A00&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847A00&gt;   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>dict</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#binary_types"><code>binary_types</code></a></strong> = <span title="{}"><code>{}                                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#BINARYARRAY"><code>BINARYARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847CA0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847C<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#BOOLEAN"><code>BOOLEAN</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847880&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847880&gt;  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#BOOLEANARRAY"><code>BOOLEANARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847BA0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DATE"><code>DATE</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847960&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847960&gt;     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DATEARRAY"><code>DATEARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847C20&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847C20<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DATETIME"><code>DATETIME</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x008478C0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x008478C0&gt; </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DATETIMEARRAY"><code>DATETIMEARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847BC0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x0084<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DECIMAL"><code>DECIMAL</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x008477A0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x008477A0&gt;  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#DECIMALARRAY"><code>DECIMALARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847B20&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>dict</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#encodings"><code>encodings</code></a></strong> = <span title="{'UTF8': 'utf_8', 'LATIN-1': 'latin_1', 'SQL_ASCII': 'ascii', 'UNICODE': 'utf_8', 'LATIN1': 'latin_1'}"><code>{'UTF8':&nbsp;'utf_8',&nbsp;'LATIN-1':&nbsp;'latin_1',&nbsp;'SQL<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#FLOAT"><code>FLOAT</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847740&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847740&gt;    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#FLOATARRAY"><code>FLOATARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847AE0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847AE<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#INTEGER"><code>INTEGER</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847700&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847700&gt;  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#INTEGERARRAY"><code>INTEGERARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847AC0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#INTERVAL"><code>INTERVAL</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x008479A0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x008479A0&gt; </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#INTERVALARRAY"><code>INTERVALARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847C60&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x0084<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#LONGINTEGER"><code>LONGINTEGER</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x008476C0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x008476<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#LONGINTEGERARRAY"><code>LONGINTEGERARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847AA0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x0<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#NUMBER"><code>NUMBER</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847680&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847680&gt;   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>str</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#paramstyle"><code>paramstyle</code></a></strong> = <span title="'pyformat'"><code><span class="variable-quote">'</span>pyformat<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#PYDATE"><code>PYDATE</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847DC0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847DC0&gt;   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#PYDATETIME"><code>PYDATETIME</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847D20&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847D2<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#PYINTERVAL"><code>PYINTERVAL</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847DE0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847DE<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#PYTIME"><code>PYTIME</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847D60&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847D60&gt;   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#ROWID"><code>ROWID</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847A60&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847A60&gt;    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#ROWIDARRAY"><code>ROWIDARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847CC0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847CC<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#STRING"><code>STRING</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847820&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847820&gt;   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>dict</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#string_types"><code>string_types</code></a></strong> = <span title="{1028: &lt;psycopg2._psycopg.type object at 0x00847CC0&gt;, 1005: &lt;psycopg2._psycopg.type object at 0x00847AC0&gt;, 16: &lt;psycopg2._psycopg.type object at 0x00847880&gt;, 17: &lt;psycopg2._psycopg.type object at 0x00847A00&gt;, 1042: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 1043: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 20: &lt;psycopg2._psycopg.type object at 0x008476C0&gt;, 21: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 23: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 25: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 26: &lt;psycopg2._psycopg.type object at 0x00847A60&gt;, 1182: &lt;psycopg2._psycopg.ty..."><code>{1028:&nbsp;&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#STRINGARRAY"><code>STRINGARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847B60&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847B<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>int</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#threadsafety"><code>threadsafety</code></a></strong> = <span title="2">2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#TIME"><code>TIME</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847900&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847900&gt;     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#TIMEARRAY"><code>TIMEARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847BE0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847BE0<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#UNICODE"><code>UNICODE</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x008477E0&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x008477E0&gt;  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%" class="vtype"><code>type</code></td>
+<td><strong><a href="../private/psycopg2._psycopg-module.html#UNICODEARRAY"><code>UNICODEARRAY</code></a></strong> = <span title="&lt;psycopg2._psycopg.type object at 0x00847B40&gt;"><code>&lt;psycopg2._psycopg.type&nbsp;object&nbsp;at&nbsp;0x00847<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Function Details</th></tr>
+</table>
+
+<a name="List"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">List</span>(<span class="sig-arg">list</span>,
+          <span class="sig-arg">enc</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+    <dl><dt>Returns:</dt>
+      <dd>
+new quoted list      </dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="__version__"></a>
+<h3>__version__</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+      <dt title="'2.0b7 (dt ext pq3)'">Value:</dt>
+      <dd title="'2.0b7 (dt ext pq3)'"><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>2.0b7 (dt ext pq3)<span class="variable-quote">'</span>                                                   </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="_C_API"></a>
+<h3>_C_API</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>PyCObject</code>
+
+      </dd>
+      <dt title="&lt;PyCObject object at 0x0076A320&gt;">Value:</dt>
+      <dd title="&lt;PyCObject object at 0x0076A320&gt;"><table><tr><td>
+<pre class="variable">
+&lt;PyCObject object at 0x0076A320&gt;                                       </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="adapters"></a>
+<h3>adapters</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+      <dt title="{(&lt;type 'bool'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Boolean'&gt;, (&lt;type 'list'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.List'&gt;, (&lt;type 'datetime.datetime'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function TimestampFromPy&gt;, (&lt;type 'buffer'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Binary'&gt;, (&lt;type 'unicode'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.QuotedString'&gt;, (&lt;type 'datetime.date'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function DateFromPy&gt;, (&lt;type 'datetime.time'&gt;, ...">Value:</dt>
+      <dd title="{(&lt;type 'bool'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Boolean'&gt;, (&lt;type 'list'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.List'&gt;, (&lt;type 'datetime.datetime'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function TimestampFromPy&gt;, (&lt;type 'buffer'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.Binary'&gt;, (&lt;type 'unicode'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;type 'psycopg2._psycopg.QuotedString'&gt;, (&lt;type 'datetime.date'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;built-in function DateFromPy&gt;, (&lt;type 'datetime.time'&gt;, ..."><table><tr><td>
+<pre class="variable">
+{(&lt;type 'datetime.timedelta'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): <span class="variable-linewrap">\</span>
+&lt;built-in function IntervalFromPy&gt;,
+ (&lt;type 'datetime.date'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;buil<span class="variable-linewrap">\</span>
+t-in function DateFromPy&gt;,
+ (&lt;type 'datetime.time'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;buil<span class="variable-linewrap">\</span>
+t-in function TimeFromPy&gt;,
+ (&lt;type 'datetime.datetime'&gt;, &lt;type 'psycopg2._psycopg.ISQLQuote'&gt;): &lt;<span class="variable-linewrap">\</span>
+built-in function TimestampFromPy&gt;,
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="apilevel"></a>
+<h3>apilevel</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+      <dt title="'2.0'">Value:</dt>
+      <dd title="'2.0'"><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>2.0<span class="variable-quote">'</span>                                                                  </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BINARY"></a>
+<h3>BINARY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847A00&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847A00&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847A00&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="binary_types"></a>
+<h3>binary_types</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+      <dt title="{}">Value:</dt>
+      <dd title="{}"><table><tr><td>
+<pre class="variable">
+{}                                                                     </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BINARYARRAY"></a>
+<h3>BINARYARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847CA0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847CA0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847CA0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BOOLEAN"></a>
+<h3>BOOLEAN</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847880&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847880&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847880&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BOOLEANARRAY"></a>
+<h3>BOOLEANARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847BA0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847BA0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847BA0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DATE"></a>
+<h3>DATE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847960&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847960&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847960&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DATEARRAY"></a>
+<h3>DATEARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847C20&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847C20&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847C20&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DATETIME"></a>
+<h3>DATETIME</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x008478C0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x008478C0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x008478C0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DATETIMEARRAY"></a>
+<h3>DATETIMEARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847BC0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847BC0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847BC0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DECIMAL"></a>
+<h3>DECIMAL</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x008477A0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x008477A0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x008477A0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DECIMALARRAY"></a>
+<h3>DECIMALARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847B20&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847B20&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847B20&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="encodings"></a>
+<h3>encodings</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+      <dt title="{'UTF8': 'utf_8', 'LATIN-1': 'latin_1', 'SQL_ASCII': 'ascii', 'UNICODE': 'utf_8', 'LATIN1': 'latin_1'}">Value:</dt>
+      <dd title="{'UTF8': 'utf_8', 'LATIN-1': 'latin_1', 'SQL_ASCII': 'ascii', 'UNICODE': 'utf_8', 'LATIN1': 'latin_1'}"><table><tr><td>
+<pre class="variable">
+{'LATIN-1': 'latin_1',
+ 'LATIN1': 'latin_1',
+ 'SQL_ASCII': 'ascii',
+ 'UNICODE': 'utf_8',
+ 'UTF8': 'utf_8'}                                                      </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="FLOAT"></a>
+<h3>FLOAT</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847740&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847740&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847740&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="FLOATARRAY"></a>
+<h3>FLOATARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847AE0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847AE0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847AE0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTEGER"></a>
+<h3>INTEGER</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847700&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847700&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847700&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTEGERARRAY"></a>
+<h3>INTEGERARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847AC0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847AC0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847AC0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTERVAL"></a>
+<h3>INTERVAL</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x008479A0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x008479A0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x008479A0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTERVALARRAY"></a>
+<h3>INTERVALARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847C60&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847C60&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847C60&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="LONGINTEGER"></a>
+<h3>LONGINTEGER</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x008476C0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x008476C0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x008476C0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="LONGINTEGERARRAY"></a>
+<h3>LONGINTEGERARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847AA0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847AA0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847AA0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="NUMBER"></a>
+<h3>NUMBER</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847680&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847680&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847680&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="paramstyle"></a>
+<h3>paramstyle</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+      <dt title="'pyformat'">Value:</dt>
+      <dd title="'pyformat'"><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>pyformat<span class="variable-quote">'</span>                                                             </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PYDATE"></a>
+<h3>PYDATE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847DC0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847DC0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847DC0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PYDATETIME"></a>
+<h3>PYDATETIME</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847D20&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847D20&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847D20&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PYINTERVAL"></a>
+<h3>PYINTERVAL</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847DE0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847DE0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847DE0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PYTIME"></a>
+<h3>PYTIME</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847D60&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847D60&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847D60&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="ROWID"></a>
+<h3>ROWID</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847A60&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847A60&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847A60&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="ROWIDARRAY"></a>
+<h3>ROWIDARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847CC0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847CC0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847CC0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="STRING"></a>
+<h3>STRING</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847820&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847820&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847820&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="string_types"></a>
+<h3>string_types</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+      <dt title="{1028: &lt;psycopg2._psycopg.type object at 0x00847CC0&gt;, 1005: &lt;psycopg2._psycopg.type object at 0x00847AC0&gt;, 16: &lt;psycopg2._psycopg.type object at 0x00847880&gt;, 17: &lt;psycopg2._psycopg.type object at 0x00847A00&gt;, 1042: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 1043: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 20: &lt;psycopg2._psycopg.type object at 0x008476C0&gt;, 21: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 23: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 25: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 26: &lt;psycopg2._psycopg.type object at 0x00847A60&gt;, 1182: &lt;psycopg2._psycopg.ty...">Value:</dt>
+      <dd title="{1028: &lt;psycopg2._psycopg.type object at 0x00847CC0&gt;, 1005: &lt;psycopg2._psycopg.type object at 0x00847AC0&gt;, 16: &lt;psycopg2._psycopg.type object at 0x00847880&gt;, 17: &lt;psycopg2._psycopg.type object at 0x00847A00&gt;, 1042: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 1043: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 20: &lt;psycopg2._psycopg.type object at 0x008476C0&gt;, 21: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 23: &lt;psycopg2._psycopg.type object at 0x00847700&gt;, 25: &lt;psycopg2._psycopg.type object at 0x00847820&gt;, 26: &lt;psycopg2._psycopg.type object at 0x00847A60&gt;, 1182: &lt;psycopg2._psycopg.ty..."><table><tr><td>
+<pre class="variable">
+{16: &lt;psycopg2._psycopg.type object at 0x00847880&gt;,
+ 17: &lt;psycopg2._psycopg.type object at 0x00847A00&gt;,
+ 18: &lt;psycopg2._psycopg.type object at 0x00847820&gt;,
+ 19: &lt;psycopg2._psycopg.type object at 0x00847820&gt;,
+ 20: &lt;psycopg2._psycopg.type object at 0x008476C0&gt;,
+ 21: &lt;psycopg2._psycopg.type object at 0x00847700&gt;,
+ 23: &lt;psycopg2._psycopg.type object at 0x00847700&gt;,
+ 25: &lt;psycopg2._psycopg.type object at 0x00847820&gt;,
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="STRINGARRAY"></a>
+<h3>STRINGARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847B60&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847B60&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847B60&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="threadsafety"></a>
+<h3>threadsafety</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>int</code>
+
+      </dd>
+      <dt title="2">Value:</dt>
+      <dd title="2"><table><tr><td>
+<pre class="variable">
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="TIME"></a>
+<h3>TIME</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847900&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847900&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847900&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="TIMEARRAY"></a>
+<h3>TIMEARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847BE0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847BE0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847BE0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UNICODE"></a>
+<h3>UNICODE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x008477E0&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x008477E0&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x008477E0&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UNICODEARRAY"></a>
+<h3>UNICODEARRAY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt>Type:</dt>
+      <dd>
+          <code>type</code>
+
+      </dd>
+      <dt title="&lt;psycopg2._psycopg.type object at 0x00847B40&gt;">Value:</dt>
+      <dd title="&lt;psycopg2._psycopg.type object at 0x00847B40&gt;"><table><tr><td>
+<pre class="variable">
+&lt;psycopg2._psycopg.type object at 0x00847B40&gt;                          </pre>
+        </td></tr></table></dd>
+    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc 2.1 on Sat Jan 14 01:42:33 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

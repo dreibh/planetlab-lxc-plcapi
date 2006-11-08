@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>psycopg2.extras.DictRow</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+<script type="text/javascript">
+<!--
+function setFrame(url1, url2){
+    parent.frames[1].location.href = url1;
+    parent.frames[2].location.href = url2;
+}
+-->
+</script>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="psycopg2-module.html">Package&nbsp;psycopg2</a> ::
+        <a href="psycopg2.extras-module.html">Module&nbsp;extras</a> ::
+        Class&nbsp;DictRow
+      </span><br />
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><span class="options">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/psycopg2.extras.DictRow-class.html">hide&nbsp;private</a>]</span></td></tr>
+      <tr><td align="right"><span class="options">[<a href="frames.html" target="_top">frames</a>&nbsp;|&nbsp;<a href="psycopg2.extras.DictRow-class.html" target="_top">no&nbsp;frames</a>]</span></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type DictRow</h2>
+
+<pre class="base-tree">
+<a href="__builtin__.object-class.html"><code>object</code></a> --+    
+         |    
+      <a href="__builtin__.list-class.html"><code>list</code></a> --+
+             |
+            <strong class="uidshort">DictRow</strong>
+</pre><br />
+
+<hr/>
+
+<p>A row object that allow by-colun-name access to data.</p>
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="__init__"></a><span class="summary-sig"><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">cursor</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="__getitem__"></a><span class="summary-sig"><span class="summary-sig-name">__getitem__</span>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">x</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="get"></a><span class="summary-sig"><span class="summary-sig-name">get</span>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">default</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="has_key"></a><span class="summary-sig"><span class="summary-sig-name">has_key</span>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">x</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="items"></a><span class="summary-sig"><span class="summary-sig-name">items</span>(<span class="summary-sig-arg">self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="keys"></a><span class="summary-sig"><span class="summary-sig-name">keys</span>(<span class="summary-sig-arg">self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><a name="values"></a><span class="summary-sig"><span class="summary-sig-name">values</span>(<span class="summary-sig-arg">self</span>)</span></code>
+</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from list</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__add__" class="summary-sig-name"><code>__add__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x+y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__contains__" class="summary-sig-name"><code>__contains__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return y in x...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__delitem__" class="summary-sig-name"><code>__delitem__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return del x[y]...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__delslice__" class="summary-sig-name"><code>__delslice__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">i</span>,
+          <span class="summary-sig-arg">j</span>)</span></code>
+<br />
+Use of negative indices is not supported.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__eq__" class="summary-sig-name"><code>__eq__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x==y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__ge__" class="summary-sig-name"><code>__ge__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x&gt;=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__getslice__" class="summary-sig-name"><code>__getslice__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">i</span>,
+          <span class="summary-sig-arg">j</span>)</span></code>
+<br />
+Use of negative indices is not supported.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__gt__" class="summary-sig-name"><code>__gt__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x&gt;y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return hash(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__iadd__" class="summary-sig-name"><code>__iadd__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x+=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__imul__" class="summary-sig-name"><code>__imul__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x*=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__iter__" class="summary-sig-name"><code>__iter__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return iter(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__le__" class="summary-sig-name"><code>__le__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x&lt;=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__len__" class="summary-sig-name"><code>__len__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return len(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__lt__" class="summary-sig-name"><code>__lt__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x&lt;y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__mul__" class="summary-sig-name"><code>__mul__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">n</span>)</span></code>
+<br />
+Return x*n...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__ne__" class="summary-sig-name"><code>__ne__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x!=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__new__" class="summary-sig-name"><code>__new__</code></a>(<span class="summary-sig-arg">T</span>,
+          <span class="summary-sig-arg">S</span>,
+          <span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+Return a new object with type S, a subtype of T...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__repr__" class="summary-sig-name"><code>__repr__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return repr(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__rmul__" class="summary-sig-name"><code>__rmul__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">n</span>)</span></code>
+<br />
+Return n*x...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__setitem__" class="summary-sig-name"><code>__setitem__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">i</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Return x[i]=y...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#__setslice__" class="summary-sig-name"><code>__setslice__</code></a>(<span class="summary-sig-arg">x</span>,
+          <span class="summary-sig-arg">i</span>,
+          <span class="summary-sig-arg">j</span>,
+          <span class="summary-sig-arg">y</span>)</span></code>
+<br />
+Use  of negative indices is not supported.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#append" class="summary-sig-name"><code>append</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">object</span>)</span></code>
+<br />
+append object to end</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#count" class="summary-sig-name"><code>count</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">value</span>)</span></code>
+<br />
+return number of occurrences of value</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#extend" class="summary-sig-name"><code>extend</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">iterable</span>)</span></code>
+<br />
+extend list by appending elements from the iterable</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#index" class="summary-sig-name"><code>index</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+L.index(value, [start, [stop]]) -&gt; integer -- return first index of value</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#insert" class="summary-sig-name"><code>insert</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">index</span>,
+          <span class="summary-sig-arg">object</span>)</span></code>
+<br />
+insert object before index</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#pop" class="summary-sig-name"><code>pop</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">index</span>)</span></code>
+<br />
+remove and return item at index (default last)</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#remove" class="summary-sig-name"><code>remove</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">value</span>)</span></code>
+<br />
+remove first occurrence of value</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#reverse" class="summary-sig-name"><code>reverse</code></a>(<span class="summary-sig-arg">L</span>)</span></code>
+<br />
+reverse <em>IN PLACE</em></td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.list-class.html#sort" class="summary-sig-name"><code>sort</code></a>(<span class="summary-sig-arg">L</span>,
+          <span class="summary-sig-arg">cmpfunc</span>)</span></code>
+<br />
+stable sort <em>IN PLACE</em>; cmpfunc(x, y) -&gt; -1, 0, 1</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__str__" class="summary-sig-name"><code>__str__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return str(x)...</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">cursor</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:</dt>
+      <dd><a href="__builtin__.list-class.html#__init__"><code>__builtin__.list.__init__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="__getitem__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__getitem__</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">x</span>)</span>
+    <br /><em class="fname">(Indexing operator)</em>
+  </h3>
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:</dt>
+      <dd><a href="__builtin__.list-class.html#__getitem__"><code>__builtin__.list.__getitem__</code></a></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">x</span>,
+          <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="has_key"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">has_key</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">x</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="items"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">items</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="keys"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">keys</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="values"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">values</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc 2.1 on Sat Jan 14 01:42:36 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

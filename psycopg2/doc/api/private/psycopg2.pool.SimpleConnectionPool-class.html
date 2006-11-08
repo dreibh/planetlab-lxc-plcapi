@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>psycopg2.pool.SimpleConnectionPool</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+<script type="text/javascript">
+<!--
+function setFrame(url1, url2){
+    parent.frames[1].location.href = url1;
+    parent.frames[2].location.href = url2;
+}
+-->
+</script>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="psycopg2-module.html">Package&nbsp;psycopg2</a> ::
+        <a href="psycopg2.pool-module.html">Module&nbsp;pool</a> ::
+        Class&nbsp;SimpleConnectionPool
+      </span><br />
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><span class="options">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/psycopg2.pool.SimpleConnectionPool-class.html">hide&nbsp;private</a>]</span></td></tr>
+      <tr><td align="right"><span class="options">[<a href="frames.html" target="_top">frames</a>&nbsp;|&nbsp;<a href="psycopg2.pool.SimpleConnectionPool-class.html" target="_top">no&nbsp;frames</a>]</span></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Type SimpleConnectionPool</h2>
+
+<pre class="base-tree">
+            <a href="__builtin__.object-class.html"><code>object</code></a> --+    
+                     |    
+<a href="psycopg2.pool.AbstractConnectionPool-class.html"><code>AbstractConnectionPool</code></a> --+
+                         |
+                        <strong class="uidshort">SimpleConnectionPool</strong>
+</pre><br />
+
+<hr/>
+
+<p>A connection pool that can't be shared across different threads.</p>
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.SimpleConnectionPool-class.html#_closeall" class="summary-sig-name"><code>closeall</code></a>(<span class="summary-sig-arg">self</span>)</span></code>
+<br />
+Close all connections.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.SimpleConnectionPool-class.html#_getconn" class="summary-sig-name"><code>getconn</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">key</span>)</span></code>
+<br />
+Get a free connection and assign it to 'key' if not None.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.SimpleConnectionPool-class.html#_putconn" class="summary-sig-name"><code>putconn</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">conn</span>,
+          <span class="summary-sig-arg">key</span>,
+          <span class="summary-sig-arg">close</span>)</span></code>
+<br />
+Put away a connection.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from AbstractConnectionPool</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="psycopg2.pool.AbstractConnectionPool-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">minconn</span>,
+          <span class="summary-sig-arg">maxconn</span>,
+          <span class="summary-sig-vararg">*args</span>,
+          <span class="summary-sig-kwarg">**kwargs</span>)</span></code>
+<br />
+Initialize the connection pool.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.AbstractConnectionPool-class.html#_closeall" class="summary-sig-name"><code>_closeall</code></a>(<span class="summary-sig-arg">self</span>)</span></code>
+<br />
+Close all connections.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.AbstractConnectionPool-class.html#_connect" class="summary-sig-name"><code>_connect</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">key</span>)</span></code>
+<br />
+Create a new connection and assign it to 'key' if not None.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.AbstractConnectionPool-class.html#_getconn" class="summary-sig-name"><code>_getconn</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">key</span>)</span></code>
+<br />
+Get a free connection and assign it to 'key' if not None.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.AbstractConnectionPool-class.html#_getkey" class="summary-sig-name"><code>_getkey</code></a>(<span class="summary-sig-arg">self</span>)</span></code>
+<br />
+Return a new unique key.</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="../private/psycopg2.pool.AbstractConnectionPool-class.html#_putconn" class="summary-sig-name"><code>_putconn</code></a>(<span class="summary-sig-arg">self</span>,
+          <span class="summary-sig-arg">conn</span>,
+          <span class="summary-sig-arg">key</span>,
+          <span class="summary-sig-arg">close</span>)</span></code>
+<br />
+Put away a connection.</td></tr>
+<tr bgcolor="#e8f0f8" class="group">
+  <th colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;Inherited from object</th></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__delattr__" class="summary-sig-name"><code>__delattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__delattr__('name') &lt;==&gt; del x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__getattribute__" class="summary-sig-name"><code>__getattribute__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__getattribute__('name') &lt;==&gt; x.name</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__hash__" class="summary-sig-name"><code>__hash__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return hash(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__new__" class="summary-sig-name"><code>__new__</code></a>(<span class="summary-sig-arg">T</span>,
+          <span class="summary-sig-arg">S</span>,
+          <span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+Return a new object with type S, a subtype of T...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce__" class="summary-sig-name"><code>__reduce__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__reduce_ex__" class="summary-sig-name"><code>__reduce_ex__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+helper for pickle</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__repr__" class="summary-sig-name"><code>__repr__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return repr(x)...</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__setattr__" class="summary-sig-name"><code>__setattr__</code></a>(<span class="summary-sig-vararg">...</span>)</span></code>
+<br />
+x.__setattr__('name', value) &lt;==&gt; x.name = value</td></tr>
+<tr><td align="right" valign="top" width="15%" class="rtype">&nbsp;</td>
+  <td><code><span class="summary-sig"><a href="__builtin__.object-class.html#__str__" class="summary-sig-name"><code>__str__</code></a>(<span class="summary-sig-arg">x</span>)</span></code>
+<br />
+Return str(x)...</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="_closeall"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">closeall</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+<p>Close all connections.</p>
+<p>Note that this can lead to some code fail badly when trying to use
+an already closed connection. If you call .closeall() make sure
+your code can deal with it.</p>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="_getconn"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">getconn</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">key</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+<p>Get a free connection and assign it to 'key' if not None.</p>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="_putconn"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">putconn</span>(<span class="sig-arg">self</span>,
+          <span class="sig-arg">conn</span>,
+          <span class="sig-arg">key</span>=<span class="sig-default">None</span>,
+          <span class="sig-arg">close</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+<p>Put away a connection.</p>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="psycopg2-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc 2.1 on Sat Jan 14 01:42:35 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
