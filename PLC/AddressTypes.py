@@ -4,12 +4,13 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.5 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.6 2006/10/25 14:29:13 mlhuang Exp $
 #
 
 from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 class AddressType(Row):
@@ -45,24 +46,21 @@ class AddressTypes(Table):
     Representation of the address_types table in the database.
     """
 
-    def __init__(self, api, address_type_id_or_name_list = None):
-        sql = "SELECT %s FROM address_types" % \
+    def __init__(self, api, address_type_filter = None):
+	Table.__init__(self, api, AddressType)
+
+        sql = "SELECT %s FROM address_types WHERE True" % \
               ", ".join(AddressType.fields)
-        
-        if address_type_id_or_name_list:
-            # Separate the list into integers and strings
-            address_type_ids = filter(lambda address_type_id: isinstance(address_type_id, (int, long)),
-                                   address_type_id_or_name_list)
-            names = filter(lambda name: isinstance(name, StringTypes),
-                           address_type_id_or_name_list)
-            sql += " WHERE (False"
-            if address_type_ids:
-                sql += " OR address_type_id IN (%s)" % ", ".join(map(str, address_type_ids))
-            if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
-            sql += ")"
 
-        rows = api.db.selectall(sql)
+        if address_type_filter is not None:
+            if isinstance(address_type_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), address_type_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), address_type_filter)
+                address_type_filter = Filter(AddressType.fields, {'address_type_id': ints, 'name': strs})
+                sql += " AND (%s)" % address_type_filter.sql(api, "OR")
+            elif isinstance(address_type_filter, dict):
+                address_type_filter = Filter(AddressType.fields, address_type_filter)
+                sql += " AND (%s)" % address_type_filter.sql(api, "AND")
 
-        for row in rows:
-            self[row['address_type_id']] = AddressType(api, row)
+        self.selectall(sql)
