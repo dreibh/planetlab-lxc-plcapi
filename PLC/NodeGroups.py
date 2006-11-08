@@ -4,13 +4,14 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.15 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.16 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.Nodes import Node, Nodes
@@ -103,31 +104,21 @@ class NodeGroups(Table):
     database.
     """
 
-    def __init__(self, api, nodegroup_id_or_name_list = None):
-	self.api = api
+    def __init__(self, api, nodegroup_filter = None):
+        Table.__init__(self, api, NodeGroup)
 
-        sql = "SELECT %s FROM view_nodegroups" % \
+        sql = "SELECT %s FROM view_nodegroups WHERE True" % \
               ", ".join(NodeGroup.fields)
 
-        if nodegroup_id_or_name_list:
-            # Separate the list into integers and strings
-            nodegroup_ids = filter(lambda nodegroup_id: isinstance(nodegroup_id, (int, long)),
-                                   nodegroup_id_or_name_list)
-            names = filter(lambda name: isinstance(name, StringTypes),
-                           nodegroup_id_or_name_list)
-            sql += " WHERE (False"
-            if nodegroup_ids:
-                sql += " OR nodegroup_id IN (%s)" % ", ".join(map(str, nodegroup_ids))
-            if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
-            sql += ")"
+        if nodegroup_filter is not None:
+            if isinstance(nodegroup_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), nodegroup_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), nodegroup_filter)
+                nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'name': strs})
+                sql += " AND (%s)" % nodegroup_filter.sql(api, "OR")
+            elif isinstance(nodegroup_filter, dict):
+                nodegroup_filter = Filter(NodeGroup.fields, nodegroup_filter)
+                sql += " AND (%s)" % nodegroup_filter.sql(api, "AND")
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['nodegroup_id']] = nodegroup = NodeGroup(api, row)
-            for aggregate in ['node_ids', 'conf_file_ids']:
-                if not nodegroup.has_key(aggregate) or nodegroup[aggregate] is None:
-                    nodegroup[aggregate] = []
-                else:
-                    nodegroup[aggregate] = map(int, nodegroup[aggregate].split(','))
+        self.selectall(sql)

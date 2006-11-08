@@ -8,6 +8,7 @@ from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 class Peer (Row):
@@ -50,29 +51,21 @@ class Peers (Table):
     Maps to the peers table in the database
     """
     
-    def __init__ (self, api, peer_id_or_peername_list = None):
-	self.api = api
+    def __init__ (self, api, peer_filter = None):
+        Table.__init__(self, api, Peer)
 
-	sql="SELECT %s FROM view_peers WHERE deleted IS False" % \
-	    ", ".join(Peer.fields)
-	if peer_id_or_peername_list:
-            peer_ids = [x for x in peer_id_or_peername_list if isinstance(x, (int, long))]
-            peernames = [x for x in peer_id_or_peername_list if isinstance(x, StringTypes)]
-	    sql += " AND (False"
-	    if peer_ids:
-		sql += " OR peer_id in (%s)"% ", ".join([str(i) for i in peer_ids])
-	    if peernames:
-		sql += " OR peername in (%s)"% ". ".join(api.db.quote(peernames)).lower()
-	    sql += ")"
+	sql = "SELECT %s FROM view_peers WHERE deleted IS False" % \
+              ", ".join(Peer.fields)
 
-	rows = self.api.db.selectall(sql)
+        if peer_filter is not None:
+            if isinstance(peer_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), peer_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), peer_filter)
+                peer_filter = Filter(Peer.fields, {'peer_id': ints, 'peername': strs})
+                sql += " AND (%s)" % peer_filter.sql(api, "OR")
+            elif isinstance(peer_filter, dict):
+                peer_filter = Filter(Peer.fields, peer_filter)
+                sql += " AND (%s)" % peer_filter.sql(api, "AND")
 
-	for row in rows:
-	    self[row['peer_id']] = peer = Peer(api,row)
-            for aggregate in ['node_ids']:
-                if not peer.has_key(aggregate) or peer[aggregate] is None:
-                    peer[aggregate] = []
-                else:
-                    peer[aggregate] = map(int, peer[aggregate].split(','))
-
-
+	self.selectall(sql)

@@ -6,6 +6,7 @@ from types import StringTypes
 
 from PLC.Table import Row, Table
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 
 class ForeignNode (Row) :
     """
@@ -42,31 +43,21 @@ class ForeignNode (Row) :
 
 class ForeignNodes (Table):
 
-    def __init__ (self, api, foreign_node_id_or_hostname_list=None):
+    def __init__ (self, api, foreign_node_filter = None):
+        Table.__init__(self, api, ForeignNode)
 
-	self.api=api
+	sql = "SELECT %s FROM view_foreign_nodes WHERE deleted IS False" % \
+              ", ".join(ForeignNode.fields)
 
-	sql =""
-	sql += "SELECT %s FROM view_foreign_nodes " % ", ".join(ForeignNode.fields)
-	sql += "WHERE view_foreign_nodes.deleted IS False " 
+        if foreign_node_filter is not None:
+            if isinstance(foreign_node_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), foreign_node_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), foreign_node_filter)
+                foreign_node_filter = Filter(ForeignNode.fields, {'node_id': ints, 'hostname': strs})
+                sql += " AND (%s)" % foreign_node_filter.sql(api, "OR")
+            elif isinstance(foreign_node_filter, dict):
+                foreign_node_filter = Filter(ForeignNode.fields, foreign_node_filter)
+                sql += " AND (%s)" % foreign_node_filter.sql(api, "AND")
 
-	if foreign_node_id_or_hostname_list:
-	    foreign_node_id_list = [ str(x) for x in foreign_node_id_or_hostname_list 
-				     if isinstance(x, (int,long))]
-	    hostname_list = [ x for x in foreign_node_id_or_hostname_list
-			      if isinstance(x, StringTypes)]
-	    sql += " AND (False"
-	    if foreign_node_id_list:
-		sql += " OR node_id in (%s)" % ", ".join(foreign_node_id_list)
-	    if hostname_list:
-		## figure how to retrieve peer_id from the hostname(s)
-		sql += " OR hostname IN (%s)" % ", ".join(api.db.quote(hostname_list))
-	    sql += ")"
-
-	rows = self.api.db.selectall (sql)
-
-	for row in rows:
-	    self[row['hostname']] = ForeignNode (api,row)
-
-
-	
+	self.selectall(sql)

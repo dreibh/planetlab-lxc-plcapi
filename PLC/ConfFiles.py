@@ -4,11 +4,12 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.6 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.7 2006/11/06 20:48:33 mlhuang Exp $
 #
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
@@ -35,8 +36,8 @@ class ConfFile(Row):
         'error_cmd': Parameter(str, "Shell command to execute if any error occurs", max = 1024, nullok = True),
         'ignore_cmd_errors': Parameter(bool, "Install file anyway even if an error occurs"),
         'always_update': Parameter(bool, "Always attempt to install file even if unchanged"),
-        'node_ids': Parameter(int, "List of nodes linked to this file", ro = True),
-        'nodegroup_ids': Parameter(int, "List of node groups linked to this file", ro = True),
+        'node_ids': Parameter(int, "List of nodes linked to this file"),
+        'nodegroup_ids': Parameter(int, "List of node groups linked to this file"),
         }
 
     def add_node(self, node, commit = True):
@@ -138,27 +139,17 @@ class ConfFiles(Table):
     Representation of the conf_files table in the database.
     """
 
-    def __init__(self, api, conf_file_ids = None, enabled = None):
+    def __init__(self, api, conf_file_filter = None):
+	Table.__init__(self, api, ConfFile)
+
         sql = "SELECT %s FROM view_conf_files WHERE True" % \
               ", ".join(ConfFile.fields)
-        
-        if conf_file_ids:
-            # Separate the list into integers and strings
-            sql += " AND conf_file_id IN (%s)" % ", ".join(map(str, api.db.quote(conf_file_ids)))
 
-        if enabled is not None:
-            sql += " AND enabled = %(enabled)s"
+        if conf_file_filter is not None:
+            if isinstance(conf_file_filter, list):
+                conf_file_filter = Filter(ConfFile.fields, {'conf_file_id': conf_file_filter})
+            elif isinstance(conf_file_filter, dict):
+                conf_file_filter = Filter(ConfFile.fields, conf_file_filter)
+            sql += " AND (%s)" % conf_file_filter.sql(api)
 
-        rows = api.db.selectall(sql, locals())
-
-        for row in rows:
-            self[row['conf_file_id']] = ConfFile(api, row)
-
-
-        for row in rows:
-            self[row['conf_file_id']] = conf_file = ConfFile(api, row)
-            for aggregate in ['node_ids', 'nodegroup_ids']:
-                if not conf_file.has_key(aggregate) or conf_file[aggregate] is None:
-                    conf_file[aggregate] = []
-                else:
-                    conf_file[aggregate] = map(int, conf_file[aggregate].split(','))
+        self.selectall(sql)

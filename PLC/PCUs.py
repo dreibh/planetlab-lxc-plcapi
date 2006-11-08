@@ -4,11 +4,12 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.6 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: PCUs.py,v 1.7 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import valid_ip, NodeNetwork, NodeNetworks
@@ -33,8 +34,8 @@ class PCU(Row):
         'password': Parameter(str, "PCU username", max = 254, nullok = True),
         'notes': Parameter(str, "Miscellaneous notes", max = 254, nullok = True),
         'model': Parameter(str, "PCU model string", max = 32, nullok = True),
-        'node_ids': Parameter([int], "List of nodes that this PCU controls", ro = True),
-        'ports': Parameter([int], "List of the port numbers that each node is connected to", ro = True),
+        'node_ids': Parameter([int], "List of nodes that this PCU controls"),
+        'ports': Parameter([int], "List of the port numbers that each node is connected to"),
         }
 
     def validate_ip(self, ip):
@@ -99,22 +100,17 @@ class PCUs(Table):
     database.
     """
 
-    def __init__(self, api, pcu_ids = None):
-        self.api = api
+    def __init__(self, api, pcu_filter = None):
+        Table.__init__(self, api, PCU)
 
-        # N.B.: Node IDs returned may be deleted.
-        sql = "SELECT %s FROM view_pcus" % \
+        sql = "SELECT %s FROM view_pcus WHERE True" % \
               ", ".join(PCU.fields)
 
-        if pcu_ids:
-            sql += " WHERE pcu_id IN (%s)" % ", ".join(map(str, pcu_ids))
+        if pcu_filter is not None:
+            if isinstance(pcu_filter, list):
+                pcu_filter = Filter(PCU.fields, {'pcu_id': pcu_filter})
+            elif isinstance(pcu_filter, dict):
+                pcu_filter = Filter(PCU.fields, pcu_filter)
+            sql += " AND (%s)" % pcu_filter.sql(api)
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['pcu_id']] = pcu = PCU(api, row)
-            for aggregate in ['node_ids', 'ports']:
-                if not pcu.has_key(aggregate) or pcu[aggregate] is None:
-                    pcu[aggregate] = []
-                else:
-                    pcu[aggregate] = map(int, pcu[aggregate].split(','))
+        self.selectall(sql)

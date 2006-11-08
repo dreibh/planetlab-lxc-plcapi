@@ -3,6 +3,7 @@ import string
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.Slices import Slice, Slices
@@ -34,11 +35,11 @@ class Site(Row):
         'last_updated': Parameter(int, "Date and time when site entry was last updated, in seconds since UNIX epoch", ro = True),
         'max_slices': Parameter(int, "Maximum number of slices that the site is able to create"),
         'max_slivers': Parameter(int, "Maximum number of slivers that the site is able to create"),
-        'person_ids': Parameter([int], "List of account identifiers", ro = True),
-        'slice_ids': Parameter([int], "List of slice identifiers", ro = True),
-        'address_ids': Parameter([int], "List of address identifiers", ro = True),
-        'pcu_ids': Parameter([int], "List of PCU identifiers", ro = True),
-        'node_ids': Parameter([int], "List of site node identifiers", ro = True),
+        'person_ids': Parameter([int], "List of account identifiers"),
+        'slice_ids': Parameter([int], "List of slice identifiers"),
+        'address_ids': Parameter([int], "List of address identifiers"),
+        'pcu_ids': Parameter([int], "List of PCU identifiers"),
+        'node_ids': Parameter([int], "List of site node identifiers"),
         }
 
     def validate_name(self, name):
@@ -228,36 +229,24 @@ class Site(Row):
 class Sites(Table):
     """
     Representation of row(s) from the sites table in the
-    database. Specify fields to limit columns to just the specified
-    fields.
+    database.
     """
 
-    def __init__(self, api, site_id_or_login_base_list = None):
-        self.api = api
+    def __init__(self, api, site_filter = None):
+        Table.__init__(self, api, Site)
 
         sql = "SELECT %s FROM view_sites WHERE deleted IS False" % \
               ", ".join(Site.fields)
 
-        if site_id_or_login_base_list:
-            # Separate the list into integers and strings
-            site_ids = filter(lambda site_id: isinstance(site_id, (int, long)),
-                              site_id_or_login_base_list)
-            login_bases = filter(lambda login_base: isinstance(login_base, StringTypes),
-                                 site_id_or_login_base_list)
-            sql += " AND (False"
-            if site_ids:
-                sql += " OR site_id IN (%s)" % ", ".join(map(str, site_ids))
-            if login_bases:
-                sql += " OR login_base IN (%s)" % ", ".join(api.db.quote(login_bases))
-            sql += ")"
+        if site_filter is not None:
+            if isinstance(site_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), site_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), site_filter)
+                site_filter = Filter(Site.fields, {'site_id': ints, 'login_base': strs})
+                sql += " AND (%s)" % site_filter.sql(api, "OR")
+            elif isinstance(site_filter, dict):
+                site_filter = Filter(Site.fields, site_filter)
+                sql += " AND (%s)" % site_filter.sql(api, "AND")
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['site_id']] = site = Site(api, row)
-            for aggregate in ['person_ids', 'slice_ids', 'address_ids',
-                              'pcu_ids', 'node_ids']:
-                if not site.has_key(aggregate) or site[aggregate] is None:
-                    site[aggregate] = []
-                else:
-                    site[aggregate] = map(int, site[aggregate].split(','))
+        self.selectall(sql)
