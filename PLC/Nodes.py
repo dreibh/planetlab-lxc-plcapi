@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.15 2006/10/27 15:32:43 mlhuang Exp $
+# $Id: Nodes.py,v 1.16 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -107,8 +107,9 @@ class Nodes(Table):
     def __init__(self, api, node_id_or_hostname_list = None):
         self.api = api
 
-        sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
-              ", ".join(Node.fields)
+        sql =  ""
+        sql += "SELECT %s FROM view_nodes " %  ", ".join(Node.fields)
+        sql += "WHERE deleted IS False"
 
         if node_id_or_hostname_list:
             # Separate the list into integers and strings

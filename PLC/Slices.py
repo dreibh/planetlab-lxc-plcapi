@@ -8,6 +8,7 @@ from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiations
 from PLC.Nodes import Node, Nodes
+from PLC.ForeignNodes import ForeignNode, ForeignNodes
 import PLC.Persons
 
 class Slice(Row):
@@ -130,13 +131,16 @@ class Slice(Row):
             self['person_ids'].remove(person_id)
             person['slice_ids'].remove(slice_id)
 
-    def add_node(self, node, commit = True):
+    def add_node(self, node, is_foreign_node = False, commit = True):
         """
         Add node to existing slice.
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, Node)
+        if not is_foreign_node:
+            assert isinstance(node, Node)
+        else:
+            assert isinstance(node, ForeignNode)
         assert 'node_id' in node
 
         slice_id = self['slice_id']

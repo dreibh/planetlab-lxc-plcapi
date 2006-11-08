@@ -17,7 +17,7 @@ class GetForeignNodes (Method):
     roles = ['admin']
 
     accepts = [ Auth(),
-		[ Mixed(ForeignNode.fields['foreign_node_id'],
+		[ Mixed(ForeignNode.fields['node_id'],
 			ForeignNode.fields['hostname'])]
 		]
     

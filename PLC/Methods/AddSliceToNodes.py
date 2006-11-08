@@ -2,12 +2,17 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
+from PLC.ForeignNodes import ForeignNode, ForeignNodes
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 
 class AddSliceToNodes(Method):
     """
-    Adds the specified slice to the specified nodes. If the slice is
+    Adds the specified slice to the specified nodes.
+    Nodes can be either regular (local) nodes as returned by GetNodes
+    or foreign nodes as returned by GetForeignNodes
+
+    If the slice is
     already associated with a node, no errors are returned. 
 
     Returns 1 if successful, faults otherwise.
@@ -37,21 +42,27 @@ class AddSliceToNodes(Method):
 
         slice = slices.values()[0]
 
-	 # Get specified nodes
-        nodes = Nodes(self.api, node_id_or_hostname_list).values()
-
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
                 pass
+            # Thierry : I cannot figure out how this works
+            # how is having pi role related to being in a slice ?
             elif 'pi' not in self.caller['roles']:
                 raise PLCPermissionDenied, "Not a member of the specified slice"
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
-	# Add slice to all nodes found
+	 # Get specified nodes, and them to the slice
+        nodes = Nodes(self.api, node_id_or_hostname_list).values()
 	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
+
+        # the same for foreign_nodes
+        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list).values()
+        for foreign_node in foreign_nodes:
+            if slice['slice_id'] not in foreign_node['slice_ids']:
+                slice.add_node (foreign_node, is_foreign_node=True, commit=False)
 
         slice.sync()
 

@@ -22,8 +22,8 @@ class Peer (Row):
 	'peer_id' : Parameter (int, "Peer identifier"),
 	'peername' : Parameter (str, "Peer name"),
 	'peer_url' : Parameter (str, "Peer API url"),
-	'person_id' : Parameter (int, "person_id of the account used to log there"),
-	'foreign_node_ids' : Parameter ([int], "doc")
+	'person_id' : Parameter (int, "Person_id of the account storing credentials - temporary"),
+	'node_ids' : Parameter ([int], "This peer's nodes ids")
 	}
 
     def validate_peer_url (self, url):
@@ -69,7 +69,7 @@ class Peers (Table):
 
 	for row in rows:
 	    self[row['peer_id']] = peer = Peer(api,row)
-            for aggregate in ['foreign_node_ids']:
+            for aggregate in ['node_ids']:
                 if not peer.has_key(aggregate) or peer[aggregate] is None:
                     peer[aggregate] = []
                 else:
