@@ -2,6 +2,7 @@ from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Roles import Role, Roles
 
@@ -45,26 +46,21 @@ class SliceAttributeTypes(Table):
     database.
     """
 
-    def __init__(self, api, attribute_type_id_or_name_list = None):
-	self.api = api
+    def __init__(self, api, attribute_type_filter = None):
+        Table.__init__(self, api, SliceAttributeType)
 
-        sql = "SELECT %s FROM slice_attribute_types" % \
+        sql = "SELECT %s FROM slice_attribute_types WHERE True" % \
               ", ".join(SliceAttributeType.fields)
 
-        if attribute_type_id_or_name_list:
-            # Separate the list into integers and strings
-            attribute_type_ids = filter(lambda attribute_type_id: isinstance(attribute_type_id, (int, long)),
-                                   attribute_type_id_or_name_list)
-            names = filter(lambda name: isinstance(name, StringTypes),
-                           attribute_type_id_or_name_list)
-            sql += " WHERE (False"
-            if attribute_type_ids:
-                sql += " OR attribute_type_id IN (%s)" % ", ".join(map(str, attribute_type_ids))
-            if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
-            sql += ")"
+        if attribute_type_filter is not None:
+            if isinstance(attribute_type_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), attribute_type_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), attribute_type_filter)
+                attribute_type_filter = Filter(SliceAttributeType.fields, {'attribute_type_id': ints, 'name': strs})
+                sql += " AND (%s)" % attribute_type_filter.sql(api, "OR")
+            elif isinstance(attribute_type_filter, dict):
+                attribute_type_filter = Filter(SliceAttributeType.fields, attribute_type_filter)
+                sql += " AND (%s)" % attribute_type_filter.sql(api, "AND")
 
-        rows = self.api.db.selectall(sql)
- 
-        for row in rows:
-            self[row['attribute_type_id']] = SliceAttributeType(api, row)
+        self.selectall(sql)

@@ -1,7 +1,6 @@
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 
@@ -31,16 +30,17 @@ class SliceAttributes(Table):
     database.
     """
 
-    def __init__(self, api, slice_attribute_id_list = None):
-	self.api = api
+    def __init__(self, api, slice_attribute_filter = None):
+        Table.__init__(self, api, SliceAttribute)
 
-        sql = "SELECT %s FROM view_slice_attributes" % \
+        sql = "SELECT %s FROM view_slice_attributes WHERE True" % \
               ", ".join(SliceAttribute.fields)
 
-        if slice_attribute_id_list:
-            sql += " WHERE slice_attribute_id IN (%s)" % ", ".join(map(str, slice_attribute_id_list))
+        if slice_attribute_filter is not None:
+            if isinstance(slice_attribute_filter, list):
+                slice_attribute_filter = Filter(SliceAttribute.fields, {'slice_attribute_id': slice_attribute_filter})
+            elif isinstance(slice_attribute_filter, dict):
+                slice_attribute_filter = Filter(SliceAttribute.fields, slice_attribute_filter)
+            sql += " AND (%s)" % slice_attribute_filter.sql(api)
 
-        rows = self.api.db.selectall(sql)
- 
-        for row in rows:
-            self[row['slice_attribute_id']] = SliceAttribute(api, row)
+        self.selectall(sql)

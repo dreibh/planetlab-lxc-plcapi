@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.11 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.12 2006/11/02 18:32:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -13,6 +13,7 @@ import struct
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NetworkTypes import NetworkType, NetworkTypes
@@ -191,26 +192,17 @@ class NodeNetworks(Table):
     database.
     """
 
-    def __init__(self, api, nodenetwork_id_or_ip_list = None):
-        self.api = api
+    def __init__(self, api, nodenetwork_filter = None):
+        Table.__init__(self, api, NodeNetwork)
 
-        sql = "SELECT %s FROM nodenetworks" % \
+        sql = "SELECT %s FROM nodenetworks WHERE True" % \
               ", ".join(NodeNetwork.fields)
 
-        if nodenetwork_id_or_ip_list:
-            # Separate the list into integers and strings
-            nodenetwork_ids = filter(lambda nodenetwork_id: isinstance(nodenetwork_id, (int, long)),
-                                     nodenetwork_id_or_ip_list)
-            ips = filter(lambda ip: isinstance(ip, StringTypes),
-                               nodenetwork_id_or_ip_list)
-            sql += " WHERE (False"
-            if nodenetwork_ids:
-                sql += " OR nodenetwork_id IN (%s)" % ", ".join(map(str, nodenetwork_ids))
-            if ips:
-                sql += " OR ip IN (%s)" % ", ".join(api.db.quote(ips)).lower()
-            sql += ")"
+        if nodenetwork_filter is not None:
+            if isinstance(nodenetwork_filter, list):
+                nodenetwork_filter = Filter(NodeNetwork.fields, {'nodenetwork_id': nodenetwork_filter})
+            elif isinstance(nodenetwork_filter, dict):
+                nodenetwork_filter = Filter(NodeNetwork.fields, nodenetwork_filter)
+            sql += " AND (%s)" % nodenetwork_filter.sql(api)
 
-        rows = self.api.db.selectall(sql)
-
-        for row in rows:
-            self[row['nodenetwork_id']] = NodeNetwork(api, row)
+        self.selectall(sql)

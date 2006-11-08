@@ -4,12 +4,13 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.5 2006/10/20 17:53:54 mlhuang Exp $
+# $Id: Roles.py,v 1.6 2006/10/24 20:02:22 mlhuang Exp $
 #
 
 from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 class Role(Row):
@@ -51,24 +52,21 @@ class Roles(Table):
     Representation of the roles table in the database.
     """
 
-    def __init__(self, api, role_id_or_name_list = None):
-        sql = "SELECT %s FROM roles" % \
+    def __init__(self, api, role_filter = None):
+        Table.__init__(self, api, Role)
+
+        sql = "SELECT %s FROM roles WHERE True" % \
               ", ".join(Role.fields)
         
-        if role_id_or_name_list:
-            # Separate the list into integers and strings
-            role_ids = filter(lambda role_id: isinstance(role_id, (int, long)),
-                                   role_id_or_name_list)
-            names = filter(lambda name: isinstance(name, StringTypes),
-                           role_id_or_name_list)
-            sql += " WHERE (False"
-            if role_ids:
-                sql += " OR role_id IN (%s)" % ", ".join(map(str, role_ids))
-            if names:
-                sql += " OR name IN (%s)" % ", ".join(api.db.quote(names))
-            sql += ")"
+        if role_filter is not None:
+            if isinstance(role_filter, list):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), role_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), role_filter)
+                role_filter = Filter(Role.fields, {'role_id': ints, 'name': strs})
+                sql += " AND (%s)" % role_filter.sql(api, "OR")
+            elif isinstance(role_filter, dict):
+                role_filter = Filter(Role.fields, role_filter)
+                sql += " AND (%s)" % role_filter.sql(api, "AND")
 
-        rows = api.db.selectall(sql)
-
-        for row in rows:
-            self[row['role_id']] = Role(api, row)
+        self.selectall(sql)
