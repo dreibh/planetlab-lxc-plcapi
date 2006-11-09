@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.16 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: Persons.py,v 1.17 2006/11/08 22:45:20 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -297,7 +297,7 @@ class Persons(Table):
               ", ".join(Person.fields)
 
         if person_filter is not None:
-            if isinstance(person_filter, list):
+            if isinstance(person_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), person_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), person_filter)

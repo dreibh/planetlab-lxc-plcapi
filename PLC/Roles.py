@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.6 2006/10/24 20:02:22 mlhuang Exp $
+# $Id: Roles.py,v 1.7 2006/11/08 23:02:01 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -59,7 +59,7 @@ class Roles(Table):
               ", ".join(Role.fields)
         
         if role_filter is not None:
-            if isinstance(role_filter, list):
+            if isinstance(role_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), role_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), role_filter)

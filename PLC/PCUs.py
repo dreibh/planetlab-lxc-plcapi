@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.7 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: PCUs.py,v 1.8 2006/11/08 23:00:00 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -107,7 +107,7 @@ class PCUs(Table):
               ", ".join(PCU.fields)
 
         if pcu_filter is not None:
-            if isinstance(pcu_filter, list):
+            if isinstance(pcu_filter, (list, tuple, set)):
                 pcu_filter = Filter(PCU.fields, {'pcu_id': pcu_filter})
             elif isinstance(pcu_filter, dict):
                 pcu_filter = Filter(PCU.fields, pcu_filter)

@@ -53,7 +53,7 @@ class SliceAttributeTypes(Table):
               ", ".join(SliceAttributeType.fields)
 
         if attribute_type_filter is not None:
-            if isinstance(attribute_type_filter, list):
+            if isinstance(attribute_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), attribute_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), attribute_type_filter)

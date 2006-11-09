@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.4 2006/10/31 21:46:14 mlhuang Exp $
+# $Id: Events.py,v 1.5 2006/11/08 22:55:55 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -67,7 +67,7 @@ class Events(Table):
               ", ".join(Event.fields)
 
         if event_filter is not None:
-            if isinstance(event_filter, list):
+            if isinstance(event_filter, (list, tuple, set)):
                 event_filter = Filter(Event.fields, {'event_id': event_filter})
             elif isinstance(event_filter, dict):
                 event_filter = Filter(Event.fields, event_filter)

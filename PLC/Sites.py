@@ -239,7 +239,7 @@ class Sites(Table):
               ", ".join(Site.fields)
 
         if site_filter is not None:
-            if isinstance(site_filter, list):
+            if isinstance(site_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), site_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), site_filter)

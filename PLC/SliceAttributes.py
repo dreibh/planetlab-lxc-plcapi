@@ -37,7 +37,7 @@ class SliceAttributes(Table):
               ", ".join(SliceAttribute.fields)
 
         if slice_attribute_filter is not None:
-            if isinstance(slice_attribute_filter, list):
+            if isinstance(slice_attribute_filter, (list, tuple, set)):
                 slice_attribute_filter = Filter(SliceAttribute.fields, {'slice_attribute_id': slice_attribute_filter})
             elif isinstance(slice_attribute_filter, dict):
                 slice_attribute_filter = Filter(SliceAttribute.fields, slice_attribute_filter)

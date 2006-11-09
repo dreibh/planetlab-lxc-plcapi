@@ -50,7 +50,7 @@ class ForeignNodes (Table):
               ", ".join(ForeignNode.fields)
 
         if foreign_node_filter is not None:
-            if isinstance(foreign_node_filter, list):
+            if isinstance(foreign_node_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), foreign_node_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), foreign_node_filter)

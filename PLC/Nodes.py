@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.17 2006/11/08 17:34:07 thierry Exp $
+# $Id: Nodes.py,v 1.18 2006/11/08 23:13:11 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -107,7 +107,7 @@ class Nodes(Table):
               ", ".join(Node.fields)
 
         if node_filter is not None:
-            if isinstance(node_filter, list):
+            if isinstance(node_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), node_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), node_filter)

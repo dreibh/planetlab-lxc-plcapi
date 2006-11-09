@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.6 2006/10/25 14:29:13 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.7 2006/11/08 22:34:05 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -53,7 +53,7 @@ class AddressTypes(Table):
               ", ".join(AddressType.fields)
 
         if address_type_filter is not None:
-            if isinstance(address_type_filter, list):
+            if isinstance(address_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), address_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), address_type_filter)

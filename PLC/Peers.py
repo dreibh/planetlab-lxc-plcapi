@@ -58,7 +58,7 @@ class Peers (Table):
               ", ".join(Peer.fields)
 
         if peer_filter is not None:
-            if isinstance(peer_filter, list):
+            if isinstance(peer_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), peer_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), peer_filter)

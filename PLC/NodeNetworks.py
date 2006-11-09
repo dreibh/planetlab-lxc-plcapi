@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.12 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.13 2006/11/08 22:59:34 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -199,7 +199,7 @@ class NodeNetworks(Table):
               ", ".join(NodeNetwork.fields)
 
         if nodenetwork_filter is not None:
-            if isinstance(nodenetwork_filter, list):
+            if isinstance(nodenetwork_filter, (list, tuple, set)):
                 nodenetwork_filter = Filter(NodeNetwork.fields, {'nodenetwork_id': nodenetwork_filter})
             elif isinstance(nodenetwork_filter, dict):
                 nodenetwork_filter = Filter(NodeNetwork.fields, nodenetwork_filter)

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.7 2006/11/06 20:48:33 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.8 2006/11/08 22:55:29 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -146,7 +146,7 @@ class ConfFiles(Table):
               ", ".join(ConfFile.fields)
 
         if conf_file_filter is not None:
-            if isinstance(conf_file_filter, list):
+            if isinstance(conf_file_filter, (list, tuple, set)):
                 conf_file_filter = Filter(ConfFile.fields, {'conf_file_id': conf_file_filter})
             elif isinstance(conf_file_filter, dict):
                 conf_file_filter = Filter(ConfFile.fields, conf_file_filter)

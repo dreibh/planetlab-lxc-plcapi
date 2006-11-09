@@ -229,7 +229,7 @@ class Slices(Table):
                 sql += " AND expires < %(expires)d"
 
         if slice_filter is not None:
-            if isinstance(slice_filter, list):
+            if isinstance(slice_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), slice_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), slice_filter)
