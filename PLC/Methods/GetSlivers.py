@@ -31,7 +31,8 @@ class GetSlivers(Method):
 
     accepts = [
         Auth(),
-        [Node.fields['hostname']]
+        [Mixed(Node.fields['node_id'],
+               Node.fields['hostname'])]
         ]
 
     returns = [{
@@ -58,13 +59,13 @@ class GetSlivers(Method):
         }]
     }]
 
-    def call(self, auth, node_hostnames = None):
+    def call(self, auth, node_id_or_hostname_list = None):
         timestamp = int(time.time())
 
-        if node_hostnames is None and isinstance(self.caller, Node):
+        if node_id_or_hostname_list is None and isinstance(self.caller, Node):
             all_nodes = {self.caller['node_id']: self.caller}
         else:
-            all_nodes = Nodes(self.api, node_hostnames)
+            all_nodes = Nodes(self.api, node_id_or_hostname_list)
             # XXX Add foreign nodes
 
         nodenetwork_ids = set()
