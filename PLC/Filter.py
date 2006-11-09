@@ -36,7 +36,8 @@ class Filter(Parameter, dict):
             # Accept either a value or a list of values of the specified type
             self.fields[field] = Mixed(expected, [expected])
 
-        Parameter.__init__(self, self.fields, doc = doc)
+        # Null filter means no filter
+        Parameter.__init__(self, self.fields, doc = doc, nullok = True)
 
     def sql(self, api, join_with = "AND"):
         """
