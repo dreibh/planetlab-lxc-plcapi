@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.8 2006/10/30 16:37:49 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.9 2006/11/08 22:43:02 mlhuang Exp $
 #
 
 import psycopg2
@@ -178,7 +178,7 @@ class PostgreSQL:
         self.execute(query, params)
         rows = self.cursor.fetchall()
 
-        if hashref:
+        if hashref or key_field is not None:
             # Return each row as a dictionary keyed on field name
             # (like DBI selectrow_hashref()).
             labels = [column[0] for column in self.description]
