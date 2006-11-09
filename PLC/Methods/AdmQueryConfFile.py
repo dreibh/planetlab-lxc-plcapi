@@ -23,7 +23,7 @@ class AdmQueryConfFile(Method):
 
     def call(self, auth, search_vals):
         if 'node_id' in search_vals:
-            conf_files = ConfFiles(self.api).values()
+            conf_files = ConfFiles(self.api)
 
             conf_files = filter(lambda conf_file: \
                                 search_vals['node_id'] in conf_file['node_ids'],

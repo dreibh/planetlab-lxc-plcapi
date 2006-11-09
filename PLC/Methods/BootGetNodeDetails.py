@@ -39,7 +39,7 @@ class BootGetNodeDetails(Method):
         details['session'] = session['session_id']
 
         if self.caller['nodenetwork_ids']:
-            details['networks'] = NodeNetworks(self.api, self.caller['nodenetwork_ids']).values()
+            details['networks'] = NodeNetworks(self.api, self.caller['nodenetwork_ids'])
             # XXX Boot Manager cannot unmarshal None
             for network in details['networks']:
                 for field in network:

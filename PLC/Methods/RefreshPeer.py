@@ -68,7 +68,7 @@ class RefreshPeer(Method):
 	foreign_nodes = ForeignNodes (self.api)
 	
 	### mark entries for this peer outofdate
-	for foreign_node in foreign_nodes.values():
+	for foreign_node in foreign_nodes:
 	    if foreign_node['peer_id'] == peer_id:
 		foreign_node.uptodate=False
 
@@ -99,5 +99,5 @@ class RefreshPeer(Method):
 	    foreign_nodes[hostname].sync()
 
 	### delete entries that are not uptodate
-	[ x.delete() for x in foreign_nodes.values() if not x.uptodate ]
+	[ x.delete() for x in foreign_nodes if not x.uptodate ]
 	

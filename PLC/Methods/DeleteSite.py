@@ -33,7 +33,7 @@ class DeleteSite(Method):
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
-        site = sites.values()[0]
+        site = sites[0]
         site.delete()
 
         return 1

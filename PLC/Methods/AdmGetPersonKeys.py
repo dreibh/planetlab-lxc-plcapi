@@ -31,7 +31,7 @@ class AdmGetPersonKeys(GetKeys):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] != person['person_id']:

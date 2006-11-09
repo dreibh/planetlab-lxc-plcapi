@@ -53,14 +53,14 @@ class Slice(Row):
             raise PLCInvalidArgument, "Invalid slice name"
 
         conflicts = Slices(self.api, [name])
-        for slice_id, slice in conflicts.iteritems():
-            if 'slice_id' not in self or self['slice_id'] != slice_id:
+        for slice in conflicts:
+            if 'slice_id' not in self or self['slice_id'] != slice['slice_id']:
                 raise PLCInvalidArgument, "Slice name already in use"
 
         return name
 
     def validate_instantiation(self, instantiation):
-        instantiations = SliceInstantiations(self.api)
+        instantiations = [row['instantiation'] for row in SliceInstantiations(self.api)]
         if instantiation not in instantiations:
             raise PLCInvalidArgument, "No such instantiation state"
 
@@ -186,7 +186,7 @@ class Slice(Row):
 
         # Before a new slice is added, delete expired slices
         if 'slice_id' not in self:
-            expired = Slices(self.api, expires = -int(time.time())).values()
+            expired = Slices(self.api, expires = -int(time.time()))
             for slice in expired:
                 slice.delete(commit)
 
@@ -215,11 +215,11 @@ class Slices(Table):
     database.
     """
 
-    def __init__(self, api, slice_filter = None, expires = int(time.time())):
-        Table.__init__(self, api, Slice)
+    def __init__(self, api, slice_filter = None, columns = None, expires = int(time.time())):
+        Table.__init__(self, api, Slice, columns)
 
         sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
-              ", ".join(Slice.fields)
+              ", ".join(self.columns)
 
         if expires is not None:
             if expires >= 0:

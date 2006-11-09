@@ -45,7 +45,7 @@ class UpdateNode(Method):
         if not nodes:
             raise PLCInvalidArgument, "No such node"
 
-        node = nodes.values()[0]
+        node = nodes[0]
 
         # Authenticated function
         assert self.caller is not None

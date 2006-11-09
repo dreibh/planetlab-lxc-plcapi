@@ -41,7 +41,7 @@ class UpdateSite(Method):
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
-        site = sites.values()[0]
+        site = sites[0]
 
         # Authenticated function
         assert self.caller is not None

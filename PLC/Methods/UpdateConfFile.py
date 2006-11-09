@@ -30,7 +30,7 @@ class UpdateConfFile(Method):
     def call(self, auth, conf_file_id, conf_file_fields):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
 
-        conf_files = ConfFiles(self.api, [conf_file_id]).values()
+        conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
             raise PLCInvalidArgument, "No such configuration file"
 

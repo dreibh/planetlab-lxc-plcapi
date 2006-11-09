@@ -47,7 +47,7 @@ class AddNodeNetwork(Method):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
         # Check if node exists
-        nodes = Nodes(self.api, [node_id_or_hostname]).values()
+        nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
 	node = nodes[0]

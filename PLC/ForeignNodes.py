@@ -42,12 +42,11 @@ class ForeignNode (Row) :
         
 
 class ForeignNodes (Table):
-
-    def __init__ (self, api, foreign_node_filter = None):
-        Table.__init__(self, api, ForeignNode)
+    def __init__ (self, api, foreign_node_filter = None, columns = None):
+        Table.__init__(self, api, ForeignNode, columns)
 
 	sql = "SELECT %s FROM view_foreign_nodes WHERE deleted IS False" % \
-              ", ".join(ForeignNode.fields)
+              ", ".join(self.columns)
 
         if foreign_node_filter is not None:
             if isinstance(foreign_node_filter, (list, tuple, set)):

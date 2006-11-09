@@ -40,7 +40,7 @@ class UpdateNodeNetwork(Method):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
 	# Get node network information
-	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip]).values()
+	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip])
 	if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 
@@ -52,7 +52,7 @@ class UpdateNodeNetwork(Method):
 	# If we are not an admin, make sure that the caller is a
         # member of the site where the node exists.
         if 'admin' not in self.caller['roles']:
-            nodes = Nodes(self.api, [nodenetwork['node_id']]).values()
+            nodes = Nodes(self.api, [nodenetwork['node_id']])
             if not nodes:
                 raise PLCPermissionDenied, "Node network is not associated with a node"
             node = nodes[0]

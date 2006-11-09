@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: ConfFiles.py,v 1.8 2006/11/08 22:55:29 mlhuang Exp $
+# $Id: ConfFiles.py,v 1.9 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -139,11 +139,11 @@ class ConfFiles(Table):
     Representation of the conf_files table in the database.
     """
 
-    def __init__(self, api, conf_file_filter = None):
-	Table.__init__(self, api, ConfFile)
+    def __init__(self, api, conf_file_filter = None, columns = None):
+	Table.__init__(self, api, ConfFile, columns)
 
         sql = "SELECT %s FROM view_conf_files WHERE True" % \
-              ", ".join(ConfFile.fields)
+              ", ".join(self.columns)
 
         if conf_file_filter is not None:
             if isinstance(conf_file_filter, (list, tuple, set)):

@@ -42,7 +42,7 @@ class UpdateSlice(Method):
     def call(self, auth, slice_id_or_name, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 
-        slices = Slices(self.api, [slice_id_or_name]).values()
+        slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
@@ -57,7 +57,7 @@ class UpdateSlice(Method):
 
         # Renewing
         if 'expires' in slice_fields and slice_fields['expires'] > slice['expires']:
-            sites = Sites(self.api, [slice['site_id']]).values()
+            sites = Sites(self.api, [slice['site_id']])
             assert sites
             site = sites[0]
 

@@ -58,8 +58,8 @@ class Site(Row):
             raise PLCInvalidArgument, "Login base must consist only of lowercase ASCII letters"
 
         conflicts = Sites(self.api, [login_base])
-        for site_id, site in conflicts.iteritems():
-            if 'site_id' not in self or self['site_id'] != site_id:
+        for site in conflicts:
+            if 'site_id' not in self or self['site_id'] != site['site_id']:
                 raise PLCInvalidArgument, "login_base already in use"
 
         return login_base
@@ -184,12 +184,12 @@ class Site(Row):
         # Delete accounts of all people at the site who are not
         # members of at least one other non-deleted site.
         persons = PLC.Persons.Persons(self.api, self['person_ids'])
-        for person_id, person in persons.iteritems():
+        for person in persons:
             delete = True
 
             person_sites = Sites(self.api, person['site_ids'])
-            for person_site_id, person_site in person_sites.iteritems():
-                if person_site_id != self['site_id']:
+            for person_site in person_sites:
+                if person_site['site_id'] != self['site_id']:
                     delete = False
                     break
 
@@ -198,22 +198,22 @@ class Site(Row):
 
         # Delete all site addresses
         addresses = Addresses(self.api, self['address_ids'])
-        for address in addresses.values():
-           address.delete(commit = False)
+        for address in addresses:
+            address.delete(commit = False)
 
         # Delete all site slices
         slices = Slices(self.api, self['slice_ids'])
-        for slice in slices.values():
-           slice.delete(commit = False)
+        for slice in slices:
+            slice.delete(commit = False)
 
         # Delete all site PCUs
         pcus = PCUs(self.api, self['pcu_ids'])
-        for pcu in pcus.values():
-           pcu.delete(commit = False)
+        for pcu in pcus:
+            pcu.delete(commit = False)
 
         # Delete all site nodes
         nodes = Nodes(self.api, self['node_ids'])
-        for node in nodes.values():
+        for node in nodes:
             node.delete(commit = False)
 
         # Clean up miscellaneous join tables
@@ -232,11 +232,11 @@ class Sites(Table):
     database.
     """
 
-    def __init__(self, api, site_filter = None):
-        Table.__init__(self, api, Site)
+    def __init__(self, api, site_filter = None, columns = None):
+        Table.__init__(self, api, Site, columns)
 
         sql = "SELECT %s FROM view_sites WHERE deleted IS False" % \
-              ", ".join(Site.fields)
+              ", ".join(self.columns)
 
         if site_filter is not None:
             if isinstance(site_filter, (list, tuple, set)):

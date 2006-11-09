@@ -24,11 +24,11 @@ class AdmDisassociatePowerControlUnitPort(DeleteNodeFromPCU):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, pcu_id, port):
-        pcus = PCUs(self.api, [pcu_id]).values()
+        pcus = PCUs(self.api, [pcu_id])
         if not pcus:
             raise PLCInvalidArgument, "No such PCU"
 
-        pcu = pcus.values()[0]
+        pcu = pcus[0]
 
         ports = dict(zip(pcu['ports'], pcu['node_ids']))
         if port not in ports:

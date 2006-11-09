@@ -16,7 +16,8 @@ class GetForeignNodes(Method):
     nodes. If foreign_node_filter is specified and is an array of
     foreign node identifiers or hostnames, or a struct of foreign node
     attributes, only foreign nodes matching the filter will be
-    returned.
+    returned. If return_fields is specified, only the specified
+    details will be returned.
     """
 
     roles = ['admin']
@@ -25,10 +26,11 @@ class GetForeignNodes(Method):
         Auth(),
         Mixed([Mixed(ForeignNode.fields['node_id'],
                      ForeignNode.fields['hostname'])],
-              Filter(ForeignNode.fields))
+              Filter(ForeignNode.fields)),
+        Parameter([str], "List of fields to return", nullok = True)
         ]
     
     returns = [ForeignNode.fields]
 
-    def call(self, auth, foreign_node_filter = None):
-	return ForeignNodes(self.api, foreign_node_filter).values()
+    def call(self, auth, foreign_node_filter = None, return_fields = None):
+	return ForeignNodes(self.api, foreign_node_filter, return_fields)

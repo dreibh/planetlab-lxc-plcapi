@@ -21,7 +21,7 @@ class DeleteConfFile(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, conf_file_id):
-        conf_files = ConfFiles(self.api, [conf_file_id]).values()
+        conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
             raise PLCInvalidArgument, "No such configuration file"
 

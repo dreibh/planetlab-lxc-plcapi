@@ -31,7 +31,7 @@ class UpdateMessage(Method):
         message_fields = dict(filter(can_update, message_fields.items()))
 
         # Get message information
-        messages = Messages(self.api, [message_id]).values()
+        messages = Messages(self.api, [message_id])
         if not messages:
             raise PLCInvalidArgument, "No such message"
         message = messages[0]

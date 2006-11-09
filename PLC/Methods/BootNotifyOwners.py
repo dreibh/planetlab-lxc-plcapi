@@ -27,7 +27,7 @@ class BootNotifyOwners(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, message_id, include_pis, include_techs, include_support):
-        messages = Messages(self.api, [message_id], enabled = True).values()
+        messages = Messages(self.api, [message_id], enabled = True)
         if not messages:
             raise PLCInvalidArgument, "No such message template"
 
@@ -43,12 +43,12 @@ class BootNotifyOwners(Method):
             recipients[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = self.api.config.PLC_NAME + " Support"
 
         if include_pis or include_techs:
-            sites = Sites(self.api, [self.caller['site_id']]).values()
+            sites = Sites(self.api, [self.caller['site_id']])
             if not sites:
                 raise PLCAPIError, "No site associated with node"
             site = sites[0]
 
-            persons = Persons(self.api, site['person_ids']).values()
+            persons = Persons(self.api, site['person_ids'])
             for person in persons:
                 if include_pis and 'pi' in person['roles'] or \
                    include_techs and 'tech' in person['roles']:

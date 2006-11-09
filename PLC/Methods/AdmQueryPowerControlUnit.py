@@ -31,7 +31,7 @@ class AdmQueryPowerControlUnit(Method):
     def call(self, auth, search_vals):
         # Get all PCUs. This is a stupid function. The API should not
         # be used for DB mining.
-        pcus = PCUs(self.api).values()
+        pcus = PCUs(self.api)
 
         if 'pcu_hostname' in search_vals:
             pcus = filter(lambda pcu: \
@@ -53,7 +53,7 @@ class AdmQueryPowerControlUnit(Method):
         if 'node_hostname' in search_vals:
             pcus = filter(lambda pcu: \
                           search_vals['node_hostname'] in \
-                          [node['hostname'] for node in Nodes(self.api, pcu['node_ids']).values()],
+                          [node['hostname'] for node in Nodes(self.api, pcu['node_ids'])],
                           pcus)
 
         return [pcu['pcu_id'] for pcu in pcus]

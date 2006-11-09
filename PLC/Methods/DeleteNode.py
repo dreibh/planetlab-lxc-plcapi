@@ -30,7 +30,7 @@ class DeleteNode(Method):
         if not nodes:
             raise PLCInvalidArgument, "No such node"
 
-        node = nodes.values()[0]
+        node = nodes[0]
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.

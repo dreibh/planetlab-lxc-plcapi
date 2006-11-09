@@ -36,9 +36,9 @@ class AdmIsPersonInRole(Method):
 
         # Only allow PI roles to be checked
         roles = {}
-        for role_id, role in Roles(self.api).iteritems():
-            roles[role_id] = role['name']
-            roles[role['name']] = role_id
+        for role in Roles(self.api):
+            roles[role['role_id']] = role['name']
+            roles[role['name']] = role['role_id']
 
         if role_id_or_name not in roles:
             raise PLCInvalidArgument, "Invalid role identifier or name"
@@ -59,7 +59,7 @@ class AdmIsPersonInRole(Method):
         if not persons:
             return 0
 
-        person = persons.values()[0]
+        person = persons[0]
 
         if role_id in person['role_ids']:
             return 1

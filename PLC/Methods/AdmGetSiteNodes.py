@@ -32,7 +32,7 @@ class AdmGetSiteNodes(Method):
 
     def call(self, auth, site_id_or_name_list = None):
         # Get site information
-	sites = Sites(self.api, site_id_or_name_list).values()	
+	sites = Sites(self.api, site_id_or_name_list)	
 	if not sites:
             raise PLCInvalidArgument, "No such site"
         

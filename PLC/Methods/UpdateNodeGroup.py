@@ -34,7 +34,7 @@ class UpdateNodeGroup(Method):
 	nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
 	if not nodegroups:
             raise PLCInvalidArgument, "No such nodegroup"
-	nodegroup = nodegroups.values()[0]
+	nodegroup = nodegroups[0]
 	
 	nodegroup.update(nodegroup_fields)
         nodegroup.sync()

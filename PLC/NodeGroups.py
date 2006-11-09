@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.17 2006/11/08 22:59:15 mlhuang Exp $
+# $Id: NodeGroups.py,v 1.18 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -104,11 +104,11 @@ class NodeGroups(Table):
     database.
     """
 
-    def __init__(self, api, nodegroup_filter = None):
-        Table.__init__(self, api, NodeGroup)
+    def __init__(self, api, nodegroup_filter = None, columns = None):
+        Table.__init__(self, api, NodeGroup, columns)
 
         sql = "SELECT %s FROM view_nodegroups WHERE True" % \
-              ", ".join(NodeGroup.fields)
+              ", ".join(self.columns)
 
         if nodegroup_filter is not None:
             if isinstance(nodegroup_filter, (list, tuple, set)):

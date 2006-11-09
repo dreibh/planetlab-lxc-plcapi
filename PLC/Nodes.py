@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.18 2006/11/08 23:13:11 mlhuang Exp $
+# $Id: Nodes.py,v 1.19 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -66,14 +66,15 @@ class Node(Row):
             raise PLCInvalidArgument, "Invalid hostname"
 
         conflicts = Nodes(self.api, [hostname])
-        for node_id, node in conflicts.iteritems():
-            if 'node_id' not in self or self['node_id'] != node_id:
+        for node in conflicts:
+            if 'node_id' not in self or self['node_id'] != node['node_id']:
                 raise PLCInvalidArgument, "Hostname already in use"
 
         return hostname
 
     def validate_boot_state(self, boot_state):
-        if boot_state not in BootStates(self.api):
+        boot_states = [row['boot_state'] for row in BootStates(self.api)]
+        if boot_state not in boot_states:
             raise PLCInvalidArgument, "Invalid boot state"
 
         return boot_state
@@ -100,11 +101,11 @@ class Nodes(Table):
     database.
     """
 
-    def __init__(self, api, node_filter = None):
-        Table.__init__(self, api, Node)
+    def __init__(self, api, node_filter = None, columns = None):
+        Table.__init__(self, api, Node, columns)
 
         sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
-              ", ".join(Node.fields)
+              ", ".join(self.columns)
 
         if node_filter is not None:
             if isinstance(node_filter, (list, tuple, set)):

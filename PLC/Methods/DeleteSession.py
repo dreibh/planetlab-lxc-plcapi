@@ -19,7 +19,7 @@ class DeleteSession(Method):
     def call(self, auth):
         assert auth.has_key('session')
 
-        sessions = Sessions(self.api, [auth['session']]).values()
+        sessions = Sessions(self.api, [auth['session']])
         if not sessions:
             raise PLCAPIError, "No such session"
         session = sessions[0]

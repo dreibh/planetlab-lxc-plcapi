@@ -28,12 +28,12 @@ class UpdateSliceAttribute(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, slice_attribute_id, value):
-        slice_attributes = SliceAttributes(self.api, [slice_attribute_id]).values()
+        slice_attributes = SliceAttributes(self.api, [slice_attribute_id])
         if not slice_attributes:
             raise PLCInvalidArgument, "No such slice attribute"
         slice_attribute = slice_attributes[0]
 
-        slices = Slices(self.api, [slice_attribute['slice_id']]).values()
+        slices = Slices(self.api, [slice_attribute['slice_id']])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]

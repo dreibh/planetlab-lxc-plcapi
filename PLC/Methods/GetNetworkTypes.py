@@ -18,4 +18,4 @@ class GetNetworkTypes(Method):
     returns = [NetworkType.fields['type']]
 
     def call(self, auth):
-        return [network_type['type'] for network_type in NetworkTypes(self.api).values()]
+        return [network_type['type'] for network_type in NetworkTypes(self.api)]

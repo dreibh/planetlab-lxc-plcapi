@@ -11,7 +11,8 @@ class GetConfFiles(Method):
     files. If conf_file_filter is specified and is an array of
     configuration file identifiers, or a struct of configuration file
     attributes, only configuration files matching the filter will be
-    returned.
+    returned. If return_fields is specified, only the specified
+    details will be returned.
     """
 
     roles = ['admin']
@@ -19,10 +20,11 @@ class GetConfFiles(Method):
     accepts = [
         Auth(),
         Mixed([ConfFile.fields['conf_file_id']],
-              Filter(ConfFile.fields))
+              Filter(ConfFile.fields)),
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [ConfFile.fields]
 
-    def call(self, auth, conf_file_filter = None):
-        return ConfFiles(self.api, conf_file_filter).values()
+    def call(self, auth, conf_file_filter = None, return_fields = None):
+        return ConfFiles(self.api, conf_file_filter, return_fields)

@@ -26,12 +26,12 @@ class DeleteAddressTypeFromAddress(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, address_type_id_or_name, address_id):
-        address_types = AddressTypes(self.api, [address_type_id_or_name]).values()
+        address_types = AddressTypes(self.api, [address_type_id_or_name])
         if not address_types:
             raise PLCInvalidArgument, "No such address type"
         address_type = address_types[0]
 
-        addresses = Addresses(self.api, [address_id]).values()
+        addresses = Addresses(self.api, [address_id])
         if not addresses:
             raise PLCInvalidArgument, "No such address"
         address = addresses[0]

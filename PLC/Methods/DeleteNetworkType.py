@@ -27,7 +27,7 @@ class DeleteNetworkType(Method):
         network_types = NetworkTypes(self.api, [name])
         if not network_types:
             raise PLCInvalidArgument, "No such network type"
-        network_type = network_types.values()[0]
+        network_type = network_types[0]
 
         network_type.delete()
 

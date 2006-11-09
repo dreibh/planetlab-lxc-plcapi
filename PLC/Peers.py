@@ -51,11 +51,11 @@ class Peers (Table):
     Maps to the peers table in the database
     """
     
-    def __init__ (self, api, peer_filter = None):
-        Table.__init__(self, api, Peer)
+    def __init__ (self, api, peer_filter = None, columns = None):
+        Table.__init__(self, api, Peer, columns)
 
 	sql = "SELECT %s FROM view_peers WHERE deleted IS False" % \
-              ", ".join(Peer.fields)
+              ", ".join(self.columns)
 
         if peer_filter is not None:
             if isinstance(peer_filter, (list, tuple, set)):

@@ -31,13 +31,13 @@ class AdmGetSiteTechContacts(Method):
         assert self.caller is not None
 
         # Get site information
-	sites = Sites(self.api, [site_id_or_login_base]).values()
+	sites = Sites(self.api, [site_id_or_login_base])
 	if not sites:
             raise PLCInvalidArgument, "No such site"
 
 	site = sites[0]
 
-        persons = Persons(self.api, site['person_ids']).values()
+        persons = Persons(self.api, site['person_ids'])
 
         has_tech_role = lambda person: 'tech' in person['roles']
         techs = filter(has_tech_role, persons)

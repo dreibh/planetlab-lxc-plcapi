@@ -31,7 +31,7 @@ class DeletePerson(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         # Authenticated function
         assert self.caller is not None

@@ -42,12 +42,12 @@ class AddSliceAttribute(Method):
     object_ids = []
 
     def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None):
-        slices = Slices(self.api, [slice_id_or_name]).values()
+        slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
 
-        attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name]).values()
+        attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name])
         if not attribute_types:
             raise PLCInvalidArgument, "No such slice attribute type"
         attribute_type = attribute_types[0]
@@ -71,7 +71,7 @@ class AddSliceAttribute(Method):
 
         # Sliver attribute if node is specified
         if node_id_or_hostname is not None:
-            nodes = Nodes(self.api, [node_id_or_hostname]).values()
+            nodes = Nodes(self.api, [node_id_or_hostname])
             if not nodes:
                 raise PLCInvalidArgument, "No such node"
             node = nodes[0]

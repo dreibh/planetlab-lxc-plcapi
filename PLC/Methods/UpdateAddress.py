@@ -34,7 +34,7 @@ class UpdateAddress(Method):
         address_fields = dict(filter(can_update, address_fields.items()))
 
         # Get associated address details
-        addresses = Addresses(self.api, [address_id]).values()
+        addresses = Addresses(self.api, [address_id])
         if not addresses:
             raise PLCInvalidArgument, "No such address"
         address = addresses[0]

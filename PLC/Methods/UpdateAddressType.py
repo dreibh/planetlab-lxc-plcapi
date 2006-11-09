@@ -30,7 +30,7 @@ class UpdateAddressType(Method):
     def call(self, auth, address_type_id_or_name, address_type_fields):
         address_type_fields = dict(filter(can_update, address_type_fields.items()))
 
-        address_types = AddressTypes(self.api, [address_type_id_or_name]).values()
+        address_types = AddressTypes(self.api, [address_type_id_or_name])
         if not address_types:
             raise PLCInvalidArgument, "No such address type"
         address_type = address_types[0]

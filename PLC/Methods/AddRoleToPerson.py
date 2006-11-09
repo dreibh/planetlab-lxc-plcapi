@@ -34,9 +34,9 @@ class AddRoleToPerson(Method):
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get all roles
         roles = {}
-        for role_id, role in Roles(self.api).iteritems():
-            roles[role_id] = role['name']
-            roles[role['name']] = role_id
+        for role in Roles(self.api):
+            roles[role['role_id']] = role['name']
+            roles[role['name']] = role['role_id']
 
         if role_id_or_name not in roles:
             raise PLCInvalidArgument, "Invalid role identifier or name"
@@ -51,7 +51,7 @@ class AddRoleToPerson(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         # Authenticated function
         assert self.caller is not None

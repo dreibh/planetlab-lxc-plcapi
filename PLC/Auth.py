@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.6 2006/10/31 23:07:43 mlhuang Exp $
+# $Id: Auth.py,v 1.7 2006/11/08 22:53:30 mlhuang Exp $
 #
 
 import crypt
@@ -49,14 +49,14 @@ class SessionAuth(Auth):
         assert auth.has_key('session')
 
         # Get session record
-        sessions = Sessions(method.api, [auth['session']], expires = None).values()
+        sessions = Sessions(method.api, [auth['session']], expires = None)
         if not sessions:
             raise PLCAuthenticationFailure, "No such session"
         session = sessions[0]
 
         try:
             if session['node_id'] is not None:
-                nodes = Nodes(method.api, [session['node_id']]).values()
+                nodes = Nodes(method.api, [session['node_id']])
                 if not nodes:
                     raise PLCAuthenticationFailure, "No such node"
                 node = nodes[0]
@@ -67,7 +67,7 @@ class SessionAuth(Auth):
                 method.caller = node
 
             elif session['person_id'] is not None and session['expires'] > time.time():
-                persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True}).values()
+                persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True})
                 if not persons:
                     raise PLCAuthenticationFailure, "No such account"
                 person = persons[0]
@@ -129,7 +129,7 @@ class BootAuth(Auth):
         assert auth.has_key('node_id')
 
         try:
-            nodes = Nodes(method.api, [auth['node_id']]).values()
+            nodes = Nodes(method.api, [auth['node_id']])
             if not nodes:
                 raise PLCAuthenticationFailure, "No such node"
             node = nodes[0]
@@ -149,7 +149,7 @@ class BootAuth(Auth):
 
                 nodenetwork = None
                 if node['nodenetwork_ids']:
-                    nodenetworks = NodeNetworks(method.api, node['nodenetwork_ids']).values()
+                    nodenetworks = NodeNetworks(method.api, node['nodenetwork_ids'])
                     for nodenetwork in nodenetworks:
                         if nodenetwork['is_primary']:
                             break
@@ -220,7 +220,7 @@ class PasswordAuth(Auth):
         if len(persons) != 1:
             raise PLCAuthenticationFailure, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         if auth['Username'] == method.api.config.PLC_API_MAINTENANCE_USER:
             # "Capability" authentication, whatever the hell that was

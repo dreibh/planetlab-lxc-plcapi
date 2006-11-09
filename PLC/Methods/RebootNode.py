@@ -32,7 +32,7 @@ class RebootNode(Method):
 
     def call(self, auth, node_id_or_hostname):
         # Get account information
-        nodes = Nodes(self.api, [node_id_or_hostname]).values()
+        nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
 
@@ -55,7 +55,7 @@ class RebootNode(Method):
         # Only use the hostname as a backup, try to use the primary ID
         # address instead.
         host = node['hostname']
-        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
         for nodenetwork in nodenetworks:
             if nodenetwork['is_primary'] == 1:
                 host = nodenetwork['ip']

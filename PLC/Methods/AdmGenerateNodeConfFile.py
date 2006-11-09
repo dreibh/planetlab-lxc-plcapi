@@ -37,7 +37,7 @@ class AdmGenerateNodeConfFile(Method):
 
     def call(self, auth, node_id_or_hostname):
         # Get node information
-        nodes = Nodes(self.api, [node_id_or_hostname]).values()
+        nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
         node = nodes[0]
@@ -50,7 +50,7 @@ class AdmGenerateNodeConfFile(Method):
 
 	# Get node networks for this node
         primary = None
-        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
         for nodenetwork in nodenetworks:
             if nodenetwork['is_primary']:
                 primary = nodenetwork

@@ -46,7 +46,7 @@ class BootUpdateNode(Method):
             if primary_network['nodenetwork_id'] not in self.caller['nodenetwork_ids']:
                 raise PLCInvalidArgument, "Node network not associated with calling node"
 
-            nodenetworks = NodeNetworks(self.api, [primary_network['nodenetwork_id']]).values()
+            nodenetworks = NodeNetworks(self.api, [primary_network['nodenetwork_id']])
             if not nodenetworks:
                 raise PLCInvalidArgument, "No such node network"
             nodenetwork = nodenetworks[0]

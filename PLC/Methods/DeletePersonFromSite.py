@@ -32,14 +32,14 @@ class DeletePersonFromSite(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
 
-        site = sites.values()[0]
+        site = sites[0]
 
         if site['site_id'] in person['site_ids']:
             site.remove_person(person)

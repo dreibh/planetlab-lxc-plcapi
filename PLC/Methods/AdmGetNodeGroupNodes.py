@@ -30,7 +30,7 @@ class AdmGetNodeGroupNodes(Method):
             raise PLCInvalidArgument, "No such node group"
 
 	# Get the info for the node group specified
-	nodegroup = nodegroups.values()[0]
+	nodegroup = nodegroups[0]
 
 	# Return the list of node_ids
         return nodegroup['node_ids']

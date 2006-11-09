@@ -30,14 +30,14 @@ class DeleteNodeFromNodeGroup(Method):
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
 
-	node = nodes.values()[0]
+	node = nodes[0]
 
 	# Get nodegroup info
         nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
         if not nodegroups:
             raise PLCInvalidArgument, "No such nodegroup"
 
-        nodegroup = nodegroups.values()[0]
+        nodegroup = nodegroups[0]
 
 	# Remove node from nodegroup
         if node['node_id'] in nodegroup['node_ids']:

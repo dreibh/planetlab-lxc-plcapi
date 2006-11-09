@@ -33,13 +33,13 @@ class AddConfFileToNode(Method):
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
             raise PLCInvalidArgument, "No such configuration file"
-        conf_file = conf_files.values()[0]
+        conf_file = conf_files[0]
 
         # Get node
 	nodes = Nodes(self.api, [node_id_or_hostname])
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
-	node = nodes.values()[0]
+	node = nodes[0]
 	
 	# Link configuration file to node
         if node['node_id'] not in conf_file['node_ids']:

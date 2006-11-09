@@ -11,7 +11,8 @@ class GetNodeNetworks(Method):
     interfacess. If nodenetworks_filter is specified and is an array
     of node network identifiers, or a struct of node network
     attributes, only node network interfaces matching the filter will
-    be returned.
+    be returned. If return_fields is specified, only the
+    specified details will be returned.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
@@ -19,10 +20,11 @@ class GetNodeNetworks(Method):
     accepts = [
         Auth(),
         Mixed([NodeNetwork.fields['nodenetwork_id']],
-              Filter(NodeNetwork.fields))
+              Filter(NodeNetwork.fields)),
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [NodeNetwork.fields]
 
-    def call(self, auth, nodenetwork_filter = None):
-        return NodeNetworks(self.api, nodenetwork_filter).values()
+    def call(self, auth, nodenetwork_filter = None, return_fields = None):
+        return NodeNetworks(self.api, nodenetwork_filter, return_fields)

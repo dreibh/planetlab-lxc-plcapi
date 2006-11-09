@@ -79,7 +79,7 @@ class Session(Row):
     def sync(self, commit = True, insert = None):
         if not self.has_key('session_id'):
             # Before a new session is added, delete expired sessions
-            expired = Sessions(self.api, expires = -int(time.time())).values()
+            expired = Sessions(self.api, expires = -int(time.time()))
             for session in expired:
                 session.delete(commit)
 

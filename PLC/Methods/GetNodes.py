@@ -10,7 +10,8 @@ class GetNodes(Method):
     Returns an array of structs containing details about nodes. If
     node_filter is specified and is an array of node identifiers or
     hostnames, or a struct of node attributes, only nodes matching the
-    filter will be returned.
+    filter will be returned. If return_fields is specified, only the
+    specified details will be returned.
 
     Some fields may only be viewed by admins.
     """
@@ -21,14 +22,15 @@ class GetNodes(Method):
         Auth(),
         Mixed([Mixed(Node.fields['node_id'],
                      Node.fields['hostname'])],
-              Filter(Node.fields))
+              Filter(Node.fields)),
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [Node.fields]
 
-    def call(self, auth, node_filter = None):
+    def call(self, auth, node_filter = None, return_fields = None):
         # Get node information
-        nodes = Nodes(self.api, node_filter).values()
+        nodes = Nodes(self.api, node_filter, return_fields)
 
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:

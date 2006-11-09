@@ -26,7 +26,7 @@ class DeleteSlice(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, slice_id_or_name):
-        slices = Slices(self.api, [slice_id_or_name]).values()
+        slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]

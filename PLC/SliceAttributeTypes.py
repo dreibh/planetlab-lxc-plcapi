@@ -27,14 +27,15 @@ class SliceAttributeType(Row):
             raise PLCInvalidArgument, "Slice attribute type name must be set"
 
         conflicts = SliceAttributeTypes(self.api, [name])
-        for attribute_type_id, attribute in conflicts.iteritems():
-            if 'attribute_type_id' not in self or self['attribute_type_id'] != attribute_type_id:
+        for attribute in conflicts:
+            if 'attribute_type_id' not in self or \
+               self['attribute_type_id'] != attribute['attribute_type_id']:
                 raise PLCInvalidArgument, "Slice attribute type name already in use"
 
         return name
 
     def validate_min_role_id(self, role_id):
-        roles = Roles(self.api)
+        roles = [row['role_id'] for row in Roles(self.api)]
         if role_id not in roles:
             raise PLCInvalidArgument, "Invalid role"
 
@@ -46,11 +47,11 @@ class SliceAttributeTypes(Table):
     database.
     """
 
-    def __init__(self, api, attribute_type_filter = None):
-        Table.__init__(self, api, SliceAttributeType)
+    def __init__(self, api, attribute_type_filter = None, columns = None):
+        Table.__init__(self, api, SliceAttributeType, columns)
 
         sql = "SELECT %s FROM slice_attribute_types WHERE True" % \
-              ", ".join(SliceAttributeType.fields)
+              ", ".join(self.columns)
 
         if attribute_type_filter is not None:
             if isinstance(attribute_type_filter, (list, tuple, set)):

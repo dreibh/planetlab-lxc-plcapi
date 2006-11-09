@@ -57,7 +57,7 @@ class AddSlice(Method):
 
         # Get associated site details
         login_base = name.split("_")[0]
-        sites = Sites(self.api, [login_base]).values()
+        sites = Sites(self.api, [login_base])
         if not sites:
             raise PLCInvalidArgument, "Invalid slice prefix"
         site = sites[0]

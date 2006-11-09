@@ -83,11 +83,11 @@ class Addresses(Table):
     database.
     """
 
-    def __init__(self, api, address_filter = None):
-	Table.__init__(self, api, Address)
+    def __init__(self, api, address_filter = None, columns = None):
+	Table.__init__(self, api, Address, columns)
 
         sql = "SELECT %s FROM view_addresses WHERE True" % \
-              ", ".join(Address.fields)
+              ", ".join(self.columns)
 
         if address_filter is not None:
             if isinstance(address_filter, (list, tuple, set)):

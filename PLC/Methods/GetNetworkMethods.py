@@ -18,4 +18,4 @@ class GetNetworkMethods(Method):
     returns = [NetworkMethod.fields['method']]
 
     def call(self, auth):
-        return [network_method['method'] for network_method in NetworkMethods(self.api).values()]
+        return [network_method['method'] for network_method in NetworkMethods(self.api)]

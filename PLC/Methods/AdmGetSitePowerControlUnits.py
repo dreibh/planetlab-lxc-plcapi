@@ -26,10 +26,10 @@ class AdmGetSitePowerControlUnits(Method):
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
-        site = sites.values()[0]
+        site = sites[0]
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to view the PCUs at that site"
 
-        return PCUs(self.api, site['pcu_ids']).values()
+        return PCUs(self.api, site['pcu_ids'])

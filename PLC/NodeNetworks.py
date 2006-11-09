@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.13 2006/11/08 22:59:34 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.14 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -67,12 +67,14 @@ class NodeNetwork(Row):
         }
 
     def validate_method(self, method):
-        if method not in NetworkMethods(self.api):
+        network_methods = [row['method'] for row in NetworkMethods(self.api)]
+        if method not in network_methods:
             raise PLCInvalidArgument, "Invalid addressing method"
 	return method
 
     def validate_type(self, type):
-        if type not in NetworkTypes(self.api):
+        network_types = [row['type'] for row in NetworkTypes(self.api)]
+        if type not in network_types:
             raise PLCInvalidArgument, "Invalid address type"
 	return type
 
@@ -130,15 +132,16 @@ class NodeNetwork(Row):
         """
 
         if is_primary:
-            nodes = PLC.Nodes.Nodes(self.api, [self['node_id']]).values()
+            nodes = PLC.Nodes.Nodes(self.api, [self['node_id']])
             if not nodes:
                 raise PLCInvalidArgument, "No such node"
             node = nodes[0]
 
             if node['nodenetwork_ids']:
                 conflicts = NodeNetworks(self.api, node['nodenetwork_ids'])
-                for nodenetwork_id, nodenetwork in conflicts.iteritems():
-                    if ('nodenetwork_id' not in self or self['nodenetwork_id'] != nodenetwork_id) and \
+                for nodenetwork in conflicts:
+                    if ('nodenetwork_id' not in self or \
+                        self['nodenetwork_id'] != nodenetwork['nodenetwork_id']) and \
                        nodenetwork['is_primary']:
                         raise PLCInvalidArgument, "Can only set one primary interface per node"
 
@@ -192,11 +195,11 @@ class NodeNetworks(Table):
     database.
     """
 
-    def __init__(self, api, nodenetwork_filter = None):
-        Table.__init__(self, api, NodeNetwork)
+    def __init__(self, api, nodenetwork_filter = None, columns = None):
+        Table.__init__(self, api, NodeNetwork, columns)
 
         sql = "SELECT %s FROM nodenetworks WHERE True" % \
-              ", ".join(NodeNetwork.fields)
+              ", ".join(self.columns)
 
         if nodenetwork_filter is not None:
             if isinstance(nodenetwork_filter, (list, tuple, set)):

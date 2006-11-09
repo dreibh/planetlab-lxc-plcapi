@@ -28,7 +28,7 @@ class AdmGetPowerControlUnitNodes(Method):
                 'port_number': Parameter(int, "Port number")}]
 
     def call(self, auth, pcu_id):
-        pcus = PCUs(self.api, [pcu_id]).values()
+        pcus = PCUs(self.api, [pcu_id])
         if not pcus:
             raise PLCInvalidArgument, "No such PCU"
         pcu = pcus[0]

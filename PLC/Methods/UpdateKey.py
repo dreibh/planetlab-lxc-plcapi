@@ -33,7 +33,7 @@ class UpdateKey(Method):
         key_fields = dict(filter(can_update, key_fields.items()))
 
         # Get key information
-        keys = Keys(self.api, [key_id]).values()
+        keys = Keys(self.api, [key_id])
         if not keys:
             raise PLCInvalidArgument, "No such key"
         key = keys[0]

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.17 2006/11/08 22:45:20 mlhuang Exp $
+# $Id: Persons.py,v 1.18 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -81,8 +81,8 @@ class Person(Row):
             raise invalid_email
 
         conflicts = Persons(self.api, [email])
-        for person_id, person in conflicts.iteritems():
-            if 'person_id' not in self or self['person_id'] != person_id:
+        for person in conflicts:
+            if 'person_id' not in self or self['person_id'] != person['person_id']:
                 raise PLCInvalidArgument, "E-mail address already in use"
 
         return email
@@ -272,7 +272,7 @@ class Person(Row):
 
         # Delete all keys
         keys = Keys(self.api, self['key_ids'])
-        for key in keys.values():
+        for key in keys:
             key.delete(commit = False)
 
         # Clean up miscellaneous join tables
@@ -290,11 +290,11 @@ class Persons(Table):
     database.
     """
 
-    def __init__(self, api, person_filter = None):
-        Table.__init__(self, api, Person)
+    def __init__(self, api, person_filter = None, columns = None):
+        Table.__init__(self, api, Person, columns)
 
         sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
-              ", ".join(Person.fields)
+              ", ".join(self.columns)
 
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):

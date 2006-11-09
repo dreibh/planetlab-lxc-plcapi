@@ -31,10 +31,10 @@ class DeleteSliceFromNodes(Method):
         if not slices:
             raise PLCInvalidArgument, "No such slice"
 
-        slice = slices.values()[0]
+        slice = slices[0]
 
 	# Get specified nodes
-        nodes = Nodes(self.api, node_id_or_hostname_list).values()
+        nodes = Nodes(self.api, node_id_or_hostname_list)
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:

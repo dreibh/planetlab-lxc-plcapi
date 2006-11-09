@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.5 2006/11/08 22:55:55 mlhuang Exp $
+# $Id: Events.py,v 1.6 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -60,11 +60,11 @@ class Events(Table):
     Representation of row(s) from the events table in the database. 
     """
 
-    def __init__(self, api, event_filter):
-        Table.__init__(self, api, Event)
+    def __init__(self, api, event_filter = None, columns = None):
+        Table.__init__(self, api, Event, columns)
 
         sql = "SELECT %s FROM view_events WHERE True" % \
-              ", ".join(Event.fields)
+              ", ".join(self.columns)
 
         if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):

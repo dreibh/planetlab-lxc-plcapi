@@ -118,29 +118,37 @@ class Row(dict):
         if commit:
             self.api.db.commit()
 
-class Table(dict):
+class Table(list):
     """
     Representation of row(s) in a database table.
     """
 
-    def __init__(self, api, row):
+    def __init__(self, api, row, columns = None):
         self.api = api
         self.row = row
+
+        if columns is None:
+            columns = row.fields
+        else:
+            columns = filter(lambda x: x in row.fields, columns)
+            if not columns:
+                raise PLCInvalidArgument, "No valid return fields specified"
+
+        self.columns = columns
 
     def sync(self, commit = True):
         """
         Flush changes back to the database.
         """
 
-        for row in self.values():
+        for row in self:
             row.sync(commit)
 
     def selectall(self, sql, params = None):
         """
         Given a list of rows from the database, fill ourselves with
-        Row objects keyed on the primary key defined by the Row class
-        we were initialized with.
+        Row objects.
         """
 
         for row in self.api.db.selectall(sql, params):
-            self[row[self.row.primary_key]] = self.row(self.api, row)
+            self.append(self.row(self.api, row))

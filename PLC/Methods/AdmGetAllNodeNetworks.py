@@ -26,7 +26,7 @@ class AdmGetAllNodeNetworks(GetNodeNetworks):
 
     def call(self, auth, node_id_or_hostname):
         # Get node information
-        nodes = Nodes(self.api, [node_id_or_hostname]).values()
+        nodes = Nodes(self.api, [node_id_or_hostname])
 	if not nodes:
             raise PLCInvalidArgument, "No such node"
 	node = nodes[0]

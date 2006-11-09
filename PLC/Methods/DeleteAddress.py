@@ -24,7 +24,7 @@ class DeleteAddress(Method):
 
     def call(self, auth, address_id):
         # Get associated address details
-        addresses = Addresses(self.api, [address_id]).values()
+        addresses = Addresses(self.api, [address_id])
         if not addresses:
             raise PLCInvalidArgument, "No such address"
         address = addresses[0]

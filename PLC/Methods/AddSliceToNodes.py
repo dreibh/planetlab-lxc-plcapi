@@ -40,7 +40,7 @@ class AddSliceToNodes(Method):
         if not slices:
             raise PLCInvalidArgument, "No such slice"
 
-        slice = slices.values()[0]
+        slice = slices[0]
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
@@ -53,13 +53,13 @@ class AddSliceToNodes(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
 	 # Get specified nodes, and them to the slice
-        nodes = Nodes(self.api, node_id_or_hostname_list).values()
+        nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
 
         # the same for foreign_nodes
-        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list).values()
+        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list)
         for foreign_node in foreign_nodes:
             if slice['slice_id'] not in foreign_node['slice_ids']:
                 slice.add_node (foreign_node, is_foreign_node=True, commit=False)

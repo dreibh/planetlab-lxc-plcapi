@@ -22,7 +22,7 @@ class AdmQueryPerson(Method):
 
     def call(self, auth, search_vals):
         if 'email' in search_vals:
-            persons = Persons(self.api, [search_vals['email']]).values()
+            persons = Persons(self.api, [search_vals['email']])
             if persons:
                 return [persons[0]['person_id']]
 

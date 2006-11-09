@@ -30,7 +30,7 @@ class AdmQueryNode(Method):
     def call(self, auth, search_vals):
         # Get possible nodenetworks
         if 'node_hostname' in search_vals:
-            nodes = Nodes(self.api, [search_vals['node_hostname']]).values()
+            nodes = Nodes(self.api, [search_vals['node_hostname']])
             if not nodes:
                 return []
 
@@ -41,11 +41,11 @@ class AdmQueryNode(Method):
                 return [nodes[0]['node_id']]
 
             if nodes[0]['nodenetwork_ids']:
-                nodenetworks = NodeNetworks(self.api, nodes[0]['nodenetwork_ids']).values()
+                nodenetworks = NodeNetworks(self.api, nodes[0]['nodenetwork_ids'])
             else:
                 nodenetworks = []
         else:
-            nodenetworks = NodeNetworks(self.api).values()
+            nodenetworks = NodeNetworks(self.api)
 
         if 'nodenetwork_ip' in search_vals:
             if not valid_ip(search_vals['nodenetwork_ip']):

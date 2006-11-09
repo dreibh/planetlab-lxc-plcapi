@@ -10,7 +10,8 @@ class GetPersons(Method):
     Returns an array of structs containing details about users. If
     person_filter is specified and is an array of user identifiers or
     usernames, or a struct of user attributes, only users matching the
-    filter will be returned.
+    filter will be returned. If return_fields is specified, only the
+    specified details will be returned.
 
     Users and techs may only retrieve details about themselves. PIs
     may retrieve details about themselves and others at their
@@ -23,7 +24,8 @@ class GetPersons(Method):
         Auth(),
         Mixed([Mixed(Person.fields['person_id'],
                      Person.fields['email'])],
-              Filter(Person.fields))
+              Filter(Person.fields)),
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     # Filter out password field
@@ -31,13 +33,13 @@ class GetPersons(Method):
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
 
-    def call(self, auth, person_filter = None):
+    def call(self, auth, person_filter = None, return_fields = None):
 	# If we are not admin, make sure to only return viewable accounts
         if 'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
             valid_person_ids = [self.caller['person_id']]
             if 'pi' in self.caller['roles'] and self.caller['site_ids']:
-                sites = Sites(self.api, self.caller['site_ids']).values()
+                sites = Sites(self.api, self.caller['site_ids'])
                 for site in sites:
                     valid_person_ids += site['person_ids']
 
@@ -47,7 +49,12 @@ class GetPersons(Method):
             if person_filter is None:
                 person_filter = valid_person_ids
 
-        persons = Persons(self.api, person_filter).values()
+        # Filter out password field
+        if return_fields:
+            while 'password' in return_fields:
+                return_fields.remove('password')
+
+        persons = Persons(self.api, person_filter, return_fields)
 
         # Filter out accounts that are not viewable
         if 'admin' not in self.caller['roles']:

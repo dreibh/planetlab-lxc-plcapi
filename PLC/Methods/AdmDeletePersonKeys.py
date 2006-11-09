@@ -35,7 +35,7 @@ class AdmDeletePersonKeys(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] != person['person_id']:
@@ -46,7 +46,7 @@ class AdmDeletePersonKeys(Method):
             return 1
 
         # Get associated key details
-        keys = Keys(self.api, key_ids).values()
+        keys = Keys(self.api, key_ids)
 
         for key in keys:
             key.delete()

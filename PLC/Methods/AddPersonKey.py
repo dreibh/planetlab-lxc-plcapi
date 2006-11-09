@@ -37,7 +37,7 @@ class AddPersonKey(Method):
         key_fields = dict(filter(can_update, key_fields.items()))
 
         # Get account details
-        persons = Persons(self.api, [person_id_or_email]).values()
+        persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
         person = persons[0]

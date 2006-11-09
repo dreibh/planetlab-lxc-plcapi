@@ -26,7 +26,7 @@ class DeleteKeyType(Method):
         key_types = KeyTypes(self.api, [name])
         if not key_types:
             raise PLCInvalidArgument, "No such key type"
-        key_type = key_types.values()[0]
+        key_type = key_types[0]
 
         key_type.delete()
 

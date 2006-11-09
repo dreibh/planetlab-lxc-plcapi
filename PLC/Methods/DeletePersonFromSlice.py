@@ -31,14 +31,14 @@ class DeletePersonFromSlice(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
 
-        person = persons.values()[0]
+        person = persons[0]
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
 
-        slice = slices.values()[0]
+        slice = slices[0]
 
         # If we are not admin, make sure the caller is a pi
         # of the site associated with the slice

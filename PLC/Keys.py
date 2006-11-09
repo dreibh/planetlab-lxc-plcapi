@@ -2,6 +2,7 @@ import re
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.KeyTypes import KeyType, KeyTypes
@@ -23,7 +24,8 @@ class Key(Row):
         }
 
     def validate_key_type(self, key_type):
-        if key_type not in KeyTypes(self.api):
+        key_types = [row['key_type'] for row in KeyTypes(self.api)]
+        if key_type not in key_types:
             raise PLCInvalidArgument, "Invalid key type"
 	return key_type
 
@@ -96,13 +98,17 @@ class Keys(Table):
     database.
     """
 
-    def __init__(self, api, key_ids = None, is_blacklisted = False):
-        Table.__init__(self, api, Key)
+    def __init__(self, api, key_filter = None, columns = None):
+        Table.__init__(self, api, Key, columns)
 	
 	sql = "SELECT %s FROM keys WHERE is_blacklisted IS False" % \
-              ", ".join(Key.fields)
+              ", ".join(self.columns)
 
-	if key_ids:
-            sql += " AND key_id IN (%s)" %  ", ".join(map(str, key_ids))
+        if key_filter is not None:
+            if isinstance(key_filter, (list, tuple, set)):
+                key_filter = Filter(Key.fields, {'key_id': key_filter})
+            elif isinstance(key_filter, dict):
+                key_filter = Filter(Key.fields, key_filter)
+            sql += " AND (%s)" % key_filter.sql(api)
 
 	self.selectall(sql)

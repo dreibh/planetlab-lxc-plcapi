@@ -28,13 +28,13 @@ class DeleteNodeNetwork(Method):
 
     def call(self, auth, nodenetwork_id_or_ip):
         # Get node network information
-        nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip]).values()
+        nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip])
         if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 	nodenetwork = nodenetworks[0]
 	
 	# Get node information
-	nodes = Nodes(self.api, [nodenetwork['node_id']]).values()
+	nodes = Nodes(self.api, [nodenetwork['node_id']])
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
 	node = nodes[0]

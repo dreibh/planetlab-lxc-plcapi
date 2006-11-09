@@ -26,7 +26,7 @@ class DeleteSliceInstantiation(Method):
         slice_instantiations = SliceInstantiations(self.api, [instantiation])
         if not slice_instantiations:
             raise PLCInvalidArgument, "No such slice instantiation state"
-        slice_instantiation = slice_instantiations.values()[0]
+        slice_instantiation = slice_instantiations[0]
 
         slice_instantiation.delete()
 

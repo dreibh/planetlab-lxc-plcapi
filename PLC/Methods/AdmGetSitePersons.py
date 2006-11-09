@@ -31,7 +31,7 @@ class AdmGetSitePersons(Method):
         assert self.caller is not None
 
         # Get site information
-	sites = Sites(self.api, [site_id_or_login_base]).values()
+	sites = Sites(self.api, [site_id_or_login_base])
 	if not sites:
             raise PLCInvalidArgument, "No such site"
 

@@ -30,7 +30,7 @@ class BlacklistKey(Method):
 
     def call(self, auth, key_id):
         # Get associated key details
-        keys = Keys(self.api, [key_id]).values()
+        keys = Keys(self.api, [key_id])
         if not keys:
             raise PLCInvalidArgument, "No such key"
         key = keys[0]

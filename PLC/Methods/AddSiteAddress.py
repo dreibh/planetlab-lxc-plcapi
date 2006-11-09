@@ -40,7 +40,7 @@ class AddSiteAddress(Method):
         address_fields = dict(filter(can_update, address_fields.items()))
 
         # Get associated site details
-        sites = Sites(self.api, [site_id_or_login_base]).values()
+        sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
         site = sites[0]

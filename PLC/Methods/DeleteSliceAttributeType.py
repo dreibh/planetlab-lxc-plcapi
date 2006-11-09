@@ -22,7 +22,7 @@ class DeleteSliceAttributeType(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, attribute_type_id_or_name):
-        attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name]).values()
+        attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name])
         if not attribute_types:
             raise PLCInvalidArgument, "No such slice attribute type"
         attribute_type = attribute_types[0]

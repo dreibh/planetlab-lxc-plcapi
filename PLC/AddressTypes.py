@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: AddressTypes.py,v 1.7 2006/11/08 22:34:05 mlhuang Exp $
+# $Id: AddressTypes.py,v 1.8 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -46,11 +46,11 @@ class AddressTypes(Table):
     Representation of the address_types table in the database.
     """
 
-    def __init__(self, api, address_type_filter = None):
-	Table.__init__(self, api, AddressType)
+    def __init__(self, api, address_type_filter = None, columns = None):
+	Table.__init__(self, api, AddressType, columns)
 
         sql = "SELECT %s FROM address_types WHERE True" % \
-              ", ".join(AddressType.fields)
+              ", ".join(self.columns)
 
         if address_type_filter is not None:
             if isinstance(address_type_filter, (list, tuple, set)):

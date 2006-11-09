@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PCUs.py,v 1.8 2006/11/08 23:00:00 mlhuang Exp $
+# $Id: PCUs.py,v 1.9 2006/11/09 03:07:42 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -100,11 +100,11 @@ class PCUs(Table):
     database.
     """
 
-    def __init__(self, api, pcu_filter = None):
-        Table.__init__(self, api, PCU)
+    def __init__(self, api, pcu_filter = None, columns = None):
+        Table.__init__(self, api, PCU, columns)
 
         sql = "SELECT %s FROM view_pcus WHERE True" % \
-              ", ".join(PCU.fields)
+              ", ".join(self.columns)
 
         if pcu_filter is not None:
             if isinstance(pcu_filter, (list, tuple, set)):

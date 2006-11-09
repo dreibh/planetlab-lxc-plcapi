@@ -34,14 +34,14 @@ class AddNodeToNodeGroup(Method):
 	nodes = Nodes(self.api, [node_id_or_hostname])
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
-	node = nodes.values()[0]
+	node = nodes[0]
 
 	# Get nodegroup info
         nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
         if not nodegroups:
             raise PLCInvalidArgument, "No such nodegroup"
 
-        nodegroup = nodegroups.values()[0]
+        nodegroup = nodegroups[0]
 	
 	# add node to nodegroup
         if node['node_id'] not in nodegroup['node_ids']:

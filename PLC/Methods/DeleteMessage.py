@@ -22,7 +22,7 @@ class DeleteMessage(Method):
 
     def call(self, auth, message_id):
         # Get message information
-        messages = Messages(self.api, [message_id]).values()
+        messages = Messages(self.api, [message_id])
         if not messages:
             raise PLCInvalidArgument, "No such message"
         message = messages[0]

@@ -30,11 +30,11 @@ class SliceAttributes(Table):
     database.
     """
 
-    def __init__(self, api, slice_attribute_filter = None):
-        Table.__init__(self, api, SliceAttribute)
+    def __init__(self, api, slice_attribute_filter = None, columns = None):
+        Table.__init__(self, api, SliceAttribute, columns)
 
         sql = "SELECT %s FROM view_slice_attributes WHERE True" % \
-              ", ".join(SliceAttribute.fields)
+              ", ".join(self.columns)
 
         if slice_attribute_filter is not None:
             if isinstance(slice_attribute_filter, (list, tuple, set)):

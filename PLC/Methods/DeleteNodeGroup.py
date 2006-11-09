@@ -29,7 +29,7 @@ class DeleteNodeGroup(Method):
         if not nodegroups:
             raise PLCInvalidArgument, "No such node group"
 
-        nodegroup = nodegroups.values()[0]
+        nodegroup = nodegroups[0]
 
         nodegroup.delete()
 

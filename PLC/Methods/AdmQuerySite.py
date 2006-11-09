@@ -33,9 +33,9 @@ class AdmQuerySite(Method):
 
     def call(self, auth, search_vals):
         if 'site_loginbase' in search_vals:
-            sites = Sites(self.api, [search_vals['site_loginbase']]).values()
+            sites = Sites(self.api, [search_vals['site_loginbase']])
         else:
-            sites = Sites(self.api).values()
+            sites = Sites(self.api)
             
         if 'site_name' in search_vals:
             sites = filter(lambda site: \
@@ -60,12 +60,12 @@ class AdmQuerySite(Method):
                 site['ips'] = []
                 site['macs'] = []
                 if site['node_ids']:
-                    nodes = Nodes(self.api, site['node_ids']).values()
+                    nodes = Nodes(self.api, site['node_ids'])
                     for node in nodes:
                         site['hostnames'].append(node['hostname'])
                         if 'nodenetwork_ip' in search_vals or \
                            'nodenetwork_mac' in search_vals:
-                            nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids']).values()
+                            nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
                             site['ips'] += [nodenetwork['ip'] for nodenetwork in nodenetworks]
                             site['macs'] += [nodenetwork['mac'] for nodenetwork in nodenetworks]
 
