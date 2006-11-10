@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.28 2006/11/08 17:34:07 thierry Exp $
+-- $Id: planetlab4.sql,v 1.29 2006/11/08 22:07:29 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -271,8 +271,8 @@ CREATE TABLE nodes (
     hostname text NOT NULL, -- Node hostname
     site_id integer REFERENCES sites, -- At which site (clause NOT NULL removed for foreign_nodes)
     boot_state text REFERENCES boot_states NOT NULL DEFAULT 'inst', -- Node boot state
-    cached boolean NOT NULL DEFAULT false,  -- is this entry cached from a peer ?
-    peer_id integer REFERENCES peers,	    -- if cached, then from what peer
+--    cached boolean NOT NULL DEFAULT false,  -- is this entry cached from a peer ?
+--    peer_id integer REFERENCES peers,	    -- if cached, then from what peer
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
 
     -- Optional
@@ -297,11 +297,20 @@ array_accum(node_id) AS node_ids
 FROM nodes
 GROUP BY site_id;
 
+-- Nodes - peers relationship
+CREATE TABLE peer_node (
+   peer_id integer REFERENCES peers NOT NULL, -- peer primary key
+   node_id integer REFERENCES nodes NOT NULL, -- node primary key
+   PRIMARY KEY (peer_id, node_id)
+) WITH OIDS;
+CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
+CREATE INDEX peer_node_node_id_idx ON peer_node (node_id);
+
 -- Nodes at each peer
 CREATE VIEW peer_nodes AS
 SELECT peer_id,
-array_to_string(array_accum(node_id), ',') AS node_ids
-FROM nodes 
+array_accum(node_id) AS node_ids
+FROM peer_node
 GROUP BY peer_id;
 
 CREATE VIEW view_peers AS
@@ -807,19 +816,20 @@ COALESCE(node_pcus.ports, '{}') AS ports,
 COALESCE(node_conf_files.conf_file_ids, '{}') AS conf_file_ids,
 node_session.session_id AS session
 FROM nodes
+LEFT JOIN peer_node USING (node_id) 
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id)
 LEFT JOIN node_pcus USING (node_id)
 LEFT JOIN node_conf_files USING (node_id)
 LEFT JOIN node_session USING (node_id)
-WHERE nodes.cached=False;
+WHERE peer_node.peer_id IS NULL;
 
 CREATE VIEW view_foreign_nodes AS
 SELECT
 nodes.node_id,
 nodes.hostname,
-nodes.peer_id,
+peer_node.peer_id,
 nodes.boot_state,
 nodes.model,
 nodes.version,
@@ -828,8 +838,9 @@ CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
 node_slices.slice_ids,
 nodes.deleted
 FROM nodes
+LEFT JOIN peer_node USING (node_id) 
 LEFT JOIN node_slices USING (node_id)
-WHERE nodes.cached=True AND nodes.deleted=False;
+WHERE peer_node.peer_id IS NOT NULL;
 
 CREATE VIEW view_nodegroups AS
 SELECT
@@ -983,21 +994,5 @@ INSERT INTO sites
 VALUES
 ('pl', 'PlanetLab Central', 'PLC', 100);
 
--- federation stuff starting here
-
---CREATE TABLE foreign_nodes (
---     foreign_node_id serial PRIMARY KEY, -- identifier
---     hostname text NOT NULL, 
---     boot_state text NOT NULL,
---     peer_id integer REFERENCES peers NOT NULL,
---       
---     deleted boolean NOT NULL DEFAULT false
---) WITH OIDS;
-
---CREATE VIEW peer_foreign_nodes AS
---SELECT peer_id,
---array_to_string(array_accum(foreign_node_id), ',') AS foreign_node_ids
---FROM foreign_nodes
---GROUP BY peer_id;
 
 

@@ -24,19 +24,25 @@ class ForeignNode (Row) :
 	'boot_state' : Parameter (str, "Boot state, see Node"),
         'model' : Parameter (str,"Model, see Node"),
         'version' : Parameter (str,"Version, see Node"),
-        'date_created': Parameter(int, "Creation time, see Node"),
-        'last_updated': Parameter(int, "Update time, see Node"),
+#        'date_created': Parameter(int, "Creation time, see Node"),
+#        'last_updated': Parameter(int, "Update time, see Node"),
 	}
 
     def __init__(self,api,fields={},uptodate=True):
 	Row.__init__(self,api,fields)
 	self.uptodate=uptodate
 
+    def purge_peer_node (self,commit=True):
+        sql = "DELETE FROM peer_node WHERE node_id=%d"%self['node_id']
+        self.api.db.do(sql)
+        if commit:
+            self.api.db.commit()
+
     def delete (self, commit=True):
         """
         Delete existing foreign node.
         """
-        print 'in ForeignNode::delete',self
+        self.purge_peer_node()
         self['deleted']=True
         self.sync(commit)
         
@@ -45,9 +51,10 @@ class ForeignNodes (Table):
     def __init__ (self, api, foreign_node_filter = None, columns = None):
         Table.__init__(self, api, ForeignNode, columns)
 
-	sql = "SELECT %s FROM view_foreign_nodes WHERE deleted IS False" % \
-              ", ".join(self.columns)
-
+        sql = ""
+	sql += "SELECT %s FROM view_foreign_nodes " % ", ".join(self.columns)
+        sql += "WHERE deleted IS False "
+              
         if foreign_node_filter is not None:
             if isinstance(foreign_node_filter, (list, tuple, set)):
                 # Separate the list into integers and strings

@@ -19,7 +19,7 @@ class RefreshPeer(Method):
     Query a peer PLC for its list of nodes, and refreshes
     the local database accordingly
     
-    Returns None
+    Returns the number of new nodes from that peer - may be negative
     """
     
     roles = ['admin']
@@ -27,18 +27,22 @@ class RefreshPeer(Method):
     accepts = [ Auth(),
 		Parameter (int, "Peer id") ]
     
-    returns = None
+    returns = Parameter(int, "Delta in number of foreign nodes attached to that peer")
 
     def call (self, auth, peer_id):
 	
 	### retrieve peer info
-	peers = Peers (self.api)
-	peer = peers[peer_id]
+	peers = Peers (self.api,[peer_id])
+        if not peers:
+            raise PLCInvalidArgument,'no such peer_id:%d'%peer_id
+        peer=peers[0]
 	
 	### retrieve account info
 	person_id = peer['person_id']
 	persons = Persons (self.api,[person_id])
-	person = persons[person_id]
+        if not persons:
+            raise PLCInvalidArgument,'no such person_id:%d'%person_id
+	person = persons[0]
 	
 	### build up foreign auth
 	auth={ 'Username': person['email'],
@@ -47,57 +51,22 @@ class RefreshPeer(Method):
 	       'Role' : 'admin' }
 
 	## connect to the peer's API
-	apiserver = xmlrpclib.Server (peer['peer_url']+"/PLCAPI/")
-	print 'auth',auth
-	current_peer_nodes = apiserver.GetNodes(auth,[])
-	
+        url=peer['peer_url']+"/PLCAPI/"
+        print 'url=',url
+	apiserver = xmlrpclib.Server (url)
+	print 'auth=',auth
+	current_peer_nodes = apiserver.GetNodes(auth)
+        print 'current_peer_nodes',current_peer_nodes
+
 	## manual feed for tests
-#	n1 = {'hostname': 'n1.plc', 'boot_state': 'inst'}
-#	n2 = {'hostname': 'n2.plc', 'boot_state': 'inst'}
-#	n3 = {'hostname': 'n3.plc', 'boot_state': 'inst'}
         n11={'session': None, 'slice_ids': [], 'nodegroup_ids': [], 'last_updated': 1162884349, 'version': None, 'nodenetwork_ids': [], 'boot_state': 'inst', 'hostname': 'n11.plc1.org', 'site_id': 1, 'ports': None, 'pcu_ids': [], 'boot_nonce': None, 'node_id': 1, 'root_person_ids': [], 'key': None, 'date_created': 1162884349, 'model': None, 'conf_file_ids': [], 'ssh_rsa_key': None}
         n12={'session': None, 'slice_ids': [], 'nodegroup_ids': [], 'last_updated': 1162884349, 'version': None, 'nodenetwork_ids': [], 'boot_state': 'inst', 'hostname': 'n12.plc1.org', 'site_id': 1, 'ports': None, 'pcu_ids': [], 'boot_nonce': None, 'node_id': 1, 'root_person_ids': [], 'key': None, 'date_created': 1162884349, 'model': None, 'conf_file_ids': [], 'ssh_rsa_key': None}
         n21={'session': None, 'slice_ids': [], 'nodegroup_ids': [], 'last_updated': 1162884349, 'version': None, 'nodenetwork_ids': [], 'boot_state': 'boot', 'hostname': 'n21.plc2.org', 'site_id': 1, 'ports': None, 'pcu_ids': [], 'boot_nonce': None, 'node_id': 1, 'root_person_ids': [], 'key': None, 'date_created': 1162884349, 'model': None, 'conf_file_ids': [], 'ssh_rsa_key': None}
         n22={'session': None, 'slice_ids': [], 'nodegroup_ids': [], 'last_updated': 1162884349, 'version': None, 'nodenetwork_ids': [], 'boot_state': 'boot', 'hostname': 'n22.plc2.org', 'site_id': 1, 'ports': None, 'pcu_ids': [], 'boot_nonce': None, 'node_id': 1, 'root_person_ids': [], 'key': None, 'date_created': 1162884349, 'model': None, 'conf_file_ids': [], 'ssh_rsa_key': None}
 
-#        current_peer_nodes = [n21,n22]
+#        current_peer_nodes = []
+#        print 'current_peer_nodes',current_peer_nodes
 
-	### now to the db
-	# we get the whole table just in case 
-	# a host would have switched from one plc to the other
-	foreign_nodes = ForeignNodes (self.api)
-	
-	### mark entries for this peer outofdate
-	for foreign_node in foreign_nodes:
-	    if foreign_node['peer_id'] == peer_id:
-		foreign_node.uptodate=False
+        nb_new_nodes = peer.refresh_nodes(current_peer_nodes)
 
-        ### these fields get copied through
-        remote_fields = ['boot_state','model','version','date_created','date_updated']
-        
-	### scan the new entries, and mark them uptodate
-	for node in current_peer_nodes:
-	    hostname = node['hostname']
-	    foreign_node = foreign_nodes.get(hostname)
-	    if foreign_node:
-		### update it anyway
-                foreign_node['cached'] = True
-		foreign_node['peer_id'] = peer_id
-                # copy other relevant fields
-                for field in remote_fields:
-                    foreign_node[field]=node[field]
-                # this row is valid
-		foreign_node.uptodate = True
-	    else:
-		foreign_nodes[hostname] = ForeignNode(self.api,
-						      {'hostname':hostname,
-                                                       'cached':True,
-						       'peer_id':peer_id,})
-                for field in remote_fields:
-                    foreign_nodes[hostname][field]=node[field]
-                    
-	    foreign_nodes[hostname].sync()
-
-	### delete entries that are not uptodate
-	[ x.delete() for x in foreign_nodes if not x.uptodate ]
-	
+	return nb_new_nodes
