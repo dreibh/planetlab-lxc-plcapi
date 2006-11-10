@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Messages.py,v 1.1 2006/11/03 16:11:42 mlhuang Exp $
+# $Id: Messages.py,v 1.2 2006/11/08 22:58:23 mlhuang Exp $
 #
 
 from PLC.Parameter import Parameter
@@ -35,7 +35,7 @@ class Messages(Table):
               ", ".join(Message.fields)
 
 	if message_ids:
-            sql += " AND message_id IN (%s)" %  ", ".join(map(str, message_ids))
+            sql += " AND message_id IN (%s)" %  ", ".join(map(api.db.quote, message_ids))
 
         if enabled is not None:
             sql += " AND enabled IS %s" % enabled
