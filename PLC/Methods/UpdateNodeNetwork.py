@@ -10,15 +10,15 @@ can_update = lambda (field, value): field not in \
 
 class UpdateNodeNetwork(Method):
     """
-    Updates an existing node network. Any values specified in update_fields 
-    are used, otherwise defaults are used. Acceptable values for method are
-    dhcp and static. If type is static, the parameter update_fields must
-    be present and ip, gateway, network, broadcast, netmask, and dns1 must
-    all be specified. If type is dhcp, these parameters, even if
-    specified, are ignored.
+    Updates an existing node network. Any values specified in
+    nodenetwork_fields are used, otherwise defaults are
+    used. Acceptable values for method are dhcp and static. If type is
+    static, then ip, gateway, network, broadcast, netmask, and dns1
+    must all be specified in nodenetwork_fields. If type is dhcp,
+    these parameters, even if specified, are ignored.
     
     PIs and techs may only update networks associated with their own
-    nodes. ins may update any node network.
+    nodes. Admins may update any node network.
  
     Returns 1 if successful, faults otherwise.
     """
@@ -29,18 +29,17 @@ class UpdateNodeNetwork(Method):
 
     accepts = [
         Auth(),
-	Mixed(NodeNetwork.fields['nodenetwork_id'],
-	      NodeNetwork.fields['ip']),
+	NodeNetwork.fields['nodenetwork_id'],
      	nodenetwork_fields
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodenetwork_id_or_ip, nodenetwork_fields):
+    def call(self, auth, nodenetwork_id, nodenetwork_fields):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 
 	# Get node network information
-	nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip])
+	nodenetworks = NodeNetworks(self.api, [nodenetwork_id])
 	if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 

@@ -7,11 +7,10 @@ from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 
 class DeleteNodeNetwork(Method):
     """
-    Delete an existing Node Network. Nodenetwork_id must be associated to 
-    node_id and not be associated with a different node.
+    Deletes an existing node network interface.
 
-    ins may delete any node network. PIs and techs can only delete 
-    nodenetworks for thier nodes.
+    Admins may delete any node network. PIs and techs may only delete
+    node network interfaces associated with nodes at their sites.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -20,15 +19,14 @@ class DeleteNodeNetwork(Method):
 
     accepts = [
         Auth(),
-	Mixed(NodeNetwork.fields['nodenetwork_id'],
-	      NodeNetwork.fields['ip'])
+	NodeNetwork.fields['nodenetwork_id']
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, nodenetwork_id_or_ip):
+    def call(self, auth, nodenetwork_id):
         # Get node network information
-        nodenetworks = NodeNetworks(self.api, [nodenetwork_id_or_ip])
+        nodenetworks = NodeNetworks(self.api, [nodenetwork_id])
         if not nodenetworks:
             raise PLCInvalidArgument, "No such node network"
 	nodenetwork = nodenetworks[0]
