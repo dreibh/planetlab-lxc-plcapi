@@ -152,7 +152,7 @@ def test03_site (args=[1,2]):
                                      'url': 'http://%s.com/'%abbrev_name,
                                      'max_slices':10})
         ### max_slices does not seem taken into account at that stage
-        s[i].UpdateSite(a[i],plc[i]['site_id'],{'max_slices':10})
+        s[i].UpdateSite(a[i],site_id,{'max_slices':10})
         print '%02d: Created site %d with max_slices=10'%(i,site_id)
         plc[i]['site_id']=site_id
 
@@ -178,7 +178,7 @@ def test04_lnode (args=[1,2]):
     for i in args:
         ### add node to it
         hostname=plc[i]['nodename']
-        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],hostname)
+        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
         print '%02d: added local node %s'%(i,hostname)
 
 def test04_fnode (args=[1,2]):
@@ -187,7 +187,7 @@ def test04_fnode (args=[1,2]):
         peer=peer_index(i)
         ### add node to it
         hostname=plc[peer]['nodename']
-        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],hostname)
+        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
         print '%02d: added local node %s'%(i,hostname)
 
 def catch_up (args=[1,2]):
@@ -197,3 +197,22 @@ def catch_up (args=[1,2]):
         plc[i]['peer_id']=1
         plc[i]['slice_id']=1
 
+###
+def test_all (args=[1,2]):
+    test00_init (args)
+    test00_print (args)
+    test00_admin (args)
+    test00_enable (args)
+    test01_check (args)
+    test01_node (args)
+    test01_peer_person (args)
+
+def test_all_2 (args=[1,2]):
+    test01_peer (args)
+    test01_check (args)
+    test02_refresh (args)
+    test01_check (args)
+    test03_site (args)
+    test03_slice (args)
+    test04_lnode (args)
+    test04_fnode (args)
