@@ -4,14 +4,14 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.6 2006/11/08 21:56:32 mlhuang Exp $
+# $Id: Makefile,v 1.7 2006/11/08 23:27:52 mlhuang Exp $
 #
 
 # Metafiles
 INIT := PLC/__init__.py PLC/Methods/__init__.py
 
 # Other stuff
-SUBDIRS := doc php
+SUBDIRS := doc php php/xmlrpc
 
 # autoconf compatible variables
 DESTDIR := /plc/root
@@ -34,6 +34,7 @@ install:
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 	(cd psycopg2 && \
 	 python setup.py install --install-lib=$(DESTDIR)/$(datadir)/plc_api)
+	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
 
 $(SUBDIRS): %:
 	$(MAKE) -C $@

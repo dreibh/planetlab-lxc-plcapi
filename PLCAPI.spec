@@ -10,6 +10,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Obsoletes: plcapilib
 
+# Standard xmlrpc.so that ships with PHP does not marshal NULL
+Obsoletes: php-xmlrpc
+Provides: php-xmlrpc
+
 # OpenJade does not honor XML catalog files and tries to access
 # www.oasis-open.org even if DTDs are locally installed. Disable
 # documentation generation for now.
@@ -29,7 +33,7 @@ through Apache mod_python.
 %build
 # Build __init__.py metafiles and PHP API. Do not build documentation
 # for now.
-%{__make} %{?_smp_mflags} SUBDIRS=php
+%{__make} %{?_smp_mflags} SUBDIRS="php php/xmlrpc"
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -38,6 +42,12 @@ rm -rf $RPM_BUILD_ROOT
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 ln -s %{_datadir}/plc_api/Shell.py $RPM_BUILD_ROOT/%{_bindir}/plcsh
+
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/php.d
+cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
+; Enable xmlrpc extension module
+extension=xmlrpc.so
+EOF
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -48,6 +58,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/plc_api
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
+%{_libdir}/php/modules/xmlrpc.so
+%{_sysconfdir}/php.d/xmlrpc.ini
 
 %changelog
 * Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> - 
