@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustess of Princeton University
 #
-# $Id: gen_php_api.py,v 1.13 2006/03/23 04:29:08 mlhuang Exp $
+# $Id: methods.py,v 1.1 2006/10/25 20:32:44 mlhuang Exp $
 #
 
 import os, sys
@@ -49,9 +49,16 @@ for method in api.methods:
         # Declare parameter
         arg = "$" + name
 
-        # Set optional parameters to special value NULL
+        # Set optional parameters to their defaults
         if name not in min_args:
-            arg += " = NULL"
+            arg += " = "
+            if default is None:
+                arg += "NULL"
+            elif isinstance(default, (list, tuple, set)):
+                arg += "array(%s)" % ", ".join(default)
+            elif isinstance(default, dict):
+                items = ["%s => %s" % (key, value) for (key, value) in default.items()]
+                arg += "array(%s)" % ", ".join(items)
 
         args.append(arg)
 
@@ -70,10 +77,7 @@ for method in api.methods:
             print "  $args[] = $this->auth;"
             continue
 
-        if name in min_args:
-            print "  $args[] = $%s;" % name
-        else:
-            print "  if ($%s !== NULL) { $args[] = $%s; }" % (name, name)
+        print "  $args[] = $%s;" % name
 
     # Call API function
     print "  return $this->call('%s', $args);" % method
