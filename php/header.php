@@ -8,7 +8,7 @@
 // Mark Huang <mlhuang@cs.princeton.edu>
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
-// $Id: header.php,v 1.1 2006/10/25 20:32:44 mlhuang Exp $
+// $Id: header.php,v 1.2 2006/10/27 15:40:20 mlhuang Exp $
 //
 //
 
@@ -105,8 +105,10 @@ class PLCAPI
     $url .= $this->server . ':' . $this->port . '/' . $this->path;
     curl_setopt($curl, CURLOPT_URL, $url);
 
-    // Marshal the XML-RPC request as a POST variable
-    $request = xmlrpc_encode_request($method, $args);
+    // Marshal the XML-RPC request as a POST variable. <nil/> is an
+    // extension to the XML-RPC spec that is supported in our custom
+    // version of xmlrpc.so via the 'allow_null' output_encoding key.
+    $request = xmlrpc_encode_request($method, $args, array('allow_null' => TRUE));
     curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
     // Construct the HTTP header

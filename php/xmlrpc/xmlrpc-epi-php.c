@@ -118,6 +118,15 @@ ZEND_GET_MODULE(xmlrpc)
 # endif
 #endif
 
+PHP_INI_BEGIN()
+STD_PHP_INI_BOOLEAN("xmlrpc.allow_null", "0", PHP_INI_ALL, OnUpdateBool, allow_null, zend_xmlrpc_globals, xmlrpc_globals)
+PHP_INI_END()
+
+static void php_xmlrpc_init_globals(zend_xmlrpc_globals *xmlrpc_globals)
+{
+	memset(xmlrpc_globals, 0, sizeof(zend_xmlrpc_globals));
+}
+
 /*******************************
 * local structures and defines *
 *******************************/
@@ -134,6 +143,7 @@ typedef struct _xmlrpc_server_data {
 typedef struct _php_output_options {
 	int b_php_out;
 	int b_auto_version;
+	int b_allow_null;
 	STRUCT_XMLRPC_REQUEST_OUTPUT_OPTIONS xmlrpc_out;
 } php_output_options;
 
@@ -152,6 +162,9 @@ typedef struct _xmlrpc_callback_data {
 #define OUTPUT_TYPE_KEY_LEN   (sizeof(OUTPUT_TYPE_KEY) - 1)
 #define OUTPUT_TYPE_VALUE_PHP "php"
 #define OUTPUT_TYPE_VALUE_XML "xml"
+
+#define ALLOW_NULL_KEY     "allow_null"
+#define ALLOW_NULL_KEY_LEN (sizeof(ALLOW_NULL_KEY) - 1)
 
 #define VERBOSITY_KEY                  "verbosity"
 #define VERBOSITY_KEY_LEN              (sizeof(VERBOSITY_KEY) - 1)
@@ -191,7 +204,7 @@ typedef struct _xmlrpc_callback_data {
 /***********************
 * forward declarations *
 ***********************/
-XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval** newvalue);
+XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(php_output_options* out, zval* value, zval** newvalue);
 static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data);
 int sset_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type);
 zval* decode_request_worker(zval* xml_in, zval* encoding_in, zval* method_name_out);
@@ -231,6 +244,10 @@ static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* module init */
 PHP_MINIT_FUNCTION(xmlrpc)
 {
+	ZEND_INIT_MODULE_GLOBALS(xmlrpc, php_xmlrpc_init_globals, NULL);
+
+	REGISTER_INI_ENTRIES();
+
 	le_xmlrpc_server = zend_register_list_destructors_ex(xmlrpc_server_destructor, NULL, "xmlrpc server", module_number);
 
 	return SUCCESS;
@@ -320,11 +337,14 @@ static int add_zval(zval* list, const char* id, zval** val)
  * and determine whether to return data as xml or php vars */
 static void set_output_options(php_output_options* options, zval* output_opts)
 {
+	XMLRPCLS_FETCH();
+
 	if (options) {
 
 		/* defaults */
 		options->b_php_out = 0;
 		options->b_auto_version = 1;
+		options->b_allow_null = 0;
 		options->xmlrpc_out.version = xmlrpc_version_1_0;
 		options->xmlrpc_out.xml_elem_opts.encoding = ENCODING_DEFAULT;
 		options->xmlrpc_out.xml_elem_opts.verbosity = xml_elem_pretty;
@@ -332,6 +352,17 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 
 		if (output_opts && Z_TYPE_P(output_opts) == IS_ARRAY) {
 			zval** val;
+
+			/* marshal NULL */
+			if (zend_hash_find(Z_ARRVAL_P(output_opts), ALLOW_NULL_KEY, ALLOW_NULL_KEY_LEN + 1, (void**) &val) == SUCCESS) {
+				if (Z_TYPE_PP(val) == IS_BOOL) {
+					if (Z_LVAL_PP(val)) {
+						options->b_allow_null = 1;
+					} else {
+						options->b_allow_null = 0;
+					}
+				}
+			}
 
 			/* type of output (xml/php) */
 			if (zend_hash_find(Z_ARRVAL_P(output_opts), OUTPUT_TYPE_KEY, OUTPUT_TYPE_KEY_LEN + 1, (void**) &val) == SUCCESS) {
@@ -478,22 +509,20 @@ static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 }
 
 /* recursively convert php values into xmlrpc values */
-static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int depth)
+static XMLRPC_VALUE PHP_to_XMLRPC_worker (php_output_options* out, const char* key, zval* in_val, int depth)
 {
    XMLRPC_VALUE xReturn = NULL;
    if(in_val) {
       zval* val = NULL;
-      XMLRPC_VALUE_TYPE type = get_zval_xmlrpc_type(in_val, &val);
+      XMLRPC_VALUE_TYPE type = get_zval_xmlrpc_type(out, in_val, &val);
       if(val) {
          switch(type) {
+            case xmlrpc_nil:
+               xReturn = XMLRPC_CreateValueEmpty();
+               XMLRPC_SetValueID(xReturn, key, 0);
+               break;
             case xmlrpc_base64:
-               if(Z_TYPE_P(val) == IS_NULL) {
-                  xReturn = XMLRPC_CreateValueEmpty();
-						XMLRPC_SetValueID(xReturn, key, 0);
-               }
-               else {
-                  xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL_P(val), Z_STRLEN_P(val));
-               }
+               xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL_P(val), Z_STRLEN_P(val));
                break;
             case xmlrpc_datetime:
                convert_to_string(val);
@@ -530,7 +559,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
                      int res = my_zend_hash_get_current_key(Z_ARRVAL_P(val), &my_key, &num_index);
                      if(res == HASH_KEY_IS_LONG) {
                         if(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
-                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(0, *pIter, depth++));
+                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(out, 0, *pIter, depth++));
                         }
                      }
                      else if(res == HASH_KEY_NON_EXISTANT) {
@@ -538,7 +567,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
                      }
                      else if(res == HASH_KEY_IS_STRING) {
                         if(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
-                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key, *pIter, depth++));
+                           XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(out, my_key, *pIter, depth++));
                         }
                      }
 
@@ -554,9 +583,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
    return xReturn;
 }
 
-static XMLRPC_VALUE PHP_to_XMLRPC(zval* root_val)
+static XMLRPC_VALUE PHP_to_XMLRPC(php_output_options* out, zval* root_val)
 {
-   return PHP_to_XMLRPC_worker(NULL, root_val, 0);
+   return PHP_to_XMLRPC_worker(out, NULL, root_val, 0);
 }
 
 /* recursively convert xmlrpc values into php values */
@@ -572,6 +601,7 @@ static zval* XMLRPC_to_PHP(XMLRPC_VALUE el)
 
       switch(type) {
          case xmlrpc_empty:
+         case xmlrpc_nil:
             Z_TYPE_P(elem) = IS_NULL;
             break;
          case xmlrpc_string:
@@ -656,7 +686,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 				XMLRPC_RequestSetRequestType(xRequest, xmlrpc_request_call);
 			}
 			if (Z_TYPE_PP(vals) != IS_NULL) {
-				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(*vals));
+				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(&out, *vals));
 			}
 
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
@@ -684,7 +714,7 @@ PHP_FUNCTION(xmlrpc_encode)
 
 	if( return_value_used ) {
 		/* convert native php type to xmlrpc type */
-		xOut = PHP_to_XMLRPC(*arg1);
+		xOut = PHP_to_XMLRPC(NULL, *arg1);
 
 		/* generate raw xml from xmlrpc data */
 		outBuf = XMLRPC_VALUE_ToXML(xOut, 0);
@@ -1086,7 +1116,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				FREE_ZVAL(data.return_data);
 				data.return_data = XMLRPC_to_PHP(xAnswer);
 			} else if(data.php_executed && !out.b_php_out) {
-				xAnswer = PHP_to_XMLRPC(data.return_data);
+				xAnswer = PHP_to_XMLRPC(&out, data.return_data);
 			}
 
 			/* should we return data as xml? */
@@ -1155,7 +1185,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 	server = zend_list_find(Z_LVAL_PP(handle), &type);
 
 	if (type == le_xmlrpc_server) {
-		XMLRPC_VALUE xDesc = PHP_to_XMLRPC(*desc);
+		XMLRPC_VALUE xDesc = PHP_to_XMLRPC(NULL, *desc);
 		if (xDesc) {
 			int retval = XMLRPC_ServerAddIntrospectionData(server->server_ptr, xDesc);
 			XMLRPC_CleanupValue(xDesc);
@@ -1211,7 +1241,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 * type data *
 ************/
 
-#define XMLRPC_TYPE_COUNT 9
+#define XMLRPC_TYPE_COUNT 10
 #define XMLRPC_VECTOR_TYPE_COUNT 4
 #define TYPE_STR_MAP_SIZE (XMLRPC_TYPE_COUNT + XMLRPC_VECTOR_TYPE_COUNT)
 
@@ -1224,6 +1254,7 @@ static const char** get_type_str_mapping(void)
       /* warning. do not add/delete without changing size define */
       str_mapping[xmlrpc_none]     = "none";
       str_mapping[xmlrpc_empty]    = "empty";
+      str_mapping[xmlrpc_nil]      = "nil";
       str_mapping[xmlrpc_base64]   = "base64";
       str_mapping[xmlrpc_boolean]  = "boolean";
       str_mapping[xmlrpc_datetime] = "datetime";
@@ -1339,15 +1370,20 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
 }
 
 /* return xmlrpc type of a php value */
-XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval** newvalue)
+XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(php_output_options* out, zval* value, zval** newvalue)
 {
    XMLRPC_VALUE_TYPE type = xmlrpc_none;
    TSRMLS_FETCH();
+   XMLRPCLS_FETCH();
 
    if (value) {
       switch (Z_TYPE_P(value)) {
          case IS_NULL:
-            type = xmlrpc_base64;
+            if (XMLRPCG(allow_null) || (out && out->b_allow_null)) {
+               type = xmlrpc_nil;
+            } else {
+               type = xmlrpc_string;
+            }
             break;
 #ifndef BOOL_AS_LONG
 
@@ -1408,7 +1444,7 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval** newvalue)
 
 
 /* {{{ proto bool xmlrpc_set_type(string value, string type)
-   Sets xmlrpc type, base64 or datetime, for a PHP string value */
+   Sets xmlrpc type, base64 or datetime or nil, for a PHP string value */
 PHP_FUNCTION(xmlrpc_set_type)
 {
 	zval **arg, **type;
@@ -1443,7 +1479,7 @@ PHP_FUNCTION(xmlrpc_get_type)
 		WRONG_PARAM_COUNT;
 	}
 
-	type = get_zval_xmlrpc_type(*arg, 0);
+	type = get_zval_xmlrpc_type(NULL, *arg, 0);
 	if (type == xmlrpc_vector) {
 		vtype = determine_vector_type(Z_ARRVAL_PP(arg));
 	}

@@ -1109,6 +1109,7 @@ int XMLRPC_AddValueToVector(XMLRPC_VALUE target, XMLRPC_VALUE source) {
          /* guard against putting value of unknown type into vector */
          switch(source->type) {
             case xmlrpc_empty:
+            case xmlrpc_nil:
             case xmlrpc_base64:
             case xmlrpc_boolean:
             case xmlrpc_datetime:
@@ -2423,6 +2424,8 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype) {
           return "none";
        case xmlrpc_empty:
           return "empty";
+       case xmlrpc_nil:
+          return "nil";
        case xmlrpc_base64:
           return "base64";
        case xmlrpc_boolean:

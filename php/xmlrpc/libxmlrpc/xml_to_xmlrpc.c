@@ -58,6 +58,7 @@ static const char rcsid[] = "#(@) $Id: xml_to_xmlrpc.c,v 1.5 2004/04/27 17:33:59
 #define ELEM_METHODNAME     "methodName"
 #define ELEM_METHODRESPONSE "methodResponse"
 #define ELEM_NAME           "name"
+#define ELEM_NIL            "nil"
 #define ELEM_PARAM          "param"
 #define ELEM_PARAMS         "params"
 #define ELEM_STRING         "string"
@@ -210,6 +211,9 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
 		else {
          switch (type) {
 			case xmlrpc_empty: /*  treat null value as empty string in xmlrpc. */
+         case xmlrpc_nil:
+            elem_val->name = strdup(ELEM_NIL);
+            break;
          case xmlrpc_string:
             elem_val->name = strdup(ELEM_STRING);
             simplestring_addn(&elem_val->text, XMLRPC_GetValueString(node), XMLRPC_GetValueStringLen(node));

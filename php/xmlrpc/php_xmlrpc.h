@@ -94,9 +94,9 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
 /* Fill in this structure and use entries in it
    for thread safety instead of using true globals.
 */
-typedef struct {
-	int x; /* fix error in msvc, cannot have empty structs */
-} zend_xmlrpc_globals;
+ZEND_BEGIN_MODULE_GLOBALS(xmlrpc)
+	long allow_null;
+ZEND_END_MODULE_GLOBALS(xmlrpc)
 
 /* In every function that needs to use variables in zend_xmlrpc_globals,
    do call XMLRPCLS_FETCH(); after declaring other variables used by
@@ -104,6 +104,16 @@ typedef struct {
    You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
+
+#ifdef ZTS
+#define XMLRPCG(v) TSRMG(xmlrpc_globals_id, zend_xmlrpc_globals *, v)
+#define XMLRPCLS_FETCH() zend_xmlrpc_globals *xmlrpc_globals = ts_resource(xmlrpc_globals_id)
+#else
+#define XMLRPCG(v) (xmlrpc_globals.v)
+#define XMLRPCLS_FETCH()
+#endif
+
+ZEND_EXTERN_MODULE_GLOBALS(xmlrpc)
 
 #else
 

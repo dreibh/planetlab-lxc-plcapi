@@ -69,7 +69,8 @@ extern "C" {
  */
 typedef enum _XMLRPC_VALUE_TYPE {
    xmlrpc_none,                   /* not a value                    */
-   xmlrpc_empty,                  /* empty value, eg NULL           */
+   xmlrpc_empty,                  /* empty value                    */
+   xmlrpc_nil,                    /* null value, eg NULL            */
    xmlrpc_base64,                 /* base64 value, eg binary data   */
    xmlrpc_boolean,                /* boolean  [0 | 1]               */
    xmlrpc_datetime,               /* datetime [ISO8601 | time_t]    */
