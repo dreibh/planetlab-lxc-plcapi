@@ -10,7 +10,14 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Obsoletes: plcapilib
 
+# We use set everywhere
+Requires: python >= 2.4
+
+# We use psycopg2
+BuildRequires: postgresql-devel
+
 # Standard xmlrpc.so that ships with PHP does not marshal NULL
+BuildRequires: php-devel
 Obsoletes: php-xmlrpc
 Provides: php-xmlrpc
 
@@ -52,13 +59,15 @@ EOF
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%define php_extension_dir %(php-config --extension-dir)
+
 %files
 %defattr(-,root,root,-)
 %doc doc/PLCAPI.xml doc/PLCAPI.pdf doc/PLCAPI.html
 %dir %{_datadir}/plc_api
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
-%{_libdir}/php/modules/xmlrpc.so
+%{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
 
 %changelog
