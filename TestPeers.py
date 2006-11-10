@@ -195,4 +195,5 @@ def catch_up (args=[1,2]):
         plc[i]['peer_admin_id']=3
         plc[i]['peer_person_id']=4
         plc[i]['peer_id']=1
+        plc[i]['slice_id']=1
 

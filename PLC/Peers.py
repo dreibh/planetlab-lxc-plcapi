@@ -78,6 +78,8 @@ class Peer (Row):
 	# we get the whole table just in case 
 	# a host would have switched from one plc to the other
 	local_foreign_nodes = ForeignNodes (self.api)
+        # new to index it by hostname for searching later
+        local_foreign_nodes.hostname_index()
 	
 	### mark entries for this peer outofdate
         old_count=0;
@@ -88,14 +90,14 @@ class Peer (Row):
 
         ### these fields get copied through
         ### xxx need to figure how to revert unix timestamp to db timestamp format
-#        remote_fields = ['boot_state','model','version','date_created','last_updated']
-        remote_fields = ['boot_state','model','version']
+        remote_fields = ['boot_state','model','version','date_created','last_updated']
+
         
 	### scan the new entries, and mark them uptodate
 	for node in current_peer_nodes:
 	    hostname = node['hostname']
             try:
-                foreign_node = ForeignNodes(self.api,{'hostname':hostname})[0]
+                foreign_node = local_foreign_nodes.hostname_locate(hostname)
                 if foreign_node['peer_id'] != peer_id:
                     ### the node has changed its plc, needs to update peer_node
                     old_peer_id = foreign_node['peer_id']
@@ -118,6 +120,7 @@ class Peer (Row):
                 new_foreign_node.sync()
                 new_foreign_node.uptodate = True
                 self.manage_node(new_foreign_node,True)
+                local_foreign_nodes.hostname_add_by(new_foreign_node)
 
 
 	### delete entries that are not uptodate

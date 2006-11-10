@@ -1,6 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
+import time
 
 from types import StringTypes
 
@@ -24,13 +25,20 @@ class ForeignNode (Row) :
 	'boot_state' : Parameter (str, "Boot state, see Node"),
         'model' : Parameter (str,"Model, see Node"),
         'version' : Parameter (str,"Version, see Node"),
-#        'date_created': Parameter(int, "Creation time, see Node"),
-#        'last_updated': Parameter(int, "Update time, see Node"),
+        'date_created': Parameter(int, "Creation time, see Node"),
+        'last_updated': Parameter(int, "Update time, see Node"),
+        'slice_ids': Parameter([int], "List of slices on this node"),
 	}
 
     def __init__(self,api,fields={},uptodate=True):
 	Row.__init__(self,api,fields)
 	self.uptodate=uptodate
+
+    def validate_date_created(self,timestamp):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(timestamp))
+
+    def validate_last_updated(self,timestamp):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(timestamp))
 
     def purge_peer_node (self,commit=True):
         sql = "DELETE FROM peer_node WHERE node_id=%d"%self['node_id']
@@ -67,3 +75,18 @@ class ForeignNodes (Table):
                 sql += " AND (%s)" % foreign_node_filter.sql(api, "AND")
 
 	self.selectall(sql)
+
+    # managing an index by hostname
+    def hostname_index(self):
+        if 'hostname' not in self.columns:
+            raise PLCFault,"ForeignNodes::index_hostname, hostname not selected"
+        self.index={}
+        for foreign_node in self:
+            self.index[foreign_node['hostname']]=foreign_node
+            
+    def hostname_add_by(self,foreign_node):
+        self.index[foreign_node['hostname']]=foreign_node
+
+    def hostname_locate(self,hostname):
+        return self.index[hostname]
+            

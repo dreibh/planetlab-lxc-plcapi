@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.29 2006/11/08 22:07:29 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.30 2006/11/10 15:05:52 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -835,7 +835,7 @@ nodes.model,
 nodes.version,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
-node_slices.slice_ids,
+COALESCE(node_slices.slice_ids, '{}') AS slice_ids,
 nodes.deleted
 FROM nodes
 LEFT JOIN peer_node USING (node_id) 
