@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.31 2006/11/10 17:00:21 thierry Exp $
+-- $Id: planetlab4.sql,v 1.32 2006/11/13 16:23:11 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -297,13 +297,13 @@ GROUP BY site_id;
 
 -- Nodes - peers relationship
 CREATE TABLE peer_node (
-    peer_id integer REFERENCES peers NOT NULL, -- peer primary key
-    node_id integer REFERENCES nodes NOT NULL, -- node primary key
-    foreign_id integer NOT NULL,
-    PRIMARY KEY (peer_id, node_id)
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    node_id integer REFERENCES nodes NOT NULL, -- (Local) node identifier
+    foreign_id integer NOT NULL, -- (Peer) node identifier
+    PRIMARY KEY (peer_id, node_id),
+    UNIQUE (node_id) -- Nodes can only be at one peer
 ) WITH OIDS;
 CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
-CREATE INDEX peer_node_node_id_idx ON peer_node (node_id);
 
 -- Nodes at each peer
 CREATE VIEW peer_nodes AS
