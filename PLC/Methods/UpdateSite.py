@@ -5,7 +5,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
-             ['name', 'abbreviated_name',
+             ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
               'max_slices', 'max_slivers']
 
@@ -15,7 +15,7 @@ class UpdateSite(Method):
     updated, all other fields are left untouched.
 
     PIs can only update sites they are a member of. Only admins can 
-    update max_slices.
+    update max_slices, max_slivers, and login_base.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -52,8 +52,9 @@ class UpdateSite(Method):
             if site['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to modify specified site"
 
-            if 'max_slices' or 'max_slivers' in site_fields:
-                raise PLCInvalidArgument, "Only admins can update max_slices and max_slivers"
+            # Remove admin only fields
+            for key in 'max_slices', 'max_slivers', 'login_base':
+                del site_fields[key]
 
         site.update(site_fields)
 	site.sync()
