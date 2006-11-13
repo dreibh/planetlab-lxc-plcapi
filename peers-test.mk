@@ -35,6 +35,10 @@ DB=install-schema stop-clients clean-db restart
 API=install-api restart
 
 db: $(DB)
+
+db-dump:
+	chroot $(CHROOT) pg_dump -U pgsqluser planetlab4 > planetlab4.dump
+
 api: $(API)
 
 install-schema:
@@ -61,7 +65,6 @@ restart:
 
 ####################
 UPGRADE=down up reconfig restart
-HELP=rpm
 
 upgrade: $(UPGRADE)
 
@@ -81,6 +84,8 @@ reconfig:
 	(echo w; echo q) | chroot $(CHROOT) plc-config-tty
 
 #######
+HELP=rpm db-dump
+
 help:
 	@echo known targets:
 	@echo push: $(PUSH) 

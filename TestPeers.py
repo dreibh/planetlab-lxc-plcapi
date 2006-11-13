@@ -15,9 +15,11 @@
 ##############################
 
 import xmlrpclib
+import os
 
 plc1={ 'name':'plc1 in federation',
-       'url':'https://lurch.cs.princeton.edu:443/',
+       'hostname':'lurch.cs.princeton.edu',
+       'url-format':'https://%s:443/PLCAPI/',
        'builtin_admin_id':'root@localhost.localdomain',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc1@planet-lab.org',
@@ -25,7 +27,8 @@ plc1={ 'name':'plc1 in federation',
        'nodename':'n11.plc1.org'
        }
 plc2={ 'name':'plc2 in federation',
-       'url':'https://planetlab-devbox.inria.fr:443/',
+       'hostname':'planetlab-devbox.inria.fr',
+       'url-format':'https://%s:443/PLCAPI/',
        'builtin_admin_id':'root@localhost.localdomain',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc2@planet-lab.org',
@@ -61,7 +64,8 @@ def test00_init (args=[1,2]):
     else:
         plc=[None,plc1,plc2]
         for i in args:
-            url=plc[i]['url']+'/PLCAPI/'
+            url=plc[i]['url-format']%plc[i]['hostname']
+            plc[i]['url']=url
             s[i]=xmlrpclib.Server(url)
             print 'initializing s[%d]'%i,url
             aa[i]={'Username':plc[i]['builtin_admin_id'],
@@ -118,7 +122,8 @@ def test01_peer_person (args=[1,2]):
         peer=peer_index(i)
         person_id = s[i].AddPerson (a[i], {'first_name':'Peering(plain passwd)', 'last_name':plc[peer]['name'], 'role_ids':[3000],
                                            'email':plc[peer]['peer_admin_name'],'password':plc[peer]['peer_admin_password']})
-        print '02%d:Created person %d as the peer person'%(i,person_id)
+        print '02%d:Created person %d as the peer person'%(i,person_id)        hostname=plc[i]['nodename']
+
         plc[i]['peer_person_id']=person_id
 
 def test01_peer (args=[1,2]):
@@ -129,7 +134,14 @@ def test01_peer (args=[1,2]):
         # NOTE : need to manually reset the encrypted password through SQL at this point
         print '%02d:Created peer %d'%(i,peer_id)
         plc[i]['peer_id']=peer_id
-        print "Please MANUALLY set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
+        print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
+
+def test01_peer_passwd (args=[1,2]):
+    global plc,s,a
+    for i in args:
+        # using an ad-hoc local command for now - never could get quotes to reach sql....
+        os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
+        print "Attempted to set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
     
 def test02_refresh (args=[1,2]):
     global plc,s,a
@@ -173,15 +185,7 @@ def test03_slice (args=[1,2]):
         plc[i]['slice_id']=slice_id
         
 
-def test04_lnode (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        ### add node to it
-        hostname=plc[i]['nodename']
-        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
-        print '%02d: added local node %s'%(i,hostname)
-
-def test04_fnode (args=[1,2]):
+def test04_nodeslice (args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
@@ -206,13 +210,15 @@ def test_all (args=[1,2]):
     test01_check (args)
     test01_node (args)
     test01_peer_person (args)
-
-def test_all_2 (args=[1,2]):
     test01_peer (args)
+    test01_peer_passwd (args)
     test01_check (args)
     test02_refresh (args)
     test01_check (args)
     test03_site (args)
     test03_slice (args)
-    test04_lnode (args)
-    test04_fnode (args)
+    test04_nodeslice (args)
+
+if __name__ == '__main__':
+    test_all()
+    
