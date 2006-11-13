@@ -5,6 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
+from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
@@ -13,12 +14,6 @@ from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
-
-def hashref(rows, key_field):
-    d = {}
-    for row in rows:
-        d[row[key_field]] = row
-    return d
 
 class GetSlivers(Method):
     """
@@ -72,48 +67,53 @@ class GetSlivers(Method):
         if node_filter is None and isinstance(self.caller, Node):
             all_nodes = {self.caller['node_id']: self.caller}
         else:
-            all_nodes = hashref(Nodes(self.api, node_filter), 'node_id')
+            all_nodes = Nodes(self.api, node_filter).dict()
             # XXX Add foreign nodes
+
+        # Get default slices
+        default_slice_ids = set()
+        sites = Sites(self.api, [self.api.config.PLC_SLICE_PREFIX])
+        if sites:
+            default_slice_ids.update(sites[0]['slice_ids'])
 
         nodenetwork_ids = set()
         nodegroup_ids = set()
-        slice_ids = set()
+        slice_ids = default_slice_ids
         for node_id, node in all_nodes.iteritems():
             nodenetwork_ids.update(node['nodenetwork_ids'])
             nodegroup_ids.update(node['nodegroup_ids'])
             slice_ids.update(node['slice_ids'])
 
         # Get nodenetwork information
-        all_nodenetworks = hashref(NodeNetworks(self.api, nodenetwork_ids), 'nodenetwork_id')
+        all_nodenetworks = NodeNetworks(self.api, nodenetwork_ids).dict()
 
         # Get node group information
-        all_nodegroups = hashref(NodeGroups(self.api, nodegroup_ids), 'nodegroup_id')
+        all_nodegroups = NodeGroups(self.api, nodegroup_ids).dict()
 
         # Get (enabled) configuration files
-        all_conf_files = hashref(ConfFiles(self.api, {'enabled': True}), 'conf_file_id')
+        all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
 
-        if slice_ids:
-            # Get slices
-            all_slices = hashref(Slices(self.api, slice_ids), 'slice_id')
+        # Get slice information
+        all_slices = Slices(self.api, slice_ids).dict()
 
-            person_ids = set()
-            slice_attribute_ids = set()
-            for slice_id, slice in all_slices.iteritems():
-                person_ids.update(slice['person_ids'])
-                slice_attribute_ids.update(slice['slice_attribute_ids'])
+        person_ids = set()
+        slice_attribute_ids = set()
+        for slice_id, slice in all_slices.iteritems():
+            person_ids.update(slice['person_ids'])
+            slice_attribute_ids.update(slice['slice_attribute_ids'])
 
-            # Get user accounts
-            all_persons = hashref(Persons(self.api, person_ids), 'person_id')
+        # Get user information
+        all_persons = Persons(self.api, person_ids).dict()
 
-            key_ids = set()
-            for person_id, person in all_persons.iteritems():
-                key_ids.update(person['key_ids'])
+        key_ids = set()
+        for person_id, person in all_persons.iteritems():
+            key_ids.update(person['key_ids'])
 
-            # Get user account keys
-            all_keys = hashref(Keys(self.api, key_ids), 'key_id')
+        # Get user account keys
+        all_keys = Keys(self.api, key_ids).dict()
 
-            # Get slice attributes
-            all_slice_attributes = hashref(SliceAttributes(self.api, slice_attribute_ids), 'slice_attribute_id')
+        # Get slice attributes
+        all_slice_attributes = SliceAttributes(self.api, slice_attribute_ids).dict()
 
         nodes = []
         for node_id, node in all_nodes.iteritems():
@@ -142,8 +142,16 @@ class GetSlivers(Method):
                 if conf_file_id in all_conf_files:
                     conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
 
+            slice_ids = node['slice_ids']
+
+            # If not a foreign node, add all of our default system
+            # slices to it.
+            # XXX if not node['peer_id']:
+            if True:
+                slice_ids += default_slice_ids
+
             slivers = []
-            for slice in map(lambda id: all_slices[id], node['slice_ids']):
+            for slice in map(lambda id: all_slices[id], slice_ids):
                 keys = []
                 for person in map(lambda id: all_persons[id], slice['person_ids']):
                     keys += [{'key_type': all_keys[key_id]['key_type'],
