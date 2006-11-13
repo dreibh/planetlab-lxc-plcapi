@@ -123,14 +123,15 @@ class Table(list):
     Representation of row(s) in a database table.
     """
 
-    def __init__(self, api, row, columns = None):
+    def __init__(self, api, classobj, columns = None):
         self.api = api
-        self.row = row
+        self.classobj = classobj
+        self.rows = {}
 
         if columns is None:
-            columns = row.fields
+            columns = classobj.fields
         else:
-            columns = filter(lambda x: x in row.fields, columns)
+            columns = filter(lambda x: x in classobj.fields, columns)
             if not columns:
                 raise PLCInvalidArgument, "No valid return fields specified"
 
@@ -151,4 +152,15 @@ class Table(list):
         """
 
         for row in self.api.db.selectall(sql, params):
-            self.append(self.row(self.api, row))
+            obj = self.classobj(self.api, row)
+            self.append(obj)
+
+    def dict(self, key_field = None):
+        """
+        Return ourself as a dict keyed on key_field.
+        """
+
+        if key_field is None:
+            key_field = self.classobj.primary_key
+
+        return dict([(obj[key_field], obj) for obj in self])
