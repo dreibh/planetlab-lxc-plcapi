@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.30 2006/11/10 15:05:52 thierry Exp $
+-- $Id: planetlab4.sql,v 1.31 2006/11/10 17:00:21 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -271,8 +271,6 @@ CREATE TABLE nodes (
     hostname text NOT NULL, -- Node hostname
     site_id integer REFERENCES sites, -- At which site (clause NOT NULL removed for foreign_nodes)
     boot_state text REFERENCES boot_states NOT NULL DEFAULT 'inst', -- Node boot state
---    cached boolean NOT NULL DEFAULT false,  -- is this entry cached from a peer ?
---    peer_id integer REFERENCES peers,	    -- if cached, then from what peer
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
 
     -- Optional
@@ -299,9 +297,10 @@ GROUP BY site_id;
 
 -- Nodes - peers relationship
 CREATE TABLE peer_node (
-   peer_id integer REFERENCES peers NOT NULL, -- peer primary key
-   node_id integer REFERENCES nodes NOT NULL, -- node primary key
-   PRIMARY KEY (peer_id, node_id)
+    peer_id integer REFERENCES peers NOT NULL, -- peer primary key
+    node_id integer REFERENCES nodes NOT NULL, -- node primary key
+    foreign_id integer NOT NULL,
+    PRIMARY KEY (peer_id, node_id)
 ) WITH OIDS;
 CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
 CREATE INDEX peer_node_node_id_idx ON peer_node (node_id);
@@ -312,13 +311,6 @@ SELECT peer_id,
 array_accum(node_id) AS node_ids
 FROM peer_node
 GROUP BY peer_id;
-
-CREATE VIEW view_peers AS
-SELECT 
-peers.*, 
-peer_nodes.node_ids 
-FROM peers
-LEFT JOIN peer_nodes USING (peer_id);
 
 --------------------------------------------------------------------------------
 -- Node groups
@@ -589,6 +581,22 @@ array_accum(slice_id) AS slice_ids
 FROM slices
 GROUP BY site_id;
 
+-- Slices - peer relationship
+CREATE TABLE peer_slice (
+    peer_id integer REFERENCES peers NOT NULL, -- peer primary key
+    slice_id integer REFERENCES slices NOT NULL, -- node primary key
+    foreign_id integer NOT NULL,
+    PRIMARY KEY (peer_id, slice_id)
+) WITH OIDS;
+CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
+CREATE INDEX peer_slice_slice_id_idx ON peer_slice (node_id);
+
+CREATE VIEW peer_slices AS
+SELECT peer_id,
+array_accum(slice_id) AS slice_ids
+FROM peer_slice
+GROUP BY peer_id;
+
 -- Slice membership
 CREATE TABLE slice_person (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
@@ -825,6 +833,15 @@ LEFT JOIN node_conf_files USING (node_id)
 LEFT JOIN node_session USING (node_id)
 WHERE peer_node.peer_id IS NULL;
 
+CREATE VIEW view_peers AS
+SELECT 
+peers.*, 
+peer_nodes.node_ids,
+peer_slices.slice_ids
+FROM peers
+LEFT JOIN peer_nodes USING (peer_id)
+LEFT JOIN peer_slices USING (peer_id);
+
 CREATE VIEW view_foreign_nodes AS
 SELECT
 nodes.node_id,
@@ -948,10 +965,29 @@ COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
 COALESCE(slice_persons.person_ids, '{}') AS person_ids,
 COALESCE(slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids
 FROM slices
+LEFT JOIN peer_slice USING (slice_id)
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
-LEFT JOIN slice_attributes USING (slice_id);
+LEFT JOIN slice_attributes USING (slice_id)
+WHERE peer_slice.peer_id IS NULL;
 
+CREATE VIEW view_foreign_slices AS
+SELECT
+slices.slice_id,
+slices.name,
+peer_slice.peer_id,
+slices.instantiation,
+slices.url,
+slices.description,
+slices.max_nodes,
+slices.is_deleted,
+CAST(date_part('epoch', slices.created) AS bigint) AS created,
+CAST(date_part('epoch', slices.expires) AS bigint) AS expires
+FROM slices
+LEFT JOIN peer_slice USING (slice_id)
+WHERE peer_slice.peer_id IS NOT NULL;
+
+--
 CREATE VIEW view_slice_attributes AS
 SELECT
 slice_attribute.slice_attribute_id,

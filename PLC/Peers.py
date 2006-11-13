@@ -3,7 +3,6 @@
 # 
 
 import re
-
 from types import StringTypes
 
 from PLC.Faults import *
@@ -38,9 +37,41 @@ class Peer (Row):
 	    raise invalid_url
 	return url
 
-    def manage_node (self, foreign_node, add_if_true_del_if_false=True, commit=True):
+    def delete (self, commit=True):
+	"""
+	Delete peer
+	"""
+	
+	assert 'peer_id' in self
+
+        # remove nodes depending on this peer
+        for foreign_node_id in self.get_foreign_nodes():
+            try:
+                foreign_node = ForeignNodes(self.api,[foreign_node_id])[0]
+                foreign_node.delete(commit)
+            except:
+                print "Glitch : a foreign node instance was uncleanly deleted"
+
+        # remove the peer
+	self['deleted'] = True
+	self.sync(commit)
+
+    def get_foreign_nodes (self):
         """
-        Add foreign node to a peer
+        returns a list of the foreign nodes in this peer
+        """
+        sql="SELECT node_ids FROM peer_nodes WHERE peer_id=%d"%self['peer_id']
+        node_ids = self.api.db.selectall(sql)
+        return node_ids[0]['node_ids']
+
+    def manage_node (self, foreign_node, foreign_id, commit=True):
+        """
+        associate/dissociate a foreign node to/from a peer
+        foreign_node is a local object that describes a remote node
+        foreign_id is the unique id as provided by the remote peer
+        convention is:
+           if foreign_id is None : performs dissociation
+           otherwise:              performs association
         """
 
         assert 'peer_id' in self
@@ -49,9 +80,9 @@ class Peer (Row):
         peer_id = self['peer_id']
         node_id = foreign_node ['node_id']
 
-        if add_if_true_del_if_false:
+        if foreign_id:
             ### ADDING
-            sql = "INSERT INTO peer_node VALUES (%d,%d)" % (peer_id,node_id)
+            sql = "INSERT INTO peer_node VALUES (%d,%d,%d)" % (peer_id,node_id,foreign_id)
             self.api.db.do(sql)
             if self['node_ids'] is None:
                 self['node_ids']=[node_id,]
@@ -65,7 +96,7 @@ class Peer (Row):
         if commit:
             self.api.db.commit()
 
-    def refresh_nodes (self, current_peer_nodes):
+    def refresh_nodes (self, peer_get_nodes):
         """
         refreshes the foreign_nodes and peer_node tables
         expected input is the current list of nodes as returned by GetNodes
@@ -92,10 +123,10 @@ class Peer (Row):
         ### xxx need to figure how to revert unix timestamp to db timestamp format
         remote_fields = ['boot_state','model','version','date_created','last_updated']
 
-        
 	### scan the new entries, and mark them uptodate
-	for node in current_peer_nodes:
+	for node in peer_get_nodes:
 	    hostname = node['hostname']
+            foreign_id = node ['node_id']
             try:
                 foreign_node = local_foreign_nodes.hostname_locate(hostname)
                 if foreign_node['peer_id'] != peer_id:
@@ -103,8 +134,10 @@ class Peer (Row):
                     old_peer_id = foreign_node['peer_id']
                     old_peers=Peers(self.api,[peer_id])
                     assert old_peer[0]
-                    old_peers[0].manage_node(foreign_node,False)
-                    self.manage_node(foreign_node,True)
+                    # remove from previous peer
+                    old_peers[0].manage_node(foreign_node,None,False)
+                    # add to new peer
+                    self.manage_node(foreign_node,foreign_id,True)
                     foreign_node['peer_id'] = peer_id
 		### update it anyway: copy other relevant fields
                 for field in remote_fields:
@@ -119,28 +152,20 @@ class Peer (Row):
                 ### need to sync so we get a node_id
                 new_foreign_node.sync()
                 new_foreign_node.uptodate = True
-                self.manage_node(new_foreign_node,True)
+                self.manage_node(new_foreign_node,foreign_id,True)
                 local_foreign_nodes.hostname_add_by(new_foreign_node)
-
 
 	### delete entries that are not uptodate
         for foreign_node in local_foreign_nodes:
             if not foreign_node.uptodate:
                 foreign_node.delete()
 
-        return len(current_peer_nodes)-old_count
+        return len(peer_get_nodes)-old_count
         
+    def refresh_slices (self, peer_get_slices):
+        return 0
+
         
-    def delete (self, commit=True):
-	"""
-	Delete peer
-	"""
-	
-	assert 'peer_id' in self
-
-	self['deleted'] = True
-	self.sync(commit)
-
 class Peers (Table):
     """ 
     Maps to the peers table in the database
