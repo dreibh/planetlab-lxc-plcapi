@@ -206,7 +206,7 @@ class Slice(Row):
                            (table, self['slice_id']), self)
 
         # Mark as deleted
-        self['is_deleted'] = True
+        self['deleted'] = True
         self.sync(commit)
 
 class Slices(Table):
@@ -218,7 +218,7 @@ class Slices(Table):
     def __init__(self, api, slice_filter = None, columns = None, expires = int(time.time())):
         Table.__init__(self, api, Slice, columns)
 
-        sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
+        sql = "SELECT %s FROM view_slices WHERE deleted IS False" % \
               ", ".join(self.columns)
 
         if expires is not None:
