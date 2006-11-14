@@ -52,6 +52,8 @@ install-api:
 stop-clients:
 	@echo 'pkilling psql'
 	@-pkill psql
+	@echo 'pkilling Shell.py'
+	@-pkill Shell.py
 	@echo stopping httpd
 	@chroot $(CHROOT) /etc/plc.d/httpd stop
 
