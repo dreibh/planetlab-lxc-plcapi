@@ -51,7 +51,7 @@ class ForeignSlice (Row) :
         Delete existing foreign slice.
         """
         self.purge_peer_slice()
-        self['is_deleted']=True
+        self['deleted']=True
         self.sync(commit)
         
 
@@ -61,7 +61,7 @@ class ForeignSlices (Table):
 
         sql = ""
 	sql += "SELECT %s FROM view_foreign_slices " % ", ".join(self.columns)
-        sql += "WHERE is_deleted IS False "
+        sql += "WHERE deleted IS False "
               
         if foreign_slice_filter is not None:
             if isinstance(foreign_slice_filter, (list, tuple, set)):
