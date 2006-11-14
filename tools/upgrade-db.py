@@ -318,12 +318,15 @@ try:
 		if os.system(recreate_cmd):
 			print "ERROR: database encoding failed. Aborting"
 			sys.exit(1)
-
+		
 		os.remove(dump_file_encoded)
 		os.remove(dump_file)
 except:
 	raise
 
+
+db = connect()
+cursor = db.cursor()
 
 # parse the schema user wishes to upgrade to
 try:
