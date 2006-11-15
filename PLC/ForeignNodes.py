@@ -54,7 +54,6 @@ class ForeignNode (Row) :
         self['deleted']=True
         self.sync(commit)
         
-
 class ForeignNodes (Table):
     def __init__ (self, api, foreign_node_filter = None, columns = None):
         Table.__init__(self, api, ForeignNode, columns)
@@ -76,17 +75,3 @@ class ForeignNodes (Table):
 
 	self.selectall(sql)
 
-#    # managing an index by hostname
-#    def hostname_index(self):
-#        if 'hostname' not in self.columns:
-#            raise PLCFault,"ForeignNodes::index_hostname, hostname not selected"
-#        self.index={}
-#        for foreign_node in self:
-#            self.index[foreign_node['hostname']]=foreign_node
-#            
-#    def hostname_add_by(self,foreign_node):
-#        self.index[foreign_node['hostname']]=foreign_node
-#
-#    def hostname_locate(self,hostname):
-#        return self.index[hostname]
-            
