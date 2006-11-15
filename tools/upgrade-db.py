@@ -297,8 +297,8 @@ try:
 		# generate db dump
 		dump_file = '%s/dump.sql' % (temp_dir)
 		dump_file_encoded = dump_file + ".utf8"
-		dump_cmd = 'pg_dump -i %s -U %s -f %s > /dev/null 2>&1' % \
-			   (config['PLC_DB_NAME'], config['PLC_DB_USER'], dump_file)
+		dump_cmd = 'pg_dump -i %s -U postgres -f %s > /dev/null 2>&1' % \
+			   (config['PLC_DB_NAME'], dump_file)
 		if os.system(dump_cmd):
 			print "ERROR: during db dump. Exiting."
 			sys.exit(1)
