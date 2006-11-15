@@ -10,7 +10,9 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
+from PLC.Nodes import Nodes,Node
 from PLC.ForeignNodes import ForeignNodes,ForeignNode
+from PLC.ForeignSlices import ForeignSlices,ForeignSlice
 
 class Peer (Row):
     """
@@ -25,7 +27,8 @@ class Peer (Row):
 	'peername' : Parameter (str, "Peer name"),
 	'peer_url' : Parameter (str, "Peer API url"),
 	'person_id' : Parameter (int, "Person_id of the account storing credentials - temporary"),
-	'node_ids' : Parameter ([int], "This peer's nodes ids")
+	'node_ids' : Parameter ([int], "This peer's nodes ids"),
+	'slice_ids' : Parameter ([int], "This peer's slices ids"),
 	}
 
     def validate_peer_url (self, url):
@@ -64,14 +67,13 @@ class Peer (Row):
         node_ids = self.api.db.selectall(sql)
         return node_ids[0]['node_ids']
 
-    def manage_node (self, foreign_node, foreign_id, commit=True):
+    def manage_node (self, foreign_node, add_if_true, commit=True):
         """
         associate/dissociate a foreign node to/from a peer
         foreign_node is a local object that describes a remote node
-        foreign_id is the unique id as provided by the remote peer
         convention is:
-           if foreign_id is None : performs dissociation
-           otherwise:              performs association
+           if add_if_true is None : performs dissociation
+           otherwise:               performs association
         """
 
         assert 'peer_id' in self
@@ -80,18 +82,52 @@ class Peer (Row):
         peer_id = self['peer_id']
         node_id = foreign_node ['node_id']
 
-        if foreign_id:
+        if add_if_true:
             ### ADDING
-            sql = "INSERT INTO peer_node VALUES (%d,%d,%d)" % (peer_id,node_id,foreign_id)
+            sql = "INSERT INTO peer_node VALUES (%d,%d)" % (peer_id,node_id)
             self.api.db.do(sql)
             if self['node_ids'] is None:
                 self['node_ids']=[node_id,]
-            self['node_ids'].append(node_id)
+            else:
+                self['node_ids'].append(node_id)
             ### DELETING
         else:
             sql = "DELETE FROM peer_node WHERE peer_id=%d AND node_id=%d" % (peer_id,node_id)
             self.api.db.do(sql)
             self['node_ids'].remove(node_id)
+
+        if commit:
+            self.api.db.commit()
+
+    def manage_slice (self, foreign_slice, add_if_true, commit=True):
+        """
+        associate/dissociate a foreign node to/from a peer
+        foreign_slice is a local object that describes a remote slice
+        alien_id is the unique id as provided by the remote peer
+        convention is:
+           if add_if_true is None : performs dissociation
+           otherwise:               performs association
+        """
+
+        assert 'peer_id' in self
+        assert 'slice_id' in foreign_slice
+
+        peer_id = self['peer_id']
+        slice_id = foreign_slice ['slice_id']
+
+        if add_if_true:
+            ### ADDING
+            sql = "INSERT INTO peer_slice VALUES (%d,%d)" % (peer_id,slice_id)
+            self.api.db.do(sql)
+            if self['slice_ids'] is None:
+                self['slice_ids']=[slice_id,]
+            else:
+                self['slice_ids'].append(slice_id)
+            ### DELETING
+        else:
+            sql = "DELETE FROM peer_slice WHERE peer_id=%d AND slice_id=%d" % (peer_id,slice_id)
+            self.api.db.do(sql)
+            self['slice_ids'].remove(slice_id)
 
         if commit:
             self.api.db.commit()
@@ -109,7 +145,7 @@ class Peer (Row):
 	# we get the whole table just in case 
 	# a host would have switched from one plc to the other
 	local_foreign_nodes = ForeignNodes (self.api)
-        # new to index it by hostname for searching later
+        # index it by hostname for searching later
         local_foreign_nodes_index = local_foreign_nodes.dict('hostname')
 	
 	### mark entries for this peer outofdate
@@ -125,7 +161,6 @@ class Peer (Row):
 	### scan the new entries, and mark them uptodate
 	for node in peer_get_nodes:
 	    hostname = node['hostname']
-            foreign_id = node ['node_id']
             try:
                 foreign_node = local_foreign_nodes_index[hostname]
                 if foreign_node['peer_id'] != peer_id:
@@ -134,9 +169,9 @@ class Peer (Row):
                     old_peers=Peers(self.api,[peer_id])
                     assert old_peer[0]
                     # remove from previous peer
-                    old_peers[0].manage_node(foreign_node,None,False)
+                    old_peers[0].manage_node(foreign_node,False,False)
                     # add to new peer
-                    self.manage_node(foreign_node,foreign_id,True)
+                    self.manage_node(foreign_node,True,True)
                     foreign_node['peer_id'] = peer_id
 		### update it anyway: copy other relevant fields
                 for field in remote_fields:
@@ -151,7 +186,7 @@ class Peer (Row):
                 ### need to sync so we get a node_id
                 new_foreign_node.sync()
                 new_foreign_node.uptodate = True
-                self.manage_node(new_foreign_node,foreign_id,True)
+                self.manage_node(new_foreign_node,True,True)
                 local_foreign_nodes_index[hostname]=new_foreign_node
 
 	### delete entries that are not uptodate
@@ -161,10 +196,110 @@ class Peer (Row):
 
         return len(peer_get_nodes)-old_count
         
-    def refresh_slices (self, peer_get_slices):
-        return 0
+    ### transcode node_id
+    def locate_alien_node_id_in_foreign_nodes (self, peer_foreign_nodes_dict, alien_id):
+        """
+        returns a local node_id as transcoded from an alien node_id
+        only lookups our local nodes because we dont need to know about other sites
+        returns a valid local node_id, or throws an exception
+        """
+        peer_foreign_node = peer_foreign_nodes_dict[alien_id]
+        hostname = peer_foreign_node['hostname']
+        return Nodes(self.api,[hostname])[0]['node_id']
 
+    def refresh_slices (self, peer_get_slices, peer_foreign_nodes):
+        """
+        refreshes the foreign_slices and peer_slice tables
+        expected input is the current list of slices as returned by GetSlices
+
+        returns the number of new slices on this peer (can be negative)
+        """
+
+        peer_id = self['peer_id']
         
+	# we get the whole table just in case 
+	# a host would have switched from one plc to the other
+	local_foreign_slices = ForeignSlices (self.api)
+        # index it by name for searching later
+        local_foreign_slices_index = local_foreign_slices.dict('name')
+	
+	### mark entries for this peer outofdate
+        old_count=0;
+	for foreign_slice in local_foreign_slices:
+	    if foreign_slice['peer_id'] == peer_id:
+		foreign_slice.uptodate=False
+                old_count += 1
+
+        ### these fields get copied through
+        remote_fields = ['instantiation', 'url', 'description',
+                         'max_nodes', 'created', 'expires']
+
+	### scan the new entries, and mark them uptodate
+        new_count=0
+	for slice in peer_get_slices:
+            ### ignore system-wide slices
+            if slice['creator_person_id'] == 1:
+                continue
+
+	    name = slice['name']
+
+            # create or update 
+            try:
+                foreign_slice = local_foreign_slices_index[name]
+                if foreign_slice['peer_id'] != peer_id:
+                    ### the slice has changed its plc, needs to update peer_slice
+                    old_peer_id = foreign_slice['peer_id']
+                    old_peers=Peers(self.api,[peer_id])
+                    assert old_peer[0]
+                    # remove from previous peer
+                    old_peers[0].manage_slice(foreign_slice,False,False)
+                    # add to new peer
+                    self.manage_slice(foreign_slice,True,True)
+                    foreign_slice['peer_id'] = peer_id
+	    except:
+                foreign_slice = ForeignSlice(self.api, {'name':name})
+#                ### xxx temporary 
+#                foreign_slice['site_id']=1
+                ### need to sync so we get a slice_id
+                foreign_slice.sync()
+                self.manage_slice(foreign_slice,True,True)
+                # insert in index
+                local_foreign_slices_index[name]=foreign_slice
+
+            # go on with update
+            for field in remote_fields:
+                foreign_slice[field]=slice[field]
+            # this row is now valid
+            foreign_slice.uptodate=True
+            new_count += 1
+            foreign_slice.sync()
+
+            ### handle node_ids
+            # in slice we get a set of node_ids
+            # but these ids are RELATIVE TO THE PEER
+            # so we need to figure the local node_id for these nodes
+            # we do this through peer_foreign_nodes 
+            # dictify once
+            peer_foreign_nodes_dict = {}
+            for foreign_node in peer_foreign_nodes:
+                peer_foreign_nodes_dict[foreign_node['node_id']]=foreign_node
+            updated_node_ids = []
+            for alien_node_id in slice['node_ids']:
+                try:
+                    local_node_id=self.locate_alien_node_id_in_foreign_nodes(peer_foreign_nodes_dict,alien_node_id)
+                    updated_node_ids.append(local_node_id)
+                except:
+                    # this node_id is not in our scope
+                    pass
+            foreign_slice.update_slice_nodes (updated_node_ids)
+
+	### delete entries that are not uptodate
+        for foreign_slice in local_foreign_slices:
+            if not foreign_slice.uptodate:
+                foreign_slice.delete()
+
+        return new_count-old_count
+
 class Peers (Table):
     """ 
     Maps to the peers table in the database

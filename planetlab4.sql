@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.33 2006/11/13 18:41:59 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.34 2006/11/14 09:44:40 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -299,7 +299,6 @@ GROUP BY site_id;
 CREATE TABLE peer_node (
     peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
     node_id integer REFERENCES nodes NOT NULL, -- (Local) node identifier
-    foreign_id integer NOT NULL, -- (Peer) node identifier
     PRIMARY KEY (peer_id, node_id),
     UNIQUE (node_id) -- Nodes can only be at one peer
 ) WITH OIDS;
@@ -530,7 +529,8 @@ INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manual
 -- Slices
 CREATE TABLE slices (
     slice_id serial PRIMARY KEY, -- Slice identifier
-    site_id integer REFERENCES sites NOT NULL, -- Site identifier
+-- xxx temporarily remove the NOT NULL constraint
+    site_id integer REFERENCES sites, -- Site identifier
     name text NOT NULL, -- Slice name
     instantiation text REFERENCES slice_instantiations NOT NULL DEFAULT 'plc-instantiated', -- Slice state, e.g. plc-instantiated
     url text, -- Project URL
@@ -538,7 +538,8 @@ CREATE TABLE slices (
 
     max_nodes integer NOT NULL DEFAULT 100, -- Maximum number of nodes that can be assigned to this slice
 
-    creator_person_id integer REFERENCES persons NOT NULL, -- Creator
+-- xxx temporarily remove the NOT NULL constraint
+    creator_person_id integer REFERENCES persons, -- Creator
     created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Creation date
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
@@ -585,7 +586,6 @@ GROUP BY site_id;
 CREATE TABLE peer_slice (
     peer_id integer REFERENCES peers NOT NULL, -- peer primary key
     slice_id integer REFERENCES slices NOT NULL, -- node primary key
-    foreign_id integer NOT NULL,
     PRIMARY KEY (peer_id, slice_id)
 ) WITH OIDS;
 CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
@@ -969,7 +969,9 @@ LEFT JOIN peer_slice USING (slice_id)
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
 LEFT JOIN slice_attributes USING (slice_id)
-WHERE peer_slice.peer_id IS NULL;
+WHERE peer_slice.peer_id IS NULL
+AND slices.site_id IS NOT NULL
+AND slices.creator_person_id IS NOT NULL;
 
 CREATE VIEW view_foreign_slices AS
 SELECT
@@ -982,9 +984,11 @@ slices.description,
 slices.max_nodes,
 slices.deleted,
 CAST(date_part('epoch', slices.created) AS bigint) AS created,
-CAST(date_part('epoch', slices.expires) AS bigint) AS expires
+CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
+COALESCE(slice_nodes.node_ids, '{}') AS node_ids
 FROM slices
 LEFT JOIN peer_slice USING (slice_id)
+LEFT JOIN slice_nodes USING (slice_id)
 WHERE peer_slice.peer_id IS NOT NULL;
 
 --

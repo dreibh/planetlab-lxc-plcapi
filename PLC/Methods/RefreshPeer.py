@@ -64,7 +64,9 @@ class RefreshPeer(Method):
 	peer_get_nodes = apiserver.GetNodes(auth)
         nb_new_nodes = peer.refresh_nodes(peer_get_nodes)
         
+        # rough and temporary
+        peer_foreign_nodes = apiserver.GetForeignNodes(auth)
         peer_get_slices = apiserver.GetSlices(auth)
-        nb_new_slices = peer.refresh_slices(peer_get_slices)
+        nb_new_slices = peer.refresh_slices(peer_get_slices,peer_foreign_nodes)
         
 	return (self.api.config.PLC_NAME,nb_new_nodes,nb_new_slices)

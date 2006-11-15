@@ -28,6 +28,7 @@ class ForeignSlice (Row) :
         'max_nodes': Parameter(int, "Maximum number of nodes that can be assigned to this slice"),
         'created': Parameter(int, "Date and time when slice was created, in seconds since UNIX epoch", ro = True),
         'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
+        'node_ids' : Parameter([int], "List of nodes in this slice"),
         }
 
     def __init__(self,api,fields={},uptodate=True):
@@ -46,6 +47,35 @@ class ForeignSlice (Row) :
         if commit:
             self.api.db.commit()
 
+    def purge_slice_node (self,commit=True):
+        sql = "DELETE FROM slice_node WHERE slice_id=%d"%self['slice_id']
+        self.api.db.do(sql)
+        if commit:
+            self.api.db.commit()
+
+    def add_slice_nodes (self, node_ids, commit=True):
+        slice_id = self['slice_id']
+        ### xxx needs to be optimized
+        ### tried to figure a way to use a single sql statement
+        ### like: insert into table (x,y) values (1,2),(3,4);
+        ### but apparently this is not supported under postgresql
+        for node_id in node_ids:
+            sql="INSERT INTO slice_node VALUES (%d,%d)"%(slice_id,node_id)
+            self.api.db.do(sql)
+        if commit:
+            self.api.db.commit()
+
+    def update_slice_nodes (self, node_ids):
+        # xxx to be optimized
+        # we could compute the (set) difference between
+        # current and updated set of node_ids
+        # and invoke the DB only based on that
+        #
+        # for now : clean all entries for this slice
+        self.purge_slice_node()
+        # and re-install new list
+        self.add_slice_nodes (node_ids)
+
     def delete (self, commit=True):
         """
         Delete existing foreign slice.
@@ -62,7 +92,7 @@ class ForeignSlices (Table):
         sql = ""
 	sql += "SELECT %s FROM view_foreign_slices " % ", ".join(self.columns)
         sql += "WHERE deleted IS False "
-              
+
         if foreign_slice_filter is not None:
             if isinstance(foreign_slice_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
@@ -76,17 +106,3 @@ class ForeignSlices (Table):
 
 	self.selectall(sql)
 
-    # managing an index by slicename
-    def name_index(self):
-        if 'name' not in self.columns:
-            raise PLCFault,"ForeignSlices::name_index, name not selected"
-        self.index={}
-        for foreign_slice in self:
-            self.index[foreign_slice['name']]=foreign_slice
-            
-    def name_add_by(self,foreign_slice):
-        self.index[foreign_slice['name']]=foreign_slice
-
-    def name_locate(self,name):
-        return self.index[name]
-            
