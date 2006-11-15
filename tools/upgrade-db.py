@@ -267,12 +267,11 @@ cursor = db.cursor()
 try:
 	cursor.execute("SELECT relname from pg_class where relname = 'plc_db_version'")
 	rows = cursor.fetchall()
-	if not rows:
+	if not rows or not rows[0] or not rows[0][0]:
 		print "WARNING: current db has no version. Unable to validate config file."
 	else:
 		cursor.execute("SELECT version FROM plc_db_version")
 		rows = cursor.fetchall()
-
 		if rows[0][0] == db_version_new:
                		print "Status: Versions are the same. No upgrade necessary."
         		sys.exit()
@@ -308,10 +307,10 @@ try:
 		# archive original db
 		archive_db(config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_sqlascii_archived')
 		# create a utf8 database and upload encoded data
-		recreate_cmd = 'createdb -U %s -E UTF8 %s > /dev/null 2>&1; ' \
+		recreate_cmd = 'createdb -U postgres -E UTF8 %s > /dev/null 2>&1; ' \
 			       'psql -a -U  %s %s < %s > /dev/null 2>&1;'   % \
-			  (config['PLC_DB_USER'], config['PLC_DB_NAME'], \
-			   config['PLC_DB_USER'], config['PLC_DB_NAME'], dump_file_encoded) 
+			  (config['PLC_DB_NAME'], config['PLC_DB_USER'], \
+			   config['PLC_DB_NAME'], dump_file_encoded) 
 		print "Status: recreating database as utf8"
 		if os.system(recreate_cmd):
 			print "Error: database encoding failed. Aborting"
@@ -389,7 +388,7 @@ try:
 				table_fields = [field.strip().split(':')[0] for field in table_def]
 				insert_cmd = "psql %s %s -c " \
                                              " 'COPY %s (%s) FROM stdin;' < %s " % \
-                                             (database, config['PLC_DB_USER'], key, ", ".join(table_fields), temp_tables[key] )
+                                             (config['PLC_DB_NAME'], config['PLC_DB_USER'], key, ", ".join(table_fields), temp_tables[key] )
 				exit_status = os.system(insert_cmd)
 				if exit_status:
 					print "Error: upgrade %s failed" % key
@@ -400,15 +399,16 @@ try:
 				for insert_stmt in inserts:
 					if insert_stmt.find(key) > -1:
                 				insert_cmd = 'psql %s postgres -qc "%s;" > /dev/null 2>&1' % \
-                             			(database, insert_stmt)
+                             			(config['PLC_DB_NAME'], insert_stmt)
                 				os.system(insert_cmd) 
 except:
 	print "Error: failed to populate db. Unarchiving original database and aborting"
 	undo_command = "dropdb -U postgres %s; psql template1 postgres -qc" \
                        " 'ALTER DATABASE %s RENAME TO %s;';  > /dev/null" % \
-                       (database, archived_database, database)
+                       (config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived', config['PLC_DB_NAME'])
 	os.system(undo_command) 
 	remove_temp_tables()
+	raise
 	
 remove_temp_tables()
 
