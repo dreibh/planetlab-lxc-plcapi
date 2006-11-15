@@ -19,10 +19,10 @@ class RefreshPeer(Method):
     Query a peer PLC for its list of nodes, and refreshes
     the local database accordingly
     
-    Returns a tuple containing
-    (*) the peer name
-    (*) the number of new nodes from that peer - may be negative
-    (*) the number of new slices from that peer - may be negative
+    Returns a dict containing
+    (*) 'plcname' :   the peer name
+    (*) 'new_nodes' : the number of new nodes from that peer - may be negative
+    (*) 'new_slices': the number of new slices from that peer - may be negative
     """
     
     roles = ['admin']
@@ -30,7 +30,7 @@ class RefreshPeer(Method):
     accepts = [ Auth(),
 		Parameter (int, "Peer id") ]
     
-    returns = Parameter(int, "Delta in number of foreign nodes attached to that peer")
+    returns = Parameter(dict, "plcname, new_nodes, new_slices")
 
     def call (self, auth, peer_id):
 	
@@ -69,4 +69,6 @@ class RefreshPeer(Method):
         peer_get_slices = apiserver.GetSlices(auth)
         nb_new_slices = peer.refresh_slices(peer_get_slices,peer_foreign_nodes)
         
-	return (self.api.config.PLC_NAME,nb_new_nodes,nb_new_slices)
+        return {'plcname':self.api.config.PLC_NAME,
+                'new_nodes':nb_new_nodes,
+                'new_slices':nb_new_slices}
