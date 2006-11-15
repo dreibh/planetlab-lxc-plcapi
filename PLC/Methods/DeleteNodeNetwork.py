@@ -24,7 +24,11 @@ class DeleteNodeNetwork(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'NodeNetwork'
+
     def call(self, auth, nodenetwork_id):
+
         # Get node network information
         nodenetworks = NodeNetworks(self.api, [nodenetwork_id])
         if not nodenetworks:
@@ -47,5 +51,6 @@ class DeleteNodeNetwork(Method):
                 raise PLCPermissionDenied, "Not allowed to delete this node network"
 
         nodenetwork.delete()
+	self.object_ids = [nodenetwork['nodenetwork_id']]
 
         return 1

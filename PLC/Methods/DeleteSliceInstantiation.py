@@ -22,6 +22,9 @@ class DeleteSliceInstantiation(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete' 
+    object_type = 'SliceInstantiation'
+
     def call(self, auth, instantiation):
         slice_instantiations = SliceInstantiations(self.api, [instantiation])
         if not slice_instantiations:

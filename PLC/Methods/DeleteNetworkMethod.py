@@ -22,6 +22,9 @@ class DeleteNetworkMethod(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+   
+    event_type = 'Delete'
+    object_type = 'NetworkMethod'
 
     def call(self, auth, name):
         network_methods = NetworkMethods(self.api, [name])

@@ -19,6 +19,9 @@ class DeleteMessage(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+       
+    event_type = 'Delete'
+    object_type = 'Message'
 
     def call(self, auth, message_id):
         # Get message information
@@ -28,5 +31,6 @@ class DeleteMessage(Method):
         message = messages[0]
 
         message.delete()
+	self.object_ids = [message['message_id']]
 
         return 1

@@ -23,6 +23,9 @@ class DeleteNodeGroup(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'NodeGroup'
+
     def call(self, auth, node_group_id_or_name):
         # Get account information
         nodegroups = NodeGroups(self.api, [node_group_id_or_name])
@@ -32,5 +35,6 @@ class DeleteNodeGroup(Method):
         nodegroup = nodegroups[0]
 
         nodegroup.delete()
+	self.object_ids = [nodegroup['nodegroup_id']]
 
         return 1

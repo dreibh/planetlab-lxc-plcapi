@@ -25,6 +25,9 @@ class DeleteRole(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'Role'
+    
     def call(self, auth, role_id_or_name):
         roles = Roles(self.api, [role_id_or_name])
         if not roles:
@@ -32,5 +35,6 @@ class DeleteRole(Method):
         role = roles[0]
 
         role.delete()
+	self.object_ids = [role['role_id']]
 
         return 1

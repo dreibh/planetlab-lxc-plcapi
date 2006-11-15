@@ -22,6 +22,9 @@ class DeleteNetworkType(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+    
+    event_type = 'Delete'
+    object_type = 'NetworkType'
 
     def call(self, auth, name):
         network_types = NetworkTypes(self.api, [name])

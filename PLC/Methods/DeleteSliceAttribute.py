@@ -28,6 +28,9 @@ class DeleteSliceAttribute(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'SliceAttribute'
+
     def call(self, auth, slice_attribute_id):
         slice_attributes = SliceAttributes(self.api, [slice_attribute_id])
         if not slice_attributes:
@@ -51,8 +54,9 @@ class DeleteSliceAttribute(Method):
 
             if slice_attribute['min_role_id'] is not None and \
                min(self.caller['role_ids']) > slice_attribute['min_role_id']:
-                raise PLCPermissionDenied, "Not allowed to delete the specified attribute"
+                raise PLCPermissioinDenied, "Not allowed to delete the specified attribute"
 
         slice_attribute.delete()
+	self.object_ids = [slice_attribute['slice_attribute_id']]
 
         return 1

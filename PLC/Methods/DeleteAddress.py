@@ -21,6 +21,9 @@ class DeleteAddress(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+    
+    event_type = 'Delete'
+    object_type = 'Address'
 
     def call(self, auth, address_id):
         # Get associated address details
@@ -34,5 +37,6 @@ class DeleteAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address.delete()
+        self.object_ids = [address['address_id']]
 
         return 1

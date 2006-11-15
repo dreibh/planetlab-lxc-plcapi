@@ -23,6 +23,9 @@ class DeleteBootState(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'BootState'
+
     def call(self, auth, name):
         boot_states = BootStates(self.api, [name])
         if not boot_states:
@@ -30,5 +33,5 @@ class DeleteBootState(Method):
         boot_state = boot_states[0]
 
         boot_state.delete()
-
+	
         return 1

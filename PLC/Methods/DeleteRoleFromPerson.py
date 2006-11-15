@@ -27,6 +27,9 @@ class DeleteRoleFromPerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'DeleteFrom'
+    object_type = 'Person'
+
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get all roles
         roles = {}
@@ -63,5 +66,7 @@ class DeleteRoleFromPerson(Method):
 
         if role_id in person['role_ids']:
             person.remove_role(role_id)
+	
+	self.object_ids = [person['person_id']]
 
         return 1

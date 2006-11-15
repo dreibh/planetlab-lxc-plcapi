@@ -25,6 +25,9 @@ class DeletePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'Person'
+
     def call(self, auth, person_id_or_email):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -41,5 +44,6 @@ class DeletePerson(Method):
             raise PLCPermissionDenied, "Not allowed to delete specified account"
 
         person.delete()
+	self.object_ids = [person['person_id']]
 
         return 1

@@ -22,6 +22,9 @@ class DeleteKey(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'Key'
+
     def call(self, auth, key_id):
         # Get associated key details
         keys = Keys(self.api, [key_id])
@@ -34,5 +37,6 @@ class DeleteKey(Method):
                 raise PLCPermissionDenied, "Key must be associated with your account"
 
         key.delete()
+	self.object_ids = [key['key_id']]
 
         return 1

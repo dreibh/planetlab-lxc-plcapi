@@ -21,7 +21,10 @@ class DeleteKeyType(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-
+    
+    event_type = 'Delete'
+    object_type = 'KeyType'
+    
     def call(self, auth, name):
         key_types = KeyTypes(self.api, [name])
         if not key_types:

@@ -22,6 +22,9 @@ class DeletePCU(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'Delete'
+    object_type = 'PCU'
+
     def call(self, auth, pcu_id):
         # Get associated PCU details
         pcus = PCUs(self.api, [pcu_id])
@@ -34,5 +37,6 @@ class DeletePCU(Method):
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
 
         pcu.delete()
+	self.object_ids = [pcu['pcu_id']]
 
         return 1

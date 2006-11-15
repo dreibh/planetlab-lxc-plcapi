@@ -25,6 +25,9 @@ class DeleteNodeFromPCU(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'DeleteFrom'
+    object_type = 'PCU'
+
     def call(self, auth, node_id_or_hostname, pcu_id):
 	 # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
@@ -54,4 +57,6 @@ class DeleteNodeFromPCU(Method):
         if node['node_id'] in pcu['node_ids']:
             pcu.remove_node(node)
 
-        return 1
+	self.object_ids = [pcu['pcu_id']]
+        
+	return 1

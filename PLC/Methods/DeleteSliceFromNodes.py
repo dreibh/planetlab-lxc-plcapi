@@ -25,6 +25,9 @@ class DeleteSliceFromNodes(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    event_type = 'DeleteFrom'
+    object_type = 'Node'
+
     def call(self, auth, slice_id_or_name, node_id_or_hostname_list):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
@@ -48,5 +51,7 @@ class DeleteSliceFromNodes(Method):
 	for node in nodes:
             if slice['slice_id'] in node['slice_ids']:
                 slice.remove_node(node)
+	
+	self.object_ids = [node['node_id'] for node in nodes]
 
         return 1
