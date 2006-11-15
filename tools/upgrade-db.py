@@ -78,8 +78,7 @@ def connect():
 
 def archive_db(database, archived_database):
 
-	print "Status: archiving old database"
-        archive_db = " dropdb -U postgres %s; > /dev/null 2>&1" \
+        archive_db = " dropdb -U postgres %s > /dev/null 2>&1;" \
 		     " psql template1 postgres -qc " \
                      " 'ALTER DATABASE %s RENAME TO %s;';" \
                      " createdb -U postgres %s > /dev/null; " % \
@@ -88,11 +87,11 @@ def archive_db(database, archived_database):
         if exit_status:
                 print "Error: unable to archive database. Upgrade failed"
                 sys.exit(1)
-        print "Status: %s has been archived. now named %s" % (database, archived_database)
+        #print "Status: %s has been archived. now named %s" % (database, archived_database)
 
 
 def encode_utf8(inputfile_name, outputfile_name):
-	# rewrite a iso-8859-1 encoded file and in utf8
+	# rewrite a iso-8859-1 encoded file in utf8
 	try:
 		inputfile = open(inputfile_name, 'r')
 		outputfile = open(outputfile_name, 'w')
@@ -267,12 +266,14 @@ cursor = db.cursor()
 try:
 	cursor.execute("SELECT relname from pg_class where relname = 'plc_db_version'")
 	rows = cursor.fetchall()
-	if not rows or not rows[0] or not rows[0][0]:
-		print "WARNING: current db has no version. Unable to validate config file."
+	if not rows:
+		print "Warning: current db has no version. Unable to validate config file."
 	else:
 		cursor.execute("SELECT version FROM plc_db_version")
 		rows = cursor.fetchall()
-		if rows[0][0] == db_version_new:
+		if not rows or not rows[0]:
+			print "Warning: current db has no version. Unable to validate config file."
+		elif rows[0][0] == db_version_new:
                		print "Status: Versions are the same. No upgrade necessary."
         		sys.exit()
 		elif not rows[0][0] == db_version_previous:
@@ -403,7 +404,7 @@ try:
                 				os.system(insert_cmd) 
 except:
 	print "Error: failed to populate db. Unarchiving original database and aborting"
-	undo_command = "dropdb -U postgres %s; psql template1 postgres -qc" \
+	undo_command = "dropdb -U postgres %s > /dev/null; psql template1 postgres -qc" \
                        " 'ALTER DATABASE %s RENAME TO %s;';  > /dev/null" % \
                        (config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived', config['PLC_DB_NAME'])
 	os.system(undo_command) 
