@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.35 2006/11/15 10:59:54 thierry Exp $
+-- $Id: planetlab4.sql,v 1.36 2006/11/15 16:42:12 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -723,6 +723,7 @@ INSERT INTO object_types (object_type) VALUES ('BootState');
 INSERT INTO object_types (object_type) VALUES ('ConfFile');
 INSERT INTO object_types (object_type) VALUES ('KeyType');
 INSERT INTO object_types (object_type) VALUES ('Key');
+INSERT INTO object_types (object_type) VALUES ('Message');
 INSERT INTO object_types (object_type) VALUES ('NetworkMethod');
 INSERT INTO object_types (object_type) VALUES ('NetworkType');
 INSERT INTO object_types (object_type) VALUES ('Network');
