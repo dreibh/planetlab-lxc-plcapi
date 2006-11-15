@@ -11,6 +11,7 @@ from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
+from PLC.ForeignSlices import ForeignSlice, ForeignSlices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
@@ -78,7 +79,10 @@ class GetSlivers(Method):
 
         nodenetwork_ids = set()
         nodegroup_ids = set()
-        slice_ids = default_slice_ids
+        # Thierry : need to copy here otherwise side effects
+        # on slice_ids would affect default_slice_ids,
+        # that we still need later on
+        slice_ids = set(default_slice_ids)
         for node_id, node in all_nodes.iteritems():
             nodenetwork_ids.update(node['nodenetwork_ids'])
             nodegroup_ids.update(node['nodegroup_ids'])
@@ -94,13 +98,21 @@ class GetSlivers(Method):
         all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
 
         # Get slice information
+        # hacky by now - merge slices and foreign slices 
         all_slices = Slices(self.api, slice_ids).dict()
+        foreign_slices_list = ForeignSlices (self.api, slice_ids)
+        for foreign_slice in foreign_slices_list:
+            all_slices[foreign_slice['slice_id']]=foreign_slice
 
         person_ids = set()
         slice_attribute_ids = set()
         for slice_id, slice in all_slices.iteritems():
-            person_ids.update(slice['person_ids'])
-            slice_attribute_ids.update(slice['slice_attribute_ids'])
+            ### still missing in foreign slices
+            if slice.get('person_ids'):
+                person_ids.update(slice['person_ids'])
+            ### still missing in foreign slices
+            if slice.get('slice_attribute_ids'):
+                slice_attribute_ids.update(slice['slice_attribute_ids'])
 
         # Get user information
         all_persons = Persons(self.api, person_ids).dict()
@@ -146,30 +158,40 @@ class GetSlivers(Method):
 
             # If not a foreign node, add all of our default system
             # slices to it.
-            # XXX if not node['peer_id']:
-            if True:
-                slice_ids += default_slice_ids
+            # Thierry : foreign nodes are totally out of scope
+            # we dont know how to answer GetSlivers for foreign nodes.
+            slice_ids += default_slice_ids
+
 
             slivers = []
             for slice in map(lambda id: all_slices[id], slice_ids):
                 keys = []
-                for person in map(lambda id: all_persons[id], slice['person_ids']):
-                    keys += [{'key_type': all_keys[key_id]['key_type'],
-                              'key': all_keys[key_id]['key']} \
-                             for key_id in person['key_ids']]
+                ### still missing in foreign slices
+                try:
+                    for person in map(lambda id: all_persons[id], slice['person_ids']):
+                        keys += [{'key_type': all_keys[key_id]['key_type'],
+                                  'key': all_keys[key_id]['key']} \
+                                 for key_id in person['key_ids']]
+                except:
+                    keys += [{'key_type':'missing',
+                              'key':'key caching not implemented yet'}]
 
                 attributes = {}
-                for slice_attribute in map(lambda id: all_slice_attributes[id],
-                                           slice['slice_attribute_ids']):
-                    # Per-node sliver attributes (slice attributes
-                    # with non-null node_id fields) take precedence
-                    # over global slice attributes.
-                    if not attributes.has_key(slice_attribute['name']) or \
-                       slice_attribute['node_id'] is not None:
-                        attributes[slice_attribute['name']] = {
-                            'name': slice_attribute['name'],
-                            'value': slice_attribute['value']
-                            }
+                ### still missing in foreign slices
+                try:
+                    for slice_attribute in map(lambda id: all_slice_attributes[id],
+                                               slice['slice_attribute_ids']):
+                        # Per-node sliver attributes (slice attributes
+                        # with non-null node_id fields) take precedence
+                        # over global slice attributes.
+                        if not attributes.has_key(slice_attribute['name']) or \
+                               slice_attribute['node_id'] is not None:
+                            attributes[slice_attribute['name']] = {
+                                'name': slice_attribute['name'],
+                                'value': slice_attribute['value']
+                                }
+                except:
+                        attributes={'ignored':{'name':'attributes caching','value':'not implemented yet'}}
 
                 slivers.append({
                     'name': slice['name'],
