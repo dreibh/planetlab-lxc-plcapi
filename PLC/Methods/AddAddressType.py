@@ -27,7 +27,6 @@ class AddAddressType(Method):
         
     event_type = 'Add'    
     object_type = 'AddressType'
-    object_ids = []
 
     def call(self, auth, address_type_fields):
         address_type_fields = dict(filter(can_update, address_type_fields.items()))

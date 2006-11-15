@@ -32,7 +32,6 @@ class AddPerson(Method):
 
     event_type = 'Add'
     object_type = 'Person'
-    object_ids = []
 
     def call(self, auth, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))

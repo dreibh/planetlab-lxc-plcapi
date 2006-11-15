@@ -31,7 +31,6 @@ class AddSite(Method):
 
     event_type = 'Add'
     object_type = 'Site'
-    object_ids = []
 
     def call(self, auth, site_fields):
         site_fields = dict(filter(can_update, site_fields.items()))

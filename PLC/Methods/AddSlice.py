@@ -40,7 +40,6 @@ class AddSlice(Method):
 
     event_type = 'Add'
     object_type = 'Slice'
-    object_ids = []
 
     def call(self, auth, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))

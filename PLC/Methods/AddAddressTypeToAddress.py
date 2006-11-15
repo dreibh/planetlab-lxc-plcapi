@@ -27,7 +27,6 @@ class AddAddressTypeToAddress(Method):
 
     event_type = 'AddTo'
     object_type = 'Address'
-    object_ids = []
 
     def call(self, auth, address_type_id_or_name, address_id):
 	address_types = AddressTypes(self.api, [address_type_id_or_name])

@@ -28,7 +28,6 @@ class AddConfFile(Method):
 
     event_type = 'Add'
     object_type = 'ConfFile'
-    object_ids = []
 
     def call(self, auth, conf_file_fields):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))

@@ -28,7 +28,6 @@ class AddNodeToPCU(Method):
     returns = Parameter(int, '1 if successful')
     event_type = 'AddTo'
     object_type = 'PCU'
-    object_ids = []
 
     def call(self, auth, node_id_or_hostname, pcu_id, port):
 	 # Get node

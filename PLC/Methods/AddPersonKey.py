@@ -31,7 +31,6 @@ class AddPersonKey(Method):
 
     event_type = 'Add'
     object_type = 'Key'
-    object_ids = []
 
     def call(self, auth, person_id_or_email, key_fields):
         key_fields = dict(filter(can_update, key_fields.items()))

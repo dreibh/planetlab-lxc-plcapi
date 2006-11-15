@@ -41,8 +41,7 @@ class AddNodeNetwork(Method):
 
     event_type = 'Add'
     object_type = 'NodeNetwork'
-    object_ids = []
-
+    
     def call(self, auth, node_id_or_hostname, nodenetwork_fields):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))
 

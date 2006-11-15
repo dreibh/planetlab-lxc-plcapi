@@ -27,7 +27,6 @@ class AddPersonToSite(Method):
     returns = Parameter(int, '1 if successful')
     event_type = 'AddTo'
     object_type = 'Site'
-    object_ids = []
 
     def call(self, auth, person_id_or_email, site_id_or_login_base):
         # Get account information

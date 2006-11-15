@@ -23,7 +23,6 @@ class AddRole(Method):
 
     event_type = 'Add'
     object_type = 'Role'
-    object_ids = []
 
     def call(self, auth, role_id, name):
         role = Role(self.api)

@@ -22,7 +22,6 @@ class AddBootState(Method):
 
     event_type = 'Add'
     object_type = 'BootState'
-    object_ids = []
     
     def call(self, auth, name):
         boot_state = BootState(self.api)

@@ -28,7 +28,6 @@ class AddNodeGroup(Method):
 
     event_type = 'Add'
     object_type = 'NodeGroup'
-    object_ids = []
 
     def call(self, auth, nodegroup_fields):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))

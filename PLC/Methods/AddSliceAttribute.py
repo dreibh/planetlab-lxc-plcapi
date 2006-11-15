@@ -39,7 +39,6 @@ class AddSliceAttribute(Method):
 
     event_type = 'Add'
     object_type = 'SliceAttribute'
-    object_ids = []
 
     def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None):
         slices = Slices(self.api, [slice_id_or_name])

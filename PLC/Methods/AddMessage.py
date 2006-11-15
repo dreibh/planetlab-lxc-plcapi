@@ -23,7 +23,6 @@ class AddMessage(Method):
 
     event_type = 'Add'
     object_type = 'Message'
-    object_ids = []
 
     def call(self, auth, message_fields):
         message = Message(self.api, message_fields)
