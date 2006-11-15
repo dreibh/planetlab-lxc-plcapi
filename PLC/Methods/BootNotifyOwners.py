@@ -29,7 +29,9 @@ class BootNotifyOwners(Method):
     def call(self, auth, message_id, include_pis, include_techs, include_support):
         messages = Messages(self.api, [message_id], enabled = True)
         if not messages:
-            raise PLCInvalidArgument, "No such message template"
+            # raise PLCInvalidArgument, "No such message template"
+            return 1
+        message = messages[0]
 
         if not self.api.config.PLC_MAIL_ENABLED:
             return 1
