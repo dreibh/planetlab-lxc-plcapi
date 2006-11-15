@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.34 2006/11/14 09:44:40 thierry Exp $
+-- $Id: planetlab4.sql,v 1.35 2006/11/15 10:59:54 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -24,6 +24,17 @@ CREATE AGGREGATE array_accum (
     stype = anyarray,
     initcond = '{}'
 );
+
+--------------------------------------------------------------------------------
+-- Version
+--------------------------------------------------------------------------------
+
+--version
+CREATE TABLE plc_db_version (
+	version integer NOT NULL 
+) WITH OIDS;
+
+INSERT INTO plc_db_version (version) VALUES (4);
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -589,7 +600,7 @@ CREATE TABLE peer_slice (
     PRIMARY KEY (peer_id, slice_id)
 ) WITH OIDS;
 CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
-CREATE INDEX peer_slice_slice_id_idx ON peer_slice (node_id);
+CREATE INDEX peer_slice_slice_id_idx ON peer_slice (slice_id);
 
 CREATE VIEW peer_slices AS
 SELECT peer_id,
