@@ -49,14 +49,14 @@ class DeleteSliceFromNodes(Method):
 
 	# Get specified nodes
         nodes = Nodes(self.api, node_id_or_hostname_list)
-	for node in nodes:
-            if slice['slice_id'] in node['slice_ids']:
-                slice.remove_node(node)
         foreign_nodes = ForeignNodes(self.api, node_id_or_hostname_list)
-	for node in foreign_nodes:
+        all_nodes = nodes+foreign_nodes;
+	for node in all_nodes:
             if slice['slice_id'] in node['slice_ids']:
-                slice.remove_node(node,is_foreign_node=True)
+                slice.remove_node(node, commit = False)
+
+        slice.sync()
 	
-	self.object_ids = [node['node_id'] for node in nodes]
+	self.object_ids = [node['node_id'] for node in all_nodes]
 
         return 1

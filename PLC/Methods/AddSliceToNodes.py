@@ -51,20 +51,17 @@ class AddSliceToNodes(Method):
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
-	 # Get specified nodes, and them to the slice
+        # Get specified nodes, add them to the slice
+         
         nodes = Nodes(self.api, node_id_or_hostname_list)
-	for node in nodes:
+        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list)
+        all_nodes = nodes+foreign_nodes;
+	for node in all_nodes:
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
 
-        # the same for foreign_nodes
-        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list)
-        for foreign_node in foreign_nodes:
-            if slice['slice_id'] not in foreign_node['slice_ids']:
-                slice.add_node (foreign_node, is_foreign_node=True, commit=False)
-
         slice.sync()
 
-	self.object_ids = [node['node_id'] for node in nodes]
+	self.object_ids = [node['node_id'] for node in all_nodes]
 
         return 1
