@@ -2,6 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
+from PLC.ForeignNodes import ForeignNode, ForeignNodes
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 
@@ -36,9 +37,6 @@ class DeleteSliceFromNodes(Method):
 
         slice = slices[0]
 
-	# Get specified nodes
-        nodes = Nodes(self.api, node_id_or_hostname_list)
-
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
                 pass
@@ -48,9 +46,16 @@ class DeleteSliceFromNodes(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
 	# Remove slice from all nodes found
+
+	# Get specified nodes
+        nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
             if slice['slice_id'] in node['slice_ids']:
                 slice.remove_node(node)
+        foreign_nodes = ForeignNodes(self.api, node_id_or_hostname_list)
+	for node in foreign_nodes:
+            if slice['slice_id'] in node['slice_ids']:
+                slice.remove_node(node,is_foreign_node=True)
 	
 	self.object_ids = [node['node_id'] for node in nodes]
 

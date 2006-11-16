@@ -153,13 +153,16 @@ class Slice(Row):
             self['node_ids'].append(node_id)
             node['slice_ids'].append(slice_id)
 
-    def remove_node(self, node, commit = True):
+    def remove_node(self, node, is_foreign_node = False, commit = True):
         """
         Remove node from existing slice.
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, Node)
+        if not is_foreign_node:
+            assert isinstance(node, Node)
+        else:
+            assert isinstance(node, ForeignNode)
         assert 'node_id' in node
 
         slice_id = self['slice_id']
