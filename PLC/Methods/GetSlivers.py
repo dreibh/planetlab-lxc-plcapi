@@ -5,7 +5,6 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
-from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
@@ -72,37 +71,31 @@ class GetSlivers(Method):
             # XXX Add foreign nodes
 
         # Get default slices
-        default_slice_ids = set()
-        sites = Sites(self.api, [self.api.config.PLC_SLICE_PREFIX])
-        if sites:
-            default_slice_ids.update(sites[0]['slice_ids'])
+        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict()
+        system_slice_ids = [slice_attribute['slice_id'] for slice_attribute in system_slice_attributes.values()]
+        system_slice_ids = dict.fromkeys(system_slice_ids)
 
-        nodenetwork_ids = set()
-        nodegroup_ids = set()
-        # Thierry : need to copy here otherwise side effects
-        # on slice_ids would affect default_slice_ids,
-        # that we still need later on
-        slice_ids = set(default_slice_ids)
+        all_nodenetwork_ids = set()
+        all_nodegroup_ids = set()
+        all_slice_ids = set(system_slice_ids.keys())
         for node_id, node in all_nodes.iteritems():
-            nodenetwork_ids.update(node['nodenetwork_ids'])
-            nodegroup_ids.update(node['nodegroup_ids'])
-            slice_ids.update(node['slice_ids'])
+            all_nodenetwork_ids.update(node['nodenetwork_ids'])
+            all_nodegroup_ids.update(node['nodegroup_ids'])
+            all_slice_ids.update(node['slice_ids'])
 
         # Get nodenetwork information
-        all_nodenetworks = NodeNetworks(self.api, nodenetwork_ids).dict()
+        all_nodenetworks = NodeNetworks(self.api, all_nodenetwork_ids).dict()
 
         # Get node group information
-        all_nodegroups = NodeGroups(self.api, nodegroup_ids).dict()
+        all_nodegroups = NodeGroups(self.api, all_nodegroup_ids).dict()
 
         # Get (enabled) configuration files
         all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
 
         # Get slice information
-        # hacky by now - merge slices and foreign slices 
-        all_slices = Slices(self.api, slice_ids).dict()
-        foreign_slices_list = ForeignSlices (self.api, slice_ids)
-        for foreign_slice in foreign_slices_list:
-            all_slices[foreign_slice['slice_id']]=foreign_slice
+        all_slices = Slices(self.api, all_slice_ids).dict()
+        # XXX Merge in foreign slices
+        all_slices.update(ForeignSlices(self.api, all_slice_ids).dict())
 
         person_ids = set()
         slice_attribute_ids = set()
@@ -154,17 +147,15 @@ class GetSlivers(Method):
                 if conf_file_id in all_conf_files:
                     conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
 
-            slice_ids = node['slice_ids']
+            slice_ids = dict.fromkeys(node['slice_ids'])
 
             # If not a foreign node, add all of our default system
             # slices to it.
-            # Thierry : foreign nodes are totally out of scope
-            # we dont know how to answer GetSlivers for foreign nodes.
-            slice_ids += default_slice_ids
-
+            # XXX if not node['peer_id']:
+            slice_ids.update(system_slice_ids)
 
             slivers = []
-            for slice in map(lambda id: all_slices[id], slice_ids):
+            for slice in map(lambda id: all_slices[id], slice_ids.keys()):
                 keys = []
                 ### still missing in foreign slices
                 try:
