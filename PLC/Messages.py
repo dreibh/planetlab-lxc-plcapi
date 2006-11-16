@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Messages.py,v 1.2 2006/11/08 22:58:23 mlhuang Exp $
+# $Id: Messages.py,v 1.3 2006/11/10 17:06:35 mlhuang Exp $
 #
 
 from PLC.Parameter import Parameter
@@ -19,6 +19,7 @@ class Message(Row):
     primary_key = 'message_id'
     fields = {
         'message_id': Parameter(str, "Message identifier"),
+        'subject': Parameter(str, "Message summary", nullok = True),
         'template': Parameter(str, "Message template", nullok = True),
         'enabled': Parameter(bool, "Message is enabled"),
         }

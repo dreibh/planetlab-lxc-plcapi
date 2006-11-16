@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.37 2006/11/15 21:07:30 tmack Exp $
+-- $Id: planetlab4.sql,v 1.38 2006/11/15 21:34:48 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -693,6 +693,7 @@ CREATE TABLE node_session (
 
 CREATE TABLE messages (
     message_id text PRIMARY KEY, -- Message name
+    subject text, -- Message summary
     template text, -- Message template
     enabled bool NOT NULL DEFAULT true -- Whether message is enabled
 ) WITH OIDS;
