@@ -138,28 +138,31 @@ def show_nodes (i,node_ids):
                 print node['hostname']+' ',
             print ''
 
-# expected : nodes on local slice
-def check_local_slice_nodes (eln, args=[1,2]):
-    global plc,s,a
-    for i in args:
-        lname=full_slice_name(i)
-        ls=s[i].GetSlices(a[i],[lname])[0]
-        lsn=ls['node_ids']
-        print '%02d: local slice (%s) on nodes '%(i,lname),lsn
-        assert len(lsn)==eln
-        show_nodes (i,lsn)
-
-# expected : nodes on foreign slice
-def check_foreign_slice_nodes (efn, args=[1,2]):
+def check_slice_nodes (expected_nodes, is_local_slice, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        fname=full_slice_name(peer)
-        fs=s[i].GetForeignSlices(a[i],[fname])[0]
-        fsn=fs['node_ids']
-        print '%02d: foreign slice (%s) on nodes '%(i,fname),fsn
-        assert len(fsn)==efn
-        show_nodes (i,fsn)
+        if is_local_slice:
+            sname=full_slice_name(i)
+            slice=s[i].GetSlices(a[i],[sname])[0]
+            message='local'
+        else:
+            sname=full_slice_name(peer)
+            slice=s[i].GetForeignSlices(a[i],[sname])[0]
+            message='foreign'
+        print '%02d: %s slice (%s) '%(i,message,sname),
+        slice_node_ids=slice['node_ids']
+        print 'on nodes ',slice_node_ids
+        assert len(slice_node_ids)==expected_nodes
+        show_nodes (i,slice_node_ids)
+
+# expected : nodes on local slice
+def check_local_slice_nodes (expected, args=[1,2]):
+    check_slice_nodes(expected,True,args)
+
+# expected : nodes on foreign slice
+def check_foreign_slice_nodes (expected, args=[1,2]):
+    check_slice_nodes(expected,False,args)
 
 def check_conf_files (args=[1,2]):
     global plc,s,a
@@ -293,22 +296,35 @@ def test03_slice (args=[1,2]):
         plc[i]['slice_id']=slice_id
         
 
-def test04_node_slice (is_local, args=[1,2]):
+def test04_node_slice (is_local, add_if_true, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
         if is_local:
             hostname=plc[i]['nodename']
+            nodetype='local'
         else:
             hostname=plc[peer]['nodename']
-        s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
-        print '%02d: added in slice %d local node %s'%(i,plc[i]['slice_id'],hostname)
+            nodetype='foreign'
+        if add_if_true:
+            s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
+            message="added"
+        else:
+            s[i].DeleteSliceFromNodes (a[i], plc[i]['slice_id'],[hostname])
+            message="deleted"
+        print '%02d: %s in slice %d %s node %s'%(i,message,plc[i]['slice_id'],nodetype,hostname)
 
-def test04_lnode_slice (args=[1,2]):
-    test04_node_slice (True,args)
+def test04_slice_add_lnode (args=[1,2]):
+    test04_node_slice (True,True,args)
 
-def test04_fnode_slice (args=[1,2]):
-    test04_node_slice (False,args)
+def test04_slice_add_fnode (args=[1,2]):
+    test04_node_slice (False,True,args)
+
+def test04_slice_del_lnode (args=[1,2]):
+    test04_node_slice (True,False,args)
+
+def test04_slice_del_fnode (args=[1,2]):
+    test04_node_slice (False,False,args)
 
 ####################
 def test_all_init ():
@@ -356,7 +372,7 @@ def test_all_nodes ():
     test02_refresh ()
     check_nodes (1,1,)
 
-def test_all_slices ():
+def test_all_addslices ():
     # each site has 3 local slices and 1 foreign slice
     check_slices (3,1)
     # no slice has any node yet
@@ -364,7 +380,7 @@ def test_all_slices ():
     check_foreign_slice_nodes(0)
 
     # insert one local node in local slice on plc1
-    test04_lnode_slice ([1])
+    test04_slice_add_lnode ([1])
     # of course the change is only local
     check_local_slice_nodes (1,[1])
     check_local_slice_nodes (0,[2])
@@ -379,7 +395,7 @@ def test_all_slices ():
     check_foreign_slice_nodes(0)
 
     # now we add a foreign node into local slice
-    test04_fnode_slice ([1])
+    test04_slice_add_fnode ([1])
     check_local_slice_nodes (2,[1])
     check_foreign_slice_nodes (0,[1])
     check_local_slice_nodes (0,[2])
@@ -397,11 +413,26 @@ def test_all_slices ():
     check_slivers(3,[1])
     check_slivers(3,[2])
 
+def test_all_delslices ():
+    test04_slice_del_fnode([1])
+    check_local_slice_nodes (1,[1])
+    check_foreign_slice_nodes (1,[2])
+    test02_refresh ()
+    check_local_slice_nodes (1,[1])
+    check_foreign_slice_nodes (0,[2])
     
+    test04_slice_del_lnode([1])
+    check_local_slice_nodes (0,[1])
+    check_foreign_slice_nodes (0,[2])
+    test02_refresh ()
+    check_local_slice_nodes (0,[1])
+    check_foreign_slice_nodes (0,[2])
+
 def test_all ():
     test_all_init ()
     test_all_nodes ()
-    test_all_slices ()
+    test_all_addslices ()
+    test_all_delslices ()
 
 if __name__ == '__main__':
     test_all()
