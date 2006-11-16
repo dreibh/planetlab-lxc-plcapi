@@ -43,41 +43,48 @@ except:
 import xmlrpclib
 import os
 
-plc1={ 'name':'plc1 in federation',
+number_nodes=5
+number_slices=3
+magic_slices = (1,2)
+
+plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
        'url-format':'https://%s:443/PLCAPI/',
        'builtin_admin_id':'root@localhost.localdomain',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc1@planet-lab.org',
        'peer_admin_password':'peer',
-       'nodename':'n11.plc1.org',
+       'node-format':'n1%02d.plc1.org',
        'plainname' : 'one',
+       'slice-format' : 's1%02d',
        }
-plc2={ 'name':'plc2 in federation',
+plc2={ 'plcname':'plc2 in federation',
        'hostname':'planetlab-devbox.inria.fr',
        'url-format':'https://%s:443/PLCAPI/',
        'builtin_admin_id':'root@localhost.localdomain',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc2@planet-lab.org',
        'peer_admin_password':'peer',
-       'nodename':'n21.plc2.org',
+       'node-format':'n2%02d.plc2.org',
        'plainname' : 'two',
+       'slice-format' : 's2%02d',
        }
 
 ####################
 def peer_index(i):
     return 3-i
 
+def plc_name (i):
+    return plc[i]['plcname']
+
 def site_name (i):
     return 'site'+str(i)
 
-def slice_name (i):
-    global plc
-    return "slice"+str(i)
+def node_name (i,n):
+    return plc[i]['node-format']%i
 
-def full_slice_name (i):
-    global plc
-    return plc[i]['plainname']+'_'+slice_name(i)
+def slice_name (i,n):
+    return plc[i]['plainname']+'_'+plc[i]['slice-format']%i
 
 ####################
 def test00_init (args=[1,2]):
@@ -143,11 +150,11 @@ def check_slice_nodes (expected_nodes, is_local_slice, args=[1,2]):
     for i in args:
         peer=peer_index(i)
         if is_local_slice:
-            sname=full_slice_name(i)
+            sname=slice_name(i,i)
             slice=s[i].GetSlices(a[i],[sname])[0]
             message='local'
         else:
-            sname=full_slice_name(peer)
+            sname=slice_name(peer,peer)
             slice=s[i].GetForeignSlices(a[i],[sname])[0]
             message='foreign'
         print '%02d: %s slice (%s) '%(i,message,sname),
@@ -167,7 +174,7 @@ def check_foreign_slice_nodes (expected, args=[1,2]):
 def check_conf_files (args=[1,2]):
     global plc,s,a
     for i in args:
-        nodename=plc[i]['nodename']
+        nodename=node_name(i,i)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
         assert ndict['hostname'] == nodename
         conf_files = ndict['conf_files']
@@ -184,7 +191,7 @@ pp = pprint.PrettyPrinter(indent=3)
 def check_slivers (esn,args=[1,2]):
     global plc,s,a
     for i in args:
-        nodename=plc[i]['nodename']
+        nodename=node_name(i,i)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
         assert ndict['hostname'] == nodename
         slivers = ndict['slivers']
@@ -196,55 +203,106 @@ def check_slivers (esn,args=[1,2]):
                 
 
 ####################
-def test00_admin (args=[1,2]):
+def test00_admin_person (args=[1,2]):
     global plc,s,a
     for i in args:
-        peer=peer_index(i)
-        person_id=s[i].AddPerson(aa[i],{'first_name':'Local', 'last_name':'PeerPoint', 'role_ids':[10],
-                                              'email':plc[i]['peer_admin_name'],'password':plc[i]['peer_admin_password']})
-        print '%02d: created peer admin account %d, %s - %s'%(i,person_id,plc[i]['peer_admin_name'],plc[i]['peer_admin_password'])
-        plc[i]['peer_admin_id']=person_id
+        email = plc[i]['peer_admin_name']
+        try:
+            p=s[i].GetPersons(a[i],[email])[0]
+            plc[i]['peer_admin_id']=p['person_id']
+        except:
+            person_id=s[i].AddPerson(aa[i],{'first_name':'Local', 'last_name':'PeerPoint', 'role_ids':[10],
+                                            'email':email,'password':plc[i]['peer_admin_password']})
+            print '%02d: created peer admin account %d, %s - %s'%(i,person_id,plc[i]['peer_admin_name'],plc[i]['peer_admin_password'])
+            plc[i]['peer_admin_id']=person_id
 
-def test00_enable (args=[1,2]):
+def test00_admin_enable (args=[1,2]):
     global plc,s,a
     for i in args:
-        peer=peer_index(i)
         s[i].AdmSetPersonEnabled(aa[i],plc[i]['peer_admin_id'],True)
         s[i].AddRoleToPerson(aa[i],'admin',plc[i]['peer_admin_id'])
         print '%02d: enabled+admin on account %d:%s'%(i,plc[i]['peer_admin_id'],plc[i]['peer_admin_name'])
 
+####################
+def test01_site (args=[1,2]):
+    global plc,s,a
+    for i in args:
+        peer=peer_index(i)
+        ### create a site (required for creating a slice)
+        sitename=site_name(i)
+        abbrev_name="abbr"+str(i)
+        login_base=plc[i]['plainname']
+        try:
+            s[i].GetSites(a[i],{'login_base':login_base})[0]
+        except:
+            site_id=s[i].AddSite (a[i], {'name':plc_name(i),
+                                         'abbreviated_name': abbrev_name,
+                                         'login_base': login_base,
+                                         'is_public': True,
+                                         'url': 'http://%s.com/'%abbrev_name,
+                                         'max_slices':10})
+        ### max_slices does not seem taken into account at that stage
+            s[i].UpdateSite(a[i],site_id,{'max_slices':10})
+            print '%02d: Created site %d with max_slices=10'%(i,site_id)
+            plc[i]['site_id']=site_id
+
+def get_node_id(i,nodename):
+    return s[i].GetNodes(a[i],[nodename])[0]['node_id']
+
+def clean_all_nodes (args=[1,2]):
+    global plc,s,a
+    for i in args:
+        print '%02d: Cleaning all nodes'%i
+        for node in s[i].GetNodes(a[i]):
+            print '%02d: > Cleaning node %d'%(i,node['node_id'])
+            s[i].DeleteNode(a[i],node['node_id'])
+
 def test01_node (args=[1,2]):
     global plc,s,a
     for i in args:
-        n=s[i].AddNode(a[i],1,{'hostname': plc[i]['nodename']})
-        print '%02d: Added node %d %s'%(i,n,plc[i]['nodename'])
-        plc[i]['node_id']=n
+        nodename = node_name(i,i)
+        try:
+            get_node_id(i,nodename)
+        except:
+            n=s[i].AddNode(a[i],1,{'hostname': nodename})
+            print '%02d: Added node %d %s'%(i,n,node_name(i,i))
 
 def test01_delnode (args=[1,2]):
     global plc,s,a
     for i in args:
-        retcod=s[i].DeleteNode(a[i],plc[i]['node_id'])
-        print '%02d: Deleted node %d, got %s'%(i,plc[i]['node_id'],retcod)
-        plc[i]['node_id']=None
+        nodename = node_name(i,i)
+        node_id = get_node_id (i,nodename)
+        retcod=s[i].DeleteNode(a[i],nodename)
+        print '%02d: Deleted node %d, got %s'%(i,node_id,retcod)
 
 def test01_peer_person (args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        person_id = s[i].AddPerson (a[i], {'first_name':'Peering(plain passwd)', 'last_name':plc[peer]['name'], 'role_ids':[3000],
-                                           'email':plc[peer]['peer_admin_name'],'password':plc[peer]['peer_admin_password']})
-        print '%02d:Created person %d as the peer person'%(i,person_id)
-        plc[i]['peer_person_id']=person_id
+        email=plc[peer]['peer_admin_name']
+        try:
+            p=s[i].GetPersons(a[i],[email])[0]
+            plc[i]['peer_person_id']=p['person_id']
+        except:
+            person_id = s[i].AddPerson (a[i], {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
+                                               'email':email,'password':plc[peer]['peer_admin_password']})
+            print '%02d:Created person %d as the peer person'%(i,person_id)
+            plc[i]['peer_person_id']=person_id
 
 def test01_peer (args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        peer_id=s[i].AddPeer (a[i], {'peername':plc[peer]['name'],'peer_url':plc[peer]['url'],'person_id':plc[i]['peer_person_id']})
-        # NOTE : need to manually reset the encrypted password through SQL at this point
-        print '%02d:Created peer %d'%(i,peer_id)
-        plc[i]['peer_id']=peer_id
-        print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
+        peername = plc_name(peer)
+        try:
+            p=s[i].GetPeers (a[i], [peername])[0]
+            plc[i]['peer_id']=p['peer_id']
+        except:
+            peer_id=s[i].AddPeer (a[i], {'peername':peername,'peer_url':plc[peer]['url'],'person_id':plc[i]['peer_person_id']})
+            # NOTE : need to manually reset the encrypted password through SQL at this point
+            print '%02d:Created peer %d'%(i,peer_id)
+            plc[i]['peer_id']=peer_id
+            print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
 
 def test01_peer_passwd (args=[1,2]):
     global plc,s,a
@@ -254,65 +312,74 @@ def test01_peer_passwd (args=[1,2]):
         retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
         print 'got',retcod
     
+# this one gets cached 
+def get_peer_id (i):
+    try:
+        return plc[i]['peer_id']
+    except:
+        peername = plc_name (peer_index(i))
+        peer_id = s[i].GetPeers(a[i],[peername])[0]['peer_id']
+        plc[i]['peer_id'] = peer_id
+        return peer_id
+
 def test02_refresh (args=[1,2]):
     global plc,s,a
     for i in args:
         print '%02d: Refreshing peer'%(i),
-        retcod=s[i].RefreshPeer(a[i],plc[i]['peer_id'])
+        retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
         print ' got ',retcod
 
-def test03_site (args=[1,2]):
+
+def clean_all_slices (args=[1,2]):
     global plc,s,a
     for i in args:
-        peer=peer_index(i)
-        ### create a site (required for creating a slice)
-        sitename=site_name(i)
-        abbrev_name="abbr"+str(i)
-        site_id=s[i].AddSite (a[i], {'name':plc[i]['name'],
-                                     'abbreviated_name': abbrev_name,
-                                     'login_base': plc[i]['plainname'],
-                                     'is_public': True,
-                                     'url': 'http://%s.com/'%abbrev_name,
-                                     'max_slices':10})
-        ### max_slices does not seem taken into account at that stage
-        s[i].UpdateSite(a[i],site_id,{'max_slices':10})
-        print '%02d: Created site %d with max_slices=10'%(i,site_id)
-        plc[i]['site_id']=site_id
+        print '%02d: Cleaning all slices'%i
+        for slice in s[i].GetSlices(a[i]):
+            slice_id = slice['slice_id']
+            if slice_id not in magic_slices:
+                print '%02d: > Cleaning slice %d'%(i,slice_id)
+                s[i].DeleteSlice(a[i],slice_id)
+
+def get_slice_id (i,name):
+    return s[i].GetSlices(a[i],[name])[0]['slice_id']
 
 def test03_slice (args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        plain=full_slice_name(i)
-        ### create a slice
-        name=slice_name(i)
-        slice_id=s[i].AddSlice (a[i],{'name':plain,
-                                      'description':'slice %s on plc %s'%(plain,plc[i]['name']),
-                                      'url':'http://planet-lab.org/%s'%name,
-                                      'max_nodes':100,
-                                      'instanciation':'plc-instantiated',
-                                      })
-        print '%02d: created slice %d'%(i,slice_id)
-        plc[i]['slice_id']=slice_id
+        plcname=plc_name(i)
+        slicename=slice_name(i,i)
+        try:
+            s[i].GetSlices(a[i],[slicename])[0]
+        except:
+            slice_id=s[i].AddSlice (a[i],{'name':slicename,
+                                          'description':'slice %s on %s'%(slicename,plcname),
+                                          'url':'http://planet-lab.org/%s'%slicename,
+                                          'max_nodes':100,
+                                          'instanciation':'plc-instantiated',
+                                          })
+            print '%02d: created slice %d'%(i,slice_id)
         
 
 def test04_node_slice (is_local, add_if_true, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
+        slice_id = get_slice_id (i,slice_name (i,i))
+        
         if is_local:
-            hostname=plc[i]['nodename']
+            hostname=node_name(i,i)
             nodetype='local'
         else:
-            hostname=plc[peer]['nodename']
+            hostname=node_name(peer,peer)
             nodetype='foreign'
         if add_if_true:
-            s[i].AddSliceToNodes (a[i], plc[i]['slice_id'],[hostname])
+            s[i].AddSliceToNodes (a[i], slice_id,[hostname])
             message="added"
         else:
-            s[i].DeleteSliceFromNodes (a[i], plc[i]['slice_id'],[hostname])
+            s[i].DeleteSliceFromNodes (a[i], slice_id,[hostname])
             message="deleted"
-        print '%02d: %s in slice %d %s node %s'%(i,message,plc[i]['slice_id'],nodetype,hostname)
+        print '%02d: %s in slice %d %s node %s'%(i,message,slice_id,nodetype,hostname)
 
 def test04_slice_add_lnode (args=[1,2]):
     test04_node_slice (True,True,args)
@@ -330,17 +397,19 @@ def test04_slice_del_fnode (args=[1,2]):
 def test_all_init ():
     test00_init ()
     test00_print ()
-    test00_admin ()
-    test00_enable ()
-    check_nodes (0,0,)
+    test00_admin_person ()
+    test00_admin_enable ()
     test01_peer_person ()
     test01_peer ()
     test01_peer_passwd ()
 
-    test03_site ()
-    test03_slice ()
+    test01_site ()
 
 def test_all_nodes ():
+
+    clean_all_nodes ()
+    test02_refresh ()
+    check_nodes(0,0)
     # create one node on each site
     test01_node ()
     check_nodes (1,0,)
@@ -373,7 +442,14 @@ def test_all_nodes ():
     check_nodes (1,1,)
 
 def test_all_addslices ():
-    # each site has 3 local slices and 1 foreign slice
+
+    clean_all_slices ()
+    test02_refresh ()
+
+    test03_slice ()
+    # each site has 3 local slices and 0 foreign slice
+    check_slices (3,0)
+    test02_refresh ()
     check_slices (3,1)
     # no slice has any node yet
     check_local_slice_nodes(0)
