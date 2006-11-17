@@ -43,21 +43,7 @@ except:
 import xmlrpclib
 import os
 
-number_nodes=5
-number_slices=3
-magic_slices = (1,2)
-number_magic=len(magic_slices)
-number_all_slices=number_slices+number_magic
-
-def set_env (nodes,slices):
-    global number_nodes, number_slices, magic_slices, number_magic, number_all_slices
-    number_nodes=nodes
-    number_slices=slices
-    magic_slices = (1,2)
-    number_magic=len(magic_slices)
-    number_all_slices=number_slices+number_magic
-    
-
+####################
 plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
        'url-format':'https://%s:443/PLCAPI/',
@@ -80,6 +66,29 @@ plc2={ 'plcname':'plc2 in federation',
        'plainname' : 'two',
        'slice-format' : 's2%02d',
        }
+
+####################
+# set initial conditions
+def define_test (nodes,slices):
+    global number_nodes, number_slices
+    number_nodes=nodes
+    number_slices=slices
+    
+define_test (nodes=5,slices=3)
+
+# predefined stuff
+system_slices_ids = (1,2)
+def system_slices ():
+    return len(system_slices_ids)
+# temporary - the myplc I use doesnt know about 'system' yet
+def system_slivers ():
+#    return len(system_slices_ids)
+    return 0
+
+def total_slices ():
+    return number_slices+system_slices()
+def total_slivers ():
+    return number_slices+system_slivers()
 
 ####################
 def peer_index(i):
@@ -141,7 +150,7 @@ def check_nodes (en,ef,args=[1,2]):
     for i in args:
         n=len(s[i].GetNodes(a[i]))
         f=len(s[i].GetForeignNodes(a[i]))
-        print '%02d: Checking nodes: got %d local nodes & %d foreign nodes'%(i,n,f)
+        print '%02d: Checking nodes: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,en,f,ef)
         assert n==en
         assert f==ef
 
@@ -151,7 +160,7 @@ def check_slices (els,efs,args=[1,2]):
     for i in args:
         ls=len(s[i].GetSlices(a[i]))
         fs=len(s[i].GetForeignSlices(a[i]))
-        print '%02d: Checking slices: got %d local slices & %d foreign slices'%(i,ls,fs)
+        print '%02d: Checking slices: got %d local (e=%d) & %d foreign (e=%d)'%(i,ls,els,fs,efs)
         assert els==ls
         assert efs==fs
 
@@ -180,11 +189,11 @@ def check_slice_nodes_n (ns,expected_nodes, is_local_slice, args=[1,2]):
             sname=slice_name(peer,ns)
             slice=s[i].GetForeignSlices(a[i],[sname])[0]
             message='foreign'
-        print '%02d: %s slice (%s) '%(i,message,sname),
+        print '%02d: %s slice %s (e=%d) '%(i,message,sname,expected_nodes),
         slice_node_ids=slice['node_ids']
         print 'on nodes ',slice_node_ids
-        assert len(slice_node_ids)==expected_nodes
         show_nodes (i,slice_node_ids)
+        assert len(slice_node_ids)==expected_nodes
 
 # expected : nodes on local slice
 def check_local_slice_nodes (expected, args=[1,2]):
@@ -230,11 +239,12 @@ def check_slivers_n (nn,esn,args=[1,2]):
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
         assert ndict['hostname'] == nodename
         slivers = ndict['slivers']
-        assert len(slivers) == esn
-        print '%02d: %d  slivers in GetSlivers for node %s'%(i,len(slivers),nodename)
+        print '%02d: %d slivers (exp. %d) in GetSlivers for node %s'\
+              %(i,len(slivers),esn,nodename)
         for sliver in slivers:
             print '>>slivername = ',sliver['name']
             pp.pprint(sliver)
+        assert len(slivers) == esn
                 
 
 ####################
@@ -383,7 +393,7 @@ def clean_all_slices (args=[1,2]):
         print '%02d: Cleaning all slices'%i
         for slice in s[i].GetSlices(a[i]):
             slice_id = slice['slice_id']
-            if slice_id not in magic_slices:
+            if slice_id not in system_slices_ids:
                 print '%02d: > Cleaning slice %d'%(i,slice_id)
                 s[i].DeleteSlice(a[i],slice_id)
 
@@ -517,11 +527,11 @@ def test_all_addslices ():
     message ("CREATING SLICES on plc1")
     test03_slice ([1])
     # each site has 3 local slices and 0 foreign slice
-    check_slices (number_all_slices,0,[1])
-    check_slices (number_magic,0,[2])
+    check_slices (total_slices(),0,[1])
+    check_slices (system_slices(),0,[2])
     test01_refresh ()
-    check_slices (number_all_slices,0,[1])
-    check_slices (number_magic,number_slices,[2])
+    check_slices (total_slices(),0,[1])
+    check_slices (system_slices(),number_slices,[2])
     # no slice has any node yet
     check_local_slice_nodes(0,[1])
     check_foreign_slice_nodes(0,[2])
@@ -553,7 +563,7 @@ def test_all_addslices ():
     check_local_slice_nodes (2*number_nodes,[1])
     check_foreign_slice_nodes (number_nodes,[2])
 
-    check_slivers_1(number_all_slices)
+    check_slivers_1(total_slivers())
 
 def test_all_delslices ():
 
@@ -562,7 +572,7 @@ def test_all_delslices ():
     check_local_slice_nodes (number_nodes,[1])
     check_foreign_slice_nodes (number_nodes,[2])
     # mmh?
-    check_slivers_1(number_all_slices,[1])
+    check_slivers_1(total_slivers(),[1])
 
     test01_refresh ()
     check_local_slice_nodes (number_nodes,[1])
@@ -578,10 +588,10 @@ def test_all_delslices ():
 
     message ("CHECKING SLICES CLEAN UP")
     clean_all_slices([1])
-    check_slices (number_magic,0,[1])
-    check_slices (number_magic,number_slices,[2])
+    check_slices (system_slices(),0,[1])
+    check_slices (system_slices(),number_slices,[2])
     test01_refresh ()
-    check_slices(number_magic,0)
+    check_slices(system_slices(),0)
 
 def test_all_slices ():
     test_all_addslices ()
