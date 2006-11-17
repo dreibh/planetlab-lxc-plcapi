@@ -49,6 +49,15 @@ magic_slices = (1,2)
 number_magic=len(magic_slices)
 number_all_slices=number_slices+number_magic
 
+def set_env (nodes,slices):
+    global number_nodes, number_slices, magic_slices, number_magic, number_all_slices
+    number_nodes=nodes
+    number_slices=slices
+    magic_slices = (1,2)
+    number_magic=len(magic_slices)
+    number_all_slices=number_slices+number_magic
+    
+
 plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
        'url-format':'https://%s:443/PLCAPI/',

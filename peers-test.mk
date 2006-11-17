@@ -3,7 +3,7 @@ CHROOT=/plc/root
 PORT=5432
 SITEDIR=/etc/planetlab/configs
 SITE=site.xml
-RPM=$(shell ls -rt myplc*rpm | tail -1)
+RPM=$(shell ls -rt /root/myplc*rpm | tail -1)
 APIDIR=/usr/share/plc_api
 
 PLC1=lurch.cs.princeton.edu
@@ -25,10 +25,12 @@ papi1:
 	rsync -a -v -C ./ root@$(PLC1):new_plc_api/
 pplc1:
 	rsync -a -v -C ./PLC/ root@$(PLC1):$(CHROOT)$(APIDIR)/PLC/
+	rsync -v -C ./planetlab4.sql root@$(PLC1):$(CHROOT)$(APIDIR)/planetlab4.sql
 papi2:
 	rsync -a -v -C ./ root@$(PLC2):new_plc_api/
 pplc2:
 	rsync -a -v -C ./PLC/ root@$(PLC2):$(CHROOT)$(APIDIR)/PLC/
+	rsync -v -C ./planetlab4.sql root@$(PLC2):$(CHROOT)$(APIDIR)/planetlab4.sql
 
 ####################
 DB=install-schema stop-clients clean-db restart
