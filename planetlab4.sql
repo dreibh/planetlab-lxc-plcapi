@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.38 2006/11/15 21:34:48 tmack Exp $
+-- $Id: planetlab4.sql,v 1.39 2006/11/16 17:03:36 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -591,6 +591,7 @@ CREATE VIEW site_slices AS
 SELECT site_id,
 array_accum(slice_id) AS slice_ids
 FROM slices
+WHERE deleted is false
 GROUP BY site_id;
 
 -- Slices - peer relationship
