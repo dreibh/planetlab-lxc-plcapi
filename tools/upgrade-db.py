@@ -48,6 +48,7 @@ except IndexError:
 schema = {}
 inserts = []
 schema_items_ordered = []
+sequences = {}
 temp_tables = {}
 
 
@@ -349,6 +350,9 @@ try:
 				while index < len(lines):
 					index = index + 1
 					nextline =lines[index]
+					# look for any sequences
+					if item_type in ['TABLE'] and nextline.find('serial') > -1:
+						sequences[item_name] = nextline.strip().split()[0]
 					fields.append(nextline)
 					if nextline.find(";") >= 0:
 						break
@@ -385,15 +389,28 @@ try:
 		create_item_from_schema(key)
 		if type == 'TABLE':
 			if upgrade_config.has_key(key):				
+				# attempt to populate with temp table data
 				table_def = upgrade_config[key].replace('(', '').replace(')', '').split(',')
 				table_fields = [field.strip().split(':')[0] for field in table_def]
 				insert_cmd = "psql %s %s -c " \
                                              " 'COPY %s (%s) FROM stdin;' < %s " % \
-                                             (config['PLC_DB_NAME'], config['PLC_DB_USER'], key, ", ".join(table_fields), temp_tables[key] )
+                                             (config['PLC_DB_NAME'], config['PLC_DB_USER'], key, 
+					      ", ".join(table_fields), temp_tables[key] )
 				exit_status = os.system(insert_cmd)
 				if exit_status:
 					print "Error: upgrade %s failed" % key
-					raise
+					sys.exit(1)
+				# update the primary key sequence
+				if sequences.has_key(key):
+					sequence = key +"_"+ sequences[key] +"_seq"
+					update_seq = "psql %s %s -c " \
+					     " \"select setval('%s', max(%s)) FROM %s;\" > /dev/null" % \
+					     (config['PLC_DB_NAME'], config['PLC_DB_USER'], sequence, 
+					      sequences[key], key)
+					exit_status = os.system(update_seq)
+					if exit_status:
+						print "Error: sequence %s update failed" % sequence
+						sys.exit(1)
 			else:
 				# check if there are any insert stmts in schema for this table
 				print "Warning: %s has no temp data file. Unable to populate with old data" % key
