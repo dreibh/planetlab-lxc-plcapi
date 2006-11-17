@@ -85,6 +85,18 @@ reconfig:
 	cp $(SITE) $(SITEDIR)
 	(echo w; echo q) | chroot $(CHROOT) plc-config-tty
 
+####################
+TEST=run checkpoint diff
+run:
+	./TestPeers.py > TestPeers.out 2>&1
+diff:
+	@echo '<< REF OUT>>'
+	diff TestPeers.ref TestPeers.out 
+
+checkpoint:
+	@echo adopting latest run as reference
+	cp TestPeers.out TestPeers.ref
+
 #######
 HELP=rpm db-dump
 
@@ -94,5 +106,6 @@ help:
 	@echo db: $(DB) 
 	@echo api: $(API) 
 	@echo upgrade: $(UPGRADE)
+	@echo test: $(TEST)
 	@echo OTHERS: $(HELP)
 

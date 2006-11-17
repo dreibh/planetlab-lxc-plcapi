@@ -46,6 +46,8 @@ import os
 number_nodes=5
 number_slices=3
 magic_slices = (1,2)
+number_magic=len(magic_slices)
+number_all_slices=number_slices+number_magic
 
 plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
@@ -81,11 +83,19 @@ def site_name (i):
     return 'site'+str(i)
 
 def node_name (i,n):
-    return plc[i]['node-format']%i
+    return plc[i]['node-format']%n
 
 def slice_name (i,n):
-    return plc[i]['plainname']+'_'+plc[i]['slice-format']%i
+    return plc[i]['plainname']+'_'+plc[i]['slice-format']%n
 
+# to have indexes start at 1
+def myrange (n):
+    return range (1,n+1,1)
+
+def message (*args):
+    print "XXXXXXXXXXXXXXXXXXXX",
+    print args
+    
 ####################
 def test00_init (args=[1,2]):
     global plc,s,a,aa
@@ -122,7 +132,7 @@ def check_nodes (en,ef,args=[1,2]):
     for i in args:
         n=len(s[i].GetNodes(a[i]))
         f=len(s[i].GetForeignNodes(a[i]))
-        print '%02d: Checking connection: got %d local nodes & %d foreign nodes'%(i,n,f)
+        print '%02d: Checking nodes: got %d local nodes & %d foreign nodes'%(i,n,f)
         assert n==en
         assert f==ef
 
@@ -132,7 +142,7 @@ def check_slices (els,efs,args=[1,2]):
     for i in args:
         ls=len(s[i].GetSlices(a[i]))
         fs=len(s[i].GetForeignSlices(a[i]))
-        print '%02d: Checking connection: got %d local slices & %d foreign slices'%(i,ls,fs)
+        print '%02d: Checking slices: got %d local slices & %d foreign slices'%(i,ls,fs)
         assert els==ls
         assert efs==fs
 
@@ -146,15 +156,19 @@ def show_nodes (i,node_ids):
             print ''
 
 def check_slice_nodes (expected_nodes, is_local_slice, args=[1,2]):
+    for ns in myrange(number_slices):
+	check_slice_nodes_n (ns,expected_nodes, is_local_slice, args)
+
+def check_slice_nodes_n (ns,expected_nodes, is_local_slice, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
         if is_local_slice:
-            sname=slice_name(i,i)
+            sname=slice_name(i,ns)
             slice=s[i].GetSlices(a[i],[sname])[0]
             message='local'
         else:
-            sname=slice_name(peer,peer)
+            sname=slice_name(peer,ns)
             slice=s[i].GetForeignSlices(a[i],[sname])[0]
             message='foreign'
         print '%02d: %s slice (%s) '%(i,message,sname),
@@ -172,9 +186,13 @@ def check_foreign_slice_nodes (expected, args=[1,2]):
     check_slice_nodes(expected,False,args)
 
 def check_conf_files (args=[1,2]):
+    for nn in myrange(number_nodes):
+	check_conf_files_n (nn,args)
+
+def check_conf_files_n (nn,args=[1,2]):
     global plc,s,a
     for i in args:
-        nodename=node_name(i,i)
+        nodename=node_name(i,nn)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
         assert ndict['hostname'] == nodename
         conf_files = ndict['conf_files']
@@ -189,6 +207,14 @@ import pprint
 pp = pprint.PrettyPrinter(indent=3)
 
 def check_slivers (esn,args=[1,2]):
+    for nn in myrange(number_nodes):
+	check_slivers_n (nn,esn,args)
+
+# too verbose to check all nodes, let's check only the first one
+def check_slivers_1 (esn,args=[1,2]):
+    check_slivers_n (1,esn,args)
+
+def check_slivers_n (nn,esn,args=[1,2]):
     global plc,s,a
     for i in args:
         nodename=node_name(i,i)
@@ -232,6 +258,8 @@ def test01_site (args=[1,2]):
         sitename=site_name(i)
         abbrev_name="abbr"+str(i)
         login_base=plc[i]['plainname']
+        ### should be enough - needs to check we can add/del slices
+        max_slices = number_slices 
         try:
             s[i].GetSites(a[i],{'login_base':login_base})[0]
         except:
@@ -240,40 +268,11 @@ def test01_site (args=[1,2]):
                                          'login_base': login_base,
                                          'is_public': True,
                                          'url': 'http://%s.com/'%abbrev_name,
-                                         'max_slices':10})
+                                         'max_slices':max_slices})
         ### max_slices does not seem taken into account at that stage
-            s[i].UpdateSite(a[i],site_id,{'max_slices':10})
-            print '%02d: Created site %d with max_slices=10'%(i,site_id)
+            s[i].UpdateSite(a[i],site_id,{'max_slices':max_slices})
+            print '%02d: Created site %d with max_slices=%d'%(i,site_id,max_slices)
             plc[i]['site_id']=site_id
-
-def get_node_id(i,nodename):
-    return s[i].GetNodes(a[i],[nodename])[0]['node_id']
-
-def clean_all_nodes (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        print '%02d: Cleaning all nodes'%i
-        for node in s[i].GetNodes(a[i]):
-            print '%02d: > Cleaning node %d'%(i,node['node_id'])
-            s[i].DeleteNode(a[i],node['node_id'])
-
-def test01_node (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        nodename = node_name(i,i)
-        try:
-            get_node_id(i,nodename)
-        except:
-            n=s[i].AddNode(a[i],1,{'hostname': nodename})
-            print '%02d: Added node %d %s'%(i,n,node_name(i,i))
-
-def test01_delnode (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        nodename = node_name(i,i)
-        node_id = get_node_id (i,nodename)
-        retcod=s[i].DeleteNode(a[i],nodename)
-        print '%02d: Deleted node %d, got %s'%(i,node_id,retcod)
 
 def test01_peer_person (args=[1,2]):
     global plc,s,a
@@ -310,8 +309,9 @@ def test01_peer_passwd (args=[1,2]):
         # using an ad-hoc local command for now - never could get quotes to reach sql....
         print "Attempting to set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
         retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
-        print 'got',retcod
+        print '-> system returns',retcod
     
+##############################
 # this one gets cached 
 def get_peer_id (i):
     try:
@@ -322,14 +322,52 @@ def get_peer_id (i):
         plc[i]['peer_id'] = peer_id
         return peer_id
 
-def test02_refresh (args=[1,2]):
+def test01_refresh (args=[1,2]):
     global plc,s,a
     for i in args:
         print '%02d: Refreshing peer'%(i),
         retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
-        print ' got ',retcod
+        print 'got ',retcod
 
+####################
+def get_node_id(i,nodename):
+    return s[i].GetNodes(a[i],[nodename])[0]['node_id']
 
+def clean_all_nodes (args=[1,2]):
+    global plc,s,a
+    for i in args:
+        print '%02d: Cleaning all nodes'%i
+        for node in s[i].GetNodes(a[i]):
+            print '%02d: > Cleaning node %d'%(i,node['node_id'])
+            s[i].DeleteNode(a[i],node['node_id'])
+
+def test02_node (args=[1,2]):
+    for nn in myrange(number_nodes):
+	test02_node_n (nn,args)
+
+def test02_node_n (nn,args=[1,2]):
+    global plc,s,a
+    for i in args:
+        nodename = node_name(i,nn)
+        try:
+            get_node_id(i,nodename)
+        except:
+            n=s[i].AddNode(a[i],1,{'hostname': nodename})
+            print '%02d: Added node %d %s'%(i,n,node_name(i,i))
+
+def test02_delnode (args=[1,2]):
+    for nn in myrange(number_nodes):
+	test02_delnode_n (nn,args)
+
+def test02_delnode_n (nn,args=[1,2]):
+    global plc,s,a
+    for i in args:
+        nodename = node_name(i,nn)
+        node_id = get_node_id (i,nodename)
+        retcod=s[i].DeleteNode(a[i],nodename)
+        print '%02d: Deleted node %d, returns %s'%(i,node_id,retcod)
+
+####################
 def clean_all_slices (args=[1,2]):
     global plc,s,a
     for i in args:
@@ -344,42 +382,55 @@ def get_slice_id (i,name):
     return s[i].GetSlices(a[i],[name])[0]['slice_id']
 
 def test03_slice (args=[1,2]):
+    for n in myrange(number_slices):
+	test03_slice_n (n,args)
+
+def test03_slice_n (ns,args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
         plcname=plc_name(i)
-        slicename=slice_name(i,i)
+        slicename=slice_name(i,ns)
+        max_nodes=number_nodes
         try:
             s[i].GetSlices(a[i],[slicename])[0]
         except:
             slice_id=s[i].AddSlice (a[i],{'name':slicename,
                                           'description':'slice %s on %s'%(slicename,plcname),
                                           'url':'http://planet-lab.org/%s'%slicename,
-                                          'max_nodes':100,
+                                          'max_nodes':max_nodes,
                                           'instanciation':'plc-instantiated',
                                           })
-            print '%02d: created slice %d'%(i,slice_id)
+            print '%02d: created slice %d - max nodes=%d'%(i,slice_id,max_nodes)
         
 
 def test04_node_slice (is_local, add_if_true, args=[1,2]):
+    for ns in myrange(number_slices):
+	test04_node_slice_ns (ns,is_local, add_if_true, args)
+
+def test04_node_slice_ns (ns,is_local, add_if_true, args=[1,2]):
+    test04_node_slice_nl_n (myrange(number_nodes),ns,is_local, add_if_true, args)
+
+def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        slice_id = get_slice_id (i,slice_name (i,i))
+        slice_id = get_slice_id (i,slice_name (i,ns))
         
         if is_local:
-            hostname=node_name(i,i)
+            hostnames=[node_name(i,nn) for nn in nnl]
             nodetype='local'
         else:
-            hostname=node_name(peer,peer)
+            hostnames=[node_name(peer,nn) for nn in nnl]
             nodetype='foreign'
         if add_if_true:
-            s[i].AddSliceToNodes (a[i], slice_id,[hostname])
+            s[i].AddSliceToNodes (a[i], slice_id,hostnames)
             message="added"
         else:
-            s[i].DeleteSliceFromNodes (a[i], slice_id,[hostname])
+            s[i].DeleteSliceFromNodes (a[i], slice_id,hostnames)
             message="deleted"
-        print '%02d: %s in slice %d %s node %s'%(i,message,slice_id,nodetype,hostname)
+        print '%02d: %s in slice %d %s '%(i,message,slice_id,nodetype),
+        print hostnames
 
 def test04_slice_add_lnode (args=[1,2]):
     test04_node_slice (True,True,args)
@@ -395,6 +446,7 @@ def test04_slice_del_fnode (args=[1,2]):
 
 ####################
 def test_all_init ():
+    message ("INIT")
     test00_init ()
     test00_print ()
     test00_admin_person ()
@@ -407,108 +459,129 @@ def test_all_init ():
 
 def test_all_nodes ():
 
+    message ("RESETTING NODES")
     clean_all_nodes ()
-    test02_refresh ()
+    test01_refresh ()
     check_nodes(0,0)
     # create one node on each site
-    test01_node ()
-    check_nodes (1,0,)
-    test02_refresh ()
-    check_nodes (1,1,)
+    message ("CREATING NODES")
+    test02_node ()
+    check_nodes (number_nodes,0,)
+    test01_refresh ()
+    check_nodes (number_nodes,number_nodes,)
 
     # check deletions
-    test01_delnode ([2])
-    check_nodes (1,1,[1])
-    check_nodes (0,1,[2])
-    test02_refresh ()
-    check_nodes (1,0,[1])
-    check_nodes (0,1,[2])
+    message ("DELETING NODES")
+    test02_delnode ([2])
+    check_nodes (number_nodes,number_nodes,[1])
+    check_nodes (0,number_nodes,[2])
+    test01_refresh ()
+    check_nodes (number_nodes,0,[1])
+    check_nodes (0,number_nodes,[2])
 
     # recreate 
-    test01_node ([2])
-    check_nodes (1,0,[1])
-    check_nodes (1,1,[2])
-    test02_refresh ()
-    check_nodes (1,1,)
+    message ("RECREATING NODES")
+    test02_node ([2])
+    check_nodes (number_nodes,0,[1])
+    check_nodes (number_nodes,number_nodes,[2])
+    test01_refresh ()
+    check_nodes (number_nodes,number_nodes,)
 
     # make sure node indexes differ
-    test01_delnode([2])
-    test01_node ([2])
-    test01_delnode([2])
-    test01_node ([2])
-    test01_delnode([2])
-    test01_node ([2])
-    test02_refresh ()
-    check_nodes (1,1,)
+    message ("DUMMY DEL/ADD for different indexes")
+    test02_delnode([2])
+    test02_node ([2])
+    check_nodes (number_nodes,number_nodes,)
+    test01_refresh ()
+    check_nodes (number_nodes,number_nodes,)
 
 def test_all_addslices ():
 
+    # reset
+    message ("RESETTING SLICES TEST")
+    clean_all_nodes ()
+    test02_node ()
     clean_all_slices ()
-    test02_refresh ()
+    test01_refresh ()
 
-    test03_slice ()
+    # create slices on plc1
+    message ("CREATING SLICES on plc1")
+    test03_slice ([1])
     # each site has 3 local slices and 0 foreign slice
-    check_slices (3,0)
-    test02_refresh ()
-    check_slices (3,1)
+    check_slices (number_all_slices,0,[1])
+    check_slices (number_magic,0,[2])
+    test01_refresh ()
+    check_slices (number_all_slices,0,[1])
+    check_slices (number_magic,number_slices,[2])
     # no slice has any node yet
-    check_local_slice_nodes(0)
-    check_foreign_slice_nodes(0)
+    check_local_slice_nodes(0,[1])
+    check_foreign_slice_nodes(0,[2])
 
-    # insert one local node in local slice on plc1
+    # insert local nodes in local slice on plc1
+    message ("ADDING LOCAL NODES IN SLICES")
     test04_slice_add_lnode ([1])
     # of course the change is only local
-    check_local_slice_nodes (1,[1])
-    check_local_slice_nodes (0,[2])
-    check_foreign_slice_nodes(0)
+    check_local_slice_nodes (number_nodes,[1])
+    check_foreign_slice_nodes(0,[2])
 
     # refreshing
-    test02_refresh ()
+    test01_refresh ()
     # remember that foreign slices only know about LOCAL nodes
     # so refreshing does not do anything
-    check_local_slice_nodes (1,[1])
-    check_local_slice_nodes (0,[2])
-    check_foreign_slice_nodes(0)
+    check_local_slice_nodes (number_nodes,[1])
+    check_foreign_slice_nodes (0,[2])
 
-    # now we add a foreign node into local slice
+    # now we add foreign nodes into local slice
+    message ("ADDING FOREIGN NODES IN SLICES")
     test04_slice_add_fnode ([1])
-    check_local_slice_nodes (2,[1])
-    check_foreign_slice_nodes (0,[1])
-    check_local_slice_nodes (0,[2])
+    check_local_slice_nodes (2*number_nodes,[1])
     check_foreign_slice_nodes (0,[2])
 
     # refreshing
-    test02_refresh ()
+    test01_refresh ()
     # remember that foreign slices only know about LOCAL nodes
     # so this does not do anything
-    check_local_slice_nodes (2,[1])
-    check_foreign_slice_nodes (0,[1])
-    check_local_slice_nodes (0,[2])
-    check_foreign_slice_nodes (1,[2])
+    check_local_slice_nodes (2*number_nodes,[1])
+    check_foreign_slice_nodes (number_nodes,[2])
 
-    check_slivers(3,[1])
-    check_slivers(3,[2])
+    check_slivers_1(number_all_slices)
 
 def test_all_delslices ():
+
+    message ("DELETING FOREIGN NODES FROM SLICES")
     test04_slice_del_fnode([1])
-    check_local_slice_nodes (1,[1])
-    check_foreign_slice_nodes (1,[2])
-    test02_refresh ()
-    check_local_slice_nodes (1,[1])
+    check_local_slice_nodes (number_nodes,[1])
+    check_foreign_slice_nodes (number_nodes,[2])
+    # mmh?
+    check_slivers_1(number_all_slices,[1])
+
+    test01_refresh ()
+    check_local_slice_nodes (number_nodes,[1])
     check_foreign_slice_nodes (0,[2])
     
+    message ("DELETING LOCAL NODES FROM SLICES")
     test04_slice_del_lnode([1])
     check_local_slice_nodes (0,[1])
     check_foreign_slice_nodes (0,[2])
-    test02_refresh ()
+    test01_refresh ()
     check_local_slice_nodes (0,[1])
     check_foreign_slice_nodes (0,[2])
 
+    message ("CHECKING SLICES CLEAN UP")
+    clean_all_slices([1])
+    check_slices (number_magic,0,[1])
+    check_slices (number_magic,number_slices,[2])
+    test01_refresh ()
+    check_slices(number_magic,0)
+
+def test_all_slices ():
+    test_all_addslices ()
+    test_all_delslices ()
+    
 def test_all ():
     test_all_init ()
     test_all_nodes ()
-    test_all_addslices ()
-    test_all_delslices ()
+    test_all_slices ()
 
 if __name__ == '__main__':
     test_all()
