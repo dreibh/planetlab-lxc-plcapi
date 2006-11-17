@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.39 2006/11/16 17:03:36 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.40 2006/11/17 10:43:17 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -554,10 +554,10 @@ CREATE TABLE slices (
     created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Creation date
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
-    deleted boolean NOT NULL DEFAULT false
+    is_deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
-CREATE INDEX slices_site_id_idx ON slices (site_id) WHERE deleted IS false;
-CREATE INDEX slices_name_idx ON slices (name) WHERE deleted IS false;
+CREATE INDEX slices_site_id_idx ON slices (site_id) WHERE is_deleted IS false;
+CREATE INDEX slices_name_idx ON slices (name) WHERE is_deleted IS false;
 
 -- Slivers
 CREATE TABLE slice_node (
@@ -591,7 +591,7 @@ CREATE VIEW site_slices AS
 SELECT site_id,
 array_accum(slice_id) AS slice_ids
 FROM slices
-WHERE deleted is false
+WHERE is_deleted is false
 GROUP BY site_id;
 
 -- Slices - peer relationship
@@ -973,7 +973,7 @@ slices.url,
 slices.description,
 slices.max_nodes,
 slices.creator_person_id,
-slices.deleted,
+slices.is_deleted,
 CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
 COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
@@ -997,7 +997,7 @@ slices.instantiation,
 slices.url,
 slices.description,
 slices.max_nodes,
-slices.deleted,
+slices.is_deleted,
 CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
 COALESCE(slice_nodes.node_ids, '{}') AS node_ids
