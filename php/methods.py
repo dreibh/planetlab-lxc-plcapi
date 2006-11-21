@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustess of Princeton University
 #
-# $Id: methods.py,v 1.1 2006/10/25 20:32:44 mlhuang Exp $
+# $Id: methods.py,v 1.2 2006/11/10 06:32:26 mlhuang Exp $
 #
 
 import os, sys
@@ -14,6 +14,25 @@ import time
 from PLC.API import PLCAPI
 from PLC.Method import *
 from PLC.Auth import Auth
+
+def php_cast(value):
+    """
+    Casts Python values to PHP values.
+    """
+    
+    if value is None:
+        return "NULL"
+    elif isinstance(value, (list, tuple, set)):
+        return "array(%s)" % ", ".join([php_cast(v) for v in value])
+    elif isinstance(value, dict):
+        items = ["%s => %s" % (php_cast(k), php_cast(v)) for (k, v) in value.items()]
+        return "array(%s)" % ", ".join(items)
+    elif isinstance(value, (int, long, bool, float)):
+        return str(value)
+    else:
+        unicode_repr = repr(unicode(value))
+        # Truncate the leading 'u' prefix
+        return unicode_repr[1:]
 
 # Class functions
 api = PLCAPI(None)
@@ -51,14 +70,7 @@ for method in api.methods:
 
         # Set optional parameters to their defaults
         if name not in min_args:
-            arg += " = "
-            if default is None:
-                arg += "NULL"
-            elif isinstance(default, (list, tuple, set)):
-                arg += "array(%s)" % ", ".join(default)
-            elif isinstance(default, dict):
-                items = ["%s => %s" % (key, value) for (key, value) in default.items()]
-                arg += "array(%s)" % ", ".join(items)
+            arg += " = " + php_cast(default)
 
         args.append(arg)
 
