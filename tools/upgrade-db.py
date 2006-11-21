@@ -292,11 +292,10 @@ try:
 	# check db encoding
 	sql = " SELECT pg_catalog.pg_encoding_to_char(d.encoding)" \
 	      " FROM pg_catalog.pg_database d "	\
-	      " LEFT JOIN pg_catalog.pg_user u ON d.datdba = u.usesysid " \
 	      " WHERE d.datname = '%s' " % config['PLC_DB_NAME']
 	cursor.execute(sql)
 	rows = cursor.fetchall()
-	if rows[0][0] not in ['UTF8']:
+	if rows[0][0] not in ['UTF8', 'UNICODE']:
 		print "WARNING: db encoding is not utf8. Attempting to encode"
 		db.close()
 		# generate db dump
