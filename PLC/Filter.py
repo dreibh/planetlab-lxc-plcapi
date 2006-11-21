@@ -53,6 +53,12 @@ class Filter(Parameter, dict):
             assert join_with in ("AND", "OR")
 
         for field, value in self.iteritems():
+            # provide for negation with a field starting with ~
+            negation=False
+            if field[0]=='~':
+                negation=True
+                field=field[1:]
+
             if field not in self.fields:
                 raise PLCInvalidArgument, "Invalid filter field '%s'" % field
 
@@ -72,6 +78,10 @@ class Filter(Parameter, dict):
                     operator = "="
                     value = str(api.db.quote(value))
 
-            conditionals.append("%s %s %s" % (field, operator, value))
+            clause = "%s %s %s" % (field, operator, value)
+            if negation:
+                clause = " ( NOT %s ) "%clause
+                
+            conditionals.append(clause)
 
         return (" %s " % join_with).join(conditionals)
