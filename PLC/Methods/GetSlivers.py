@@ -10,7 +10,7 @@ from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
-from PLC.ForeignSlices import ForeignSlice, ForeignSlices
+#from PLC.ForeignSlices import ForeignSlice, ForeignSlices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
@@ -68,7 +68,6 @@ class GetSlivers(Method):
             all_nodes = {self.caller['node_id']: self.caller}
         else:
             all_nodes = Nodes(self.api, node_filter).dict()
-            # XXX Add foreign nodes
 
         # Get default slices
         system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict()
@@ -94,8 +93,6 @@ class GetSlivers(Method):
 
         # Get slice information
         all_slices = Slices(self.api, all_slice_ids).dict()
-        # XXX Merge in foreign slices
-        all_slices.update(ForeignSlices(self.api, all_slice_ids).dict())
 
         person_ids = set()
         slice_attribute_ids = set()

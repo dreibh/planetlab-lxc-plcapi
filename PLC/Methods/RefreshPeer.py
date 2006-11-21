@@ -11,7 +11,6 @@ from PLC.Auth import Auth
 
 from PLC.Peers import Peer, Peers
 from PLC.Persons import Person, Persons
-##from PLC.ForeignNodes import ForeignNode, ForeignNodes
 
 
 class RefreshPeer(Method):
@@ -57,17 +56,15 @@ class RefreshPeer(Method):
 
 	## connect to the peer's API
         url=peer['peer_url']
-        print 'url=',url
-	apiserver = xmlrpclib.Server (url)
-	print 'auth=',auth
+	apiserver = xmlrpclib.ServerProxy (url,allow_none=True)
 
-	peer_get_nodes = apiserver.GetNodes(auth)
-        nb_new_nodes = peer.refresh_nodes(peer_get_nodes)
+        peer_local_nodes = apiserver.GetNodes(auth,None,None,'local')
+        nb_new_nodes = peer.refresh_nodes(peer_local_nodes)
         
         # rough and temporary
-        peer_foreign_nodes = apiserver.GetForeignNodes(auth)
-        peer_get_slices = apiserver.GetSlices(auth)
-        nb_new_slices = peer.refresh_slices(peer_get_slices,peer_foreign_nodes)
+        peer_foreign_nodes = apiserver.GetNodes(auth,None,None,'foreign')
+        peer_local_slices = apiserver.GetSlices(auth,{'peer_id':None})
+        nb_new_slices = peer.refresh_slices(peer_local_slices,peer_foreign_nodes)
         
         return {'plcname':self.api.config.PLC_NAME,
                 'new_nodes':nb_new_nodes,

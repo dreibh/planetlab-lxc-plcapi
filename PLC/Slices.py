@@ -9,7 +9,6 @@ from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiations
 from PLC.Nodes import Node, Nodes
-from PLC.ForeignNodes import ForeignNode, ForeignNodes
 import PLC.Persons
 
 class Slice(Row):
@@ -25,6 +24,7 @@ class Slice(Row):
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
+        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
         'name': Parameter(str, "Slice name", max = 32),
         'instantiation': Parameter(str, "Slice instantiation state"),
         'url': Parameter(str, "URL further describing this slice", max = 254, nullok = True),
@@ -131,7 +131,7 @@ class Slice(Row):
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, (Node,ForeignNode))
+        assert isinstance(node, Node)
         assert 'node_id' in node
 
         slice_id = self['slice_id']
@@ -156,7 +156,7 @@ class Slice(Row):
         """
 
         assert 'slice_id' in self
-        assert isinstance(node, (Node,ForeignNode))
+        assert isinstance(node, Node)
         assert 'node_id' in node
 
         slice_id = self['slice_id']
@@ -176,6 +176,37 @@ class Slice(Row):
             self['node_ids'].remove(node_id)
             node['slice_ids'].remove(slice_id)
 
+    ########## for foreign slices update, from ForeignSlices
+    def purge_slice_node (self,commit=True):
+        sql = "DELETE FROM slice_node WHERE slice_id=%d"%self['slice_id']
+        self.api.db.do(sql)
+        if commit:
+            self.api.db.commit()
+
+    def add_slice_nodes (self, node_ids, commit=True):
+        slice_id = self['slice_id']
+        ### xxx needs to be optimized
+        ### tried to figure a way to use a single sql statement
+        ### like: insert into table (x,y) values (1,2),(3,4);
+        ### but apparently this is not supported under postgresql
+        for node_id in node_ids:
+            sql="INSERT INTO slice_node VALUES (%d,%d)"%(slice_id,node_id)
+            self.api.db.do(sql)
+        if commit:
+            self.api.db.commit()
+
+    def update_slice_nodes (self, node_ids):
+        # xxx to be optimized
+        # we could compute the (set) difference between
+        # current and updated set of node_ids
+        # and invoke the DB only based on that
+        #
+        # for now : clean all entries for this slice
+        self.purge_slice_node()
+        # and re-install new list
+        self.add_slice_nodes (node_ids)
+
+    ##########
     def sync(self, commit = True):
         """
         Add or update a slice.

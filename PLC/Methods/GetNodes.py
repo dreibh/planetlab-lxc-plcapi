@@ -23,14 +23,15 @@ class GetNodes(Method):
         Mixed([Mixed(Node.fields['node_id'],
                      Node.fields['hostname'])],
               Filter(Node.fields)),
-        Parameter([str], "List of fields to return", nullok = True)
+        Parameter([str], "List of fields to return", nullok = True),
+        Parameter(str,"scope string, can be either 'all', 'local' or 'foreign'"),
         ]
 
     returns = [Node.fields]
 
-    def call(self, auth, node_filter = None, return_fields = None):
+    def call(self, auth, node_filter = None, return_fields = None, scope = 'all'):
         # Get node information
-        nodes = Nodes(self.api, node_filter, return_fields)
+        nodes = Nodes(self.api, node_filter, return_fields, scope)
 
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:

@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.40 2006/11/17 10:43:17 thierry Exp $
+-- $Id: planetlab4.sql,v 1.41 2006/11/17 19:31:08 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -280,7 +280,11 @@ CREATE TABLE nodes (
     -- Mandatory
     node_id serial PRIMARY KEY, -- Node identifier
     hostname text NOT NULL, -- Node hostname
-    site_id integer REFERENCES sites, -- At which site (clause NOT NULL removed for foreign_nodes)
+    -- temporarily removed NOT NULL clause for foreign_nodes
+    site_id integer REFERENCES sites, -- At which site 
+    -- may be NULL for local_nodes
+    peer_id integer REFERENCES peers, -- From which peer 
+
     boot_state text REFERENCES boot_states NOT NULL DEFAULT 'inst', -- Node boot state
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
 
@@ -306,20 +310,11 @@ array_accum(node_id) AS node_ids
 FROM nodes
 GROUP BY site_id;
 
--- Nodes - peers relationship
-CREATE TABLE peer_node (
-    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
-    node_id integer REFERENCES nodes NOT NULL, -- (Local) node identifier
-    PRIMARY KEY (peer_id, node_id),
-    UNIQUE (node_id) -- Nodes can only be at one peer
-) WITH OIDS;
-CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
-
 -- Nodes at each peer
 CREATE VIEW peer_nodes AS
 SELECT peer_id,
 array_accum(node_id) AS node_ids
-FROM peer_node
+FROM nodes
 GROUP BY peer_id;
 
 --------------------------------------------------------------------------------
@@ -542,6 +537,8 @@ CREATE TABLE slices (
     slice_id serial PRIMARY KEY, -- Slice identifier
 -- xxx temporarily remove the NOT NULL constraint
     site_id integer REFERENCES sites, -- Site identifier
+    peer_id integer REFERENCES peers, -- on which peer
+
     name text NOT NULL, -- Slice name
     instantiation text REFERENCES slice_instantiations NOT NULL DEFAULT 'plc-instantiated', -- Slice state, e.g. plc-instantiated
     url text, -- Project URL
@@ -594,19 +591,10 @@ FROM slices
 WHERE is_deleted is false
 GROUP BY site_id;
 
--- Slices - peer relationship
-CREATE TABLE peer_slice (
-    peer_id integer REFERENCES peers NOT NULL, -- peer primary key
-    slice_id integer REFERENCES slices NOT NULL, -- node primary key
-    PRIMARY KEY (peer_id, slice_id)
-) WITH OIDS;
-CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
-CREATE INDEX peer_slice_slice_id_idx ON peer_slice (slice_id);
-
 CREATE VIEW peer_slices AS
 SELECT peer_id,
 array_accum(slice_id) AS slice_ids
-FROM peer_slice
+FROM slices
 GROUP BY peer_id;
 
 -- Slice membership
@@ -817,11 +805,21 @@ LEFT JOIN person_sites USING (person_id)
 LEFT JOIN person_keys USING (person_id)
 LEFT JOIN person_slices USING (person_id);
 
+CREATE VIEW view_peers AS
+SELECT 
+peers.*, 
+peer_nodes.node_ids,
+peer_slices.slice_ids
+FROM peers
+LEFT JOIN peer_nodes USING (peer_id)
+LEFT JOIN peer_slices USING (peer_id);
+
 CREATE VIEW view_nodes AS
 SELECT
 nodes.node_id,
 nodes.hostname,
 nodes.site_id,
+nodes.peer_id,
 nodes.boot_state,
 nodes.deleted,
 nodes.model,
@@ -839,40 +837,12 @@ COALESCE(node_pcus.ports, '{}') AS ports,
 COALESCE(node_conf_files.conf_file_ids, '{}') AS conf_file_ids,
 node_session.session_id AS session
 FROM nodes
-LEFT JOIN peer_node USING (node_id) 
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id)
 LEFT JOIN node_pcus USING (node_id)
 LEFT JOIN node_conf_files USING (node_id)
-LEFT JOIN node_session USING (node_id)
-WHERE peer_node.peer_id IS NULL;
-
-CREATE VIEW view_peers AS
-SELECT 
-peers.*, 
-peer_nodes.node_ids,
-peer_slices.slice_ids
-FROM peers
-LEFT JOIN peer_nodes USING (peer_id)
-LEFT JOIN peer_slices USING (peer_id);
-
-CREATE VIEW view_foreign_nodes AS
-SELECT
-nodes.node_id,
-nodes.hostname,
-peer_node.peer_id,
-nodes.boot_state,
-nodes.model,
-nodes.version,
-CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
-CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
-COALESCE(node_slices.slice_ids, '{}') AS slice_ids,
-nodes.deleted
-FROM nodes
-LEFT JOIN peer_node USING (node_id) 
-LEFT JOIN node_slices USING (node_id)
-WHERE peer_node.peer_id IS NOT NULL;
+LEFT JOIN node_session USING (node_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
@@ -967,6 +937,7 @@ CREATE VIEW view_slices AS
 SELECT
 slices.slice_id,
 slices.site_id,
+slices.peer_id,
 slices.name,
 slices.instantiation,
 slices.url,
@@ -980,31 +951,9 @@ COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
 COALESCE(slice_persons.person_ids, '{}') AS person_ids,
 COALESCE(slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids
 FROM slices
-LEFT JOIN peer_slice USING (slice_id)
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
-LEFT JOIN slice_attributes USING (slice_id)
-WHERE peer_slice.peer_id IS NULL
-AND slices.site_id IS NOT NULL
-AND slices.creator_person_id IS NOT NULL;
-
-CREATE VIEW view_foreign_slices AS
-SELECT
-slices.slice_id,
-slices.name,
-peer_slice.peer_id,
-slices.instantiation,
-slices.url,
-slices.description,
-slices.max_nodes,
-slices.is_deleted,
-CAST(date_part('epoch', slices.created) AS bigint) AS created,
-CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
-COALESCE(slice_nodes.node_ids, '{}') AS node_ids
-FROM slices
-LEFT JOIN peer_slice USING (slice_id)
-LEFT JOIN slice_nodes USING (slice_id)
-WHERE peer_slice.peer_id IS NOT NULL;
+LEFT JOIN slice_attributes USING (slice_id);
 
 --
 CREATE VIEW view_slice_attributes AS

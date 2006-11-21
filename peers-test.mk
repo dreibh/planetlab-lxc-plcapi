@@ -67,6 +67,10 @@ restart:
 	@echo 'Restarting PLC'
 	@chroot $(CHROOT) service plc restart
 
+http:
+	@echo 'Restarting httpd'
+	@chroot $(CHROOT) /etc/plc.d/httpd stop ; chroot $(CHROOT) /etc/plc.d/httpd start
+
 ####################
 UPGRADE=down up reconfig restart
 
@@ -100,7 +104,7 @@ checkpoint:
 	cp TestPeers.out TestPeers.ref
 
 #######
-HELP=rpm db-dump
+HELP=rpm db-dump http
 
 help:
 	@echo known targets:

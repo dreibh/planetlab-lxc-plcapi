@@ -2,15 +2,13 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
-from PLC.ForeignNodes import ForeignNode, ForeignNodes
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 
 class AddSliceToNodes(Method):
     """
     Adds the specified slice to the specified nodes.
-    Nodes can be either regular (local) nodes as returned by GetNodes
-    or foreign nodes as returned by GetForeignNodes
+    Nodes can be either local or foreign nodes, as returned by GetNodes
 
     If the slice is
     already associated with a node, no errors are returned. 
@@ -54,14 +52,12 @@ class AddSliceToNodes(Method):
         # Get specified nodes, add them to the slice
          
         nodes = Nodes(self.api, node_id_or_hostname_list)
-        foreign_nodes = ForeignNodes (self.api, node_id_or_hostname_list)
-        all_nodes = nodes+foreign_nodes;
-	for node in all_nodes:
+	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
 
         slice.sync()
 
-	self.object_ids = [node['node_id'] for node in all_nodes]
+	self.object_ids = [node['node_id'] for node in nodes]
 
         return 1

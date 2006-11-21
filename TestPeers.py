@@ -73,6 +73,9 @@ def define_test (nodes,slices):
     global number_nodes, number_slices
     number_nodes=nodes
     number_slices=slices
+
+def fast():
+    define_test(1,1)
     
 define_test (nodes=5,slices=3)
 
@@ -125,7 +128,7 @@ def test00_init (args=[1,2]):
         for i in args:
             url=plc[i]['url-format']%plc[i]['hostname']
             plc[i]['url']=url
-            s[i]=xmlrpclib.Server(url)
+            s[i]=xmlrpclib.ServerProxy(url,allow_none=True)
             print 'initializing s[%d]'%i,url
             aa[i]={'Username':plc[i]['builtin_admin_id'],
                    'AuthMethod':'password',
@@ -148,8 +151,11 @@ def test00_print (args=[1,2]):
 def check_nodes (en,ef,args=[1,2]):
     global plc,s,a
     for i in args:
-        n=len(s[i].GetNodes(a[i]))
-        f=len(s[i].GetForeignNodes(a[i]))
+        # use a single request and sort afterwards for efficiency
+        # could have used GetNodes's scope as well
+        all_nodes = s[i].GetNodes(a[i])
+        n = len ([ x for x in all_nodes if x['peer_id'] is None])
+        f = len ([ x for x in all_nodes if x['peer_id'] is not None])
         print '%02d: Checking nodes: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,en,f,ef)
         assert n==en
         assert f==ef
@@ -158,15 +164,19 @@ def check_nodes (en,ef,args=[1,2]):
 def check_slices (els,efs,args=[1,2]):
     global plc,s,a
     for i in args:
-        ls=len(s[i].GetSlices(a[i]))
-        fs=len(s[i].GetForeignSlices(a[i]))
+        ls=len(s[i].GetSlices(a[i],{'peer_id':None}))
+        fs=len(s[i].GetSlices(a[i],{'~peer_id':None}))
         print '%02d: Checking slices: got %d local (e=%d) & %d foreign (e=%d)'%(i,ls,els,fs,efs)
         assert els==ls
         assert efs==fs
 
 def show_nodes (i,node_ids):
-    for message,nodes in [ ['LOC',s[i].GetNodes(a[i],node_ids)],
-                           ['FOR',s[i].GetForeignNodes(a[i],node_ids)] ]:
+    # same as above
+    all_nodes = s[i].GetNodes(a[i],node_ids)
+    loc_nodes = filter (lambda n: n['peer_id'] is None, all_nodes)
+    for_nodes = filter (lambda n: n['peer_id'] is not None, all_nodes)
+
+    for message,nodes in [ ['LOC',loc_nodes], ['FOR',for_nodes] ] :
         if nodes:
             print '[%s:%d] : '%(message,len(nodes)),
             for node in nodes:
@@ -183,11 +193,11 @@ def check_slice_nodes_n (ns,expected_nodes, is_local_slice, args=[1,2]):
         peer=peer_index(i)
         if is_local_slice:
             sname=slice_name(i,ns)
-            slice=s[i].GetSlices(a[i],[sname])[0]
+            slice=s[i].GetSlices(a[i],{'name':[sname],'peer_id':None})[0]
             message='local'
         else:
             sname=slice_name(peer,ns)
-            slice=s[i].GetForeignSlices(a[i],[sname])[0]
+            slice=s[i].GetSlices(a[i],{'name':[sname],'~peer_id':None})[0]
             message='foreign'
         print '%02d: %s slice %s (e=%d) '%(i,message,sname,expected_nodes),
         slice_node_ids=slice['node_ids']
@@ -235,7 +245,7 @@ def check_slivers_1 (esn,args=[1,2]):
 def check_slivers_n (nn,esn,args=[1,2]):
     global plc,s,a
     for i in args:
-        nodename=node_name(i,i)
+        nodename=node_name(i,nn)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
         assert ndict['hostname'] == nodename
         slivers = ndict['slivers']
@@ -349,14 +359,17 @@ def test01_refresh (args=[1,2]):
         print 'got ',retcod
 
 ####################
-def get_node_id(i,nodename):
-    return s[i].GetNodes(a[i],[nodename])[0]['node_id']
+# retrieves node_id from hostname - checks for local nodes only
+def get_local_node_id(i,nodename):
+    return s[i].GetNodes(a[i],[nodename],None,'local')[0]['node_id']
 
+# clean all local nodes - foreign nodes are not supposed to be cleaned up manually
 def clean_all_nodes (args=[1,2]):
     global plc,s,a
     for i in args:
         print '%02d: Cleaning all nodes'%i
-        for node in s[i].GetNodes(a[i]):
+        loc_nodes = s[i].GetNodes(a[i],None,None,'local')
+        for node in loc_nodes:
             print '%02d: > Cleaning node %d'%(i,node['node_id'])
             s[i].DeleteNode(a[i],node['node_id'])
 
@@ -369,7 +382,7 @@ def test02_node_n (nn,args=[1,2]):
     for i in args:
         nodename = node_name(i,nn)
         try:
-            get_node_id(i,nodename)
+            get_local_node_id(i,nodename)
         except:
             n=s[i].AddNode(a[i],1,{'hostname': nodename})
             print '%02d: Added node %d %s'%(i,n,node_name(i,i))
@@ -382,7 +395,7 @@ def test02_delnode_n (nn,args=[1,2]):
     global plc,s,a
     for i in args:
         nodename = node_name(i,nn)
-        node_id = get_node_id (i,nodename)
+        node_id = get_local_node_id (i,nodename)
         retcod=s[i].DeleteNode(a[i],nodename)
         print '%02d: Deleted node %d, returns %s'%(i,node_id,retcod)
 
@@ -391,14 +404,14 @@ def clean_all_slices (args=[1,2]):
     global plc,s,a
     for i in args:
         print '%02d: Cleaning all slices'%i
-        for slice in s[i].GetSlices(a[i]):
+        for slice in s[i].GetSlices(a[i],{'peer_id':None}):
             slice_id = slice['slice_id']
             if slice_id not in system_slices_ids:
                 print '%02d: > Cleaning slice %d'%(i,slice_id)
                 s[i].DeleteSlice(a[i],slice_id)
 
-def get_slice_id (i,name):
-    return s[i].GetSlices(a[i],[name])[0]['slice_id']
+def get_local_slice_id (i,name):
+    return s[i].GetSlices(a[i],{'name':[name],'peer_id':None})[0]['slice_id']
 
 def test03_slice (args=[1,2]):
     for n in myrange(number_slices):
@@ -434,7 +447,7 @@ def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
     global plc,s,a
     for i in args:
         peer=peer_index(i)
-        slice_id = get_slice_id (i,slice_name (i,ns))
+        slice_id = get_local_slice_id (i,slice_name (i,ns))
         
         if is_local:
             hostnames=[node_name(i,nn) for nn in nnl]
@@ -513,6 +526,14 @@ def test_all_nodes ():
     check_nodes (number_nodes,number_nodes,)
     test01_refresh ()
     check_nodes (number_nodes,number_nodes,)
+
+def populate ():
+    test02_node()
+    test03_slice([1])
+    test01_refresh ([1])
+    test04_slice_add_lnode([1])
+    test04_slice_add_fnode([1])
+    test01_refresh()
 
 def test_all_addslices ():
 
