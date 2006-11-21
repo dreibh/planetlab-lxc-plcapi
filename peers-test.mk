@@ -45,7 +45,7 @@ api: $(API)
 
 install-schema:
 	@echo 'installing schema'
-	@cp planetlab4.sql $(CHROOT)$(APIDIR)/planetlab4.sql
+	@rsync -a -v planetlab4.sql $(CHROOT)$(APIDIR)/planetlab4.sql
 
 install-api:
 	find . -name '*.py' | xargs tar cf - | ( cd $(CHROOT)$(APIDIR) ; tar xf -)
@@ -90,7 +90,7 @@ reconfig:
 ####################
 TEST=run checkpoint diff
 run:
-	./TestPeers.py > TestPeers.out 2>&1
+	python -u ./TestPeers.py > TestPeers.out 2>&1
 diff:
 	@echo '<< REF OUT>>'
 	diff TestPeers.ref TestPeers.out 
