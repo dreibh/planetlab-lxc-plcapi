@@ -1,6 +1,12 @@
 #!/usr/bin/python
 #
-# Tool for upgrading a db based on db version #
+# Tool for upgrading/converting a db
+# Requirements:
+# 1) Databse Schema - schema for the new database you what to upgrade to
+# 2) Config File - the config file that describes how to convert the db
+#
+# Notes:
+# 1) Script will attempt to conver the db defined in  /etc/planetlab/plc_config
 import sys
 import os
 import getopt
@@ -81,10 +87,9 @@ def archive_db(database, archived_database):
 
         archive_db = " dropdb -U postgres %s > /dev/null 2>&1;" \
 		     " psql template1 postgres -qc " \
-                     " 'ALTER DATABASE %s RENAME TO %s;';" \
-                     " createdb -U postgres %s > /dev/null; " % \
-                     (archived_database, database, archived_database, database)
-        exit_status = os.system(archive_db)
+                     " 'ALTER DATABASE %s RENAME TO %s;';" % \
+                     (archived_database, database, archived_database)
+	exit_status = os.system(archive_db)
         if exit_status:
                 print "Error: unable to archive database. Upgrade failed"
                 sys.exit(1)
@@ -97,7 +102,9 @@ def encode_utf8(inputfile_name, outputfile_name):
 		inputfile = open(inputfile_name, 'r')
 		outputfile = open(outputfile_name, 'w')
 		for line in inputfile:
-        		outputfile.write(unicode(line, 'iso-8859-1').encode('utf8'))
+			if line.upper().find('SET CLIENT_ENCODING') > -1:
+				continue
+			outputfile.write(unicode(line, 'iso-8859-1').encode('utf8'))
 		inputfile.close()
 		outputfile.close()		
 	except:
@@ -312,7 +319,7 @@ try:
 		# archive original db
 		archive_db(config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_sqlascii_archived')
 		# create a utf8 database and upload encoded data
-		recreate_cmd = 'createdb -U postgres -E UTF8 %s > /dev/null 2>&1; ' \
+		recreate_cmd = 'createdb -U postgres -E UTF8 %s > /dev/null; ' \
 			       'psql -a -U  %s %s < %s > /dev/null 2>&1;'   % \
 			  (config['PLC_DB_NAME'], config['PLC_DB_USER'], \
 			   config['PLC_DB_NAME'], dump_file_encoded) 
@@ -382,7 +389,7 @@ db.close()
 
 print "Status: archiving database"
 archive_db(config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived')
-
+os.system('createdb -U postgres -E UTF8 %s > /dev/null; ' % config['PLC_DB_NAME'])
 
 print "Status: upgrading database"
 # attempt to create and load all items from schema into temp db
