@@ -6,7 +6,10 @@
 # 2) Config File - the config file that describes how to convert the db
 #
 # Notes:
-# 1) Script will attempt to conver the db defined in  /etc/planetlab/plc_config
+# 1) Will attempt to convert the db defined in  /etc/planetlab/plc_config
+# 2) Does not automatically drop archived database. They must be removed
+#    manually
+
 import sys
 import os
 import getopt
