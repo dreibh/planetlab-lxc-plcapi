@@ -108,7 +108,7 @@ try:
 		# delete these zombie records
 		if zombie_keys_list:
 			print " -> Deleting %d zombie record(s) from %s after checking %s" % \
-                        		(len(zombie_keys_list), foreign_key[0], primary_key[0])
+                        		(len(zombie_keys_list), foreign_key_parts[0], primary_key_parts[0])
 			sql_delete = 'DELETE FROM %s WHERE %s IN %s' % \
 			(foreign_key_parts[0], foreign_key_parts[1], tuple(zombie_keys_list))
 			cursor.execute(sql_delete)
