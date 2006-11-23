@@ -12,6 +12,7 @@ from PLC.Auth import Auth
 from PLC.Peers import Peer, Peers
 from PLC.Persons import Person, Persons
 
+from PLC.Cache import Cache
 
 class RefreshPeer(Method):
     """
@@ -48,24 +49,15 @@ class RefreshPeer(Method):
         except:
             raise PLCInvalidArgument,'no such person_id:%d'%person_id
 	
+	## connect to the peer's API
+        url=peer['peer_url']
+	apiserver = xmlrpclib.ServerProxy (url,allow_none=True)
+
 	### build up foreign auth
 	auth={ 'Username': person['email'],
 	       'AuthMethod' : 'password',
 	       'AuthString' : person['password'],
 	       'Role' : 'admin' }
 
-	## connect to the peer's API
-        url=peer['peer_url']
-	apiserver = xmlrpclib.ServerProxy (url,allow_none=True)
-
-        peer_local_nodes = apiserver.GetNodes(auth,None,None,'local')
-        nb_new_nodes = peer.refresh_nodes(peer_local_nodes)
-        
-        # rough and temporary
-        peer_foreign_nodes = apiserver.GetNodes(auth,None,None,'foreign')
-        peer_local_slices = apiserver.GetSlices(auth,{'peer_id':None})
-        nb_new_slices = peer.refresh_slices(peer_local_slices,peer_foreign_nodes)
-        
-        return {'plcname':self.api.config.PLC_NAME,
-                'new_nodes':nb_new_nodes,
-                'new_slices':nb_new_slices}
+	cache = Cache (self.api, peer, apiserver, auth)
+	return cache.refresh_peer ()

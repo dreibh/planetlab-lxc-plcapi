@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.20 2006/11/09 19:43:55 mlhuang Exp $
+# $Id: Nodes.py,v 1.21 2006/11/21 10:57:00 thierry Exp $
 #
 
 from types import StringTypes
@@ -62,11 +62,10 @@ class Node(Row):
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         }
 
-    # foreign attributes management
-    # the key to track remote objects
-    foreign_key = 'hostname'
-    # the fields that get verbatim copied from foreign objects
+    class_id = 'node_id'
+    class_key = 'hostname'
     foreign_fields = ['boot_state','model','version','date_created','last_updated']
+    foreign_xrefs = {}
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):

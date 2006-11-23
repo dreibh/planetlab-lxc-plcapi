@@ -37,6 +37,13 @@ class Slice(Row):
         'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
         'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
         }
+    # for Cache
+    class_id = 'slice_id'
+    class_key = 'name'
+    foreign_fields = ['instantiation', 'url', 'description',
+                         'max_nodes', 'created', 'expires']
+    foreign_xrefs = { 'Node' : { 'field' : 'node_ids' ,
+				 'table': 'slice_node' } }
 
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base
@@ -55,7 +62,7 @@ class Slice(Row):
         conflicts = Slices(self.api, [name])
         for slice in conflicts:
             if 'slice_id' not in self or self['slice_id'] != slice['slice_id']:
-                raise PLCInvalidArgument, "Slice name already in use"
+                raise PLCInvalidArgument, "Slice name already in use, %s"%name
 
         return name
 
@@ -175,36 +182,6 @@ class Slice(Row):
 
             self['node_ids'].remove(node_id)
             node['slice_ids'].remove(slice_id)
-
-    ########## for foreign slices update, from ForeignSlices
-    def purge_slice_node (self,commit=True):
-        sql = "DELETE FROM slice_node WHERE slice_id=%d"%self['slice_id']
-        self.api.db.do(sql)
-        if commit:
-            self.api.db.commit()
-
-    def add_slice_nodes (self, node_ids, commit=True):
-        slice_id = self['slice_id']
-        ### xxx needs to be optimized
-        ### tried to figure a way to use a single sql statement
-        ### like: insert into table (x,y) values (1,2),(3,4);
-        ### but apparently this is not supported under postgresql
-        for node_id in node_ids:
-            sql="INSERT INTO slice_node VALUES (%d,%d)"%(slice_id,node_id)
-            self.api.db.do(sql)
-        if commit:
-            self.api.db.commit()
-
-    def update_slice_nodes (self, node_ids):
-        # xxx to be optimized
-        # we could compute the (set) difference between
-        # current and updated set of node_ids
-        # and invoke the DB only based on that
-        #
-        # for now : clean all entries for this slice
-        self.purge_slice_node()
-        # and re-install new list
-        self.add_slice_nodes (node_ids)
 
     ##########
     def sync(self, commit = True):
