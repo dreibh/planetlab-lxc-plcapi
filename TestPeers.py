@@ -54,6 +54,7 @@ plc1={ 'plcname':'plc1 in federation',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc1@planet-lab.org',
        'peer_admin_password':'peer',
+       'peer_admin_key':'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAqK1lKNf61lAGYAXzG6xKnFQkfv3ViG0GP2Krp1zD7d/93IkmsXVEjLfGhEJQjRjzRc9/gFdATP703cDzp4Ag2eR2wdQz0e6SXOBd2sLuW3LqTwor1XMmp5f0QCOg5OSKXwozE3Tlt0+ewBNvAE8HWwZFjou5CFnrFMVZPjqfhpU= thierry.parmentelat@sophia.inria.fr',
        'node-format':'n1%02d.plc1.org',
        'plainname' : 'one',
        'slice-format' : 's1%02d',
@@ -65,6 +66,7 @@ plc2={ 'plcname':'plc2 in federation',
        'builtin_admin_password':'root',
        'peer_admin_name':'plc2@planet-lab.org',
        'peer_admin_password':'peer',
+       'peer_admin_key':'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAlsX+X+sgN/rsNizPhsXMdHzArxVdwN1KJMG4vTY1m0KQMFJSilaX6xlMIirKhFmNDrVkrOPT2On59K4fDFjGgDq9gMMfdaAfEhxDdy2x1k/H/vJRQE/CqkoRZE8mVAt/cgMsOHTLJTDxBm/0RedaBlcXBpCwqBi3n05sGkS2BjM= VTHD-tester-ssh-v2',
        'node-format':'n2%02d.plc2.org',
        'plainname' : 'two',
        'slice-format' : 's2%02d',
@@ -117,7 +119,7 @@ def myrange (n):
     return range (1,n+1,1)
 
 def message (*args):
-    print "XXXXXXXXXXXXXXXXXXXX",
+    print "====================",
     print args
     
 ####################
@@ -271,10 +273,18 @@ def test00_admin_person (args=[1,2]):
             p=s[i].GetPersons(a[i],[email])[0]
             plc[i]['peer_admin_id']=p['person_id']
         except:
-            person_id=s[i].AddPerson(aa[i],{'first_name':'Local', 'last_name':'PeerPoint', 'role_ids':[10],
-                                            'email':email,'password':plc[i]['peer_admin_password']})
-            print '%02d: created peer admin account %d, %s - %s'%(i,person_id,plc[i]['peer_admin_name'],plc[i]['peer_admin_password'])
+            person_id=s[i].AddPerson(aa[i],{'first_name':'Local', 
+					    'last_name':'PeerPoint', 
+					    'role_ids':[10],
+                                            'email':email,
+					    'password':plc[i]['peer_admin_password']})
+            print '%02d: created peer admin account %d, %s - %s'%(i,
+								  person_id,plc[i]['peer_admin_name'],
+								  plc[i]['peer_admin_password'])
             plc[i]['peer_admin_id']=person_id
+	    s[i].AddPersonKey(aa[i],email,{'key_type':'ssh',
+					   'key':plc[i]['peer_admin_key']})
+            print '%02d: added key to peer admin '%i
 
 def test00_admin_enable (args=[1,2]):
     global plc,s,a
@@ -358,7 +368,7 @@ def get_peer_id (i):
 
 def test01_refresh (message,args=[1,2]):
     global plc,s,a
-    print 'XXX refresh',message
+    print '=== refresh',message
     for i in args:
         print '%02d: Refreshing peer'%(i),
         retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
@@ -623,9 +633,9 @@ def populate ():
 
 def test_now ():
     test_all_init()
-    clean_all_nodes()
-    clean_all_slices()
-    populate()
+#    clean_all_nodes()
+#    clean_all_slices()
+#    populate()
 
 #####
 def usage ():
