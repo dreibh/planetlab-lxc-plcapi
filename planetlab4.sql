@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.41 2006/11/17 19:31:08 tmack Exp $
+-- $Id: planetlab4.sql,v 1.42 2006/11/21 10:57:00 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -35,6 +35,22 @@ CREATE TABLE plc_db_version (
 ) WITH OIDS;
 
 INSERT INTO plc_db_version (version) VALUES (4);
+
+--------------------------------------------------------------------------------
+-- Peers
+--------------------------------------------------------------------------------
+
+-- Peers
+CREATE TABLE peers (
+     peer_id  serial PRIMARY KEY, -- identifier
+     peername text NOT NULL,      -- free text
+     peer_url text NOT NULL,      -- the url of that peer's API
+     -- oops, looks like we have a dependency loop here
+     --person_id integer REFERENCES persons NOT NULL, -- the account we use for logging in
+     person_id integer NOT NULL, -- the account we use for logging in
+       
+     deleted boolean NOT NULL DEFAULT false
+) WITH OIDS;
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -197,7 +213,8 @@ CREATE TABLE keys (
     key_id serial PRIMARY KEY, -- Key identifier
     key_type text REFERENCES key_types NOT NULL, -- Key type
     key text NOT NULL, -- Key material
-    is_blacklisted boolean NOT NULL DEFAULT false -- Has been blacklisted
+    is_blacklisted boolean NOT NULL DEFAULT false, -- Has been blacklisted
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 
 -- Account authentication key(s)
@@ -263,17 +280,6 @@ INSERT INTO boot_states (boot_state) VALUES ('inst');
 INSERT INTO boot_states (boot_state) VALUES ('rins');
 INSERT INTO boot_states (boot_state) VALUES ('rcnf');
 INSERT INTO boot_states (boot_state) VALUES ('new');
-
--- Peers
-CREATE TABLE peers (
-     peer_id  serial PRIMARY KEY, -- identifier
-     peername text NOT NULL,      -- free text
-     peer_url text NOT NULL,      -- the url of that peer's API
-     person_id integer REFERENCES persons NOT NULL, -- the account we use for logging in
-       
-     deleted boolean NOT NULL DEFAULT false
-) WITH OIDS;
-
 
 -- Nodes
 CREATE TABLE nodes (

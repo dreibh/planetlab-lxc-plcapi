@@ -21,7 +21,13 @@ class Key(Row):
         'key_id': Parameter(int, "Key identifier"),
         'key_type': Parameter(str, "Key type"),
         'key': Parameter(str, "Key value", max = 4096),
+        'peer_id': Parameter(int, "Peer at which this node is managed", nullok = True),
         }
+
+    # for Cache
+    class_key= 'key'
+    foreign_fields = ['key_type']
+    foreign_xrefs = {}
 
     def validate_key_type(self, key_type):
         key_types = [row['key_type'] for row in KeyTypes(self.api)]

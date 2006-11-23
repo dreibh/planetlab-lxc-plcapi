@@ -4,6 +4,7 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 verbose_flag=False;
+#verbose_flag=True;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -19,7 +20,7 @@ def class_attributes (classname):
 
     return {'row_class':row_class, 
 	    'table_class':table_class,
-	    'class_id': row_class.__dict__['class_id'],
+	    'primary_key': row_class.__dict__['primary_key'],
 	    'class_key': row_class.__dict__['class_key'],
 	    'foreign_fields': row_class.__dict__['foreign_fields'],
 	    'foreign_xrefs': row_class.__dict__['foreign_xrefs'],
@@ -45,18 +46,16 @@ class Cache:
 	def __init__ (self, api, classname, alien_objects):
 	    self.api = api
 	    attrs = class_attributes (classname)
-	    self.class_id = attrs['class_id']
+	    self.primary_key = attrs['primary_key']
 	    self.class_key = attrs['class_key']
 
 	    # cannot use dict, it's acquired by xmlrpc and is untyped
-	    d = {}
-	    for x in alien_objects:
-		verbose ('indexing',x)
-		d[x[self.class_id]]=x
-	    self.alien_objects_byid = d
+	    self.alien_objects_byid = dict( [ (x[self.primary_key],x) for x in alien_objects ] )
 
+	    # retrieve local objects
 	    local_objects = attrs['table_class'] (api)
 	    self.local_objects_byname = local_objects.dict(self.class_key)
+
 	    verbose ('Transcoder init :',classname,
 		     self.alien_objects_byid.keys(),
 		     self.local_objects_byname.keys())
@@ -71,7 +70,7 @@ class Cache:
 	    verbose ('got name',name,)
 	    local_object=self.local_objects_byname[name]
 	    verbose ('found local obj')
-	    local_id=local_object[self.class_id]
+	    local_id=local_object[self.primary_key]
 	    verbose ('and local_id',local_id)
 	    return local_id
 	    
@@ -114,6 +113,7 @@ class Cache:
     # classname: the type of objects we are talking about;       e.g. 'Slice'
     # peer_object_list list of objects at a given peer -         e.g. peer.GetSlices()
     # alien_xref_objs_dict : a dict {'classname':alien_obj_list} e.g. {'Node':peer.GetNodes()}
+    # his must match the keys in xref_specs
     # lambda_ignore : the alien objects are ignored if this returns true
     def update_table (self,
                       classname,
@@ -127,18 +127,18 @@ class Cache:
 	attrs = class_attributes (classname)
 	row_class = attrs['row_class']
 	table_class = attrs['table_class']
-	class_id = attrs['class_id']
+	primary_key = attrs['primary_key']
 	class_key = attrs['class_key']
 	foreign_fields = attrs['foreign_fields']
 	foreign_xrefs = attrs['foreign_xrefs']
 
 	## allocate transcoders and xreftables once, for each item in foreign_xrefs
-	accessories={}
-	for xref_classname,xref_spec in foreign_xrefs.iteritems():
-	    d={}
-	    d['transcoder']=Cache.Transcoder (self.api,xref_classname,alien_xref_objs_dict[xref_classname])
-	    d['xref_table'] =Cache.XrefTable (self.api,xref_spec['table'],classname,xref_classname)
-	    accessories[xref_classname]=d
+	# create a dict 'classname' -> {'transcoder' : ..., 'xref_table' : ...}
+	accessories = dict(
+	    [ (xref_classname,
+	       {'transcoder':Cache.Transcoder (self.api,xref_classname,alien_xref_objs_dict[xref_classname]),
+		'xref_table':Cache.XrefTable (self.api,xref_spec['table'],classname,xref_classname)})
+	      for xref_classname,xref_spec in foreign_xrefs.iteritems()])
 
         ### get current local table
         # get ALL local objects so as to cope with
@@ -146,6 +146,8 @@ class Cache:
 	# (*) or naming conflicts
         local_objects = table_class (self.api)
         ### index upon class_key for future searches
+	verbose ('local objects:',local_objects)
+	verbose ('class_key',class_key)
         local_objects_index = local_objects.dict(class_key)
 	verbose ('update_table',classname,local_objects_index.keys())
 
@@ -225,7 +227,7 @@ class Cache:
 			former_xrefs=local_object[xref_spec['field']]
 		    except:
 			former_xrefs=[]
-		    xref_table.update_item (local_object[class_id],
+		    xref_table.update_item (local_object[primary_key],
 					    former_xrefs,
 					    local_values)
 		elif isinstance (alien_value,int):
@@ -269,19 +271,22 @@ class Cache:
         
     def refresh_peer (self):
 	
+	peer_local_keys = self.peer_server.GetKeys(self.auth,{'peer_id':None})
         peer_local_nodes = self.peer_server.GetNodes(self.auth,None,None,'local')
+	# xxx would ideally get our own nodes only, 
+	# requires to know remote peer's peer_id for ourselves, mmhh
         peer_foreign_nodes = self.peer_server.GetNodes(self.auth,None,None,'foreign')
         peer_local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
 
-	from PLC.Nodes import Nodes
-	verbose ('local nodes before refresh',len(Nodes(self.api)))
-        nb_new_nodes = self.refresh_nodes(peer_local_nodes)
-	verbose ('local nodes after refresh',len(Nodes(self.api)))
-        
+	nb_new_keys = self.update_table('Key', peer_local_keys)
+
+        nb_new_nodes = self.update_table('Node', peer_local_nodes)
+
         # rough and temporary
         nb_new_slices = self.refresh_slices(peer_local_slices,peer_local_nodes+peer_foreign_nodes)
         
         return {'plcname':self.api.config.PLC_NAME,
+		'new_keys':nb_new_keys,
                 'new_nodes':nb_new_nodes,
                 'new_slices':nb_new_slices}
 

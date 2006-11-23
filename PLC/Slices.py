@@ -38,7 +38,6 @@ class Slice(Row):
         'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
         }
     # for Cache
-    class_id = 'slice_id'
     class_key = 'name'
     foreign_fields = ['instantiation', 'url', 'description',
                          'max_nodes', 'created', 'expires']

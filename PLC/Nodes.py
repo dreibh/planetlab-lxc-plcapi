@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.21 2006/11/21 10:57:00 thierry Exp $
+# $Id: Nodes.py,v 1.22 2006/11/23 11:55:24 thierry Exp $
 #
 
 from types import StringTypes
@@ -62,7 +62,7 @@ class Node(Row):
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         }
 
-    class_id = 'node_id'
+    # for Cache
     class_key = 'hostname'
     foreign_fields = ['boot_state','model','version','date_created','last_updated']
     foreign_xrefs = {}
