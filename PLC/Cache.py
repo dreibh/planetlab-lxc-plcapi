@@ -3,7 +3,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
-verbose_flag=True;
+verbose_flag=False;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -51,6 +51,7 @@ class Cache:
 	    # cannot use dict, it's acquired by xmlrpc and is untyped
 	    d = {}
 	    for x in alien_objects:
+		verbose ('indexing',x)
 		d[x[self.class_id]]=x
 	    self.alien_objects_byid = d
 
@@ -131,6 +132,13 @@ class Cache:
 	foreign_fields = attrs['foreign_fields']
 	foreign_xrefs = attrs['foreign_xrefs']
 
+	## allocate transcoders and xreftables once, for each item in foreign_xrefs
+	accessories={}
+	for xref_classname,xref_spec in foreign_xrefs.iteritems():
+	    d={}
+	    d['transcoder']=Cache.Transcoder (self.api,xref_classname,alien_xref_objs_dict[xref_classname])
+	    d['xref_table'] =Cache.XrefTable (self.api,xref_spec['table'],classname,xref_classname)
+	    accessories[xref_classname]=d
 
         ### get current local table
         # get ALL local objects so as to cope with
@@ -154,7 +162,7 @@ class Cache:
         # scan the peer's local objects
         for alien_object in alien_object_list:
 
-            ### ignore system-wide slices
+            ### ignore, e.g. system-wide slices
             if lambda_ignore(alien_object):
                 continue
 
@@ -196,14 +204,13 @@ class Cache:
             local_object.sync()
 
 	    # manage cross-refs
-	    for related_class,xrefspec in foreign_xrefs.iteritems():
-		field=xrefspec['field']
-		alien_xref_obj_list = alien_xref_objs_dict[related_class]
+	    for xref_classname,xref_spec in foreign_xrefs.iteritems():
+		field=xref_spec['field']
+		alien_xref_obj_list = alien_xref_objs_dict[xref_classname]
 		alien_value = alien_object[field]
-		### yyy optimize objects allocations for transcoders and xreftables
 		if isinstance (alien_value,list):
-		    verbose ('update_table list-transcoding ',related_class,' aliens=',alien_value,)
-		    transcoder = Cache.Transcoder(self.api,related_class,alien_xref_obj_list)
+		    verbose ('update_table list-transcoding ',xref_classname,' aliens=',alien_value,)
+		    transcoder = accessories[xref_classname]['transcoder']
 		    local_values=[]
 		    for a in alien_value:
 			try:
@@ -211,11 +218,11 @@ class Cache:
 			except:
 			    # could not transcode - might be from another peer that we dont know about..
 			    pass
-		    verbose (" trasncoded as ",local_values)
-		    xref_table = Cache.XrefTable (self.api,xrefspec['table'],classname,related_class)
+		    verbose (" transcoded as ",local_values)
+		    xref_table = accessories[xref_classname]['xref_table']
 		    # newly created objects dont have xrefs yet
 		    try:
-			former_xrefs=local_object[xrefspec['field']]
+			former_xrefs=local_object[xref_spec['field']]
 		    except:
 			former_xrefs=[]
 		    xref_table.update_item (local_object[class_id],
@@ -255,7 +262,7 @@ class Cache:
         returns the number of new slices on this peer (can be negative)
         """
 
-	# xxx use 'system' flag for slices
+	# xxx use 'system' flag for finding system slices
         return self.update_table ('Slice', peer_get_slices,
 				  {'Node':peer_foreign_nodes},
 				  lambda x: x['creator_person_id']==1)
