@@ -12,7 +12,7 @@ PLC2=planetlab-devbox.inria.fr
 all:help
 
 ####################
-PUSH=pclean pplc1 pplc2 papi1 papi2
+PUSH=pclean pplc2 papi2 pplc1 papi1
 
 push:$(PUSH)
 
@@ -25,23 +25,24 @@ papi1:
 	rsync -a -v -C ./ root@$(PLC1):new_plc_api/
 pplc1:
 	rsync -a -v -C ./PLC/ root@$(PLC1):$(CHROOT)$(APIDIR)/PLC/
-	rsync -v -C ./planetlab4.sql root@$(PLC1):$(CHROOT)$(APIDIR)/planetlab4.sql
+	rsync -a -v -C ./planetlab4.sql root@$(PLC1):$(CHROOT)$(APIDIR)/planetlab4.sql
 papi2:
 	rsync -a -v -C ./ root@$(PLC2):new_plc_api/
 pplc2:
 	rsync -a -v -C ./PLC/ root@$(PLC2):$(CHROOT)$(APIDIR)/PLC/
-	rsync -v -C ./planetlab4.sql root@$(PLC2):$(CHROOT)$(APIDIR)/planetlab4.sql
+	rsync -a -v -C ./planetlab4.sql root@$(PLC2):$(CHROOT)$(APIDIR)/planetlab4.sql
 
 ####################
 DB=install-schema stop-clients clean-db restart
-API=install-api restart
+WEB=install-api restart
 
 db: $(DB)
+	@date
 
 db-dump:
 	chroot $(CHROOT) pg_dump -U pgsqluser planetlab4 > planetlab4.dump
 
-api: $(API)
+web: $(WEB)
 
 install-schema:
 	@echo 'installing schema'
@@ -92,12 +93,28 @@ reconfig:
 	(echo w; echo q) | chroot $(CHROOT) plc-config-tty
 
 ####################
+RUN=api sql log
+api:
+	chroot $(CHROOT) /usr/share/plc_api/Shell.py
+
+sql:
+	chroot $(CHROOT) psql -U pgsqluser planetlab4
+
+log:
+	emacs /plc/data/var/log/httpd/error_log /plc/data/var/log/boot.log
+
+####################
+normalize= sed -ibkp "s|'expires':.*,|'expires': normalized,|"
+
 TEST=run checkpoint diff
-run:
+run: run-only normalize
+run-only:
 	python -u ./TestPeers.py > TestPeers.out 2>&1
+normalize:
+	$(normalize) TestPeers.out
 diff:
 	@echo '<< REF OUT>>'
-	diff TestPeers.ref TestPeers.out 
+	diff TestPeers.ref TestPeers.out
 
 checkpoint:
 	@echo adopting latest run as reference
@@ -110,8 +127,9 @@ help:
 	@echo known targets:
 	@echo push: $(PUSH) 
 	@echo db: $(DB) 
-	@echo api: $(API) 
+	@echo web: $(WEB) 
 	@echo upgrade: $(UPGRADE)
 	@echo test: $(TEST)
+	@echo run: $(RUN)
 	@echo OTHERS: $(HELP)
 
