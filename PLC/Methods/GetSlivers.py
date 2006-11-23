@@ -148,8 +148,8 @@ class GetSlivers(Method):
 
             # If not a foreign node, add all of our default system
             # slices to it.
-            # XXX if not node['peer_id']:
-            slice_ids.update(system_slice_ids)
+            if node['peer_id'] is not None:
+		slice_ids.update(system_slice_ids)
 
             slivers = []
             for slice in map(lambda id: all_slices[id], slice_ids.keys()):
