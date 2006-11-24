@@ -48,50 +48,6 @@ import xmlrpclib
 import os
 
 ####################
-plc1={ 'plcname':'plc1 in federation',
-       'hostname':'lurch.cs.princeton.edu',
-       'url-format':'https://%s:443/PLCAPI/',
-       'builtin-admin-id':'root@plc1.org',
-       'builtin-admin-password':'root',
-       'peer-admin-name':'plc1@planet-lab.org',
-       'peer-admin-password':'peer',
-       'node-format':'n1%02d.plc1.org',
-       'plainname' : 'one',
-       'slice-format' : 's1%02d',
-       'person-format' : 'user1-%d@plc1.org',
-       'key-format':'ssh-rsa 1111111111111111 user%d-key%d',
-       'person-password' : 'password1',
-       }
-plc2={ 'plcname':'plc2 in federation',
-       'hostname':'planetlab-devbox.inria.fr',
-       'url-format':'https://%s:443/PLCAPI/',
-       'builtin-admin-id':'root@plc2.org',
-       'builtin-admin-password':'root',
-       'peer-admin-name':'plc2@planet-lab.org',
-       'peer-admin-password':'peer',
-       'node-format':'n2%02d.plc2.org',
-       'plainname' : 'two',
-       'slice-format' : 's2%02d',
-       'person-format' : 'user2-%d@plc2.org',
-       'key-format':'ssh-rsa 2222222222222222 user%d-key%d',
-       'person-password' : 'password2',
-       }
-
-####################
-# set initial conditions
-def define_test (keys,persons,nodes,slices,fast_mode):
-    global number_keys, number_persons, number_nodes, number_slices, fast_flag
-    number_keys=keys
-    number_persons=persons
-    number_nodes=nodes
-    number_slices=slices
-    fast_flag=fast_mode
-
-def fast():
-    define_test(1,1,1,1,True)
-    
-define_test (keys=4,persons=2,nodes=5,slices=3,fast_mode=False)
-
 # predefined stuff
 # number of 'system' persons
 # builtin maint, local root, 2 persons for the peering
@@ -113,26 +69,92 @@ def total_slivers ():
     return number_slices+system_slivers()
 
 ####################
+# set initial conditions
+def define_test (sites,keys,persons,nodes,slices,fast_mode):
+    global number_sites, number_keys, number_persons, number_nodes, number_slices, fast_flag
+    number_sites = sites
+    number_keys=keys
+    number_persons=persons
+    number_nodes=nodes
+    number_slices=slices
+    fast_flag=fast_mode
+
+def show_test():
+    print '%d sites, %d keys, %d persons, %d nodes & %d slices'%(number_sites, number_keys,number_persons,
+								 number_nodes,number_slices)
+
+def fast():
+    define_test(1,1,1,1,1,True)
+    
+def normal():
+    define_test (sites=4,keys=2,persons=4,nodes=5,slices=4,fast_mode=False)
+
+def big():
+    define_test (sites=16,keys=8,persons=16,nodes=20,slices=16,fast_mode=False)
+
+fast()
+#normal()
+
+####################
+# argh
+plain_numbers=['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+	       'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
+####################
+plc1={ 'plcname':'plc1 in federation',
+       'hostname':'lurch.cs.princeton.edu',
+       'url-format':'https://%s:443/PLCAPI/',
+       'builtin-admin-id':'root@plc1.org',
+       'builtin-admin-password':'root',
+       'peer-admin-name':'peer1@planet-lab.org',
+       'peer-admin-password':'peer',
+       'node-format':'n1%02d.plc1.org',
+       'plainname' : 'one',
+       'site-format':'one%s',
+       'person-format' : 'user1-%d@plc1.org',
+       'key-format':'ssh-rsa 1111111111111111 user%d-key%d',
+       'person-password' : 'password1',
+       }
+plc2={ 'plcname':'plc2 in federation',
+       'hostname':'planetlab-devbox.inria.fr',
+       'url-format':'https://%s:443/PLCAPI/',
+       'builtin-admin-id':'root@plc2.org',
+       'builtin-admin-password':'root',
+       'peer-admin-name':'peer2@planet-lab.org',
+       'peer-admin-password':'peer',
+       'node-format':'n2%02d.plc2.org',
+       'plainname' : 'two',
+       'site-format':'two%s',
+       'person-format' : 'user2-%d@plc2.org',
+       'key-format':'ssh-rsa 2222222222222222 user%d-key%d',
+       'person-password' : 'password2',
+       }
+
+####################
 def peer_index(i):
     return 3-i
 
 def plc_name (i):
     return plc[i]['plcname']
 
-def site_name (i):
-    return 'site'+str(i)
+def site_name (i,n):
+    x=site_login_base(i,n)
+    return 'Site fullname '+x
 
-def node_name (i,n):
-    return plc[i]['node-format']%n
-
-def slice_name (i,n):
-    return plc[i]['plainname']+'_'+plc[i]['slice-format']%n
+def site_login_base (i,n):
+    return plc[i]['site-format']%plain_numbers[n]
 
 def person_name (i,n):
     return plc[i]['person-format']%n
 
 def key_name (i,n,k):
     return plc[i]['key-format']%(n,k)
+
+def node_name (i,n):
+    return plc[i]['node-format']%n
+
+def slice_name (i,n):
+    site_index=(n%number_slices)+1
+    return "%s_slice%d"%(site_login_base(i,site_index),n)
 
 # to have indexes start at 1
 def myrange (n):
@@ -153,6 +175,7 @@ def timer_show ():
 
 ####################
 def test00_init (args=[1,2]):
+    timer_start()
     global plc,s,a,aa
     ## have you loaded this file already (support for reload)
     if plc[1]:
@@ -334,7 +357,7 @@ def test00_admin_enable (args=[1,2]):
         s[i].AddRoleToPerson(aa[i],'admin',plc[i]['peer-admin-id'])
         print '%02d:== enabled+admin on account %d:%s'%(i,plc[i]['peer-admin-id'],plc[i]['peer-admin-name'])
 
-def test01_peer_person (args=[1,2]):
+def test00_peer_person (args=[1,2]):
     global plc
     for i in args:
         peer=peer_index(i)
@@ -349,7 +372,7 @@ def test01_peer_person (args=[1,2]):
             plc[i]['peer_person_id']=person_id
 
 ####################
-def test01_peer (args=[1,2]):
+def test00_peer (args=[1,2]):
     global plc
     for i in args:
         peer=peer_index(i)
@@ -364,38 +387,13 @@ def test01_peer (args=[1,2]):
             plc[i]['peer_id']=peer_id
             print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
 
-def test01_peer_passwd (args=[1,2]):
+def test00_peer_passwd (args=[1,2]):
     for i in args:
         # using an ad-hoc local command for now - never could get quotes to reach sql....
         print "Attempting to set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
         retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
         print '-> system returns',retcod
     
-def test01_site (args=[1,2]):
-    global plc
-    for i in args:
-        peer=peer_index(i)
-        ### create a site (required for creating a slice)
-        sitename=site_name(i)
-        abbrev_name="abbr"+str(i)
-        login_base=plc[i]['plainname']
-        ### should be enough - needs to check we can add/del slices
-        max_slices = number_slices 
-        try:
-            s[i].GetSites(a[i],{'login_base':login_base})[0]
-        except:
-            site_id=s[i].AddSite (a[i], {'name':plc_name(i),
-                                         'abbreviated_name': abbrev_name,
-                                         'login_base': login_base,
-                                         'is_public': True,
-                                         'url': 'http://%s.com/'%abbrev_name,
-                                         'max_slices':max_slices})
-        ### max_slices does not seem taken into account at that stage
-            s[i].UpdateSite(a[i],site_id,{'max_slices':max_slices})
-            print '%02d:== Created site %d with max_slices=%d'%(i,site_id,max_slices)
-            plc[i]['site_id']=site_id
-
-##############################
 # this one gets cached 
 def get_peer_id (i):
     try:
@@ -406,7 +404,8 @@ def get_peer_id (i):
         plc[i]['peer_id'] = peer_id
         return peer_id
 
-def test01_refresh (message,args=[1,2]):
+##############################
+def test00_refresh (message,args=[1,2]):
     print '=== refresh',message
     timer_show()
     for i in args:
@@ -416,56 +415,50 @@ def test01_refresh (message,args=[1,2]):
 	timer_show()
 
 ####################
-# retrieves node_id from hostname - checks for local nodes only
-def get_local_node_id(i,nodename):
-    return s[i].GetNodes(a[i],[nodename],None,'local')[0]['node_id']
+def test01_site (args=[1,2]):
+    for ns in myrange(number_sites):
+	test01_site_n (ns,True,args)
 
-# clean all local nodes - foreign nodes are not supposed to be cleaned up manually
-def clean_all_nodes (args=[1,2]):
+def test01_del_site (args=[1,2]):
+    for ns in myrange(number_sites):
+	test01_site_n (ns,False,args)
+
+def test01_site_n (ns,add_if_true,args=[1,2]):
     for i in args:
-        print '%02d:== Cleaning all nodes'%i
-        loc_nodes = s[i].GetNodes(a[i],None,None,'local')
-        for node in loc_nodes:
-            print '%02d:==== Cleaning node %d'%(i,node['node_id'])
-            s[i].DeleteNode(a[i],node['node_id'])
-
-def test02_node (args=[1,2]):
-    for nn in myrange(number_nodes):
-	test02_node_n (nn,args)
-
-def test02_node_n (nn,args=[1,2]):
-    for i in args:
-        nodename = node_name(i,nn)
+	login_base = site_login_base (i,ns)
         try:
-            get_local_node_id(i,nodename)
+	    site_id = s[i].GetSites(a[i],[login_base])[0]['site_id']
+	    if not add_if_true:
+		s[i].DeleteSite(a[i],site_id)
+		print "%02d:== deleted site_id %d"%(i,site_id)
         except:
-            n=s[i].AddNode(a[i],1,{'hostname': nodename})
-            print '%02d:== Added node %d %s'%(i,n,node_name(i,i))
-
-def test02_delnode (args=[1,2]):
-    for nn in myrange(number_nodes):
-	test02_delnode_n (nn,args)
-
-def test02_delnode_n (nn,args=[1,2]):
-    for i in args:
-        nodename = node_name(i,nn)
-        node_id = get_local_node_id (i,nodename)
-        retcod=s[i].DeleteNode(a[i],nodename)
-        print '%02d:== Deleted node %d, returns %s'%(i,node_id,retcod)
+	    if add_if_true:
+		sitename=site_name(i,ns)
+		abbrev_name="abbr"+str(i)
+		max_slices = number_slices
+		site_id=s[i].AddSite (a[i], {'name':plc_name(i),
+					     'abbreviated_name': abbrev_name,
+					     'login_base': login_base,
+					     'is_public': True,
+					     'url': 'http://%s.com/'%abbrev_name,
+					     'max_slices':max_slices})
+                ### max_slices does not seem taken into account at that stage
+		s[i].UpdateSite(a[i],site_id,{'max_slices':max_slices})
+		print '%02d:== Created site %d with max_slices=%d'%(i,site_id,max_slices)
 
 ####################
-def test05_person (args=[1,2]):
+def test02_person (args=[1,2]):
     for np in myrange(number_persons):
-	test05_person_n (np,True,args)
+	test02_person_n (np,True,args)
 
-def test05_del_person (args=[1,2]):
+def test02_del_person (args=[1,2]):
     for np in myrange(number_persons):
-	test05_person_n (np,False,args)
+	test02_person_n (np,False,args)
 
-def test05_person_n (np,add_if_true,args=[1,2]):
-    test05_person_n_ks (np, myrange(number_keys),add_if_true,args)
+def test02_person_n (np,add_if_true,args=[1,2]):
+    test02_person_n_ks (np, myrange(number_keys),add_if_true,args)
 
-def test05_person_n_ks (np,nks,add_if_true,args=[1,2]):
+def test02_person_n_ks (np,nks,add_if_true,args=[1,2]):
     for i in args:
         email = person_name(i,np)
         try:
@@ -488,6 +481,45 @@ def test05_person_n_ks (np,nks,add_if_true,args=[1,2]):
 		    print '%02d:== added key %s to person %s'%(i,key,email)
 
 ####################
+# retrieves node_id from hostname - checks for local nodes only
+def get_local_node_id(i,nodename):
+    return s[i].GetNodes(a[i],[nodename],None,'local')[0]['node_id']
+
+# clean all local nodes - foreign nodes are not supposed to be cleaned up manually
+def clean_all_nodes (args=[1,2]):
+    for i in args:
+        print '%02d:== Cleaning all nodes'%i
+        loc_nodes = s[i].GetNodes(a[i],None,None,'local')
+        for node in loc_nodes:
+            print '%02d:==== Cleaning node %d'%(i,node['node_id'])
+            s[i].DeleteNode(a[i],node['node_id'])
+
+def test03_node (args=[1,2]):
+    for nn in myrange(number_nodes):
+	test03_node_n (nn,args)
+
+def test03_node_n (nn,args=[1,2]):
+    for i in args:
+        nodename = node_name(i,nn)
+        try:
+            get_local_node_id(i,nodename)
+        except:
+	    login_base=site_login_base(i,(nn%number_sites)+1)
+            n=s[i].AddNode(a[i],login_base,{'hostname': nodename})
+            print '%02d:== Added node %d %s'%(i,n,node_name(i,i))
+
+def test02_delnode (args=[1,2]):
+    for nn in myrange(number_nodes):
+	test02_delnode_n (nn,args)
+
+def test02_delnode_n (nn,args=[1,2]):
+    for i in args:
+        nodename = node_name(i,nn)
+        node_id = get_local_node_id (i,nodename)
+        retcod=s[i].DeleteNode(a[i],nodename)
+        print '%02d:== Deleted node %d, returns %s'%(i,node_id,retcod)
+
+####################
 def clean_all_slices (args=[1,2]):
     for i in args:
         print '%02d:== Cleaning all slices'%i
@@ -500,11 +532,11 @@ def clean_all_slices (args=[1,2]):
 def get_local_slice_id (i,name):
     return s[i].GetSlices(a[i],{'name':[name],'peer_id':None})[0]['slice_id']
 
-def test03_slice (args=[1,2]):
+def test04_slice (args=[1,2]):
     for n in myrange(number_slices):
-	test03_slice_n (n,args)
+	test04_slice_n (n,args)
 
-def test03_slice_n (ns,args=[1,2]):
+def test04_slice_n (ns,args=[1,2]):
     for i in args:
         peer=peer_index(i)
         plcname=plc_name(i)
@@ -572,41 +604,60 @@ def test_all_init ():
     test00_print ()
     test00_admin_person ()
     test00_admin_enable ()
-    test01_peer_person ()
-    test01_peer ()
-    test01_peer_passwd ()
+    test00_peer_person ()
+    test00_peer ()
+    test00_peer_passwd ()
 
+def test_all_sites ():
     test01_site ()
+    test00_refresh ('after site creation')
+
+def test_all_persons ():
+    test02_del_person()
+    test00_refresh ('before persons&keys creation')
+    check_keys(0,0)
+    check_persons(system_persons,system_persons_cross)
+    message ("Creating persons&keys")
+    test02_person ()
+    if not fast_flag:
+	message ("1 extra del/add cycle for unique indexes")
+	test02_del_person([2])
+	test02_person([2])
+    check_keys(number_persons*number_keys,0)
+    check_persons(system_persons+number_persons,system_persons_cross)
+    test00_refresh ('after persons&keys creation')
+    check_keys(number_persons*number_keys,number_persons*number_keys)
+    check_persons(system_persons+number_persons,system_persons_cross+number_persons)
 
 def test_all_nodes ():
 
     message ("RESETTING NODES")
     clean_all_nodes ()
-    test01_refresh ('cleaned nodes')
+    test00_refresh ('cleaned nodes')
     check_nodes(0,0)
 
     # create one node on each site
     message ("CREATING NODES")
-    test02_node ()
+    test03_node ()
     check_nodes(number_nodes,0)
-    test01_refresh ('after node creation')
+    test00_refresh ('after node creation')
     check_nodes(number_nodes,number_nodes)
     test02_delnode([2])
     if not fast_flag:
 	message ("2 extra del/add cycles on plc2 for different indexes")
-	test02_node ([2])
+	test03_node ([2])
 	test02_delnode([2])
-	test02_node ([2])
+	test03_node ([2])
 	test02_delnode([2])
     check_nodes(0,number_nodes,[2])
-    test01_refresh('after deletion on plc2')
+    test00_refresh('after deletion on plc2')
     check_nodes(number_nodes,0,[1])
     check_nodes(0,number_nodes,[2])
     message ("ADD on plc2 for different indexes")
-    test02_node ([2])
+    test03_node ([2])
     check_nodes (number_nodes,0,[1])
     check_nodes (number_nodes,number_nodes,[2])
-    test01_refresh('after re-creation on plc2')
+    test00_refresh('after re-creation on plc2')
     check_nodes (number_nodes,number_nodes,)
 
 def test_all_addslices ():
@@ -614,17 +665,17 @@ def test_all_addslices ():
     # reset
     message ("RESETTING SLICES TEST")
     clean_all_nodes ()
-    test02_node ()
+    test03_node ()
     clean_all_slices ()
-    test01_refresh ("After slices init")
+    test00_refresh ("After slices init")
 
     # create slices on plc1
     message ("CREATING SLICES on plc1")
-    test03_slice ([1])
+    test04_slice ([1])
     # each site has 3 local slices and 0 foreign slice
     check_slices (total_slices(),0,[1])
     check_slices (system_slices(),0,[2])
-    test01_refresh ("after slice created on plc1")
+    test00_refresh ("after slice created on plc1")
     check_slices (total_slices(),0,[1])
     check_slices (system_slices(),number_slices,[2])
     # no slice has any node yet
@@ -639,7 +690,7 @@ def test_all_addslices ():
     check_foreign_slice_nodes(0,[2])
 
     # refreshing
-    test01_refresh ("After local nodes were added on plc1")
+    test00_refresh ("After local nodes were added on plc1")
     check_local_slice_nodes (number_nodes,[1])
     check_foreign_slice_nodes (number_nodes,[2])
 
@@ -650,7 +701,7 @@ def test_all_addslices ():
     check_foreign_slice_nodes (number_nodes,[2])
 
     # refreshing
-    test01_refresh ("After foreign nodes were added in plc1")
+    test00_refresh ("After foreign nodes were added in plc1")
     # remember that foreign slices only know about LOCAL nodes
     # so this does not do anything
     check_local_slice_nodes (2*number_nodes,[1])
@@ -667,7 +718,7 @@ def test_all_delslices ():
     # mmh?
     check_slivers_1(total_slivers(),[1])
 
-    test01_refresh ("After foreign nodes were removed on plc1")
+    test00_refresh ("After foreign nodes were removed on plc1")
     check_local_slice_nodes (number_nodes,[1])
     check_foreign_slice_nodes (number_nodes,[2])
     
@@ -676,7 +727,7 @@ def test_all_delslices ():
     check_local_slice_nodes (0,[1])
     check_foreign_slice_nodes (number_nodes,[2])
 
-    test01_refresh ("After local nodes were removed on plc1")
+    test00_refresh ("After local nodes were removed on plc1")
     check_local_slice_nodes (0,[1])
     check_foreign_slice_nodes (0,[2])
 
@@ -684,32 +735,17 @@ def test_all_delslices ():
     clean_all_slices([1])
     check_slices (system_slices(),0,[1])
     check_slices (system_slices(),number_slices,[2])
-    test01_refresh ("After slices clenaup")
+    test00_refresh ("After slices clenaup")
     check_slices(system_slices(),0)
 
 def test_all_slices ():
     test_all_addslices ()
     test_all_delslices ()
     
-def test_all_persons ():
-    test05_del_person()
-    test01_refresh ('before persons&keys creation')
-    check_keys(0,0)
-    check_persons(system_persons,system_persons_cross)
-    message ("Creating persons&keys")
-    test05_person ()
-    if not fast_flag:
-	message ("1 extra del/add cycle for unique indexes")
-	test05_del_person([2])
-	test05_person([2])
-    check_keys(number_persons*number_keys,0)
-    check_persons(system_persons+number_persons,system_persons_cross)
-    test01_refresh ('after persons&keys creation')
-    check_keys(number_persons*number_keys,number_persons*number_keys)
-    check_persons(system_persons+number_persons,system_persons_cross+number_persons)
-
 def test_all ():
     test_all_init ()
+    timer_show()
+    test_all_sites ()
     timer_show()
     test_all_persons ()
     timer_show()
@@ -717,20 +753,23 @@ def test_all ():
     timer_show()
     test_all_slices ()
     timer_show()
+    message("END")
 
 ### ad hoc test sequences
 def populate ():
-    test05_person()
-    test02_node()
-    test03_slice([1])
-    test01_refresh ("populate: refreshing peer 1",[1])
+    test_all_init()
+    test01_site()
+    test02_person()
+    test03_node()
+    test04_slice([1])
+    test00_refresh ("populate: refreshing peer 1",[1])
     test04_slice_add_lnode([1])
     test04_slice_add_fnode([1])
-    test01_refresh("populate: refresh all")
+    test00_refresh("populate: refresh all")
 
 def test_now ():
     test_all_init()
-    test_all_persons ()
+    test_all_sites ()
 #    clean_all_nodes()
 #    clean_all_slices()
 #    populate()
@@ -739,6 +778,7 @@ def test_now ():
 def usage ():
     print "Usage: %s [-n] [-f]"%sys.argv[0]
     print " -f runs faster (1 node - 1 slice)"
+    print " -b performs big run (4 times as large as normal)"
     print " -n runs test_now instead of test_all"
     print " -p runs populate instead of test_all"
     
@@ -746,13 +786,15 @@ def usage ():
 
 def main ():
     try:
-        (o,a) = getopt.getopt(sys.argv[1:], "fnp")
+        (o,a) = getopt.getopt(sys.argv[1:], "fnpb")
     except:
         usage()
     func = test_all
     for (opt,val) in o:
         if opt=='-f':
             fast()
+	elif opt=='-b':
+            big()
         elif opt=='-n':
 	    print 'Running test_now'
             func = test_now
@@ -763,10 +805,10 @@ def main ():
             usage()
     if a:
         usage()
-    print '%d nodes & %d slices'%(number_nodes,number_slices)
-    timer_start()
+    show_test()
     func()   
  
 if __name__ == '__main__':
+    normal()
     main()
     
