@@ -120,6 +120,8 @@ checkpoint:
 	@echo adopting latest run as reference
 	cp TestPeers.out TestPeers.ref
 
+frun:
+	python -u ./TestPeers.py -f > TestPeers.fout 2>&1
 #######
 HELP=rpm db-dump http
 
