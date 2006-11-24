@@ -41,8 +41,10 @@ class Slice(Row):
     class_key = 'name'
     foreign_fields = ['instantiation', 'url', 'description',
                          'max_nodes', 'created', 'expires']
-    foreign_xrefs = { 'Node' : { 'field' : 'node_ids' ,
-				 'table': 'slice_node' } }
+    foreign_xrefs = { 
+	'Node' :   { 'field' : 'node_ids' , 'table': 'slice_node' },
+	'Person' : { 'field': 'person_ids', 'table' : 'slice_person'},
+    }
 
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base

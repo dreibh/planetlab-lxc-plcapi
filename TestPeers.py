@@ -19,6 +19,7 @@
 
 import getopt
 import sys
+import time
 
 ## we use indexes 1 and 2 
 try:
@@ -78,17 +79,18 @@ plc2={ 'plcname':'plc2 in federation',
 
 ####################
 # set initial conditions
-def define_test (keys,persons,nodes,slices):
-    global number_keys, number_persons, number_nodes, number_slices
+def define_test (keys,persons,nodes,slices,fast_mode):
+    global number_keys, number_persons, number_nodes, number_slices, fast_flag
     number_keys=keys
     number_persons=persons
     number_nodes=nodes
     number_slices=slices
+    fast_flag=fast_mode
 
 def fast():
-    define_test(1,1,1,1)
+    define_test(1,1,1,1,True)
     
-define_test (keys=4,persons=2,nodes=5,slices=3)
+define_test (keys=4,persons=2,nodes=5,slices=3,fast_mode=False)
 
 # predefined stuff
 # number of 'system' persons
@@ -140,6 +142,15 @@ def message (*args):
     print "====================",
     print args
     
+##########
+def timer_start ():
+    global epoch
+    epoch = time.time()
+    print '+++ timer start'
+
+def timer_show ():
+    print '+++ %d seconds ellapsed'%(time.time()-epoch)
+
 ####################
 def test00_init (args=[1,2]):
     global plc,s,a,aa
@@ -397,10 +408,12 @@ def get_peer_id (i):
 
 def test01_refresh (message,args=[1,2]):
     print '=== refresh',message
+    timer_show()
     for i in args:
         print '%02d:== Refreshing peer'%(i),
         retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
         print 'got ',retcod
+	timer_show()
 
 ####################
 # retrieves node_id from hostname - checks for local nodes only
@@ -507,6 +520,10 @@ def test03_slice_n (ns,args=[1,2]):
                                           'instanciation':'plc-instantiated',
                                           })
             print '%02d:== created slice %d - max nodes=%d'%(i,slice_id,max_nodes)
+	    for np in myrange(number_persons):
+		email = person_name (i,np)
+		retcod = s[i].AddPersonToSlice (a[i], email, slicename)
+		print '%02d:== Attached person %s to slice %s'%(i,email,slicename)
         
 
 def test04_node_slice (is_local, add_if_true, args=[1,2]):
@@ -574,12 +591,13 @@ def test_all_nodes ():
     check_nodes(number_nodes,0)
     test01_refresh ('after node creation')
     check_nodes(number_nodes,number_nodes)
-    message ("2 extra del/add cycles on plc2 for different indexes")
     test02_delnode([2])
-    test02_node ([2])
-    test02_delnode([2])
-    test02_node ([2])
-    test02_delnode([2])
+    if not fast_flag:
+	message ("2 extra del/add cycles on plc2 for different indexes")
+	test02_node ([2])
+	test02_delnode([2])
+	test02_node ([2])
+	test02_delnode([2])
     check_nodes(0,number_nodes,[2])
     test01_refresh('after deletion on plc2')
     check_nodes(number_nodes,0,[1])
@@ -675,15 +693,15 @@ def test_all_slices ():
     
 def test_all_persons ():
     test05_del_person()
-    check_keys(0,0)
-    check_persons(system_persons,0)
     test01_refresh ('before persons&keys creation')
     check_keys(0,0)
     check_persons(system_persons,system_persons_cross)
-    message ("Creating persons&keys - 1 extra del/add cycle for unique indexes")
+    message ("Creating persons&keys")
     test05_person ()
-    test05_del_person([2])
-    test05_person([2])
+    if not fast_flag:
+	message ("1 extra del/add cycle for unique indexes")
+	test05_del_person([2])
+	test05_person([2])
     check_keys(number_persons*number_keys,0)
     check_persons(system_persons+number_persons,system_persons_cross)
     test01_refresh ('after persons&keys creation')
@@ -692,12 +710,17 @@ def test_all_persons ():
 
 def test_all ():
     test_all_init ()
+    timer_show()
     test_all_persons ()
+    timer_show()
     test_all_nodes ()
+    timer_show()
     test_all_slices ()
+    timer_show()
 
 ### ad hoc test sequences
 def populate ():
+    test05_person()
     test02_node()
     test03_slice([1])
     test01_refresh ("populate: refreshing peer 1",[1])
@@ -717,30 +740,32 @@ def usage ():
     print "Usage: %s [-n] [-f]"%sys.argv[0]
     print " -f runs faster (1 node - 1 slice)"
     print " -n runs test_now instead of test_all"
+    print " -p runs populate instead of test_all"
     
     sys.exit(1)
 
 def main ():
     try:
-        (o,a) = getopt.getopt(sys.argv[1:], "fn")
+        (o,a) = getopt.getopt(sys.argv[1:], "fnp")
     except:
         usage()
-    now_opt = False;
+    func = test_all
     for (opt,val) in o:
         if opt=='-f':
             fast()
         elif opt=='-n':
-            now_opt=True
+	    print 'Running test_now'
+            func = test_now
+        elif opt=='-p':
+	    print 'Running populate'
+            func = populate
         else:
             usage()
     if a:
         usage()
     print '%d nodes & %d slices'%(number_nodes,number_slices)
-    if now_opt:
-	print 'Running test_now'
-	test_now()   
-    else:
-	test_all()   
+    timer_start()
+    func()   
  
 if __name__ == '__main__':
     main()

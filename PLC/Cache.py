@@ -179,7 +179,7 @@ class Cache:
                 local_object = local_objects_index[object_name]
 		if local_object ['peer_id'] is None:
 		    ### xxx send e-mail
-		    print 'We are in trouble here'
+		    print '==================== We are in trouble here'
 		    print 'The %s object named %s is natively defined twice'%(classname,object_name)
 		    print 'Once on this PLC and once on peer %d'%peer_id
 		    print 'We dont raise an exception so that the remaining updates can still take place'
@@ -248,60 +248,43 @@ class Cache:
         ### return delta in number of objects 
         return new_count-old_count
                 
-    def refresh_nodes (self, peer_get_nodes):
-        """
-        refreshes the foreign_nodes and peer_node tables
-        expected input is the current list of local nodes
-        as returned from the peer by GetNodes {'peer_id':None}
+    def get_locals (self, list):
+	return [x for x in list if x['peer_id'] is None]
 
-        returns the number of new nodes (can be negative)
-        """
-
-        return self.update_table ('Node', peer_get_nodes)
-        
-    def refresh_slices (self, peer_get_slices, peer_foreign_nodes):
-        """
-        refreshes the foreign_slices and peer_slice tables
-        expected input is the current list of slices as returned by GetSlices
-
-        returns the number of new slices on this peer (can be negative)
-        """
-
-	# xxx use 'system' flag for finding system slices
-        return self.update_table ('Slice', peer_get_slices,
-				  {'Node':peer_foreign_nodes},
-				  lambda x: x['creator_person_id']==1)
-        
     def refresh_peer (self):
 	
-        peer_local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
+	# so as to minimize the numer of requests
+	# we get all objects in a single call and sort afterwards
+	# xxx ideally get objects either local or the ones attached here
+	# requires to know remote peer's peer_id for ourselves, mmhh..
+	# does not make any difference in a 2-peer deployment though
 
 	# refresh keys
-	peer_local_keys = self.peer_server.GetKeys(self.auth,{'peer_id':None})
-	nb_new_keys = self.update_table('Key', peer_local_keys)
+	all_keys = self.peer_server.GetKeys(self.auth)
+	local_keys = self.get_locals (all_keys)
+	nb_new_keys = self.update_table('Key', local_keys)
 
 	# refresh nodes
-        peer_local_nodes = self.peer_server.GetNodes(self.auth,{'peer_id':None})
-        nb_new_nodes = self.update_table('Node', peer_local_nodes)
+        all_nodes = self.peer_server.GetNodes(self.auth)
+	local_nodes = self.get_locals(all_nodes)
+        nb_new_nodes = self.update_table('Node', local_nodes)
 
 	# refresh persons
-	peer_local_persons = self.peer_server.GetPersons(self.auth,{'peer_id':None})
-	# xxx ideally get our own persons only
-	# requires to know remote peer's peer_id for ourselves, mmhh
-	peer_all_keys = peer_local_keys + self.peer_server.GetKeys(self.auth,{'~peer_id':None})
-	nb_new_persons = self.update_table ('Person', peer_local_persons,
-					    { 'Key': peer_all_keys} )
+	all_persons = self.peer_server.GetPersons(self.auth)
+	local_persons = self.get_locals(all_persons)
+	nb_new_persons = self.update_table ('Person', local_persons,
+					    { 'Key': all_keys} )
 
 	# refresh slices
+        local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
+
 	def is_system_slice (slice):
 	    return slice['creator_person_id'] == 1
-	# xxx would ideally get our own nodes only, 
-        peer_all_nodes = peer_local_nodes+self.peer_server.GetNodes(self.auth,{'~peer_id':None})
 
-        nb_new_slices = self.update_table ('Slice', peer_local_slices,
-					   {'Node':peer_all_nodes},
+        nb_new_slices = self.update_table ('Slice', local_slices,
+					   {'Node': all_nodes,
+					    'Person': all_persons},
 					   is_system_slice)
-
 
         return {'plcname':self.api.config.PLC_NAME,
 		'new_keys':nb_new_keys,
