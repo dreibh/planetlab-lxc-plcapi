@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.18 2006/11/09 03:07:42 mlhuang Exp $
+# $Id: Persons.py,v 1.19 2006/11/09 19:43:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -50,7 +50,23 @@ class Person(Row):
         'site_ids': Parameter([int], "List of site identifiers"),
         'key_ids': Parameter([int], "List of key identifiers"),
         'slice_ids': Parameter([int], "List of slice identifiers"),
+        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
         }
+
+    # for Cache
+    class_key = 'email'
+    foreign_fields = ['first_name', 'last_name', 'title', 'email', 'phone', 'url',
+		      'bio', 'enabled', 'password', 'last_updated', 'date_created']
+    #foreign_xrefs = { 'Node' : { 'field' : 'node_ids' ,
+    #		       'table': 'slice_node' } }
+    foreign_xrefs = {
+	'Key' : { 'field' : 'key_ids', 'table' : 'person_key' }
+#        'key_ids': Parameter([int], "List of key identifiers"),
+#        'role_ids': Parameter([int], "List of role identifiers"),
+#        'roles': Parameter([str], "List of roles"),
+#        'site_ids': Parameter([int], "List of site identifiers"),
+#        'slice_ids': Parameter([int], "List of slice identifiers"),
+}
 
     def validate_email(self, email):
         """

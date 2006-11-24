@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.42 2006/11/21 10:57:00 thierry Exp $
+-- $Id: planetlab4.sql,v 1.43 2006/11/23 19:35:38 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -79,7 +79,9 @@ CREATE TABLE persons (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 CREATE INDEX persons_email_idx ON persons (email) WHERE deleted IS false;
 
@@ -798,6 +800,7 @@ persons.title,
 persons.phone,
 persons.url,
 persons.bio,
+persons.peer_id,
 CAST(date_part('epoch', persons.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', persons.last_updated) AS bigint) AS last_updated,
 COALESCE(person_roles.role_ids, '{}') AS role_ids,

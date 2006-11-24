@@ -50,51 +50,63 @@ import os
 plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
        'url-format':'https://%s:443/PLCAPI/',
-       'builtin_admin_id':'root@localhost.localdomain',
-       'builtin_admin_password':'root',
-       'peer_admin_name':'plc1@planet-lab.org',
-       'peer_admin_password':'peer',
-       'peer_admin_key':'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAqK1lKNf61lAGYAXzG6xKnFQkfv3ViG0GP2Krp1zD7d/93IkmsXVEjLfGhEJQjRjzRc9/gFdATP703cDzp4Ag2eR2wdQz0e6SXOBd2sLuW3LqTwor1XMmp5f0QCOg5OSKXwozE3Tlt0+ewBNvAE8HWwZFjou5CFnrFMVZPjqfhpU= thierry.parmentelat@sophia.inria.fr',
+       'builtin-admin-id':'root@plc1.org',
+       'builtin-admin-password':'root',
+       'peer-admin-name':'plc1@planet-lab.org',
+       'peer-admin-password':'peer',
        'node-format':'n1%02d.plc1.org',
        'plainname' : 'one',
        'slice-format' : 's1%02d',
+       'person-format' : 'user1-%d@plc1.org',
+       'key-format':'ssh-rsa 1111111111111111 user%d-key%d',
+       'person-password' : 'password1',
        }
 plc2={ 'plcname':'plc2 in federation',
        'hostname':'planetlab-devbox.inria.fr',
        'url-format':'https://%s:443/PLCAPI/',
-       'builtin_admin_id':'root@localhost.localdomain',
-       'builtin_admin_password':'root',
-       'peer_admin_name':'plc2@planet-lab.org',
-       'peer_admin_password':'peer',
-       'peer_admin_key':'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAlsX+X+sgN/rsNizPhsXMdHzArxVdwN1KJMG4vTY1m0KQMFJSilaX6xlMIirKhFmNDrVkrOPT2On59K4fDFjGgDq9gMMfdaAfEhxDdy2x1k/H/vJRQE/CqkoRZE8mVAt/cgMsOHTLJTDxBm/0RedaBlcXBpCwqBi3n05sGkS2BjM= VTHD-tester-ssh-v2',
+       'builtin-admin-id':'root@plc2.org',
+       'builtin-admin-password':'root',
+       'peer-admin-name':'plc2@planet-lab.org',
+       'peer-admin-password':'peer',
        'node-format':'n2%02d.plc2.org',
        'plainname' : 'two',
        'slice-format' : 's2%02d',
+       'person-format' : 'user2-%d@plc2.org',
+       'key-format':'ssh-rsa 2222222222222222 user%d-key%d',
+       'person-password' : 'password2',
        }
 
 ####################
 # set initial conditions
-def define_test (nodes,slices):
-    global number_nodes, number_slices
+def define_test (keys,persons,nodes,slices):
+    global number_keys, number_persons, number_nodes, number_slices
+    number_keys=keys
+    number_persons=persons
     number_nodes=nodes
     number_slices=slices
 
 def fast():
-    define_test(1,1)
+    define_test(1,1,1,1)
     
-define_test (nodes=5,slices=3)
+define_test (keys=4,persons=2,nodes=5,slices=3)
 
 # predefined stuff
+# number of 'system' persons
+# builtin maint, local root, 2 persons for the peering
+system_persons = 4
+# among that, 1 gets refreshed - other ones have conflicting names
+system_persons_cross = 1
+
 system_slices_ids = (1,2)
 def system_slices ():
     return len(system_slices_ids)
+def total_slices ():
+    return number_slices+system_slices()
+
 # temporary - the myplc I use doesnt know about 'system' yet
 def system_slivers ():
 #    return len(system_slices_ids)
     return 0
-
-def total_slices ():
-    return number_slices+system_slices()
 def total_slivers ():
     return number_slices+system_slivers()
 
@@ -113,6 +125,12 @@ def node_name (i,n):
 
 def slice_name (i,n):
     return plc[i]['plainname']+'_'+plc[i]['slice-format']%n
+
+def person_name (i,n):
+    return plc[i]['person-format']%n
+
+def key_name (i,n,k):
+    return plc[i]['key-format']%(n,k)
 
 # to have indexes start at 1
 def myrange (n):
@@ -135,39 +153,58 @@ def test00_init (args=[1,2]):
             plc[i]['url']=url
             s[i]=xmlrpclib.ServerProxy(url,allow_none=True)
             print 'initializing s[%d]'%i,url
-            aa[i]={'Username':plc[i]['builtin_admin_id'],
+            aa[i]={'Username':plc[i]['builtin-admin-id'],
                    'AuthMethod':'password',
-                   'AuthString':plc[i]['builtin_admin_password'],
+                   'AuthString':plc[i]['builtin-admin-password'],
                    'Role':'admin'}
             print 'initialized aa[%d]'%i, aa[i]
-            a[i]={'Username':plc[i]['peer_admin_name'],
+            a[i]={'Username':plc[i]['peer-admin-name'],
                   'AuthMethod':'password',
-                  'AuthString':plc[i]['peer_admin_password'],
+                  'AuthString':plc[i]['peer-admin-password'],
                   'Role':'admin'}
             print 'initialized a[%d]'%i, a[i]
 
 def test00_print (args=[1,2]):
-    global plc,s,a,aa
     for i in args:
         print 's[%d]'%i,s[i]
         print 'aa[%d]'%i, aa[i]
         print 'a[%d]'%i, a[i]
 
-def check_nodes (en,ef,args=[1,2]):
-    global plc,s,a
+def check_nodes (el,ef,args=[1,2]):
     for i in args:
         # use a single request and sort afterwards for efficiency
         # could have used GetNodes's scope as well
         all_nodes = s[i].GetNodes(a[i])
         n = len ([ x for x in all_nodes if x['peer_id'] is None])
         f = len ([ x for x in all_nodes if x['peer_id'] is not None])
-        print '%02d: Checking nodes: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,en,f,ef)
-        assert n==en
+        print '%02d: Checking nodes: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
+        assert n==el
+        assert f==ef
+
+def check_keys (el,ef,args=[1,2]):
+    for i in args:
+        # use a single request and sort afterwards for efficiency
+        # could have used GetKeys's scope as well
+        all_keys = s[i].GetKeys(a[i])
+        n = len ([ x for x in all_keys if x['peer_id'] is None])
+        f = len ([ x for x in all_keys if x['peer_id'] is not None])
+        print '%02d: Checking keys: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
+        assert n==el
+        assert f==ef
+
+def check_persons (el,ef,args=[1,2]):
+    for i in args:
+        # use a single request and sort afterwards for efficiency
+        # could have used GetPersons's scope as well
+        all_persons = s[i].GetPersons(a[i])
+        n = len ([ x for x in all_persons if x['peer_id'] is None])
+        f = len ([ x for x in all_persons if x['peer_id'] is not None])
+        print '%02d: Checking persons: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
+        assert n==el
         assert f==ef
 
 # expected : local slices, foreign slices
 def check_slices (els,efs,args=[1,2]):
-    global plc,s,a
     for i in args:
         ls=len(s[i].GetSlices(a[i],{'peer_id':None}))
         fs=len(s[i].GetSlices(a[i],{'~peer_id':None}))
@@ -193,7 +230,6 @@ def check_slice_nodes (expected_nodes, is_local_slice, args=[1,2]):
 	check_slice_nodes_n (ns,expected_nodes, is_local_slice, args)
 
 def check_slice_nodes_n (ns,expected_nodes, is_local_slice, args=[1,2]):
-    global plc,s,a
     for i in args:
         peer=peer_index(i)
         if is_local_slice:
@@ -225,7 +261,6 @@ def check_conf_files (args=[1,2]):
 	check_conf_files_n (nn,args)
 
 def check_conf_files_n (nn,args=[1,2]):
-    global plc,s,a
     for i in args:
         nodename=node_name(i,nn)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
@@ -250,7 +285,6 @@ def check_slivers_1 (esn,args=[1,2]):
     check_slivers_n (1,esn,args)
 
 def check_slivers_n (nn,esn,args=[1,2]):
-    global plc,s,a
     for i in args:
         nodename=node_name(i,nn)
         ndict= s[i].GetSlivers(a[i],[nodename])[0]
@@ -266,36 +300,68 @@ def check_slivers_n (nn,esn,args=[1,2]):
 
 ####################
 def test00_admin_person (args=[1,2]):
-    global plc,s,a
+    global plc
     for i in args:
-        email = plc[i]['peer_admin_name']
+        email = plc[i]['peer-admin-name']
         try:
             p=s[i].GetPersons(a[i],[email])[0]
-            plc[i]['peer_admin_id']=p['person_id']
+            plc[i]['peer-admin-id']=p['person_id']
         except:
             person_id=s[i].AddPerson(aa[i],{'first_name':'Local', 
 					    'last_name':'PeerPoint', 
 					    'role_ids':[10],
                                             'email':email,
-					    'password':plc[i]['peer_admin_password']})
-            print '%02d: created peer admin account %d, %s - %s'%(i,
-								  person_id,plc[i]['peer_admin_name'],
-								  plc[i]['peer_admin_password'])
-            plc[i]['peer_admin_id']=person_id
-	    s[i].AddPersonKey(aa[i],email,{'key_type':'ssh',
-					   'key':plc[i]['peer_admin_key']})
-            print '%02d: added key to peer admin '%i
+					    'password':plc[i]['peer-admin-password']})
+            print '%02d:== created peer admin account %d, %s - %s'%(i,
+								  person_id,plc[i]['peer-admin-name'],
+								  plc[i]['peer-admin-password'])
+            plc[i]['peer-admin-id']=person_id
 
 def test00_admin_enable (args=[1,2]):
-    global plc,s,a
     for i in args:
-        s[i].AdmSetPersonEnabled(aa[i],plc[i]['peer_admin_id'],True)
-        s[i].AddRoleToPerson(aa[i],'admin',plc[i]['peer_admin_id'])
-        print '%02d: enabled+admin on account %d:%s'%(i,plc[i]['peer_admin_id'],plc[i]['peer_admin_name'])
+        s[i].AdmSetPersonEnabled(aa[i],plc[i]['peer-admin-id'],True)
+        s[i].AddRoleToPerson(aa[i],'admin',plc[i]['peer-admin-id'])
+        print '%02d:== enabled+admin on account %d:%s'%(i,plc[i]['peer-admin-id'],plc[i]['peer-admin-name'])
+
+def test01_peer_person (args=[1,2]):
+    global plc
+    for i in args:
+        peer=peer_index(i)
+        email=plc[peer]['peer-admin-name']
+        try:
+            p=s[i].GetPersons(a[i],[email])[0]
+            plc[i]['peer_person_id']=p['person_id']
+        except:
+            person_id = s[i].AddPerson (a[i], {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
+                                               'email':email,'password':plc[peer]['peer-admin-password']})
+            print '%02d:Created person %d as the peer person'%(i,person_id)
+            plc[i]['peer_person_id']=person_id
 
 ####################
+def test01_peer (args=[1,2]):
+    global plc
+    for i in args:
+        peer=peer_index(i)
+        peername = plc_name(peer)
+        try:
+            p=s[i].GetPeers (a[i], [peername])[0]
+            plc[i]['peer_id']=p['peer_id']
+        except:
+            peer_id=s[i].AddPeer (a[i], {'peername':peername,'peer_url':plc[peer]['url'],'person_id':plc[i]['peer_person_id']})
+            # NOTE : need to manually reset the encrypted password through SQL at this point
+            print '%02d:Created peer %d'%(i,peer_id)
+            plc[i]['peer_id']=peer_id
+            print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
+
+def test01_peer_passwd (args=[1,2]):
+    for i in args:
+        # using an ad-hoc local command for now - never could get quotes to reach sql....
+        print "Attempting to set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
+        retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
+        print '-> system returns',retcod
+    
 def test01_site (args=[1,2]):
-    global plc,s,a
+    global plc
     for i in args:
         peer=peer_index(i)
         ### create a site (required for creating a slice)
@@ -315,46 +381,9 @@ def test01_site (args=[1,2]):
                                          'max_slices':max_slices})
         ### max_slices does not seem taken into account at that stage
             s[i].UpdateSite(a[i],site_id,{'max_slices':max_slices})
-            print '%02d: Created site %d with max_slices=%d'%(i,site_id,max_slices)
+            print '%02d:== Created site %d with max_slices=%d'%(i,site_id,max_slices)
             plc[i]['site_id']=site_id
 
-def test01_peer_person (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        peer=peer_index(i)
-        email=plc[peer]['peer_admin_name']
-        try:
-            p=s[i].GetPersons(a[i],[email])[0]
-            plc[i]['peer_person_id']=p['person_id']
-        except:
-            person_id = s[i].AddPerson (a[i], {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
-                                               'email':email,'password':plc[peer]['peer_admin_password']})
-            print '%02d:Created person %d as the peer person'%(i,person_id)
-            plc[i]['peer_person_id']=person_id
-
-def test01_peer (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        peer=peer_index(i)
-        peername = plc_name(peer)
-        try:
-            p=s[i].GetPeers (a[i], [peername])[0]
-            plc[i]['peer_id']=p['peer_id']
-        except:
-            peer_id=s[i].AddPeer (a[i], {'peername':peername,'peer_url':plc[peer]['url'],'person_id':plc[i]['peer_person_id']})
-            # NOTE : need to manually reset the encrypted password through SQL at this point
-            print '%02d:Created peer %d'%(i,peer_id)
-            plc[i]['peer_id']=peer_id
-            print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
-
-def test01_peer_passwd (args=[1,2]):
-    global plc,s,a
-    for i in args:
-        # using an ad-hoc local command for now - never could get quotes to reach sql....
-        print "Attempting to set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
-        retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
-        print '-> system returns',retcod
-    
 ##############################
 # this one gets cached 
 def get_peer_id (i):
@@ -367,10 +396,9 @@ def get_peer_id (i):
         return peer_id
 
 def test01_refresh (message,args=[1,2]):
-    global plc,s,a
     print '=== refresh',message
     for i in args:
-        print '%02d: Refreshing peer'%(i),
+        print '%02d:== Refreshing peer'%(i),
         retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
         print 'got ',retcod
 
@@ -381,12 +409,11 @@ def get_local_node_id(i,nodename):
 
 # clean all local nodes - foreign nodes are not supposed to be cleaned up manually
 def clean_all_nodes (args=[1,2]):
-    global plc,s,a
     for i in args:
-        print '%02d: Cleaning all nodes'%i
+        print '%02d:== Cleaning all nodes'%i
         loc_nodes = s[i].GetNodes(a[i],None,None,'local')
         for node in loc_nodes:
-            print '%02d: > Cleaning node %d'%(i,node['node_id'])
+            print '%02d:==== Cleaning node %d'%(i,node['node_id'])
             s[i].DeleteNode(a[i],node['node_id'])
 
 def test02_node (args=[1,2]):
@@ -394,36 +421,67 @@ def test02_node (args=[1,2]):
 	test02_node_n (nn,args)
 
 def test02_node_n (nn,args=[1,2]):
-    global plc,s,a
     for i in args:
         nodename = node_name(i,nn)
         try:
             get_local_node_id(i,nodename)
         except:
             n=s[i].AddNode(a[i],1,{'hostname': nodename})
-            print '%02d: Added node %d %s'%(i,n,node_name(i,i))
+            print '%02d:== Added node %d %s'%(i,n,node_name(i,i))
 
 def test02_delnode (args=[1,2]):
     for nn in myrange(number_nodes):
 	test02_delnode_n (nn,args)
 
 def test02_delnode_n (nn,args=[1,2]):
-    global plc,s,a
     for i in args:
         nodename = node_name(i,nn)
         node_id = get_local_node_id (i,nodename)
         retcod=s[i].DeleteNode(a[i],nodename)
-        print '%02d: Deleted node %d, returns %s'%(i,node_id,retcod)
+        print '%02d:== Deleted node %d, returns %s'%(i,node_id,retcod)
+
+####################
+def test05_person (args=[1,2]):
+    for np in myrange(number_persons):
+	test05_person_n (np,True,args)
+
+def test05_del_person (args=[1,2]):
+    for np in myrange(number_persons):
+	test05_person_n (np,False,args)
+
+def test05_person_n (np,add_if_true,args=[1,2]):
+    test05_person_n_ks (np, myrange(number_keys),add_if_true,args)
+
+def test05_person_n_ks (np,nks,add_if_true,args=[1,2]):
+    for i in args:
+        email = person_name(i,np)
+        try:
+            person_id=s[i].GetPersons(a[i],[email])[0]['person_id']
+	    if not add_if_true:
+		s[i].DeletePerson(a[i],person_id)
+		print "%02d:== deleted person_id %d"%(i,person_id)
+        except:
+	    if add_if_true:
+		password = plc[i]['person-password']
+		person_id=s[i].AddPerson(a[i],{'first_name':'Your average', 
+					       'last_name':'User%d'%np, 
+					       'role_ids':[30],
+					       'email':email,
+					       'password': password })
+		print '%02d:== created user account %d, %s - %s'%(i, person_id,email,password)
+		for nk in nks:
+		    key=key_name(i,np,nk)
+		    s[i].AddPersonKey(aa[i],email,{'key_type':'ssh', 'key':key})
+		    print '%02d:== added key %s to person %s'%(i,key,email)
 
 ####################
 def clean_all_slices (args=[1,2]):
-    global plc,s,a
     for i in args:
-        print '%02d: Cleaning all slices'%i
+        print '%02d:== Cleaning all slices'%i
         for slice in s[i].GetSlices(a[i],{'peer_id':None}):
             slice_id = slice['slice_id']
             if slice_id not in system_slices_ids:
-                print '%02d: > Cleaning slice %d'%(i,slice_id)
+                print '%02d:==== Cleaning slice %d'%(i,slice_id)
                 s[i].DeleteSlice(a[i],slice_id)
 
 def get_local_slice_id (i,name):
@@ -434,7 +492,6 @@ def test03_slice (args=[1,2]):
 	test03_slice_n (n,args)
 
 def test03_slice_n (ns,args=[1,2]):
-    global plc,s,a
     for i in args:
         peer=peer_index(i)
         plcname=plc_name(i)
@@ -449,7 +506,7 @@ def test03_slice_n (ns,args=[1,2]):
                                           'max_nodes':max_nodes,
                                           'instanciation':'plc-instantiated',
                                           })
-            print '%02d: created slice %d - max nodes=%d'%(i,slice_id,max_nodes)
+            print '%02d:== created slice %d - max nodes=%d'%(i,slice_id,max_nodes)
         
 
 def test04_node_slice (is_local, add_if_true, args=[1,2]):
@@ -460,7 +517,6 @@ def test04_node_slice_ns (ns,is_local, add_if_true, args=[1,2]):
     test04_node_slice_nl_n (myrange(number_nodes),ns,is_local, add_if_true, args)
 
 def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
-    global plc,s,a
     for i in args:
         peer=peer_index(i)
         slice_id = get_local_slice_id (i,slice_name (i,ns))
@@ -477,7 +533,7 @@ def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
         else:
             s[i].DeleteSliceFromNodes (a[i], slice_id,hostnames)
             message="deleted"
-        print '%02d: %s in slice %d %s '%(i,message,slice_id,nodetype),
+        print '%02d:== %s in slice %d %s '%(i,message,slice_id,nodetype),
         print hostnames
 
 def test04_slice_add_lnode (args=[1,2]):
@@ -617,8 +673,26 @@ def test_all_slices ():
     test_all_addslices ()
     test_all_delslices ()
     
+def test_all_persons ():
+    test05_del_person()
+    check_keys(0,0)
+    check_persons(system_persons,0)
+    test01_refresh ('before persons&keys creation')
+    check_keys(0,0)
+    check_persons(system_persons,system_persons_cross)
+    message ("Creating persons&keys - 1 extra del/add cycle for unique indexes")
+    test05_person ()
+    test05_del_person([2])
+    test05_person([2])
+    check_keys(number_persons*number_keys,0)
+    check_persons(system_persons+number_persons,system_persons_cross)
+    test01_refresh ('after persons&keys creation')
+    check_keys(number_persons*number_keys,number_persons*number_keys)
+    check_persons(system_persons+number_persons,system_persons_cross+number_persons)
+
 def test_all ():
     test_all_init ()
+    test_all_persons ()
     test_all_nodes ()
     test_all_slices ()
 
@@ -633,6 +707,7 @@ def populate ():
 
 def test_now ():
     test_all_init()
+    test_all_persons ()
 #    clean_all_nodes()
 #    clean_all_slices()
 #    populate()

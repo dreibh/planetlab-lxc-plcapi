@@ -1,0 +1,405 @@
+5 nodes & 3 slices
+==================== ('INIT',)
+initializing s[1] https://lurch.cs.princeton.edu:443/PLCAPI/
+initialized aa[1] {'Username': 'root@plc1.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'root'}
+initialized a[1] {'Username': 'plc1@planet-lab.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'peer'}
+initializing s[2] https://planetlab-devbox.inria.fr:443/PLCAPI/
+initialized aa[2] {'Username': 'root@plc2.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'root'}
+initialized a[2] {'Username': 'plc2@planet-lab.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'peer'}
+s[1] <ServerProxy for lurch.cs.princeton.edu:443/PLCAPI/>
+aa[1] {'Username': 'root@plc1.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'root'}
+a[1] {'Username': 'plc1@planet-lab.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'peer'}
+s[2] <ServerProxy for planetlab-devbox.inria.fr:443/PLCAPI/>
+aa[2] {'Username': 'root@plc2.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'root'}
+a[2] {'Username': 'plc2@planet-lab.org', 'AuthMethod': 'password', 'Role': 'admin', 'AuthString': 'peer'}
+01:== created peer admin account 3, plc1@planet-lab.org - peer
+02:== created peer admin account 3, plc2@planet-lab.org - peer
+01:== enabled+admin on account 3:plc1@planet-lab.org
+02:== enabled+admin on account 3:plc2@planet-lab.org
+01:Created person 4 as the peer person
+02:Created person 4 as the peer person
+01:Created peer 1
+PLEASE manually set password for person_id=4 in DB1
+02:Created peer 1
+PLEASE manually set password for person_id=4 in DB2
+Attempting to set passwd for person_id=4 in DB1UPDATE 1
+ -> system returns 0
+Attempting to set passwd for person_id=4 in DB2UPDATE 1
+ -> system returns 0
+01:== Created site 2 with max_slices=3
+02:== Created site 2 with max_slices=3
+01: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
+02: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
+01: Checking persons: got 4 local (e=4) & 0 foreign (e=0)
+02: Checking persons: got 4 local (e=4) & 0 foreign (e=0)
+=== refresh before persons&keys creation
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 1, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 1, 'new_nodes': 0}
+01: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
+02: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
+01: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
+02: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
+==================== ('Creating persons&keys - 1 extra del/add cycle for unique indexes',)
+01:== created user account 6, user1-1@plc1.org - password1
+01:== added key ssh-rsa 1111111111111111 user1-key1 to person user1-1@plc1.org
+01:== added key ssh-rsa 1111111111111111 user1-key2 to person user1-1@plc1.org
+01:== added key ssh-rsa 1111111111111111 user1-key3 to person user1-1@plc1.org
+01:== added key ssh-rsa 1111111111111111 user1-key4 to person user1-1@plc1.org
+02:== created user account 6, user2-1@plc2.org - password2
+02:== added key ssh-rsa 2222222222222222 user1-key1 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key2 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key3 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key4 to person user2-1@plc2.org
+01:== created user account 7, user1-2@plc1.org - password1
+01:== added key ssh-rsa 1111111111111111 user2-key1 to person user1-2@plc1.org
+01:== added key ssh-rsa 1111111111111111 user2-key2 to person user1-2@plc1.org
+01:== added key ssh-rsa 1111111111111111 user2-key3 to person user1-2@plc1.org
+01:== added key ssh-rsa 1111111111111111 user2-key4 to person user1-2@plc1.org
+02:== created user account 7, user2-2@plc2.org - password2
+02:== added key ssh-rsa 2222222222222222 user2-key1 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key2 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key3 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key4 to person user2-2@plc2.org
+02:== deleted person_id 6
+02:== deleted person_id 7
+02:== created user account 8, user2-1@plc2.org - password2
+02:== added key ssh-rsa 2222222222222222 user1-key1 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key2 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key3 to person user2-1@plc2.org
+02:== added key ssh-rsa 2222222222222222 user1-key4 to person user2-1@plc2.org
+02:== created user account 9, user2-2@plc2.org - password2
+02:== added key ssh-rsa 2222222222222222 user2-key1 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key2 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key3 to person user2-2@plc2.org
+02:== added key ssh-rsa 2222222222222222 user2-key4 to person user2-2@plc2.org
+01: Checking keys: got 8 local (e=8) & 0 foreign (e=0)
+02: Checking keys: got 8 local (e=8) & 0 foreign (e=0)
+01: Checking persons: got 6 local (e=6) & 1 foreign (e=1)
+02: Checking persons: got 6 local (e=6) & 1 foreign (e=1)
+=== refresh after persons&keys creation
+01:== Refreshing peer got  {'new_keys': 8, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 2, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 8, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 2, 'new_nodes': 0}
+01: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
+02: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
+01: Checking persons: got 6 local (e=6) & 3 foreign (e=3)
+02: Checking persons: got 6 local (e=6) & 3 foreign (e=3)
+==================== ('RESETTING NODES',)
+01:== Cleaning all nodes
+02:== Cleaning all nodes
+=== refresh cleaned nodes
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
+02: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
+==================== ('CREATING NODES',)
+01:== Added node 1 n101.plc1.org
+02:== Added node 1 n202.plc2.org
+01:== Added node 2 n101.plc1.org
+02:== Added node 2 n202.plc2.org
+01:== Added node 3 n101.plc1.org
+02:== Added node 3 n202.plc2.org
+01:== Added node 4 n101.plc1.org
+02:== Added node 4 n202.plc2.org
+01:== Added node 5 n101.plc1.org
+02:== Added node 5 n202.plc2.org
+01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
+02: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
+=== refresh after node creation
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 5}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 5}
+01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
+02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
+==================== ('2 extra del/add cycles on plc2 for different indexes',)
+02:== Deleted node 1, returns 1
+02:== Deleted node 2, returns 1
+02:== Deleted node 3, returns 1
+02:== Deleted node 4, returns 1
+02:== Deleted node 5, returns 1
+02:== Added node 11 n202.plc2.org
+02:== Added node 12 n202.plc2.org
+02:== Added node 13 n202.plc2.org
+02:== Added node 14 n202.plc2.org
+02:== Added node 15 n202.plc2.org
+02:== Deleted node 11, returns 1
+02:== Deleted node 12, returns 1
+02:== Deleted node 13, returns 1
+02:== Deleted node 14, returns 1
+02:== Deleted node 15, returns 1
+02:== Added node 16 n202.plc2.org
+02:== Added node 17 n202.plc2.org
+02:== Added node 18 n202.plc2.org
+02:== Added node 19 n202.plc2.org
+02:== Added node 20 n202.plc2.org
+02:== Deleted node 16, returns 1
+02:== Deleted node 17, returns 1
+02:== Deleted node 18, returns 1
+02:== Deleted node 19, returns 1
+02:== Deleted node 20, returns 1
+02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
+=== refresh after deletion on plc2
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': -5}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
+02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
+==================== ('ADD on plc2 for different indexes',)
+02:== Added node 21 n202.plc2.org
+02:== Added node 22 n202.plc2.org
+02:== Added node 23 n202.plc2.org
+02:== Added node 24 n202.plc2.org
+02:== Added node 25 n202.plc2.org
+01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
+02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
+=== refresh after re-creation on plc2
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 5}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
+02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
+==================== ('RESETTING SLICES TEST',)
+01:== Cleaning all nodes
+01:==== Cleaning node 1
+01:==== Cleaning node 2
+01:==== Cleaning node 3
+01:==== Cleaning node 4
+01:==== Cleaning node 5
+02:== Cleaning all nodes
+02:==== Cleaning node 21
+02:==== Cleaning node 22
+02:==== Cleaning node 23
+02:==== Cleaning node 24
+02:==== Cleaning node 25
+01:== Added node 16 n101.plc1.org
+02:== Added node 26 n202.plc2.org
+01:== Added node 17 n101.plc1.org
+02:== Added node 27 n202.plc2.org
+01:== Added node 18 n101.plc1.org
+02:== Added node 28 n202.plc2.org
+01:== Added node 19 n101.plc1.org
+02:== Added node 29 n202.plc2.org
+01:== Added node 20 n101.plc1.org
+02:== Added node 30 n202.plc2.org
+01:== Cleaning all slices
+01:==== Cleaning slice 3
+02:== Cleaning all slices
+02:==== Cleaning slice 3
+=== refresh After slices init
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+==================== ('CREATING SLICES on plc1',)
+01:== created slice 4 - max nodes=5
+01:== created slice 5 - max nodes=5
+01:== created slice 6 - max nodes=5
+01: Checking slices: got 5 local (e=5) & 0 foreign (e=0)
+02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
+=== refresh after slice created on plc1
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 3, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: Checking slices: got 5 local (e=5) & 0 foreign (e=0)
+02: Checking slices: got 2 local (e=2) & 3 foreign (e=3)
+01: local slice one_s101 (e=0)  on nodes  []
+01: local slice one_s102 (e=0)  on nodes  []
+01: local slice one_s103 (e=0)  on nodes  []
+02: foreign slice one_s101 (e=0)  on nodes  []
+02: foreign slice one_s102 (e=0)  on nodes  []
+02: foreign slice one_s103 (e=0)  on nodes  []
+==================== ('ADDING LOCAL NODES IN SLICES',)
+01:== added in slice 4 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01:== added in slice 5 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01:== added in slice 6 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01: local slice one_s101 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s102 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s103 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s101 (e=0)  on nodes  []
+02: foreign slice one_s102 (e=0)  on nodes  []
+02: foreign slice one_s103 (e=0)  on nodes  []
+=== refresh After local nodes were added on plc1
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: local slice one_s101 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s102 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s103 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s101 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+==================== ('ADDING FOREIGN NODES IN SLICES',)
+01:== added in slice 4 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01:== added in slice 5 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01:== added in slice 6 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01: local slice one_s101 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+01: local slice one_s102 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+01: local slice one_s103 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+02: foreign slice one_s101 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+=== refresh After foreign nodes were added in plc1
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: local slice one_s101 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+01: local slice one_s102 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+01: local slice one_s103 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+[FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+02: foreign slice one_s101 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: 3 slivers (exp. 3) in GetSlivers for node n101.plc1.org
+>>slivername =  one_s101
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s101',
+   'slice_id': 4}
+>>slivername =  one_s102
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s102',
+   'slice_id': 5}
+>>slivername =  one_s103
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s103',
+   'slice_id': 6}
+02: 3 slivers (exp. 3) in GetSlivers for node n201.plc2.org
+>>slivername =  one_s101
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s101',
+   'slice_id': 4}
+>>slivername =  one_s102
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s102',
+   'slice_id': 5}
+>>slivername =  one_s103
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s103',
+   'slice_id': 6}
+==================== ('DELETING FOREIGN NODES FROM SLICES',)
+01:== deleted in slice 4 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01:== deleted in slice 5 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01:== deleted in slice 6 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
+01: local slice one_s101 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s102 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s103 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s101 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+[LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: 3 slivers (exp. 3) in GetSlivers for node n101.plc1.org
+>>slivername =  one_s101
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s101',
+   'slice_id': 4}
+>>slivername =  one_s102
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s102',
+   'slice_id': 5}
+>>slivername =  one_s103
+{  'attributes': [],
+   'expires': normalized,
+   'instantiation': 'plc-instantiated',
+   'keys': [],
+   'name': 'one_s103',
+   'slice_id': 6}
+=== refresh After foreign nodes were removed on plc1
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: local slice one_s101 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s102 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+01: local slice one_s103 (e=5)  on nodes  [16, 17, 18, 19, 20]
+[LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s101 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+==================== ('DELETING LOCAL NODES FROM SLICES',)
+01:== deleted in slice 4 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01:== deleted in slice 5 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01:== deleted in slice 6 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
+01: local slice one_s101 (e=0)  on nodes  []
+01: local slice one_s102 (e=0)  on nodes  []
+01: local slice one_s103 (e=0)  on nodes  []
+02: foreign slice one_s101 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s102 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+02: foreign slice one_s103 (e=5)  on nodes  [8, 9, 10, 6, 7]
+[FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
+=== refresh After local nodes were removed on plc1
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: local slice one_s101 (e=0)  on nodes  []
+01: local slice one_s102 (e=0)  on nodes  []
+01: local slice one_s103 (e=0)  on nodes  []
+02: foreign slice one_s101 (e=0)  on nodes  []
+02: foreign slice one_s102 (e=0)  on nodes  []
+02: foreign slice one_s103 (e=0)  on nodes  []
+==================== ('CHECKING SLICES CLEAN UP',)
+01:== Cleaning all slices
+01:==== Cleaning slice 4
+01:==== Cleaning slice 5
+01:==== Cleaning slice 6
+01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
+02: Checking slices: got 2 local (e=2) & 3 foreign (e=3)
+=== refresh After slices clenaup
+01:== Refreshing peer got  {'new_keys': 0, 'new_slices': 0, 'plcname': 'Thierry plc1', 'new_persons': 0, 'new_nodes': 0}
+02:== Refreshing peer got  {'new_keys': 0, 'new_slices': -3, 'plcname': 'Thierry plc2 on devbox', 'new_persons': 0, 'new_nodes': 0}
+01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
+02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)

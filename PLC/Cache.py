@@ -146,7 +146,7 @@ class Cache:
 	# (*) or naming conflicts
         local_objects = table_class (self.api)
         ### index upon class_key for future searches
-	verbose ('local objects:',local_objects)
+	#verbose ('local objects:',local_objects)
 	verbose ('class_key',class_key)
         local_objects_index = local_objects.dict(class_key)
 	verbose ('update_table',classname,local_objects_index.keys())
@@ -164,11 +164,13 @@ class Cache:
         # scan the peer's local objects
         for alien_object in alien_object_list:
 
+            object_name = alien_object[class_key]
+
             ### ignore, e.g. system-wide slices
             if lambda_ignore(alien_object):
+		verbose('Ignoring',object_name)
                 continue
 
-            object_name = alien_object[class_key]
 	    verbose ('update_table - Considering',object_name)
                 
             # create or update
@@ -176,6 +178,7 @@ class Cache:
                 ### We know about this object already
                 local_object = local_objects_index[object_name]
 		if local_object ['peer_id'] is None:
+		    ### xxx send e-mail
 		    print 'We are in trouble here'
 		    print 'The %s object named %s is natively defined twice'%(classname,object_name)
 		    print 'Once on this PLC and once on peer %d'%peer_id
@@ -271,22 +274,38 @@ class Cache:
         
     def refresh_peer (self):
 	
-	peer_local_keys = self.peer_server.GetKeys(self.auth,{'peer_id':None})
-        peer_local_nodes = self.peer_server.GetNodes(self.auth,None,None,'local')
-	# xxx would ideally get our own nodes only, 
-	# requires to know remote peer's peer_id for ourselves, mmhh
-        peer_foreign_nodes = self.peer_server.GetNodes(self.auth,None,None,'foreign')
         peer_local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
 
+	# refresh keys
+	peer_local_keys = self.peer_server.GetKeys(self.auth,{'peer_id':None})
 	nb_new_keys = self.update_table('Key', peer_local_keys)
 
+	# refresh nodes
+        peer_local_nodes = self.peer_server.GetNodes(self.auth,{'peer_id':None})
         nb_new_nodes = self.update_table('Node', peer_local_nodes)
 
-        # rough and temporary
-        nb_new_slices = self.refresh_slices(peer_local_slices,peer_local_nodes+peer_foreign_nodes)
-        
+	# refresh persons
+	peer_local_persons = self.peer_server.GetPersons(self.auth,{'peer_id':None})
+	# xxx ideally get our own persons only
+	# requires to know remote peer's peer_id for ourselves, mmhh
+	peer_all_keys = peer_local_keys + self.peer_server.GetKeys(self.auth,{'~peer_id':None})
+	nb_new_persons = self.update_table ('Person', peer_local_persons,
+					    { 'Key': peer_all_keys} )
+
+	# refresh slices
+	def is_system_slice (slice):
+	    return slice['creator_person_id'] == 1
+	# xxx would ideally get our own nodes only, 
+        peer_all_nodes = peer_local_nodes+self.peer_server.GetNodes(self.auth,{'~peer_id':None})
+
+        nb_new_slices = self.update_table ('Slice', peer_local_slices,
+					   {'Node':peer_all_nodes},
+					   is_system_slice)
+
+
         return {'plcname':self.api.config.PLC_NAME,
 		'new_keys':nb_new_keys,
                 'new_nodes':nb_new_nodes,
+		'new_persons':nb_new_persons,
                 'new_slices':nb_new_slices}
 
