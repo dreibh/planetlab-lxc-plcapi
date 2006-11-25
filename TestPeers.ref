@@ -27,7 +27,7 @@ Attempting to set passwd for person_id=4 in DB1UPDATE 1
  -> system returns 0
 Attempting to set passwd for person_id=4 in DB2UPDATE 1
  -> system returns 0
-+++ 18 seconds ellapsed
++++ 19 seconds ellapsed
 01:== Created site 2 with max_slices=4
 02:== Created site 2 with max_slices=4
 01:== Created site 3 with max_slices=4
@@ -37,18 +37,18 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01:== Created site 5 with max_slices=4
 02:== Created site 5 with max_slices=4
 === refresh after site creation
-+++ 37 seconds ellapsed
++++ 39 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0}
-+++ 43 seconds ellapsed
++++ 44 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0}
-+++ 48 seconds ellapsed
-+++ 48 seconds ellapsed
++++ 50 seconds ellapsed
++++ 50 seconds ellapsed
 === refresh before persons&keys creation
-+++ 55 seconds ellapsed
++++ 56 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 60 seconds ellapsed
++++ 62 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 66 seconds ellapsed
++++ 67 seconds ellapsed
 01: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 01: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
@@ -100,25 +100,25 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 02: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 === refresh after persons&keys creation
-+++ 114 seconds ellapsed
++++ 117 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0}
-+++ 120 seconds ellapsed
++++ 123 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0}
-+++ 126 seconds ellapsed
++++ 129 seconds ellapsed
 01: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 02: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 01: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
 02: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
-+++ 130 seconds ellapsed
++++ 134 seconds ellapsed
 ==================== ('RESETTING NODES',)
 01:== Cleaning all nodes
 02:== Cleaning all nodes
 === refresh cleaned nodes
-+++ 132 seconds ellapsed
++++ 135 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 138 seconds ellapsed
++++ 142 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 143 seconds ellapsed
++++ 147 seconds ellapsed
 01: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 ==================== ('CREATING NODES',)
@@ -135,11 +135,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 === refresh after node creation
-+++ 163 seconds ellapsed
++++ 168 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5}
-+++ 170 seconds ellapsed
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5}
 +++ 176 seconds ellapsed
+02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5}
++++ 182 seconds ellapsed
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02:== Deleted node 1, returns 1
@@ -170,11 +170,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Deleted node 20, returns 1
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 === refresh after deletion on plc2
-+++ 212 seconds ellapsed
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': -5}
-+++ 218 seconds ellapsed
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
 +++ 224 seconds ellapsed
+01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': -5}
++++ 231 seconds ellapsed
+02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
++++ 237 seconds ellapsed
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 ==================== ('ADD on plc2 for different indexes',)
@@ -186,14 +186,14 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 === refresh after re-creation on plc2
-+++ 234 seconds ellapsed
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5}
-+++ 241 seconds ellapsed
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
 +++ 247 seconds ellapsed
+01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5}
++++ 254 seconds ellapsed
+02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
++++ 260 seconds ellapsed
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
-+++ 250 seconds ellapsed
++++ 262 seconds ellapsed
 ==================== ('RESETTING SLICES TEST',)
 01:== Cleaning all nodes
 01:==== Cleaning node 1
@@ -222,146 +222,146 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Cleaning all slices
 02:==== Cleaning slice 3
 === refresh After slices init
-+++ 279 seconds ellapsed
++++ 293 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 286 seconds ellapsed
++++ 300 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 292 seconds ellapsed
++++ 306 seconds ellapsed
 ==================== ('CREATING SLICES on plc1',)
 01:== created slice 4 - max nodes=5
-01:== Attached person user1-1@plc1.org to slice onetwo_slice1
-01:== Attached person user1-2@plc1.org to slice onetwo_slice1
-01:== Attached person user1-3@plc1.org to slice onetwo_slice1
-01:== Attached person user1-4@plc1.org to slice onetwo_slice1
+01:== Attached person user1-1@plc1.org to slice oneone_slice1
+01:== Attached person user1-2@plc1.org to slice oneone_slice1
+01:== Attached person user1-3@plc1.org to slice oneone_slice1
+01:== Attached person user1-4@plc1.org to slice oneone_slice1
 01:== created slice 5 - max nodes=5
-01:== Attached person user1-1@plc1.org to slice onethree_slice2
-01:== Attached person user1-2@plc1.org to slice onethree_slice2
-01:== Attached person user1-3@plc1.org to slice onethree_slice2
-01:== Attached person user1-4@plc1.org to slice onethree_slice2
+01:== Attached person user1-1@plc1.org to slice onetwo_slice2
+01:== Attached person user1-2@plc1.org to slice onetwo_slice2
+01:== Attached person user1-3@plc1.org to slice onetwo_slice2
+01:== Attached person user1-4@plc1.org to slice onetwo_slice2
 01:== created slice 6 - max nodes=5
-01:== Attached person user1-1@plc1.org to slice onefour_slice3
-01:== Attached person user1-2@plc1.org to slice onefour_slice3
-01:== Attached person user1-3@plc1.org to slice onefour_slice3
-01:== Attached person user1-4@plc1.org to slice onefour_slice3
+01:== Attached person user1-1@plc1.org to slice onethree_slice3
+01:== Attached person user1-2@plc1.org to slice onethree_slice3
+01:== Attached person user1-3@plc1.org to slice onethree_slice3
+01:== Attached person user1-4@plc1.org to slice onethree_slice3
 01:== created slice 7 - max nodes=5
-01:== Attached person user1-1@plc1.org to slice oneone_slice4
-01:== Attached person user1-2@plc1.org to slice oneone_slice4
-01:== Attached person user1-3@plc1.org to slice oneone_slice4
-01:== Attached person user1-4@plc1.org to slice oneone_slice4
+01:== Attached person user1-1@plc1.org to slice onefour_slice4
+01:== Attached person user1-2@plc1.org to slice onefour_slice4
+01:== Attached person user1-3@plc1.org to slice onefour_slice4
+01:== Attached person user1-4@plc1.org to slice onefour_slice4
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 === refresh after slice created on plc1
-+++ 322 seconds ellapsed
++++ 334 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 328 seconds ellapsed
++++ 343 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 4, 'new_persons': 0, 'new_nodes': 0}
-+++ 335 seconds ellapsed
++++ 350 seconds ellapsed
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
-01: local slice onetwo_slice1 (e=0)  on nodes  []
-01: local slice onethree_slice2 (e=0)  on nodes  []
-01: local slice onefour_slice3 (e=0)  on nodes  []
-01: local slice oneone_slice4 (e=0)  on nodes  []
-02: foreign slice onetwo_slice1 (e=0)  on nodes  []
-02: foreign slice onethree_slice2 (e=0)  on nodes  []
-02: foreign slice onefour_slice3 (e=0)  on nodes  []
-02: foreign slice oneone_slice4 (e=0)  on nodes  []
+01: local slice oneone_slice1 (e=0)  on nodes  []
+01: local slice onetwo_slice2 (e=0)  on nodes  []
+01: local slice onethree_slice3 (e=0)  on nodes  []
+01: local slice onefour_slice4 (e=0)  on nodes  []
+02: foreign slice oneone_slice1 (e=0)  on nodes  []
+02: foreign slice onetwo_slice2 (e=0)  on nodes  []
+02: foreign slice onethree_slice3 (e=0)  on nodes  []
+02: foreign slice onefour_slice4 (e=0)  on nodes  []
 ==================== ('ADDING LOCAL NODES IN SLICES',)
 01:== added in slice 4 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== added in slice 5 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== added in slice 6 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== added in slice 7 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
-01: local slice onetwo_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onethree_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onefour_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onethree_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice oneone_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onefour_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onetwo_slice1 (e=0)  on nodes  []
-02: foreign slice onethree_slice2 (e=0)  on nodes  []
-02: foreign slice onefour_slice3 (e=0)  on nodes  []
-02: foreign slice oneone_slice4 (e=0)  on nodes  []
+02: foreign slice oneone_slice1 (e=0)  on nodes  []
+02: foreign slice onetwo_slice2 (e=0)  on nodes  []
+02: foreign slice onethree_slice3 (e=0)  on nodes  []
+02: foreign slice onefour_slice4 (e=0)  on nodes  []
 === refresh After local nodes were added on plc1
-+++ 372 seconds ellapsed
++++ 390 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 379 seconds ellapsed
++++ 397 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 385 seconds ellapsed
-01: local slice onetwo_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
++++ 403 seconds ellapsed
+01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onethree_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onefour_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onethree_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice oneone_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onefour_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onetwo_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice oneone_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onetwo_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onethree_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 ==================== ('ADDING FOREIGN NODES IN SLICES',)
 01:== added in slice 4 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== added in slice 5 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== added in slice 6 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== added in slice 7 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
-01: local slice onetwo_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice oneone_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice onethree_slice2 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onetwo_slice2 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice onefour_slice3 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onethree_slice3 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice oneone_slice4 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onefour_slice4 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-02: foreign slice onetwo_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice oneone_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onetwo_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onethree_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After foreign nodes were added in plc1
-+++ 424 seconds ellapsed
++++ 444 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 431 seconds ellapsed
++++ 451 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 437 seconds ellapsed
-01: local slice onetwo_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
++++ 457 seconds ellapsed
+01: local slice oneone_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice onethree_slice2 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onetwo_slice2 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice onefour_slice3 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onethree_slice3 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-01: local slice oneone_slice4 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
+01: local slice onefour_slice4 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
-02: foreign slice onetwo_slice1 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice oneone_slice1 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onetwo_slice2 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onethree_slice3 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onefour_slice4 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
->>slivername =  onetwo_slice1
+>>slivername =  oneone_slice1
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -381,9 +381,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onetwo_slice1',
+   'name': 'oneone_slice1',
    'slice_id': 4}
->>slivername =  onethree_slice2
+>>slivername =  onetwo_slice2
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -403,9 +403,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onethree_slice2',
+   'name': 'onetwo_slice2',
    'slice_id': 5}
->>slivername =  onefour_slice3
+>>slivername =  onethree_slice3
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -425,9 +425,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onefour_slice3',
+   'name': 'onethree_slice3',
    'slice_id': 6}
->>slivername =  oneone_slice4
+>>slivername =  onefour_slice4
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -447,10 +447,10 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'oneone_slice4',
+   'name': 'onefour_slice4',
    'slice_id': 7}
 02: 4 slivers (exp. 4) in GetSlivers for node n201.plc2.org
->>slivername =  onetwo_slice1
+>>slivername =  oneone_slice1
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -470,9 +470,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user2-key2',
                  'key_type': 'ssh'}],
-   'name': 'onetwo_slice1',
+   'name': 'oneone_slice1',
    'slice_id': 4}
->>slivername =  onethree_slice2
+>>slivername =  onetwo_slice2
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -492,9 +492,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user2-key2',
                  'key_type': 'ssh'}],
-   'name': 'onethree_slice2',
+   'name': 'onetwo_slice2',
    'slice_id': 5}
->>slivername =  onefour_slice3
+>>slivername =  onethree_slice3
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -514,9 +514,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user2-key2',
                  'key_type': 'ssh'}],
-   'name': 'onefour_slice3',
+   'name': 'onethree_slice3',
    'slice_id': 6}
->>slivername =  oneone_slice4
+>>slivername =  onefour_slice4
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -536,35 +536,35 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user2-key2',
                  'key_type': 'ssh'}],
-   'name': 'oneone_slice4',
+   'name': 'onefour_slice4',
    'slice_id': 7}
 ==================== ('DELETING FOREIGN NODES FROM SLICES',)
 01:== deleted in slice 4 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== deleted in slice 5 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== deleted in slice 6 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
 01:== deleted in slice 7 foreign  ['n201.plc2.org', 'n202.plc2.org', 'n203.plc2.org', 'n204.plc2.org', 'n205.plc2.org']
-01: local slice onetwo_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onethree_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onefour_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onethree_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice oneone_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onefour_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onetwo_slice1 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice oneone_slice1 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onetwo_slice2 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onethree_slice3 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
+02: foreign slice onefour_slice4 (e=10)  on nodes  [8, 9, 10, 6, 7, 26, 27, 28, 29, 30]
 [LOC:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
->>slivername =  onetwo_slice1
+>>slivername =  oneone_slice1
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -584,9 +584,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onetwo_slice1',
+   'name': 'oneone_slice1',
    'slice_id': 4}
->>slivername =  onethree_slice2
+>>slivername =  onetwo_slice2
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -606,9 +606,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onethree_slice2',
+   'name': 'onetwo_slice2',
    'slice_id': 5}
->>slivername =  onefour_slice3
+>>slivername =  onethree_slice3
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -628,9 +628,9 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'onefour_slice3',
+   'name': 'onethree_slice3',
    'slice_id': 6}
->>slivername =  oneone_slice4
+>>slivername =  onefour_slice4
 {  'attributes': [],
    'expires': normalized,
    'instantiation': 'plc-instantiated',
@@ -650,61 +650,61 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
                  'key_type': 'ssh'},
               {  'key': 'ssh-rsa 1111111111111111 user4-key2',
                  'key_type': 'ssh'}],
-   'name': 'oneone_slice4',
+   'name': 'onefour_slice4',
    'slice_id': 7}
 === refresh After foreign nodes were removed on plc1
-+++ 486 seconds ellapsed
++++ 507 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 492 seconds ellapsed
++++ 514 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 499 seconds ellapsed
-01: local slice onetwo_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
++++ 520 seconds ellapsed
+01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onethree_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice onefour_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onethree_slice3 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-01: local slice oneone_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
+01: local slice onefour_slice4 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onetwo_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice oneone_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onetwo_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onethree_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 ==================== ('DELETING LOCAL NODES FROM SLICES',)
 01:== deleted in slice 4 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== deleted in slice 5 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== deleted in slice 6 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
 01:== deleted in slice 7 local  ['n101.plc1.org', 'n102.plc1.org', 'n103.plc1.org', 'n104.plc1.org', 'n105.plc1.org']
-01: local slice onetwo_slice1 (e=0)  on nodes  []
-01: local slice onethree_slice2 (e=0)  on nodes  []
-01: local slice onefour_slice3 (e=0)  on nodes  []
-01: local slice oneone_slice4 (e=0)  on nodes  []
-02: foreign slice onetwo_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
+01: local slice oneone_slice1 (e=0)  on nodes  []
+01: local slice onetwo_slice2 (e=0)  on nodes  []
+01: local slice onethree_slice3 (e=0)  on nodes  []
+01: local slice onefour_slice4 (e=0)  on nodes  []
+02: foreign slice oneone_slice1 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onethree_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onetwo_slice2 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice onefour_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onethree_slice3 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
-02: foreign slice oneone_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
+02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After local nodes were removed on plc1
-+++ 537 seconds ellapsed
++++ 558 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 543 seconds ellapsed
++++ 564 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 549 seconds ellapsed
-01: local slice onetwo_slice1 (e=0)  on nodes  []
-01: local slice onethree_slice2 (e=0)  on nodes  []
-01: local slice onefour_slice3 (e=0)  on nodes  []
-01: local slice oneone_slice4 (e=0)  on nodes  []
-02: foreign slice onetwo_slice1 (e=0)  on nodes  []
-02: foreign slice onethree_slice2 (e=0)  on nodes  []
-02: foreign slice onefour_slice3 (e=0)  on nodes  []
-02: foreign slice oneone_slice4 (e=0)  on nodes  []
++++ 571 seconds ellapsed
+01: local slice oneone_slice1 (e=0)  on nodes  []
+01: local slice onetwo_slice2 (e=0)  on nodes  []
+01: local slice onethree_slice3 (e=0)  on nodes  []
+01: local slice onefour_slice4 (e=0)  on nodes  []
+02: foreign slice oneone_slice1 (e=0)  on nodes  []
+02: foreign slice onetwo_slice2 (e=0)  on nodes  []
+02: foreign slice onethree_slice3 (e=0)  on nodes  []
+02: foreign slice onefour_slice4 (e=0)  on nodes  []
 ==================== ('CHECKING SLICES CLEAN UP',)
 01:== Cleaning all slices
 01:==== Cleaning slice 4
@@ -714,11 +714,12 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
 === refresh After slices clenaup
-+++ 571 seconds ellapsed
++++ 593 seconds ellapsed
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0}
-+++ 577 seconds ellapsed
++++ 600 seconds ellapsed
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slices': -4, 'new_persons': 0, 'new_nodes': 0}
-+++ 583 seconds ellapsed
++++ 606 seconds ellapsed
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
-+++ 586 seconds ellapsed
++++ 609 seconds ellapsed
+==================== ('END',)

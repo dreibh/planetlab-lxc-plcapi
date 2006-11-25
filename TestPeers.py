@@ -96,7 +96,7 @@ fast()
 #normal()
 
 ####################
-# argh
+# argh, for login_name that doesn't accept digits
 plain_numbers=['zero','one','two','three','four','five','six','seven','eight','nine','ten',
 	       'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
 ####################
@@ -152,8 +152,14 @@ def key_name (i,n,k):
 def node_name (i,n):
     return plc[i]['node-format']%n
 
+def map_on_site (n):
+    result=(n%number_sites)
+    if (result==0):
+	result=number_sites
+    return result
+
 def slice_name (i,n):
-    site_index=(n%number_slices)+1
+    site_index=map_on_site(n)
     return "%s_slice%d"%(site_login_base(i,site_index),n)
 
 # to have indexes start at 1
@@ -504,7 +510,7 @@ def test03_node_n (nn,args=[1,2]):
         try:
             get_local_node_id(i,nodename)
         except:
-	    login_base=site_login_base(i,(nn%number_sites)+1)
+	    login_base=site_login_base(i,map_on_site(nn))
             n=s[i].AddNode(a[i],login_base,{'hostname': nodename})
             print '%02d:== Added node %d %s'%(i,n,node_name(i,i))
 
