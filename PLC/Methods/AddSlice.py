@@ -58,15 +58,17 @@ class AddSlice(Method):
         login_base = name.split("_")[0]
         sites = Sites(self.api, [login_base])
         if not sites:
-            raise PLCInvalidArgument, "Invalid slice prefix"
+            raise PLCInvalidArgument, "Invalid slice prefix %s in %s"%(login_base,name)
         site = sites[0]
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Slice prefix must be the same as the login_base of one of your sites"
+                raise PLCPermissionDenied, "Slice prefix %s must be the same as the login_base of one of your sites"%login_base
 
         if len(site['slice_ids']) >= site['max_slices']:
-            raise PLCInvalidArgument, "Site has reached its maximum allowable slice count"
+            raise PLCInvalidArgument, "Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
+                                                                                                         len(site['slice_ids']),
+                                                                                                         site['max_slices'])
 
         slice = Slice(self.api, slice_fields)
         slice['creator_person_id'] = self.caller['person_id']

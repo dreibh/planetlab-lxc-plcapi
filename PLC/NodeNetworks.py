@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.14 2006/11/09 03:07:42 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.15 2006/11/09 19:43:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -69,18 +69,18 @@ class NodeNetwork(Row):
     def validate_method(self, method):
         network_methods = [row['method'] for row in NetworkMethods(self.api)]
         if method not in network_methods:
-            raise PLCInvalidArgument, "Invalid addressing method"
+            raise PLCInvalidArgument, "Invalid addressing method %s"%method
 	return method
 
     def validate_type(self, type):
         network_types = [row['type'] for row in NetworkTypes(self.api)]
         if type not in network_types:
-            raise PLCInvalidArgument, "Invalid address type"
+            raise PLCInvalidArgument, "Invalid address type %s"%type
 	return type
 
     def validate_ip(self, ip):
         if ip and not valid_ip(ip):
-            raise PLCInvalidArgument, "Invalid IP address " + ip
+            raise PLCInvalidArgument, "Invalid IP address %s"%ip
         return ip
 
     def validate_mac(self, mac):
@@ -98,7 +98,7 @@ class NodeNetwork(Row):
                 bytes[i] = "%02x" % byte
             mac = ":".join(bytes)
         except:
-            raise PLCInvalidArgument, "Invalid MAC address"
+            raise PLCInvalidArgument, "Invalid MAC address %s"%mac
 
         return mac
 
@@ -115,14 +115,14 @@ class NodeNetwork(Row):
             return hostname
 
         if not PLC.Nodes.valid_hostname(hostname):
-            raise PLCInvalidArgument, "Invalid hostname"
+            raise PLCInvalidArgument, "Invalid hostname %s"%hostname
 
         return hostname
 
     def validate_node_id(self, node_id):
         nodes = PLC.Nodes.Nodes(self.api, [node_id])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument, "No such node %d"%node_id
 
         return node_id
 
@@ -134,7 +134,7 @@ class NodeNetwork(Row):
         if is_primary:
             nodes = PLC.Nodes.Nodes(self.api, [self['node_id']])
             if not nodes:
-                raise PLCInvalidArgument, "No such node"
+                raise PLCInvalidArgument, "No such node %d"%node_id
             node = nodes[0]
 
             if node['nodenetwork_ids']:

@@ -39,7 +39,7 @@ class Row(dict):
         mandatory_fields = self.api.db.fields(self.table_name, notnull = True, hasdef = False)
         for field in mandatory_fields:
             if not self.has_key(field) or self[field] is None:
-                raise PLCInvalidArgument, field + " must be specified and cannot be unset"
+                raise PLCInvalidArgument, field + " must be specified and cannot be unset in class %s"%self.__class__.__name__
 
         # Validate values before committing
         for key, value in self.iteritems():
