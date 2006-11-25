@@ -40,7 +40,21 @@ class Site(Row):
         'address_ids': Parameter([int], "List of address identifiers"),
         'pcu_ids': Parameter([int], "List of PCU identifiers"),
         'node_ids': Parameter([int], "List of site node identifiers"),
+        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
         }
+
+    # for Cache
+    class_key = 'login_base'
+    foreign_fields = ['abbreviated_name', 'name', 'is_public', 'latitude', 'longitude',
+		      'url', 'date_created', 'last_updated', 'max_slices', 'max_slivers',
+		      ]
+    foreign_xrefs = {
+#'person_ids',
+#'slice_ids',
+#'node_ids',
+#'address_ids',
+#'pcu_ids',
+}
 
     def validate_name(self, name):
         if not len(name):

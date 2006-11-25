@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.19 2006/11/09 19:43:55 mlhuang Exp $
+# $Id: Persons.py,v 1.20 2006/11/24 12:06:00 thierry Exp $
 #
 
 from types import StringTypes
@@ -60,7 +60,8 @@ class Person(Row):
     #foreign_xrefs = { 'Node' : { 'field' : 'node_ids' ,
     #		       'table': 'slice_node' } }
     foreign_xrefs = {
-	'Key' : { 'field' : 'key_ids', 'table' : 'person_key' }
+	'Key' : { 'field' : 'key_ids', 'table' : 'person_key' } ,
+	'Site' : { 'field' : 'site_ids', 'table' : 'person_site'},
 #        'key_ids': Parameter([int], "List of key identifiers"),
 #        'role_ids': Parameter([int], "List of role identifiers"),
 #        'roles': Parameter([str], "List of roles"),

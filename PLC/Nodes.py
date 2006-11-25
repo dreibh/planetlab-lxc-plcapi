@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.22 2006/11/23 11:55:24 thierry Exp $
+# $Id: Nodes.py,v 1.23 2006/11/23 19:35:38 thierry Exp $
 #
 
 from types import StringTypes
@@ -65,7 +65,10 @@ class Node(Row):
     # for Cache
     class_key = 'hostname'
     foreign_fields = ['boot_state','model','version','date_created','last_updated']
-    foreign_xrefs = {}
+    foreign_xrefs = { 
+	# in this case, we dont need the 'table' but Cache will look it up, so...
+	'Site' : { 'field' : 'site_id' , 'table' : 'unused' } ,
+	}
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):

@@ -4,7 +4,7 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 verbose_flag=False;
-#verbose_flag=True;
+verbose_flag=True;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -213,9 +213,9 @@ class Cache:
 		field=xref_spec['field']
 		alien_xref_obj_list = alien_xref_objs_dict[xref_classname]
 		alien_value = alien_object[field]
+		transcoder = accessories[xref_classname]['transcoder']
 		if isinstance (alien_value,list):
 		    verbose ('update_table list-transcoding ',xref_classname,' aliens=',alien_value,)
-		    transcoder = accessories[xref_classname]['transcoder']
 		    local_values=[]
 		    for a in alien_value:
 			try:
@@ -234,6 +234,7 @@ class Cache:
 					    former_xrefs,
 					    local_values)
 		elif isinstance (alien_value,int):
+		    verbose ('update_table atom-transcoding ',xref_classname,' aliens=',alien_value,)
 		    new_value = transcoder.transcode(alien_value)
 		    local_object[field] = new_value
 		    local_object.sync()
@@ -259,6 +260,11 @@ class Cache:
 	# requires to know remote peer's peer_id for ourselves, mmhh..
 	# does not make any difference in a 2-peer deployment though
 
+	# refresh sites
+	all_sites = self.peer_server.GetSites(self.auth)
+	local_sites = self.get_locals (all_sites)
+	nb_new_sites = self.update_table('Site', local_sites)
+
 	# refresh keys
 	all_keys = self.peer_server.GetKeys(self.auth)
 	local_keys = self.get_locals (all_keys)
@@ -267,13 +273,14 @@ class Cache:
 	# refresh nodes
         all_nodes = self.peer_server.GetNodes(self.auth)
 	local_nodes = self.get_locals(all_nodes)
-        nb_new_nodes = self.update_table('Node', local_nodes)
+        nb_new_nodes = self.update_table('Node', local_nodes,
+					 { 'Site' : all_sites } )
 
 	# refresh persons
 	all_persons = self.peer_server.GetPersons(self.auth)
 	local_persons = self.get_locals(all_persons)
 	nb_new_persons = self.update_table ('Person', local_persons,
-					    { 'Key': all_keys} )
+					    { 'Key': all_keys, 'Site' : all_sites } )
 
 	# refresh slices
         local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
@@ -282,11 +289,11 @@ class Cache:
 	    return slice['creator_person_id'] == 1
 
         nb_new_slices = self.update_table ('Slice', local_slices,
-					   {'Node': all_nodes,
-					    'Person': all_persons},
+					   {'Node': all_nodes, 'Person': all_persons},
 					   is_system_slice)
 
         return {'plcname':self.api.config.PLC_NAME,
+		'new_sites':nb_new_sites,
 		'new_keys':nb_new_keys,
                 'new_nodes':nb_new_nodes,
 		'new_persons':nb_new_persons,

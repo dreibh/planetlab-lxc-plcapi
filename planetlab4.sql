@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.43 2006/11/23 19:35:38 thierry Exp $
+-- $Id: planetlab4.sql,v 1.44 2006/11/24 12:05:59 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -108,7 +108,9 @@ CREATE TABLE sites (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 CREATE INDEX sites_login_base_idx ON sites (login_base) WHERE deleted IS false;
 
@@ -913,6 +915,7 @@ sites.max_slivers,
 sites.latitude,
 sites.longitude,
 sites.url,
+sites.peer_id,
 CAST(date_part('epoch', sites.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
 COALESCE(site_persons.person_ids, '{}') AS person_ids,
