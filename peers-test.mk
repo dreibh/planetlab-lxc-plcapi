@@ -122,6 +122,10 @@ checkpoint:
 
 frun:
 	python -u ./TestPeers.py -f > TestPeers.fout 2>&1
+brun:
+	python -u ./TestPeers.py -b > TestPeers.bout 2>&1
+prun:
+	python -u ./TestPeers.py -p > TestPeers.pout 2>&1
 #######
 HELP=rpm db-dump http
 
