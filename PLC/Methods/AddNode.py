@@ -60,9 +60,6 @@ class AddNode(Method):
 
         node = Node(self.api, node_fields)
         node['site_id'] = site['site_id']
-        # xxx temporary, until I figure a way to get local/foreign nodes
-        # so far I cannot seem to use a filter/dict like {'~peer_id':None}
-        # node['peer_id'] = 0
         node.sync()
 
 	self.object_ids = [site['site_id'], node['node_id']]	
