@@ -177,7 +177,7 @@ def timer_start ():
     print '+++ timer start'
 
 def timer_show ():
-    print '+++ %d seconds ellapsed'%(time.time()-epoch)
+    print '+++ %.02f seconds ellapsed'%(time.time()-epoch)
 
 ####################
 def test00_init (args=[1,2]):
