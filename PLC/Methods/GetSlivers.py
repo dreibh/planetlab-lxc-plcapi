@@ -62,7 +62,7 @@ class GetSlivers(Method):
     }]
 
     def call(self, auth, node_filter = None):
-        timestamp = int(time.time())
+	timestamp = int(time.time())
 
         if node_filter is None and isinstance(self.caller, Node):
             all_nodes = {self.caller['node_id']: self.caller}
@@ -73,15 +73,15 @@ class GetSlivers(Method):
         system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict()
         system_slice_ids = [slice_attribute['slice_id'] for slice_attribute in system_slice_attributes.values()]
         system_slice_ids = dict.fromkeys(system_slice_ids)
-
+	
         all_nodenetwork_ids = set()
         all_nodegroup_ids = set()
         all_slice_ids = set(system_slice_ids.keys())
         for node_id, node in all_nodes.iteritems():
             all_nodenetwork_ids.update(node['nodenetwork_ids'])
             all_nodegroup_ids.update(node['nodegroup_ids'])
-            all_slice_ids.update(node['slice_ids'])
-
+            #all_slice_ids.update(node['slice_ids'])
+	
         # Get nodenetwork information
         all_nodenetworks = NodeNetworks(self.api, all_nodenetwork_ids).dict()
 
@@ -104,7 +104,7 @@ class GetSlivers(Method):
             if slice.get('slice_attribute_ids'):
                 slice_attribute_ids.update(slice['slice_attribute_ids'])
 
-        # Get user information
+	# Get user information
         all_persons = Persons(self.api, person_ids).dict()
 
         key_ids = set()
@@ -116,10 +116,10 @@ class GetSlivers(Method):
 
         # Get slice attributes
         all_slice_attributes = SliceAttributes(self.api, slice_attribute_ids).dict()
-
-        nodes = []
+        
+	nodes = []
         for node_id, node in all_nodes.iteritems():
-            networks = [all_nodenetworks[nodenetwork_id] for nodenetwork_id in node['nodenetwork_ids']]
+	    networks = [all_nodenetworks[nodenetwork_id] for nodenetwork_id in node['nodenetwork_ids']]
             nodegroups = [all_nodegroups[nodegroup_id] for nodegroup_id in node['nodegroup_ids']]
             groups = [nodegroup['name'] for nodegroup in nodegroups]
 
@@ -129,31 +129,32 @@ class GetSlivers(Method):
             for conf_file in all_conf_files.values():
                 if not conf_file['node_ids'] and not conf_file['nodegroup_ids']:
                     conf_files[conf_file['dest']] = conf_file
-
-            # If a node belongs to multiple node
+            
+	    # If a node belongs to multiple node
             # groups for which the same configuration file is defined,
             # it is undefined which one takes precedence.
             for nodegroup in nodegroups:
                 for conf_file_id in nodegroup['conf_file_ids']:
                     if conf_file_id in all_conf_files:
                         conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
-
-            # Node configuration files always take precedence over
+            
+	    # Node configuration files always take precedence over
             # node group configuration files.
             for conf_file_id in node['conf_file_ids']:
                 if conf_file_id in all_conf_files:
                     conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
-
-            # filter out any slices in this nodes slice_id list that may be invalid
+            
+	    # filter out any slices in this nodes slice_id list that may be invalid
             # (i.e. expired slices)
-	    slice_ids = dict.fromkeys([slice['slice_id'] for slice in Slices(self.api, node['slice_ids'])])
-
-            # If not a foreign node, add all of our default system
+	    slice_ids = dict.fromkeys([slice['slice_id'] for slice in all_slice_ids])
+            
+	    # If not a foreign node, add all of our default system
             # slices to it.
             if node['peer_id'] is not None:
 		slice_ids.update(system_slice_ids)
 
             slivers = [] 
+	    
 	    for slice in map(lambda id: all_slices[id], slice_ids.keys()):
                 keys = []
                 ### still missing in foreign slices
@@ -191,7 +192,7 @@ class GetSlivers(Method):
                     'keys': keys,
                     'attributes': attributes.values()
                     })
-
+	    
             nodes.append({
                 'timestamp': timestamp,
                 'node_id': node['node_id'],
