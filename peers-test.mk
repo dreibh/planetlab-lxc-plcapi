@@ -125,7 +125,7 @@ diff: normalize
 checkpoint:
 	@echo adopting latest run as reference
 	cp TestPeers.out TestPeers.ref
-	cp TestPeers.ref.nor TestPeers.out.nor
+	cp TestPeers.out.nor TestPeers.ref.nor
 
 frun:
 	python -u ./TestPeers.py -f > TestPeers.fout 2>&1
