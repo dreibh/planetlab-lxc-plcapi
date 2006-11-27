@@ -15,7 +15,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Slices import Slice, Slices
-
+from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 
 class GetPeerData (Method):
     """
@@ -45,6 +45,7 @@ class GetPeerData (Method):
             'Nodes' : Nodes (self.api),
             'Persons' : Persons (self.api),
             'SliceAttibuteTypes' : SliceAttributeTypes (self.api),
-            'Slices' : Slices (self.api,{'peer_id':None}),
+            'Slices' : Slices (self.api),
+            'SliceAttributes': SliceAttributes (self.api)
             }
         

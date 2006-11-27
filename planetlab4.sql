@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.45 2006/11/25 09:35:36 thierry Exp $
+-- $Id: planetlab4.sql,v 1.46 2006/11/27 12:18:12 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -981,7 +981,8 @@ slice_attribute_types.attribute_type_id,
 slice_attribute_types.name,
 slice_attribute_types.description,
 slice_attribute_types.min_role_id,
-slice_attribute.value
+slice_attribute.value,
+slice_attribute.peer_id
 FROM slice_attribute
 INNER JOIN slice_attribute_types USING (attribute_type_id);
 

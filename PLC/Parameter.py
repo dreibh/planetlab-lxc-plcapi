@@ -4,10 +4,11 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py,v 1.5 2006/11/02 18:32:55 mlhuang Exp $
+# $Id: Parameter.py,v 1.6 2006/11/08 22:10:00 mlhuang Exp $
 #
 
 from types import *
+from PLC.Faults import *
 
 class Parameter:
     """

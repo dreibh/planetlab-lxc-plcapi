@@ -345,7 +345,7 @@ def check_slivers_n (nn,esn,args=[1,2]):
               %(i,len(slivers),esn,nodename)
         for sliver in slivers:
             print '>>slivername = ',sliver['name']
-            pp.pprint(sliver)
+            pretty_printer.pprint(sliver)
         assert len(slivers) == esn
                 
 
@@ -648,8 +648,8 @@ def test05_sa_atom (slice_name,sat_name,value,node,i):
                                          slice_name,
                                          sat_name,
                                          value)
-            print '%02d:== created SliceAttribute = %d'%(i,sa_id),
-            print 'On slice',slice_name,'and node',node
+        print '%02d:== created SliceAttribute = %d'%(i,sa_id),
+        print 'On slice',slice_name,'and node',node
         
 def test05_sa (args=[1,2]):
     for i in args:
@@ -658,6 +658,119 @@ def test05_sa (args=[1,2]):
         test05_sa_atom (slice_name(i,1),'net_max','predefined sat/all nodes',None,i)
         test05_sa_atom (slice_name(i,1),'net_max','predefined sat/node1',node_name(i,1),i)
         
+##############################
+# readable dumps
+##############################
+def p_site (s):
+    print (s['site_id'],s['peer_id'],s['login_base'],s['name'],s['node_ids'])
+
+def p_key (k):
+    print  (k['key_id'],k['peer_id'],k['key'])
+    
+def p_person (p):
+    print  (p['person_id'],p['peer_id'],p['email'],'keys:',p['key_ids'],'sites:',p['site_ids']) 
+
+def p_node(n):
+    print (n['node_id'],n['peer_id'],n['hostname'],'sls=',n['slice_ids'],'site=',n['site_id'])
+
+def p_slice(s):
+    print (s['slice_id'],s['peer_id'],s['name'],'nodes=',s['node_ids'],'persons=',s['person_ids'])
+    print '---',('sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id'])
+
+def p_sat(sat):
+    print (sat['attribute_type_id'],sat['peer_id'], sat['name'], sat['min_role_id'], sat['description'])
+
+def p_sa (sa):
+        print (sa['slice_attribute_id'],sa['peer_id'],sa['name'],'AT_id:',sa['attribute_type_id'])
+        print '---',('v=',sa['value'],'sl=',sa['slice_id'],'n=',sa['node_id'])
+
+def p_sliver (x):
+    print ('SLIVERS for : hostname',x['hostname'])
+    print ('%d config files'%len(x['conf_files']))
+    for sv in x['slivers']:
+        p_sliver_slice(sv,x['hostname'])
+
+import pprint
+pretty_printer=pprint.PrettyPrinter(5)
+
+def p_sliver_slice(sliver,hostname):
+    print 'SLIVER on hostname %s, s='%hostname,sliver['name']
+    print 'KEYS',
+    pretty_printer.pprint(sliver['keys'])
+    print 'ATTRIBUTES',
+    pretty_printer.pprint(sliver['attributes'])
+
+def dump (args=[1,2]):
+    for i in args:
+        print 'SITES'
+        [p_site(x) for x in s[i].GetSites(a[i])]
+        print 'KEYS'
+        [p_key(x) for x in s[i].GetKeys(a[i])]
+        print 'PERSONS'
+        [p_person(x) for x in s[i].GetPersons(a[i])]
+        print 'NODES'
+        [p_node(x) for x in s[i].GetNodes(a[i])]
+        print 'SLICES'
+        [p_slice(x) for x in s[i].GetSlices(a[i])]
+        print 'Slice Attribute Types'
+        [p_sat(x) for x in s[i].GetSliceAttributeTypes(a[i])]
+        print 'Slice Attributes'
+        [p_sa(x) for x in s[i].GetSliceAttributes(a[i])]
+        print 'SLIVERS'
+        [p_sliver(x) for x in s[i].GetSlivers(a[i])]
+    
+
+## for usage under the api
+def pt ():
+    for x in GetSites():
+        p_site(x)
+        
+def pk ():
+    for x in GetKeys():
+        print  (x['key_id'],x['peer_id'],x['key']) 
+
+def pp ():
+    for x in GetPersons():
+        p_person(x)
+
+def pn ():
+    for x in GetNodes():
+        p_node(x)
+
+def ps ():
+    for x in GetSlices():
+        p_slice(x)
+
+def psat():
+    for x in GetSliceAttributeTypes():
+        p_sat(x)
+        
+def psa():
+    for x in GetSliceAttributes():
+        p_sa(x)
+        
+def pv ():
+    for s in GetSlivers():
+        p_sliver(s)
+
+def all():
+    print 'SITES'
+    pt()
+    print 'KEYS'
+    pk()
+    print 'PERSONS'
+    pp()
+    print 'NODES'
+    pn()
+    print 'SLICES'
+    ps()
+    print 'SLICE ATTR TYPES'
+    psat()
+    print 'SLICE ATTRS'
+    psa()
+    print 'SLIVERS'
+    pv()
+
 
 ####################
 def test_all_init ():
@@ -821,6 +934,8 @@ def test_all ():
     timer_show()
     test_all_sats ()
     timer_show()
+    dump()
+    timer_show()
     message("END")
 
 ### ad hoc test sequences
@@ -833,9 +948,10 @@ def populate ():
     test04_slice_add_lnode([1])
     test05_sat()
     test05_sa([1])
-#    test00_refresh ("populate: refreshing peer 1",[1])
-#    test04_slice_add_fnode([1])
-#    test00_refresh("populate: refresh all")
+    test00_refresh ("populate: refreshing peer 1",[1])
+    test04_slice_add_fnode([1])
+    test00_refresh("populate: refresh all")
+    dump()
 
 def test_now ():
     test_all_init()
@@ -877,7 +993,8 @@ def main ():
         usage()
     show_test()
     func()   
- 
+    timer_show()
+
 if __name__ == '__main__':
     normal()
     main()

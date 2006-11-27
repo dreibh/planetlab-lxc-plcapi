@@ -4,7 +4,7 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 verbose_flag=False;
-#verbose_flag=True;
+verbose_flag=True;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -30,14 +30,9 @@ class Cache:
 
     # an attempt to provide genericity in the caching algorithm
     
-    # the Peer object we are syncing with
     def __init__ (self, api, peer_id, peer_server, auth):
 
-#	import PLC.Peers
-
 	self.api = api
-#        assert isinstance(peer,PLC.Peers.Peer)
-#        self.peer = peer
         self.peer_id = peer_id
 	self.peer_server = peer_server
 	self.auth = auth
@@ -64,15 +59,15 @@ class Cache:
 	def transcode (self, alien_id):
 	    """ transforms an alien id into a local one """
 	    # locate alien obj from alien_id
-	    verbose ('entering transcode with alien_id',alien_id,)
+	    verbose ('.entering transcode with alien_id',alien_id,)
 	    alien_object=self.alien_objects_byid[alien_id]
-	    verbose ('located alien_obj',)
+	    verbose ('..located alien_obj',)
 	    name = alien_object [self.class_key]
-	    verbose ('got name',name,)
+	    verbose ('...got name',name,)
 	    local_object=self.local_objects_byname[name]
-	    verbose ('found local obj')
+	    verbose ('....found local obj')
 	    local_id=local_object[self.primary_key]
-	    verbose ('and local_id',local_id)
+	    verbose ('.....and local_id',local_id)
 	    return local_id
 	    
 
@@ -123,8 +118,6 @@ class Cache:
                       lambda_ignore=lambda x:False,
                       report_name_conflicts = True):
         
-#        peer = self.peer
-#        peer_id = peer['peer_id']
         peer_id=self.peer_id
 
 	attrs = class_attributes (classname)
@@ -149,12 +142,12 @@ class Cache:
 	# (*) or naming conflicts
         local_objects = table_class (self.api)
         ### index upon class_key for future searches
-	#verbose ('local objects:',local_objects)
-	verbose ('class_key',class_key)
         local_objects_index = local_objects.dict(class_key)
+
 	verbose ('update_table',classname,local_objects_index.keys())
 
 	### mark entries for this peer outofdate
+        new_count=0
         old_count=0;
 	for local_object in local_objects:
 	    if local_object['peer_id'] == peer_id:
@@ -163,7 +156,6 @@ class Cache:
 	    else:
 		local_object.uptodate=True
 
-        new_count=0
         # scan the peer's local objects
         for alien_object in alien_object_list:
 
@@ -174,7 +166,7 @@ class Cache:
 		verbose('Ignoring',object_name)
                 continue
 
-	    verbose ('update_table - Considering',object_name)
+	    verbose ('update_table (%s) - Considering'%classname,object_name)
                 
             # create or update
             try:
@@ -253,6 +245,104 @@ class Cache:
         ### return delta in number of objects 
         return new_count-old_count
 
+    # slice attributes exhibit a special behaviour
+    # because there is no name we can use to retrieve/check for equality
+    # this object is like a 3-part xref, linking slice_attribute_type, slice,
+    #    and potentially node, together with a value that can change over time.
+    # extending the generic model to support a lambda rather than class_key
+    #    would clearly become overkill
+    def update_slice_attributes (self,
+                                 alien_slice_attributes,
+                                 alien_nodes,
+                                 alien_slices):
+
+        from PLC.SliceAttributeTypes import SliceAttributeTypes
+        from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+
+        # init
+        peer_id = self.peer_id
+        
+        # create transcoders
+        node_xcoder = Cache.Transcoder (self.api, 'Node', alien_nodes)
+        slice_xcoder= Cache.Transcoder (self.api, 'Slice', alien_slices)
+        # no need to transcode SliceAttributeTypes, we have a name in the result
+        local_sat_dict = SliceAttributeTypes(self.api).dict('name')
+               
+        # load local objects
+        local_objects = SliceAttributes (self.api,{'peer_id':peer_id})
+
+	### mark entries for this peer outofdate
+        new_count = 0
+        old_count=len(local_objects)
+	for local_object in local_objects:
+            local_object.uptodate=False
+
+        for alien_object in alien_slice_attributes:
+
+            verbose('----- update_slice_attributes: considering ...')
+            verbose('   ',alien_object)
+
+            # locate local slice
+            try:
+                slice_id = slice_xcoder.transcode(alien_object['slice_id'])
+            except:
+                verbose('update_slice_attributes: unable to locate slice',
+                        alien_object['slice_id'])
+                continue
+            # locate slice_attribute_type
+            try:
+                sat_id = local_sat_dict[alien_object['name']]['attribute_type_id']
+            except:
+                verbose('update_slice_attributes: unable to locate slice attribute type',
+                        alien_object['name'])
+                continue
+            # locate local node if specified
+            try:
+                alien_node_id = alien_object['node_id']
+                if alien_node_id is not None:
+                    node_id = node_xcoder.transcode(alien_node_id)
+                else:
+                    node_id=None
+            except:
+                verbose('update_slice_attributes: unable to locate node',
+                        alien_object['node_id'])
+                continue
+
+            # locate the local SliceAttribute if any
+            try:
+                verbose ('searching name=', alien_object['name'],
+                         'slice_id',slice_id, 'node_id',node_id)
+                local_object = SliceAttributes (self.api,
+                                                {'name':alien_object['name'],
+                                                 'slice_id':slice_id,
+                                                 'node_id':node_id})[0]
+                
+                if local_object['peer_id'] != peer_id:
+                    verbose ('FOUND local sa - skipped')
+                    continue
+                verbose('FOUND already cached sa')
+                local_object['value'] = alien_object['value']
+            # create it if missing
+            except:
+                local_object = SliceAttribute(self.api,
+                                              {'peer_id':peer_id,
+                                               'slice_id':slice_id,
+                                               'node_id':node_id,
+                                               'attribute_type_id':sat_id,
+                                               'value':alien_object['value']})
+                verbose('CREATED new sa')
+            local_object.uptodate=True
+            new_count += 1
+            local_object.sync()
+
+        for local_object in local_objects:
+            if not local_object.uptodate:
+                local_object.delete()
+
+        self.api.db.commit()
+        ### return delta in number of objects 
+        return new_count-old_count
+
     def get_locals (self, list):
 	return [x for x in list if x['peer_id'] is None]
 
@@ -270,48 +360,51 @@ class Cache:
         all_data = self.peer_server.GetPeerData (self.auth,0)
 
 	# refresh sites
-	#all_sites = self.peer_server.GetSites(self.auth)
 	all_sites = all_data['Sites']
-	local_sites = self.get_locals (all_sites)
-	nb_new_sites = self.update_table('Site', local_sites)
+	plocal_sites = self.get_locals (all_sites)
+	nb_new_sites = self.update_table('Site', plocal_sites)
 
 	# refresh keys
-	#all_keys = self.peer_server.GetKeys(self.auth)
 	all_keys = all_data['Keys']
-	local_keys = self.get_locals (all_keys)
-	nb_new_keys = self.update_table('Key', local_keys)
+	plocal_keys = self.get_locals (all_keys)
+	nb_new_keys = self.update_table('Key', plocal_keys)
 
 	# refresh nodes
-        #all_nodes = self.peer_server.GetNodes(self.auth)
         all_nodes = all_data['Nodes']
-	local_nodes = self.get_locals(all_nodes)
-        nb_new_nodes = self.update_table('Node', local_nodes,
+	plocal_nodes = self.get_locals(all_nodes)
+        nb_new_nodes = self.update_table('Node', plocal_nodes,
 					 { 'Site' : all_sites } )
 
 	# refresh persons
-	#all_persons = self.peer_server.GetPersons(self.auth)
 	all_persons = all_data['Persons']
-	local_persons = self.get_locals(all_persons)
-	nb_new_persons = self.update_table ('Person', local_persons,
+	plocal_persons = self.get_locals(all_persons)
+	nb_new_persons = self.update_table ('Person', plocal_persons,
 					    { 'Key': all_keys, 'Site' : all_sites } )
 
         # refresh slice attribute types
         all_slice_attribute_types = all_data ['SliceAttibuteTypes']
-        local_slice_attribute_types = self.get_locals(all_slice_attribute_types)
+        plocal_slice_attribute_types = self.get_locals(all_slice_attribute_types)
         nb_new_slice_attribute_types = self.update_table ('SliceAttributeType',
-                                                          local_slice_attribute_types,
+                                                          plocal_slice_attribute_types,
                                                           report_name_conflicts = False)
 
 	# refresh slices
-        #local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
-        local_slices = all_data['Slices']
+        all_slices = all_data['Slices']
+        plocal_slices = self.get_locals(all_slices)
 
 	def is_system_slice (slice):
 	    return slice['creator_person_id'] == 1
 
-        nb_new_slices = self.update_table ('Slice', local_slices,
+        nb_new_slices = self.update_table ('Slice', plocal_slices,
 					   {'Node': all_nodes, 'Person': all_persons},
 					   is_system_slice)
+
+        # refresh slice attributes
+        all_slice_attributes = all_data ['SliceAttributes']
+        plocal_slice_attributes = self.get_locals(all_slice_attributes)
+        nb_new_slice_attributes = self.update_slice_attributes (plocal_slice_attributes,
+                                                                all_nodes,
+                                                                all_slices)
 
         ### returned as-is by RefreshPeer
         return {'plcname':self.api.config.PLC_NAME,
@@ -321,5 +414,6 @@ class Cache:
 		'new_persons':nb_new_persons,
                 'new_slice_attribute_types':nb_new_slice_attribute_types,
                 'new_slices':nb_new_slices,
+                'new_slice_attributes':nb_new_slice_attributes,
                 }
 
