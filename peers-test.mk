@@ -104,21 +104,28 @@ log:
 	emacs /plc/data/var/log/httpd/error_log /plc/data/var/log/boot.log
 
 ####################
-normalize= sed -ibkp "s|'expires':.*,|'expires': normalized,|"
+# remove time/delay dependent output
+normalize	= egrep -v "'expires':|^+++.*ellapsed"
 
 TEST=run checkpoint diff
 run: run-only normalize
 run-only:
 	python -u ./TestPeers.py > TestPeers.out 2>&1
-normalize:
-	$(normalize) TestPeers.out
-diff:
+
+normalize: TestPeers.out.nor TestPeers.ref.nor
+TestPeers.out.nor: TestPeers.out
+	$(normalize) TestPeers.out > TestPeers.out.nor
+TestPeers.ref.nor: TestPeers.ref
+	$(normalize) TestPeers.ref > TestPeers.ref.nor
+
+diff: normalize
 	@echo '<< REF OUT>>'
-	diff TestPeers.ref TestPeers.out
+	diff TestPeers.ref.nor TestPeers.out.nor
 
 checkpoint:
 	@echo adopting latest run as reference
 	cp TestPeers.out TestPeers.ref
+	cp TestPeers.ref.nor TestPeers.out.nor
 
 frun:
 	python -u ./TestPeers.py -f > TestPeers.fout 2>&1
