@@ -144,15 +144,17 @@ class GetSlivers(Method):
                 if conf_file_id in all_conf_files:
                     conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
 
-            slice_ids = dict.fromkeys(node['slice_ids'])
+            # filter out any slices in this nodes slice_id list that may be invalid
+            # (i.e. expired slices)
+	    slice_ids = dict.fromkeys([slice['slice_id'] for slice in Slices(self.api, node['slice_ids'])])
 
             # If not a foreign node, add all of our default system
             # slices to it.
             if node['peer_id'] is not None:
 		slice_ids.update(system_slice_ids)
 
-            slivers = []
-            for slice in map(lambda id: all_slices[id], slice_ids.keys()):
+            slivers = [] 
+	    for slice in map(lambda id: all_slices[id], slice_ids.keys()):
                 keys = []
                 ### still missing in foreign slices
                 try:
