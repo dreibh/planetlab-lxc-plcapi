@@ -4,7 +4,7 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 verbose_flag=False;
-verbose_flag=True;
+#verbose_flag=True;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -31,13 +31,14 @@ class Cache:
     # an attempt to provide genericity in the caching algorithm
     
     # the Peer object we are syncing with
-    def __init__ (self, api, peer, peer_server, auth):
+    def __init__ (self, api, peer_id, peer_server, auth):
 
-	import PLC.Peers
+#	import PLC.Peers
 
 	self.api = api
-        assert isinstance(peer,PLC.Peers.Peer)
-        self.peer = peer
+#        assert isinstance(peer,PLC.Peers.Peer)
+#        self.peer = peer
+        self.peer_id = peer_id
 	self.peer_server = peer_server
 	self.auth = auth
         
@@ -119,10 +120,12 @@ class Cache:
                       classname,
                       alien_object_list,
 		      alien_xref_objs_dict = {},
-                      lambda_ignore=lambda x:False):
+                      lambda_ignore=lambda x:False,
+                      report_name_conflicts = True):
         
-        peer = self.peer
-        peer_id = peer['peer_id']
+#        peer = self.peer
+#        peer_id = peer['peer_id']
+        peer_id=self.peer_id
 
 	attrs = class_attributes (classname)
 	row_class = attrs['row_class']
@@ -178,11 +181,12 @@ class Cache:
                 ### We know about this object already
                 local_object = local_objects_index[object_name]
 		if local_object ['peer_id'] is None:
-		    ### xxx send e-mail
-		    print '==================== We are in trouble here'
-		    print 'The %s object named %s is natively defined twice'%(classname,object_name)
-		    print 'Once on this PLC and once on peer %d'%peer_id
-		    print 'We dont raise an exception so that the remaining updates can still take place'
+                    if report_name_conflicts:
+		        ### xxx send e-mail
+                        print '==================== We are in trouble here'
+                        print 'The %s object named %s is natively defined twice'%(classname,object_name)
+                        print 'Once on this PLC and once on peer %d'%peer_id
+                        print 'We dont raise an exception so that the remaining updates can still take place'
 		    continue
                 if local_object['peer_id'] != peer_id:
                     ### the object has changed its plc, 
@@ -248,7 +252,7 @@ class Cache:
 
         ### return delta in number of objects 
         return new_count-old_count
-                
+
     def get_locals (self, list):
 	return [x for x in list if x['peer_id'] is None]
 
@@ -260,30 +264,47 @@ class Cache:
 	# requires to know remote peer's peer_id for ourselves, mmhh..
 	# does not make any difference in a 2-peer deployment though
 
+        ### uses GetPeerData to gather all info in a single xmlrpc request
+
+        # xxx see also GetPeerData - peer_id arg unused yet
+        all_data = self.peer_server.GetPeerData (self.auth,0)
+
 	# refresh sites
-	all_sites = self.peer_server.GetSites(self.auth)
+	#all_sites = self.peer_server.GetSites(self.auth)
+	all_sites = all_data['Sites']
 	local_sites = self.get_locals (all_sites)
 	nb_new_sites = self.update_table('Site', local_sites)
 
 	# refresh keys
-	all_keys = self.peer_server.GetKeys(self.auth)
+	#all_keys = self.peer_server.GetKeys(self.auth)
+	all_keys = all_data['Keys']
 	local_keys = self.get_locals (all_keys)
 	nb_new_keys = self.update_table('Key', local_keys)
 
 	# refresh nodes
-        all_nodes = self.peer_server.GetNodes(self.auth)
+        #all_nodes = self.peer_server.GetNodes(self.auth)
+        all_nodes = all_data['Nodes']
 	local_nodes = self.get_locals(all_nodes)
         nb_new_nodes = self.update_table('Node', local_nodes,
 					 { 'Site' : all_sites } )
 
 	# refresh persons
-	all_persons = self.peer_server.GetPersons(self.auth)
+	#all_persons = self.peer_server.GetPersons(self.auth)
+	all_persons = all_data['Persons']
 	local_persons = self.get_locals(all_persons)
 	nb_new_persons = self.update_table ('Person', local_persons,
 					    { 'Key': all_keys, 'Site' : all_sites } )
 
+        # refresh slice attribute types
+        all_slice_attribute_types = all_data ['SliceAttibuteTypes']
+        local_slice_attribute_types = self.get_locals(all_slice_attribute_types)
+        nb_new_slice_attribute_types = self.update_table ('SliceAttributeType',
+                                                          local_slice_attribute_types,
+                                                          report_name_conflicts = False)
+
 	# refresh slices
-        local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
+        #local_slices = self.peer_server.GetSlices(self.auth,{'peer_id':None})
+        local_slices = all_data['Slices']
 
 	def is_system_slice (slice):
 	    return slice['creator_person_id'] == 1
@@ -292,10 +313,13 @@ class Cache:
 					   {'Node': all_nodes, 'Person': all_persons},
 					   is_system_slice)
 
+        ### returned as-is by RefreshPeer
         return {'plcname':self.api.config.PLC_NAME,
 		'new_sites':nb_new_sites,
 		'new_keys':nb_new_keys,
                 'new_nodes':nb_new_nodes,
 		'new_persons':nb_new_persons,
-                'new_slices':nb_new_slices}
+                'new_slice_attribute_types':nb_new_slice_attribute_types,
+                'new_slices':nb_new_slices,
+                }
 

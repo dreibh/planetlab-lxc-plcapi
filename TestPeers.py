@@ -14,6 +14,10 @@
 ###
 ##############################
 
+### xxx todo
+# check sites
+# check persons
+
 # support reloading without wiping everything off
 # dunno how to do (defvar plc)
 
@@ -162,6 +166,9 @@ def slice_name (i,n):
     site_index=map_on_site(n)
     return "%s_slice%d"%(site_login_base(i,site_index),n)
 
+def sat_name (i):
+    return 'sat_%d'%i
+
 # to have indexes start at 1
 def myrange (n):
     return range (1,n+1,1)
@@ -172,12 +179,16 @@ def message (*args):
     
 ##########
 def timer_start ():
-    global epoch
+    global epoch,last_time
     epoch = time.time()
+    last_time=epoch
     print '+++ timer start'
 
 def timer_show ():
-    print '+++ %.02f seconds ellapsed'%(time.time()-epoch)
+    global last_time
+    now=time.time()
+    print '+++ %.02f seconds ellapsed (%.02f)'%(now-epoch,now-last_time)
+    last_time=now
 
 ####################
 def test00_init (args=[1,2]):
@@ -535,9 +546,6 @@ def clean_all_slices (args=[1,2]):
                 print '%02d:==== Cleaning slice %d'%(i,slice_id)
                 s[i].DeleteSlice(a[i],slice_id)
 
-def get_local_slice_id (i,name):
-    return s[i].GetSlices(a[i],{'name':[name],'peer_id':None})[0]['slice_id']
-
 def test04_slice (args=[1,2]):
     for n in myrange(number_slices):
 	test04_slice_n (n,args)
@@ -574,7 +582,7 @@ def test04_node_slice_ns (ns,is_local, add_if_true, args=[1,2]):
 def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
     for i in args:
         peer=peer_index(i)
-        slice_id = get_local_slice_id (i,slice_name (i,ns))
+        sname = slice_name (i,ns)
         
         if is_local:
             hostnames=[node_name(i,nn) for nn in nnl]
@@ -583,12 +591,12 @@ def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
             hostnames=[node_name(peer,nn) for nn in nnl]
             nodetype='foreign'
         if add_if_true:
-            s[i].AddSliceToNodes (a[i], slice_id,hostnames)
+            s[i].AddSliceToNodes (a[i], sname,hostnames)
             message="added"
         else:
-            s[i].DeleteSliceFromNodes (a[i], slice_id,hostnames)
+            s[i].DeleteSliceFromNodes (a[i], sname,hostnames)
             message="deleted"
-        print '%02d:== %s in slice %d %s '%(i,message,slice_id,nodetype),
+        print '%02d:== %s in slice %s %s '%(i,message,sname,nodetype),
         print hostnames
 
 def test04_slice_add_lnode (args=[1,2]):
@@ -602,6 +610,54 @@ def test04_slice_del_lnode (args=[1,2]):
 
 def test04_slice_del_fnode (args=[1,2]):
     test04_node_slice (False,False,args)
+
+####################
+def test05_sat (args=[1,2]):
+    for i in args:
+        name = sat_name(i)
+        try:
+            sat_id=s[i].GetSliceAttributeTypes (a[i],[name])[0]
+        except:
+            description="custom sat on plc%d"%i
+            min_role_id=10
+            sat_id=s[i].AddSliceAttributeType (a[i],
+                                               { 'name':name,
+                                                 'description': description,
+                                                 'min_role_id' : min_role_id})
+            print '%02d:== created SliceAttributeType = %d'%(i,sat_id)
+
+# for test, we create 4 slice_attributes
+# on slice1 - sat=custom_made (see above) - all nodes
+# on slice1 - sat=custom_made (see above) - node=n1
+# on slice1 - sat='net_max' - all nodes
+# on slice1 - sat='net_max' - node=n1
+
+def test05_sa_atom (slice_name,sat_name,value,node,i):
+    sa_id=s[i].GetSliceAttributes(a[i],{'name':sat_name,
+                                        'value':value})
+    if not sa_id:
+        if node:
+            sa_id=s[i].AddSliceAttribute(a[i],
+                                         slice_name,
+                                         sat_name,
+                                         value,
+                                         node)
+        else:
+            print 'slice_name',slice_name,'sat_name',sat_name
+            sa_id=s[i].AddSliceAttribute(a[i],
+                                         slice_name,
+                                         sat_name,
+                                         value)
+            print '%02d:== created SliceAttribute = %d'%(i,sa_id),
+            print 'On slice',slice_name,'and node',node
+        
+def test05_sa (args=[1,2]):
+    for i in args:
+        test05_sa_atom (slice_name(i,1),sat_name(i),'custom sat/all nodes',None,i)
+        test05_sa_atom (slice_name(i,1),sat_name(i),'custom sat/node1',node_name(i,1),i)
+        test05_sa_atom (slice_name(i,1),'net_max','predefined sat/all nodes',None,i)
+        test05_sa_atom (slice_name(i,1),'net_max','predefined sat/node1',node_name(i,1),i)
+        
 
 ####################
 def test_all_init ():
@@ -748,6 +804,10 @@ def test_all_slices ():
     test_all_addslices ()
     test_all_delslices ()
     
+def test_all_sats ():
+    test05_sat ()
+    test00_refresh("after SliceAttributeType creation")                   
+
 def test_all ():
     test_all_init ()
     timer_show()
@@ -759,6 +819,8 @@ def test_all ():
     timer_show()
     test_all_slices ()
     timer_show()
+    test_all_sats ()
+    timer_show()
     message("END")
 
 ### ad hoc test sequences
@@ -768,10 +830,12 @@ def populate ():
     test02_person()
     test03_node()
     test04_slice([1])
-    test00_refresh ("populate: refreshing peer 1",[1])
     test04_slice_add_lnode([1])
-    test04_slice_add_fnode([1])
-    test00_refresh("populate: refresh all")
+    test05_sat()
+    test05_sa([1])
+#    test00_refresh ("populate: refreshing peer 1",[1])
+#    test04_slice_add_fnode([1])
+#    test00_refresh("populate: refresh all")
 
 def test_now ():
     test_all_init()

@@ -21,16 +21,20 @@ class RefreshPeer(Method):
     
     Returns a dict containing
     (*) 'plcname' :   the peer name
-    (*) 'new_nodes' : the number of new nodes from that peer - may be negative
-    (*) 'new_slices': the number of new slices from that peer - may be negative
+    (*) 'new_sites':  the number of new sites from that peer - may be negative
+    (*) 'new_keys':    
+    (*) 'new_nodes':   
+    (*) 'new_persons': 
+    (*) 'new_slices':  
     """
     
     roles = ['admin']
     
     accepts = [ Auth(),
-		Parameter (int, "Peer id") ]
+		Parameter (int, "Peer id"),
+                ]
     
-    returns = Parameter(dict, "plcname, new_nodes, new_slices")
+    returns = Parameter(dict, "plcname, new_sites, new_keys, new_nodes, new_persons, new_slices")
 
     def call (self, auth, peer_id):
 	
@@ -59,5 +63,5 @@ class RefreshPeer(Method):
 	       'AuthString' : person['password'],
 	       'Role' : 'admin' }
 
-	cache = Cache (self.api, peer, apiserver, auth)
+	cache = Cache (self.api, peer_id, apiserver, auth)
 	return cache.refresh_peer ()

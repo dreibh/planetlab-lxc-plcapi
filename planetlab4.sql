@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.44 2006/11/24 12:05:59 thierry Exp $
+-- $Id: planetlab4.sql,v 1.45 2006/11/25 09:35:36 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -639,7 +639,9 @@ CREATE TABLE slice_attribute_types (
     attribute_type_id serial PRIMARY KEY, -- Attribute type identifier
     name text UNIQUE NOT NULL, -- Attribute name
     description text, -- Attribute description
-    min_role_id integer REFERENCES roles DEFAULT 10 -- If set, minimum (least powerful) role that can set or change this attribute
+    min_role_id integer REFERENCES roles DEFAULT 10, -- If set, minimum (least powerful) role that can set or change this attribute
+ 
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 
 -- Slice/sliver attributes
@@ -648,7 +650,9 @@ CREATE TABLE slice_attribute (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes, -- Sliver attribute if set
     attribute_type_id integer REFERENCES slice_attribute_types NOT NULL, -- Attribute type identifier
-    value text
+    value text,
+
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
 CREATE INDEX slice_attribute_node_id_idx ON slice_attribute (node_id);
