@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.46 2006/11/27 12:18:12 thierry Exp $
+-- $Id: planetlab4.sql,v 1.47 2006/11/27 16:43:31 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -290,10 +290,7 @@ CREATE TABLE nodes (
     -- Mandatory
     node_id serial PRIMARY KEY, -- Node identifier
     hostname text NOT NULL, -- Node hostname
-    -- temporarily removed NOT NULL clause for foreign_nodes
-    site_id integer REFERENCES sites, -- At which site 
-    -- may be NULL for local_nodes
-    peer_id integer REFERENCES peers, -- From which peer 
+    site_id integer REFERENCES sites NOT NULL, -- At which site 
 
     boot_state text REFERENCES boot_states NOT NULL DEFAULT 'inst', -- Node boot state
     deleted boolean NOT NULL DEFAULT false, -- Is deleted
@@ -308,7 +305,9 @@ CREATE TABLE nodes (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    peer_id integer REFERENCES peers -- From which peer 
 ) WITH OIDS;
 CREATE INDEX nodes_hostname_idx ON nodes (hostname) WHERE deleted IS false;
 CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
@@ -545,8 +544,7 @@ INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manual
 -- Slices
 CREATE TABLE slices (
     slice_id serial PRIMARY KEY, -- Slice identifier
--- xxx temporarily remove the NOT NULL constraint
-    site_id integer REFERENCES sites, -- Site identifier
+    site_id integer REFERENCES sites NOT NULL, -- Site identifier
     peer_id integer REFERENCES peers, -- on which peer
 
     name text NOT NULL, -- Slice name
@@ -556,8 +554,7 @@ CREATE TABLE slices (
 
     max_nodes integer NOT NULL DEFAULT 100, -- Maximum number of nodes that can be assigned to this slice
 
--- xxx temporarily remove the NOT NULL constraint
-    creator_person_id integer REFERENCES persons, -- Creator
+    creator_person_id integer REFERENCES persons NOT NULL, -- Creator
     created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Creation date
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
