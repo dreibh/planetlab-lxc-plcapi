@@ -74,38 +74,47 @@ def total_slivers ():
 
 ####################
 # set initial conditions
-def define_test (sites,keys,persons,nodes,slices,fast_mode):
-    global number_sites, number_keys, number_persons, number_nodes, number_slices, fast_flag
-    number_sites = sites
+def define_test (keys,sites,persons,nodes,slices,fast_mode=None):
+    global number_keys, number_sites, number_persons, number_nodes, number_slices, fast_flag
     number_keys=keys
+    number_sites = sites
     number_persons=persons
     number_nodes=nodes
     number_slices=slices
-    fast_flag=fast_mode
+    if fast_mode is not None:
+        fast_flag=fast_mode
+
+local_index=None
 
 def show_test():
-    print '%d sites, %d keys, %d persons, %d nodes & %d slices'%(
-        number_sites, number_keys,number_persons,number_nodes,number_slices)
+    print '%d keys, %d sites, %d persons, %d nodes & %d slices'%(
+        number_keys, number_sites,number_persons,number_nodes,number_slices),
+    print 'fast_flag',fast_flag
+    if local_index is not None:
+        print 'Running locally on index %d'%local_index
 
 def mini():
     define_test(1,1,1,1,1,True)
     
 def normal():
-    define_test (sites=4,keys=2,persons=4,nodes=5,slices=4,fast_mode=False)
+    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,fast_mode=False)
 
+# use only 1 key in this case
 big_factor=4
 def big():
-    global number_sites, number_keys, number_persons, number_nodes, number_slices
+    global number_keys, number_sites, number_persons, number_nodes, number_slices
     normal()
-    (number_sites,number_keys,number_persons,number_nodes,number_slices) = [
-        big_factor * x for x in (number_sites,number_keys,number_persons,number_nodes,number_slices)]
+    (number_sites,number_persons,number_nodes,number_slices) = [
+        big_factor * x for x in (number_sites,number_persons,number_nodes,number_slices)]
+    number_keys=1
 
 huge_factor=50
 def huge():
-    global number_sites, number_keys, number_persons, number_nodes, number_slices
+    global number_keys, number_sites, number_persons, number_nodes, number_slices
     normal()
-    (number_sites,number_keys,number_persons,number_nodes,number_slices) = [
-        huge_factor * x for x in (number_sites,number_keys,number_persons,number_nodes,number_slices)]
+    (number_sites,number_persons,number_nodes,number_slices) = [
+        huge_factor * x for x in (number_sites,number_persons,number_nodes,number_slices)]
+    number_keys=1
 
 # use fast by default in interactive mode
 mini()
@@ -115,6 +124,7 @@ mini()
 # argh, for login_name that doesn't accept digits
 plain_numbers=['zero','one','two','three','four','five','six','seven','eight','nine','ten',
 	       'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
+plain_digits=['a','b','c','d','e','f','g','h','i','j']
 ####################
 plc1={ 'plcname':'plc1 in federation',
        'hostname':'lurch.cs.princeton.edu',
@@ -127,7 +137,7 @@ plc1={ 'plcname':'plc1 in federation',
        'plainname' : 'one',
        'site-format':'one%s',
        'person-format' : 'user1-%d@plc1.org',
-       'key-format':'ssh-rsa 1111111111111111 user%d-key%d',
+       'key-format':'ssh-rsa 11key4plc11 user%d-key%d',
        'person-password' : 'password1',
        }
 plc2={ 'plcname':'plc2 in federation',
@@ -141,7 +151,7 @@ plc2={ 'plcname':'plc2 in federation',
        'plainname' : 'two',
        'site-format':'two%s',
        'person-format' : 'user2-%d@plc2.org',
-       'key-format':'ssh-rsa 2222222222222222 user%d-key%d',
+       'key-format':'ssh-rsa 22key4plc22 user%d-key%d',
        'person-password' : 'password2',
        }
 
@@ -157,7 +167,20 @@ def site_name (i,n):
     return 'Site fullname '+x
 
 def site_login_base (i,n):
-    return plc[i]['site-format']%plain_numbers[n]
+    # for huge
+    if number_sites<len(plain_numbers):
+        return plc[i]['site-format']%plain_numbers[n]
+    else:
+        string=''
+        while True:
+            quo=n/10
+            rem=n%10
+            string=plain_digits[rem]+string
+            if quo == 0:
+                break
+            else:
+                n=quo
+        return plc[i]['site-format']%string
 
 def person_name (i,n):
     return plc[i]['person-format']%n
@@ -995,12 +1018,13 @@ def usage ():
     print " -m run in mini mode (1 instance of each class)"
     print " -b performs big run (%d times as large as normal)"%big_factor
     print " -H performs huge run (%d times as large as normal)"%huge_factor
+    print " -l n : tester runs locally for peer <n>, rather than through xmlrpc"
     
     sys.exit(1)
 
 def main ():
     try:
-        (o,a) = getopt.getopt(sys.argv[1:], "mnpbH")
+        (o,a) = getopt.getopt(sys.argv[1:], "mnpbHl:")
     except:
         usage()
     func = test_all
@@ -1017,6 +1041,14 @@ def main ():
             big()
 	elif opt=='-H':
             huge()
+        elif opt=='-l':
+            if val in (1,2):
+                local_index=val
+                print '-l option not implemented yet'
+                # need to figure a way to use Shell.py-like calling paradigm
+                sys.exit(1)
+            else:
+                usage()
         else:
             usage()
     if a:
