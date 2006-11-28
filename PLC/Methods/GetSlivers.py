@@ -146,8 +146,8 @@ class GetSlivers(Method):
             
 	    # filter out any slices in this nodes slice_id list that may be invalid
             # (i.e. expired slices)
-	    slice_ids = dict.fromkeys([slice['slice_id'] for slice in all_slice_ids])
-            
+            slice_ids = dict.fromkeys(filter(lambda slice_id: slice_id in all_slice_ids, node['slice_ids']))
+	    
 	    # If not a foreign node, add all of our default system
             # slices to it.
             if node['peer_id'] is not None:
