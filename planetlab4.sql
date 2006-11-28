@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.49 2006/11/28 14:54:59 thierry Exp $
+-- $Id: planetlab4.sql,v 1.50 2006/11/28 21:48:08 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -728,6 +728,7 @@ INSERT INTO object_types (object_type) VALUES ('SliceAttributeType');
 INSERT INTO object_types (object_type) VALUES ('SliceAttribute');
 INSERT INTO object_types (object_type) VALUES ('Slice');
 INSERT INTO object_types (object_type) VALUES ('SliceInstantiation');
+INSERT INTO object_types (object_type) VALUES ('Sliver');
 INSERT INTO object_types (object_type) VALUES ('Unknown');
 
 -- Events
