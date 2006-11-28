@@ -150,7 +150,7 @@ class GetSlivers(Method):
 	    
 	    # If not a foreign node, add all of our default system
             # slices to it.
-            if node['peer_id'] is not None:
+            if node['peer_id'] is None:
 		slice_ids.update(system_slice_ids)
 
             slivers = [] 
@@ -167,22 +167,29 @@ class GetSlivers(Method):
                     keys += [{'key_type':'missing',
                               'key':'key caching not implemented yet'}]
 
-                attributes = {}
+                sliver_attributes = []
+                attributes = []
                 ### still missing in foreign slices
                 try:
-                    for slice_attribute in map(lambda id: all_slice_attributes[id],
-                                               slice['slice_attribute_ids']):
-                        # Per-node sliver attributes (slice attributes
-                        # with non-null node_id fields) take precedence
-                        # over global slice attributes.
-                        if not attributes.has_key(slice_attribute['name']) or \
-                               slice_attribute['node_id'] is not None:
-                            attributes[slice_attribute['name']] = {
-                                'name': slice_attribute['name'],
-                                'value': slice_attribute['value']
-                                }
-                except:
-                        attributes={'ignored':{'name':'attributes caching','value':'not implemented yet'}}
+                    slice_attributes = map(lambda id: all_slice_attributes[id],
+                                           slice['slice_attribute_ids'])
+
+                    # Per-node sliver attributes take precedence over
+                    # global slice attributes, so set them first.
+                    for sliver_attribute in filter(lambda a: a['node_id'] == node_id, slice_attributes):
+                        sliver_attributes.append(sliver_attribute['name'])
+                        attributes.append({'name': sliver_attribute['name'],
+                                           'value': sliver_attribute['value']})
+
+                    for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
+                        # Do not set any global slice attributes for
+                        # which there is at least one sliver attribute
+                        # already set.
+                        if slice_attribute['name'] not in sliver_attributes:
+                            attributes.append({'name': slice_attribute['name'],
+                                               'value': slice_attribute['value']})
+                except Exception, err:
+                    attributes=[{'name':'attributes caching','value':'not implemented yet'}]
 
                 slivers.append({
                     'name': slice['name'],
@@ -190,7 +197,7 @@ class GetSlivers(Method):
                     'instantiation': slice['instantiation'],
                     'expires': slice['expires'],
                     'keys': keys,
-                    'attributes': attributes.values()
+                    'attributes': attributes
                     })
 	    
             nodes.append({
