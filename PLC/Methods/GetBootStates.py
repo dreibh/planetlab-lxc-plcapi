@@ -16,6 +16,9 @@ class GetBootStates(Method):
         ]
 
     returns = [BootState.fields['boot_state']]
+    
+    event_type = 'Get'
+    object_type = 'BootState'
 
     def call(self, auth):
         return [boot_state['boot_state'] for boot_state in BootStates(self.api)]

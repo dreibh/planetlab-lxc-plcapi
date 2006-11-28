@@ -22,7 +22,6 @@ class GetMessages(Method):
 
     event_type = 'Get'
     object_type = 'Message'
-    object_ids = []
 
     def call(self, auth, message_ids = None):
         return Messages(self.api, message_ids)

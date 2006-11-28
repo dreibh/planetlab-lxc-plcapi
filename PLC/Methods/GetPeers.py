@@ -30,6 +30,8 @@ class GetPeers (Method):
         ]
 
     returns = [Peer.fields]
+    event_type = 'Get'
+    object_type = 'Peer'
 
     def call (self, auth, peer_filter = None, return_fields = None):
 	return Peers(self.api, peer_filter, return_fields)

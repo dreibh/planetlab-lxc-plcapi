@@ -32,8 +32,12 @@ class GetPersons(Method):
     can_return = lambda (field, value): field not in ['password']
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
+    
+    event_type = 'Get'
+    object_type = 'Person'
 
     def call(self, auth, person_filter = None, return_fields = None):
+
 	# If we are not admin, make sure to only return viewable accounts
         if 'admin' not in self.caller['roles']:
             # Get accounts that we are able to view

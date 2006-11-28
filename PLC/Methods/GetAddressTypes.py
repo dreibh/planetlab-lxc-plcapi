@@ -27,5 +27,8 @@ class GetAddressTypes(Method):
 
     returns = [AddressType.fields]
 
+    event_type = 'Get'
+    object_type = 'AddressType'
+
     def call(self, auth, address_type_filter = None, return_fields = None):
         return AddressTypes(self.api, address_type_filter, return_fields)

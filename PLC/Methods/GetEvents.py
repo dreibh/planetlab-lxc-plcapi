@@ -24,6 +24,9 @@ class GetEvents(Method):
         ]
 
     returns = [Event.fields]
+    event_type = 'Get'
+    object_type = 'Event'
 
     def call(self, auth, event_filter = None, return_fields = None):
         return Events(self.api, event_filter, return_fields)
+

@@ -16,6 +16,9 @@ class GetRoles(Method):
         ]
 
     returns = [Role.fields]
+    
+    event_type = 'Get'
+    object_type = 'Role'
 
     def call(self, auth):
 	return Roles(self.api)

@@ -16,6 +16,9 @@ class GetSession(Method):
     roles = ['admin', 'pi', 'user', 'tech', 'node']
     accepts = [Auth()]
     returns = Session.fields['session_id']
+    
+    event_type = 'Get'
+    object_type = 'Session'
 
     def call(self, auth):
         # Authenticated with a session key, just return it

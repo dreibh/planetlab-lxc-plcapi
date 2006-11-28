@@ -25,6 +25,9 @@ class GetNodeNetworks(Method):
         ]
 
     returns = [NodeNetwork.fields]
+    
+    event_type = 'Get'
+    object_type = 'NodeNetwork'
 
     def call(self, auth, nodenetwork_filter = None, return_fields = None):
         return NodeNetworks(self.api, nodenetwork_filter, return_fields)

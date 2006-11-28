@@ -27,7 +27,6 @@ class GetSites(Method):
 
     event_type = 'Get'
     object_type = 'Site'
-    object_ids = []
 	
     def call(self, auth, site_filter = None, return_fields = None):
         return Sites(self.api, site_filter, return_fields)

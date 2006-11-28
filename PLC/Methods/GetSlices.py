@@ -29,6 +29,9 @@ class GetSlices(Method):
         ]
 
     returns = [Slice.fields]
+    
+    event_type = 'Get'
+    object_type = 'Slice'
 
     def call(self, auth, slice_filter = None, return_fields = None):
 	# If we are not admin, make sure to return only viewable

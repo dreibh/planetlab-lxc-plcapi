@@ -27,6 +27,8 @@ class GetPCUs(Method):
         ]
 
     returns = [PCU.fields]
+    event_type = 'Get'
+    object_type = 'PCU'
 
     def call(self, auth, pcu_filter = None, return_fields = None):
 	# If we are not admin, make sure to only return our own PCUs

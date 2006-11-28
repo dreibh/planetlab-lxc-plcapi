@@ -26,5 +26,8 @@ class GetSliceAttributeTypes(Method):
 
     returns = [SliceAttributeType.fields]
 
+    event_type = 'Get'
+    object_type = 'SliceAttributeType'
+
     def call(self, auth, attribute_type_filter = None, return_fields = None):
         return SliceAttributeTypes(self.api, attribute_type_filter, return_fields)

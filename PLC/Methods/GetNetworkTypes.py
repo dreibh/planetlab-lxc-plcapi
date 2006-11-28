@@ -17,5 +17,8 @@ class GetNetworkTypes(Method):
 
     returns = [NetworkType.fields['type']]
 
+    event_type = 'Get'
+    object_type = 'NetworkType'
+
     def call(self, auth):
         return [network_type['type'] for network_type in NetworkTypes(self.api)]

@@ -61,6 +61,9 @@ class GetSlivers(Method):
         }]
     }]
 
+    event_type = 'Get'
+    object_type = 'Sliver'
+
     def call(self, auth, node_filter = None):
 	timestamp = int(time.time())
 

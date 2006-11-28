@@ -26,5 +26,8 @@ class GetConfFiles(Method):
 
     returns = [ConfFile.fields]
 
+    event_type = 'Get'
+    object_type = 'ConfFile'
+
     def call(self, auth, conf_file_filter = None, return_fields = None):
         return ConfFiles(self.api, conf_file_filter, return_fields)

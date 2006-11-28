@@ -17,5 +17,8 @@ class GetSliceInstantiations(Method):
 
     returns = [SliceInstantiation.fields['instantiation']]
 
+    event_type = 'Get'
+    object_type = 'SliceInstantiation'
+
     def call(self, auth):
         return [slice_instantiation['instantiation'] for slice_instantiation in SliceInstantiations(self.api)]
