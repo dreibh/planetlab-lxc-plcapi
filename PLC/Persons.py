@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.20 2006/11/24 12:06:00 thierry Exp $
+# $Id: Persons.py,v 1.21 2006/11/25 09:35:36 thierry Exp $
 #
 
 from types import StringTypes
@@ -57,17 +57,12 @@ class Person(Row):
     class_key = 'email'
     foreign_fields = ['first_name', 'last_name', 'title', 'email', 'phone', 'url',
 		      'bio', 'enabled', 'password', 'last_updated', 'date_created']
-    #foreign_xrefs = { 'Node' : { 'field' : 'node_ids' ,
-    #		       'table': 'slice_node' } }
-    foreign_xrefs = {
-	'Key' : { 'field' : 'key_ids', 'table' : 'person_key' } ,
-	'Site' : { 'field' : 'site_ids', 'table' : 'person_site'},
-#        'key_ids': Parameter([int], "List of key identifiers"),
+    foreign_xrefs = [
+        {'field' : 'key_ids',  'class': 'Key',  'table' : 'person_key' } ,
+        {'field' : 'site_ids', 'class': 'Site', 'table' : 'person_site'},
+#       xxx this is not handled by Cache yet
 #        'role_ids': Parameter([int], "List of role identifiers"),
-#        'roles': Parameter([str], "List of roles"),
-#        'site_ids': Parameter([int], "List of site identifiers"),
-#        'slice_ids': Parameter([int], "List of slice identifiers"),
-}
+]
 
     def validate_email(self, email):
         """

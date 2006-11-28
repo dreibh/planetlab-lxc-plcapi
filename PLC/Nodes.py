@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.24 2006/11/25 09:35:36 thierry Exp $
+# $Id: Nodes.py,v 1.25 2006/11/28 10:25:03 thierry Exp $
 #
 
 from types import StringTypes
@@ -65,10 +65,10 @@ class Node(Row):
     # for Cache
     class_key = 'hostname'
     foreign_fields = ['boot_state','model','version','date_created','last_updated']
-    foreign_xrefs = { 
+    foreign_xrefs = [
 	# in this case, we dont need the 'table' but Cache will look it up, so...
-	'Site' : { 'field' : 'site_id' , 'table' : 'unused' } ,
-	}
+        {'field' : 'site_id' , 'class' : 'Site' , 'table' : 'unused-on-direct-refs' } ,
+	]
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):
@@ -111,7 +111,7 @@ class Nodes(Table):
     database.
     """
 
-    def __init__(self, api, node_filter = None, columns = None, scope = 'all'):
+    def __init__(self, api, node_filter = None, columns = None):
         Table.__init__(self, api, Node, columns)
 
         sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
@@ -127,11 +127,6 @@ class Nodes(Table):
             elif isinstance(node_filter, dict):
                 node_filter = Filter(Node.fields, node_filter)
                 sql += " AND (%s)" % node_filter.sql(api, "AND")
-
-        if scope == 'local':
-            sql += " AND (peer_id is NULL) "
-        elif scope == 'foreign':
-            sql += " AND (peer_id is NOT NULL) "
 
         self.selectall(sql)
 

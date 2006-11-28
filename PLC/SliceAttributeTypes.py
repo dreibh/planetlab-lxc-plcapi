@@ -26,7 +26,7 @@ class SliceAttributeType(Row):
     # for Cache
     class_key = 'name'
     foreign_fields = ['description','min_role_id']
-    foreign_xrefs = {}
+    foreign_xrefs = []
 
     def validate_name(self, name):
         if not len(name):

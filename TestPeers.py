@@ -84,19 +84,31 @@ def define_test (sites,keys,persons,nodes,slices,fast_mode):
     fast_flag=fast_mode
 
 def show_test():
-    print '%d sites, %d keys, %d persons, %d nodes & %d slices'%(number_sites, number_keys,number_persons,
-								 number_nodes,number_slices)
+    print '%d sites, %d keys, %d persons, %d nodes & %d slices'%(
+        number_sites, number_keys,number_persons,number_nodes,number_slices)
 
-def fast():
+def mini():
     define_test(1,1,1,1,1,True)
     
 def normal():
     define_test (sites=4,keys=2,persons=4,nodes=5,slices=4,fast_mode=False)
 
+big_factor=4
 def big():
-    define_test (sites=16,keys=8,persons=16,nodes=20,slices=16,fast_mode=False)
+    global number_sites, number_keys, number_persons, number_nodes, number_slices
+    normal()
+    (number_sites,number_keys,number_persons,number_nodes,number_slices) = [
+        big_factor * x for x in (number_sites,number_keys,number_persons,number_nodes,number_slices)]
 
-fast()
+huge_factor=50
+def huge():
+    global number_sites, number_keys, number_persons, number_nodes, number_slices
+    normal()
+    (number_sites,number_keys,number_persons,number_nodes,number_slices) = [
+        huge_factor * x for x in (number_sites,number_keys,number_persons,number_nodes,number_slices)]
+
+# use fast by default in interactive mode
+mini()
 #normal()
 
 ####################
@@ -500,13 +512,13 @@ def test02_person_n_ks (np,nks,add_if_true,args=[1,2]):
 ####################
 # retrieves node_id from hostname - checks for local nodes only
 def get_local_node_id(i,nodename):
-    return s[i].GetNodes(a[i],[nodename],None,'local')[0]['node_id']
+    return s[i].GetNodes(a[i],{'hostname':nodename,'peer_id':None})[0]['node_id']
 
 # clean all local nodes - foreign nodes are not supposed to be cleaned up manually
 def clean_all_nodes (args=[1,2]):
     for i in args:
         print '%02d:== Cleaning all nodes'%i
-        loc_nodes = s[i].GetNodes(a[i],None,None,'local')
+        loc_nodes = s[i].GetNodes(a[i],{'peer_id':None})
         for node in loc_nodes:
             print '%02d:==== Cleaning node %d'%(i,node['node_id'])
             s[i].DeleteNode(a[i],node['node_id'])
@@ -662,62 +674,64 @@ def test05_sa (args=[1,2]):
 # readable dumps
 ##############################
 def p_site (s):
-    print (s['site_id'],s['peer_id'],s['login_base'],s['name'],s['node_ids'])
+    print s['site_id'],s['peer_id'],s['login_base'],s['name'],s['node_ids']
 
 def p_key (k):
-    print  (k['key_id'],k['peer_id'],k['key'])
+    print  k['key_id'],k['peer_id'],k['key']
     
 def p_person (p):
-    print  (p['person_id'],p['peer_id'],p['email'],'keys:',p['key_ids'],'sites:',p['site_ids']) 
+    print  p['person_id'],p['peer_id'],p['email'],'keys:',p['key_ids'],'sites:',p['site_ids']
 
 def p_node(n):
-    print (n['node_id'],n['peer_id'],n['hostname'],'sls=',n['slice_ids'],'site=',n['site_id'])
+    print n['node_id'],n['peer_id'],n['hostname'],'sls=',n['slice_ids'],'site=',n['site_id']
 
 def p_slice(s):
-    print (s['slice_id'],s['peer_id'],s['name'],'nodes=',s['node_ids'],'persons=',s['person_ids'])
-    print '---',('sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id'])
+    print s['slice_id'],s['peer_id'],s['name'],'nodes=',s['node_ids'],'persons=',s['person_ids']
+    print '---','sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id'],'e=',s['expires']
 
 def p_sat(sat):
-    print (sat['attribute_type_id'],sat['peer_id'], sat['name'], sat['min_role_id'], sat['description'])
+    print sat['attribute_type_id'],sat['peer_id'], sat['name'], sat['min_role_id'], sat['description']
 
 def p_sa (sa):
-        print (sa['slice_attribute_id'],sa['peer_id'],sa['name'],'AT_id:',sa['attribute_type_id'])
-        print '---',('v=',sa['value'],'sl=',sa['slice_id'],'n=',sa['node_id'])
-
-def p_sliver (x):
-    print ('SLIVERS for : hostname',x['hostname'])
-    print ('%d config files'%len(x['conf_files']))
-    for sv in x['slivers']:
-        p_sliver_slice(sv,x['hostname'])
+        print sa['slice_attribute_id'],sa['peer_id'],sa['name'],'AT_id:',sa['attribute_type_id']
+        print '---','v=',sa['value'],'sl=',sa['slice_id'],'n=',sa['node_id']
 
 import pprint
 pretty_printer=pprint.PrettyPrinter(5)
 
-def p_sliver_slice(sliver,hostname):
-    print 'SLIVER on hostname %s, s='%hostname,sliver['name']
-    print 'KEYS',
+def p_sliver (margin,x):
+    print margin,'SLIVERS for : hostname',x['hostname']
+    print margin,'%d config files'%len(x['conf_files'])
+    for sv in x['slivers']:
+        p_sliver_slice(margin,sv,x['hostname'])
+
+def p_sliver_slice(margin,sliver,hostname):
+    print margin,'SLIVER on hostname %s, s='%hostname,sliver['name']
+    print margin,'KEYS',
     pretty_printer.pprint(sliver['keys'])
-    print 'ATTRIBUTES',
+    print margin,'ATTRIBUTES',
     pretty_printer.pprint(sliver['attributes'])
 
 def dump (args=[1,2]):
     for i in args:
-        print 'SITES'
+        print '%02d:============================== DUMPING'%i
+        print '%02d: SITES'%i
         [p_site(x) for x in s[i].GetSites(a[i])]
-        print 'KEYS'
+        print '%02d: KEYS'%i
         [p_key(x) for x in s[i].GetKeys(a[i])]
-        print 'PERSONS'
+        print '%02d: PERSONS'%i
         [p_person(x) for x in s[i].GetPersons(a[i])]
-        print 'NODES'
+        print '%02d: NODES'%i
         [p_node(x) for x in s[i].GetNodes(a[i])]
-        print 'SLICES'
+        print '%02d: SLICES'%i
         [p_slice(x) for x in s[i].GetSlices(a[i])]
-        print 'Slice Attribute Types'
+        print '%02d: Slice Attribute Types'%i
         [p_sat(x) for x in s[i].GetSliceAttributeTypes(a[i])]
-        print 'Slice Attributes'
+        print '%02d: Slice Attributes'%i
         [p_sa(x) for x in s[i].GetSliceAttributes(a[i])]
-        print 'SLIVERS'
-        [p_sliver(x) for x in s[i].GetSlivers(a[i])]
+        print '%02d: SLIVERS'%i
+        [p_sliver('%02d:'%i,x) for x in s[i].GetSlivers(a[i])]
+        print '%02d:============================== END DUMP'%i
     
 
 ## for usage under the api
@@ -751,7 +765,7 @@ def psa():
         
 def pv ():
     for s in GetSlivers():
-        p_sliver(s)
+        p_sliver('',s)
 
 def all():
     print 'SITES'
@@ -940,19 +954,32 @@ def test_all ():
 
 ### ad hoc test sequences
 def populate ():
+    timer_start()
     test_all_init()
+    timer_show()
     test01_site()
+    timer_show()
     test02_person()
+    timer_show()
     test03_node()
+    timer_show()
     test04_slice([1])
+    timer_show()
     test04_slice_add_lnode([1])
+    timer_show()
     test05_sat()
+    timer_show()
     test05_sa([1])
+    timer_show()
     test00_refresh ("populate: refreshing peer 1",[1])
+    timer_show()
     test04_slice_add_fnode([1])
+    timer_show()
     test00_refresh("populate: refresh all")
     dump()
+    timer_show()
 
+# temporary - scratch as needed
 def test_now ():
     test_all_init()
     test_all_sites ()
@@ -963,30 +990,33 @@ def test_now ():
 #####
 def usage ():
     print "Usage: %s [-n] [-f]"%sys.argv[0]
-    print " -f runs faster (1 node - 1 slice)"
-    print " -b performs big run (4 times as large as normal)"
     print " -n runs test_now instead of test_all"
     print " -p runs populate instead of test_all"
+    print " -m run in mini mode (1 instance of each class)"
+    print " -b performs big run (%d times as large as normal)"%big_factor
+    print " -H performs huge run (%d times as large as normal)"%huge_factor
     
     sys.exit(1)
 
 def main ():
     try:
-        (o,a) = getopt.getopt(sys.argv[1:], "fnpb")
+        (o,a) = getopt.getopt(sys.argv[1:], "mnpbH")
     except:
         usage()
     func = test_all
     for (opt,val) in o:
-        if opt=='-f':
-            fast()
-	elif opt=='-b':
-            big()
-        elif opt=='-n':
+        if opt=='-n':
 	    print 'Running test_now'
             func = test_now
         elif opt=='-p':
 	    print 'Running populate'
             func = populate
+        elif opt=='-m':
+            mini()
+	elif opt=='-b':
+            big()
+	elif opt=='-H':
+            huge()
         else:
             usage()
     if a:

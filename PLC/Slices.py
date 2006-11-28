@@ -24,7 +24,6 @@ class Slice(Row):
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
-        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
         'name': Parameter(str, "Slice name", max = 32),
         'instantiation': Parameter(str, "Slice instantiation state"),
         'url': Parameter(str, "URL further describing this slice", max = 254, nullok = True),
@@ -36,15 +35,17 @@ class Slice(Row):
         'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
         'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
         'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
+        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
         }
     # for Cache
     class_key = 'name'
-    foreign_fields = ['instantiation', 'url', 'description',
-                         'max_nodes', 'created', 'expires']
-    foreign_xrefs = { 
-	'Node' :   { 'field' : 'node_ids' , 'table': 'slice_node' },
-	'Person' : { 'field': 'person_ids', 'table' : 'slice_person'},
-    }
+    foreign_fields = ['instantiation', 'url', 'description', 'max_nodes', 'created', 'expires']
+    foreign_xrefs = [
+        {'field': 'node_ids' ,         'class': 'Node',   'table': 'slice_node' },
+	{'field': 'person_ids',        'class': 'Person', 'table': 'slice_person'},
+	{'field': 'creator_person_id', 'class': 'Person', 'table': 'unused-on-direct-refs'},
+        {'field': 'site_id',           'class': 'Site',   'table': 'unused-on-direct-refs'},
+    ]
 
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base

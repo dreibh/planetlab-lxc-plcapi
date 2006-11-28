@@ -71,6 +71,7 @@ class Cache:
 	    return local_id
 	    
 
+    # for handling simple n-to-n relation tables, like e.g. slice_node
     class XrefTable: 
 
 	def __init__ (self, api, tablename, class1, class2):
@@ -109,7 +110,7 @@ class Cache:
     # classname: the type of objects we are talking about;       e.g. 'Slice'
     # peer_object_list list of objects at a given peer -         e.g. peer.GetSlices()
     # alien_xref_objs_dict : a dict {'classname':alien_obj_list} e.g. {'Node':peer.GetNodes()}
-    # his must match the keys in xref_specs
+    #    we need an entry for each class mentioned in the class's foreign_xrefs
     # lambda_ignore : the alien objects are ignored if this returns true
     def update_table (self,
                       classname,
@@ -118,6 +119,7 @@ class Cache:
                       lambda_ignore=lambda x:False,
                       report_name_conflicts = True):
         
+        verbose ("============================== entering update_table on",classname)
         peer_id=self.peer_id
 
 	attrs = class_attributes (classname)
@@ -130,11 +132,15 @@ class Cache:
 
 	## allocate transcoders and xreftables once, for each item in foreign_xrefs
 	# create a dict 'classname' -> {'transcoder' : ..., 'xref_table' : ...}
-	accessories = dict(
-	    [ (xref_classname,
-	       {'transcoder':Cache.Transcoder (self.api,xref_classname,alien_xref_objs_dict[xref_classname]),
-		'xref_table':Cache.XrefTable (self.api,xref_spec['table'],classname,xref_classname)})
-	      for xref_classname,xref_spec in foreign_xrefs.iteritems()])
+        xref_accessories = dict(
+            [ (xref['field'],
+               {'transcoder' : Cache.Transcoder (self.api,xref['class'],alien_xref_objs_dict[xref['class']]),
+                'xref_table' : Cache.XrefTable (self.api,xref['table'],classname,xref['class'])})
+              for xref in foreign_xrefs ])
+
+        # the fields that are direct references, like e.g. site_id in Node
+        # determined lazily, we need an alien_object to do that, and we may have none here
+        direct_ref_fields = None
 
         ### get current local table
         # get ALL local objects so as to cope with
@@ -175,10 +181,11 @@ class Cache:
 		if local_object ['peer_id'] is None:
                     if report_name_conflicts:
 		        ### xxx send e-mail
-                        print '==================== We are in trouble here'
-                        print 'The %s object named %s is natively defined twice'%(classname,object_name)
-                        print 'Once on this PLC and once on peer %d'%peer_id
+                        print '!!!!!!!!!! We are in trouble here'
+                        print 'The %s object named %s is natively defined twice, '%(classname,object_name),
+                        print 'once on this PLC and once on peer %d'%peer_id
                         print 'We dont raise an exception so that the remaining updates can still take place'
+                        print '!!!!!!!!!!'
 		    continue
                 if local_object['peer_id'] != peer_id:
                     ### the object has changed its plc, 
@@ -186,6 +193,9 @@ class Cache:
 		    ### we can assume the object just moved
 		    ### needs to update peer_id though
                     local_object['peer_id'] = peer_id
+                # update all fields as per foreign_fields
+                for field in foreign_fields:
+                    local_object[field]=alien_object[field]
 		verbose ('update_table FOUND',object_name)
 	    except:
                 ### create a new entry
@@ -194,24 +204,44 @@ class Cache:
                 # insert in index
                 local_objects_index[class_key]=local_object
 		verbose ('update_table CREATED',object_name)
-
-            # go on with update
-            for field in foreign_fields:
-                local_object[field]=alien_object[field]
+                # update all fields as per foreign_fields
+                for field in foreign_fields:
+                    local_object[field]=alien_object[field]
+                # this is tricky; at this point we may have primary_key unspecified,
+                # but we need it for handling xrefs below, so we'd like to sync to get one
+                # on the other hand some required fields may be still missing so
+                #  the DB would refuse to sync in this case (e.g. site_id in Node)
+                # so let's fill them with 1 so we can sync, this will be overridden below
+                # lazily determine this set of fields now
+                if direct_ref_fields is None:
+                    direct_ref_fields=[]
+                    for xref in foreign_xrefs:
+                        field=xref['field']
+                        verbose('checking field %s for direct_ref'%field)
+                        if isinstance(alien_object[field],int):
+                            direct_ref_fields.append(field)
+                    verbose("FOUND DIRECT REFS",direct_ref_fields)
+                for field in direct_ref_fields:
+                    local_object[field]=1
+                verbose('Early sync on',local_object)
+                local_object.sync()
+                verbose('Early syncing of %s, reloading'%object_name)
+                # sigh: now we have to reload it because of side-effects, like e.g. on Slice.expires
+                local_object=table_class(self.api, {class_key:object_name})[0]
+                verbose('After reload',local_object)
 
             # this row is now valid
             local_object.uptodate=True
             new_count += 1
-            local_object.sync()
 
 	    # manage cross-refs
-	    for xref_classname,xref_spec in foreign_xrefs.iteritems():
-		field=xref_spec['field']
-		alien_xref_obj_list = alien_xref_objs_dict[xref_classname]
+	    for xref in foreign_xrefs:
+		field=xref['field']
+		alien_xref_obj_list = alien_xref_objs_dict[xref['class']]
 		alien_value = alien_object[field]
-		transcoder = accessories[xref_classname]['transcoder']
+		transcoder = xref_accessories[xref['field']]['transcoder']
 		if isinstance (alien_value,list):
-		    verbose ('update_table list-transcoding ',xref_classname,' aliens=',alien_value,)
+		    verbose ('update_table list-transcoding ',xref['class'],' aliens=',alien_value,)
 		    local_values=[]
 		    for a in alien_value:
 			try:
@@ -220,20 +250,24 @@ class Cache:
 			    # could not transcode - might be from another peer that we dont know about..
 			    pass
 		    verbose (" transcoded as ",local_values)
-		    xref_table = accessories[xref_classname]['xref_table']
-		    # newly created objects dont have xrefs yet
+		    xref_table = xref_accessories[xref['field']]['xref_table']
+		    # newly created objects dont have xref fields set yet
 		    try:
-			former_xrefs=local_object[xref_spec['field']]
+			former_xrefs=local_object[xref['field']]
 		    except:
 			former_xrefs=[]
 		    xref_table.update_item (local_object[primary_key],
 					    former_xrefs,
 					    local_values)
 		elif isinstance (alien_value,int):
-		    verbose ('update_table atom-transcoding ',xref_classname,' aliens=',alien_value,)
+		    verbose ('update_table atom-transcoding ',xref['class'],' aliens=',alien_value,)
 		    new_value = transcoder.transcode(alien_value)
 		    local_object[field] = new_value
-		    local_object.sync()
+
+            ### this object is completely updated, let's save it
+            verbose('FINAL sync on %s:'%object_name,local_object)
+            local_object.sync()
+                    
 
 	### delete entries that are not uptodate
         for local_object in local_objects:
@@ -396,7 +430,7 @@ class Cache:
 	    return slice['creator_person_id'] == 1
 
         nb_new_slices = self.update_table ('Slice', plocal_slices,
-					   {'Node': all_nodes, 'Person': all_persons},
+                                           {'Node': all_nodes, 'Person': all_persons, 'Site': all_sites},
 					   is_system_slice)
 
         # refresh slice attributes

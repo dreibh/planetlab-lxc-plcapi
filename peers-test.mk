@@ -24,16 +24,14 @@ pclean:
 papi1:
 	rsync -a -v -C ./ root@$(PLC1):new_plc_api/
 pplc1:
-	rsync -a -v -C ./PLC/ root@$(PLC1):$(CHROOT)$(APIDIR)/PLC/
-	rsync -a -v -C ./planetlab4.sql root@$(PLC1):$(CHROOT)$(APIDIR)/planetlab4.sql
+	rsync -a -v -C ./planetlab4.sql ./PLC root@$(PLC1):$(CHROOT)$(APIDIR)/
 papi2:
 	rsync -a -v -C ./ root@$(PLC2):new_plc_api/
 pplc2:
-	rsync -a -v -C ./PLC/ root@$(PLC2):$(CHROOT)$(APIDIR)/PLC/
-	rsync -a -v -C ./planetlab4.sql root@$(PLC2):$(CHROOT)$(APIDIR)/planetlab4.sql
+	rsync -a -v -C ./planetlab4.sql ./PLC root@$(PLC2):$(CHROOT)$(APIDIR)/
 
 ####################
-DB=install-schema stop-clients clean-db restart
+DB=install-schema stop-clients clean-db restart-db
 WEB=install-api restart
 
 db: $(DB)
@@ -63,6 +61,11 @@ stop-clients:
 clean-db:
 	@echo 'dropping db'
 	@chroot $(CHROOT) psql -U postgres --port $(PORT) template1 -c 'drop database planetlab4'
+
+restart-db:
+	@echo 'restarting db'
+	@chroot $(CHROOT) service plc stop db postgresql httpd
+	@chroot $(CHROOT) service plc start httpd postgresql db
 
 restart:
 	@echo 'Restarting PLC'
@@ -127,12 +130,17 @@ checkpoint:
 	cp TestPeers.out TestPeers.ref
 	cp TestPeers.out.nor TestPeers.ref.nor
 
-frun:
-	python -u ./TestPeers.py -f > TestPeers.fout 2>&1
+mrun:
+	python -u ./TestPeers.py -m > TestPeers.mout 2>&1
 brun:
 	python -u ./TestPeers.py -b > TestPeers.bout 2>&1
 prun:
 	python -u ./TestPeers.py -p > TestPeers.pout 2>&1
+pbrun:
+	python -u ./TestPeers.py -p -b > TestPeers.pbout 2>&1
+phrun:
+	python -u ./TestPeers.py -p -H > TestPeers.phout 2>&1
+
 #######
 HELP=rpm db-dump http
 

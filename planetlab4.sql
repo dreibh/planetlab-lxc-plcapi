@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.47 2006/11/27 16:43:31 thierry Exp $
+-- $Id: planetlab4.sql,v 1.48 2006/11/28 10:25:03 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -319,13 +319,6 @@ array_accum(node_id) AS node_ids
 FROM nodes
 GROUP BY site_id;
 
--- Nodes at each peer
-CREATE VIEW peer_nodes AS
-SELECT peer_id,
-array_accum(node_id) AS node_ids
-FROM nodes
-GROUP BY peer_id;
-
 --------------------------------------------------------------------------------
 -- Node groups
 --------------------------------------------------------------------------------
@@ -598,12 +591,6 @@ FROM slices
 WHERE is_deleted is false
 GROUP BY site_id;
 
-CREATE VIEW peer_slices AS
-SELECT peer_id,
-array_accum(slice_id) AS slice_ids
-FROM slices
-GROUP BY peer_id;
-
 -- Slice membership
 CREATE TABLE slice_person (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
@@ -816,6 +803,19 @@ LEFT JOIN person_roles USING (person_id)
 LEFT JOIN person_sites USING (person_id)
 LEFT JOIN person_keys USING (person_id)
 LEFT JOIN person_slices USING (person_id);
+
+-- Nodes at each peer
+CREATE VIEW peer_nodes AS
+SELECT peer_id,
+array_accum(node_id) AS node_ids
+FROM nodes
+GROUP BY peer_id;
+
+CREATE VIEW peer_slices AS
+SELECT peer_id,
+array_accum(slice_id) AS slice_ids
+FROM slices
+GROUP BY peer_id;
 
 CREATE VIEW view_peers AS
 SELECT 
