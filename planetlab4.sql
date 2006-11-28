@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.48 2006/11/28 10:25:03 thierry Exp $
+-- $Id: planetlab4.sql,v 1.49 2006/11/28 14:54:59 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -719,6 +719,7 @@ INSERT INTO object_types (object_type) VALUES ('NodeGroup');
 INSERT INTO object_types (object_type) VALUES ('NodeNetwork');
 INSERT INTO object_types (object_type) VALUES ('Node');
 INSERT INTO object_types (object_type) VALUES ('PCU');
+INSERT INTO object_types (object_type) VALUES ('Peer');
 INSERT INTO object_types (object_type) VALUES ('Person');
 INSERT INTO object_types (object_type) VALUES ('Role');
 INSERT INTO object_types (object_type) VALUES ('Session');
