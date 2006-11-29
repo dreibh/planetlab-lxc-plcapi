@@ -74,7 +74,11 @@ class Filter(Parameter, dict):
                 if value is None:
                     operator = "IS"
                     value = "NULL"
-                else:
+                elif not isinstance(value, bool) \
+		and (value.find("*") > -1 or value.find("%") > -1):
+		    operator = "LIKE"
+                    value = str(api.db.quote(value.replace("*", "%")))
+		else:
                     operator = "="
                     value = str(api.db.quote(value))
 
