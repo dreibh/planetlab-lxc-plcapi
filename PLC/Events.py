@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.7 2006/11/09 19:43:55 mlhuang Exp $
+# $Id: Events.py,v 1.8 2006/11/29 17:57:27 tmack Exp $
 #
 
 from PLC.Faults import *
@@ -71,5 +71,5 @@ class Events(Table):
             elif isinstance(event_filter, dict):
                 event_filter = Filter(Event.fields, event_filter)
             sql += " AND (%s)" % event_filter.sql(api)
-
+	sql += " ORDER BY %s" % Event.primary_key
         self.selectall(sql)
