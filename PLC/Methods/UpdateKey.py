@@ -44,5 +44,6 @@ class UpdateKey(Method):
 
         key.update(key_fields)
         key.sync()
+	self.object_ids = [key['key_id']]
 
         return 1

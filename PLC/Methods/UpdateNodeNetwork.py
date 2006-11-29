@@ -61,5 +61,6 @@ class UpdateNodeNetwork(Method):
 	# Update node network
 	nodenetwork.update(nodenetwork_fields)
         nodenetwork.sync()
-	
+	self.object_ids = [nodenetwork['nodenetwork_id']]
+
         return 1

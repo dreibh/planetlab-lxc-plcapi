@@ -52,5 +52,6 @@ class UpdatePerson(Method):
 
         person.update(person_fields)
         person.sync()
+	self.object_ids = [person['person_id']]
 
         return 1

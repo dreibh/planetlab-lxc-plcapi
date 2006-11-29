@@ -45,5 +45,6 @@ class UpdateAddress(Method):
 
         address.update(address_fields)
         address.sync()
+	self.object_ids = [address['address_id']]
 
         return 1

@@ -54,5 +54,5 @@ class UpdateSliceAttribute(Method):
 
         slice_attribute['value'] = value
         slice_attribute.sync()
-
+	self.object_ids = [slice_attribute['slice_attribute_id']]
         return 1

@@ -44,5 +44,6 @@ class UpdatePCU(Method):
 
         pcu.update(pcu_fields)
         pcu.sync()
+	self.object_ids = [pcu['pcu_id']]
 
         return 1

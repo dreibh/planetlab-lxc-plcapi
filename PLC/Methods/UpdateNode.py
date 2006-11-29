@@ -58,5 +58,6 @@ class UpdateNode(Method):
 
         node.update(node_fields)
         node.sync()
+	self.object_ids = [node['node_id']]
 
         return 1

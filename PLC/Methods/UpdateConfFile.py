@@ -37,5 +37,6 @@ class UpdateConfFile(Method):
         conf_file = conf_files[0]
         conf_file.update(conf_file_fields)
         conf_file.sync()
+	self.object_ids = [conf_file['conf_file_id']]	
 
         return 1

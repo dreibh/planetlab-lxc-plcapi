@@ -84,5 +84,6 @@ class UpdateSlice(Method):
             raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
 
         slice.sync()
+	self.object_ids = [slice['slice_id']]
 
         return 1

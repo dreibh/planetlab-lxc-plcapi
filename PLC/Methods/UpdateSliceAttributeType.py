@@ -38,5 +38,6 @@ class UpdateSliceAttributeType(Method):
 
         attribute_type.update(attribute_type_fields)
         attribute_type.sync()
+	self.object_ids = [attribute_type['attribute_type_id']]
 
         return 1

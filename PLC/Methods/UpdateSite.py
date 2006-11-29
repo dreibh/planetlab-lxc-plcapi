@@ -58,5 +58,6 @@ class UpdateSite(Method):
 
         site.update(site_fields)
 	site.sync()
+	self.object_ids = [site['site_id']]
 	
 	return 1

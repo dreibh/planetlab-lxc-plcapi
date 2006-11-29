@@ -38,5 +38,6 @@ class UpdateNodeGroup(Method):
 	
 	nodegroup.update(nodegroup_fields)
         nodegroup.sync()
+	self.object_ids = [nodegroup['nodegroup_id']]
 
         return 1
