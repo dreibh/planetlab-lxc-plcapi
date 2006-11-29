@@ -25,8 +25,6 @@ class GetNodeGroups(Method):
         ]
 
     returns = [NodeGroup.fields]
-    event_type = 'Get'
-    object_type = 'NodeGroup'
   
     def call(self, auth, nodegroup_filter = None, return_fields = None):
 	return NodeGroups(self.api, nodegroup_filter, return_fields)

@@ -34,8 +34,6 @@ class GetPeerData (Method):
                ]
     # for RefreshPeer 
     returns = Parameter (dict,"Sites, Keys, Nodes, Persons, Slices")
-    event_type = 'Get'
-    object_type = 'Peer'
 
     def call (self, auth, peer_id):
         # xxx a peer cannot yet compute it's peer_id under another plc

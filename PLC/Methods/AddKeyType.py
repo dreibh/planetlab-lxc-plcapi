@@ -20,8 +20,6 @@ class AddKeyType(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Add'
-    object_type = 'KeyType'
 
     def call(self, auth, name):
         key_type = KeyType(self.api)

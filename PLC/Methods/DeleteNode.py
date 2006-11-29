@@ -24,8 +24,6 @@ class DeleteNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Node'
 
     def call(self, auth, node_id_or_hostname):
         # Get account information

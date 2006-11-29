@@ -28,8 +28,6 @@ class GetKeys(Method):
 
     returns = [Key.fields]
 
-    event_type = 'Get'
-    object_type = 'Key'
 
     def call(self, auth, key_filter = None, return_fields = None):
 	keys = Keys(self.api, key_filter, return_fields)

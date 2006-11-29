@@ -20,8 +20,6 @@ class AddSliceInstantiation(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Add'
-    object_type = 'SliceInstantiation'
 
     def call(self, auth, name):
         slice_instantiation = SliceInstantiation(self.api)

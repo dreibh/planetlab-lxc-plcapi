@@ -25,8 +25,6 @@ class DeletePersonFromSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'DeleteFrom'
-    object_type = 'Slice'
 
     def call(self, auth, person_id_or_email, slice_id_or_name):
         # Get account information

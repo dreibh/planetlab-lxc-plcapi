@@ -34,8 +34,6 @@ class GetSliceAttributes(Method):
 
     returns = [SliceAttribute.fields]
     
-    event_type = 'Get'
-    object_type = 'SliceAttribute'
 
     def call(self, auth, slice_attribute_filter = None, return_fields = None):
 	# If we are not admin, make sure to only return our own slice

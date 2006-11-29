@@ -25,8 +25,6 @@ class DeleteRole(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Role'
     
     def call(self, auth, role_id_or_name):
         roles = Roles(self.api, [role_id_or_name])

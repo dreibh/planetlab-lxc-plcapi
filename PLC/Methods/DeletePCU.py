@@ -22,8 +22,6 @@ class DeletePCU(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'PCU'
 
     def call(self, auth, pcu_id):
         # Get associated PCU details

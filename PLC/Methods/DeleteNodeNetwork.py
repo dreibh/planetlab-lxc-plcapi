@@ -24,8 +24,6 @@ class DeleteNodeNetwork(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'NodeNetwork'
 
     def call(self, auth, nodenetwork_id):
 

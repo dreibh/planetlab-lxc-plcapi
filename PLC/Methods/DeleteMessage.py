@@ -20,8 +20,6 @@ class DeleteMessage(Method):
 
     returns = Parameter(int, '1 if successful')
        
-    event_type = 'Delete'
-    object_type = 'Message'
 
     def call(self, auth, message_id):
         # Get message information

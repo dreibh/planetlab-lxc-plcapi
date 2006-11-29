@@ -26,8 +26,6 @@ class AddConfFile(Method):
 
     returns = Parameter(int, 'New conf_file_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'ConfFile'
 
     def call(self, auth, conf_file_fields):
         conf_file_fields = dict(filter(can_update, conf_file_fields.items()))

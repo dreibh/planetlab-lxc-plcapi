@@ -21,8 +21,6 @@ class AddMessage(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Add'
-    object_type = 'Message'
 
     def call(self, auth, message_fields):
         message = Message(self.api, message_fields)

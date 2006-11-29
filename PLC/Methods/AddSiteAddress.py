@@ -32,8 +32,6 @@ class AddSiteAddress(Method):
 
     returns = Parameter(int, 'New address_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'Address'
 
     def call(self, auth, site_id_or_login_base, address_fields):
         address_fields = dict(filter(can_update, address_fields.items()))

@@ -21,8 +21,6 @@ class AddRole(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Add'
-    object_type = 'Role'
 
     def call(self, auth, role_id, name):
         role = Role(self.api)

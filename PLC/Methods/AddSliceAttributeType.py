@@ -27,8 +27,6 @@ class AddSliceAttributeType(Method):
 
     returns = Parameter(int, 'New attribute_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'SliceAttributeType'
 
     def call(self, auth, attribute_type_fields):
         attribute_type_fields = dict(filter(can_update, attribute_type_fields.items()))

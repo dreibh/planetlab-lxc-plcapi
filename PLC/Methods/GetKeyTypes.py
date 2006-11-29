@@ -17,8 +17,6 @@ class GetKeyTypes(Method):
 
     returns = [KeyType.fields['key_type']]
 
-    event_type = 'Get'
-    object_type = 'KeyType'
 
     def call(self, auth):
         return [key_type['key_type'] for key_type in KeyTypes(self.api)]

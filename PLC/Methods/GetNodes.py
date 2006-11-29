@@ -28,8 +28,6 @@ class GetNodes(Method):
 
     returns = [Node.fields]
 
-    event_type = 'Get'
-    object_type = 'Node'
 
     def call(self, auth, node_filter = None, return_fields = None):
         # Get node information

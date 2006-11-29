@@ -27,8 +27,6 @@ class AddRoleToPerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'AddTo'
-    object_type = 'Person'
 
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get all roles

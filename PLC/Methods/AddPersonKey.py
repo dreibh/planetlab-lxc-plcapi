@@ -29,8 +29,6 @@ class AddPersonKey(Method):
 
     returns = Parameter(int, 'New key_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'Key'
 
     def call(self, auth, person_id_or_email, key_fields):
         key_fields = dict(filter(can_update, key_fields.items()))

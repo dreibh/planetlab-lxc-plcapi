@@ -25,8 +25,6 @@ class AddConfFileToNodeGroup(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'AddTo'
-    object_type = 'ConfFile'
 
     def call(self, auth, conf_file_id, nodegroup_id_or_name):
 	# Get configuration file

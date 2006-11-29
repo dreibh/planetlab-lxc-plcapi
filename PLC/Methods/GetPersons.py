@@ -33,8 +33,6 @@ class GetPersons(Method):
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
     
-    event_type = 'Get'
-    object_type = 'Person'
 
     def call(self, auth, person_filter = None, return_fields = None):
 

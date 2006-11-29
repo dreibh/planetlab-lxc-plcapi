@@ -25,8 +25,6 @@ class DeletePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Person'
 
     def call(self, auth, person_id_or_email):
         # Get account information

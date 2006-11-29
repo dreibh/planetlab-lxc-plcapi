@@ -21,8 +21,6 @@ class DeleteSliceAttributeType(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'SliceAttributeType'
 
     def call(self, auth, attribute_type_id_or_name):
         attribute_types = SliceAttributeTypes(self.api, [attribute_type_id_or_name])

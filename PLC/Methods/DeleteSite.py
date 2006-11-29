@@ -27,8 +27,6 @@ class DeleteSite(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Site'
 
     def call(self, auth, site_id_or_login_base):
         # Get account information

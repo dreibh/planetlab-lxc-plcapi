@@ -21,8 +21,6 @@ class DeleteAddressType(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'AddressType'
 
     def call(self, auth, address_type_id_or_name):
         address_types = AddressTypes(self.api, [address_type_id_or_name])

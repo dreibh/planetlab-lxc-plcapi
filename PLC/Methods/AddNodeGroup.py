@@ -26,8 +26,6 @@ class AddNodeGroup(Method):
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'NodeGroup'
 
     def call(self, auth, nodegroup_fields):
         nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))

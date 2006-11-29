@@ -25,8 +25,6 @@ class AddNodeToNodeGroup(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'AddTo'
-    object_type = 'NodeGroup'
 
     def call(self, auth, node_id_or_hostname, nodegroup_id_or_name):
         # Get node info

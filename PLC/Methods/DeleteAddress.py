@@ -22,8 +22,6 @@ class DeleteAddress(Method):
 
     returns = Parameter(int, '1 if successful')
     
-    event_type = 'Delete'
-    object_type = 'Address'
 
     def call(self, auth, address_id):
         # Get associated address details

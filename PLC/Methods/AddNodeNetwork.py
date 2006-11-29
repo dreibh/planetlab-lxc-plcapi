@@ -39,8 +39,6 @@ class AddNodeNetwork(Method):
 
     returns = Parameter(int, 'New nodenetwork_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'NodeNetwork'
     
     def call(self, auth, node_id_or_hostname, nodenetwork_fields):
         nodenetwork_fields = dict(filter(can_update, nodenetwork_fields.items()))

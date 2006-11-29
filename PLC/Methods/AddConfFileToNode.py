@@ -24,8 +24,6 @@ class AddConfFileToNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'AddTo'
-    object_type = 'ConfFile'
 
     def call(self, auth, conf_file_id, node_id_or_hostname):
 	# Get configuration file

@@ -20,8 +20,6 @@ class AddBootState(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Add'
-    object_type = 'BootState'
     
     def call(self, auth, name):
         boot_state = BootState(self.api)

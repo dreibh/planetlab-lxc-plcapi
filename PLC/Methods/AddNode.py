@@ -33,8 +33,6 @@ class AddNode(Method):
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
 
-    event_type = 'Add'
-    object_type = 'Node'
 
     def call(self, auth, site_id_or_login_base, node_fields):
         node_fields = dict(filter(can_update, node_fields.items()))

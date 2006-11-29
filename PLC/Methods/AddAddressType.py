@@ -25,8 +25,6 @@ class AddAddressType(Method):
 
     returns = Parameter(int, 'New address_type_id (> 0) if successful')
         
-    event_type = 'Add'    
-    object_type = 'AddressType'
 
     def call(self, auth, address_type_fields):
         address_type_fields = dict(filter(can_update, address_type_fields.items()))

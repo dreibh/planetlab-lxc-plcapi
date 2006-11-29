@@ -22,8 +22,6 @@ class DeleteKey(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Key'
 
     def call(self, auth, key_id):
         # Get associated key details

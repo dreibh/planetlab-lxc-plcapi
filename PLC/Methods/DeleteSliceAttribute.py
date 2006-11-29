@@ -28,8 +28,6 @@ class DeleteSliceAttribute(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'SliceAttribute'
 
     def call(self, auth, slice_attribute_id):
         slice_attributes = SliceAttributes(self.api, [slice_attribute_id])

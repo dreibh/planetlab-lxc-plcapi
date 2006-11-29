@@ -16,8 +16,6 @@ class DeleteSession(Method):
     accepts = [SessionAuth()]
     returns = Parameter(int, '1 if successful')
 
-    event_type = 'Delete'
-    object_type = 'Session'
 
     def call(self, auth):
         assert auth.has_key('session')
