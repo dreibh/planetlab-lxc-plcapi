@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.6 2006/11/09 03:07:42 mlhuang Exp $
+# $Id: Events.py,v 1.7 2006/11/09 19:43:55 mlhuang Exp $
 #
 
 from PLC.Faults import *
@@ -24,10 +24,9 @@ class Event(Row):
         'event_id': Parameter(int, "Event identifier"),
         'person_id': Parameter(int, "Identifier of person responsible for event, if any"),
         'node_id': Parameter(int, "Identifier of node responsible for event, if any"),
-        'event_type': Parameter(str, "Type of event"),
-        'object_type': Parameter(str, "Type of object affected by this event"),
         'fault_code': Parameter(int, "Event fault code"),
-        'call': Parameter(str, "Call responsible for this event"),
+	'call_name': Parameter(str, "Call responsible for this event"),
+	'call': Parameter(str, "Call responsible for this event, including paramters"),
         'runtime': Parameter(float, "Runtime of event"),
         'time': Parameter(int, "Date and time that the event took place, in seconds since UNIX epoch", ro = True),
         'object_ids': Parameter([int], "IDs of objects affected by this event")

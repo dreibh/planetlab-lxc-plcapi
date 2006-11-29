@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.17 2006/11/03 23:44:51 mlhuang Exp $
+# $Id: Method.py,v 1.18 2006/11/08 22:11:26 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -129,6 +129,7 @@ class Method:
         # Log call representation
         # XXX Truncate to avoid DoS
         event['call'] = self.name + pprint.saferepr(args)
+	event['call_name'] = self.name
 
         # Both users and nodes can call some methods
         if isinstance(self.caller, Person):

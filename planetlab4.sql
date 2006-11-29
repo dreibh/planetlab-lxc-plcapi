@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.50 2006/11/28 21:48:08 tmack Exp $
+-- $Id: planetlab4.sql,v 1.51 2006/11/28 22:00:14 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -689,57 +689,15 @@ CREATE TABLE messages (
 -- Events
 --------------------------------------------------------------------------------
 
--- Event types
-CREATE TABLE event_types (
-    event_type text PRIMARY KEY -- Event type
-) WITH OIDS;
-INSERT INTO event_types (event_type) VALUES ('Add');
-INSERT INTO event_types (event_type) VALUES ('AddTo');
-INSERT INTO event_types (event_type) VALUES ('Get');
-INSERT INTO event_types (event_type) VALUES ('Update');
-INSERT INTO event_types (event_type) VALUES ('Delete');
-INSERT INTO event_types (event_type) VALUES ('DeleteFrom');
-INSERT INTO event_types (event_type) VALUES ('Unknown');
-
--- Object types
-CREATE TABLE object_types (
-    object_type text PRIMARY KEY -- Object type 
-) WITH OIDS;
-INSERT INTO object_types (object_type) VALUES ('AddressType');
-INSERT INTO object_types (object_type) VALUES ('Address');
-INSERT INTO object_types (object_type) VALUES ('BootState');
-INSERT INTO object_types (object_type) VALUES ('ConfFile');
-INSERT INTO object_types (object_type) VALUES ('KeyType');
-INSERT INTO object_types (object_type) VALUES ('Key');
-INSERT INTO object_types (object_type) VALUES ('Message');
-INSERT INTO object_types (object_type) VALUES ('NetworkMethod');
-INSERT INTO object_types (object_type) VALUES ('NetworkType');
-INSERT INTO object_types (object_type) VALUES ('Network');
-INSERT INTO object_types (object_type) VALUES ('NodeGroup');
-INSERT INTO object_types (object_type) VALUES ('NodeNetwork');
-INSERT INTO object_types (object_type) VALUES ('Node');
-INSERT INTO object_types (object_type) VALUES ('PCU');
-INSERT INTO object_types (object_type) VALUES ('Peer');
-INSERT INTO object_types (object_type) VALUES ('Person');
-INSERT INTO object_types (object_type) VALUES ('Role');
-INSERT INTO object_types (object_type) VALUES ('Session');
-INSERT INTO object_types (object_type) VALUES ('Site');
-INSERT INTO object_types (object_type) VALUES ('SliceAttributeType');
-INSERT INTO object_types (object_type) VALUES ('SliceAttribute');
-INSERT INTO object_types (object_type) VALUES ('Slice');
-INSERT INTO object_types (object_type) VALUES ('SliceInstantiation');
-INSERT INTO object_types (object_type) VALUES ('Sliver');
-INSERT INTO object_types (object_type) VALUES ('Unknown');
 
 -- Events
 CREATE TABLE events (
     event_id serial PRIMARY KEY,  -- Event identifier
     person_id integer REFERENCES persons, -- Person responsible for event, if any
     node_id integer REFERENCES nodes, -- Node responsible for event, if any
-    event_type text REFERENCES event_types NOT NULL DEFAULT 'Unknown', -- Event type 
-    object_type text REFERENCES object_types NOT NULL DEFAULT 'Unknown', -- Object type associated with event
     fault_code integer NOT NULL DEFAULT 0, -- Did this event result in error
-    call text NOT NULL, -- Call responsible for this event
+    call_name text Not NULL, -- Call responsible for this event
+    call text NOT NULL, -- Call responsible for this event, including paramters
     runtime float, -- Event run time
     time timestamp without time zone  NOT NULL DEFAULT CURRENT_TIMESTAMP -- Event timestamp
 ) WITH OIDS;
@@ -767,9 +725,8 @@ SELECT
 events.event_id,
 events.person_id,
 events.node_id,
-events.event_type,
-events.object_type,
 events.fault_code,
+events.call_name,
 events.call,
 events.runtime,
 CAST(date_part('epoch', events.time) AS bigint) AS time,
