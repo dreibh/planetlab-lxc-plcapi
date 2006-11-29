@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustess of Princeton University
 #
-# $Id: methods.py,v 1.2 2006/11/10 06:32:26 mlhuang Exp $
+# $Id: methods.py,v 1.3 2006/11/21 20:00:53 mlhuang Exp $
 #
 
 import os, sys
@@ -81,6 +81,7 @@ for method in api.methods:
     print "{"
 
     # API function arguments
+    i = 0
     for name, expected, default in parameters:
         # Automatically added auth structures
         if isinstance(expected, Auth) or \
@@ -89,7 +90,12 @@ for method in api.methods:
             print "  $args[] = $this->auth;"
             continue
 
-        print "  $args[] = $%s;" % name
+        print " ",
+        if name not in min_args:
+            print "if (func_num_args() > %d)" % i, 
+        print "$args[] = $%s;" % name
+
+        i += 1
 
     # Call API function
     print "  return $this->call('%s', $args);" % method
