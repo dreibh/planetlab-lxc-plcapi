@@ -65,7 +65,7 @@ class GetSlivers(Method):
     object_type = 'Sliver'
 
     def call(self, auth, node_filter = None):
-	timestamp = int(time.time())
+        timestamp = int(time.time())
 
         if node_filter is None and isinstance(self.caller, Node):
             all_nodes = {self.caller['node_id']: self.caller}
@@ -83,7 +83,7 @@ class GetSlivers(Method):
         for node_id, node in all_nodes.iteritems():
             all_nodenetwork_ids.update(node['nodenetwork_ids'])
             all_nodegroup_ids.update(node['nodegroup_ids'])
-            #all_slice_ids.update(node['slice_ids'])
+            all_slice_ids.update(node['slice_ids'])
 	
         # Get nodenetwork information
         all_nodenetworks = NodeNetworks(self.api, all_nodenetwork_ids).dict()
