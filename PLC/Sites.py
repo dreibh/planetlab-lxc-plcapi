@@ -48,7 +48,7 @@ class Site(Row):
     foreign_fields = ['abbreviated_name', 'name', 'is_public', 'latitude', 'longitude',
 		      'url', 'date_created', 'last_updated', 'max_slices', 'max_slivers',
 		      ]
-    foreign_xrefs = {}
+    foreign_xrefs = []
 
     def validate_name(self, name):
         if not len(name):
