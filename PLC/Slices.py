@@ -75,13 +75,14 @@ class Slice(Row):
 
         return instantiation
 
+    # timestamps
+    def validate_created (self, timestamp):
+	return self.validate_timestamp (timestamp)
+
     def validate_expires(self, expires):
         # N.B.: Responsibility of the caller to ensure that expires is
         # not too far into the future.
-        if expires < time.time():
-            raise PLCInvalidArgument, "Expiration date must be in the future"
-
-        return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
+	return self.validate_timestamp (expires,True)
 
     def add_person(self, person, commit = True):
         """

@@ -86,6 +86,12 @@ class Site(Row):
 
         return longitude
 
+    # timestamps
+    def validate_date_created (self, timestamp):
+	return self.validate_timestamp (timestamp)
+    def validate_last_updated (self, timestamp):
+	return self.validate_timestamp (timestamp)
+
     def add_person(self, person, commit = True):
         """
         Add person to existing site.

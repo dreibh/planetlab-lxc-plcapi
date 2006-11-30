@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.25 2006/11/28 10:25:03 thierry Exp $
+# $Id: Nodes.py,v 1.26 2006/11/28 14:55:00 thierry Exp $
 #
 
 from types import StringTypes
@@ -87,6 +87,12 @@ class Node(Row):
             raise PLCInvalidArgument, "Invalid boot state"
 
         return boot_state
+
+    # timestamps
+    def validate_date_created (self, timestamp):
+	return self.validate_timestamp (timestamp)
+    def validate_last_updated (self, timestamp):
+	return self.validate_timestamp (timestamp)
 
     def delete(self, commit = True):
         """

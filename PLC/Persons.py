@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.21 2006/11/25 09:35:36 thierry Exp $
+# $Id: Persons.py,v 1.22 2006/11/28 14:55:00 thierry Exp $
 #
 
 from types import StringTypes
@@ -115,6 +115,13 @@ class Person(Row):
             salt = str(time.time()) + str(Random().random())
             salt = md5.md5(salt).hexdigest()[:8] 
             return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
+
+    # timestamps
+    # verification_expires in the DB but not exposed here
+    def validate_date_created (self, timestamp):
+	return self.validate_timestamp (timestamp)
+    def validate_last_updated (self, timestamp):
+	return self.validate_timestamp (timestamp)
 
     def can_update(self, person):
         """

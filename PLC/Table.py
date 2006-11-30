@@ -1,3 +1,6 @@
+import time
+import calendar
+
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 
@@ -46,6 +49,19 @@ class Row(dict):
             if value is not None and hasattr(self, 'validate_' + key):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
+
+    time_format = "%Y-%m-%d %H:%M:%S"
+    def validate_timestamp (self, timestamp, check_future=False):
+	# in case we try to sync the same object twice
+	if isinstance(timestamp,str):
+	    # calendar.timegm is the inverse of time.gmtime, in that it computes in UTC
+	    # surprisingly enough, no other method in the time module behaves this way
+            # this method is documented in the time module's documentation
+	    timestamp = calendar.timegm (time.strptime (timestamp,Row.time_format))
+	human = time.strftime (Row.time_format, time.gmtime(timestamp))
+	if check_future and (timestamp < time.time()):
+            raise PLCInvalidArgument, "%s: date must be in the future"%human
+	return human
 
     def sync(self, commit = True, insert = None):
         """

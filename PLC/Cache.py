@@ -4,7 +4,7 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 
 verbose_flag=False;
-verbose_flag=True;
+#verbose_flag=True;
 def verbose (*args):
     if verbose_flag:
 	print (args)
@@ -59,15 +59,15 @@ class Cache:
 	def transcode (self, alien_id):
 	    """ transforms an alien id into a local one """
 	    # locate alien obj from alien_id
-	    verbose ('.entering transcode with alien_id',alien_id,)
+	    #verbose ('.entering transcode with alien_id',alien_id,)
 	    alien_object=self.alien_objects_byid[alien_id]
-	    verbose ('..located alien_obj',)
+	    #verbose ('..located alien_obj',)
 	    name = alien_object [self.class_key]
-	    verbose ('...got name',name,)
+	    #verbose ('...got name',name,)
 	    local_object=self.local_objects_byname[name]
-	    verbose ('....found local obj')
+	    #verbose ('....found local obj')
 	    local_id=local_object[self.primary_key]
-	    verbose ('.....and local_id',local_id)
+	    #verbose ('.....and local_id',local_id)
 	    return local_id
 	    
 
@@ -150,7 +150,7 @@ class Cache:
         ### index upon class_key for future searches
         local_objects_index = local_objects.dict(class_key)
 
-	verbose ('update_table',classname,local_objects_index.keys())
+	#verbose ('update_table',classname,local_objects_index.keys())
 
 	### mark entries for this peer outofdate
         new_count=0
@@ -225,10 +225,6 @@ class Cache:
                     local_object[field]=1
                 verbose('Early sync on',local_object)
                 local_object.sync()
-                verbose('Early syncing of %s, reloading'%object_name)
-                # sigh: now we have to reload it because of side-effects, like e.g. on Slice.expires
-                local_object=table_class(self.api, {class_key:object_name})[0]
-                verbose('After reload',local_object)
 
             # this row is now valid
             local_object.uptodate=True
@@ -241,7 +237,7 @@ class Cache:
 		alien_value = alien_object[field]
 		transcoder = xref_accessories[xref['field']]['transcoder']
 		if isinstance (alien_value,list):
-		    verbose ('update_table list-transcoding ',xref['class'],' aliens=',alien_value,)
+		    #verbose ('update_table list-transcoding ',xref['class'],' aliens=',alien_value,)
 		    local_values=[]
 		    for a in alien_value:
 			try:
@@ -249,7 +245,7 @@ class Cache:
 			except:
 			    # could not transcode - might be from another peer that we dont know about..
 			    pass
-		    verbose (" transcoded as ",local_values)
+		    #verbose (" transcoded as ",local_values)
 		    xref_table = xref_accessories[xref['field']]['xref_table']
 		    # newly created objects dont have xref fields set yet
 		    try:
@@ -260,7 +256,7 @@ class Cache:
 					    former_xrefs,
 					    local_values)
 		elif isinstance (alien_value,int):
-		    verbose ('update_table atom-transcoding ',xref['class'],' aliens=',alien_value,)
+		    #verbose ('update_table atom-transcoding ',xref['class'],' aliens=',alien_value,)
 		    new_value = transcoder.transcode(alien_value)
 		    local_object[field] = new_value
 
@@ -354,7 +350,7 @@ class Cache:
                 if local_object['peer_id'] != peer_id:
                     verbose ('FOUND local sa - skipped')
                     continue
-                verbose('FOUND already cached sa')
+                verbose('FOUND already cached sa - setting value')
                 local_object['value'] = alien_object['value']
             # create it if missing
             except:
