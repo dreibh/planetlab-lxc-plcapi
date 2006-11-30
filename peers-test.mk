@@ -111,35 +111,41 @@ log:
 normalize	= egrep -v "'expires':|^+++.*ellapsed"
 
 TEST=run checkpoint diff
-run: run-only normalize
-run-only:
-	python -u ./TestPeers.py > TestPeers.out 2>&1
+run: nrun normalize 
+normalize: TestPeers-n.nout TestPeers-n.nref
 
-normalize: TestPeers.out.nor TestPeers.ref.nor
-TestPeers.out.nor: TestPeers.out
-	$(normalize) TestPeers.out > TestPeers.out.nor
-TestPeers.ref.nor: TestPeers.ref
-	$(normalize) TestPeers.ref > TestPeers.ref.nor
+nrun: 
+	python -u ./TestPeers.py > TestPeers-n.out 2>&1
+mrun:
+	python -u ./TestPeers.py -m > TestPeers-m.out 2>&1
+brun:
+	python -u ./TestPeers.py -b > TestPeers-b.out 2>&1
+prun:
+	python -u ./TestPeers.py -p > TestPeers-p.out 2>&1
+pbrun:
+	python -u ./TestPeers.py -p -b > TestPeers-pb.out 2>&1
+phrun:
+	python -u ./TestPeers.py -p -H > TestPeers-ph.phout 2>&1
+
+%.nout: %.out
+	$(normalize) $*.out > $@
+%.nref: %.ref
+	$(normalize) $*.ref > $@
 
 diff: normalize
 	@echo '<< REF OUT>>'
-	diff TestPeers.ref.nor TestPeers.out.nor
+	diff TestPeers-n.ref TestPeers-n.out
 
-checkpoint:
+ckp checkpoint:
 	@echo adopting latest run as reference
-	cp TestPeers.out TestPeers.ref
-	cp TestPeers.out.nor TestPeers.ref.nor
+	cp TestPeers-n.out TestPeers-n.ref
+	rm -f TestPeers-n.n???
 
-mrun:
-	python -u ./TestPeers.py -m > TestPeers.mout 2>&1
-brun:
-	python -u ./TestPeers.py -b > TestPeers.bout 2>&1
-prun:
-	python -u ./TestPeers.py -p > TestPeers.pout 2>&1
-pbrun:
-	python -u ./TestPeers.py -p -b > TestPeers.pbout 2>&1
-phrun:
-	python -u ./TestPeers.py -p -H > TestPeers.phout 2>&1
+mdiff: TestPeers-m.nref TestPeers-m.nout 
+	diff TestPeers-m.nref TestPeers-m.nout
+mckp:
+	cp TestPeers-m.out TestPeers-m.ref
+	rm -f TestPeers-m.n???
 
 #######
 HELP=rpm db-dump http

@@ -1,4 +1,4 @@
-4 sites, 2 keys, 4 persons, 5 nodes & 4 slices
+2 keys, 4 sites, 4 persons, 5 nodes, 4 slices & 5 nodes/slice fast_flag False
 ==================== ('INIT',)
 +++ timer start
 initializing s[1] https://lurch.cs.princeton.edu:443/PLCAPI/
@@ -27,7 +27,7 @@ Attempting to set passwd for person_id=4 in DB1UPDATE 1
  -> system returns 0
 Attempting to set passwd for person_id=4 in DB2UPDATE 1
  -> system returns 0
-+++ 12.99 seconds ellapsed (12.99)
++++ 13.02 seconds ellapsed (13.02)
 01:== Created site 2 with max_slices=4
 02:== Created site 2 with max_slices=4
 01:== Created site 3 with max_slices=4
@@ -37,88 +37,88 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01:== Created site 5 with max_slices=4
 02:== Created site 5 with max_slices=4
 === refresh after site creation
-+++ 24.68 seconds ellapsed (11.68)
++++ 25.09 seconds ellapsed (12.07)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 27.15 seconds ellapsed (2.47)
++++ 27.42 seconds ellapsed (2.32)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 28.86 seconds ellapsed (1.71)
-+++ 28.86 seconds ellapsed (0.00)
++++ 29.11 seconds ellapsed (1.70)
++++ 29.11 seconds ellapsed (0.00)
 === refresh before persons&keys creation
-+++ 32.60 seconds ellapsed (3.75)
++++ 32.92 seconds ellapsed (3.81)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 34.89 seconds ellapsed (2.29)
++++ 35.21 seconds ellapsed (2.29)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 36.52 seconds ellapsed (1.63)
++++ 36.85 seconds ellapsed (1.64)
 01: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 01: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
 02: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
 ==================== ('Creating persons&keys',)
 01:== created user account 6, user1-1@plc1.org - password1
-01:== added key ssh-rsa 1111111111111111 user1-key1 to person user1-1@plc1.org
-01:== added key ssh-rsa 1111111111111111 user1-key2 to person user1-1@plc1.org
+01:== added key ssh-rsa 11key4plc11 user1-key1 to person user1-1@plc1.org
+01:== added key ssh-rsa 11key4plc11 user1-key2 to person user1-1@plc1.org
 02:== created user account 6, user2-1@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user1-key1 to person user2-1@plc2.org
-02:== added key ssh-rsa 2222222222222222 user1-key2 to person user2-1@plc2.org
+02:== added key ssh-rsa 22key4plc22 user1-key1 to person user2-1@plc2.org
+02:== added key ssh-rsa 22key4plc22 user1-key2 to person user2-1@plc2.org
 01:== created user account 7, user1-2@plc1.org - password1
-01:== added key ssh-rsa 1111111111111111 user2-key1 to person user1-2@plc1.org
-01:== added key ssh-rsa 1111111111111111 user2-key2 to person user1-2@plc1.org
+01:== added key ssh-rsa 11key4plc11 user2-key1 to person user1-2@plc1.org
+01:== added key ssh-rsa 11key4plc11 user2-key2 to person user1-2@plc1.org
 02:== created user account 7, user2-2@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user2-key1 to person user2-2@plc2.org
-02:== added key ssh-rsa 2222222222222222 user2-key2 to person user2-2@plc2.org
+02:== added key ssh-rsa 22key4plc22 user2-key1 to person user2-2@plc2.org
+02:== added key ssh-rsa 22key4plc22 user2-key2 to person user2-2@plc2.org
 01:== created user account 8, user1-3@plc1.org - password1
-01:== added key ssh-rsa 1111111111111111 user3-key1 to person user1-3@plc1.org
-01:== added key ssh-rsa 1111111111111111 user3-key2 to person user1-3@plc1.org
+01:== added key ssh-rsa 11key4plc11 user3-key1 to person user1-3@plc1.org
+01:== added key ssh-rsa 11key4plc11 user3-key2 to person user1-3@plc1.org
 02:== created user account 8, user2-3@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user3-key1 to person user2-3@plc2.org
-02:== added key ssh-rsa 2222222222222222 user3-key2 to person user2-3@plc2.org
+02:== added key ssh-rsa 22key4plc22 user3-key1 to person user2-3@plc2.org
+02:== added key ssh-rsa 22key4plc22 user3-key2 to person user2-3@plc2.org
 01:== created user account 9, user1-4@plc1.org - password1
-01:== added key ssh-rsa 1111111111111111 user4-key1 to person user1-4@plc1.org
-01:== added key ssh-rsa 1111111111111111 user4-key2 to person user1-4@plc1.org
+01:== added key ssh-rsa 11key4plc11 user4-key1 to person user1-4@plc1.org
+01:== added key ssh-rsa 11key4plc11 user4-key2 to person user1-4@plc1.org
 02:== created user account 9, user2-4@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user4-key1 to person user2-4@plc2.org
-02:== added key ssh-rsa 2222222222222222 user4-key2 to person user2-4@plc2.org
+02:== added key ssh-rsa 22key4plc22 user4-key1 to person user2-4@plc2.org
+02:== added key ssh-rsa 22key4plc22 user4-key2 to person user2-4@plc2.org
 ==================== ('1 extra del/add cycle for unique indexes',)
 02:== deleted person_id 6
 02:== deleted person_id 7
 02:== deleted person_id 8
 02:== deleted person_id 9
 02:== created user account 10, user2-1@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user1-key1 to person user2-1@plc2.org
-02:== added key ssh-rsa 2222222222222222 user1-key2 to person user2-1@plc2.org
+02:== added key ssh-rsa 22key4plc22 user1-key1 to person user2-1@plc2.org
+02:== added key ssh-rsa 22key4plc22 user1-key2 to person user2-1@plc2.org
 02:== created user account 11, user2-2@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user2-key1 to person user2-2@plc2.org
-02:== added key ssh-rsa 2222222222222222 user2-key2 to person user2-2@plc2.org
+02:== added key ssh-rsa 22key4plc22 user2-key1 to person user2-2@plc2.org
+02:== added key ssh-rsa 22key4plc22 user2-key2 to person user2-2@plc2.org
 02:== created user account 12, user2-3@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user3-key1 to person user2-3@plc2.org
-02:== added key ssh-rsa 2222222222222222 user3-key2 to person user2-3@plc2.org
+02:== added key ssh-rsa 22key4plc22 user3-key1 to person user2-3@plc2.org
+02:== added key ssh-rsa 22key4plc22 user3-key2 to person user2-3@plc2.org
 02:== created user account 13, user2-4@plc2.org - password2
-02:== added key ssh-rsa 2222222222222222 user4-key1 to person user2-4@plc2.org
-02:== added key ssh-rsa 2222222222222222 user4-key2 to person user2-4@plc2.org
+02:== added key ssh-rsa 22key4plc22 user4-key1 to person user2-4@plc2.org
+02:== added key ssh-rsa 22key4plc22 user4-key2 to person user2-4@plc2.org
 01: Checking keys: got 8 local (e=8) & 0 foreign (e=0)
 02: Checking keys: got 8 local (e=8) & 0 foreign (e=0)
 01: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 02: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 === refresh after persons&keys creation
-+++ 59.25 seconds ellapsed (22.74)
++++ 59.63 seconds ellapsed (22.77)
 01:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 61.75 seconds ellapsed (2.50)
++++ 62.23 seconds ellapsed (2.60)
 02:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 63.72 seconds ellapsed (1.97)
++++ 64.19 seconds ellapsed (1.97)
 01: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 02: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 01: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
 02: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
-+++ 66.10 seconds ellapsed (2.39)
++++ 66.59 seconds ellapsed (2.40)
 ==================== ('RESETTING NODES',)
 01:== Cleaning all nodes
 02:== Cleaning all nodes
 === refresh cleaned nodes
-+++ 67.04 seconds ellapsed (0.94)
++++ 67.53 seconds ellapsed (0.94)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 69.53 seconds ellapsed (2.49)
++++ 70.02 seconds ellapsed (2.49)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 71.37 seconds ellapsed (1.84)
++++ 71.87 seconds ellapsed (1.86)
 01: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 ==================== ('CREATING NODES',)
@@ -135,11 +135,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 === refresh after node creation
-+++ 82.98 seconds ellapsed (11.60)
++++ 83.46 seconds ellapsed (11.58)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 85.60 seconds ellapsed (2.62)
++++ 86.07 seconds ellapsed (2.61)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 87.58 seconds ellapsed (1.98)
++++ 88.09 seconds ellapsed (2.02)
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02:== Deleted node 1, returns 1
@@ -170,11 +170,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Deleted node 20, returns 1
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 === refresh after deletion on plc2
-+++ 95.98 seconds ellapsed (8.40)
++++ 96.21 seconds ellapsed (8.11)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': -5, 'new_slice_attribute_types': 0}
-+++ 98.56 seconds ellapsed (2.59)
++++ 98.78 seconds ellapsed (2.58)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 100.48 seconds ellapsed (1.92)
++++ 100.70 seconds ellapsed (1.91)
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 ==================== ('ADD on plc2 for different indexes',)
@@ -186,14 +186,14 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 === refresh after re-creation on plc2
-+++ 104.06 seconds ellapsed (3.58)
++++ 104.31 seconds ellapsed (3.61)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 106.66 seconds ellapsed (2.60)
++++ 106.93 seconds ellapsed (2.62)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 108.62 seconds ellapsed (1.96)
++++ 108.85 seconds ellapsed (1.93)
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
-+++ 109.90 seconds ellapsed (1.29)
++++ 110.13 seconds ellapsed (1.28)
 ==================== ('RESETTING SLICES TEST',)
 01:== Cleaning all nodes
 01:==== Cleaning node 1
@@ -222,11 +222,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Cleaning all slices
 02:==== Cleaning slice 3
 === refresh After slices init
-+++ 127.36 seconds ellapsed (17.46)
++++ 127.56 seconds ellapsed (17.43)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 129.91 seconds ellapsed (2.55)
++++ 130.13 seconds ellapsed (2.57)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 131.78 seconds ellapsed (1.87)
++++ 132.05 seconds ellapsed (1.92)
 ==================== ('CREATING SLICES on plc1',)
 01:== created slice 4 - max nodes=5
 01:== Attached person user1-1@plc1.org to slice oneone_slice1
@@ -251,11 +251,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 === refresh after slice created on plc1
-+++ 153.57 seconds ellapsed (21.79)
++++ 153.80 seconds ellapsed (21.76)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 156.09 seconds ellapsed (2.52)
++++ 156.33 seconds ellapsed (2.52)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 4, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 158.10 seconds ellapsed (2.01)
++++ 158.35 seconds ellapsed (2.03)
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
 01: local slice oneone_slice1 (e=0)  on nodes  []
@@ -284,11 +284,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onethree_slice3 (e=0)  on nodes  []
 02: foreign slice onefour_slice4 (e=0)  on nodes  []
 === refresh After local nodes were added on plc1
-+++ 179.23 seconds ellapsed (21.13)
++++ 179.46 seconds ellapsed (21.11)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 181.75 seconds ellapsed (2.53)
++++ 182.16 seconds ellapsed (2.69)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 183.73 seconds ellapsed (1.98)
++++ 184.11 seconds ellapsed (1.95)
 01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
@@ -331,11 +331,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After foreign nodes were added in plc1
-+++ 204.28 seconds ellapsed (20.54)
++++ 204.59 seconds ellapsed (20.48)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 206.86 seconds ellapsed (2.58)
++++ 207.18 seconds ellapsed (2.59)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 208.90 seconds ellapsed (2.04)
++++ 209.19 seconds ellapsed (2.01)
 01: local slice oneone_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
@@ -363,178 +363,178 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1165932042,
+     'expires': 1166091452,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'oneone_slice1',
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1165932040,
+     'expires': 1166091449,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onetwo_slice2',
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1165932052,
+     'expires': 1166091462,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onethree_slice3',
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1165932057,
+     'expires': 1166091467,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onefour_slice4',
      'slice_id': 7}
 02: 4 slivers (exp. 4) in GetSlivers for node n201.plc2.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1165932042,
+     'expires': 1166091452,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'}],
      'name': 'oneone_slice1',
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1165932040,
+     'expires': 1166091449,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'}],
      'name': 'onetwo_slice2',
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1165932052,
+     'expires': 1166091462,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'}],
      'name': 'onethree_slice3',
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1165932057,
+     'expires': 1166091467,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'}],
      'name': 'onefour_slice4',
      'slice_id': 7}
@@ -566,98 +566,98 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1165932042,
+     'expires': 1166091452,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'oneone_slice1',
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1165932040,
+     'expires': 1166091449,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onetwo_slice2',
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1165932052,
+     'expires': 1166091462,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onethree_slice3',
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1165932057,
+     'expires': 1166091467,
      'instantiation': 'plc-instantiated',
-     'keys': [    {    'key': 'ssh-rsa 1111111111111111 user1-key1',
+     'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user1-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user1-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user2-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user2-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user3-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user3-key2',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key1',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key1',
                        'key_type': 'ssh'},
-                  {    'key': 'ssh-rsa 1111111111111111 user4-key2',
+                  {    'key': 'ssh-rsa 11key4plc11 user4-key2',
                        'key_type': 'ssh'}],
      'name': 'onefour_slice4',
      'slice_id': 7}
 === refresh After foreign nodes were removed on plc1
-+++ 232.69 seconds ellapsed (23.79)
++++ 232.75 seconds ellapsed (23.57)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 235.24 seconds ellapsed (2.55)
++++ 235.31 seconds ellapsed (2.56)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 237.18 seconds ellapsed (1.94)
++++ 237.26 seconds ellapsed (1.94)
 01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
@@ -692,11 +692,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After local nodes were removed on plc1
-+++ 256.56 seconds ellapsed (19.38)
++++ 256.49 seconds ellapsed (19.24)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 259.09 seconds ellapsed (2.53)
++++ 259.04 seconds ellapsed (2.55)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 261.03 seconds ellapsed (1.94)
++++ 261.02 seconds ellapsed (1.98)
 01: local slice oneone_slice1 (e=0)  on nodes  []
 01: local slice onetwo_slice2 (e=0)  on nodes  []
 01: local slice onethree_slice3 (e=0)  on nodes  []
@@ -714,23 +714,23 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
 === refresh After slices clenaup
-+++ 274.75 seconds ellapsed (13.72)
++++ 274.71 seconds ellapsed (13.68)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 277.30 seconds ellapsed (2.55)
++++ 277.64 seconds ellapsed (2.94)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': -4, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 279.23 seconds ellapsed (1.93)
++++ 279.61 seconds ellapsed (1.97)
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
-+++ 281.12 seconds ellapsed (1.89)
++++ 281.49 seconds ellapsed (1.88)
 01:== created SliceAttributeType = 20
 02:== created SliceAttributeType = 20
 === refresh after SliceAttributeType creation
-+++ 283.02 seconds ellapsed (1.90)
++++ 283.39 seconds ellapsed (1.90)
 01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 1}
-+++ 285.56 seconds ellapsed (2.54)
++++ 285.91 seconds ellapsed (2.53)
 02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 1}
-+++ 287.47 seconds ellapsed (1.91)
-+++ 287.47 seconds ellapsed (0.00)
++++ 287.81 seconds ellapsed (1.90)
++++ 287.81 seconds ellapsed (0.00)
 01:============================== DUMPING
 01: SITES
 1 None pl Thierry plc1 Central []
@@ -743,22 +743,22 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 8 1 twothree plc2 in federation [8, 13]
 9 1 twofour plc2 in federation [9, 14]
 01: KEYS
-1 None ssh-rsa 1111111111111111 user1-key1
-2 None ssh-rsa 1111111111111111 user1-key2
-3 None ssh-rsa 1111111111111111 user2-key1
-4 None ssh-rsa 1111111111111111 user2-key2
-5 None ssh-rsa 1111111111111111 user3-key1
-6 None ssh-rsa 1111111111111111 user3-key2
-7 None ssh-rsa 1111111111111111 user4-key1
-8 None ssh-rsa 1111111111111111 user4-key2
-9 1 ssh-rsa 2222222222222222 user1-key1
-10 1 ssh-rsa 2222222222222222 user1-key2
-11 1 ssh-rsa 2222222222222222 user2-key1
-12 1 ssh-rsa 2222222222222222 user2-key2
-13 1 ssh-rsa 2222222222222222 user3-key1
-14 1 ssh-rsa 2222222222222222 user3-key2
-15 1 ssh-rsa 2222222222222222 user4-key1
-16 1 ssh-rsa 2222222222222222 user4-key2
+1 None ssh-rsa 11key4plc11 user1-key1
+2 None ssh-rsa 11key4plc11 user1-key2
+3 None ssh-rsa 11key4plc11 user2-key1
+4 None ssh-rsa 11key4plc11 user2-key2
+5 None ssh-rsa 11key4plc11 user3-key1
+6 None ssh-rsa 11key4plc11 user3-key2
+7 None ssh-rsa 11key4plc11 user4-key1
+8 None ssh-rsa 11key4plc11 user4-key2
+9 1 ssh-rsa 22key4plc22 user1-key1
+10 1 ssh-rsa 22key4plc22 user1-key2
+11 1 ssh-rsa 22key4plc22 user2-key1
+12 1 ssh-rsa 22key4plc22 user2-key2
+13 1 ssh-rsa 22key4plc22 user3-key1
+14 1 ssh-rsa 22key4plc22 user3-key2
+15 1 ssh-rsa 22key4plc22 user4-key1
+16 1 ssh-rsa 22key4plc22 user4-key2
 01: PERSONS
 1 None maint@localhost.localdomain keys: [] sites: []
 2 None root@plc1.org keys: [] sites: [1]
@@ -786,9 +786,11 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 15 1 n205.plc2.org sls= [] site= 6
 01: SLICES
 1 None pl_conf nodes= [] persons= []
---- sas= [1, 2, 3] pl_conf crp= 1 e= 1165931897
+--- sas= [1, 2, 3] pl_conf crp= 1
+--- 'expires': 1166091315
 2 None pl_conf_vserverslice nodes= [] persons= []
---- sas= [4, 5, 6] pl_conf_vserverslice crp= 1 e= 1165931897
+--- sas= [4, 5, 6] pl_conf_vserverslice crp= 1
+--- 'expires': 1166091315
 01: Slice Attribute Types
 1 None type 20 Type of slice (e.g. vserver)
 2 None system 10 Is a default system slice (1) or not (0 or unset)
@@ -862,22 +864,22 @@ sl= 1 n= None
 6 1 oneone plc1 in federation [6, 10]
 7 1 onetwo plc1 in federation [7]
 02: KEYS
-9 None ssh-rsa 2222222222222222 user1-key1
-10 None ssh-rsa 2222222222222222 user1-key2
-11 None ssh-rsa 2222222222222222 user2-key1
-12 None ssh-rsa 2222222222222222 user2-key2
-13 None ssh-rsa 2222222222222222 user3-key1
-14 None ssh-rsa 2222222222222222 user3-key2
-15 None ssh-rsa 2222222222222222 user4-key1
-16 None ssh-rsa 2222222222222222 user4-key2
-17 1 ssh-rsa 1111111111111111 user1-key1
-18 1 ssh-rsa 1111111111111111 user1-key2
-19 1 ssh-rsa 1111111111111111 user2-key1
-20 1 ssh-rsa 1111111111111111 user2-key2
-21 1 ssh-rsa 1111111111111111 user3-key1
-22 1 ssh-rsa 1111111111111111 user3-key2
-23 1 ssh-rsa 1111111111111111 user4-key1
-24 1 ssh-rsa 1111111111111111 user4-key2
+9 None ssh-rsa 22key4plc22 user1-key1
+10 None ssh-rsa 22key4plc22 user1-key2
+11 None ssh-rsa 22key4plc22 user2-key1
+12 None ssh-rsa 22key4plc22 user2-key2
+13 None ssh-rsa 22key4plc22 user3-key1
+14 None ssh-rsa 22key4plc22 user3-key2
+15 None ssh-rsa 22key4plc22 user4-key1
+16 None ssh-rsa 22key4plc22 user4-key2
+17 1 ssh-rsa 11key4plc11 user1-key1
+18 1 ssh-rsa 11key4plc11 user1-key2
+19 1 ssh-rsa 11key4plc11 user2-key1
+20 1 ssh-rsa 11key4plc11 user2-key2
+21 1 ssh-rsa 11key4plc11 user3-key1
+22 1 ssh-rsa 11key4plc11 user3-key2
+23 1 ssh-rsa 11key4plc11 user4-key1
+24 1 ssh-rsa 11key4plc11 user4-key2
 02: PERSONS
 1 None maint@localhost.localdomain keys: [] sites: []
 2 None root@plc2.org keys: [] sites: [1]
@@ -905,9 +907,11 @@ sl= 1 n= None
 10 1 n105.plc1.org sls= [] site= 6
 02: SLICES
 1 None pl_conf nodes= [] persons= []
---- sas= [1, 2, 3] pl_conf crp= 1 e= 1165931898
+--- sas= [1, 2, 3] pl_conf crp= 1
+--- 'expires': 1166091316
 2 None pl_conf_vserverslice nodes= [] persons= []
---- sas= [4, 5, 6] pl_conf_vserverslice crp= 1 e= 1165931898
+--- sas= [4, 5, 6] pl_conf_vserverslice crp= 1
+--- 'expires': 1166091316
 02: Slice Attribute Types
 1 None type 20 Type of slice (e.g. vserver)
 2 None system 10 Is a default system slice (1) or not (0 or unset)
@@ -969,6 +973,6 @@ sl= 1 n= None
 02: SLIVERS for : hostname n205.plc2.org
 02: 31 config files
 02:============================== END DUMP
-+++ 298.57 seconds ellapsed (11.10)
++++ 298.86 seconds ellapsed (11.05)
 ==================== ('END',)
-+++ 298.57 seconds ellapsed (0.00)
++++ 298.86 seconds ellapsed (0.00)
