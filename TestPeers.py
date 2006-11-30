@@ -74,30 +74,35 @@ def total_slivers ():
 
 ####################
 # set initial conditions
-def define_test (keys,sites,persons,nodes,slices,fast_mode=None):
-    global number_keys, number_sites, number_persons, number_nodes, number_slices, fast_flag
+# actual nodes_per_slice is min(number_nodes,number_nodes_per_slice)
+# this is to prevent quadractic test times on big tests
+def define_test (keys,sites,persons,nodes,slices,nodes_per_slice,fast_mode=None):
+    global number_keys, number_sites, number_persons, number_nodes, number_slices
+    global number_nodes_per_slice, fast_flag
     number_keys=keys
     number_sites = sites
     number_persons=persons
     number_nodes=nodes
     number_slices=slices
+    number_nodes_per_slice=nodes_per_slice
     if fast_mode is not None:
         fast_flag=fast_mode
 
+# when we run locally on a given peer
 local_index=None
 
 def show_test():
-    print '%d keys, %d sites, %d persons, %d nodes & %d slices'%(
-        number_keys, number_sites,number_persons,number_nodes,number_slices),
+    print '%d keys, %d sites, %d persons, %d nodes, %d slices & %d nodes/slice'%(
+        number_keys, number_sites,number_persons,number_nodes,number_slices,number_nodes_per_slice),
     print 'fast_flag',fast_flag
     if local_index is not None:
         print 'Running locally on index %d'%local_index
 
 def mini():
-    define_test(1,1,1,1,1,True)
+    define_test(1,1,1,1,1,1,True)
     
 def normal():
-    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,fast_mode=False)
+    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,nodes_per_slice=5,fast_mode=False)
 
 # use only 1 key in this case
 big_factor=4
@@ -116,7 +121,7 @@ def huge():
         huge_factor * x for x in (number_sites,number_persons,number_nodes,number_slices)]
     number_keys=1
 
-# use fast by default in interactive mode
+# use mini test by default in interactive mode
 mini()
 #normal()
 
@@ -612,7 +617,8 @@ def test04_node_slice (is_local, add_if_true, args=[1,2]):
 	test04_node_slice_ns (ns,is_local, add_if_true, args)
 
 def test04_node_slice_ns (ns,is_local, add_if_true, args=[1,2]):
-    test04_node_slice_nl_n (myrange(number_nodes),ns,is_local, add_if_true, args)
+    actual_nodes_per_slice = min (number_nodes,number_nodes_per_slice)
+    test04_node_slice_nl_n (myrange(actual_nodes_per_slice),ns,is_local, add_if_true, args)
 
 def test04_node_slice_nl_n (nnl,ns,is_local, add_if_true, args=[1,2]):
     for i in args:
@@ -710,7 +716,8 @@ def p_node(n):
 
 def p_slice(s):
     print s['slice_id'],s['peer_id'],s['name'],'nodes=',s['node_ids'],'persons=',s['person_ids']
-    print '---','sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id'],'e=',s['expires']
+    print '---','sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id']
+    print "--- 'expires':",s['expires']
 
 def p_sat(sat):
     print sat['attribute_type_id'],sat['peer_id'], sat['name'], sat['min_role_id'], sat['description']
@@ -994,11 +1001,11 @@ def populate ():
     timer_show()
     test05_sa([1])
     timer_show()
-    test00_refresh ("populate: refreshing peer 1",[1])
-    timer_show()
-    test04_slice_add_fnode([1])
-    timer_show()
-    test00_refresh("populate: refresh all")
+#    test00_refresh ("populate: refreshing peer 1",[1])
+#    timer_show()
+#    test04_slice_add_fnode([1])
+#    timer_show()
+#    test00_refresh("populate: refresh all")
     dump()
     timer_show()
 
