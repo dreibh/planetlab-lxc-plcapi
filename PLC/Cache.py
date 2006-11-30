@@ -373,9 +373,6 @@ class Cache:
         ### return delta in number of objects 
         return new_count-old_count
 
-    def get_locals (self, list):
-	return [x for x in list if x['peer_id'] is None]
-
     def refresh_peer (self):
 	
 	# so as to minimize the numer of requests
@@ -390,52 +387,52 @@ class Cache:
         all_data = self.peer_server.GetPeerData (self.auth,0)
 
 	# refresh sites
-	all_sites = all_data['Sites']
-	plocal_sites = self.get_locals (all_sites)
+	plocal_sites = all_data['Sites-local']
+        all_sites = plocal_sites + all_data['Sites-peer']
 	nb_new_sites = self.update_table('Site', plocal_sites)
 
 	# refresh keys
-	all_keys = all_data['Keys']
-	plocal_keys = self.get_locals (all_keys)
+	plocal_keys = all_data['Keys-local']
+        all_keys = plocal_keys + all_data['Keys-peer']
 	nb_new_keys = self.update_table('Key', plocal_keys)
 
 	# refresh nodes
-        all_nodes = all_data['Nodes']
-	plocal_nodes = self.get_locals(all_nodes)
+	plocal_nodes = all_data['Nodes-local']
+        all_nodes = plocal_nodes + all_data['Nodes-peer']
         nb_new_nodes = self.update_table('Node', plocal_nodes,
 					 { 'Site' : all_sites } )
 
 	# refresh persons
-	all_persons = all_data['Persons']
-	plocal_persons = self.get_locals(all_persons)
+	plocal_persons = all_data['Persons-local']
+        all_persons = plocal_persons + all_data['Persons-peer']
 	nb_new_persons = self.update_table ('Person', plocal_persons,
 					    { 'Key': all_keys, 'Site' : all_sites } )
 
         # refresh slice attribute types
-        all_slice_attribute_types = all_data ['SliceAttibuteTypes']
-        plocal_slice_attribute_types = self.get_locals(all_slice_attribute_types)
+        plocal_slice_attribute_types = all_data ['SliceAttibuteTypes-local']
         nb_new_slice_attribute_types = self.update_table ('SliceAttributeType',
                                                           plocal_slice_attribute_types,
                                                           report_name_conflicts = False)
 
 	# refresh slices
-        all_slices = all_data['Slices']
-        plocal_slices = self.get_locals(all_slices)
+        plocal_slices = all_data['Slices-local']
+        all_slices = plocal_slices + all_data['Slices-peer']
 
 	def is_system_slice (slice):
 	    return slice['creator_person_id'] == 1
 
         nb_new_slices = self.update_table ('Slice', plocal_slices,
-                                           {'Node': all_nodes, 'Person': all_persons, 'Site': all_sites},
+                                           {'Node': all_nodes,
+                                            'Person': all_persons,
+                                            'Site': all_sites},
 					   is_system_slice)
 
         # refresh slice attributes
-        all_slice_attributes = all_data ['SliceAttributes']
-        plocal_slice_attributes = self.get_locals(all_slice_attributes)
+        plocal_slice_attributes = all_data ['SliceAttributes-local']
         nb_new_slice_attributes = self.update_slice_attributes (plocal_slice_attributes,
                                                                 all_nodes,
                                                                 all_slices)
-
+        
         ### returned as-is by RefreshPeer
         return {'plcname':self.api.config.PLC_NAME,
 		'new_sites':nb_new_sites,

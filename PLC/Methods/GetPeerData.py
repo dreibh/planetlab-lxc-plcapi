@@ -37,15 +37,22 @@ class GetPeerData (Method):
 
     def call (self, auth, peer_id):
         # xxx a peer cannot yet compute it's peer_id under another plc
-        # so we return evrything by now
+        # so we return all foreign objects by now
         
         return {
-            'Sites' : Sites (self.api),
-            'Keys' : Keys (self.api),
-            'Nodes' : Nodes (self.api),
-            'Persons' : Persons (self.api),
-            'SliceAttibuteTypes' : SliceAttributeTypes (self.api),
-            'Slices' : Slices (self.api),
-            'SliceAttributes': SliceAttributes (self.api)
+            'Sites-local' : Sites (self.api,{'peer_id':None}),
+            'Sites-peer' : Sites (self.api,{'~peer_id':None}),
+            'Keys-local' : Keys (self.api,{'peer_id':None}),
+            'Keys-peer' : Keys (self.api,{'~peer_id':None}),
+            'Nodes-local' : Nodes (self.api,{'peer_id':None}),
+            'Nodes-peer' : Nodes (self.api,{'~peer_id':None}),
+            'Persons-local' : Persons (self.api,{'peer_id':None}),
+            'Persons-peer' : Persons (self.api,{'~peer_id':None}),
+            'SliceAttibuteTypes-local' : SliceAttributeTypes (self.api,{'peer_id':None}),
+            'SliceAttibuteTypes-peer' : SliceAttributeTypes (self.api,{'~peer_id':None}),
+            'Slices-local' : Slices (self.api,{'peer_id':None}),
+            'Slices-peer' : Slices (self.api,{'~peer_id':None}),
+            'SliceAttributes-local': SliceAttributes (self.api,{'peer_id':None}),
+            'SliceAttributes-peer': SliceAttributes (self.api,{'~peer_id':None}),
             }
         
