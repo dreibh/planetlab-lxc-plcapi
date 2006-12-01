@@ -2,6 +2,8 @@
 # Thierry Parmentelat - INRIA
 # 
 
+import time
+
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -39,7 +41,8 @@ class GetPeerData (Method):
         # xxx a peer cannot yet compute it's peer_id under another plc
         # so we return all foreign objects by now
         
-        return {
+        t_start = time.time()
+        result = {
             'Sites-local' : Sites (self.api,{'peer_id':None}),
             'Sites-peer' : Sites (self.api,{'~peer_id':None}),
             'Keys-local' : Keys (self.api,{'peer_id':None}),
@@ -55,4 +58,7 @@ class GetPeerData (Method):
             'SliceAttributes-local': SliceAttributes (self.api,{'peer_id':None}),
             'SliceAttributes-peer': SliceAttributes (self.api,{'~peer_id':None}),
             }
+        t_end = time.time()
+        result['ellapsed'] = t_end-t_start
+        return result
         

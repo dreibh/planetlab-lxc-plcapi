@@ -1,3 +1,5 @@
+import time
+
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -383,9 +385,11 @@ class Cache:
 
         ### uses GetPeerData to gather all info in a single xmlrpc request
 
+        t_start=time.time()
         # xxx see also GetPeerData - peer_id arg unused yet
         all_data = self.peer_server.GetPeerData (self.auth,0)
 
+        t_acquired = time.time()
 	# refresh sites
 	plocal_sites = all_data['Sites-local']
         all_sites = plocal_sites + all_data['Sites-peer']
@@ -433,6 +437,7 @@ class Cache:
                                                                 all_nodes,
                                                                 all_slices)
         
+        t_end=time.time()
         ### returned as-is by RefreshPeer
         return {'plcname':self.api.config.PLC_NAME,
 		'new_sites':nb_new_sites,
@@ -442,5 +447,9 @@ class Cache:
                 'new_slice_attribute_types':nb_new_slice_attribute_types,
                 'new_slices':nb_new_slices,
                 'new_slice_attributes':nb_new_slice_attributes,
+                'time_gather': all_data['ellapsed'],
+                'time_transmit':t_acquired-t_start-all_data['ellapsed'],
+                'time_process':t_end-t_acquired,
+                'time_all':t_end-t_start,
                 }
 
