@@ -13,7 +13,7 @@ def verbose (*args):
 
 def class_attributes (classname):
     """ locates various attributes defined in the row class """
-    topmodule = __import__ ('PLC')
+    topmodule = __import__ ('PLC.%ss'%classname)
     module = topmodule.__dict__['%ss'%classname]
     # local row-like class, e.g. Node
     row_class = module.__dict__['%s'%classname]
