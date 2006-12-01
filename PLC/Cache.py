@@ -92,12 +92,12 @@ class Cache:
 		self.api.db.do (sql)
 
 	def insert_new_items (self, id1, id2_set):
-        ### xxx needs to be optimized
-        ### tried to figure a way to use a single sql statement
-        ### like: insert into table (x,y) values (1,2),(3,4);
-        ### but apparently this is not supported under postgresql
-	    for id2 in id2_set:
-		sql = "INSERT INTO %s VALUES (%d,%d)"%(self.tablename,id1,id2)
+	    if id2_set:
+		sql = "INSERT INTO %s select %d, %d " % \
+   			self.tablename, id1, id2[0] 
+	    	for id2 in id2_set[1:]:
+			sql += " UNION ALL SELECT %d, %d " % \
+			(id1,id2)
 		self.api.db.do (sql)
 
 	def update_item (self, id1, old_id2s, new_id2s):
