@@ -74,17 +74,20 @@ def total_slivers ():
 
 ####################
 # set initial conditions
+# actual persons_per_slice is min(number_persons,number_persons_per_slice)
 # actual nodes_per_slice is min(number_nodes,number_nodes_per_slice)
 # this is to prevent quadractic test times on big tests
-def define_test (keys,sites,persons,nodes,slices,nodes_per_slice,fast_mode=None):
+def define_test (keys,sites,persons,nodes,slices,
+                 nodes_per_slice,persons_per_slice,fast_mode=None):
     global number_keys, number_sites, number_persons, number_nodes, number_slices
-    global number_nodes_per_slice, fast_flag
+    global number_nodes_per_slice, number_persons_per_slice, fast_flag
     number_keys=keys
     number_sites = sites
     number_persons=persons
     number_nodes=nodes
     number_slices=slices
     number_nodes_per_slice=nodes_per_slice
+    number_persons_per_slice=persons_per_slice
     if fast_mode is not None:
         fast_flag=fast_mode
 
@@ -99,10 +102,10 @@ def show_test():
         print 'Running locally on index %d'%local_index
 
 def mini():
-    define_test(1,1,1,1,1,1,True)
+    define_test(1,1,1,1,1,1,1,True)
     
 def normal():
-    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,nodes_per_slice=5,fast_mode=False)
+    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,nodes_per_slice=5,persons_per_slice=8,fast_mode=False)
 
 # use only 1 key in this case
 big_factor=4
@@ -563,7 +566,7 @@ def test03_node_n (nn,args=[1,2]):
         except:
 	    login_base=site_login_base(i,map_on_site(nn))
             n=s[i].AddNode(a[i],login_base,{'hostname': nodename})
-            print '%02d:== Added node %d %s'%(i,n,node_name(i,i))
+            print '%02d:== Added node %d %s'%(i,n,node_name(i,nn))
 
 def test02_delnode (args=[1,2]):
     for nn in myrange(number_nodes):
@@ -606,7 +609,8 @@ def test04_slice_n (ns,args=[1,2]):
                                           'instanciation':'plc-instantiated',
                                           })
             print '%02d:== created slice %d - max nodes=%d'%(i,slice_id,max_nodes)
-	    for np in myrange(number_persons):
+            actual_persons_per_slice = min (number_persons,number_persons_per_slice)
+	    for np in myrange(actual_persons_per_slice):
 		email = person_name (i,np)
 		retcod = s[i].AddPersonToSlice (a[i], email, slicename)
 		print '%02d:== Attached person %s to slice %s'%(i,email,slicename)
@@ -983,6 +987,7 @@ def test_all ():
     message("END")
 
 ### ad hoc test sequences
+# we just create objects here so we can dump the DB
 def populate ():
     timer_start()
     test_all_init()
@@ -1001,13 +1006,17 @@ def populate ():
     timer_show()
     test05_sa([1])
     timer_show()
-#    test00_refresh ("populate: refreshing peer 1",[1])
-#    timer_show()
-#    test04_slice_add_fnode([1])
-#    timer_show()
-#    test00_refresh("populate: refresh all")
+
+def populate_end():
+    test00_init()
+    test00_refresh ("populate: refreshing peer 1",[1])
+    timer_show()
+    test04_slice_add_fnode([1])
+    timer_show()
+    test00_refresh("populate: refresh all")
     dump()
     timer_show()
+    message("END")
 
 # temporary - scratch as needed
 def test_now ():
@@ -1022,6 +1031,7 @@ def usage ():
     print "Usage: %s [-n] [-f]"%sys.argv[0]
     print " -n runs test_now instead of test_all"
     print " -p runs populate instead of test_all"
+    print " -e runs populate_end of test_all"
     print " -m run in mini mode (1 instance of each class)"
     print " -b performs big run (%d times as large as normal)"%big_factor
     print " -H performs huge run (%d times as large as normal)"%huge_factor
@@ -1031,7 +1041,7 @@ def usage ():
 
 def main ():
     try:
-        (o,a) = getopt.getopt(sys.argv[1:], "mnpbHl:")
+        (o,a) = getopt.getopt(sys.argv[1:], "emnpbHl:")
     except:
         usage()
     func = test_all
@@ -1042,6 +1052,9 @@ def main ():
         elif opt=='-p':
 	    print 'Running populate'
             func = populate
+        elif opt=='-e':
+	    print 'Running populate_end'
+            func = populate_end
         elif opt=='-m':
             mini()
 	elif opt=='-b':
