@@ -34,9 +34,7 @@ typecastObject_initlist typecast_builtins[] = {
   {"FLOAT", typecast_FLOAT_types, typecast_FLOAT_cast, NULL},
   {"DECIMAL", typecast_DECIMAL_types, typecast_DECIMAL_cast, NULL},
   {"UNICODE", typecast_UNICODE_types, typecast_UNICODE_cast, NULL},
-  /* XXX Unicode array elements are always cast to regular Python strings */
-  /* {"STRING", typecast_STRING_types, typecast_STRING_cast, NULL}, */
-  {"STRING", typecast_STRING_types, typecast_UNICODE_cast, NULL},
+  {"STRING", typecast_STRING_types, typecast_STRING_cast, NULL},
   {"BOOLEAN", typecast_BOOLEAN_types, typecast_BOOLEAN_cast, NULL},
   {"DATETIME", typecast_DATETIME_types, typecast_DATETIME_cast, NULL},
   {"TIME", typecast_TIME_types, typecast_TIME_cast, NULL},

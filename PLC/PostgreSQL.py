@@ -5,12 +5,14 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.9 2006/11/08 22:43:02 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.10 2006/11/09 19:34:04 mlhuang Exp $
 #
 
 import psycopg2
 import psycopg2.extensions
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+# UNICODEARRAY not exported yet
+psycopg2.extensions.register_type(psycopg2._psycopg.UNICODEARRAY)
 
 import pgdb
 from types import StringTypes, NoneType
