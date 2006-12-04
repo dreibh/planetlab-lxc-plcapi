@@ -92,37 +92,44 @@ def define_test (keys,sites,persons,nodes,slices,
         fast_flag=fast_mode
 
 # when we run locally on a given peer
-local_index=None
+local_peer=None
 
 def show_test():
-    print '%d keys, %d sites, %d persons, %d nodes, %d slices & %d nodes/slice'%(
-        number_keys, number_sites,number_persons,number_nodes,number_slices,number_nodes_per_slice),
+    print '%d keys, %d sites, %d persons, %d nodes & %d slices'%(
+        number_keys, number_sites,number_persons,number_nodes,number_slices)
+    print '%d keys/person, %d nodes/slice & %d persons/slice'%(
+        number_keys,number_nodes_per_slice,number_persons_per_slice)
     print 'fast_flag',fast_flag
-    if local_index is not None:
-        print 'Running locally on index %d'%local_index
+    if local_peer is not None:
+        print 'Running locally on index %d'%local_peer
 
 def mini():
     define_test(1,1,1,1,1,1,1,True)
     
 def normal():
-    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,nodes_per_slice=5,persons_per_slice=8,fast_mode=False)
+    define_test (keys=2,sites=4,persons=4,nodes=5,slices=4,
+                 nodes_per_slice=5,persons_per_slice=8,fast_mode=False)
 
 # use only 1 key in this case
 big_factor=4
 def big():
-    global number_keys, number_sites, number_persons, number_nodes, number_slices
+    global number_sites, number_persons, number_nodes, number_slices
     normal()
     (number_sites,number_persons,number_nodes,number_slices) = [
         big_factor * x for x in (number_sites,number_persons,number_nodes,number_slices)]
+    global number_keys
     number_keys=1
 
-huge_factor=50
+huge_factor=100
 def huge():
-    global number_keys, number_sites, number_persons, number_nodes, number_slices
+    global number_sites, number_persons, number_nodes, number_slices
     normal()
     (number_sites,number_persons,number_nodes,number_slices) = [
         huge_factor * x for x in (number_sites,number_persons,number_nodes,number_slices)]
+    global number_keys
     number_keys=1
+    global number_persons_per_slice
+    number_persons_per_slice=2
 
 # use mini test by default in interactive mode
 mini()
@@ -471,7 +478,18 @@ def test00_refresh (message,args=[1,2]):
     for i in args:
         print '%02d:== Refreshing peer'%(i),
         retcod=s[i].RefreshPeer(a[i],get_peer_id(i))
-        print 'got ',retcod
+        keys=retcod.keys()
+        keys.sort()
+        print "Result: {",
+        for key in keys:
+            if "time_" not in key:
+                print key,retcod[key],
+        print "}"
+        print "+++ ellapsed: {",
+        for key in keys:
+            if "time_" in key:
+                print key,retcod[key],
+        print "}"
 	timer_show()
 
 ####################
@@ -1014,6 +1032,8 @@ def populate_end():
     test04_slice_add_fnode([1])
     timer_show()
     test00_refresh("populate: refresh all")
+    timer_show()
+    test00_refresh("empty refresh")
     dump()
     timer_show()
     message("END")
@@ -1063,10 +1083,9 @@ def main ():
             huge()
         elif opt=='-l':
             if val in (1,2):
-                local_index=val
+                local_peer=val
                 print '-l option not implemented yet'
                 # need to figure a way to use Shell.py-like calling paradigm
-                sys.exit(1)
             else:
                 usage()
         else:

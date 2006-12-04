@@ -1,4 +1,6 @@
-2 keys, 4 sites, 4 persons, 5 nodes, 4 slices & 5 nodes/slice fast_flag False
+2 keys, 4 sites, 4 persons, 5 nodes & 4 slices
+2 keys/person, 5 nodes/slice & 8 persons/slice
+fast_flag False
 ==================== ('INIT',)
 +++ timer start
 initializing s[1] https://lurch.cs.princeton.edu:443/PLCAPI/
@@ -27,7 +29,7 @@ Attempting to set passwd for person_id=4 in DB1UPDATE 1
  -> system returns 0
 Attempting to set passwd for person_id=4 in DB2UPDATE 1
  -> system returns 0
-+++ 13.02 seconds ellapsed (13.02)
++++ 13.05 seconds ellapsed (13.05)
 01:== Created site 2 with max_slices=4
 02:== Created site 2 with max_slices=4
 01:== Created site 3 with max_slices=4
@@ -37,18 +39,22 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01:== Created site 5 with max_slices=4
 02:== Created site 5 with max_slices=4
 === refresh after site creation
-+++ 25.09 seconds ellapsed (12.07)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 27.42 seconds ellapsed (2.32)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 4, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 1, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 29.11 seconds ellapsed (1.70)
-+++ 29.11 seconds ellapsed (0.00)
++++ 24.59 seconds ellapsed (11.54)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 1 new_sites 4 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.53231501579 time_gather 0.0437541007996 time_process 0.164775848389 time_transmit 1.3237850666 }
++++ 26.94 seconds ellapsed (2.35)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 1 new_sites 4 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.58680510521 time_gather 0.0349020957947 time_process 0.197776079178 time_transmit 1.35412693024 }
++++ 28.66 seconds ellapsed (1.72)
++++ 28.66 seconds ellapsed (0.00)
 === refresh before persons&keys creation
-+++ 32.92 seconds ellapsed (3.81)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 35.21 seconds ellapsed (2.29)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 36.85 seconds ellapsed (1.64)
++++ 32.41 seconds ellapsed (3.75)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.51098799706 time_gather 0.0452809333801 time_process 0.108983039856 time_transmit 1.35672402382 }
++++ 34.75 seconds ellapsed (2.34)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.53021216393 time_gather 0.0360291004181 time_process 0.14048910141 time_transmit 1.3536939621 }
++++ 36.41 seconds ellapsed (1.66)
 01: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking keys: got 0 local (e=0) & 0 foreign (e=0)
 01: Checking persons: got 4 local (e=4) & 1 foreign (e=1)
@@ -100,46 +106,52 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 02: Checking persons: got 8 local (e=8) & 1 foreign (e=1)
 === refresh after persons&keys creation
-+++ 59.63 seconds ellapsed (22.77)
-01:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 62.23 seconds ellapsed (2.60)
-02:== Refreshing peer got  {'new_keys': 8, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 4, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 64.19 seconds ellapsed (1.97)
++++ 59.18 seconds ellapsed (22.77)
+01:== Refreshing peer Result: { new_keys 8 new_nodes 0 new_persons 4 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.78520703316 time_gather 0.0463678836823 time_process 0.286010026932 time_transmit 1.45282912254 }
++++ 61.79 seconds ellapsed (2.61)
+02:== Refreshing peer Result: { new_keys 8 new_nodes 0 new_persons 4 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.8553981781 time_gather 0.0377640724182 time_process 0.350681066513 time_transmit 1.46695303917 }
++++ 63.78 seconds ellapsed (1.99)
 01: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 02: Checking keys: got 8 local (e=8) & 8 foreign (e=8)
 01: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
 02: Checking persons: got 8 local (e=8) & 5 foreign (e=5)
-+++ 66.59 seconds ellapsed (2.40)
++++ 66.17 seconds ellapsed (2.39)
 ==================== ('RESETTING NODES',)
 01:== Cleaning all nodes
 02:== Cleaning all nodes
 === refresh cleaned nodes
-+++ 67.53 seconds ellapsed (0.94)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 70.02 seconds ellapsed (2.49)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 71.87 seconds ellapsed (1.86)
++++ 67.11 seconds ellapsed (0.94)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.68751502037 time_gather 0.0444610118866 time_process 0.178684949875 time_transmit 1.46436905861 }
++++ 69.62 seconds ellapsed (2.51)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.74660205841 time_gather 0.0371038913727 time_process 0.242964982986 time_transmit 1.46653318405 }
++++ 71.50 seconds ellapsed (1.88)
 01: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 0 foreign (e=0)
 ==================== ('CREATING NODES',)
 01:== Added node 1 n101.plc1.org
-02:== Added node 1 n202.plc2.org
-01:== Added node 2 n101.plc1.org
+02:== Added node 1 n201.plc2.org
+01:== Added node 2 n102.plc1.org
 02:== Added node 2 n202.plc2.org
-01:== Added node 3 n101.plc1.org
-02:== Added node 3 n202.plc2.org
-01:== Added node 4 n101.plc1.org
-02:== Added node 4 n202.plc2.org
-01:== Added node 5 n101.plc1.org
-02:== Added node 5 n202.plc2.org
+01:== Added node 3 n103.plc1.org
+02:== Added node 3 n203.plc2.org
+01:== Added node 4 n104.plc1.org
+02:== Added node 4 n204.plc2.org
+01:== Added node 5 n105.plc1.org
+02:== Added node 5 n205.plc2.org
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 === refresh after node creation
-+++ 83.46 seconds ellapsed (11.58)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 86.07 seconds ellapsed (2.61)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 88.09 seconds ellapsed (2.02)
++++ 83.15 seconds ellapsed (11.65)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 5 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.81052184105 time_gather 0.0459451675415 time_process 0.288089036942 time_transmit 1.47648763657 }
++++ 85.79 seconds ellapsed (2.63)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 5 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.92083191872 time_gather 0.0368890762329 time_process 0.349598884583 time_transmit 1.5343439579 }
++++ 87.84 seconds ellapsed (2.05)
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02:== Deleted node 1, returns 1
@@ -148,21 +160,21 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Deleted node 4, returns 1
 02:== Deleted node 5, returns 1
 ==================== ('2 extra del/add cycles on plc2 for different indexes',)
-02:== Added node 11 n202.plc2.org
+02:== Added node 11 n201.plc2.org
 02:== Added node 12 n202.plc2.org
-02:== Added node 13 n202.plc2.org
-02:== Added node 14 n202.plc2.org
-02:== Added node 15 n202.plc2.org
+02:== Added node 13 n203.plc2.org
+02:== Added node 14 n204.plc2.org
+02:== Added node 15 n205.plc2.org
 02:== Deleted node 11, returns 1
 02:== Deleted node 12, returns 1
 02:== Deleted node 13, returns 1
 02:== Deleted node 14, returns 1
 02:== Deleted node 15, returns 1
-02:== Added node 16 n202.plc2.org
+02:== Added node 16 n201.plc2.org
 02:== Added node 17 n202.plc2.org
-02:== Added node 18 n202.plc2.org
-02:== Added node 19 n202.plc2.org
-02:== Added node 20 n202.plc2.org
+02:== Added node 18 n203.plc2.org
+02:== Added node 19 n204.plc2.org
+02:== Added node 20 n205.plc2.org
 02:== Deleted node 16, returns 1
 02:== Deleted node 17, returns 1
 02:== Deleted node 18, returns 1
@@ -170,30 +182,34 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:== Deleted node 20, returns 1
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 === refresh after deletion on plc2
-+++ 96.21 seconds ellapsed (8.11)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': -5, 'new_slice_attribute_types': 0}
-+++ 98.78 seconds ellapsed (2.58)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 100.70 seconds ellapsed (1.91)
++++ 95.90 seconds ellapsed (8.06)
+01:== Refreshing peer Result: { new_keys 0 new_nodes -5 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.76638698578 time_gather 0.0375680923462 time_process 0.250076055527 time_transmit 1.47874283791 }
++++ 98.49 seconds ellapsed (2.59)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.79944801331 time_gather 0.0346529483795 time_process 0.284554958344 time_transmit 1.48024010658 }
++++ 100.42 seconds ellapsed (1.94)
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 0 local (e=0) & 5 foreign (e=5)
 ==================== ('ADD on plc2 for different indexes',)
-02:== Added node 21 n202.plc2.org
+02:== Added node 21 n201.plc2.org
 02:== Added node 22 n202.plc2.org
-02:== Added node 23 n202.plc2.org
-02:== Added node 24 n202.plc2.org
-02:== Added node 25 n202.plc2.org
+02:== Added node 23 n203.plc2.org
+02:== Added node 24 n204.plc2.org
+02:== Added node 25 n205.plc2.org
 01: Checking nodes: got 5 local (e=5) & 0 foreign (e=0)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 === refresh after re-creation on plc2
-+++ 104.31 seconds ellapsed (3.61)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 5, 'new_slice_attribute_types': 0}
-+++ 106.93 seconds ellapsed (2.62)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 108.85 seconds ellapsed (1.93)
++++ 103.97 seconds ellapsed (3.55)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 5 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.82585000992 time_gather 0.0428400039673 time_process 0.287154197693 time_transmit 1.49585580826 }
++++ 106.62 seconds ellapsed (2.64)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.81237101555 time_gather 0.0299639701843 time_process 0.287971019745 time_transmit 1.49443602562 }
++++ 108.56 seconds ellapsed (1.95)
 01: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
 02: Checking nodes: got 5 local (e=5) & 5 foreign (e=5)
-+++ 110.13 seconds ellapsed (1.28)
++++ 109.84 seconds ellapsed (1.28)
 ==================== ('RESETTING SLICES TEST',)
 01:== Cleaning all nodes
 01:==== Cleaning node 1
@@ -208,25 +224,27 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02:==== Cleaning node 24
 02:==== Cleaning node 25
 01:== Added node 16 n101.plc1.org
-02:== Added node 26 n202.plc2.org
-01:== Added node 17 n101.plc1.org
+02:== Added node 26 n201.plc2.org
+01:== Added node 17 n102.plc1.org
 02:== Added node 27 n202.plc2.org
-01:== Added node 18 n101.plc1.org
-02:== Added node 28 n202.plc2.org
-01:== Added node 19 n101.plc1.org
-02:== Added node 29 n202.plc2.org
-01:== Added node 20 n101.plc1.org
-02:== Added node 30 n202.plc2.org
+01:== Added node 18 n103.plc1.org
+02:== Added node 28 n203.plc2.org
+01:== Added node 19 n104.plc1.org
+02:== Added node 29 n204.plc2.org
+01:== Added node 20 n105.plc1.org
+02:== Added node 30 n205.plc2.org
 01:== Cleaning all slices
 01:==== Cleaning slice 3
 02:== Cleaning all slices
 02:==== Cleaning slice 3
 === refresh After slices init
-+++ 127.56 seconds ellapsed (17.43)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 130.13 seconds ellapsed (2.57)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 132.05 seconds ellapsed (1.92)
++++ 127.25 seconds ellapsed (17.41)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.76366019249 time_gather 0.0377299785614 time_process 0.224427223206 time_transmit 1.50150299072 }
++++ 129.84 seconds ellapsed (2.58)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.75789785385 time_gather 0.029687166214 time_process 0.263741016388 time_transmit 1.46446967125 }
++++ 131.73 seconds ellapsed (1.89)
 ==================== ('CREATING SLICES on plc1',)
 01:== created slice 4 - max nodes=5
 01:== Attached person user1-1@plc1.org to slice oneone_slice1
@@ -251,11 +269,13 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 === refresh after slice created on plc1
-+++ 153.80 seconds ellapsed (21.76)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 156.33 seconds ellapsed (2.52)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 4, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 158.35 seconds ellapsed (2.03)
++++ 153.48 seconds ellapsed (21.75)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.74248790741 time_gather 0.039745092392 time_process 0.219425916672 time_transmit 1.48331689835 }
++++ 156.04 seconds ellapsed (2.56)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 4 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.9096159935 time_gather 0.0304329395294 time_process 0.369858026505 time_transmit 1.50932502747 }
++++ 158.08 seconds ellapsed (2.04)
 01: Checking slices: got 6 local (e=6) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
 01: local slice oneone_slice1 (e=0)  on nodes  []
@@ -284,11 +304,13 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onethree_slice3 (e=0)  on nodes  []
 02: foreign slice onefour_slice4 (e=0)  on nodes  []
 === refresh After local nodes were added on plc1
-+++ 179.46 seconds ellapsed (21.11)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 182.16 seconds ellapsed (2.69)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 184.11 seconds ellapsed (1.95)
++++ 179.19 seconds ellapsed (21.10)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.72503185272 time_gather 0.0388669967651 time_process 0.213292837143 time_transmit 1.47287201881 }
++++ 181.73 seconds ellapsed (2.54)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.82426786423 time_gather 0.0306141376495 time_process 0.319747924805 time_transmit 1.47390580177 }
++++ 183.71 seconds ellapsed (1.98)
 01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
@@ -331,11 +353,13 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After foreign nodes were added in plc1
-+++ 204.59 seconds ellapsed (20.48)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 207.18 seconds ellapsed (2.59)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 209.19 seconds ellapsed (2.01)
++++ 204.19 seconds ellapsed (20.48)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.80476403236 time_gather 0.0411069393158 time_process 0.226280927658 time_transmit 1.53737616539 }
++++ 206.82 seconds ellapsed (2.63)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.88829112053 time_gather 0.0308990478516 time_process 0.342664003372 time_transmit 1.51472806931 }
++++ 208.84 seconds ellapsed (2.02)
 01: local slice oneone_slice1 (e=10)  on nodes  [16, 17, 18, 19, 20, 11, 12, 13, 14, 15]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 [FOR:5] :  n201.plc2.org  n202.plc2.org  n203.plc2.org  n204.plc2.org  n205.plc2.org  
@@ -363,7 +387,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1166091452,
+     'expires': 1166452572,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -385,7 +409,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1166091449,
+     'expires': 1166452569,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -407,7 +431,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1166091462,
+     'expires': 1166452581,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -429,7 +453,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1166091467,
+     'expires': 1166452586,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -452,7 +476,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: 4 slivers (exp. 4) in GetSlivers for node n201.plc2.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1166091452,
+     'expires': 1166452572,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
@@ -474,7 +498,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1166091449,
+     'expires': 1166452569,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
@@ -496,7 +520,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1166091462,
+     'expires': 1166452581,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
@@ -518,7 +542,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1166091467,
+     'expires': 1166452586,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user3-key1',
                        'key_type': 'ssh'},
@@ -566,7 +590,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: 4 slivers (exp. 4) in GetSlivers for node n101.plc1.org
 >>slivername =  oneone_slice1
 {    'attributes': [],
-     'expires': 1166091452,
+     'expires': 1166452572,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -588,7 +612,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 4}
 >>slivername =  onetwo_slice2
 {    'attributes': [],
-     'expires': 1166091449,
+     'expires': 1166452569,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -610,7 +634,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 5}
 >>slivername =  onethree_slice3
 {    'attributes': [],
-     'expires': 1166091462,
+     'expires': 1166452581,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -632,7 +656,7 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'slice_id': 6}
 >>slivername =  onefour_slice4
 {    'attributes': [],
-     'expires': 1166091467,
+     'expires': 1166452586,
      'instantiation': 'plc-instantiated',
      'keys': [    {    'key': 'ssh-rsa 11key4plc11 user1-key1',
                        'key_type': 'ssh'},
@@ -653,11 +677,13 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
      'name': 'onefour_slice4',
      'slice_id': 7}
 === refresh After foreign nodes were removed on plc1
-+++ 232.75 seconds ellapsed (23.57)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 235.31 seconds ellapsed (2.56)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 237.26 seconds ellapsed (1.94)
++++ 232.45 seconds ellapsed (23.61)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.90232896805 time_gather 0.0400369167328 time_process 0.218807935715 time_transmit 1.6434841156 }
++++ 235.17 seconds ellapsed (2.72)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.84636998177 time_gather 0.0306148529053 time_process 0.314095020294 time_transmit 1.50166010857 }
++++ 237.15 seconds ellapsed (1.98)
 01: local slice oneone_slice1 (e=5)  on nodes  [16, 17, 18, 19, 20]
 [LOC:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 01: local slice onetwo_slice2 (e=5)  on nodes  [16, 17, 18, 19, 20]
@@ -692,11 +718,13 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 02: foreign slice onefour_slice4 (e=5)  on nodes  [8, 9, 10, 6, 7]
 [FOR:5] :  n101.plc1.org  n102.plc1.org  n103.plc1.org  n104.plc1.org  n105.plc1.org  
 === refresh After local nodes were removed on plc1
-+++ 256.49 seconds ellapsed (19.24)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 259.04 seconds ellapsed (2.55)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 261.02 seconds ellapsed (1.98)
++++ 256.34 seconds ellapsed (19.20)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.75599598885 time_gather 0.0399141311646 time_process 0.220777988434 time_transmit 1.49530386925 }
++++ 258.92 seconds ellapsed (2.57)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.82033109665 time_gather 0.0314879417419 time_process 0.314651012421 time_transmit 1.47419214249 }
++++ 260.87 seconds ellapsed (1.95)
 01: local slice oneone_slice1 (e=0)  on nodes  []
 01: local slice onetwo_slice2 (e=0)  on nodes  []
 01: local slice onethree_slice3 (e=0)  on nodes  []
@@ -714,23 +742,27 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 4 foreign (e=4)
 === refresh After slices clenaup
-+++ 274.71 seconds ellapsed (13.68)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 277.64 seconds ellapsed (2.94)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': -4, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 0}
-+++ 279.61 seconds ellapsed (1.97)
++++ 274.60 seconds ellapsed (13.73)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.75281190872 time_gather 0.0411880016327 time_process 0.217626810074 time_transmit 1.49399709702 }
++++ 277.17 seconds ellapsed (2.57)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 0 new_slice_attributes 0 new_slices -4 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.8151268959 time_gather 0.0297141075134 time_process 0.318310976028 time_transmit 1.46710181236 }
++++ 279.12 seconds ellapsed (1.95)
 01: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
 02: Checking slices: got 2 local (e=2) & 0 foreign (e=0)
-+++ 281.49 seconds ellapsed (1.88)
-01:== created SliceAttributeType = 20
-02:== created SliceAttributeType = 20
++++ 281.01 seconds ellapsed (1.89)
+01:== created SliceAttributeType = 21
+02:== created SliceAttributeType = 21
 === refresh after SliceAttributeType creation
-+++ 283.39 seconds ellapsed (1.90)
-01:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc1', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 1}
-+++ 285.91 seconds ellapsed (2.53)
-02:== Refreshing peer got  {'new_keys': 0, 'new_sites': 0, 'plcname': 'Thierry plc2 on devbox', 'new_slice_attributes': 0, 'new_slices': 0, 'new_persons': 0, 'new_nodes': 0, 'new_slice_attribute_types': 1}
-+++ 287.81 seconds ellapsed (1.90)
-+++ 287.81 seconds ellapsed (0.00)
++++ 282.90 seconds ellapsed (1.90)
+01:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 1 new_slice_attributes 0 new_slices 0 plcname Thierry plc1 }
++++ ellapsed: { time_all 1.75995182991 time_gather 0.0382769107819 time_process 0.230616807938 time_transmit 1.49105811119 }
++++ 285.48 seconds ellapsed (2.58)
+02:== Refreshing peer Result: { new_keys 0 new_nodes 0 new_persons 0 new_sites 0 new_slice_attribute_types 1 new_slice_attributes 0 new_slices 0 plcname Thierry plc2 on devbox }
++++ ellapsed: { time_all 1.77619385719 time_gather 0.0305790901184 time_process 0.285783052444 time_transmit 1.45983171463 }
++++ 287.39 seconds ellapsed (1.91)
++++ 287.39 seconds ellapsed (0.00)
 01:============================== DUMPING
 01: SITES
 1 None pl Thierry plc1 Central []
@@ -787,10 +819,10 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 01: SLICES
 1 None pl_conf nodes= [] persons= []
 --- sas= [1, 2, 3] pl_conf crp= 1
---- 'expires': 1166091315
+--- 'expires': 1166452434
 2 None pl_conf_vserverslice nodes= [] persons= []
 --- sas= [4, 5, 6] pl_conf_vserverslice crp= 1
---- 'expires': 1166091315
+--- 'expires': 1166452434
 01: Slice Attribute Types
 1 None type 20 Type of slice (e.g. vserver)
 2 None system 10 Is a default system slice (1) or not (0 or unset)
@@ -808,28 +840,29 @@ Attempting to set passwd for person_id=4 in DB2UPDATE 1
 14 None net2_avg 10 Average bandwidth over routes exempt from node bandwidth limits (bps)
 15 None net2_share 10 Number of bandwidth shares over routes exempt from node bandwidth limits
 16 None disk_max 10 Disk quota (1k disk blocks)
-17 None plc_slice_type 20 Type of slice rspec to be created
-18 None plc_agent_version 10 Version of PLC agent (slice creation service) software to be deployed
-19 None plc_ticket_pubkey 10 Public key used to verify PLC-signed tickets
-20 None sat_1 10 custom sat on plc1
-21 1 sat_2 10 custom sat on plc2
+17 None proper_op 10 Proper operation (e.g. bind_socket)
+18 None plc_slice_type 20 Type of slice rspec to be created
+19 None plc_agent_version 10 Version of PLC agent (slice creation service) software to be deployed
+20 None plc_ticket_pubkey 10 Public key used to verify PLC-signed tickets
+21 None sat_1 10 custom sat on plc1
+22 1 sat_2 10 custom sat on plc2
 01: Slice Attributes
-1 None plc_agent_version AT_id: 18
---- v= 1.0 sl= 1 n= None
-2 None plc_slice_type AT_id: 17
+1 None plc_slice_type AT_id: 18
 --- v= VServerSlice sl= 1 n= None
-3 None plc_ticket_pubkey AT_id: 19
---- v= MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIUaG0IE/V4tHb2XeAdV37JvAS
-h3YmxVpFFAYbjI3i2rcNFYGbjRxaBxQbLMVVI1vNCcgqVZTxDcHJKWRGJHwD6LTK
-s57VXANFQNMnFVmp6DiA/5xnf40UYpyvzmw90AY4I3IURgeoEMXKdBsAfccGv+fw
-AHiU1HxVVV3ClJZlkwIDAQAB
+2 None plc_agent_version AT_id: 19
+--- v= 1.0 sl= 1 n= None
+3 None plc_ticket_pubkey AT_id: 20
+--- v= MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDOTQoURmv9XRWJRN9lKuXEqZOV
+MQXuc2SAqECNNQkFnhUF27NnSZ9NO8AJe3jJ5eKvFcIwFRawgKlzn1oJAjXdzRgU
+5DWB0UfsqL3rr55ASuEK3SNnBXnTLY7xst9Zc96FedTpEzbbarVTLHJ87+NYWPZ5
+N5Jb/oqO06jQbGqEJQIDAQAB
 sl= 1 n= None
-4 None disk_max AT_id: 16
---- v= 5000000 sl= 2 n= None
-5 None cpu_share AT_id: 7
+4 None cpu_share AT_id: 7
 --- v= 32 sl= 2 n= None
-6 None plc_slice_type AT_id: 17
+5 None plc_slice_type AT_id: 18
 --- v= VServerSlice sl= 2 n= None
+6 None disk_max AT_id: 16
+--- v= 5000000 sl= 2 n= None
 01: SLIVERS
 01: SLIVERS for : hostname n201.plc2.org
 01: 31 config files
@@ -908,10 +941,10 @@ sl= 1 n= None
 02: SLICES
 1 None pl_conf nodes= [] persons= []
 --- sas= [1, 2, 3] pl_conf crp= 1
---- 'expires': 1166091316
+--- 'expires': 1166452435
 2 None pl_conf_vserverslice nodes= [] persons= []
 --- sas= [4, 5, 6] pl_conf_vserverslice crp= 1
---- 'expires': 1166091316
+--- 'expires': 1166452435
 02: Slice Attribute Types
 1 None type 20 Type of slice (e.g. vserver)
 2 None system 10 Is a default system slice (1) or not (0 or unset)
@@ -929,28 +962,29 @@ sl= 1 n= None
 14 None net2_avg 10 Average bandwidth over routes exempt from node bandwidth limits (bps)
 15 None net2_share 10 Number of bandwidth shares over routes exempt from node bandwidth limits
 16 None disk_max 10 Disk quota (1k disk blocks)
-17 None plc_slice_type 20 Type of slice rspec to be created
-18 None plc_agent_version 10 Version of PLC agent (slice creation service) software to be deployed
-19 None plc_ticket_pubkey 10 Public key used to verify PLC-signed tickets
-20 None sat_2 10 custom sat on plc2
-21 1 sat_1 10 custom sat on plc1
+17 None proper_op 10 Proper operation (e.g. bind_socket)
+18 None plc_slice_type 20 Type of slice rspec to be created
+19 None plc_agent_version 10 Version of PLC agent (slice creation service) software to be deployed
+20 None plc_ticket_pubkey 10 Public key used to verify PLC-signed tickets
+21 None sat_2 10 custom sat on plc2
+22 1 sat_1 10 custom sat on plc1
 02: Slice Attributes
-1 None plc_agent_version AT_id: 18
---- v= 1.0 sl= 1 n= None
-2 None plc_slice_type AT_id: 17
+1 None plc_slice_type AT_id: 18
 --- v= VServerSlice sl= 1 n= None
-3 None plc_ticket_pubkey AT_id: 19
---- v= MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzNBijHgrh8Md4VsdyvB2JscUz
-T9eiCmZ+nWFPq7WgH8BVHYg7ltu5cuUU6R2KkjvwPSlK6NASdZaowlqp2TjHJodA
-myoh6CQQwuyzb+EWxfkBq3cv3uYWnpR2rJBtHtgQbmSDT6cxyZz8KVXcYTztfxTh
-hfcSi5YPSiWRE7xh1wIDAQAB
+2 None plc_agent_version AT_id: 19
+--- v= 1.0 sl= 1 n= None
+3 None plc_ticket_pubkey AT_id: 20
+--- v= MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGjlDHVbuu0BzdY89N2WTFf8H1
+uoZwZQIr8NzGI0hycHkiKdJl/n9X8GjPBZ1v7d+ncO7nMjP5gZkKsjHOx1BbP/sQ
+Pn3zhbqkkVztBa9QAfBl6t2DHwI/s5wk31e06NkEB1l6rqpAiQ590wDHE9HlMHkJ
+XzSGaMQWqjiOjo+2jQIDAQAB
 sl= 1 n= None
-4 None disk_max AT_id: 16
---- v= 5000000 sl= 2 n= None
-5 None cpu_share AT_id: 7
+4 None cpu_share AT_id: 7
 --- v= 32 sl= 2 n= None
-6 None plc_slice_type AT_id: 17
+5 None plc_slice_type AT_id: 18
 --- v= VServerSlice sl= 2 n= None
+6 None disk_max AT_id: 16
+--- v= 5000000 sl= 2 n= None
 02: SLIVERS
 02: SLIVERS for : hostname n101.plc1.org
 02: 31 config files
@@ -973,6 +1007,6 @@ sl= 1 n= None
 02: SLIVERS for : hostname n205.plc2.org
 02: 31 config files
 02:============================== END DUMP
-+++ 298.86 seconds ellapsed (11.05)
++++ 298.40 seconds ellapsed (11.01)
 ==================== ('END',)
-+++ 298.86 seconds ellapsed (0.00)
++++ 298.40 seconds ellapsed (0.00)
