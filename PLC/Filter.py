@@ -1,3 +1,5 @@
+from types import StringTypes
+
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type
 
@@ -55,9 +57,9 @@ class Filter(Parameter, dict):
         for field, value in self.iteritems():
             # provide for negation with a field starting with ~
             negation=False
-            if field[0]=='~':
-                negation=True
-                field=field[1:]
+            if field[0] == '~':
+                negation = True
+                field = field[1:]
 
             if field not in self.fields:
                 raise PLCInvalidArgument, "Invalid filter field '%s'" % field
@@ -74,8 +76,8 @@ class Filter(Parameter, dict):
                 if value is None:
                     operator = "IS"
                     value = "NULL"
-                elif not isinstance(value, bool) \
-		and (value.find("*") > -1 or value.find("%") > -1):
+                elif isinstance(value, StringTypes) and \
+                     (value.find("*") > -1 or value.find("%") > -1):
 		    operator = "LIKE"
                     value = str(api.db.quote(value.replace("*", "%")))
 		else:
