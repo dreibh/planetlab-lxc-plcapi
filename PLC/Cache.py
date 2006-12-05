@@ -92,12 +92,22 @@ class Cache:
 		self.api.db.do (sql)
 
 	def insert_new_items (self, id1, id2_set):
-	    if id2_set:
-		sql = "INSERT INTO %s select %d, %d " % \
-   			self.tablename, id1, id2[0] 
-	    	for id2 in id2_set[1:]:
-			sql += " UNION ALL SELECT %d, %d " % \
-			(id1,id2)
+            ### xxx needs to be optimized
+            ### tried to figure a way to use a single sql statement
+            ### like: insert into table (x,y) values (1,2),(3,4);
+            ### but apparently this is not supported under postgresql
+            for id2 in id2_set:
+                sql = "INSERT INTO %s (%s_id,%s_id) VALUES (%d,%d)"% \
+                      (self.tablename,self.lowerclass1,self.lowerclass2,id1,id2)
+
+# below is Tony's code but it's badly broken. I'm not sure we care in fact.
+#	    if id2_set:
+#		sql = "INSERT INTO %s select %d, %d " % \
+#   			self.tablename, id1, id2[0] 
+#	    	for id2 in id2_set[1:]:
+#			sql += " UNION ALL SELECT %d, %d " % \
+#			(id1,id2)
+
 		self.api.db.do (sql)
 
 	def update_item (self, id1, old_id2s, new_id2s):
@@ -152,8 +162,6 @@ class Cache:
         ### index upon class_key for future searches
         local_objects_index = local_objects.dict(class_key)
 
-	#verbose ('update_table',classname,local_objects_index.keys())
-
 	### mark entries for this peer outofdate
         new_count=0
         old_count=0;
@@ -176,6 +184,9 @@ class Cache:
 
 	    verbose ('update_table (%s) - Considering'%classname,object_name)
                 
+            # optimizing : avoid doing useless syncs
+            needs_sync = False
+
             # create or update
             try:
                 ### We know about this object already
@@ -195,9 +206,12 @@ class Cache:
 		    ### we can assume the object just moved
 		    ### needs to update peer_id though
                     local_object['peer_id'] = peer_id
+                    needs_sync = True
                 # update all fields as per foreign_fields
                 for field in foreign_fields:
-                    local_object[field]=alien_object[field]
+                    if (local_object[field] != alien_object [field]):
+                        local_object[field]=alien_object[field]
+                        needs_sync = True
 		verbose ('update_table FOUND',object_name)
 	    except:
                 ### create a new entry
@@ -219,7 +233,7 @@ class Cache:
                     direct_ref_fields=[]
                     for xref in foreign_xrefs:
                         field=xref['field']
-                        verbose('checking field %s for direct_ref'%field)
+                        #verbose('checking field %s for direct_ref'%field)
                         if isinstance(alien_object[field],int):
                             direct_ref_fields.append(field)
                     verbose("FOUND DIRECT REFS",direct_ref_fields)
@@ -227,6 +241,7 @@ class Cache:
                     local_object[field]=1
                 verbose('Early sync on',local_object)
                 local_object.sync()
+                needs_sync = False
 
             # this row is now valid
             local_object.uptodate=True
@@ -260,13 +275,15 @@ class Cache:
 		elif isinstance (alien_value,int):
 		    #verbose ('update_table atom-transcoding ',xref['class'],' aliens=',alien_value,)
 		    new_value = transcoder.transcode(alien_value)
-		    local_object[field] = new_value
+                    if local_object[field] != new_value:
+                        local_object[field] = new_value
+                        needs_sync = True
 
             ### this object is completely updated, let's save it
-            verbose('FINAL sync on %s:'%object_name,local_object)
-            local_object.sync()
+            if needs_sync:
+                verbose('FINAL sync on %s:'%object_name,local_object)
+                local_object.sync(False)
                     
-
 	### delete entries that are not uptodate
         for local_object in local_objects:
             if not local_object.uptodate:
@@ -365,7 +382,7 @@ class Cache:
                 verbose('CREATED new sa')
             local_object.uptodate=True
             new_count += 1
-            local_object.sync()
+            local_object.sync(False)
 
         for local_object in local_objects:
             if not local_object.uptodate:
@@ -385,6 +402,7 @@ class Cache:
 
         ### uses GetPeerData to gather all info in a single xmlrpc request
 
+        timers={}
         t_start=time.time()
         # xxx see also GetPeerData - peer_id arg unused yet
         all_data = self.peer_server.GetPeerData (self.auth,0)
@@ -395,10 +413,18 @@ class Cache:
         all_sites = plocal_sites + all_data['Sites-peer']
 	nb_new_sites = self.update_table('Site', plocal_sites)
 
+        t0 = time.time()
+        timers['process-sites']=t0-t_acquired
+        
+
 	# refresh keys
 	plocal_keys = all_data['Keys-local']
         all_keys = plocal_keys + all_data['Keys-peer']
 	nb_new_keys = self.update_table('Key', plocal_keys)
+
+        t=time.time()
+        timers['process-keys']=t-t0
+        t0=t
 
 	# refresh nodes
 	plocal_nodes = all_data['Nodes-local']
@@ -406,17 +432,29 @@ class Cache:
         nb_new_nodes = self.update_table('Node', plocal_nodes,
 					 { 'Site' : all_sites } )
 
+        t=time.time()
+        timers['process-nodes']=t-t0
+        t0=t
+
 	# refresh persons
 	plocal_persons = all_data['Persons-local']
         all_persons = plocal_persons + all_data['Persons-peer']
 	nb_new_persons = self.update_table ('Person', plocal_persons,
 					    { 'Key': all_keys, 'Site' : all_sites } )
 
+        t=time.time()
+        timers['process-persons']=t-t0
+        t0=t
+
         # refresh slice attribute types
         plocal_slice_attribute_types = all_data ['SliceAttibuteTypes-local']
         nb_new_slice_attribute_types = self.update_table ('SliceAttributeType',
                                                           plocal_slice_attribute_types,
                                                           report_name_conflicts = False)
+
+        t=time.time()
+        timers['process-sat']=t-t0
+        t0=t
 
 	# refresh slices
         plocal_slices = all_data['Slices-local']
@@ -431,13 +469,26 @@ class Cache:
                                             'Site': all_sites},
 					   is_system_slice)
 
+        t=time.time()
+        timers['process-slices']=t-t0
+        t0=t
+
         # refresh slice attributes
         plocal_slice_attributes = all_data ['SliceAttributes-local']
         nb_new_slice_attributes = self.update_slice_attributes (plocal_slice_attributes,
                                                                 all_nodes,
                                                                 all_slices)
+        t=time.time()
+        timers['process-sa']=t-t0
+        t0=t
         
         t_end=time.time()
+
+        timers['time_gather']   = all_data['ellapsed']
+        timers['time_transmit'] = t_acquired-t_start-all_data['ellapsed']
+        timers['time_process']  = t_end-t_acquired
+        timers['time_all']      = t_end-t_start
+        
         ### returned as-is by RefreshPeer
         return {'plcname':self.api.config.PLC_NAME,
 		'new_sites':nb_new_sites,
@@ -447,9 +498,6 @@ class Cache:
                 'new_slice_attribute_types':nb_new_slice_attribute_types,
                 'new_slices':nb_new_slices,
                 'new_slice_attributes':nb_new_slice_attributes,
-                'time_gather': all_data['ellapsed'],
-                'time_transmit':t_acquired-t_start-all_data['ellapsed'],
-                'time_process':t_end-t_acquired,
-                'time_all':t_end-t_start,
+                'timers':timers,
                 }
 

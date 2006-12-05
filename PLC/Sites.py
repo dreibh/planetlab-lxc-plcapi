@@ -46,8 +46,11 @@ class Site(Row):
     # for Cache
     class_key = 'login_base'
     foreign_fields = ['abbreviated_name', 'name', 'is_public', 'latitude', 'longitude',
-		      'url', 'date_created', 'last_updated', 'max_slices', 'max_slivers',
+		      'url', 'max_slices', 'max_slivers',
 		      ]
+    # forget about these ones, they are read-only anyway
+    # handling them causes Cache to re-sync all over again 
+    # 'last_updated', 'date_created'
     foreign_xrefs = []
 
     def validate_name(self, name):

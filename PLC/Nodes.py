@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.26 2006/11/28 14:55:00 thierry Exp $
+# $Id: Nodes.py,v 1.27 2006/11/30 10:12:01 thierry Exp $
 #
 
 from types import StringTypes
@@ -64,7 +64,10 @@ class Node(Row):
 
     # for Cache
     class_key = 'hostname'
-    foreign_fields = ['boot_state','model','version','date_created','last_updated']
+    foreign_fields = ['boot_state','model','version']
+    # forget about these ones, they are read-only anyway
+    # handling them causes Cache to re-sync all over again 
+    # 'date_created','last_updated'
     foreign_xrefs = [
 	# in this case, we dont need the 'table' but Cache will look it up, so...
         {'field' : 'site_id' , 'class' : 'Site' , 'table' : 'unused-on-direct-refs' } ,

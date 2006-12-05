@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.22 2006/11/28 14:55:00 thierry Exp $
+# $Id: Persons.py,v 1.23 2006/11/30 10:12:01 thierry Exp $
 #
 
 from types import StringTypes
@@ -56,7 +56,10 @@ class Person(Row):
     # for Cache
     class_key = 'email'
     foreign_fields = ['first_name', 'last_name', 'title', 'email', 'phone', 'url',
-		      'bio', 'enabled', 'password', 'last_updated', 'date_created']
+		      'bio', 'enabled', 'password', ]
+    # forget about these ones, they are read-only anyway
+    # handling them causes Cache to re-sync all over again 
+    # 'last_updated', 'date_created'
     foreign_xrefs = [
         {'field' : 'key_ids',  'class': 'Key',  'table' : 'person_key' } ,
         {'field' : 'site_ids', 'class': 'Site', 'table' : 'person_site'},
