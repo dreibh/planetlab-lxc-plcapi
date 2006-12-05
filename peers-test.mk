@@ -11,10 +11,13 @@ PLC2=planetlab-devbox.inria.fr
 PLC1SSH=root@$(PLC1)
 PLC2SSH=root@$(PLC2)
 
+PY=python -u
+
 all:help
 
 ####################
 PUSH=pclean pplc2 papi2 pplc1 papi1
+EXTRA-PUSHS= ./Shell.py ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh
 
 push:$(PUSH)
 
@@ -26,11 +29,11 @@ pclean:
 papi1:
 	rsync -a -v -C ./ root@$(PLC1):new_plc_api/
 pplc1:
-	rsync -a -v -C ./planetlab4.sql ./PLC root@$(PLC1):$(CHROOT)$(APIDIR)/
+	rsync -a -v -C $(EXTRA-PUSHS) ./PLC root@$(PLC1):$(CHROOT)$(APIDIR)/
 papi2:
 	rsync -a -v -C ./ root@$(PLC2):new_plc_api/
 pplc2:
-	rsync -a -v -C ./planetlab4.sql ./PLC root@$(PLC2):$(CHROOT)$(APIDIR)/
+	rsync -a -v -C $(EXTRA-PUSHS) ./PLC root@$(PLC2):$(CHROOT)$(APIDIR)/
 
 ####################
 DB=install-schema stop-clients db-drop restart-full-db
@@ -132,18 +135,17 @@ log:
 # remove time/delay dependent output
 normalize	= egrep -v "'expires':|^+++.*ellapsed"
 
-TEST=run checkpoint diff
-run: run-n normalize 
-normalize: TestPeers-n.nout TestPeers-n.nref
+TEST=run diff checkpoint
+run: run-n 
 
 %.nout: %.out
 	$(normalize) $*.out > $@
 %.nref: %.ref
 	$(normalize) $*.ref > $@
 
-diff: normalize
+diff: TestPeers-n.nref TestPeers-n.nout
 	@echo '<< REF OUT>>'
-	diff TestPeers-n.ref TestPeers-n.out
+	diff TestPeers-n.nref TestPeers-n.nout
 
 ckp checkpoint:
 	@echo adopting latest run as reference
@@ -155,31 +157,31 @@ VARIANT-TESTS :=
 
 VARIANT-TESTS += run-n
 run-n: 
-	python -u ./TestPeers.py > TestPeers-n.out 2>&1
+	$(PY) ./TestPeers.py > TestPeers-n.out 2>&1
 VARIANT-TESTS += run-m
 run-m:
-	python -u ./TestPeers.py -m > TestPeers-m.out 2>&1
+	$(PY) ./TestPeers.py -m > TestPeers-m.out 2>&1
 VARIANT-TESTS += run-b
 run-b:
-	python -u ./TestPeers.py -b > TestPeers-b.out 2>&1
+	$(PY) ./TestPeers.py -b > TestPeers-b.out 2>&1
 VARIANT-TESTS += run-p run-pn
-run-p run-pn:
-	python -u ./TestPeers.py -p > TestPeers-p.out 2>&1
+run-pn:
+	$(PY) ./TestPeers.py -p > TestPeers-pn.out 2>&1
 VARIANT-TESTS += run-pb
 run-pb:
-	python -u ./TestPeers.py -p -b > TestPeers-pb.out 2>&1
+	$(PY) ./TestPeers.py -p -b > TestPeers-pb.out 2>&1
 VARIANT-TESTS += run-ph
 run-ph:
-	python -u ./TestPeers.py -p -H > TestPeers-ph.out 2>&1
+	$(PY) ./TestPeers.py -p -H > TestPeers-ph.out 2>&1
 VARIANT-TESTS += run-e run-en
-run-e run-en:
-	python -u ./TestPeers.py -e > TestPeers-e.out 2>&1
+run-en:
+	$(PY) ./TestPeers.py -e > TestPeers-en.out 2>&1
 VARIANT-TESTS += run-eb
 run-eb:
-	python -u ./TestPeers.py -e -b > TestPeers-eb.out 2>&1
+	$(PY) ./TestPeers.py -e -b > TestPeers-eb.out 2>&1
 VARIANT-TESTS += run-eh
 run-eh:
-	python -u ./TestPeers.py -e -H > TestPeers-eh.out 2>&1
+	$(PY) ./TestPeers.py -e -H > TestPeers-eh.out 2>&1
 
 VARIANT-TESTS += diff-m
 diff-m: TestPeers-m.nref TestPeers-m.nout 
@@ -190,12 +192,54 @@ ckp-m:
 	rm -f TestPeers-m.n???
 
 VARIANT-TESTS += diff-p
-diff-p: TestPeers-p.nref TestPeers-p.nout 
-	diff TestPeers-p.nref TestPeers-p.nout
+diff-p: TestPeers-pn.nref TestPeers-pn.nout 
+	diff TestPeers-pn.nref TestPeers-pn.nout
 VARIANT-TESTS += ckp-p
 ckp-p:
-	cp TestPeers-p.out TestPeers-p.ref
-	rm -f TestPeers-p.n???
+	cp TestPeers-pn.out TestPeers-pn.ref
+	rm -f TestPeers-pn.n???
+
+VARIANT-TESTS += diff-eh
+diff-eh: TestPeers-eh.nref TestPeers-eh.nout 
+	diff TestPeers-eh.nref TestPeers-eh.nout
+VARIANT-TESTS += ckp-eh
+ckp-eh:
+	cp TestPeers-eh.out TestPeers-eh.ref
+	rm -f TestPeers-eh.n???
+
+### need to run in installed plc for gaining direct access (psycopg2 broken)
+VARIANT-TESTS += run-lpn-1
+run-lpn-1:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpn-1
+chroot-run-lpn-1:
+	$(PY) TestPeers.py -n -p -l 1 -f 8 > TestPeers-pn-1.out
+VARIANT-TESTS += run-lpn-2
+run-lpn-2:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpn-2
+chroot-run-lpn-2:
+	$(PY) TestPeers.py -n -p -l 2 -f 8 > TestPeers-pn-2.out
+
+VARIANT-TESTS += run-lpb-1
+run-lpb-1:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpb-1
+chroot-run-lpb-1:
+	$(PY) TestPeers.py -b -p -l 1 > TestPeers-pb-1.out
+VARIANT-TESTS += run-lpb-2
+run-lpb-2:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpb-2
+chroot-run-lpb-2:
+	$(PY) TestPeers.py -b -p -l 2 > TestPeers-pb-2.out
+
+VARIANT-TESTS += run-lph-1
+run-lph-1:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lph-1
+chroot-run-lph-1:
+	$(PY) TestPeers.py -H -p -l 1 > TestPeers-ph-1.out
+VARIANT-TESTS += run-lph-1
+run-lph-2:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lph-2
+chroot-run-lph-2:
+	$(PY) TestPeers.py -H -p -l 2 > TestPeers-ph-2.out
 
 
 VARIANTS-DB := 
@@ -203,57 +247,61 @@ VARIANTS-DB :=
 DB1=populate-1.sql
 DB2=populate-2.sql
 
-SAVE=save1 save2
-VARIANT-DB += save
-save: $(SAVE)
-
 VARIANT-DB += save-n
-save-n: DB1=populate-n-1.sql
-save-n: DB2=populate-n-2.sql
-save-n:save
+save-n: save-n-1 save-n-2
+save-n-1: DB1=populate-n-1.sql
+save-n-1: save1
+save-n-2: DB2=populate-n-2.sql
+save-n-2:save2
 
 VARIANT-DB += save-b
-save-b: DB1=populate-b-1.sql
-save-b: DB2=populate-b-2.sql
-save-b:save
+save-b: save-b-1 save-b-2
+save-b-1: DB1=populate-b-1.sql
+save-b-1: save1
+save-b-2: DB2=populate-b-2.sql
+save-b-2:save2
 
 VARIANT-DB += save-h
-save-h: DB1=populate-h-1.sql
-save-h: DB2=populate-h-2.sql
-save-h:save
+save-h: save-h-1 save-h-2
+save-h-1: DB1=populate-h-1.sql
+save-h-1: save1
+save-h-2: DB2=populate-h-2.sql
+save-h-2:save2
 
 save1:
-	ssh $(PLC1SSH) "make -C new_plc_api -f peers-test.mk DBDUMP=$(DB1) db-dump"
+	ssh $(PLC1SSH) make -C new_plc_api -f peers-test.mk DBDUMP=$(DB1) db-dump
 	scp $(PLC1SSH):new_plc_api/$(DB1) .
 save2:
-	ssh $(PLC2SSH) "make -C new_plc_api -f peers-test.mk DBDUMP=$(DB2) db-dump"
+	ssh $(PLC2SSH) make -C new_plc_api -f peers-test.mk DBDUMP=$(DB2) db-dump
 	scp $(PLC2SSH):new_plc_api/$(DB2) .
 
-RESTORE=restore1 restore2
-VARIANT-DB += restore
-restore:$(RESTORE)
-
 VARIANT-DB += restore-n
-restore-n: DB1=populate-n-1.sql
-restore-n: DB2=populate-n-2.sql
-restore-n:restore
+restore-n: restore-n-1 restore-n-2
+restore-n-1: DB1=populate-n-1.sql
+restore-n-1: restore1
+restore-n-2: DB2=populate-n-2.sql
+restore-n-2:restore2
 
 VARIANT-DB += restore-b
-restore-b: DB1=populate-b-1.sql
-restore-b: DB2=populate-b-2.sql
-restore-b:restore
+restore-b: restore-b-1 restore-b-2
+restore-b-1: DB1=populate-b-1.sql
+restore-b-1: restore1
+restore-b-2: DB2=populate-b-2.sql
+restore-b-2:restore2
 
 VARIANT-DB += restore-h
-restore-h: DB1=populate-h-1.sql
-restore-h: DB2=populate-h-2.sql
-restore-h:restore
+restore-h: restore-h-1 restore-h-2
+restore-h-1: DB1=populate-h-1.sql
+restore-h-1: restore1
+restore-h-2: DB2=populate-h-2.sql
+restore-h-2:restore2
 
 restore1:
 	scp $(DB1) $(PLC1SSH):new_plc_api/
-	ssh $(PLC1SSH) "make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB1) dbi"
+	ssh $(PLC1SSH) make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB1) dbi
 restore2:
 	scp $(DB2) $(PLC2SSH):new_plc_api/
-	ssh $(PLC2SSH) "make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB2) dbi"
+	ssh $(PLC2SSH) make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB2) dbi
 
 #######
 HELP=rpm db-dump restart-http
@@ -268,8 +316,6 @@ help:
 	@echo upgrade: $(UPGRADE)
 	@echo test: $(TEST)
 	@echo other test targets: $(VARIANT-TESTS)
-	@echo save:$(SAVE)
-	@echo restore:$(RESTORE)
 	@echo db targets: $(VARIANT-DB)
 	@echo OTHERS: $(HELP)
 
