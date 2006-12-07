@@ -32,6 +32,8 @@ class AddPersonToSlice(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	# Let's be open-minded as a start
+	#PLCCheckLocalPerson(person,"AddPersonToSlice")
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
@@ -39,6 +41,7 @@ class AddPersonToSlice(Method):
             raise PLCInvalidArgument, "No such slice"
 
         slice = slices[0]
+	PLCCheckLocalSlice(slice,"AddPersonToSlice")
 
         # If we are not admin, make sure the caller is a PI
         # of the site associated with the slice

@@ -34,6 +34,7 @@ class BlacklistKey(Method):
         if not keys:
             raise PLCInvalidArgument, "No such key"
         key = keys[0]
+	PLCCheckLocalKey(key,"BlackListKey")
 
         key.blacklist()
 	self.object_ids = [key['key_id']]

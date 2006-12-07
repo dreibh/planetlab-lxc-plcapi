@@ -40,6 +40,7 @@ class DeletePersonFromSlice(Method):
             raise PLCInvalidArgument, "No such slice"
 
         slice = slices[0]
+	PLCCheckLocalSlice(slice,"DeletePersonFromSlice")
 
         # If we are not admin, make sure the caller is a pi
         # of the site associated with the slice

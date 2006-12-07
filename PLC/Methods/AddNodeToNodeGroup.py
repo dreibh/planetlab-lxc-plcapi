@@ -32,6 +32,7 @@ class AddNodeToNodeGroup(Method):
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
+	PLCCheckLocalNode (node,"AddNodeToNodeGroup")
 
 	# Get nodegroup info
         nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])

@@ -32,6 +32,7 @@ class SetPersonPrimarySite(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	PLCCheckLocalPerson(person,"SetPersonPrimarySite")
 
         # Authenticated function
         assert self.caller is not None
@@ -47,6 +48,7 @@ class SetPersonPrimarySite(Method):
             raise PLCInvalidArgument, "No such site"
 
         site = sites[0]
+	PLCCheckLocalSite(site,"SetPersonPrimarySite")
 
         if site['site_id'] not in person['site_ids']:
             raise PLCInvalidArgument, "Not a member of the specified site"

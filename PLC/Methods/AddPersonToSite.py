@@ -33,6 +33,7 @@ class AddPersonToSite(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	PLCCheckLocalPerson(person,"AddPersonToSite")
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
@@ -40,6 +41,7 @@ class AddPersonToSite(Method):
             raise PLCInvalidArgument, "No such site"
 
         site = sites[0]
+	PLCCheckLocalSite(site,"AddPersonToSite")
 
         if site['site_id'] not in person['site_ids']:
             site.add_person(person)

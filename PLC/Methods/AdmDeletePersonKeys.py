@@ -36,6 +36,7 @@ class AdmDeletePersonKeys(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	PLCCheckLocalPerson(person,"AdmDeletePersonKeys")
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] != person['person_id']:

@@ -38,6 +38,7 @@ class AddPersonKey(Method):
         if not persons:
             raise PLCInvalidArgument, "No such account"
         person = persons[0]
+	PLCCheckLocalPerson (person,"AddPersonKey")
 
 	# If we are not admin, make sure caller is adding a key to their account
         if 'admin' not in self.caller['roles']:

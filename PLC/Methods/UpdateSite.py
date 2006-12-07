@@ -42,6 +42,7 @@ class UpdateSite(Method):
             raise PLCInvalidArgument, "No such site"
 
         site = sites[0]
+	PLCCheckLocalSite(site,"UpdateSite")
 
         # Authenticated function
         assert self.caller is not None

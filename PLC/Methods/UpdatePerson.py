@@ -42,6 +42,7 @@ class UpdatePerson(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	PLCCheckLocalPerson(person,"UpdatePerson")
 
         # Authenticated function
         assert self.caller is not None

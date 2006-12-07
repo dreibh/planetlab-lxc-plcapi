@@ -34,6 +34,7 @@ class AddNodeToPCU(Method):
             raise PLCInvalidArgument, "No such node"
 
         node = nodes[0]
+	PLCCheckLocalNode(node,"AddNodeToPCU")
 
         # Get PCU
         pcus = PCUs(self.api, [pcu_id])

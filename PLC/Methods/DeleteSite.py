@@ -35,6 +35,8 @@ class DeleteSite(Method):
             raise PLCInvalidArgument, "No such site"
 
         site = sites[0]
+	PLCCheckLocalSite(site,"DeleteSite")
+
         site.delete()
 	self.object_ids = [site['site_id']]
 

@@ -46,6 +46,7 @@ class UpdateSlice(Method):
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
+	PLCCheckLocalSlice(slice,"UpdateSlice")
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:

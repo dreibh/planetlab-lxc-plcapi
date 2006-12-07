@@ -49,6 +49,7 @@ class DeleteRoleFromPerson(Method):
             raise PLCInvalidArgument, "No such account"
 
         person = persons[0]
+	PLCCheckLocalPerson(person,"DeleteRoleFromPerson")
 
         # Authenticated function
         assert self.caller is not None

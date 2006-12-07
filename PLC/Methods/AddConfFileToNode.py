@@ -37,6 +37,7 @@ class AddConfFileToNode(Method):
 	if not nodes:
 		raise PLCInvalidArgument, "No such node"
 	node = nodes[0]
+	PLCCheckLocalNode (node,"AddConfFileToNode")
 	
 	# Link configuration file to node
         if node['node_id'] not in conf_file['node_ids']:

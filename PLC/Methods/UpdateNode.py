@@ -46,6 +46,7 @@ class UpdateNode(Method):
             raise PLCInvalidArgument, "No such node"
 
         node = nodes[0]
+	PLCCheckLocalNode(node,"UpdateNode")
 
         # Authenticated function
         assert self.caller is not None

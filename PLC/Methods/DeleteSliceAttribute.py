@@ -34,11 +34,13 @@ class DeleteSliceAttribute(Method):
         if not slice_attributes:
             raise PLCInvalidArgument, "No such slice attribute"
         slice_attribute = slice_attributes[0]
+	PLCCheckLocalSliceAttribute(slice_attribute,"DeleteSliceAttribute")
 
         slices = Slices(self.api, [slice_attribute['slice_id']])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
+	PLCCheckLocalSlice(slice,"DeleteSliceAttribute")
 
         assert slice_attribute['slice_attribute_id'] in slice['slice_attribute_ids']
 

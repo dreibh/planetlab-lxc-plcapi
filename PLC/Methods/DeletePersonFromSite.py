@@ -41,6 +41,7 @@ class DeletePersonFromSite(Method):
             raise PLCInvalidArgument, "No such site"
 
         site = sites[0]
+	PLCCheckLocalSite(site,"DeletePersonFromSite")
 
         if site['site_id'] in person['site_ids']:
             site.remove_person(person)
