@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.13 2006/11/02 22:12:47 mlhuang Exp $
+# $Id: Shell.py,v 1.14 2006/12/05 16:25:26 thierry Exp $
 #
 
 import os, sys
@@ -100,7 +100,7 @@ class Shell:
             elif opt == "-x" or opt == "--xmlrpc":
                 self.xmlrpc = True
             elif opt == "--help":
-                usage(self.argv)
+                self.usage(self.argv)
 
     def usage(self,argv):
         print "Usage: %s [OPTION]..." % argv[0]
