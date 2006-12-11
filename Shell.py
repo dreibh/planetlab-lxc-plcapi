@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.14 2006/12/05 16:25:26 thierry Exp $
+# $Id: Shell.py,v 1.15 2006/12/11 11:56:37 thierry Exp $
 #
 
 import os, sys
@@ -53,7 +53,13 @@ class Shell:
         if config is not None:
             self.config=config
         else:
-            self.config = "/etc/planetlab/plc_config"
+            # support running on non-myplc boxes
+            default_config_file = "/etc/planetlab/plc_config"
+            try:
+                open (default_config_file).close()
+            except:
+                default_config_file="/dev/null"
+            self.config = default_config_file
         self.url = None
         self.method = None
         self.user = None
