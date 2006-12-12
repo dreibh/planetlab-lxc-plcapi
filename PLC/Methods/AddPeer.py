@@ -9,12 +9,12 @@ from PLC.Auth import Auth
 
 from PLC.Peers import Peer, Peers
 
-can_update = lambda(k,v): k in ['peername','peer_url','person_id']
+can_update = lambda(k,v): k in ['peername','peer_url','auth_person_id']
 
 class AddPeer (Method):
     """
     Creates a peer entry in the database and returns its id
-    Temporarily, requires to provide a person_id 
+    Temporarily, requires to provide an auth_person_id 
     this is used to store the credentials that we'll
     use when connecting to the peer's API
     """

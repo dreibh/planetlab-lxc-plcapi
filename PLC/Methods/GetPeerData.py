@@ -32,31 +32,41 @@ class GetPeerData (Method):
     roles = ['admin']
 
     accepts = [Auth(),
-               Parameter (int, "Peer id"),
+               Mixed (Parameter (Peer.fields['peer_id']),
+                      Parameter (Peer.fields['peername'])),
                ]
     # for RefreshPeer 
-    returns = Parameter (dict,"Sites, Keys, Nodes, Persons, Slices")
+    returns = Parameter (dict,
+                         "Sites-local Sites-peer Keys-local Keys-peer "
+                         "Nodes-local Nodes-peer Persons-local Persons-peer "
+                         "SliceAttibuteTypes-local SliceAttibuteTypes-peer "
+                         "Slices-local Slices-peer "
+                         "SliceAttributes-local SliceAttributes-peer")
 
-    def call (self, auth, peer_id):
-        # xxx a peer cannot yet compute it's peer_id under another plc
-        # so we return all foreign objects by now
+    def call (self, auth, peer_id_or_peername):
+
+        # checking the argument
+        try:
+            peer_id = Peers(self.api,[peer_id_or_peername])[0]['peer_id']
+        except:
+            raise PLCInvalidArgument,'GetPeerData: no such peer %r'%peer_id_or_peername
         
         t_start = time.time()
         result = {
             'Sites-local' : Sites (self.api,{'peer_id':None}),
-            'Sites-peer' : Sites (self.api,{'~peer_id':None}),
+            'Sites-peer' : Sites (self.api,{'peer_id':peer_id}),
             'Keys-local' : Keys (self.api,{'peer_id':None}),
-            'Keys-peer' : Keys (self.api,{'~peer_id':None}),
+            'Keys-peer' : Keys (self.api,{'peer_id':peer_id}),
             'Nodes-local' : Nodes (self.api,{'peer_id':None}),
-            'Nodes-peer' : Nodes (self.api,{'~peer_id':None}),
+            'Nodes-peer' : Nodes (self.api,{'peer_id':peer_id}),
             'Persons-local' : Persons (self.api,{'peer_id':None}),
-            'Persons-peer' : Persons (self.api,{'~peer_id':None}),
+            'Persons-peer' : Persons (self.api,{'peer_id':peer_id}),
             'SliceAttibuteTypes-local' : SliceAttributeTypes (self.api,{'peer_id':None}),
-            'SliceAttibuteTypes-peer' : SliceAttributeTypes (self.api,{'~peer_id':None}),
+            'SliceAttibuteTypes-peer' : SliceAttributeTypes (self.api,{'peer_id':peer_id}),
             'Slices-local' : Slices (self.api,{'peer_id':None}),
-            'Slices-peer' : Slices (self.api,{'~peer_id':None}),
+            'Slices-peer' : Slices (self.api,{'peer_id':peer_id}),
             'SliceAttributes-local': SliceAttributes (self.api,{'peer_id':None}),
-            'SliceAttributes-peer': SliceAttributes (self.api,{'~peer_id':None}),
+            'SliceAttributes-peer': SliceAttributes (self.api,{'peer_id':peer_id}),
             }
         t_end = time.time()
         result['ellapsed'] = t_end-t_start

@@ -30,7 +30,34 @@ def class_attributes (classname):
 
 class Cache:
 
-    # an attempt to provide genericity in the caching algorithm
+    """
+    This class is the core of the RefreshPeer method's implementation,
+    that basically calls Cache:refresh_peer
+
+    It manages caching on a table-by-table basis, and performs required
+    transcoding from remote ids to local ids - that's the job of the
+    Transcoder class
+
+    For the tables (classes) that it handles, it uses the following
+    attributes
+    (*) primary_key is the name of the field where db indexes are stored
+    (*) class_key is used to implement equality on objects
+    (*) foreign_fields is the list of fields that are copied verbatim from
+        foreign objects
+    (*) foreign_xrefs is the list of columns that are subject to transcoding
+        (.) when obj[field] is an int, the transcoded value is directly
+        inserted in the table
+        (.) if it's a list, it is assumed that the relationship is maintained
+            in an external 2-column table. That's where the XrefTable class comes in
+
+    The relationship between slices, slice attribute types and slice attributes being
+    more complex, it is handled in a specifically customized version of update_table
+
+    Of course the order in which the tables are managed is important, with different
+    orders several iterations might be needed for the update process to converge.
+
+    Of course the timers field was introduced for optimization and could safely be removed
+    """
     
     def __init__ (self, api, peer_id, peer_server, auth):
 
@@ -100,7 +127,7 @@ class Cache:
                 sql = "INSERT INTO %s (%s_id,%s_id) VALUES (%d,%d)"% \
                       (self.tablename,self.lowerclass1,self.lowerclass2,id1,id2)
 
-# below is Tony's code but it's badly broken. I'm not sure we care in fact.
+# below is Tony's code but it's badly broken. I'm not sure we care much in fact.
 #	    if id2_set:
 #		sql = "INSERT INTO %s select %d, %d " % \
 #   			self.tablename, id1, id2[0] 
@@ -123,12 +150,10 @@ class Cache:
     # peer_object_list list of objects at a given peer -         e.g. peer.GetSlices()
     # alien_xref_objs_dict : a dict {'classname':alien_obj_list} e.g. {'Node':peer.GetNodes()}
     #    we need an entry for each class mentioned in the class's foreign_xrefs
-    # lambda_ignore : the alien objects are ignored if this returns true
     def update_table (self,
                       classname,
                       alien_object_list,
 		      alien_xref_objs_dict = {},
-                      lambda_ignore=lambda x:False,
                       report_name_conflicts = True):
         
         verbose ("============================== entering update_table on",classname)
@@ -172,18 +197,16 @@ class Cache:
 	    else:
 		local_object.uptodate=True
 
+        for alien_object in alien_object_list:
+            verbose ('+++ Got alien object',alien_object)
+
         # scan the peer's local objects
         for alien_object in alien_object_list:
 
             object_name = alien_object[class_key]
 
-            ### ignore, e.g. system-wide slices
-            if lambda_ignore(alien_object):
-		verbose('Ignoring',object_name)
-                continue
+	    verbose ('----- update_table (%s) - considering'%classname,object_name)
 
-	    verbose ('update_table (%s) - Considering'%classname,object_name)
-                
             # optimizing : avoid doing useless syncs
             needs_sync = False
 
@@ -308,6 +331,8 @@ class Cache:
         from PLC.SliceAttributeTypes import SliceAttributeTypes
         from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 
+        verbose ("============================== entering update_slice_attributes")
+
         # init
         peer_id = self.peer_id
         
@@ -405,7 +430,17 @@ class Cache:
         timers={}
         t_start=time.time()
         # xxx see also GetPeerData - peer_id arg unused yet
-        all_data = self.peer_server.GetPeerData (self.auth,0)
+        all_data = self.peer_server.GetPeerData (self.auth,self.api.config.PLC_NAME)
+
+        verbose ('Passed GetPeerData the name',self.api.config.PLC_NAME)
+        sks=all_data.keys()
+        sks.sort()
+        for k in sks:
+            f=all_data[k]
+            try:
+                verbose ('GetPeerData[%s] -> %d'%(k,len(f)))
+            except:
+                pass
 
         t_acquired = time.time()
 	# refresh sites
@@ -460,14 +495,13 @@ class Cache:
         plocal_slices = all_data['Slices-local']
         all_slices = plocal_slices + all_data['Slices-peer']
 
-	def is_system_slice (slice):
-	    return slice['creator_person_id'] == 1
+        # forget about ignoring remote system slices
+        # just update them too, we'll be able to filter them out later in GetSlivers
 
         nb_new_slices = self.update_table ('Slice', plocal_slices,
                                            {'Node': all_nodes,
                                             'Person': all_persons,
-                                            'Site': all_sites},
-					   is_system_slice)
+                                            'Site': all_sites})
 
         t=time.time()
         timers['process-slices']=t-t0
@@ -490,7 +524,7 @@ class Cache:
         timers['time_all']      = t_end-t_start
         
         ### returned as-is by RefreshPeer
-        return {'plcname':self.api.config.PLC_NAME,
+        return {
 		'new_sites':nb_new_sites,
 		'new_keys':nb_new_keys,
                 'new_nodes':nb_new_nodes,

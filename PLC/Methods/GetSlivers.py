@@ -70,8 +70,8 @@ class GetSlivers(Method):
         else:
             all_nodes = Nodes(self.api, node_filter).dict()
 
-        # Get default slices
-        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict()
+        # Get local default slices
+        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1', 'peer_id': None}).dict()
         system_slice_ids = [slice_attribute['slice_id'] for slice_attribute in system_slice_attributes.values()]
         system_slice_ids = dict.fromkeys(system_slice_ids)
 	

@@ -25,7 +25,11 @@ class Peer (Row):
 	'peer_id' : Parameter (int, "Peer identifier"),
 	'peername' : Parameter (str, "Peer name"),
 	'peer_url' : Parameter (str, "Peer API url"),
-	'person_id' : Parameter (int, "Person_id of the account storing credentials - temporary"),
+        ### xxx this trick is temporary, for peer authentication
+	'auth_person_id' : Parameter (int, "Person_id of the account storing credentials - temporary"),
+        ### cross refs
+        'site_ids' : Parameter ([int], "This peer's sites ids"),
+        'person_ids' : Parameter ([int], "This peer's persons ids"),
 	'node_ids' : Parameter ([int], "This peer's nodes ids"),
 	'slice_ids' : Parameter ([int], "This peer's slices ids"),
 	}
@@ -38,6 +42,12 @@ class Peer (Row):
 	if not re.compile ("^https://.*$").match(url) : 
 	    raise invalid_url
 	return url
+
+    ### for use by RefreshPeer, *not* a method of the API
+    def update_name (self,peername):
+        if self['peername'] != peername:
+            self['peername']=peername
+            self.sync()
 
     def delete (self, commit=True):
 	"""
