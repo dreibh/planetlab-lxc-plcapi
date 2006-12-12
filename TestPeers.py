@@ -73,16 +73,15 @@ system_persons = 4
 # among that, 1 gets refreshed - other ones have conflicting names
 system_persons_cross = 1
 
-system_slices_ids = (1,2)
+system_slices_ids = (1,)
 def system_slices ():
     return len(system_slices_ids)
 def total_slices ():
     return number_slices+system_slices()
 
-# temporary - the myplc I use doesnt know about 'system' yet
 def system_slivers ():
-#    return len(system_slices_ids)
-    return 0
+    return len(system_slices_ids)
+
 # too tedious to do the maths : how many slices attached to node 1
 expected_slivers=None
 def total_slivers ():
@@ -179,8 +178,8 @@ plain_numbers=['zero','one','two','three','four','five','six','seven','eight','n
 	       'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
 plain_digits=['a','b','c','d','e','f','g','h','i','j']
 ####################
-plc[1]={ 'plcname':'plc1 in federation',
-         'hostname':'lurch.cs.princeton.edu',
+plc[1]={ 'plcname':'Thierry plc1',
+         'hostname':'planetlab-devbox.inria.fr',
          'url-format':'https://%s:443/PLCAPI/',
          'builtin-admin-id':'root@plc1.org',
          'builtin-admin-password':'root',
@@ -193,8 +192,8 @@ plc[1]={ 'plcname':'plc1 in federation',
          'key-format':'ssh-rsa 11key4plc11 user%d-key%d',
          'person-password' : 'password1',
        }
-plc[2]={ 'plcname':'plc2 in federation',
-         'hostname':'planetlab-devbox.inria.fr',
+plc[2]={ 'plcname':'Thierry plc2',
+         'hostname':'lurch.cs.princeton.edu',
          'url-format':'https://%s:443/PLCAPI/',
          'builtin-admin-id':'root@plc2.org',
          'builtin-admin-password':'root',
@@ -297,8 +296,6 @@ def test00_init (args=[1,2]):
         if local_peer is None:
             # the regular remote mode
             argv=[sys.argv[0],
-                  # xxx todo - Shell.py still needs a non-empty config even if we define everything
-                  '--config','dummy-config',
                   '--url',url,
                   '--user',plc[i]['builtin-admin-id'],
                   '--password',plc[i]['builtin-admin-password']]
@@ -485,7 +482,7 @@ def test00_peer_person (args=[1,2]):
             person_id = s[i].AddPerson ( {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
                                                'email':email,'password':plc[peer]['peer-admin-password']})
             if person_id:
-                print '%02d:== Created person %d as the peer person'%(i,person_id)
+                print '%02d:== Created person %d as the auth peer person'%(i,person_id)
             plc[i]['peer_person_id']=person_id
 
 ####################
@@ -498,7 +495,7 @@ def test00_peer (args=[1,2]):
             p=s[i].GetPeers ( [peername])[0]
             plc[i]['peer_id']=p['peer_id']
         except:
-            peer_id=s[i].AddPeer ( {'peername':peername,'peer_url':plc[peer]['url'],'person_id':plc[i]['peer_person_id']})
+            peer_id=s[i].AddPeer ( {'peername':peername,'peer_url':plc[peer]['url'],'auth_person_id':plc[i]['peer_person_id']})
             # NOTE : need to manually reset the encrypted password through SQL at this point
             if peer_id:
                 print '%02d:Created peer %d'%(i,peer_id)
@@ -848,8 +845,13 @@ def dump (args=[1,2]):
         [p_sat(x) for x in s[i].GetSliceAttributeTypes()]
         print '%02d: Slice Attributes'%i
         [p_sa(x) for x in s[i].GetSliceAttributes()]
-        print '%02d: SLIVERS'%i
-        [p_sliver('%02d:'%i,x) for x in s[i].GetSlivers()]
+        timer_show()
+        print '%02d: Gathering all slivers'%i
+        slivers = s[i].GetSlivers()
+        timer_show()
+        snodes=min(3,number_nodes)
+        print '%02d: SLIVERS for first %d nodes'%(i,snodes)
+        [p_sliver('%02d:'%i,x) for x in s[i].GetSlivers(myrange(snodes))]
         print '%02d:============================== END DUMP'%i
     
 
@@ -980,12 +982,12 @@ def test_all_addslices ():
     # create slices on plc1
     message ("CREATING SLICES on plc1")
     test04_slice ([1])
-    # each site has 3 local slices and 0 foreign slice
-    check_slices (total_slices(),0,[1])
-    check_slices (system_slices(),0,[2])
+
+    check_slices (total_slices(),system_slices(),[1])
+    check_slices (system_slices(),system_slices(),[2])
     test00_refresh ("after slice created on plc1")
-    check_slices (total_slices(),0,[1])
-    check_slices (system_slices(),number_slices,[2])
+    check_slices (total_slices(),system_slices(),[1])
+    check_slices (system_slices(),total_slices(),[2])
     # no slice has any node yet
     check_local_slice_nodes(0,[1])
     check_foreign_slice_nodes(0,[2])
@@ -1041,10 +1043,10 @@ def test_all_delslices ():
 
     message ("CHECKING SLICES CLEAN UP")
     clean_all_slices([1])
-    check_slices (system_slices(),0,[1])
-    check_slices (system_slices(),number_slices,[2])
+    check_slices (system_slices(),system_slices(),[1])
+    check_slices (system_slices(),total_slices(),[2])
     test00_refresh ("After slices clenaup")
-    check_slices(system_slices(),0)
+    check_slices(system_slices(),system_slices())
 
 def test_all_slices ():
     test_all_addslices ()
@@ -1095,7 +1097,7 @@ def populate ():
 
 def populate_end():
     test00_init()
-    test00_refresh ("populate: refreshing peer 1",[1])
+    test00_refresh ("Peer 1 for publishing foreign nodes from 2",[1])
     timer_show()
     test04_slice_add_fnode([1])
     timer_show()
@@ -1108,8 +1110,12 @@ def populate_end():
 
 # temporary - scratch as needed
 def test_now ():
-    test_all_init()
-    test_all_sites ()
+    populate()
+    test00_refresh('peer 1 gets plc2 nodes',[1])
+    test04_slice_add_fnode([1])
+    test00_refresh('final',[1])
+    
+#    test_all_sites ()
 #    clean_all_nodes()
 #    clean_all_slices()
 #    populate()

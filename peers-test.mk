@@ -6,8 +6,8 @@ SITE=site.xml
 RPM=$(shell ls -rt /root/myplc*rpm | tail -1)
 APIDIR=/usr/share/plc_api
 
-PLC1=lurch.cs.princeton.edu
-PLC2=planetlab-devbox.inria.fr
+PLC1=planetlab-devbox.inria.fr
+PLC2=lurch.cs.princeton.edu
 PLC1SSH=root@$(PLC1)
 PLC2SSH=root@$(PLC2)
 
@@ -16,7 +16,7 @@ PY=python -u
 all:help
 
 ####################
-PUSH=pclean pplc2 papi2 pplc1 papi1
+PUSH=pclean pplc1 papi1 pplc2 papi2
 EXTRA-PUSHS= ./Shell.py ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh
 
 push:$(PUSH)
@@ -37,19 +37,19 @@ pplc2:
 
 ####################
 DB=install-schema stop-clients db-drop restart-full-db
-DBI= stop-clients db-drop restart-db db-restore restart-http
+DBRESTORE= stop-clients db-drop restart-db db-restore restart-http
 WEB=install-api restart
 
 db: $(DB)
 	@date
 
-dbi: $(DBI)
-	@echo Restored $(DBDUMP) on $(shell hostname) at $(shell date)
+dbrestore: $(DBRESTORE)
+	@echo Restored $(DBDUMPFILE) on $(shell hostname) at $(shell date)
 
-DBDUMP=planetlab4.dump
+DBDUMPFILE=planetlab4.dump
 
 db-dump:
-	chroot $(CHROOT) pg_dump -c -U pgsqluser planetlab4 > $(DBDUMP)
+	chroot $(CHROOT) pg_dump -c -U pgsqluser planetlab4 > $(DBDUMPFILE)
 
 web: $(WEB)
 
@@ -74,10 +74,10 @@ db-drop:
 	chroot $(CHROOT) psql -U postgres --port $(PORT) template1 -c 'drop database planetlab4'
 
 db-restore: 
-	echo Restoring $(DBDUMP)
-	rm -f $(DBDUMP).rest-log  $(DBDUMP).rest-err
-	chroot $(CHROOT) psql -U postgres --port $(PORT) -d planetlab4 < $(DBDUMP) > $(DBDUMP).rest-log 2> $(DBDUMP).rest-err
-	ls -l $(DBDUMP).rest-log  $(DBDUMP).rest-err
+	echo Restoring $(DBDUMPFILE)
+	rm -f $(DBDUMPFILE).rest-log  $(DBDUMPFILE).rest-err
+	chroot $(CHROOT) psql -U postgres --port $(PORT) -d planetlab4 < $(DBDUMPFILE) > $(DBDUMPFILE).rest-log 2> $(DBDUMPFILE).rest-err
+	ls -l $(DBDUMPFILE).rest-log  $(DBDUMPFILE).rest-err
 
 restart-db:
 	@echo 'restarting db only'
@@ -135,113 +135,131 @@ log:
 # remove time/delay dependent output
 normalize	= egrep -v "'expires':|^+++.*ellapsed"
 
-TEST=run diff checkpoint
-run: run-n 
+TEST=run diff ckp
+run: run-en 
+diff: diff-en
+ckp: ckp-en
 
 %.nout: %.out
 	$(normalize) $*.out > $@
 %.nref: %.ref
 	$(normalize) $*.ref > $@
 
-diff: TestPeers-n.nref TestPeers-n.nout
-	@echo '<< REF OUT>>'
-	diff TestPeers-n.nref TestPeers-n.nout
-
-ckp checkpoint:
-	@echo adopting latest run as reference
-	cp TestPeers-n.out TestPeers-n.ref
-	rm -f TestPeers-n.n???
-
 # variant runs
 VARIANT-TESTS :=
 
-VARIANT-TESTS += run-n
-run-n: 
-	$(PY) ./TestPeers.py > TestPeers-n.out 2>&1
-VARIANT-TESTS += run-m
-run-m:
-	$(PY) ./TestPeers.py -m > TestPeers-m.out 2>&1
-VARIANT-TESTS += run-b
-run-b:
-	$(PY) ./TestPeers.py -b > TestPeers-b.out 2>&1
-VARIANT-TESTS += run-p run-pn
-run-pn:
-	$(PY) ./TestPeers.py -p > TestPeers-pn.out 2>&1
-VARIANT-TESTS += run-pb
-run-pb:
-	$(PY) ./TestPeers.py -p -b > TestPeers-pb.out 2>&1
-VARIANT-TESTS += run-ph
-run-ph:
-	$(PY) ./TestPeers.py -p -H > TestPeers-ph.out 2>&1
-VARIANT-TESTS += run-e run-en
+# run end of test (after it was populated) with normal size
+VARIANT-TESTS += run-en
 run-en:
-	$(PY) ./TestPeers.py -e > TestPeers-en.out 2>&1
+	$(PY) ./TestPeers.py -e > testpeers-en.out 2>&1
+# big size
 VARIANT-TESTS += run-eb
 run-eb:
-	$(PY) ./TestPeers.py -e -b > TestPeers-eb.out 2>&1
+	$(PY) ./TestPeers.py -e -b > testpeers-eb.out 2>&1
+# huge size
 VARIANT-TESTS += run-eh
 run-eh:
-	$(PY) ./TestPeers.py -e -H > TestPeers-eh.out 2>&1
+	$(PY) ./TestPeers.py -e -H > testpeers-eh.out 2>&1
 
-VARIANT-TESTS += diff-m
-diff-m: TestPeers-m.nref TestPeers-m.nout 
-	diff TestPeers-m.nref TestPeers-m.nout
-VARIANT-TESTS += ckp-m
-ckp-m:
-	cp TestPeers-m.out TestPeers-m.ref
-	rm -f TestPeers-m.n???
+# normal size - performs diff and checkpoint (adopt result)
+VARIANT-TESTS += diff-en
+diff-en: testpeers-en.nref testpeers-en.nout 
+	diff testpeers-en.nref testpeers-en.nout
+VARIANT-TESTS += ckp-en
+ckp-en:
+	cp testpeers-en.out testpeers-en.ref
+	rm -f testpeers-en.n???
 
-VARIANT-TESTS += diff-p
-diff-p: TestPeers-pn.nref TestPeers-pn.nout 
-	diff TestPeers-pn.nref TestPeers-pn.nout
-VARIANT-TESTS += ckp-p
-ckp-p:
-	cp TestPeers-pn.out TestPeers-pn.ref
-	rm -f TestPeers-pn.n???
+VARIANT-TESTS += diff-eb
+diff-eb: testpeers-eb.nref testpeers-eb.nout 
+	diff testpeers-eb.nref testpeers-eb.nout
+VARIANT-TESTS += ckp-eb
+ckp-eb:
+	cp testpeers-eb.out testpeers-eb.ref
+	rm -f testpeers-eb.n???
 
 VARIANT-TESTS += diff-eh
-diff-eh: TestPeers-eh.nref TestPeers-eh.nout 
-	diff TestPeers-eh.nref TestPeers-eh.nout
+diff-eh: testpeers-eh.nref testpeers-eh.nout 
+	diff testpeers-eh.nref testpeers-eh.nout
 VARIANT-TESTS += ckp-eh
 ckp-eh:
-	cp TestPeers-eh.out TestPeers-eh.ref
-	rm -f TestPeers-eh.n???
+	cp testpeers-eh.out testpeers-eh.ref
+	rm -f testpeers-eh.n???
 
-### need to run in installed plc for gaining direct access (psycopg2 broken)
+### locally populate, various sizes
+# need to run in installed plc for gaining direct access (psycopg2 broken)
+VARIANT-TESTS += run-lpn-1
+run-lpm-1:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpm-1
+chroot-run-lpm-1:
+	$(PY) TestPeers.py -m -p -l 1 > testpeers-pm-1.out
+VARIANT-TESTS += run-lpm-2
+run-lpm-2:
+	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpm-2
+chroot-run-lpm-2:
+	$(PY) TestPeers.py -m -p -l 2 > testpeers-pm-2.out
+
 VARIANT-TESTS += run-lpn-1
 run-lpn-1:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpn-1
 chroot-run-lpn-1:
-	$(PY) TestPeers.py -n -p -l 1 -f 8 > TestPeers-pn-1.out
+	$(PY) TestPeers.py -p -l 1 > testpeers-pn-1.out
 VARIANT-TESTS += run-lpn-2
 run-lpn-2:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpn-2
 chroot-run-lpn-2:
-	$(PY) TestPeers.py -n -p -l 2 -f 8 > TestPeers-pn-2.out
+	$(PY) TestPeers.py -p -l 2 > testpeers-pn-2.out
 
 VARIANT-TESTS += run-lpb-1
 run-lpb-1:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpb-1
 chroot-run-lpb-1:
-	$(PY) TestPeers.py -b -p -l 1 > TestPeers-pb-1.out
+	$(PY) TestPeers.py -b -p -l 1 > testpeers-pb-1.out
 VARIANT-TESTS += run-lpb-2
 run-lpb-2:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lpb-2
 chroot-run-lpb-2:
-	$(PY) TestPeers.py -b -p -l 2 > TestPeers-pb-2.out
+	$(PY) TestPeers.py -b -p -l 2 > testpeers-pb-2.out
 
 VARIANT-TESTS += run-lph-1
 run-lph-1:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lph-1
 chroot-run-lph-1:
-	$(PY) TestPeers.py -H -p -l 1 > TestPeers-ph-1.out
+	$(PY) TestPeers.py -H -p -l 1 > testpeers-ph-1.out
 VARIANT-TESTS += run-lph-1
 run-lph-2:
 	chroot $(CHROOT) make -C $(APIDIR) -f peers-test.mk chroot-run-lph-2
 chroot-run-lph-2:
-	$(PY) TestPeers.py -H -p -l 2 > TestPeers-ph-2.out
+	$(PY) TestPeers.py -H -p -l 2 > testpeers-ph-2.out
 
 
+### old-fashioned all-in-one tests - too slow
+VARIANT-TESTS += run-n
+run-n: 
+	$(PY) ./TestPeers.py > testpeers-n.out 2>&1
+VARIANT-TESTS += run-m
+run-m:
+	$(PY) ./TestPeers.py -m > testpeers-m.out 2>&1
+VARIANT-TESTS += diff-m
+diff-m: testpeers-m.nref testpeers-m.nout 
+	diff testpeers-m.nref testpeers-m.nout
+VARIANT-TESTS += ckp-m
+ckp-m:
+	cp testpeers-m.out testpeers-m.ref
+	rm -f testpeers-m.n???
+
+### populating only, but remotely - too slow too
+VARIANT-TESTS += run-p run-pn
+run-pn:
+	$(PY) ./TestPeers.py -p > testpeers-pn.out 2>&1
+VARIANT-TESTS += run-pb
+run-pb:
+	$(PY) ./TestPeers.py -p -b > testpeers-pb.out 2>&1
+VARIANT-TESTS += run-ph
+run-ph:
+	$(PY) ./TestPeers.py -p -H > testpeers-ph.out 2>&1
+
+##############################
 VARIANTS-DB := 
 
 DB1=populate-1.sql
@@ -269,10 +287,10 @@ save-h-2: DB2=populate-h-2.sql
 save-h-2:save2
 
 save1:
-	ssh $(PLC1SSH) make -C new_plc_api -f peers-test.mk DBDUMP=$(DB1) db-dump
+	ssh $(PLC1SSH) make -C new_plc_api -f peers-test.mk DBDUMPFILE=$(DB1) db-dump
 	scp $(PLC1SSH):new_plc_api/$(DB1) .
 save2:
-	ssh $(PLC2SSH) make -C new_plc_api -f peers-test.mk DBDUMP=$(DB2) db-dump
+	ssh $(PLC2SSH) make -C new_plc_api -f peers-test.mk DBDUMPFILE=$(DB2) db-dump
 	scp $(PLC2SSH):new_plc_api/$(DB2) .
 
 VARIANT-DB += restore-n
@@ -298,10 +316,10 @@ restore-h-2:restore2
 
 restore1:
 	scp $(DB1) $(PLC1SSH):new_plc_api/
-	ssh $(PLC1SSH) make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB1) dbi
+	ssh $(PLC1SSH) make -C  new_plc_api -f peers-test.mk DBDUMPFILE=$(DB1) dbrestore
 restore2:
 	scp $(DB2) $(PLC2SSH):new_plc_api/
-	ssh $(PLC2SSH) make -C  new_plc_api -f peers-test.mk DBDUMP=$(DB2) dbi
+	ssh $(PLC2SSH) make -C  new_plc_api -f peers-test.mk DBDUMPFILE=$(DB2) dbrestore
 
 #######
 HELP=rpm db-dump restart-http
@@ -310,7 +328,7 @@ help:
 	@echo known targets:
 	@echo push: $(PUSH) 
 	@echo db: $(DB) 
-	@echo dbi: $(DBI) 
+	@echo dbrestore: $(DBRESTORE) 
 	@echo run: $(RUN)
 	@echo web: $(WEB) 
 	@echo upgrade: $(UPGRADE)
