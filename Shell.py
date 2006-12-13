@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.15 2006/12/11 11:56:37 thierry Exp $
+# $Id: Shell.py,v 1.16 2006/12/11 13:02:41 thierry Exp $
 #
 
 import os, sys
@@ -148,10 +148,10 @@ class Shell:
                     self.url = "https://"
                 else:
                     self.url = "http://"
-                    self.url += config.PLC_API_HOST + \
-                                ":" + str(config.PLC_API_PORT) + \
-                                "/" + config.PLC_API_PATH + "/"
-                    
+                self.url += self.config.PLC_API_HOST + \
+                            ":" + str(self.config.PLC_API_PORT) + \
+                            "/" + self.config.PLC_API_PATH + "/"
+
             self.server = xmlrpclib.ServerProxy(self.url, allow_none = 1)
 
         # Default is to use capability authentication
