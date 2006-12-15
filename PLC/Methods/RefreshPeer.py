@@ -2,8 +2,6 @@
 # Thierry Parmentelat - INRIA
 # 
 
-import xmlrpclib
-
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -37,64 +35,36 @@ class RefreshPeer(Method):
                       Peer.fields['peername']),
                 ]
     
-    returns = Parameter(dict, 
-                        'new_sites '
-                        'new_keys '
-                        'new_nodes '
-                        'new_persons '
-                        'new_slice_attribute_types '
-                        'new_slices '
-                        'new_slice_attributes '
-                        'timers ')
+    returns = {
+        'new_sites': Parameter([dict], "List of new sites"),
+        'new_keys': Parameter([dict], "List of new keys"),
+        'new_nodes': Parameter([dict], "List of new nodes"),
+        'new_persons': Parameter([dict], "List of new users"),
+        'new_slice_attribute_types': Parameter([dict], "List of new slice attribute types"),
+        'new_slices': Parameter([dict], "List of new slices"),
+        'new_slice_attributes': Parameter([dict], "List of new slice attributes"),
+        'timers': Parameter(dict, "(Debug) Timing information"),
+        }
 
     def call (self, auth, peer_id_or_peername):
-	
-	### retrieve peer info
-	peers = Peers (self.api,[peer_id_or_peername])
-        try:
-            peer=peers[0]
-        except:
-            raise PLCInvalidArgument,'RefreshPeer: no such peer:%r'%peer_id_or_peername
-	
-	### retrieve account info
-	auth_person_id = peer['auth_person_id']
-	persons = Persons (self.api,[auth_person_id])
-        try:
-            person = persons[0]
-        except:
-            raise PLCInvalidArgument,'RefreshPeer: no such person_id:%d'%auth_person_id
-	
-	## connect to the peer's API
-        url=peer['peer_url']
-	apiserver = xmlrpclib.ServerProxy (url,allow_none=True)
+	peers = Peers(self.api, [peer_id_or_peername])
+        if not peers:
+            raise PLCInvalidArgument, "No such peer '%s'" % unicode(peer_id_or_peername)
+        peer = peers[0]
 
-	### build up foreign auth
-	auth={ 'Username': person['email'],
-	       'AuthMethod' : 'password',
-	       'AuthString' : person['password'],
-	       'Role' : 'admin' ,
-               }
+	# Connect to peer API
+        peer.connect()
 
-        # xxx
-        # right now we *need* the remote peer to know our name
-        # (this is used in the GetPeerData that we issue)
-        # in general this will be true
-        # however if anyone decides to change its own plc name things can get wrong
-        # doing this should ensure things become right again after some iterations
-        # that is, hopefully
-        # might wish to change this policy once we have peer authentication, maybe
-        
-        # make sure we have the right name for that peer
-        peername = apiserver.GetPeerName (auth)
-        peer.update_name(peername)
+        # Update peer name
+        peername = peer.GetPeerName()
+        if peer['peername'] != peername:
+            peer['peername'] = peername
+            peer.sync()
 
-        # we need a peer_id from there on
-        peer_id = peer['peer_id']
+	cache = Cache(self.api, peer['peer_id'], peer)
+        result = cache.refresh_peer()
 
-        print 'Got peer_id',peer_id
-
-	cache = Cache (self.api, peer_id, apiserver, auth)
-        result = cache.refresh_peer ()
-        result['peername']=peername
+        # Add peer name to result set
+        result['peername'] = peername
 
         return result
