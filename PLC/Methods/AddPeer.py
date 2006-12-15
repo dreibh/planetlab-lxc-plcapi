@@ -2,37 +2,33 @@
 # Thierry Parmentelat - INRIA
 # 
 
-from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
-
 from PLC.Peers import Peer, Peers
 
-can_update = lambda(k,v): k in ['peername','peer_url','auth_person_id']
+can_update = lambda (field, value): field in \
+             ['peername', 'peer_url', 'key', 'cacert']
 
-class AddPeer (Method):
+class AddPeer(Method):
     """
-    Creates a peer entry in the database and returns its id
-    Temporarily, requires to provide an auth_person_id 
-    this is used to store the credentials that we'll
-    use when connecting to the peer's API
+    Adds a new peer.
+
+    Returns the new peer_id (> 0) if successful, faults otherwise.
     """
 
     roles = ['admin']
-    peer_fields = dict( [x for x in Peer.fields.iteritems() if can_update(x)] )
 
-    accepts = [ Auth(),
-		peer_fields
-		]
+    peer_fields = dict(filter(can_update, Peer.fields.items()))
 
-    returns = Parameter (int, "peer_id")
+    accepts = [
+        Auth(),
+        peer_fields
+        ]
 
-    def call (self, auth, fields):
+    returns = Parameter(int, "New peer_id (> 0) if successful")
 
-	peer = Peer (self.api,fields);
+    def call(self, auth, peer_fields):
+	peer = Peer(self.api, peer_fields);
 	peer.sync()
-	
 	return peer['peer_id']
-	
-
