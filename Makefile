@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.8 2006/11/10 06:34:19 mlhuang Exp $
+# $Id: Makefile,v 1.9 2006/12/15 16:19:49 mlhuang Exp $
 #
 
 # Metafiles
@@ -35,7 +35,7 @@ install: $(modules-install)
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
 
-$(subdirs): $(init)
+$(subdirs): $(init) $(modules)
 
 $(subdirs): %:
 	$(MAKE) -C $@
