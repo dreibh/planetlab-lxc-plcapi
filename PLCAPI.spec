@@ -40,7 +40,7 @@ through Apache mod_python.
 %build
 # Build __init__.py metafiles and PHP API. Do not build documentation
 # for now.
-%{__make} %{?_smp_mflags} SUBDIRS="php php/xmlrpc"
+%{__make} %{?_smp_mflags} subdirs="php php/xmlrpc"
 
 %install
 rm -rf $RPM_BUILD_ROOT
