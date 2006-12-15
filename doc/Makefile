@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.1 2006/09/06 15:34:41 mlhuang Exp $
+# $Id: Makefile,v 1.2 2006/11/03 20:36:05 thierry Exp $
 #
 
 all: PLCAPI.pdf
@@ -38,10 +38,7 @@ endef
 $(foreach format,$(FORMATS),$(eval $(call docbook2,$(format))))
 
 clean:
-	rm -f $(patsubst %,*.%,$(FORMATS)) .*.xml.valid
-
-docclean:
-	rm -f Methods.xml PLCAPI.pdf
+	rm -f $(patsubst %,*.%,$(FORMATS)) .*.xml.valid Methods.xml
 
 force:
 
