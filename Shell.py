@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.16 2006/12/11 13:02:41 thierry Exp $
+# $Id: Shell.py,v 1.17 2006/12/13 22:29:28 mlhuang Exp $
 #
 
 import os, sys
@@ -21,6 +21,7 @@ from PLC.Parameter import Mixed
 from PLC.Auth import Auth
 from PLC.Config import Config
 from PLC.Method import Method
+from PLC.PyCurl import PyCurlTransport
 import PLC.Methods
 
 # the list of globals formerly defined by Shell.py before it was made a class
@@ -67,6 +68,7 @@ class Shell:
         self.role = None
         self.xmlrpc = False
         self.server = None
+        self.cacert = None
 
         # More convenient multicall support
         self.multi = False
@@ -85,6 +87,7 @@ class Shell:
                                           "password=", "pass=", "authstring=",
                                           "role=",
                                           "xmlrpc",
+                                          "cacert=",
                                           "help"])
         except getopt.GetoptError, err:
             print "Error: ", err.msg
@@ -105,6 +108,8 @@ class Shell:
                 self.role = optval
             elif opt == "-x" or opt == "--xmlrpc":
                 self.xmlrpc = True
+            elif opt == "--cacert":
+                self.cacert = optval
             elif opt == "--help":
                 self.usage(self.argv)
 
@@ -118,6 +123,7 @@ class Shell:
         print "     -p, --password=STRING   API password"
         print "     -r, --role=ROLE         API role"
         print "     -x, --xmlrpc            Use XML-RPC interface"
+        print "     --cacert=CACERT         API SSL certificate"
         print "     --help                  This message"
         sys.exit(1)
 
@@ -129,8 +135,8 @@ class Shell:
         try:
             # If any XML-RPC options have been specified, do not try
             # connecting directly to the DB.
-            if (self.url, self.method, self.user, self.password, self.role, self.xmlrpc) != \
-                   (None, None, None, None, None, False):
+            if (self.url, self.method, self.user, self.password, self.role, self.cacert, self.xmlrpc) != \
+                   (None, None, None, None, None, None, False):
                 raise Exception
         
             # Otherwise, first try connecting directly to the DB. If this
@@ -152,7 +158,10 @@ class Shell:
                             ":" + str(self.config.PLC_API_PORT) + \
                             "/" + self.config.PLC_API_PATH + "/"
 
-            self.server = xmlrpclib.ServerProxy(self.url, allow_none = 1)
+            if self.cacert is None:
+                self.cacert = self.config.PLC_API_CA_SSL_CRT
+
+            self.server = xmlrpclib.ServerProxy(self.url, PyCurlTransport(self.url, self.cacert), allow_none = 1)
 
         # Default is to use capability authentication
         if (self.method, self.user, self.password) == (None, None, None):
