@@ -29,19 +29,31 @@ class GetPeerData (Method):
     the local objects as well as the ones attached to that peer
     """
 
-    roles = ['admin']
+    roles = ['admin', 'peer']
 
-    accepts = [Auth(),
-               Mixed (Parameter (Peer.fields['peer_id']),
-                      Parameter (Peer.fields['peername'])),
-               ]
+    accepts = [
+        Auth(),
+        Mixed(Peer.fields['peer_id'],
+              Peer.fields['peername']),
+        ]
+
     # for RefreshPeer 
-    returns = Parameter (dict,
-                         "Sites-local Sites-peer Keys-local Keys-peer "
-                         "Nodes-local Nodes-peer Persons-local Persons-peer "
-                         "SliceAttibuteTypes-local SliceAttibuteTypes-peer "
-                         "Slices-local Slices-peer "
-                         "SliceAttributes-local SliceAttributes-peer")
+    returns = {
+        'Sites-local': Parameter([dict], "List of local sites"),
+        'Sites-peer': Parameter([dict], "List of foreign sites"),
+        'Keys-local': Parameter([dict], "List of local keys"),
+        'Keys-peer':  Parameter([dict], "List of foreign keys"),
+        'Nodes-local':  Parameter([dict], "List of local nodes"),
+        'Nodes-peer':  Parameter([dict], "List of foreign nodes"),
+        'Persons-local':  Parameter([dict], "List of local users"),
+        'Persons-peer':  Parameter([dict], "List of foreign users"),
+        'SliceAttibuteTypes-local':  Parameter([dict], "List of local slice attribute types"),
+        'SliceAttibuteTypes-peer':  Parameter([dict], "List of foreign slice attribute types"),
+        'Slices-local':  Parameter([dict], "List of local slices"),
+        'Slices-peer':  Parameter([dict], "List of foreign slices"),
+        'SliceAttributes-local':  Parameter([dict], "List of local slice attributes"),
+        'SliceAttributes-peer':  Parameter([dict], "List of foreign slice attributes"),
+        }
 
     def call (self, auth, peer_id_or_peername):
 
