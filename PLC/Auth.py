@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.7 2006/11/08 22:53:30 mlhuang Exp $
+# $Id: Auth.py,v 1.8 2006/11/09 19:43:55 mlhuang Exp $
 #
 
 import crypt
@@ -17,12 +17,14 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
 from PLC.Sessions import Session, Sessions
+from PLC.Peers import Peer, Peers
+from PLC.GPG import gpg_verify
 
 class Auth(Parameter):
     """
     Base class for all API authentication methods, as well as a class
-    that can be used to represent Mixed(SessionAuth(), PasswordAuth()),
-    i.e. the two principal API authentication methods.
+    that can be used to represent Mixed(SessionAuth(), PasswordAuth(),
+    GPGAuth()), i.e. the three principal API authentication methods.
     """
 
     def __init__(self, auth = {}):
@@ -30,16 +32,67 @@ class Auth(Parameter):
 
     def check(self, method, auth, *args):
         method.type_check("auth", auth,
-                          Mixed(SessionAuth(), PasswordAuth()),
+                          Mixed(SessionAuth(), PasswordAuth(), GPGAuth()),
                           (auth,) + args)
 
-class SessionAuth(Auth):
+class GPGAuth(Auth):
     """
     Proposed PlanetLab federation authentication structure.
     """
 
     def __init__(self):
         Auth.__init__(self, {
+            'AuthMethod': Parameter(str, "Authentication method to use, always 'gpg'", optional = False),
+            'name': Parameter(str, "Peer or user name", optional = False),
+            'signature': Parameter(str, "Message signature", optional = False)
+            })
+
+    def check(self, method, auth, *args):
+        try:
+            peers = Peers(method.api, [auth['name']])
+            if peers:
+                if 'peer' not in method.roles:
+                    raise PLCAuthenticationFailure, "Not allowed to call method"
+
+                method.caller = peer = peers[0]
+                keys = [peer['key']]
+            else:
+                persons = Persons(method.api, {'email': auth['name'], 'enabled': True})
+                if not persons:
+                    raise PLCAuthenticationFailure, "No such peer or user '%s'" % auth['name']
+
+                if not set(person['roles']).intersection(method.roles):
+                    raise PLCAuthenticationFailure, "Not allowed to call method"
+
+                method.caller = person = persons[0]
+                keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg"})
+
+            if not keys:
+                raise PLCAuthenticationFailure, "No GPG key on record for peer or user '%s'"
+
+            for key in keys:
+                try:
+                    gpg_verify(method.name, args, auth['signature'], key)
+                    return
+                except PLCAuthenticationFailure, fault:
+                    pass
+
+            raise fault
+
+        except PLCAuthenticationFailure, fault:
+            # XXX Send e-mail
+            raise fault
+
+class SessionAuth(Auth):
+    """
+    Secondary authentication method. After authenticating with a
+    primary authentication method, call GetSession() to generate a
+    session key that may be used for subsequent calls.
+    """
+
+    def __init__(self):
+        Auth.__init__(self, {
+            'AuthMethod': Parameter(str, "Authentication method to use, always 'session'", optional = False),
             'session': Parameter(str, "Session key", optional = False)
             })
 
