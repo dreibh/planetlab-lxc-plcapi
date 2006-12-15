@@ -8,12 +8,12 @@ class GetPeerName (Method):
     """
     Returns this peer's name, as defined in the config as PLC_NAME
     """
-    roles = ['admin']
+
+    roles = ['admin', 'peer']
 
     accepts = [Auth()]
 
-    returns = Parameter (Peer.fields['peername'])
+    returns = Peer.fields['peername']
 
     def call (self, auth):
         return self.api.config.PLC_NAME
-    
