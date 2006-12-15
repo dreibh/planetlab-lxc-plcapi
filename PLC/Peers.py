@@ -4,6 +4,7 @@
 
 import re
 from types import StringTypes
+from urlparse import urlparse
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
@@ -11,8 +12,13 @@ from PLC.Filter import Filter
 from PLC.Table import Row, Table
 import PLC.Auth
 
-from PLC.Nodes import Nodes,Node
-from PLC.Slices import Slices,Slice
+from PLC.Sites import Site, Sites
+from PLC.Persons import Person, Persons
+from PLC.Keys import Key, Keys
+from PLC.Nodes import Node, Nodes
+from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
+from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.Slices import Slice, Slices
 
 import xmlrpclib
 from PLC.PyCurl import PyCurlTransport
@@ -27,39 +33,52 @@ class Peer(Row):
     table_name = 'peers'
     primary_key = 'peer_id'
     fields = {
-	'peer_id' : Parameter (int, "Peer identifier"),
-	'peername' : Parameter (str, "Peer name"),
-	'peer_url' : Parameter (str, "Peer API url"),
+	'peer_id': Parameter (int, "Peer identifier"),
+	'peername': Parameter (str, "Peer name"),
+	'peer_url': Parameter (str, "Peer API URL"),
 	'key': Parameter(str, "Peer GPG public key"),
 	'cacert': Parameter(str, "Peer SSL public certificate"),
         ### cross refs
-        'site_ids' : Parameter ([int], "This peer's sites ids"),
-        'person_ids' : Parameter ([int], "This peer's persons ids"),
-	'node_ids' : Parameter ([int], "This peer's nodes ids"),
-	'slice_ids' : Parameter ([int], "This peer's slices ids"),
+        'site_ids': Parameter([int], "List of sites for this peer is authoritative"),
+        'person_ids': Parameter([int], "List of users for this peer is authoritative"),
+        'key_ids': Parameter([int], "List of keys for which this peer is authoritative"),
+        'node_ids': Parameter([int], "List of nodes for which this peer is authoritative"),
+        'attribute_type_ids': Parameter([int], "List of slice attribute types for which this peer is authoritative"),
+        'slice_attribute_ids': Parameter([int], "List of slice attributes for which this peer is authoritative"),
+        'slice_ids': Parameter([int], "List of slices for which this peer is authoritative"),
 	}
 
-    def validate_peer_url (self, url):
+    def validate_peer_url(self, url):
 	"""
-	Validate URL, checks it looks like https 
+	Validate URL. Must be HTTPS.
 	"""
-	invalid_url = PLCInvalidArgument("Invalid URL")
-	if not re.compile ("^https://.*$").match(url) : 
-	    raise invalid_url
+
+        (scheme, netloc, path, params, query, fragment) = urlparse(url)
+        if scheme != "https":
+            raise PLCInvalidArgument, "Peer URL scheme must be https"
+
 	return url
 
-    def delete (self, commit=True):
+    def delete(self, commit = True):
 	"""
-	Delete peer
+	Deletes this peer and all related entities.
 	"""
-	
+
 	assert 'peer_id' in self
 
-        # remove nodes depending on this peer
-        for foreign_node in Nodes (self.api, self['node_ids']):
-            foreign_node.delete(commit)
+        # Remove all related entities
+        for obj in \
+                Sites(self.api, self['site_ids']) + \
+                Persons(self.api, self['person_ids']) + \
+                Keys(self.api, self['key_ids']) + \
+                Nodes(self.api, self['node_ids']) + \
+                SliceAttributeTypes(self.api, self['attribute_type_ids']) + \
+                SliceAttributes(self.api, self['slice_attribute_ids']) + \
+                Slices(self.api, self['slice_ids']):
+            assert obj['peer_id'] == self['peer_id']
+            obj.delete(commit = False)
 
-        # remove the peer
+        # Mark as deleted
 	self['deleted'] = True
 	self.sync(commit)
 
