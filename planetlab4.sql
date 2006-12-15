@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.53 2006/12/12 10:58:58 thierry Exp $
+-- $Id: planetlab4.sql,v 1.54 2006/12/15 18:34:46 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -774,10 +774,28 @@ array_accum(person_id) AS person_ids
 FROM persons
 GROUP BY peer_id;
 
+CREATE VIEW peer_keys AS
+SELECT peer_id,
+array_accum(key_id) AS key_ids
+FROM keys
+GROUP BY peer_id;
+
 CREATE VIEW peer_nodes AS
 SELECT peer_id,
 array_accum(node_id) AS node_ids
 FROM nodes
+GROUP BY peer_id;
+
+CREATE VIEW peer_slice_attribute_types AS
+SELECT peer_id,
+array_accum(attribute_type_id) AS attribute_type_ids
+FROM slice_attribute_types
+GROUP BY peer_id;
+
+CREATE VIEW peer_slice_attributes AS
+SELECT peer_id,
+array_accum(slice_attribute_id) AS slice_attribute_ids
+FROM slice_attribute
 GROUP BY peer_id;
 
 CREATE VIEW peer_slices AS
@@ -789,14 +807,20 @@ GROUP BY peer_id;
 CREATE VIEW view_peers AS
 SELECT 
 peers.*, 
-peer_sites.site_ids,
-peer_persons.person_ids,
-peer_nodes.node_ids,
-peer_slices.slice_ids
+COALESCE(peer_sites.site_ids, '{}') AS site_ids,
+COALESCE(peer_persons.person_ids, '{}') AS person_ids,
+COALESCE(peer_keys.key_ids, '{}') AS key_ids,
+COALESCE(peer_nodes.node_ids, '{}') AS node_ids,
+COALESCE(peer_slice_attribute_types.attribute_type_ids, '{}') AS attribute_type_ids,
+COALESCE(peer_slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids,
+COALESCE(peer_slices.slice_ids, '{}') AS slice_ids
 FROM peers
 LEFT JOIN peer_sites USING (peer_id)
 LEFT JOIN peer_persons USING (peer_id)
+LEFT JOIN peer_keys USING (peer_id)
 LEFT JOIN peer_nodes USING (peer_id)
+LEFT JOIN peer_slice_attribute_types USING (peer_id)
+LEFT JOIN peer_slice_attributes USING (peer_id)
 LEFT JOIN peer_slices USING (peer_id);
 
 CREATE VIEW view_nodes AS
