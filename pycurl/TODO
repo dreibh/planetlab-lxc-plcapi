@@ -1,0 +1,27 @@
+# $Id: TODO,v 1.95 2005/03/04 14:43:04 kjetilja Exp $
+# vi:ts=4:et
+
+If you want to hack on pycurl, here's our list of unresolved issues:
+
+
+NEW FEATURES/IMPROVEMENTS:
+
+    * Add docs to the high-level interface.
+
+    * Add more options to the undocumented and currently mostly useless
+      Curl.unsetopt() method. Have to carefully check the libcurl source
+      code for each option we want to support.
+
+    * curl_easy_reset() should probably be supported.  But we have to be
+      careful since curl_easy_reset() e.g. modifies callbacks and other
+      pointers which could leave pycurl and libcurl out of sync.
+
+
+DEFICIENICES:
+
+    * Using certain invalid options, it may be possible to cause a crash.
+      This is un-Pythonic behaviour, but you somewhere have to draw a line
+      between efficiency (and feature completeness) and safety.
+      There _are_ quite a number of internal error checks, but tracking and
+      catching all possible (deliberate) misuses is not a goal (and probably
+      impossible anyway, due to the complexity of libcurl).
