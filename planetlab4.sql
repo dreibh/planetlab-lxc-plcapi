@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.52 2006/11/29 17:57:27 tmack Exp $
+-- $Id: planetlab4.sql,v 1.53 2006/12/12 10:58:58 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -45,10 +45,9 @@ CREATE TABLE peers (
      peer_id  serial PRIMARY KEY, -- identifier
      peername text NOT NULL,      -- free text
      peer_url text NOT NULL,      -- the url of that peer's API
-     -- oops, looks like we have a dependency loop here
-     --person_id integer REFERENCES persons NOT NULL, -- the account we use for logging in
-     auth_person_id integer NOT NULL, -- the account we use for logging in
-       
+     cacert text, -- (SSL) Public certificate of peer API server
+     key text, -- (GPG) Public key used for authentication
+
      deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
 
