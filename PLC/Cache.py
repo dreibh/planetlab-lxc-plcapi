@@ -59,12 +59,11 @@ class Cache:
     Of course the timers field was introduced for optimization and could safely be removed
     """
     
-    def __init__ (self, api, peer_id, peer_server, auth):
+    def __init__ (self, api, peer_id, peer_server):
 
 	self.api = api
         self.peer_id = peer_id
 	self.peer_server = peer_server
-	self.auth = auth
         
     class Transcoder:
 
@@ -430,7 +429,7 @@ class Cache:
         timers={}
         t_start=time.time()
         # xxx see also GetPeerData - peer_id arg unused yet
-        all_data = self.peer_server.GetPeerData (self.auth,self.api.config.PLC_NAME)
+        all_data = self.peer_server.GetPeerData (self.api.config.PLC_NAME)
 
         verbose ('Passed GetPeerData the name',self.api.config.PLC_NAME)
         sks=all_data.keys()
