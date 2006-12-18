@@ -4,14 +4,22 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.9 2006/12/15 16:19:49 mlhuang Exp $
+# $Id: Makefile,v 1.10 2006/12/15 16:20:20 mlhuang Exp $
 #
 
 # Metafiles
 init := PLC/__init__.py PLC/Methods/__init__.py
 
 # Python modules
-modules := psycopg2 pycurl
+modules := psycopg2
+
+# Temporarily until we can kill the Fedora Core 2 build
+curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
+pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
+ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
+modules += pycurl
+endif
+
 modules-install := $(foreach module, $(modules), $(module)-install)
 modules-clean := $(foreach module, $(modules), $(module)-clean)
 
