@@ -59,6 +59,10 @@ class UpdateSite(Method):
 
         site.update(site_fields)
 	site.sync()
+	
+	# Logging variables
 	self.object_ids = [site['site_id']]
+	self.message = 'Site %d updated: %s' % \
+		(site['site_id'], ", ".join(site_fields.keys()))  	
 	
 	return 1

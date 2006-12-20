@@ -65,7 +65,9 @@ class AddNodeNetwork(Method):
 	if not node['nodenetwork_ids']:
 		nodenetwork['is_primary'] = True
         nodenetwork.sync()
-
+	
+	# Logging variables
 	self.object_ids = [node['node_id'], nodenetwork['nodenetwork_id']]	
+	self.messgage = "Node network %d added" % nodenetwork['nodenetwork_id']
 
         return nodenetwork['nodenetwork_id']

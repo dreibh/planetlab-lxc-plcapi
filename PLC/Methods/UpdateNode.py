@@ -59,6 +59,12 @@ class UpdateNode(Method):
 
         node.update(node_fields)
         node.sync()
+	
+	# Logging variables
 	self.object_ids = [node['node_id']]
+	self.message = 'Node %d updated: %s.' % \
+		(node['node_id'], ", ".join(node_fields.keys()))
+	if 'boot_state' in node_fields.keys():
+		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
 
         return 1

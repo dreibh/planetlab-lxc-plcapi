@@ -49,6 +49,9 @@ class DeleteNodeNetwork(Method):
                 raise PLCPermissionDenied, "Not allowed to delete this node network"
 
         nodenetwork.delete()
+
+	# Logging variables
 	self.object_ids = [nodenetwork['nodenetwork_id']]
+	self.message = "Node network %d deleted" % nodenetwork['nodenetwork_id']
 
         return 1

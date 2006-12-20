@@ -50,6 +50,9 @@ class AddSiteAddress(Method):
         address.sync(commit = False)
         site.add_address(address, commit = True)
 
+	# Logging variables
 	self.object_ids = [site['site_id'], address['address_id']]
+	self.message = 'Address %d assigned to Site %d' % \
+		(address['address_id'], site['site_id'])
 
         return address['address_id']

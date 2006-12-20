@@ -44,6 +44,9 @@ class DeleteNode(Method):
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
         node.delete()
+
+	# Logging variables
 	self.object_ids = [node['node_id']]
+	self.message = "Node %d deleted" % node['node_id']
 
         return 1

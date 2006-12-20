@@ -36,6 +36,8 @@ class AddPerson(Method):
         person = Person(self.api, person_fields)
         person.sync()
 
+	# Logging variables
 	self.object_ids = [person['person_id']]
+	self.message = 'Person %d added' % person['person_id']	
 
         return person['person_id']

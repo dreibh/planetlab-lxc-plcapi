@@ -52,9 +52,13 @@ class DeleteNodeFromPCU(Method):
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
 	
 	# Removed node from PCU
+	
         if node['node_id'] in pcu['node_ids']:
             pcu.remove_node(node)
 
+	# Logging variables
 	self.object_ids = [pcu['pcu_id']]
-        
+	self.message = 'Node %d removed from PCU %d' % \
+		(node['node_id'], pcu['pcu_id']) 
+	
 	return 1

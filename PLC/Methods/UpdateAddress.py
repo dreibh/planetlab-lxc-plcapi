@@ -45,6 +45,10 @@ class UpdateAddress(Method):
 
         address.update(address_fields)
         address.sync()
+	
+	# Logging variables
 	self.object_ids = [address['address_id']]
-
-        return 1
+	self.message = 'Address %d updated: %s' % \
+		(address['address_id'], ", ".join(address_fields.keys()))
+        
+	return 1

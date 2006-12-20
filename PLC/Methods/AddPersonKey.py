@@ -49,6 +49,9 @@ class AddPersonKey(Method):
         key.sync(commit = False)
         person.add_key(key, commit = True)
 
-        self.object_ids = [person['person_id'], key['key_id']]
+        # Logging variables
+	self.object_ids = [person['person_id'], key['key_id']]
+	self.message = 'Key %d added to person %d' % \
+		(key['key_id'], person['person_id'])
 
         return key['key_id']

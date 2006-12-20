@@ -46,6 +46,8 @@ class DeletePersonFromSite(Method):
         if site['site_id'] in person['site_ids']:
             site.remove_person(person)
 
+	# Logging variables
 	self.object_ids = [site['site_id']]
-	
+	self.message = 'Person %d deleted from site %d	' % \
+		(person['person_id'], site['site_id'])
         return 1

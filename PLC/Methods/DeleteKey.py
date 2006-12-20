@@ -36,6 +36,9 @@ class DeleteKey(Method):
                 raise PLCPermissionDenied, "Key must be associated with your account"
 
         key.delete()
+	
+	# Logging variables
 	self.object_ids = [key['key_id']]
+	self.message = 'Key %d deleted' % key['key_id']
 
         return 1

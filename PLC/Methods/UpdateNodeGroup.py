@@ -38,6 +38,9 @@ class UpdateNodeGroup(Method):
 	
 	nodegroup.update(nodegroup_fields)
         nodegroup.sync()
+	
+	# Logging variables
 	self.object_ids = [nodegroup['nodegroup_id']]
-
+	self.message = 'Node group %d updated: %s' % \
+		(nodegroup['nodegroup_id'], ", ".join(nodegroup_fields.keys()))  
         return 1

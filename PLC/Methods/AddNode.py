@@ -61,5 +61,6 @@ class AddNode(Method):
         node.sync()
 
 	self.object_ids = [site['site_id'], node['node_id']]	
+	self.message = "Node %s created" % node['node_id']
 
         return node['node_id']

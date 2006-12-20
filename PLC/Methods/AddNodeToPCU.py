@@ -65,6 +65,8 @@ class AddNodeToPCU(Method):
 
         pcu.add_node(node, port)
 
+	# Logging variables
 	self.object_ids = [node['node_id'], pcu['pcu_id']]
-
+	self.message = 'Node %d added to pcu %d on port %d' % \
+		(node['node_id'], pcu['pcu_id'], port)
         return 1

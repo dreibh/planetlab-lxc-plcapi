@@ -67,5 +67,7 @@ class AddRoleToPerson(Method):
             person.add_role(role_id)
 
 	self.object_ids = [person['person_id']]
+	self.message = "Role %d granted to person %d" % \
+		(role['role_id'], person['person_id'])
 
         return 1

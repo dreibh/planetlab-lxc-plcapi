@@ -59,5 +59,6 @@ class BootUpdateNode(Method):
             nodenetwork.sync(commit = False)
 
         self.caller.sync(commit = True)
+	self.message = "Node updated: %s" % ", ".join(node_fields.keys())
 
         return 1

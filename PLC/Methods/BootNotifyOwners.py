@@ -57,5 +57,6 @@ class BootNotifyOwners(Method):
                     recipients[person['email']] = person['first_name'] + " " + person['last_name']
 
         # XXX Send mail
+	self.message = "Node sent message %s to contacts"
 
         return 1

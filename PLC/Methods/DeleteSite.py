@@ -38,6 +38,9 @@ class DeleteSite(Method):
 	PLCCheckLocalSite(site,"DeleteSite")
 
         site.delete()
+	
+	# Logging variables
 	self.object_ids = [site['site_id']]
+	self.message = 'Site %d deleted' % site['site_id']	
 
         return 1

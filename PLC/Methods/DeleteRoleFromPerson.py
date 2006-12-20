@@ -66,6 +66,8 @@ class DeleteRoleFromPerson(Method):
         if role_id in person['role_ids']:
             person.remove_role(role_id)
 	
+	# Logging variables
 	self.object_ids = [person['person_id']]
-
+	self.message = 'Role %d revoked from person %d' \
+		(role['role_id'], person['person_id'])
         return 1

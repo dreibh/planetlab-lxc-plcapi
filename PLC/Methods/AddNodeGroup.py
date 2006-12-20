@@ -32,6 +32,8 @@ class AddNodeGroup(Method):
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup.sync()
 
+	# Logging variables
 	self.object_ids = [nodegroup['nodegroup_id']]
-
+	self.message = 'Node group %d created' % nodegroup['nodegroup_id']
+ 
         return nodegroup['nodegroup_id']

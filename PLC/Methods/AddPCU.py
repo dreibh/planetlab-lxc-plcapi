@@ -52,6 +52,9 @@ class AddPCU(Method):
         pcu['site_id'] = site['site_id']
         pcu.sync()
 
+	# Logging variables
 	self.object_ids = [site['site_id'], pcu['pcu_id']]
+	self.message = 'PCU %d added site %s' % \
+		(pcu['pcu_id'], site['site_id'])
 
         return pcu['pcu_id']

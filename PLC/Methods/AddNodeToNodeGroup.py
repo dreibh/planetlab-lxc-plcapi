@@ -44,6 +44,9 @@ class AddNodeToNodeGroup(Method):
 	# add node to nodegroup
         if node['node_id'] not in nodegroup['node_ids']:
             nodegroup.add_node(node)
+	
+	# Logging variables
 	self.object_ids = [nodegroup['nodegroup_id']]
-
+	self.message = 'Node %d added to node group %d' % \
+		(node['node_id'], nodegroup['nodegroup_id'])
         return 1

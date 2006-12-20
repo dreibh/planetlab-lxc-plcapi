@@ -53,6 +53,12 @@ class UpdatePerson(Method):
 
         person.update(person_fields)
         person.sync()
+	
+	# Logging variables
 	self.object_ids = [person['person_id']]
+	self.message = 'Person %d updated: %s.' % \
+		(person['person_id'], person_fields.keys())
+	if 'enabled' in person_fields:
+		self.message += ' Person enabled' 	
 
         return 1

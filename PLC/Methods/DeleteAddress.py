@@ -35,6 +35,9 @@ class DeleteAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address.delete()
+
+	# Logging variables
         self.object_ids = [address['address_id']]
+	self.message = 'Address %d deleted' % address['address_id']	
 
         return 1

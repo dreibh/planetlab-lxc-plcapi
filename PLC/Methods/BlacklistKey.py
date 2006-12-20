@@ -37,6 +37,9 @@ class BlacklistKey(Method):
 	PLCCheckLocalKey(key,"BlackListKey")
 
         key.blacklist()
+	
+	# Logging variables
 	self.object_ids = [key['key_id']]
+	self.message = 'Key %d blacklisted' % key['key_id']
 
         return 1
