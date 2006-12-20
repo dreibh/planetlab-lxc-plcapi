@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.18 2006/11/08 22:11:26 mlhuang Exp $
+# $Id: Method.py,v 1.19 2006/11/29 17:57:27 tmack Exp $
 #
 
 import xmlrpclib
@@ -144,6 +144,10 @@ class Method:
             for object_id in self.object_ids:
                 event.add_object(object_id, commit = False)
 
+	# Get message for this event
+	if hasattr(self, 'message'):
+		event['message'] = self.message	
+	
         # Commit
         event.sync(commit = True)
 
