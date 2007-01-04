@@ -20,10 +20,6 @@ from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Slices import Slice, Slices
 
-import xmlrpclib
-from PLC.PyCurl import PyCurlTransport
-from PLC.GPG import gpg_sign
-
 class Peer(Row):
     """
     Stores the list of peering PLCs in the peers table. 
@@ -87,6 +83,8 @@ class Peer(Row):
         Connect to this peer via XML-RPC.
         """
 
+        import xmlrpclib
+        from PLC.PyCurl import PyCurlTransport
         self.server = xmlrpclib.ServerProxy(self['peer_url'],
                                             PyCurlTransport(self['peer_url'], self['cacert']),
                                             allow_none = 1, **kwds)
@@ -98,6 +96,7 @@ class Peer(Row):
         """
 
         def wrapper(*args, **kwds):
+            from PLC.GPG import gpg_sign
             signature = gpg_sign(methodname, args,
                                  self.api.config.PLC_ROOT_GPG_KEY,
                                  self.api.config.PLC_ROOT_GPG_KEY_PUB)

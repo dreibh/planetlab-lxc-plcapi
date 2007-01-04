@@ -1,4 +1,9 @@
 from types import StringTypes
+try:
+    set
+except NameError:
+    from sets import Set
+    set = Set
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type

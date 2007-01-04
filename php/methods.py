@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustess of Princeton University
 #
-# $Id: methods.py,v 1.3 2006/11/21 20:00:53 mlhuang Exp $
+# $Id: methods.py,v 1.4 2006/11/29 19:43:17 mlhuang Exp $
 #
 
 import os, sys
@@ -14,6 +14,12 @@ import time
 from PLC.API import PLCAPI
 from PLC.Method import *
 from PLC.Auth import Auth
+
+try:
+    set
+except NameError:
+    from sets import Set
+    set = Set
 
 def php_cast(value):
     """

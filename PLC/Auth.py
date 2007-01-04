@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.8 2006/11/09 19:43:55 mlhuang Exp $
+# $Id: Auth.py,v 1.9 2006/12/15 18:35:38 mlhuang Exp $
 #
 
 import crypt
@@ -18,7 +18,6 @@ from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
 from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
-from PLC.GPG import gpg_verify
 
 class Auth(Parameter):
     """
@@ -72,6 +71,7 @@ class GPGAuth(Auth):
 
             for key in keys:
                 try:
+                    from PLC.GPG import gpg_verify
                     gpg_verify(method.name, args, auth['signature'], key)
                     return
                 except PLCAuthenticationFailure, fault:
