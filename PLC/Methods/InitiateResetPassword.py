@@ -59,25 +59,8 @@ class InitiateResetPassword(Method):
             time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()+86400))
         person.sync()
 	
-	# email user next step instructions
-	to_addr = {}
-	to_addr[person['email']] = "%s %s" % \
-	    (person['first_name'], person['last_name'])
-	from_addr = {}  
-	from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
-	"%s %s" % ('Planetlab', 'Support')
-	messages = Messages(self.api, ['PASSWORD_RESET_INITIATE'])
-	if not messages:
-		raise PLCAPIError, "Email template not found"
-	message = messages[0]
-	subject = message['subject']
-	template = message['template'] % \
-		(self.api.config.PLC_WWW_HOST,
-		 verification_key, person['person_id'],
-		 self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
-		 self.api.config.PLC_WWW_HOST)
-	
-	self.api.mailer.mail(to_addr, None, from_addr, subject, template) 
+	# send notification email
+	person.send_initiate_password_reset_email()
 
 	# Logging variables
         self.object_ids = [person['person_id']]
