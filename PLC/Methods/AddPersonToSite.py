@@ -45,7 +45,8 @@ class AddPersonToSite(Method):
 
         if site['site_id'] not in person['site_ids']:
             site.add_person(person)
-	
+	    person.send_account_registered_email(site)		  	
+
 	# Logging variables
 	self.object_ids = [site['site_id']]
 	self.message = 'Person %d added to site %d' % \
