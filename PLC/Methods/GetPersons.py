@@ -29,7 +29,8 @@ class GetPersons(Method):
         ]
 
     # Filter out password field
-    can_return = lambda (field, value): field not in ['password']
+    can_return = lambda (field, value): field not in \
+	['password', 'verification_key', 'verification_expires']
     return_fields = dict(filter(can_return, Person.fields.items()))
     returns = [return_fields]
     
@@ -53,9 +54,10 @@ class GetPersons(Method):
 
         # Filter out password field
         if return_fields:
-            while 'password' in return_fields:
-                return_fields.remove('password')
-
+            return_fields = filter(self.can_return, return_fields)
+	else:
+	    return_fields = self.return_fields.keys()
+		
         persons = Persons(self.api, person_filter, return_fields)
 
         # Filter out accounts that are not viewable
