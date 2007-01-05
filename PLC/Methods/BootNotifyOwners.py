@@ -32,11 +32,14 @@ class BootNotifyOwners(Method):
             # raise PLCInvalidArgument, "No such message template"
             return 1
         message = messages[0]
-
+	
         if not self.api.config.PLC_MAIL_ENABLED:
             return 1
 
-        recipients = {}
+        from_addr = {}
+        from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
+        "%s %s" % ('Planetlab', 'Support')
+	recipients = {}
 
         if self.api.config.PLC_MAIL_BOOT_ADDRESS:
             recipients[self.api.config.PLC_MAIL_BOOT_ADDRESS] = "Boot Messages"
@@ -56,7 +59,13 @@ class BootNotifyOwners(Method):
                    include_techs and 'tech' in person['roles']:
                     recipients[person['email']] = person['first_name'] + " " + person['last_name']
 
-        # XXX Send mail
+        subject = message['subject']
+        template = message['template']
+	
+	# Send email
+	self.api.mailer.mail(recipients, None, from_addr, subject, template)
+
+	# Logging variables
 	self.message = "Node sent message %s to contacts"
 
         return 1
