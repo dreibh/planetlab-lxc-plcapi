@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.6 2006/10/27 18:57:32 mlhuang Exp $
+# $Id: API.py,v 1.7 2006/10/30 16:37:11 mlhuang Exp $
 #
 
 import sys
@@ -83,6 +83,7 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
+from PLC.sendmail import sendmail
 
 class PLCAPI:
     methods = PLC.Methods.methods
@@ -96,13 +97,17 @@ class PLCAPI:
 
         # Load configuration
         self.config = Config(config)
-
-        # Initialize database connection
+	
+	# Initialize mailer
+	self.mailer = sendmail(self.config)
+        
+	# Initialize database connection
         if self.config.PLC_DB_TYPE == "postgresql":
             from PLC.PostgreSQL import PostgreSQL
             self.db = PostgreSQL(self)
+
         else:
-            raise PLCAPIError, "Unsupported database type " + config.PLC_DB_TYPE
+            raise PLCAPIError, "Unsupported database type " + self.config.PLC_DB_TYPE
 
     def callable(self, method):
         """
