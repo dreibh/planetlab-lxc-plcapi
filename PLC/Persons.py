@@ -298,19 +298,60 @@ class Person(Row):
         from_addr = {}
         from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
         "%s %s" % ('Planetlab', 'Support')
+
+	# fill in template
         messages = Messages(self.api, ['PASSWORD_RESET_INITIATE'])
         if not messages:
-                raise PLCAPIError, "Email template not found"
+            raise PLCAPIError, "Email template not found"
+
         message = messages[0]
         subject = message['subject']
         template = message['template'] % \
-                (self.api.config.PLC_WWW_HOST,
-                 self['verification_key'], self['person_id'],
-                 self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
-                 self.api.config.PLC_WWW_HOST)
+            (self.api.config.PLC_WWW_HOST,
+             self['verification_key'], self['person_id'],
+             self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
+             self.api.config.PLC_WWW_HOST)
 
         self.api.mailer.mail(to_addr, None, from_addr, subject, template)
+    
+    def send_account_registered_email(self, site):
+	
+	to_addr = {}
+	cc_addr = {}
+	from_addr = {}
+	from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
+        "%s %s" % ('Planetlab', 'Support')
 
+	# email user
+	user_full_name = "%s %s" % (self['first_name'], self['last_name'])
+	to_addr[self['email']] = "%s" % user_full_name
+
+	# if the account had a admin role or a pi role, email support.
+        if set(['admin', 'pi']).intersection(self['roles']):
+            to_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
+                "%s %s" % ('Planetlab', 'Support')
+	
+	# cc site pi's
+	site_persons = Persons(self.api, site['person_ids'])
+        for person in site_persons:
+            if 'pi' in person['roles'] and not person['email'] in to_addr.keys():
+                cc_addr[person['email']] = "%s %s" % \
+		(person['first_name'], person['last_name'])
+
+	# fill in template
+	messages = Messages(self.api, ['ACCOUNT_REGISTERED'])
+        if not messages:
+            raise PLCAPIError, "Email template not found"
+
+        message = messages[0]
+        subject = message['subject'] % (user_full_name, site['name'])
+        template = message['template'] % \
+	    (user_full_name, site['name'], ", ".join(self['roles']),
+	     self.api.config.PLC_WWW_HOST, self['person_id'],
+             self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
+             self.api.config.PLC_WWW_HOST)
+			    	
+	self.api.mailer.mail(to_addr, cc_addr, from_addr, subject, template)
 
     def delete(self, commit = True):
         """
