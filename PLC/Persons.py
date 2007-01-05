@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.24 2006/12/05 16:45:03 thierry Exp $
+# $Id: Persons.py,v 1.25 2007/01/05 15:54:39 tmack Exp $
 #
 
 from types import StringTypes
@@ -44,7 +44,7 @@ class Person(Row):
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'verification_key': Parameter(str, "Reset password key", max = 254),
-	'verification_expires': Parameter(str, "Date/Time verification_key expires", max = 254),
+	'verification_expires': Parameter(str, "Date/Time when verification_key expires", max = 254),
 	'last_updated': Parameter(int, "Date and time of last update", ro = True),
         'date_created': Parameter(int, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers"),
