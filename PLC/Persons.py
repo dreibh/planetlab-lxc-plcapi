@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.25 2007/01/05 15:54:39 tmack Exp $
+# $Id: Persons.py,v 1.26 2007/01/05 15:56:16 tmack Exp $
 #
 
 from types import StringTypes
@@ -20,6 +20,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Keys import Key, Keys
+from PLC.Messages import Message, Messages
 import PLC.Sites
 
 class Person(Row):
@@ -288,6 +289,28 @@ class Person(Row):
         # Make sure that the primary site is first in the list
         self['site_ids'].remove(site_id)
         self['site_ids'].insert(0, site_id)
+
+    def send_initiate_password_reset_email(self):
+	# email user next step instructions
+        to_addr = {}
+        to_addr[self['email']] = "%s %s" % \
+            (self['first_name'], self['last_name'])
+        from_addr = {}
+        from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
+        "%s %s" % ('Planetlab', 'Support')
+        messages = Messages(self.api, ['PASSWORD_RESET_INITIATE'])
+        if not messages:
+                raise PLCAPIError, "Email template not found"
+        message = messages[0]
+        subject = message['subject']
+        template = message['template'] % \
+                (self.api.config.PLC_WWW_HOST,
+                 self['verification_key'], self['person_id'],
+                 self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
+                 self.api.config.PLC_WWW_HOST)
+
+        self.api.mailer.mail(to_addr, None, from_addr, subject, template)
+
 
     def delete(self, commit = True):
         """
