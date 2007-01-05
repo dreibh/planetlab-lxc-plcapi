@@ -7,7 +7,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: GPG.py,v 1.1 2006/12/15 18:21:57 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -45,7 +45,9 @@ def gpg_sign(methodname, args, secret_keyring, keyring):
 
     message = canonicalize(methodname, args)
 
+    homedir = mkdtemp()
     p = Popen(["gpg", "--batch", "--no-tty",
+               "--homedir", homedir,
                "--no-default-keyring",
                "--secret-keyring", secret_keyring,
                "--keyring", keyring,
@@ -55,6 +57,10 @@ def gpg_sign(methodname, args, secret_keyring, keyring):
     p.stdin.close()
     signature = p.stdout.read()
     rc = p.wait()
+
+    # Clean up
+    shutil.rmtree(homedir)
+
     if rc:
         raise PLCAuthenticationFailure, "GPG signing failed with return code %d" % rc
 
