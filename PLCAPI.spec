@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-ln -s %{_datadir}/plc_api/Shell.py $RPM_BUILD_ROOT/%{_bindir}/plcsh
+ln -s %{_datadir}/plc_api/plcsh $RPM_BUILD_ROOT/%{_bindir}/plcsh
 
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/php.d
 cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
