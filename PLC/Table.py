@@ -64,7 +64,6 @@ class Row(dict):
             raise PLCInvalidArgument, "%s: date must be in the future"%human
 	return human
 
-    @classmethod
     def add_object(self, classobj, join_table, columns = None):
         """
         Returns a function that can be used to associate this object
@@ -103,8 +102,9 @@ class Row(dict):
                 self.api.db.commit()
     
         return add
-    
-    @classmethod
+
+    add_object = classmethod(add_object)
+
     def remove_object(self, classobj, join_table):
         """
         Returns a function that can be used to disassociate this
@@ -137,6 +137,8 @@ class Row(dict):
                 self.api.db.commit()
 
         return remove
+
+    remove_object = classmethod(remove_object)
 
     def db_fields(self, obj = None):
         """
