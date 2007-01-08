@@ -1,3 +1,4 @@
+from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
@@ -34,8 +35,12 @@ class UpdatePeer(Method):
         peers = Peers(self.api, [peer_id_or_name])
         if not peers:
             raise PLCInvalidArgument, "No such peer"
-
         peer = peers[0]
+
+        if isinstance(self.caller, Peer):
+            if self.caller['peer_id'] != peer['peer_id']:
+                raise PLCPermissionDenied, "Not allowed to update specified peer"
+
         peer.update(peer_fields)
         peer.sync()
 
