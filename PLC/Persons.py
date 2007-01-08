@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.26 2007/01/05 15:56:16 tmack Exp $
+# $Id: Persons.py,v 1.28 2007/01/05 19:50:20 tmack Exp $
 #
 
 from types import StringTypes
@@ -16,6 +16,7 @@ import re
 import crypt
 
 from PLC.Faults import *
+from PLC.Debug import log
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
@@ -300,9 +301,10 @@ class Person(Row):
         "%s %s" % ('Planetlab', 'Support')
 
 	# fill in template
-        messages = Messages(self.api, ['PASSWORD_RESET_INITIATE'])
+        messages = Messages(self.api, ['ASSWORD_RESET_INITIATE'])
         if not messages:
-            raise PLCAPIError, "Email template not found"
+            print >> log, "No such message template"
+	    return 1
 
         message = messages[0]
         subject = message['subject']
@@ -341,7 +343,8 @@ class Person(Row):
 	# fill in template
 	messages = Messages(self.api, ['ACCOUNT_REGISTERED'])
         if not messages:
-            raise PLCAPIError, "Email template not found"
+	    print >> log, "No such message template"
+            return 1
 
         message = messages[0]
         subject = message['subject'] % (user_full_name, site['name'])
