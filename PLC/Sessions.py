@@ -30,51 +30,15 @@ class Session(Row):
 
         return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
 
-    def add_person(self, person, commit = True):
-        """
-        Associate person with session.
-        """
-
-        assert 'session_id' in self
-        assert isinstance(person, Person)
-        assert 'person_id' in person
-
-        session_id = self['session_id']
-        person_id = person['person_id']
-
-        self.api.db.do("INSERT INTO person_session (session_id, person_id)" \
-                       " VALUES(%(session_id)s, %(person_id)d)",
-                       locals())
-
-        if commit:
-            self.api.db.commit()
-
-        self['person_id'] = person_id
+    add_person = Row.add_object(Person, 'person_session')
 
     def add_node(self, node, commit = True):
-        """
-        Associate node with session.
-        """
-
-        assert 'session_id' in self
-        assert isinstance(node, Node)
-        assert 'node_id' in node
-
-        session_id = self['session_id']
-        node_id = node['node_id']
-
         # Nodes can have only one session at a time
-        self.api.db.do("DELETE FROM node_session WHERE node_id = %(node_id)d",
-                       locals())
+        self.api.db.do("DELETE FROM node_session WHERE node_id = %d" % \
+                       node['node_id'])
 
-        self.api.db.do("INSERT INTO node_session (session_id, node_id)" \
-                       " VALUES(%(session_id)s, %(node_id)d)",
-                       locals())
-
-        if commit:
-            self.api.db.commit()
-
-        self['node_id'] = node_id
+        add = Row.add_object(Node, 'person_session')
+        add(self, node, commit)
 
     def sync(self, commit = True, insert = None):
         if not self.has_key('session_id'):
