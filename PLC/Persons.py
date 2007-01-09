@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.28 2007/01/05 19:50:20 tmack Exp $
+# $Id: Persons.py,v 1.29 2007/01/08 16:34:12 tmack Exp $
 #
 
 from types import StringTypes
@@ -20,9 +20,9 @@ from PLC.Debug import log
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
+from PLC.Roles import Role, Roles
 from PLC.Keys import Key, Keys
 from PLC.Messages import Message, Messages
-import PLC.Sites
 
 class Person(Row):
     """
@@ -33,9 +33,9 @@ class Person(Row):
 
     table_name = 'persons'
     primary_key = 'person_id'
-    join_tables = ['person_role', 'person_site', 'slice_person', 'person_session']
+    join_tables = ['person_key', 'person_role', 'person_site', 'slice_person', 'person_session', 'peer_person']
     fields = {
-        'person_id': Parameter(int, "Account identifier"),
+        'person_id': Parameter(int, "User identifier"),
         'first_name': Parameter(str, "Given name", max = 128),
         'last_name': Parameter(str, "Surname", max = 128),
         'title': Parameter(str, "Title", max = 128, nullok = True),
@@ -46,7 +46,7 @@ class Person(Row):
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'verification_key': Parameter(str, "Reset password key", max = 254),
-	'verification_expires': Parameter(str, "Date/Time when verification_key expires", max = 254),
+	'verification_expires': Parameter(int, "Date and time when verification_key expires"),
 	'last_updated': Parameter(int, "Date and time of last update", ro = True),
         'date_created': Parameter(int, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers"),
@@ -54,7 +54,8 @@ class Person(Row):
         'site_ids': Parameter([int], "List of site identifiers"),
         'key_ids': Parameter([int], "List of key identifiers"),
         'slice_ids': Parameter([int], "List of slice identifiers"),
-        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this user belongs", nullok = True),
+        'peer_person_id': Parameter(int, "Foreign user identifier at peer", nullok = True),
         }
 
     # for Cache
@@ -123,12 +124,9 @@ class Person(Row):
             salt = md5.md5(salt).hexdigest()[:8] 
             return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
 
-    # timestamps
-    # verification_expires in the DB but not exposed here
-    def validate_date_created (self, timestamp):
-	return self.validate_timestamp (timestamp)
-    def validate_last_updated (self, timestamp):
-	return self.validate_timestamp (timestamp)
+    validate_date_created = Row.validate_timestamp
+    validate_last_updated = Row.validate_timestamp
+    validate_verification_expires = Row.validate_timestamp
 
     def can_update(self, person):
         """
@@ -178,97 +176,18 @@ class Person(Row):
 
         return False
 
-    def add_role(self, role_id, commit = True):
-        """
-        Add role to existing account.
-        """
+    add_role = Row.add_object(Role, 'person_role')
+    remove_role = Row.remove_object(Role, 'person_role')
 
-        assert 'person_id' in self
-
-        person_id = self['person_id']
-
-        if role_id not in self['role_ids']:
-            self.api.db.do("INSERT INTO person_role (person_id, role_id)" \
-                           " VALUES(%(person_id)d, %(role_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['role_ids'].append(role_id)
-
-    def remove_role(self, role_id, commit = True):
-        """
-        Remove role from existing account.
-        """
-
-        assert 'person_id' in self
-
-        person_id = self['person_id']
-
-        if role_id in self['role_ids']:
-            self.api.db.do("DELETE FROM person_role" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND role_id = %(role_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['role_ids'].remove(role_id)
- 
-    def add_key(self, key, commit = True):
-        """
-        Add key to existing account.
-        """
-
-        assert 'person_id' in self
-        assert isinstance(key, Key)
-        assert 'key_id' in key
-
-        person_id = self['person_id']
-        key_id = key['key_id']
-
-        if key_id not in self['key_ids']:
-            self.api.db.do("INSERT INTO person_key (person_id, key_id)" \
-                           " VALUES(%(person_id)d, %(key_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['key_ids'].append(key_id)
-
-    def remove_key(self, key, commit = True):
-        """
-        Remove key from existing account.
-        """
-
-        assert 'person_id' in self
-        assert isinstance(key, Key)
-        assert 'key_id' in key
-
-        person_id = self['person_id']
-        key_id = key['key_id']
-
-        if key_id in self['key_ids']:
-            self.api.db.do("DELETE FROM person_key" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND key_id = %(key_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['key_ids'].remove(key_id)
+    add_key = Row.add_object(Key, 'person_key')
+    remove_key = Row.remove_object(Key, 'person_key')
 
     def set_primary_site(self, site, commit = True):
         """
-        Set the primary site for an existing account.
+        Set the primary site for an existing user.
         """
 
         assert 'person_id' in self
-        assert isinstance(site, PLC.Sites.Site)
         assert 'site_id' in site
 
         person_id = self['person_id']
@@ -317,7 +236,6 @@ class Person(Row):
         self.api.mailer.mail(to_addr, None, from_addr, subject, template)
     
     def send_account_registered_email(self, site):
-	
 	to_addr = {}
 	cc_addr = {}
 	from_addr = {}
@@ -358,7 +276,7 @@ class Person(Row):
 
     def delete(self, commit = True):
         """
-        Delete existing account.
+        Delete existing user.
         """
 
         # Delete all keys
@@ -381,11 +299,16 @@ class Persons(Table):
     database.
     """
 
-    def __init__(self, api, person_filter = None, columns = None):
+    def __init__(self, api, person_filter = None, columns = None, peer_id = None):
         Table.__init__(self, api, Person, columns)
 
         sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
               ", ".join(self.columns)
+
+        if peer_id is None:
+            sql += " AND peer_id IS NULL"
+        elif isinstance(peer_id, (int, long)):
+            sql += " AND peer_id = %d" % peer_id
 
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):

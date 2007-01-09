@@ -16,12 +16,14 @@ class Key(Row):
 
     table_name = 'keys'
     primary_key = 'key_id'
-    join_tables = ['person_key']
+    join_tables = ['person_key', 'peer_key']
     fields = {
         'key_id': Parameter(int, "Key identifier"),
         'key_type': Parameter(str, "Key type"),
         'key': Parameter(str, "Key value", max = 4096),
-        'peer_id': Parameter(int, "Peer at which this node is managed", nullok = True),
+        'person_id': Parameter(int, "User to which this key belongs", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this key belongs", nullok = True),
+        'peer_key_id': Parameter(int, "Foreign key identifier at peer", nullok = True),
         }
 
     # for Cache
@@ -104,11 +106,16 @@ class Keys(Table):
     database.
     """
 
-    def __init__(self, api, key_filter = None, columns = None):
+    def __init__(self, api, key_filter = None, columns = None, peer_id = None):
         Table.__init__(self, api, Key, columns)
 	
-	sql = "SELECT %s FROM keys WHERE is_blacklisted IS False" % \
+	sql = "SELECT %s FROM view_keys WHERE is_blacklisted IS False" % \
               ", ".join(self.columns)
+
+        if peer_id is None:
+            sql += " AND peer_id IS NULL"
+        elif isinstance(peer_id, (int, long)):
+            sql += " AND peer_id = %d" % peer_id
 
         if key_filter is not None:
             if isinstance(key_filter, (list, tuple, set)):

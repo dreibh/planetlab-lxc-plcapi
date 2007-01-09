@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.27 2006/11/30 10:12:01 thierry Exp $
+# $Id: Nodes.py,v 1.28 2006/12/05 16:45:03 thierry Exp $
 #
 
 from types import StringTypes
@@ -38,7 +38,7 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session']
+    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node']
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
@@ -59,7 +59,8 @@ class Node(Row):
         'slice_ids': Parameter([int], "List of slices on this node"),
         'pcu_ids': Parameter([int], "List of PCUs that control this node"),
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
-        'peer_id': Parameter(int, "Peer at which this node is managed", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
+        'peer_node_id': Parameter(int, "Foreign node identifier at peer", nullok = True),
         }
 
     # for Cache
@@ -91,11 +92,8 @@ class Node(Row):
 
         return boot_state
 
-    # timestamps
-    def validate_date_created (self, timestamp):
-	return self.validate_timestamp (timestamp)
-    def validate_last_updated (self, timestamp):
-	return self.validate_timestamp (timestamp)
+    validate_date_created = Row.validate_timestamp
+    validate_last_updated = Row.validate_timestamp
 
     def delete(self, commit = True):
         """
@@ -120,11 +118,16 @@ class Nodes(Table):
     database.
     """
 
-    def __init__(self, api, node_filter = None, columns = None):
+    def __init__(self, api, node_filter = None, columns = None, peer_id = None):
         Table.__init__(self, api, Node, columns)
 
         sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
               ", ".join(self.columns)
+
+        if peer_id is None:
+            sql += " AND peer_id IS NULL"
+        elif isinstance(peer_id, (int, long)):
+            sql += " AND peer_id = %d" % peer_id
 
         if node_filter is not None:
             if isinstance(node_filter, (list, tuple, set)):
@@ -138,4 +141,3 @@ class Nodes(Table):
                 sql += " AND (%s)" % node_filter.sql(api, "AND")
 
         self.selectall(sql)
-

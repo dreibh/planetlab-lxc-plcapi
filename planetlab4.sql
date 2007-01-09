@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.55 2006/12/15 19:39:04 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.56 2006/12/20 14:06:40 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -29,27 +29,12 @@ CREATE AGGREGATE array_accum (
 -- Version
 --------------------------------------------------------------------------------
 
---version
+-- Database version
 CREATE TABLE plc_db_version (
 	version integer NOT NULL 
 ) WITH OIDS;
 
 INSERT INTO plc_db_version (version) VALUES (4);
-
---------------------------------------------------------------------------------
--- Peers
---------------------------------------------------------------------------------
-
--- Peers
-CREATE TABLE peers (
-     peer_id  serial PRIMARY KEY, -- identifier
-     peername text NOT NULL,      -- free text
-     peer_url text NOT NULL,      -- the url of that peer's API
-     cacert text, -- (SSL) Public certificate of peer API server
-     key text, -- (GPG) Public key used for authentication
-
-     deleted boolean NOT NULL DEFAULT false
-) WITH OIDS;
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -66,7 +51,7 @@ CREATE TABLE persons (
     enabled boolean NOT NULL DEFAULT false, -- Has been disabled
 
     -- Password
-    password text NOT NULL, -- Password (md5crypted)
+    password text NOT NULL DEFAULT 'nopass', -- Password (md5crypted)
     verification_key text, -- Reset password key
     verification_expires timestamp without time zone,
 
@@ -78,9 +63,7 @@ CREATE TABLE persons (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    peer_id integer REFERENCES peers -- From which peer 
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
 CREATE INDEX persons_email_idx ON persons (email) WHERE deleted IS false;
 
@@ -107,9 +90,7 @@ CREATE TABLE sites (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    peer_id integer REFERENCES peers -- From which peer 
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
 CREATE INDEX sites_login_base_idx ON sites (login_base) WHERE deleted IS false;
 
@@ -216,18 +197,15 @@ CREATE TABLE keys (
     key_id serial PRIMARY KEY, -- Key identifier
     key_type text REFERENCES key_types NOT NULL, -- Key type
     key text NOT NULL, -- Key material
-    is_blacklisted boolean NOT NULL DEFAULT false, -- Has been blacklisted
-    peer_id integer REFERENCES peers -- From which peer 
+    is_blacklisted boolean NOT NULL DEFAULT false -- Has been blacklisted
 ) WITH OIDS;
 
 -- Account authentication key(s)
 CREATE TABLE person_key (
-    person_id integer REFERENCES persons NOT NULL, -- Account identifier
-    key_id integer REFERENCES keys NOT NULL, -- Key identifier
-    PRIMARY KEY (person_id, key_id)
+    key_id integer REFERENCES keys PRIMARY KEY, -- Key identifier
+    person_id integer REFERENCES persons NOT NULL -- Account identifier
 ) WITH OIDS;
 CREATE INDEX person_key_person_id_idx ON person_key (person_id);
-CREATE INDEX person_key_key_id_idx ON person_key (key_id);
 
 CREATE VIEW person_keys AS
 SELECT person_id,
@@ -303,9 +281,7 @@ CREATE TABLE nodes (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    peer_id integer REFERENCES peers -- From which peer 
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
 CREATE INDEX nodes_hostname_idx ON nodes (hostname) WHERE deleted IS false;
 CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
@@ -536,7 +512,6 @@ INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manual
 CREATE TABLE slices (
     slice_id serial PRIMARY KEY, -- Slice identifier
     site_id integer REFERENCES sites NOT NULL, -- Site identifier
-    peer_id integer REFERENCES peers, -- on which peer
 
     name text NOT NULL, -- Slice name
     instantiation text REFERENCES slice_instantiations NOT NULL DEFAULT 'plc-instantiated', -- Slice state, e.g. plc-instantiated
@@ -621,9 +596,7 @@ CREATE TABLE slice_attribute_types (
     attribute_type_id serial PRIMARY KEY, -- Attribute type identifier
     name text UNIQUE NOT NULL, -- Attribute name
     description text, -- Attribute description
-    min_role_id integer REFERENCES roles DEFAULT 10, -- If set, minimum (least powerful) role that can set or change this attribute
- 
-    peer_id integer REFERENCES peers -- From which peer 
+    min_role_id integer REFERENCES roles DEFAULT 10 -- If set, minimum (least powerful) role that can set or change this attribute
 ) WITH OIDS;
 
 -- Slice/sliver attributes
@@ -632,9 +605,7 @@ CREATE TABLE slice_attribute (
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes, -- Sliver attribute if set
     attribute_type_id integer REFERENCES slice_attribute_types NOT NULL, -- Attribute type identifier
-    value text,
-
-    peer_id integer REFERENCES peers -- From which peer 
+    value text
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
 CREATE INDEX slice_attribute_node_id_idx ON slice_attribute (node_id);
@@ -644,6 +615,97 @@ SELECT slice_id,
 array_accum(slice_attribute_id) AS slice_attribute_ids
 FROM slice_attribute
 GROUP BY slice_id;
+
+--------------------------------------------------------------------------------
+-- Peers
+--------------------------------------------------------------------------------
+
+-- Peers
+CREATE TABLE peers (
+    peer_id serial PRIMARY KEY, -- Peer identifier
+    peername text NOT NULL, -- Peer name
+    peer_url text NOT NULL, -- (HTTPS) URL of the peer PLCAPI interface
+    cacert text, -- (SSL) Public certificate of peer API server
+    key text, -- (GPG) Public key used for authentication
+    deleted boolean NOT NULL DEFAULT false
+) WITH OIDS;
+CREATE INDEX peers_peername_idx ON peers (peername) WHERE deleted IS false;
+
+-- Objects at each peer
+CREATE TABLE peer_site (
+    site_id integer REFERENCES sites PRIMARY KEY, -- Local site identifier
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    peer_site_id integer NOT NULL, -- Foreign site identifier at peer
+    UNIQUE (peer_id, peer_site_id) -- The same foreign site should not be cached twice
+) WITH OIDS;
+CREATE INDEX peer_site_peer_id_idx ON peers (peer_id);
+
+CREATE VIEW peer_sites AS
+SELECT peer_id,
+array_accum(site_id) AS site_ids,
+array_accum(peer_site_id) AS peer_site_ids
+FROM peer_site
+GROUP BY peer_id;
+
+CREATE TABLE peer_person (
+    person_id integer REFERENCES persons PRIMARY KEY, -- Local user identifier
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    peer_person_id integer NOT NULL, -- Foreign user identifier at peer
+    UNIQUE (peer_id, peer_person_id) -- The same foreign user should not be cached twice
+) WITH OIDS;
+CREATE INDEX peer_person_peer_id_idx ON peer_person (peer_id);
+
+CREATE VIEW peer_persons AS
+SELECT peer_id,
+array_accum(person_id) AS person_ids,
+array_accum(peer_person_id) AS peer_person_ids
+FROM peer_person
+GROUP BY peer_id;
+
+CREATE TABLE peer_key (
+    key_id integer REFERENCES keys PRIMARY KEY, -- Local key identifier
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    peer_key_id integer NOT NULL, -- Foreign key identifier at peer
+    UNIQUE (peer_id, peer_key_id) -- The same foreign key should not be cached twice
+) WITH OIDS;
+CREATE INDEX peer_key_peer_id_idx ON peer_key (peer_id);
+
+CREATE VIEW peer_keys AS
+SELECT peer_id,
+array_accum(key_id) AS key_ids,
+array_accum(peer_key_id) AS peer_key_ids
+FROM peer_key
+GROUP BY peer_id;
+
+CREATE TABLE peer_node (
+    node_id integer REFERENCES nodes PRIMARY KEY, -- Local node identifier
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    peer_node_id integer NOT NULL, -- Foreign node identifier
+    UNIQUE (peer_id, peer_node_id) -- The same foreign node should not be cached twice
+) WITH OIDS;
+CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
+
+CREATE VIEW peer_nodes AS
+SELECT peer_id,
+array_accum(node_id) AS node_ids,
+array_accum(peer_node_id) AS peer_node_ids
+FROM peer_node
+GROUP BY peer_id;
+
+CREATE TABLE peer_slice (
+    slice_id integer REFERENCES slices PRIMARY KEY, -- Local slice identifier
+    peer_id integer REFERENCES peers NOT NULL, -- Peer identifier
+    peer_slice_id integer NOT NULL, -- Slice identifier at peer
+    UNIQUE (peer_id, peer_slice_id) -- The same foreign slice should not be cached twice
+) WITH OIDS;
+CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
+
+CREATE VIEW peer_slices AS
+SELECT peer_id,
+array_accum(slice_id) AS slice_ids,
+array_accum(peer_slice_id) AS peer_slice_ids
+FROM peer_slice
+GROUP BY peer_id;
 
 --------------------------------------------------------------------------------
 -- Authenticated sessions
@@ -687,21 +749,20 @@ CREATE TABLE messages (
 -- Events
 --------------------------------------------------------------------------------
 
-
 -- Events
 CREATE TABLE events (
     event_id serial PRIMARY KEY,  -- Event identifier
     person_id integer REFERENCES persons, -- Person responsible for event, if any
     node_id integer REFERENCES nodes, -- Node responsible for event, if any
     fault_code integer NOT NULL DEFAULT 0, -- Did this event result in error
-    call_name text Not NULL, -- Call responsible for this event
-    call text NOT NULL, -- Call responsible for this event, including paramters
+    call_name text NOT NULL, -- Call responsible for this event
+    call text NOT NULL, -- Call responsible for this event, including parameters
     message text, -- High level description of this event
-    runtime float, -- Event run time
-    time timestamp without time zone  NOT NULL DEFAULT CURRENT_TIMESTAMP -- Event timestamp
+    runtime float DEFAULT 0, -- Event run time
+    time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP -- Event timestamp
 ) WITH OIDS;
 
--- Event objects
+-- Database object(s) that may have been affected by a particular event
 CREATE TABLE event_object (
     event_id integer REFERENCES events NOT NULL, -- Event identifier
     object_id integer NOT NULL -- Object identifier
@@ -727,6 +788,7 @@ events.node_id,
 events.fault_code,
 events.call_name,
 events.call,
+events.message,
 events.runtime,
 CAST(date_part('epoch', events.time) AS bigint) AS time,
 COALESCE(event_objects.object_ids, '{}') AS object_ids
@@ -748,80 +810,40 @@ persons.title,
 persons.phone,
 persons.url,
 persons.bio,
-persons.peer_id,
 CAST(date_part('epoch', persons.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', persons.last_updated) AS bigint) AS last_updated,
+peer_person.peer_id,
+peer_person.peer_person_id,
 COALESCE(person_roles.role_ids, '{}') AS role_ids,
 COALESCE(person_roles.roles, '{}') AS roles,
 COALESCE(person_sites.site_ids, '{}') AS site_ids,
 COALESCE(person_keys.key_ids, '{}') AS key_ids,
 COALESCE(person_slices.slice_ids, '{}') AS slice_ids
 FROM persons
+LEFT JOIN peer_person USING (person_id)
 LEFT JOIN person_roles USING (person_id)
 LEFT JOIN person_sites USING (person_id)
 LEFT JOIN person_keys USING (person_id)
 LEFT JOIN person_slices USING (person_id);
 
--- Objects at each peer
-CREATE VIEW peer_sites AS
-SELECT peer_id,
-array_accum(site_id) AS site_ids
-FROM sites
-GROUP BY peer_id;
-
-CREATE VIEW peer_persons AS
-SELECT peer_id,
-array_accum(person_id) AS person_ids
-FROM persons
-GROUP BY peer_id;
-
-CREATE VIEW peer_keys AS
-SELECT peer_id,
-array_accum(key_id) AS key_ids
-FROM keys
-GROUP BY peer_id;
-
-CREATE VIEW peer_nodes AS
-SELECT peer_id,
-array_accum(node_id) AS node_ids
-FROM nodes
-GROUP BY peer_id;
-
-CREATE VIEW peer_slice_attribute_types AS
-SELECT peer_id,
-array_accum(attribute_type_id) AS attribute_type_ids
-FROM slice_attribute_types
-GROUP BY peer_id;
-
-CREATE VIEW peer_slice_attributes AS
-SELECT peer_id,
-array_accum(slice_attribute_id) AS slice_attribute_ids
-FROM slice_attribute
-GROUP BY peer_id;
-
-CREATE VIEW peer_slices AS
-SELECT peer_id,
-array_accum(slice_id) AS slice_ids
-FROM slices
-GROUP BY peer_id;
-
 CREATE VIEW view_peers AS
 SELECT 
 peers.*, 
 COALESCE(peer_sites.site_ids, '{}') AS site_ids,
+COALESCE(peer_sites.peer_site_ids, '{}') AS peer_site_ids,
 COALESCE(peer_persons.person_ids, '{}') AS person_ids,
+COALESCE(peer_persons.peer_person_ids, '{}') AS peer_person_ids,
 COALESCE(peer_keys.key_ids, '{}') AS key_ids,
+COALESCE(peer_keys.peer_key_ids, '{}') AS peer_key_ids,
 COALESCE(peer_nodes.node_ids, '{}') AS node_ids,
-COALESCE(peer_slice_attribute_types.attribute_type_ids, '{}') AS attribute_type_ids,
-COALESCE(peer_slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids,
-COALESCE(peer_slices.slice_ids, '{}') AS slice_ids
+COALESCE(peer_nodes.peer_node_ids, '{}') AS peer_node_ids,
+COALESCE(peer_slices.slice_ids, '{}') AS slice_ids,
+COALESCE(peer_slices.peer_slice_ids, '{}') AS peer_slice_ids
 FROM peers
 LEFT JOIN peer_sites USING (peer_id)
 LEFT JOIN peer_persons USING (peer_id)
 LEFT JOIN peer_keys USING (peer_id)
 LEFT JOIN peer_nodes USING (peer_id)
-LEFT JOIN peer_slice_attribute_types USING (peer_id)
-LEFT JOIN peer_slice_attributes USING (peer_id)
 LEFT JOIN peer_slices USING (peer_id);
 
 CREATE VIEW view_nodes AS
@@ -829,7 +851,6 @@ SELECT
 nodes.node_id,
 nodes.hostname,
 nodes.site_id,
-nodes.peer_id,
 nodes.boot_state,
 nodes.deleted,
 nodes.model,
@@ -839,6 +860,8 @@ nodes.ssh_rsa_key,
 nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
+peer_node.peer_id,
+peer_node.peer_node_id,
 COALESCE(node_nodenetworks.nodenetwork_ids, '{}') AS nodenetwork_ids,
 COALESCE(node_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids,
 COALESCE(node_slices.slice_ids, '{}') AS slice_ids,
@@ -847,6 +870,7 @@ COALESCE(node_pcus.ports, '{}') AS ports,
 COALESCE(node_conf_files.conf_file_ids, '{}') AS conf_file_ids,
 node_session.session_id AS session
 FROM nodes
+LEFT JOIN peer_node USING (node_id)
 LEFT JOIN node_nodenetworks USING (node_id)
 LEFT JOIN node_nodegroups USING (node_id)
 LEFT JOIN node_slices USING (node_id)
@@ -856,9 +880,7 @@ LEFT JOIN node_session USING (node_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
-nodegroups.nodegroup_id,
-nodegroups.name,
-nodegroups.description,
+nodegroups.*,
 COALESCE(nodegroup_nodes.node_ids, '{}') AS node_ids,
 COALESCE(nodegroup_conf_files.conf_file_ids, '{}') AS conf_file_ids
 FROM nodegroups
@@ -867,18 +889,7 @@ LEFT JOIN nodegroup_conf_files USING (nodegroup_id);
 
 CREATE VIEW view_conf_files AS
 SELECT
-conf_files.conf_file_id,
-conf_files.enabled,
-conf_files.source,
-conf_files.dest,
-conf_files.file_permissions,
-conf_files.file_owner,
-conf_files.file_group,
-conf_files.preinstall_cmd,
-conf_files.postinstall_cmd,
-conf_files.error_cmd,
-conf_files.ignore_cmd_errors,
-conf_files.always_update,
+conf_files.*,
 COALESCE(conf_file_nodes.node_ids, '{}') AS node_ids,
 COALESCE(conf_file_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids
 FROM conf_files
@@ -887,15 +898,7 @@ LEFT JOIN conf_file_nodegroups USING (conf_file_id);
 
 CREATE VIEW view_pcus AS
 SELECT
-pcus.pcu_id,
-pcus.site_id,
-pcus.hostname,
-pcus.ip,
-pcus.protocol,
-pcus.username,
-pcus.password,
-pcus.model,
-pcus.notes,
+pcus.*,
 COALESCE(pcu_nodes.node_ids, '{}') AS node_ids,
 COALESCE(pcu_nodes.ports, '{}') AS ports
 FROM pcus
@@ -914,15 +917,17 @@ sites.max_slivers,
 sites.latitude,
 sites.longitude,
 sites.url,
-sites.peer_id,
 CAST(date_part('epoch', sites.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
+peer_site.peer_id,
+peer_site.peer_site_id,
 COALESCE(site_persons.person_ids, '{}') AS person_ids,
 COALESCE(site_nodes.node_ids, '{}') AS node_ids,
 COALESCE(site_addresses.address_ids, '{}') AS address_ids,
 COALESCE(site_slices.slice_ids, '{}') AS slice_ids,
 COALESCE(site_pcus.pcu_ids, '{}') AS pcu_ids
 FROM sites
+LEFT JOIN peer_site USING (site_id)
 LEFT JOIN site_persons USING (site_id)
 LEFT JOIN site_nodes USING (site_id)
 LEFT JOIN site_addresses USING (site_id)
@@ -931,24 +936,26 @@ LEFT JOIN site_pcus USING (site_id);
 
 CREATE VIEW view_addresses AS
 SELECT
-addresses.address_id,
-addresses.line1,
-addresses.line2,
-addresses.line3,
-addresses.city,
-addresses.state,
-addresses.postalcode,
-addresses.country,
+addresses.*,
 COALESCE(address_address_types.address_type_ids, '{}') AS address_type_ids,
 COALESCE(address_address_types.address_types, '{}') AS address_types
 FROM addresses
 LEFT JOIN address_address_types USING (address_id);
 
+CREATE VIEW view_keys AS
+SELECT
+keys.*,
+person_key.person_id,
+peer_key.peer_id,
+peer_key.peer_key_id
+FROM keys
+LEFT JOIN person_key USING (key_id)
+LEFT JOIN peer_key USING (key_id);
+
 CREATE VIEW view_slices AS
 SELECT
 slices.slice_id,
 slices.site_id,
-slices.peer_id,
 slices.name,
 slices.instantiation,
 slices.url,
@@ -958,15 +965,17 @@ slices.creator_person_id,
 slices.is_deleted,
 CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
+peer_slice.peer_id,
+peer_slice.peer_slice_id,
 COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
 COALESCE(slice_persons.person_ids, '{}') AS person_ids,
 COALESCE(slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids
 FROM slices
+LEFT JOIN peer_slice USING (slice_id)
 LEFT JOIN slice_nodes USING (slice_id)
 LEFT JOIN slice_persons USING (slice_id)
 LEFT JOIN slice_attributes USING (slice_id);
 
---
 CREATE VIEW view_slice_attributes AS
 SELECT
 slice_attribute.slice_attribute_id,
@@ -976,8 +985,7 @@ slice_attribute_types.attribute_type_id,
 slice_attribute_types.name,
 slice_attribute_types.description,
 slice_attribute_types.min_role_id,
-slice_attribute.value,
-slice_attribute.peer_id
+slice_attribute.value
 FROM slice_attribute
 INNER JOIN slice_attribute_types USING (attribute_type_id);
 
@@ -1009,6 +1017,3 @@ INSERT INTO sites
 (login_base, name, abbreviated_name, max_slices)
 VALUES
 ('pl', 'PlanetLab Central', 'PLC', 100);
-
-
-
