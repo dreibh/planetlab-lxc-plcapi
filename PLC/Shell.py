@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.18 2006/12/15 18:36:16 mlhuang Exp $
+# $Id: Shell.py,v 1.1 2007/01/08 18:10:30 mlhuang Exp $
 #
 
 import pydoc
@@ -80,20 +80,20 @@ class Shell:
             else:
                 self.api = PLCAPI(config)
             self.config = self.api.config
+            self.url = None
             self.server = None
         except Exception, err:
             # Try connecting to the API server via XML-RPC
             self.api = PLCAPI(None)
 
-            if config is None:
-                self.config = Config()
-            else:
-                try:
+            try:
+                if config is None:
+                    self.config = Config()
+                else:
                     self.config = Config(config)
-                except Exception, err:
-                    # Try to continue if no configuration file is available
-                    self.config = None
-                    pass
+            except Exception, err:
+                # Try to continue if no configuration file is available
+                self.config = None
 
             if url is None:
                 if self.config is None:
@@ -106,6 +106,7 @@ class Shell:
             if cacert is None and self.config is not None:
                 cacert = self.config.PLC_API_CA_SSL_CRT
 
+            self.url = url
             self.server = xmlrpclib.ServerProxy(url, PyCurlTransport(url, cacert), allow_none = 1)
 
         # Set up authentication structure
