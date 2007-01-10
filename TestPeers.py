@@ -25,7 +25,7 @@ import getopt
 import sys
 import time
 
-import Shell
+from PLC.Shell import Shell
 import PLC.Methods
 
 # when running locally, we might wish to run only our local stuff
@@ -43,13 +43,10 @@ class DummyShell:
             return 0
     def __init__(self,index):
         self.index=index
-    def init(self):
         for method in PLC.Methods.methods:
             # ignore path-defined methods for now
             if "." not in method:
                 setattr(self,method,DummyShell.Callable(method,self.index))
-    def show_config(self,*args):
-        print 'DummyShell'
         
 ####################
 import xmlrpclib
@@ -191,6 +188,8 @@ plc[1]={ 'plcname':'Thierry plc1',
          'person-format' : 'user1-%d@plc1.org',
          'key-format':'ssh-rsa 11key4plc11 user%d-key%d',
          'person-password' : 'password1',
+	 'gpg-keyring':'/etc/planetlab/gpg_plc1.pub',
+	 'api-cacert':'/etc/planetlab/api_plc1.crt',
        }
 plc[2]={ 'plcname':'Thierry plc2',
          'hostname':'lurch.cs.princeton.edu',
@@ -205,6 +204,8 @@ plc[2]={ 'plcname':'Thierry plc2',
          'person-format' : 'user2-%d@plc2.org',
          'key-format':'ssh-rsa 22key4plc22 user%d-key%d',
          'person-password' : 'password2',
+	 'gpg-keyring':'/etc/planetlab/gpg_plc2.pub',
+	 'api-cacert':'/etc/planetlab/api_plc2.crt',
        }
 
 ####################
@@ -295,26 +296,22 @@ def test00_init (args=[1,2]):
         plc[i]['url']=url
         if local_peer is None:
             # the regular remote mode
-            argv=[sys.argv[0],
-                  '--url',url,
-                  '--user',plc[i]['builtin-admin-id'],
-                  '--password',plc[i]['builtin-admin-password']]
             print 'initializing s[%d]=>%s'%(i,url)
-            s[i]=Shell.Shell(argv)
-            s[i].init()
+            s[i]=Shell(url=url,
+                       user=plc[i]['builtin-admin-id'],
+                       password=plc[i]['builtin-admin-password'])
         elif local_peer == i:
             # local mode - use Shell's Direct mode - use /etc/planetlab/plc_config
-            s[i]=Shell.Shell([sys.argv[0]])
-            s[i].init()
+            s[i]=Shell()
         else:
             # remote peer in local mode : use dummy shell instead
             s[i]=DummyShell(i)
-            s[i].init()
 
 def test00_print (args=[1,2]):
     for i in args:
         print '==================== s[%d]'%i
-        s[i].show_config()
+#        s[i].show_config()
+        print 'show_config obsoleted'
     print '===================='
 
 def check_nodes (el,ef,args=[1,2]):
@@ -470,20 +467,20 @@ def test00_admin_enable (args=[1,2]):
             s[i].AddRoleToPerson('admin',plc[i]['peer-admin-id'])
             print '%02d:== enabled+admin on account %d:%s'%(i,plc[i]['peer-admin-id'],plc[i]['peer-admin-name'])
 
-def test00_peer_person (args=[1,2]):
-    global plc
-    for i in args:
-        peer=peer_index(i)
-        email=plc[peer]['peer-admin-name']
-        try:
-            p=s[i].GetPersons([email])[0]
-            plc[i]['peer_person_id']=p['person_id']
-        except:
-            person_id = s[i].AddPerson ( {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
-                                               'email':email,'password':plc[peer]['peer-admin-password']})
-            if person_id:
-                print '%02d:== Created person %d as the auth peer person'%(i,person_id)
-            plc[i]['peer_person_id']=person_id
+#def test00_peer_person (args=[1,2]):
+#    global plc
+#    for i in args:
+#        peer=peer_index(i)
+#        email=plc[peer]['peer-admin-name']
+#        try:
+#            p=s[i].GetPersons([email])[0]
+#            plc[i]['peer_person_id']=p['person_id']
+#        except:
+#            person_id = s[i].AddPerson ( {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
+#                                               'email':email,'password':plc[peer]['peer-admin-password']})
+#            if person_id:
+#                print '%02d:== Created person %d as the auth peer person'%(i,person_id)
+#            plc[i]['peer_person_id']=person_id
 
 ####################
 def test00_peer (args=[1,2]):
@@ -493,28 +490,52 @@ def test00_peer (args=[1,2]):
         peername = plc_name(peer)
         try:
             p=s[i].GetPeers ( [peername])[0]
-            plc[i]['peer_id']=p['peer_id']
         except:
-            peer_id=s[i].AddPeer ( {'peername':peername,'peer_url':plc[peer]['url'],'auth_person_id':plc[i]['peer_person_id']})
-            # NOTE : need to manually reset the encrypted password through SQL at this point
-            if peer_id:
+            try:
+                keyring=file(plc[peer]['gpg-keyring']).read()
+                cacert=file(plc[peer]['api-cacert']).read()
+                peer_id=s[i].AddPeer ( {'peername':peername,
+                                        'peer_url':plc[peer]['url'],
+                                        'key':keyring,
+                                        'cacert': cacert,
+                                        })
                 print '%02d:Created peer %d'%(i,peer_id)
-                print "PLEASE manually set password for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i)
-            plc[i]['peer_id']=peer_id
-
-def test00_peer_passwd (args=[1,2]):
-    if local_peer is None:
-        for i in args:
-            # using an ad-hoc local command for now - never could get quotes to reach sql....
-            print "Attempting to remotely set passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
-            retcod=os.system("ssh root@%s new_plc_api/person-password.sh %d"%(plc[i]['hostname'],plc[i]['peer_person_id']))
-            print '-> system returns',retcod
-    else:
-        i=local_peer
-        print "Locally setting passwd for person_id=%d in DB%d"%(plc[i]['peer_person_id'],i),
-        retcod=os.system("./person-password.sh -l %d"%(plc[i]['peer_person_id']))
-        print '-> system returns',retcod
+            except:
+                print 'Could not create peer, file not found'
     
+# push various stuff across hosts through external ssh/scp
+# this is broken, use peers-test.mk instead
+#def test00_push_public_peer_material (args=[1,2]):
+#    for i in args:
+#	peer=peer_index(i)
+#
+#	### the gpg keyring
+#	# refresh
+#	local_keyring="/etc/planetlab/gpg_keyring.pub"
+#	command="ssh root@%s gpg --homedir=/etc/planetlab --export --armor > %s"\
+#	       %(plc[i]['hostname'],local_keyring)
+#	retcod=os.system(command)
+#	print '#',command,'->',retcod
+#
+#    for i in args:
+#	peer=peer_index(i)
+#	# push
+#	src_url='root@%s:%s'%(plc[i]['hostname'],local_keyring)
+#	dst_url='root@%s:%s'%(plc[peer]['hostname'], plc[i]['gpg-keyring'])
+#	command = 'scp %s %s'%(src_url,dst_url)
+#	retcod=os.system(command)
+#	print '#',command,'->',retcod
+#	
+#    for i in args:
+#	peer=peer_index(i)
+#	# push cacert
+#	local_cacert='/etc/planetlab/api_ca_ssl.crt'
+#	src_url='root@%s:%s'%(plc[i]['hostname'],local_cacert)
+#	dst_url='root@%s:%s'%(plc[peer]['hostname'], plc[i]['api-cacert'])
+#	command = 'scp %s %s'%(src_url,dst_url)
+#	retcod=os.system(command)
+#	print '#',command,'->',retcod
+
 # this one gets cached 
 def get_peer_id (i):
     try:
@@ -914,9 +935,10 @@ def test_all_init ():
     test00_print ()
     test00_admin_person ()
     test00_admin_enable ()
-    test00_peer_person ()
+# required before we can add peers
+# use make -f peers-test.mk peers instead    
+#    test00_push_public_peer_material()
     test00_peer ()
-    test00_peer_passwd ()
 
 def test_all_sites ():
     test01_site ()
@@ -1110,11 +1132,13 @@ def populate_end():
 
 # temporary - scratch as needed
 def test_now ():
-    populate()
-    test00_refresh('peer 1 gets plc2 nodes',[1])
-    test04_slice_add_fnode([1])
-    test00_refresh('final',[1])
-    
+    test_all_init()
+
+#    populate()
+#    test00_refresh('peer 1 gets plc2 nodes',[1])
+#    test04_slice_add_fnode([1])
+#    test00_refresh('final',[1])
+#    
 #    test_all_sites ()
 #    clean_all_nodes()
 #    clean_all_slices()

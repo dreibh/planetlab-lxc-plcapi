@@ -17,7 +17,8 @@ all:help
 
 ####################
 PUSH=pclean pplc1 papi1 pplc2 papi2
-EXTRA-PUSHS= ./Shell.py ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh
+#EXTRA-PUSHS= ./Shell.py ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh
+EXTRA-PUSHS=  ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh ./plcsh
 
 push:$(PUSH)
 
@@ -99,6 +100,41 @@ restart-http:
 	service plc start httpd
 
 ####################
+PEERS= peer-gpg peer-push-gpg peer-push-cacert
+
+peers: $(PEERS)
+peer-gpg: peer-gpg-1 peer-gpg-2
+peer-gpg-1:
+	ssh $(PLC1SSH) "gpg --homedir=/etc/planetlab --export --armor > /etc/planetlab/gpg_plc1.pub"
+peer-gpg-2:
+	ssh $(PLC2SSH) "gpg --homedir=/etc/planetlab --export --armor > /etc/planetlab/gpg_plc2.pub"
+
+# directly scp'ing from one url to the other does not work, looks like
+# first host tries to connect the second one
+peer-push-gpg: peer-push-gpg-1 peer-push-gpg-2
+peer-push-gpg-1:
+	scp $(PLC1SSH):/etc/planetlab/gpg_plc1.pub ./
+	scp ./gpg_plc1.pub $(PLC2SSH):/etc/planetlab/
+peer-push-gpg-2:
+	scp $(PLC2SSH):/etc/planetlab/gpg_plc2.pub ./
+	scp ./gpg_plc2.pub $(PLC1SSH):/etc/planetlab/
+
+peer-push-cacert: peer-push-cacert-1 peer-push-cacert-2
+peer-push-cacert-1:
+	scp $(PLC1SSH):/etc/planetlab/api_ca_ssl.crt ./api_plc1.crt
+	scp ./api_plc1.crt $(PLC2SSH):/etc/planetlab/
+peer-push-cacert-2:
+	scp $(PLC2SSH):/etc/planetlab/api_ca_ssl.crt ./api_plc2.crt
+	scp ./api_plc2.crt $(PLC1SSH):/etc/planetlab/
+
+HELP += peers-clean
+peers-clean: peers-clean-1 peers-clean-2
+peers-clean-1:
+	ssh $(PLC1SSH) "rm -f /etc/planetlab/*plc[12]*"
+peers-clean-2:
+	ssh $(PLC1SSH) "rm -f /etc/planetlab/*plc[12]*"
+
+####################
 UPGRADE=stop-clients down clean-plc up reconfig restart
 
 upgrade: $(UPGRADE)
@@ -123,7 +159,7 @@ reconfig:
 ####################
 RUN=api sql log
 api:
-	chroot $(CHROOT) /usr/share/plc_api/Shell.py
+	chroot $(CHROOT) /usr/bin/plcsh
 
 sql:
 	chroot $(CHROOT) psql -U pgsqluser planetlab4
@@ -327,6 +363,7 @@ HELP=rpm db-dump restart-http
 help:
 	@echo known targets:
 	@echo push: $(PUSH) 
+	@echo peers: $(PEERS)
 	@echo db: $(DB) 
 	@echo dbrestore: $(DBRESTORE) 
 	@echo run: $(RUN)
