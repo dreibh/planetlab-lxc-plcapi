@@ -7,7 +7,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: GPG.py,v 1.2 2007/01/05 18:50:40 mlhuang Exp $
+# $Id: GPG.py,v 1.3 2007/01/08 18:11:54 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -37,6 +37,33 @@ def canonicalize(methodname, args):
     xml = buf.getvalue().encode('utf-8')
 
     return xml
+
+def gpg_export(keyring, armor = True):
+    """
+    Exports the specified public keyring file.
+    """
+
+    homedir = mkdtemp()
+    args = ["gpg", "--batch", "--no-tty",
+            "--homedir", homedir,
+            "--no-default-keyring",
+            "--keyring", keyring,
+            "--export"]
+    if armor:
+        args.append("--armor")
+
+    p = Popen(args, stdin = PIPE, stdout = PIPE, stderr = PIPE)
+    export = p.stdout.read()
+    err = p.stderr.read()
+    rc = p.wait()
+
+    # Clean up
+    shutil.rmtree(homedir)
+
+    if rc:
+        raise PLCAuthenticationFailure, "GPG export failed with return code %d: %s" % (rc, err)
+
+    return export
 
 def gpg_sign(methodname, args, secret_keyring, keyring):
     """
