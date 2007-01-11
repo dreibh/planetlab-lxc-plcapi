@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: Faults.py,v 1.1 2006/09/06 15:36:06 mlhuang Exp $
+# $Id: Faults.py,v 1.2 2006/12/07 09:13:55 thierry Exp $
 #
 
 import xmlrpclib
@@ -46,14 +46,6 @@ class PLCAuthenticationFailure(PLCFault):
         faultString = "Failed to authenticate call"
         PLCFault.__init__(self, 103, faultString, extra)
 
-class PLCLocalObjectRequired(PLCFault):
-    def __init__(self,method_name="anonymous",obj_name="anonymous",
-		 peer_id=None,extra=None):
-	faultString = "Method: <%s> - Object <%s> must be local"%(method_name,obj_name)
-	if peer_id is not None:
-	    faultString += " (authoritative plc has peer_id %d)"%peer_id
-        PLCFault.__init__(self, 104, faultString, extra)
-
 class PLCDBError(PLCFault):
     def __init__(self, extra = None):
         faultString = "Database error"
@@ -73,35 +65,3 @@ class PLCAPIError(PLCFault):
     def __init__(self, extra = None):
         faultString = "Internal API error"
         PLCFault.__init__(self, 111, faultString, extra)
-
-####################
-# shorthands to check various types of objects for localness (are we authoritative)
-def PLCCheckLocalNode (node,method_name):
-    if node['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,node['hostname'],node['peer_id'])
-
-def PLCCheckLocalPerson (person,method_name):
-    if person['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,person['email'],person['peer_id'])
-
-def PLCCheckLocalSite (site,method_name):
-    if site['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,site['name'],site['peer_id'])
-
-def PLCCheckLocalSlice (slice,method_name):
-    if slice['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,slice['name'],slice['peer_id'])
-
-def PLCCheckLocalKey (key,method_name):
-    if key['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,key['key_id'],key['peer_id'])
-
-def PLCCheckLocalSliceAttributeType (sliceAttributeType,method_name):
-    if sliceAttributeType['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,sliceAttributeType['name'],sliceAttributeType['peer_id'])
-
-def PLCCheckLocalSliceAttribute (sliceAttribute,method_name):
-    if sliceAttribute['peer_id'] is not None:
-	raise PLCLocalObjectRequired(method_name,sliceAttribute['name'],sliceAttribute['peer_id'])
-
-
