@@ -16,12 +16,14 @@ class Key(Row):
 
     table_name = 'keys'
     primary_key = 'key_id'
-    join_tables = ['person_key']
+    join_tables = ['person_key', 'peer_key']
     fields = {
         'key_id': Parameter(int, "Key identifier"),
         'key_type': Parameter(str, "Key type"),
         'key': Parameter(str, "Key value", max = 4096),
-        'peer_id': Parameter(int, "Peer at which this node is managed", nullok = True),
+        'person_id': Parameter(int, "User to which this key belongs", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this key belongs", nullok = True),
+        'peer_key_id': Parameter(int, "Foreign key identifier at peer", nullok = True),
         }
 
     # for Cache
@@ -91,7 +93,7 @@ class Key(Row):
                        " WHERE key_id IN (%s)" % ", ".join(map(str, key_ids)))
 
 	# But disassociate them from all join tables
-        for table in ['person_key']:
+        for table in self.join_tables:
             self.api.db.do("DELETE FROM %s WHERE key_id IN (%s)" % \
                            (table, ", ".join(map(str, key_ids))))
 
@@ -107,7 +109,7 @@ class Keys(Table):
     def __init__(self, api, key_filter = None, columns = None):
         Table.__init__(self, api, Key, columns)
 	
-	sql = "SELECT %s FROM keys WHERE is_blacklisted IS False" % \
+	sql = "SELECT %s FROM view_keys WHERE is_blacklisted IS False" % \
               ", ".join(self.columns)
 
         if key_filter is not None:
