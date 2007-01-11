@@ -10,35 +10,31 @@ from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
-#from PLC.ForeignSlices import ForeignSlice, ForeignSlices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 
 class GetSlivers(Method):
     """
-    Returns an array of structs representing nodes and their slivers
-    (slices bound to nodes). If node_filter is specified, only
-    information about the specified nodes will be returned. If
-    node_filter is not specified and called by a node, only
-    information about the caller will be returned.
+    Returns a struct containing information about the specified node
+    (or calling node, if called by a node and node_id_or_hostname is
+    not specified), including the current set of slivers bound to the
+    node.
 
     All of the information returned by this call can be gathered from
     other calls, e.g. GetNodes, GetNodeNetworks, GetSlices, etc. This
-    function exists primarily for the benefit of Node Manager and
-    Federation Manager.
+    function exists almost solely for the benefit of Node Manager.
     """
 
     roles = ['admin', 'node']
 
     accepts = [
         Auth(),
-        Mixed([Mixed(Node.fields['node_id'],
-                     Node.fields['hostname'])],
-              Filter(Node.fields)),
+        Mixed(Node.fields['node_id'],
+              Node.fields['hostname']),
         ]
 
-    returns = [{
+    returns = {
         'timestamp': Parameter(int, "Timestamp of this call, in seconds since UNIX epoch"),
         'node_id': Node.fields['node_id'],
         'hostname': Node.fields['hostname'],
@@ -59,57 +55,53 @@ class GetSlivers(Method):
                 'value': SliceAttribute.fields['value']
             }]
         }]
-    }]
+    }
 
-
-    def call(self, auth, node_filter = None):
+    def call(self, auth, node_id_or_hostname = None):
         timestamp = int(time.time())
 
-        if node_filter is None and isinstance(self.caller, Node):
-            all_nodes = {self.caller['node_id']: self.caller}
+        # Get node
+        if node_id_or_hostname is None:
+            if isinstance(self.caller, Node):
+                node = self.caller
+            else:
+                raise PLCInvalidArgument, "'node_id_or_hostname' not specified"
         else:
-            all_nodes = Nodes(self.api, node_filter).dict()
+            nodes = Nodes(self.api, [node_id_or_hostname])
+            if not nodes:
+                raise PLCInvalidArgument, "No such node"
+            node = nodes[0]
 
-        # Get local default slices
-        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1', 'peer_id': None}).dict()
-        system_slice_ids = [slice_attribute['slice_id'] for slice_attribute in system_slice_attributes.values()]
-        system_slice_ids = dict.fromkeys(system_slice_ids)
-	
-        all_nodenetwork_ids = set()
-        all_nodegroup_ids = set()
-        all_slice_ids = set(system_slice_ids.keys())
-        for node_id, node in all_nodes.iteritems():
-            all_nodenetwork_ids.update(node['nodenetwork_ids'])
-            all_nodegroup_ids.update(node['nodegroup_ids'])
-            all_slice_ids.update(node['slice_ids'])
-	
+            if node['peer_id'] is not None:
+                raise PLCInvalidArgument, "Not a local node"
+
         # Get nodenetwork information
-        all_nodenetworks = NodeNetworks(self.api, all_nodenetwork_ids).dict()
+        networks = NodeNetworks(self.api, node['nodenetwork_ids'])
 
         # Get node group information
-        all_nodegroups = NodeGroups(self.api, all_nodegroup_ids).dict()
+        nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('name')
+        groups = nodegroups.keys()
 
-        # Get (enabled) configuration files
-        all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
+        # Get system slices
+        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+        system_slice_ids = system_slice_attributes.keys()
 
         # Get slice information
-        all_slices = Slices(self.api, all_slice_ids).dict()
+        slices = Slices(self.api, system_slice_ids + node['slice_ids'])
 
+        # Build up list of users and slice attributes
         person_ids = set()
         slice_attribute_ids = set()
-        for slice_id, slice in all_slices.iteritems():
-            ### still missing in foreign slices
-            if slice.get('person_ids'):
-                person_ids.update(slice['person_ids'])
-            ### still missing in foreign slices
-            if slice.get('slice_attribute_ids'):
-                slice_attribute_ids.update(slice['slice_attribute_ids'])
+        for slice in slices:
+            person_ids.update(slice['person_ids'])
+            slice_attribute_ids.update(slice['slice_attribute_ids'])
 
 	# Get user information
         all_persons = Persons(self.api, person_ids).dict()
 
+        # Build up list of keys
         key_ids = set()
-        for person_id, person in all_persons.iteritems():
+        for person in all_persons.values():
             key_ids.update(person['key_ids'])
 
         # Get user account keys
@@ -118,97 +110,85 @@ class GetSlivers(Method):
         # Get slice attributes
         all_slice_attributes = SliceAttributes(self.api, slice_attribute_ids).dict()
         
-	nodes = []
-        for node_id, node in all_nodes.iteritems():
-	    networks = [all_nodenetworks[nodenetwork_id] for nodenetwork_id in node['nodenetwork_ids']]
-            nodegroups = [all_nodegroups[nodegroup_id] for nodegroup_id in node['nodegroup_ids']]
-            groups = [nodegroup['name'] for nodegroup in nodegroups]
+        # Get all (enabled) configuration files
+        all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
+        conf_files = {}
 
-            # If multiple entries for the same global configuration
-            # file exist, it is undefined which one takes precedence.
-            conf_files = {}
-            for conf_file in all_conf_files.values():
-                if not conf_file['node_ids'] and not conf_file['nodegroup_ids']:
-                    conf_files[conf_file['dest']] = conf_file
-            
-	    # If a node belongs to multiple node
-            # groups for which the same configuration file is defined,
-            # it is undefined which one takes precedence.
-            for nodegroup in nodegroups:
-                for conf_file_id in nodegroup['conf_file_ids']:
-                    if conf_file_id in all_conf_files:
-                        conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
-            
-	    # Node configuration files always take precedence over
-            # node group configuration files.
-            for conf_file_id in node['conf_file_ids']:
+        # Global configuration files are the default. If multiple
+        # entries for the same global configuration file exist, it is
+        # undefined which one takes precedence.
+        for conf_file in all_conf_files.values():
+            if not conf_file['node_ids'] and not conf_file['nodegroup_ids']:
+                conf_files[conf_file['dest']] = conf_file
+        
+        # Node group configuration files take precedence over global
+        # ones. If a node belongs to multiple node groups for which
+        # the same configuration file is defined, it is undefined
+        # which one takes precedence.
+        for nodegroup in nodegroups.values():
+            for conf_file_id in nodegroup['conf_file_ids']:
                 if conf_file_id in all_conf_files:
                     conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
+        
+        # Node configuration files take precedence over node group
+        # configuration files.
+        for conf_file_id in node['conf_file_ids']:
+            if conf_file_id in all_conf_files:
+                conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
             
-	    # filter out any slices in this nodes slice_id list that may be invalid
-            # (i.e. expired slices)
-            slice_ids = dict.fromkeys(filter(lambda slice_id: slice_id in all_slice_ids, node['slice_ids']))
-	    
-	    # If not a foreign node, add all of our default system
-            # slices to it.
-            if node['peer_id'] is None:
-		slice_ids.update(system_slice_ids)
+        slivers = [] 
+        for slice in slices:
+            keys = []
+            for person_id in slice['person_ids']:
+                if person_id in all_persons:
+                    person = all_persons[person_id]
+                    if not person['enabled']:
+                        continue
+                    for key_id in person['key_ids']:
+                        if key_id in all_keys:
+                            key = all_keys[key_id]
+                            keys += [{'key_type': key['key_type'],
+                                      'key': key['key']}]
 
-            slivers = [] 
-	    
-	    for slice in map(lambda id: all_slices[id], slice_ids.keys()):
-                keys = []
-                ### still missing in foreign slices
-                try:
-                    for person in map(lambda id: all_persons[id], slice['person_ids']):
-                        keys += [{'key_type': all_keys[key_id]['key_type'],
-                                  'key': all_keys[key_id]['key']} \
-                                 for key_id in person['key_ids']]
-                except:
-                    keys += [{'key_type':'missing',
-                              'key':'key caching not implemented yet'}]
+            attributes = []
 
-                sliver_attributes = []
-                attributes = []
-                ### still missing in foreign slices
-                try:
-                    slice_attributes = map(lambda id: all_slice_attributes[id],
-                                           slice['slice_attribute_ids'])
+            # All (per-node and global) attributes for this slice
+            slice_attributes = []
+            for slice_attribute_id in slice['slice_attribute_ids']:
+                if slice_attribute_id in all_slice_attributes:
+                    slice_attributes.append(all_slice_attributes[slice_attribute_id])
 
-                    # Per-node sliver attributes take precedence over
-                    # global slice attributes, so set them first.
-                    for sliver_attribute in filter(lambda a: a['node_id'] == node_id, slice_attributes):
-                        sliver_attributes.append(sliver_attribute['name'])
-                        attributes.append({'name': sliver_attribute['name'],
-                                           'value': sliver_attribute['value']})
+            # Per-node sliver attributes take precedence over global
+            # slice attributes, so set them first.
+            sliver_attributes = []
+            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_attributes):
+                sliver_attributes.append(sliver_attribute['name'])
+                attributes.append({'name': sliver_attribute['name'],
+                                   'value': sliver_attribute['value']})
 
-                    for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
-                        # Do not set any global slice attributes for
-                        # which there is at least one sliver attribute
-                        # already set.
-                        if slice_attribute['name'] not in sliver_attributes:
-                            attributes.append({'name': slice_attribute['name'],
-                                               'value': slice_attribute['value']})
-                except Exception, err:
-                    attributes=[{'name':'attributes caching','value':'not implemented yet'}]
+            for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
+                # Do not set any global slice attributes for
+                # which there is at least one sliver attribute
+                # already set.
+                if slice_attribute['name'] not in sliver_attributes:
+                    attributes.append({'name': slice_attribute['name'],
+                                       'value': slice_attribute['value']})
 
-                slivers.append({
-                    'name': slice['name'],
-                    'slice_id': slice['slice_id'],
-                    'instantiation': slice['instantiation'],
-                    'expires': slice['expires'],
-                    'keys': keys,
-                    'attributes': attributes
-                    })
-	    
-            nodes.append({
-                'timestamp': timestamp,
-                'node_id': node['node_id'],
-                'hostname': node['hostname'],
-                'networks': networks,
-                'groups': groups,
-                'conf_files': conf_files.values(),
-                'slivers': slivers
+            slivers.append({
+                'name': slice['name'],
+                'slice_id': slice['slice_id'],
+                'instantiation': slice['instantiation'],
+                'expires': slice['expires'],
+                'keys': keys,
+                'attributes': attributes
                 })
-
-        return nodes
+	    
+        return {
+            'timestamp': timestamp,
+            'node_id': node['node_id'],
+            'hostname': node['hostname'],
+            'networks': networks,
+            'groups': groups,
+            'conf_files': conf_files.values(),
+            'slivers': slivers
+            }
