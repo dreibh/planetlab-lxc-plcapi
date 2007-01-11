@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.1 2007/01/08 18:10:30 mlhuang Exp $
+# $Id: plcsh,v 1.1 2007/01/08 18:23:14 mlhuang Exp $
 #
 
 import os
@@ -44,6 +44,10 @@ try:
                   url = options.url, xmlrpc = options.xmlrpc, cacert = options.cacert,
                   method = options.method, role = options.role,
                   user = options.user, password = options.password)
+    # Register a few more globals for backward compatibility
+    auth = shell.auth
+    api = shell.api
+    config = api.config
 except Exception, err:
     print "Error:", err
     print
