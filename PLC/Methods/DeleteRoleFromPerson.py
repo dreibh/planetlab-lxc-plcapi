@@ -29,27 +29,20 @@ class DeleteRoleFromPerson(Method):
 
 
     def call(self, auth, role_id_or_name, person_id_or_email):
-        # Get all roles
-        roles = {}
-        for role in Roles(self.api):
-            roles[role['role_id']] = role['name']
-            roles[role['name']] = role['role_id']
-
-        if role_id_or_name not in roles:
-            raise PLCInvalidArgument, "Invalid role identifier or name"
-
-        if isinstance(role_id_or_name, int):
-            role_id = role_id_or_name
-        else:
-            role_id = roles[role_id_or_name]
+        # Get role
+        roles = Roles(self.api, [role_id_or_name])
+        if not roles:
+            raise PLCInvalidArgument, "Invalid role '%s'" % unicode(role_id_or_name)
+        role = roles[0]
 
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
-	PLCCheckLocalPerson(person,"DeleteRoleFromPerson")
+
+        if person['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local account"
 
         # Authenticated function
         assert self.caller is not None
@@ -60,14 +53,15 @@ class DeleteRoleFromPerson(Method):
 
         # Can only revoke lesser (higher) roles from others
         if 'admin' not in self.caller['roles'] and \
-           role_id <= min(self.caller['role_ids']):
+           role['role_id'] <= min(self.caller['role_ids']):
             raise PLCPermissionDenied, "Not allowed to revoke that role"
 
-        if role_id in person['role_ids']:
-            person.remove_role(role_id)
+        if role['role_id'] in person['role_ids']:
+            person.remove_role(role)
 	
 	# Logging variables
 	self.object_ids = [person['person_id']]
-	self.message = 'Role %d revoked from person %d' \
-		(role['role_id'], person['person_id'])
+	self.message = "Role %d revoked from person %d" % \
+                       (role['role_id'], person['person_id'])
+
         return 1
