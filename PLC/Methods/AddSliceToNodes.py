@@ -7,11 +7,11 @@ from PLC.Auth import Auth
 
 class AddSliceToNodes(Method):
     """
-    Adds the specified slice to the specified nodes.
-    Nodes can be either local or foreign nodes, as returned by GetNodes
+    Adds the specified slice to the specified nodes. Nodes may be
+    either local or foreign nodes.
 
-    If the slice is
-    already associated with a node, no errors are returned. 
+    If the slice is already associated with a node, no errors are
+    returned.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -34,22 +34,20 @@ class AddSliceToNodes(Method):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-
         slice = slices[0]
-	PLCCheckLocalSlice(slice,"AddSliceToNodes")
+
+        if slice['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local slice"
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
                 pass
-            # Thierry : I cannot figure out how this works
-            # how is having pi role related to being in a slice ?
             elif 'pi' not in self.caller['roles']:
                 raise PLCPermissionDenied, "Not a member of the specified slice"
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
-        # Get specified nodes, add them to the slice
-         
+        # Get specified nodes, add them to the slice         
         nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
             if slice['slice_id'] not in node['slice_ids']:
