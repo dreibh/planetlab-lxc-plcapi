@@ -9,9 +9,8 @@ from PLC.Table import Row, Table
 from PLC.Slices import Slice, Slices
 from PLC.PCUs import PCU, PCUs
 from PLC.Nodes import Node, Nodes
-from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Addresses import Address, Addresses
-import PLC.Persons
+from PLC.Persons import Person, Persons
 
 class Site(Row):
     """
@@ -22,6 +21,7 @@ class Site(Row):
 
     table_name = 'sites'
     primary_key = 'site_id'
+    join_tables = ['person_site', 'site_address', 'peer_site']
     fields = {
         'site_id': Parameter(int, "Site identifier"),
         'name': Parameter(str, "Full site name", max = 254),
@@ -40,7 +40,8 @@ class Site(Row):
         'address_ids': Parameter([int], "List of address identifiers"),
         'pcu_ids': Parameter([int], "List of PCU identifiers"),
         'node_ids': Parameter([int], "List of site node identifiers"),
-        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this site belongs", nullok = True),
+        'peer_site_id': Parameter(int, "Foreign site identifier at peer", nullok = True),
         }
 
     # for Cache
@@ -89,107 +90,14 @@ class Site(Row):
 
         return longitude
 
-    # timestamps
-    def validate_date_created (self, timestamp):
-	return self.validate_timestamp (timestamp)
-    def validate_last_updated (self, timestamp):
-	return self.validate_timestamp (timestamp)
+    validate_date_created = Row.validate_timestamp
+    validate_last_updated = Row.validate_timestamp
 
-    def add_person(self, person, commit = True):
-        """
-        Add person to existing site.
-        """
+    add_person = Row.add_object(Person, 'person_site')
+    remove_person = Row.remove_object(Person, 'person_site')
 
-        assert 'site_id' in self
-        assert isinstance(person, PLC.Persons.Person)
-        assert 'person_id' in person
-
-        site_id = self['site_id']
-        person_id = person['person_id']
-
-        if person_id not in self['person_ids']:
-            assert site_id not in person['site_ids']
-
-            self.api.db.do("INSERT INTO person_site (person_id, site_id)" \
-                           " VALUES(%(person_id)d, %(site_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['person_ids'].append(person_id)
-            person['site_ids'].append(site_id)
-
-    def remove_person(self, person, commit = True):
-        """
-        Remove person from existing site.
-        """
-
-        assert 'site_id' in self
-        assert isinstance(person, PLC.Persons.Person)
-        assert 'person_id' in person
-
-        site_id = self['site_id']
-        person_id = person['person_id']
-
-        if person_id in self['person_ids']:
-            assert site_id in person['site_ids']
-
-            self.api.db.do("DELETE FROM person_site" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND site_id = %(site_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['person_ids'].remove(person_id)
-            person['site_ids'].remove(site_id)
-
-    def add_address(self, address, commit = True):
-        """
-        Add address to existing site.
-        """
-
-        assert 'site_id' in self
-        assert isinstance(address, Address)
-        assert 'address_id' in address
-
-        site_id = self['site_id']
-        address_id = address['address_id']
-
-        if address_id not in self['address_ids']:
-            self.api.db.do("INSERT INTO site_address (address_id, site_id)" \
-                           " VALUES(%(address_id)d, %(site_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['address_ids'].append(address_id)
-
-    def remove_address(self, address, commit = True):
-        """
-        Remove address from existing site.
-        """
-
-        assert 'site_id' in self
-        assert isinstance(address, Address)
-        assert 'address_id' in address
-
-        site_id = self['site_id']
-        address_id = address['address_id']
-
-        if address_id in self['address_ids']:
-            self.api.db.do("DELETE FROM site_address" \
-                           " WHERE address_id = %(address_id)d" \
-                           " AND site_id = %(site_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['address_ids'].remove(address_id)
+    add_address = Row.add_object(Address, 'site_address')
+    remove_address = Row.remove_object(Address, 'site_address')
 
     def delete(self, commit = True):
         """
@@ -200,7 +108,7 @@ class Site(Row):
 
         # Delete accounts of all people at the site who are not
         # members of at least one other non-deleted site.
-        persons = PLC.Persons.Persons(self.api, self['person_ids'])
+        persons = Persons(self.api, self['person_ids'])
         for person in persons:
             delete = True
 
@@ -234,10 +142,9 @@ class Site(Row):
             node.delete(commit = False)
 
         # Clean up miscellaneous join tables
-        for table in ['person_site']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE site_id = %d" % \
-                           (table, self['site_id']), self)
+        for table in self.join_tables:
+            self.api.db.do("DELETE FROM %s WHERE site_id = %d" % \
+                           (table, self['site_id']))
 
         # Mark as deleted
         self['deleted'] = True
