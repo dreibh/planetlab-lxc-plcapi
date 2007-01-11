@@ -273,10 +273,15 @@ class RefreshPeer(Method):
 
         # Fix up site_id and boot_states references
         for peer_node_id, node in nodes_at_peer.items():
-            if node['site_id'] not in peer_sites or \
-               node['boot_state'] not in boot_states:               
+            errors = []
+            if node['site_id'] not in peer_sites:
+                errors.append("invalid site %d" % node['site_id'])
+            if node['boot_state'] not in boot_states:
+                errors.append("invalid boot state %s" % node['boot_state'])
+            if errors:
                 # XXX Log an event instead of printing to logfile
-                print >> log, "Warning: Skipping invalid %s node:" % peer['peername'], node
+                print >> log, "Warning: Skipping invalid %s node:" % peer['peername'], \
+                      node, ":", ", ".join(errors)
                 del nodes_at_peer[peer_node_id]
                 continue
             else:
@@ -340,11 +345,16 @@ class RefreshPeer(Method):
 
         # Fix up site_id, instantiation, and creator_person_id references
         for peer_slice_id, slice in slices_at_peer.items():
-            if slice['site_id'] not in peer_sites or \
-               slice['instantiation'] not in slice_instantiations or \
-               slice['creator_person_id'] not in peer_persons:
-                # XXX Log an event instead of printing to logfile
-                print >> log, "Warning: Skipping invalid %s slice:" % peer['peername'], slice
+            errors = []
+            if slice['site_id'] not in peer_sites:
+                errors.append("invalid site %d" % slice['site_id'])
+            if slice['instantiation'] not in slice_instantiations:
+                errors.append("invalid instantiation %s" % slice['instantiation'])
+            if slice['creator_person_id'] not in peer_persons:
+                errors.append("invalid creator %d" % slice['creator_person_id'])
+            if errors:
+                print >> log, "Warning: Skipping invalid %s slice:" % peer['peername'], \
+                      slice, ":", ", ".join(errors)
                 del slices_at_peer[peer_slice_id]
                 continue
             else:
