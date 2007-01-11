@@ -37,8 +37,8 @@ class Session(Row):
         self.api.db.do("DELETE FROM node_session WHERE node_id = %d" % \
                        node['node_id'])
 
-        add = Row.add_object(Node, 'person_session')
-        add(self, node, commit)
+        add = Row.add_object(Node, 'node_session')
+        add(self, node, commit = commit)
 
     def sync(self, commit = True, insert = None):
         if not self.has_key('session_id'):
