@@ -34,7 +34,8 @@ class BlacklistKey(Method):
         if not keys:
             raise PLCInvalidArgument, "No such key"
         key = keys[0]
-	PLCCheckLocalKey(key,"BlackListKey")
+
+        # N.B.: Can blacklist any key, even foreign ones
 
         key.blacklist()
 	
