@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: ModPython.py,v 1.2 2006/10/25 21:05:05 mlhuang Exp $
+# $Id: ModPython.py,v 1.3 2006/10/30 16:39:24 mlhuang Exp $
 #
 
 import sys
@@ -52,7 +52,7 @@ def handler(req):
 
         return apache.OK
 
-    except:
+    except Exception, err:
         # Log error in /var/log/httpd/(ssl_)?error_log
-        print >> log, traceback.format_exc()
+        print >> log, err, traceback.format_exc()
         return apache.HTTP_INTERNAL_SERVER_ERROR
