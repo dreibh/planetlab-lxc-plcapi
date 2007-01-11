@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.9 2006/12/15 18:35:38 mlhuang Exp $
+# $Id: Auth.py,v 1.10 2007/01/04 16:01:28 mlhuang Exp $
 #
 
 import crypt
@@ -56,15 +56,15 @@ class GPGAuth(Auth):
                 method.caller = peer = peers[0]
                 keys = [peer['key']]
             else:
-                persons = Persons(method.api, {'email': auth['name'], 'enabled': True})
+                persons = Persons(method.api, {'email': auth['name'], 'enabled': True, 'peer_id': None})
                 if not persons:
-                    raise PLCAuthenticationFailure, "No such peer or user '%s'" % auth['name']
+                    raise PLCAuthenticationFailure, "No such user '%s'" % auth['name']
 
                 if not set(person['roles']).intersection(method.roles):
                     raise PLCAuthenticationFailure, "Not allowed to call method"
 
                 method.caller = person = persons[0]
-                keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg"})
+                keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg", 'peer_id': None})
 
             if not keys:
                 raise PLCAuthenticationFailure, "No GPG key on record for peer or user '%s'"
@@ -109,7 +109,7 @@ class SessionAuth(Auth):
 
         try:
             if session['node_id'] is not None:
-                nodes = Nodes(method.api, [session['node_id']])
+                nodes = Nodes(method.api, {'node_id': session['node_id'], 'peer_id': None})
                 if not nodes:
                     raise PLCAuthenticationFailure, "No such node"
                 node = nodes[0]
@@ -120,7 +120,7 @@ class SessionAuth(Auth):
                 method.caller = node
 
             elif session['person_id'] is not None and session['expires'] > time.time():
-                persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True})
+                persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True, 'peer_id': None})
                 if not persons:
                     raise PLCAuthenticationFailure, "No such account"
                 person = persons[0]
@@ -182,7 +182,7 @@ class BootAuth(Auth):
         assert auth.has_key('node_id')
 
         try:
-            nodes = Nodes(method.api, [auth['node_id']])
+            nodes = Nodes(method.api, {'node_id': auth['node_id'], 'peer_id': None})
             if not nodes:
                 raise PLCAuthenticationFailure, "No such node"
             node = nodes[0]
@@ -269,7 +269,7 @@ class PasswordAuth(Auth):
         assert auth.has_key('Username')
 
         # Get record (must be enabled)
-        persons = Persons(method.api, {'email': auth['Username'], 'enabled': True})
+        persons = Persons(method.api, {'email': auth['Username'], 'enabled': True, 'peer_id': None})
         if len(persons) != 1:
             raise PLCAuthenticationFailure, "No such account"
 
