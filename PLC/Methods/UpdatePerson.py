@@ -40,9 +40,10 @@ class UpdatePerson(Method):
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
-	PLCCheckLocalPerson(person,"UpdatePerson")
+
+        if person['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local account"
 
         # Authenticated function
         assert self.caller is not None
@@ -56,9 +57,13 @@ class UpdatePerson(Method):
 	
 	# Logging variables
 	self.object_ids = [person['person_id']]
-	self.message = 'Person %d updated: %s.' % \
-		(person['person_id'], person_fields.keys())
+
+        # Redact password
+        if 'password' in person_fields:
+            person_fields['password'] = "Removed by API"
+        self.message = 'Person %d updated: %s.' % \
+                       (person['person_id'], person_fields.keys())
 	if 'enabled' in person_fields:
-		self.message += ' Person enabled' 	
+            self.message += ' Person enabled' 	
 
         return 1
