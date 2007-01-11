@@ -15,8 +15,6 @@ from PLC.Sites import Site, Sites
 from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
-from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Slices import Slice, Slices
 
 class GetPeerData(Method):
