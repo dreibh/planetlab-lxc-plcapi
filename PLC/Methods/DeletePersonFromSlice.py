@@ -31,16 +31,19 @@ class DeletePersonFromSlice(Method):
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-
         slice = slices[0]
-	PLCCheckLocalSlice(slice,"DeletePersonFromSlice")
+
+        # N.B. Allow foreign users to be added to local slices and
+        # local users to be added to foreign slices (and, of course,
+        # local users to be added to local slices).
+        if person['peer_id'] is not None and slice['peer_id'] is not None:
+            raise PLCInvalidArgument, "Cannot delete foreign users from foreign slices"
 
         # If we are not admin, make sure the caller is a pi
         # of the site associated with the slice
