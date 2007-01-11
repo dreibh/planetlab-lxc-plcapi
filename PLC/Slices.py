@@ -7,9 +7,9 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.SliceInstantiations import SliceInstantiations
+from PLC.SliceInstantiations import SliceInstantiation, SliceInstantiations
 from PLC.Nodes import Node, Nodes
-import PLC.Persons
+from PLC.Persons import Person, Persons
 
 class Slice(Row):
     """
@@ -21,6 +21,7 @@ class Slice(Row):
 
     table_name = 'slices'
     primary_key = 'slice_id'
+    join_tables = ['slice_node', 'slice_person', 'slice_attribute', 'peer_slice']
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
@@ -35,7 +36,8 @@ class Slice(Row):
         'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
         'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
         'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
-        'peer_id': Parameter(int, "Peer at which this slice was created", nullok = True),
+        'peer_id': Parameter(int, "Peer to which this slice belongs", nullok = True),
+        'peer_slice_id': Parameter(int, "Foreign slice identifier at peer", nullok = True),
         }
     # for Cache
     class_key = 'name'
@@ -78,118 +80,19 @@ class Slice(Row):
 
         return instantiation
 
-    # timestamps
-    def validate_created (self, timestamp):
-	return self.validate_timestamp (timestamp)
+    validate_created = Row.validate_timestamp
 
     def validate_expires(self, expires):
         # N.B.: Responsibility of the caller to ensure that expires is
         # not too far into the future.
-	return self.validate_timestamp (expires,True)
+	return Row.validate_timestamp(self, expires, check_future = True)
 
-    def add_person(self, person, commit = True):
-        """
-        Add person to existing slice.
-        """
+    add_person = Row.add_object(Person, 'slice_person')
+    remove_person = Row.remove_object(Person, 'slice_person')
 
-        assert 'slice_id' in self
-        assert isinstance(person, PLC.Persons.Person)
-        assert 'person_id' in person
+    add_node = Row.add_object(Node, 'slice_node')
+    remove_node = Row.remove_object(Node, 'slice_node')
 
-        slice_id = self['slice_id']
-        person_id = person['person_id']
-
-        if person_id not in self['person_ids']:
-            assert slice_id not in person['slice_ids']
-
-            self.api.db.do("INSERT INTO slice_person (person_id, slice_id)" \
-                           " VALUES(%(person_id)d, %(slice_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['person_ids'].append(person_id)
-            person['slice_ids'].append(slice_id)
-
-    def remove_person(self, person, commit = True):
-        """
-        Remove person from existing slice.
-        """
-
-        assert 'slice_id' in self
-        assert isinstance(person, PLC.Persons.Person)
-        assert 'person_id' in person
-
-        slice_id = self['slice_id']
-        person_id = person['person_id']
-
-        if person_id in self['person_ids']:
-            assert slice_id in person['slice_ids']
-
-            self.api.db.do("DELETE FROM slice_person" \
-                           " WHERE person_id = %(person_id)d" \
-                           " AND slice_id = %(slice_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['person_ids'].remove(person_id)
-            person['slice_ids'].remove(slice_id)
-
-    def add_node(self, node, commit = True):
-        """
-        Add node to existing slice.
-        """
-
-        assert 'slice_id' in self
-        assert isinstance(node, Node)
-        assert 'node_id' in node
-
-        slice_id = self['slice_id']
-        node_id = node['node_id']
-
-        if node_id not in self['node_ids']:
-            assert slice_id not in node['slice_ids']
-
-            self.api.db.do("INSERT INTO slice_node (node_id, slice_id)" \
-                           " VALUES(%(node_id)d, %(slice_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['node_ids'].append(node_id)
-            node['slice_ids'].append(slice_id)
-
-    def remove_node(self, node, commit = True):
-        """
-        Remove node from existing slice.
-        """
-
-        assert 'slice_id' in self
-        assert isinstance(node, Node)
-        assert 'node_id' in node
-
-        slice_id = self['slice_id']
-        node_id = node['node_id']
-
-        if node_id in self['node_ids']:
-            assert slice_id in node['slice_ids']
-
-            self.api.db.do("DELETE FROM slice_node" \
-                           " WHERE node_id = %(node_id)d" \
-                           " AND slice_id = %(slice_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['node_ids'].remove(node_id)
-            node['slice_ids'].remove(slice_id)
-
-    ##########
     def sync(self, commit = True):
         """
         Add or update a slice.
@@ -211,10 +114,9 @@ class Slice(Row):
         assert 'slice_id' in self
 
         # Clean up miscellaneous join tables
-        for table in ['slice_node', 'slice_person', 'slice_attribute']:
-            self.api.db.do("DELETE FROM %s" \
-                           " WHERE slice_id = %d" % \
-                           (table, self['slice_id']), self)
+        for table in self.join_tables:
+            self.api.db.do("DELETE FROM %s WHERE slice_id = %d" % \
+                           (table, self['slice_id']))
 
         # Mark as deleted
         self['is_deleted'] = True
