@@ -41,7 +41,9 @@ class AdmGenerateNodeConfFile(Method):
         if not nodes:
             raise PLCInvalidArgument, "No such node"
         node = nodes[0]
-	PLCCheckLocalNode(node,"AdmGenerateNodeConfFile")
+
+        if node['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local node"
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.

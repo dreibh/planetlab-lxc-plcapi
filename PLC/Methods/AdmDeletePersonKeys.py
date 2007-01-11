@@ -34,9 +34,10 @@ class AdmDeletePersonKeys(Method):
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
-	PLCCheckLocalPerson(person,"AdmDeletePersonKeys")
+
+        if person['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local account"
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] != person['person_id']:

@@ -32,13 +32,14 @@ class UpdateSliceAttribute(Method):
         if not slice_attributes:
             raise PLCInvalidArgument, "No such slice attribute"
         slice_attribute = slice_attributes[0]
-	PLCCheckLocalSliceAttribute(slice_attribute,"UpdateSliceAttribute")
 
         slices = Slices(self.api, [slice_attribute['slice_id']])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
-	PLCCheckLocalSlice(slice,"UpdateSliceAttribute")
+
+        if slice['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local slice"
 
         assert slice_attribute['slice_attribute_id'] in slice['slice_attribute_ids']
 

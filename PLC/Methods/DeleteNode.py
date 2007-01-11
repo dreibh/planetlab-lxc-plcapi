@@ -30,9 +30,10 @@ class DeleteNode(Method):
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
-
         node = nodes[0]
-	PLCCheckLocalNode(node,"DeleteNode")
+
+        if node['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local node"
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.

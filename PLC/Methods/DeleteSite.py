@@ -33,9 +33,10 @@ class DeleteSite(Method):
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
-
         site = sites[0]
-	PLCCheckLocalSite(site,"DeleteSite")
+
+        if site['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local site"
 
         site.delete()
 	

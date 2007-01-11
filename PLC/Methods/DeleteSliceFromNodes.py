@@ -31,9 +31,10 @@ class DeleteSliceFromNodes(Method):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-
         slice = slices[0]
-	PLCCheckLocalSlice(slice,"DeleteSliceFromNodes")
+
+        if slice['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local slice"
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:

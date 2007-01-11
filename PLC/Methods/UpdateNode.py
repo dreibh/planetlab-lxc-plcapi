@@ -44,9 +44,10 @@ class UpdateNode(Method):
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
-
         node = nodes[0]
-	PLCCheckLocalNode(node,"UpdateNode")
+
+        if node['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local node"
 
         # Authenticated function
         assert self.caller is not None

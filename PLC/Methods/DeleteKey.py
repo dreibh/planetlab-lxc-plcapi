@@ -29,7 +29,9 @@ class DeleteKey(Method):
         if not keys:
             raise PLCInvalidArgument, "No such key"
         key = keys[0]
-	PLCCheckLocalKey(key,"DeleteKey")
+
+        if key['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local key"
 
         if 'admin' not in self.caller['roles']:
             if key['key_id'] not in self.caller['key_ids']:

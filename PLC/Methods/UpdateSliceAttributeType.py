@@ -35,7 +35,6 @@ class UpdateSliceAttributeType(Method):
         if not attribute_types:
             raise PLCInvalidArgument, "No such attribute"
         attribute_type = attribute_types[0]
-	PLCCheckLocalSliceAttributeType(attribute_type,"UpdateSliceAttributeType")
 
         attribute_type.update(attribute_type_fields)
         attribute_type.sync()

@@ -32,15 +32,15 @@ class AddNodeToPCU(Method):
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
-
         node = nodes[0]
-	PLCCheckLocalNode(node,"AddNodeToPCU")
+
+        if node['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local node"
 
         # Get PCU
         pcus = PCUs(self.api, [pcu_id])
         if not pcus:
             raise PLCInvalidArgument, "No such PCU"
-
         pcu = pcus[0]
 
         if 'admin' not in self.caller['roles']:

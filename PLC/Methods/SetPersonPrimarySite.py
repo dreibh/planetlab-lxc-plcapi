@@ -30,9 +30,10 @@ class SetPersonPrimarySite(Method):
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
-	PLCCheckLocalPerson(person,"SetPersonPrimarySite")
+
+        if person['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local account"
 
         # Authenticated function
         assert self.caller is not None
@@ -46,9 +47,10 @@ class SetPersonPrimarySite(Method):
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
             raise PLCInvalidArgument, "No such site"
-
         site = sites[0]
-	PLCCheckLocalSite(site,"SetPersonPrimarySite")
+
+        if site['peer_id'] is not None:
+            raise PLCInvalidArgument, "Not a local site"
 
         if site['site_id'] not in person['site_ids']:
             raise PLCInvalidArgument, "Not a member of the specified site"

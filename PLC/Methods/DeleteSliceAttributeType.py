@@ -27,7 +27,6 @@ class DeleteSliceAttributeType(Method):
         if not attribute_types:
             raise PLCInvalidArgument, "No such slice attribute type"
         attribute_type = attribute_types[0]
-	PLCCheckLocalSliceAttributeType(attribute_type,"DeleteSliceAttributeType")
 
         attribute_type.delete()
 	self.object_ids = [attribute_type['attribute_type_id']]
