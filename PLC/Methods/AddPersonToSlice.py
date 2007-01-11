@@ -30,18 +30,19 @@ class AddPersonToSlice(Method):
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account"
-
         person = persons[0]
-	# Let's be open-minded as a start
-	#PLCCheckLocalPerson(person,"AddPersonToSlice")
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-
         slice = slices[0]
-	PLCCheckLocalSlice(slice,"AddPersonToSlice")
+
+        # N.B. Allow foreign users to be added to local slices and
+        # local users to be added to foreign slices (and, of course,
+        # local users to be added to local slices).
+        if person['peer_id'] is not None and slice['peer_id'] is not None:
+            raise PLCInvalidArgument, "Cannot add foreign users to foreign slices"
 
         # If we are not admin, make sure the caller is a PI
         # of the site associated with the slice
@@ -51,6 +52,8 @@ class AddPersonToSlice(Method):
 
 	if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)
+
+        # Logging variables
 	self.object_ids = [slice['slice_id']]
 
         return 1
