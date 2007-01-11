@@ -22,7 +22,6 @@ class SliceAttribute(Row):
         'min_role_id': SliceAttributeType.fields['min_role_id'],
         # XXX Arbitrary max, make configurable
         'value': Parameter(str, "Slice attribute value", max = 254),
-        'peer_id': Parameter(int, "Peer at which this node is managed", nullok = True),
         }
 
 class SliceAttributes(Table):
