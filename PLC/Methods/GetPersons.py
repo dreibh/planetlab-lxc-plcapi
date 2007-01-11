@@ -5,6 +5,8 @@ from PLC.Filter import Filter
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
+hidden_fields = ['password', 'verification_key', 'verification_expires']
+
 class GetPersons(Method):
     """
     Returns an array of structs containing details about users. If
@@ -29,14 +31,11 @@ class GetPersons(Method):
         ]
 
     # Filter out password field
-    can_return = lambda (field, value): field not in \
-	['password', 'verification_key', 'verification_expires']
-    return_fields = dict(filter(can_return, Person.fields.items()))
+    return_fields = dict(filter(lambda (field, value): field not in hidden_fields,
+                                Person.fields.items()))
     returns = [return_fields]
     
-
     def call(self, auth, person_filter = None, return_fields = None):
-
 	# If we are not admin, make sure to only return viewable accounts
         if 'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
@@ -54,10 +53,11 @@ class GetPersons(Method):
 
         # Filter out password field
         if return_fields:
-            return_fields = filter(self.can_return, return_fields)
+            return_fields = filter(lambda field: field not in hidden_fields,
+                                   return_fields)
 	else:
 	    return_fields = self.return_fields.keys()
-		
+
         persons = Persons(self.api, person_filter, return_fields)
 
         # Filter out accounts that are not viewable
