@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.19 2007/01/09 16:23:47 mlhuang Exp $
+# $Id: Test.py,v 1.20 2007/01/12 00:15:22 mlhuang Exp $
 #
 
 """
@@ -41,7 +41,7 @@ service plc start
 service plc2 start
 
 # Run test
-./TestPeers.py -f /etc/planetlab/plc_config -f /plc2/data/etc/planetlab/plc_config
+./Test.py -f /etc/planetlab/plc_config -f /plc2/data/etc/planetlab/plc_config
 
 # If the test fails and your databases are corrupt and/or you want to
 # start over, you can always just blow the databases away.
