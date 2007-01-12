@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.19 2007/01/09 16:23:47 mlhuang Exp $
+# $Id: Test.py,v 1.1 2007/01/11 21:27:49 mlhuang Exp $
 #
 
 from pprint import pprint
@@ -605,6 +605,8 @@ class Test:
         for person_id in self.person_ids:
             # Update user
             person_fields = random_person()
+            # Keep them enabled
+            person_fields['enabled'] = True
             self.api.UpdatePerson(person_id, person_fields)
 
             if self.check:
