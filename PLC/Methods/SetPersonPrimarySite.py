@@ -10,7 +10,7 @@ class SetPersonPrimarySite(Method):
     Makes the specified site the person's primary site. The person
     must already be a member of the site.
 
-    ins may update anyone. All others may only update themselves.
+    Admins may update anyone. All others may only update themselves.
     """
 
     roles = ['admin', 'pi', 'user', 'tech']
