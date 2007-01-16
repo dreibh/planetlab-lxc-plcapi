@@ -6,7 +6,7 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 from PLC.Methods.AddSliceToNodes import AddSliceToNodes
 
-class SliceNodesAdd(Method):
+class SliceNodesAdd(AddSliceToNodes):
     """
     Deprecated. See AddSliceToNodes.
 

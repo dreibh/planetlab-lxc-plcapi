@@ -6,7 +6,7 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
 
-class SliceNodesDel(Method):
+class SliceNodesDel(DeleteSliceFromNodes):
     """
     Deprecated. See DeleteSliceFromNodes.
 
