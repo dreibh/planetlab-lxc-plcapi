@@ -5,6 +5,8 @@ from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
 from PLC.Sites import Site, Sites
+from PLC.Persons import Person, Persons
+from PLC.Nodes import Node, Nodes
 
 class SliceInfo(Method):
     """
@@ -58,10 +60,14 @@ class SliceInfo(Method):
 	    index = slices.index(slice)
 	    node_ids = slices[index].pop('node_ids')
 	    person_ids = slices[index].pop('person_ids')
-	    if return_users:
-		slices[index]['users'] = person_ids
-	    if return_nodes:
-	        slices[index]['nodes'] = node_ids
+	    if return_users or return_users is None:
+		persons = Persons(self.api, person_ids)
+		emails = [person['email'] for person in persons]
+		slices[index]['users'] = emails
+	    if return_nodes or return_nodes is None:
+		nodes = Nodes(self.api, node_ids)
+		hostnames = [node['hostname'] for node in nodes]
+	        slices[index]['nodes'] = hostnames
 		
 	
         return slices
