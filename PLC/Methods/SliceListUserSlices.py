@@ -4,8 +4,9 @@ from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
+from PLC.Methods.GetSlices import GetSlices
 
-class SliceListUserSlices(Method):
+class SliceListUserSlices(GetSlices):
     """
     Deprecated. Can be implemented with GetPersons.
 
@@ -36,7 +37,8 @@ class SliceListUserSlices(Method):
 	slice_ids = person['slice_ids']
 	if not slice_ids:
 		return []
-	slices = Slices(self.api, slice_ids)
+	
+	slices = GetSlices.call(self, auth, slice_ids)
 	slice_names = [slice['name'] for slice in slices]
 
         return slice_names

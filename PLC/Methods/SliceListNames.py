@@ -3,8 +3,9 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
+from PLC.Methods.GetSlices import GetSlices
 
-class SliceListNames(Method):
+class SliceListNames(GetSlices):
     """
     Deprecated. Can be implemented with GetSlices.
 
@@ -32,24 +33,10 @@ class SliceListNames(Method):
         if prefix:
             slice_filter = {'name': prefix+'*'}
 	
-        slices = Slices(self.api, slice_filter)
+        slices = GetSlices.call(self, auth, slice_filter)
+	
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-	
-	# If we are not admin, make sure to return only viewable
-	# slices.
-        if 'admin' not in self.caller['roles']:
-            # Get slices that we are able to view
-            valid_slice_ids = self.caller['slice_ids']
-            if 'pi' in self.caller['roles'] and self.caller['site_ids']:
-                sites = Sites(self.api, self.caller['site_ids'])
-                for site in sites:
-                    valid_slice_ids += site['slice_ids']
-
-            if not valid_slice_ids:
-                return []
-
-            slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
 	
 	slice_names = [slice['name'] for slice in slices]
 
