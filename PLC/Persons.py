@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.31 2007/01/09 16:22:49 mlhuang Exp $
+# $Id: Persons.py,v 1.32 2007/01/11 05:37:55 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -45,8 +45,8 @@ class Person(Row):
         'bio': Parameter(str, "Biography", max = 254, nullok = True),
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
-        'verification_key': Parameter(str, "Reset password key", max = 254),
-	'verification_expires': Parameter(int, "Date and time when verification_key expires"),
+        'verification_key': Parameter(str, "Reset password key", max = 254, nullok = True),
+	'verification_expires': Parameter(int, "Date and time when verification_key expires", nullok = True),
 	'last_updated': Parameter(int, "Date and time of last update", ro = True),
         'date_created': Parameter(int, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers"),
@@ -209,70 +209,6 @@ class Person(Row):
         # Make sure that the primary site is first in the list
         self['site_ids'].remove(site_id)
         self['site_ids'].insert(0, site_id)
-
-    def send_initiate_password_reset_email(self):
-	# email user next step instructions
-        to_addr = {}
-        to_addr[self['email']] = "%s %s" % \
-            (self['first_name'], self['last_name'])
-        from_addr = {}
-        from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
-        "%s %s" % ('Planetlab', 'Support')
-
-	# fill in template
-        messages = Messages(self.api, ['ASSWORD_RESET_INITIATE'])
-        if not messages:
-            print >> log, "No such message template"
-	    return 1
-
-        message = messages[0]
-        subject = message['subject']
-        template = message['template'] % \
-            (self.api.config.PLC_WWW_HOST,
-             self['verification_key'], self['person_id'],
-             self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
-             self.api.config.PLC_WWW_HOST)
-
-        self.api.mailer.mail(to_addr, None, from_addr, subject, template)
-    
-    def send_account_registered_email(self, site):
-	to_addr = {}
-	cc_addr = {}
-	from_addr = {}
-	from_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
-        "%s %s" % ('Planetlab', 'Support')
-
-	# email user
-	user_full_name = "%s %s" % (self['first_name'], self['last_name'])
-	to_addr[self['email']] = "%s" % user_full_name
-
-	# if the account had a admin role or a pi role, email support.
-        if set(['admin', 'pi']).intersection(self['roles']):
-            to_addr[self.api.config.PLC_MAIL_SUPPORT_ADDRESS] = \
-                "%s %s" % ('Planetlab', 'Support')
-	
-	# cc site pi's
-	site_persons = Persons(self.api, site['person_ids'])
-        for person in site_persons:
-            if 'pi' in person['roles'] and not person['email'] in to_addr.keys():
-                cc_addr[person['email']] = "%s %s" % \
-		(person['first_name'], person['last_name'])
-
-	# fill in template
-	messages = Messages(self.api, ['ACCOUNT_REGISTERED'])
-        if not messages:
-	    print >> log, "No such message template"
-            return 1
-
-        message = messages[0]
-        subject = message['subject'] % (user_full_name, site['name'])
-        template = message['template'] % \
-	    (user_full_name, site['name'], ", ".join(self['roles']),
-	     self.api.config.PLC_WWW_HOST, self['person_id'],
-             self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
-             self.api.config.PLC_WWW_HOST)
-			    	
-	self.api.mailer.mail(to_addr, cc_addr, from_addr, subject, template)
 
     def delete(self, commit = True):
         """
