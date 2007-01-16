@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.1 2007/01/08 18:10:30 mlhuang Exp $
+# $Id: Shell.py,v 1.2 2007/01/10 21:04:40 mlhuang Exp $
 #
 
 import pydoc
@@ -107,7 +107,10 @@ class Shell:
                 cacert = self.config.PLC_API_CA_SSL_CRT
 
             self.url = url
-            self.server = xmlrpclib.ServerProxy(url, PyCurlTransport(url, cacert), allow_none = 1)
+            if cacert is not None:
+                self.server = xmlrpclib.ServerProxy(url, PyCurlTransport(url, cacert), allow_none = 1)
+            else:
+                self.server = xmlrpclib.ServerProxy(url, allow_none = 1)
 
         # Set up authentication structure
 
