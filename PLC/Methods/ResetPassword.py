@@ -96,7 +96,7 @@ class ResetPassword(Method):
             params = {'PLC_NAME': self.api.config.PLC_NAME,
                       'PLC_MAIL_SUPPORT_ADDRESS': self.api.config.PLC_MAIL_SUPPORT_ADDRESS,
                       'PLC_WWW_HOST': self.api.config.PLC_WWW_HOST,
-                      'PLC_WWW_SSL_PORT': self.api.config.PLC_WWW_PORT,
+                      'PLC_WWW_SSL_PORT': self.api.config.PLC_WWW_SSL_PORT,
                       'person_id': person['person_id'],
                       # Will be used in a URL, so must quote appropriately
                       'verification_key': urllib.quote_plus(random_key),
