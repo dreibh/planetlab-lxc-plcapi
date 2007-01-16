@@ -51,17 +51,27 @@ class Row(dict):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
 
-    time_format = "%Y-%m-%d %H:%M:%S"
-    def validate_timestamp (self, timestamp, check_future=False):
-	# in case we try to sync the same object twice
+    def validate_timestamp(self, timestamp, check_future = False):
+        """
+        Validates the specified GMT timestamp string (must be in
+        %Y-%m-%d %H:%M:%S format) or number (seconds since UNIX epoch,
+        i.e., 1970-01-01 00:00:00 GMT). If check_future is True,
+        raises an exception if timestamp is not in the future. Returns
+        a GMT timestamp string.
+        """
+
+        time_format = "%Y-%m-%d %H:%M:%S"
+
 	if isinstance(timestamp, StringTypes):
-	    # calendar.timegm is the inverse of time.gmtime, in that it computes in UTC
-	    # surprisingly enough, no other method in the time module behaves this way
-            # this method is documented in the time module's documentation
-	    timestamp = calendar.timegm (time.strptime (timestamp,Row.time_format))
-	human = time.strftime (Row.time_format, time.gmtime(timestamp))
-	if check_future and (timestamp < time.time()):
-            raise PLCInvalidArgument, "%s: date must be in the future"%human
+	    # calendar.timegm() is the inverse of time.gmtime()
+	    timestamp = calendar.timegm(time.strptime(timestamp, time_format))
+
+        # Human readable timestamp string
+	human = time.strftime(time_format, time.gmtime(timestamp))
+
+	if check_future and timestamp < time.time():
+            raise PLCInvalidArgument, "'%s' not in the future" % human
+
 	return human
 
     def add_object(self, classobj, join_table, columns = None):
