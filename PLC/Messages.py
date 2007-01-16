@@ -4,11 +4,12 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Messages.py,v 1.3 2006/11/10 17:06:35 mlhuang Exp $
+# $Id: Messages.py,v 1.4 2006/11/16 17:03:36 mlhuang Exp $
 #
 
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table
+from PLC.Filter import Filter
 
 class Message(Row):
     """
@@ -29,16 +30,21 @@ class Messages(Table):
     Representation of row(s) from the messages table in the database. 
     """
 
-    def __init__(self, api, message_ids, enabled = None):
-        Table.__init__(self, api, Message)
+    def __init__(self, api, message_filter = None, columns = None, enabled = None):
+        Table.__init__(self, api, Message, columns)
     
         sql = "SELECT %s from messages WHERE True" % \
-              ", ".join(Message.fields)
-
-	if message_ids:
-            sql += " AND message_id IN (%s)" %  ", ".join(map(api.db.quote, message_ids))
+              ", ".join(self.columns)
 
         if enabled is not None:
             sql += " AND enabled IS %s" % enabled
+
+        if message_filter is not None:
+            if isinstance(message_filter, (list, tuple, set)):
+                message_filter = Filter(Message.fields, {'message_id': message_filter})
+                sql += " AND (%s)" % message_filter.sql(api, "OR")
+            elif isinstance(message_filter, dict):
+                message_filter = Filter(Message.fields, message_filter)
+                sql += " AND (%s)" % message_filter.sql(api, "AND")
 
         self.selectall(sql)
