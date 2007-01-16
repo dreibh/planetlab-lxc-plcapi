@@ -3,7 +3,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
+from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Sites import Site, Sites
+from PLC.Nodes import Node, Nodes
+from PLC.Persons import Person, Persons
 
 class SliceExtendedInfo(Method):
     """
@@ -31,7 +34,7 @@ class SliceExtendedInfo(Method):
     returns = [Slice.fields]
     
 
-    def call(self, auth, slice_name_list=None, return_users=None, return_nodes=None):
+    def call(self, auth, slice_name_list=None, return_users=None, return_nodes=None, return_attributes=None):
 	# If we are not admin, make sure to return only viewable
 	# slices.
 	slice_filter = slice_name_list
@@ -53,14 +56,27 @@ class SliceExtendedInfo(Method):
 	    slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
 
 	for slice in slices:
-	    slices.pop(slice)
-	    person_ids = slice.pop('person_ids')
-	    node_ids = slice.pop('node_ids')
-	    if return_users:
-		slice['users'] = person_ids
-	    if return_nodes:
-	        slice['nodes'] = node_ids
-	    slices.add(slice)
-		
+	    index = slices.index(slice)
+            node_ids = slices[index].pop('node_ids')
+            person_ids = slices[index].pop('person_ids')
+	    attribute_ids = slices[index].pop('slice_attribute_ids')
+            if return_users or return_users is None:
+                persons = Persons(self.api, person_ids)
+                person_info = [{'email': person['email'], 
+				'person_id': person['person_id']} \
+		 	       for person in persons]
+                slices[index]['users'] = person_info
+            if return_nodes or return_nodes is None:
+                nodes = Nodes(self.api, node_ids)
+                node_info = [{'hostname': node['hostname'], 
+			      'node_id': node['node_id']} \
+			     for node in nodes]
+                slices[index]['nodes'] = node_info
+	    if return_attributes or return_attributes is None:
+		attributes = SliceAttributes(self.api, attribute_ids)
+		attribute_info = [{'name': attribute['name'],
+				   'value': attribute['value']} \
+				  for attribute in attributes]
+		slices[index]['attributes'] = attribute_info
 	
         return slices
