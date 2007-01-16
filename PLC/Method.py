@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.19 2006/11/29 17:57:27 tmack Exp $
+# $Id: Method.py,v 1.20 2006/12/20 14:08:40 tmack Exp $
 #
 
 import xmlrpclib
@@ -92,7 +92,7 @@ class Method:
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
 
-            if self.api.config.PLC_API_DEBUG:
+            if self.api.config.PLC_API_DEBUG or hasattr(self, 'message'):
 		self.log(0, runtime, *args)
 	    	
 	    return result
@@ -139,17 +139,16 @@ class Method:
 
         event.sync(commit = False)
 
-        # XXX object_ids is currently defined as a class variable
         if hasattr(self, 'object_ids'):
             for object_id in self.object_ids:
                 event.add_object(object_id, commit = False)
 
-	# Get message for this event
+	# Set the message for this event
 	if hasattr(self, 'message'):
-		event['message'] = self.message	
+            event['message'] = self.message	
 	
         # Commit
-        event.sync(commit = True)
+        event.sync()
 
     def help(self, indent = "  "):
         """
