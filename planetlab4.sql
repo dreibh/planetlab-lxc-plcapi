@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.60 2007/01/09 16:23:47 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.61 2007/01/11 05:26:34 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -801,7 +801,7 @@ persons.deleted,
 persons.enabled,
 persons.password,
 persons.verification_key,
-persons.verification_expires,
+CAST(date_part('epoch', persons.verification_expires) AS bigint) AS verification_expires,
 persons.title,
 persons.phone,
 persons.url,
