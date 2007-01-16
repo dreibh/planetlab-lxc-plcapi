@@ -6,7 +6,7 @@ from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.Methods.GetSlices import GetSlices
 
-class SliceNodesList(Method):
+class SliceNodesList(GetSlices):
     """
     Deprecated. Can be implemented with GetSlices.
 
@@ -25,9 +25,7 @@ class SliceNodesList(Method):
     
 
     def call(self, auth, slice_name):
-	# If we are not admin, make sure to return only viewable
-	# slices.
-	slices = GetSlices(self, auth, [slice_name])
+	slices = GetSlices.call(self, auth, [slice_name])
 	slice = slices[0]
 	nodes = Nodes(self.api, slice['node_ids'])
 	if not nodes:
