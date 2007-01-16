@@ -31,7 +31,7 @@ class SliceListUserSlices(GetSlices, GetPersons):
 
     def call(self, auth, email):
 
-	persons = GetPersons(self, auth, [email])
+	persons = GetPersons.call(self, auth, [email])
 	if not persons:
 		return []
 	person = persons[0]
