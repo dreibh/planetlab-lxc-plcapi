@@ -5,10 +5,11 @@ from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
 from PLC.Methods.GetSlices import GetSlices
+from PLC.Methods.GetPersons import GetPersons
 
-class SliceListUserSlices(GetSlices):
+class SliceListUserSlices(GetSlices, GetPersons):
     """
-    Deprecated. Can be implemented with GetPersons.
+    Deprecated. Can be implemented with GetPersons and GetSlices.
 
     Return the slices the specified user (by email address) is a member of.
 
@@ -22,15 +23,15 @@ class SliceListUserSlices(GetSlices):
 
     accepts = [
         Auth(),
-        Parameter(str, "Slice prefix", nullok = True)
+        Person.fields['email']
         ]
 
-    returns = [Slice.fields]
+    returns = [Slice.fields['name']]
     
 
     def call(self, auth, email):
 
-	persons = Persons(self.api, [email])
+	persons = GetPersons(self, auth, [email])
 	if not persons:
 		return []
 	person = persons[0]

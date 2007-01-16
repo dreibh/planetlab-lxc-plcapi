@@ -24,7 +24,7 @@ class SliceListNames(GetSlices):
         Parameter(str, "Slice prefix", nullok = True)
         ]
 
-    returns = [Slice.fields]
+    returns = [Slice.fields['name']]
     
 
     def call(self, auth, prefix=None):
