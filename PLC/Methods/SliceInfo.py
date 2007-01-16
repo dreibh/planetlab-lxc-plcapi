@@ -1,5 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Faults import *
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
@@ -52,15 +53,15 @@ class SliceInfo(Method):
 	
 	    slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
 
+
 	for slice in slices:
-	    slices.pop(slice)
-	    person_ids = slice.pop('person_ids')
-	    node_ids = slice.pop('node_ids')
+	    index = slices.index(slice)
+	    node_ids = slices[index].pop('node_ids')
+	    person_ids = slices[index].pop('person_ids')
 	    if return_users:
-		slice['users'] = person_ids
+		slices[index]['users'] = person_ids
 	    if return_nodes:
-	        slice['nodes'] = node_ids
-	    slices.add(slice)
+	        slices[index]['nodes'] = node_ids
 		
 	
         return slices
