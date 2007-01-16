@@ -38,6 +38,6 @@ class SliceUsersList(GetSlices, GetPersons):
 	slice = slices[0]
      
 	persons = GetPersons.call(self, auth, slice['person_ids'])
-	person_names = [person['email'] for person in persons]
+	person_emails = [person['email'] for person in persons]
 
-        return person_names
+        return person_emails
