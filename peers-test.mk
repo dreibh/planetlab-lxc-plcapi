@@ -184,7 +184,10 @@ ckp: ckp-en
 # variant runs
 VARIANT-TESTS :=
 
-# run end of test (after it was populated) with normal size
+# run end of test (after it was populated) with mini size
+VARIANT-TESTS += run-em
+run-em:
+	$(PY) ./TestPeers.py -e -m > testpeers-em.out 2>&1
 VARIANT-TESTS += run-en
 run-en:
 	$(PY) ./TestPeers.py -e > testpeers-en.out 2>&1

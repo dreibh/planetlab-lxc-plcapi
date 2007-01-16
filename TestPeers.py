@@ -49,7 +49,7 @@ class DummyShell:
                 setattr(self,method,DummyShell.Callable(method,self.index))
         
 ####################
-import xmlrpclib
+#import xmlrpclib
 import os
 
 ## try to support reload
@@ -188,8 +188,8 @@ plc[1]={ 'plcname':'Thierry plc1',
          'person-format' : 'user1-%d@plc1.org',
          'key-format':'ssh-rsa 11key4plc11 user%d-key%d',
          'person-password' : 'password1',
-	 'gpg-keyring':'/etc/planetlab/gpg_plc1.pub',
-	 'api-cacert':'/etc/planetlab/api_plc1.crt',
+	 'gpg-keyring':'gpg_plc2.pub',
+	 'api-cacert':'api_plc2.crt',
        }
 plc[2]={ 'plcname':'Thierry plc2',
          'hostname':'lurch.cs.princeton.edu',
@@ -204,8 +204,8 @@ plc[2]={ 'plcname':'Thierry plc2',
          'person-format' : 'user2-%d@plc2.org',
          'key-format':'ssh-rsa 22key4plc22 user%d-key%d',
          'person-password' : 'password2',
-	 'gpg-keyring':'/etc/planetlab/gpg_plc2.pub',
-	 'api-cacert':'/etc/planetlab/api_plc2.crt',
+	 'gpg-keyring':'gpg_plc1.pub',
+	 'api-cacert':'api_plc1.crt',
        }
 
 ####################
@@ -288,24 +288,46 @@ def timer_show ():
     last_time=now
 
 ####################
-def test00_init (args=[1,2]):
+errors=0
+def myassert (message,boolean):
+    if not boolean:
+        print 'ASSERTION FAILED',message
+        global errors
+        errors +=1
+
+def epilogue ():
+    if errors != 0:
+        print 'TEST FAILED with %d errors'%errors
+        assert errors == 0
+        
+####################
+# init
+def test00_init (args=[1,2],builtin_person=False):
     timer_start()
-    ## have you loaded this file already (support for reload)
     for i in args:
         url=plc[i]['url-format']%plc[i]['hostname']
         plc[i]['url']=url
         if local_peer is None:
             # the regular remote mode
-            print 'initializing s[%d]=>%s'%(i,url)
+            print 'initializing s[%d]=>%s'%(i,url),
+            if builtin_person:
+                user=plc[i]['builtin-admin-id']
+                password=plc[i]['builtin-admin-password']
+            else:
+                user=plc[i]['peer-admin-name']
+                password=plc[i]['peer-admin-password']
             s[i]=Shell(url=url,
-                       user=plc[i]['builtin-admin-id'],
-                       password=plc[i]['builtin-admin-password'])
+                       user=user,
+                       password=password)
+            print 'user=',user
         elif local_peer == i:
             # local mode - use Shell's Direct mode - use /etc/planetlab/plc_config
             s[i]=Shell()
         else:
             # remote peer in local mode : use dummy shell instead
             s[i]=DummyShell(i)
+
+# use new person's account
 
 def test00_print (args=[1,2]):
     for i in args:
@@ -322,8 +344,8 @@ def check_nodes (el,ef,args=[1,2]):
         n = len ([ x for x in all_nodes if x['peer_id'] is None])
         f = len ([ x for x in all_nodes if x['peer_id'] is not None])
         print '%02d: Checking nodes: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
-        assert n==el
-        assert f==ef
+        myassert ('local nodes',n==el)
+        myassert ('foreign nodes',f==ef)
 
 def check_keys (el,ef,args=[1,2]):
     for i in args:
@@ -333,8 +355,8 @@ def check_keys (el,ef,args=[1,2]):
         n = len ([ x for x in all_keys if x['peer_id'] is None])
         f = len ([ x for x in all_keys if x['peer_id'] is not None])
         print '%02d: Checking keys: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
-        assert n==el
-        assert f==ef
+        myassert ('local keys',n==el)
+        myassert ('foreign_keys',f==ef)
 
 def check_persons (el,ef,args=[1,2]):
     for i in args:
@@ -344,8 +366,8 @@ def check_persons (el,ef,args=[1,2]):
         n = len ([ x for x in all_persons if x['peer_id'] is None])
         f = len ([ x for x in all_persons if x['peer_id'] is not None])
         print '%02d: Checking persons: got %d local (e=%d) & %d foreign (e=%d)'%(i,n,el,f,ef)
-        assert n==el
-        assert f==ef
+        myassert ('local persons',n==el)
+        myassert ('foreign persons',f==ef)
 
 # expected : local slices, foreign slices
 def check_slices (els,efs,args=[1,2]):
@@ -353,8 +375,8 @@ def check_slices (els,efs,args=[1,2]):
         ls=len(s[i].GetSlices({'peer_id':None}))
         fs=len(s[i].GetSlices({'~peer_id':None}))
         print '%02d: Checking slices: got %d local (e=%d) & %d foreign (e=%d)'%(i,ls,els,fs,efs)
-        assert els==ls
-        assert efs==fs
+        myassert ('local slices',els==ls)
+        myassert ('foreign slices',efs==fs)
 
 def show_nodes (i,node_ids):
     # same as above
@@ -388,7 +410,7 @@ def check_slice_nodes_n (ns,expected_nodes, is_local_slice, args=[1,2]):
         slice_node_ids=slice['node_ids']
         print 'on nodes ',slice_node_ids
         show_nodes (i,slice_node_ids)
-        assert len(slice_node_ids)>=expected_nodes
+        myassert ('slice nodes',len(slice_node_ids)>=expected_nodes)
 	if len(slice_node_ids) != expected_nodes:
 	    print 'TEMPORARY'
 
@@ -408,7 +430,7 @@ def check_conf_files_n (nn,args=[1,2]):
     for i in args:
         nodename=node_name(i,nn)
         ndict= s[i].GetSlivers([nodename])[0]
-        assert ndict['hostname'] == nodename
+        myassert ('conf files',ndict['hostname'] == nodename)
         conf_files = ndict['conf_files']
         print '%02d: %d conf_files in GetSlivers for node %s'%(i,len(conf_files),nodename)
         for conf_file in conf_files:
@@ -431,15 +453,15 @@ def check_slivers_1 (esn,args=[1,2]):
 def check_slivers_n (nn,esn,args=[1,2]):
     for i in args:
         nodename=node_name(i,nn)
-        ndict= s[i].GetSlivers([nodename])[0]
-        assert ndict['hostname'] == nodename
+        ndict= s[i].GetSlivers(nodename)
+        myassert ('slivers hostname',ndict['hostname'] == nodename)
         slivers = ndict['slivers']
         print '%02d: %d slivers (exp. %d) in GetSlivers for node %s'\
               %(i,len(slivers),esn,nodename)
         for sliver in slivers:
             print '>>slivername = ',sliver['name']
             pretty_printer.pprint(sliver)
-        assert len(slivers) == esn
+        myassert ('slivers count',len(slivers) == esn)
                 
 
 ####################
@@ -467,22 +489,18 @@ def test00_admin_enable (args=[1,2]):
             s[i].AddRoleToPerson('admin',plc[i]['peer-admin-id'])
             print '%02d:== enabled+admin on account %d:%s'%(i,plc[i]['peer-admin-id'],plc[i]['peer-admin-name'])
 
-#def test00_peer_person (args=[1,2]):
-#    global plc
-#    for i in args:
-#        peer=peer_index(i)
-#        email=plc[peer]['peer-admin-name']
-#        try:
-#            p=s[i].GetPersons([email])[0]
-#            plc[i]['peer_person_id']=p['person_id']
-#        except:
-#            person_id = s[i].AddPerson ( {'first_name':'Peering(plain passwd)', 'last_name':plc_name(peer), 'role_ids':[3000],
-#                                               'email':email,'password':plc[peer]['peer-admin-password']})
-#            if person_id:
-#                print '%02d:== Created person %d as the auth peer person'%(i,person_id)
-#            plc[i]['peer_person_id']=person_id
-
 ####################
+def locate_key (filename):
+     " tries to locate a key file, either in . or in /etc/planetlab"
+     try:
+         return file("./"+filename).read()
+     except:
+         try:
+             return file("/etc/planetlab/"+filename).read()
+         except:
+             raise Exception,"Could not locate key %s"%filename
+             
+
 def test00_peer (args=[1,2]):
     global plc
     for i in args:
@@ -492,16 +510,21 @@ def test00_peer (args=[1,2]):
             p=s[i].GetPeers ( [peername])[0]
         except:
             try:
-                keyring=file(plc[peer]['gpg-keyring']).read()
-                cacert=file(plc[peer]['api-cacert']).read()
+                keyringname=plc[i]['gpg-keyring']
+                cacertname=plc[i]['api-cacert']
+                print 'Trying to locate keys for peer on plc[%d]'%i,
+                print 'in %s and %s'%(keyringname,cacertname)
+
+                keyring=locate_key(keyringname)
+                cacert=locate_key(cacertname)
                 peer_id=s[i].AddPeer ( {'peername':peername,
                                         'peer_url':plc[peer]['url'],
                                         'key':keyring,
                                         'cacert': cacert,
                                         })
                 print '%02d:Created peer %d'%(i,peer_id)
-            except:
-                print 'Could not create peer, file not found'
+            except Exception,e:
+                print 'Could not create peer,',e
     
 # push various stuff across hosts through external ssh/scp
 # this is broken, use peers-test.mk instead
@@ -561,7 +584,7 @@ def test00_refresh (message,args=[1,2]):
                 print key,retcod[key],
         print "}"
         print "+++ ellapsed: {",
-        timers=retcod['timers']
+        timers=retcod
         keys=timers.keys()
         keys.sort()
         for key in keys:
@@ -827,10 +850,10 @@ def p_slice(s):
     print "--- 'expires':",s['expires']
 
 def p_sat(sat):
-    print sat['attribute_type_id'],sat['peer_id'], sat['name'], sat['min_role_id'], sat['description']
+    print sat['attribute_type_id'], sat['name'], sat['min_role_id'], sat['description']
 
 def p_sa (sa):
-        print sa['slice_attribute_id'],sa['peer_id'],sa['name'],'AT_id:',sa['attribute_type_id']
+        print sa['slice_attribute_id'],sa['name'],'AT_id:',sa['attribute_type_id']
         print '---','v=',sa['value'],'sl=',sa['slice_id'],'n=',sa['node_id']
 
 import pprint
@@ -867,12 +890,12 @@ def dump (args=[1,2]):
         print '%02d: Slice Attributes'%i
         [p_sa(x) for x in s[i].GetSliceAttributes()]
         timer_show()
-        print '%02d: Gathering all slivers'%i
-        slivers = s[i].GetSlivers()
-        timer_show()
         snodes=min(3,number_nodes)
         print '%02d: SLIVERS for first %d nodes'%(i,snodes)
-        [p_sliver('%02d:'%i,x) for x in s[i].GetSlivers(myrange(snodes))]
+        print 'WARNING - GetSlivers needs fix'
+#        for id in myrange(snodes):
+#            p_sliver('%02d:'%i,s[i].GetSlivers(id))
+
         print '%02d:============================== END DUMP'%i
     
 
@@ -931,10 +954,11 @@ def all():
 ####################
 def test_all_init ():
     message ("INIT")
-    test00_init ()
+    test00_init (builtin_person=True)
     test00_print ()
     test00_admin_person ()
     test00_admin_enable ()
+    test00_init (builtin_person=False)
 # required before we can add peers
 # use make -f peers-test.mk peers instead    
 #    test00_push_public_peer_material()
@@ -1118,7 +1142,7 @@ def populate ():
     message("END")
 
 def populate_end():
-    test00_init()
+    test00_init(builtin_person=False)
     test00_refresh ("Peer 1 for publishing foreign nodes from 2",[1])
     timer_show()
     test04_slice_add_fnode([1])
@@ -1195,6 +1219,7 @@ def main ():
     show_test()
     func()   
     timer_show()
+    epilogue
 
 if __name__ == '__main__':
     normal()
