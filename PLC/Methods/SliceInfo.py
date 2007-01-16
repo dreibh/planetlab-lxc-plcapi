@@ -23,7 +23,7 @@ class SliceInfo(Method):
 
     accepts = [
         Auth(),
-        [Mixed(Slice.fields['slice_name']],
+        [Mixed(Slice.fields['name']],
         Parameter(bool, "Whether or not to return users for the slices", nullok = True)
 	Parameter(bool, "Whether or not to return nodes for the slices", nullok = True)
         ]

@@ -18,7 +18,7 @@ class SliceNodesList(Method):
 
     accepts = [
         Auth(),
-        Slice.fields['slice_name']
+        Slice.fields['name']
         ]
 
     returns = [Node.fields['hostname']]
