@@ -5,10 +5,11 @@ from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.Methods.GetSlices import GetSlices
+from PLC.Methods.GetNodes import GetNodes
 
-class SliceNodesList(GetSlices):
+class SliceNodesList(GetSlices, GetNodes):
     """
-    Deprecated. Can be implemented with GetSlices.
+    Deprecated. Can be implemented with GetSlices and GetNodes.
 
     """
   
@@ -26,8 +27,11 @@ class SliceNodesList(GetSlices):
 
     def call(self, auth, slice_name):
 	slices = GetSlices.call(self, auth, [slice_name])
+	if not slices:
+	    return []
+
 	slice = slices[0]
-	nodes = Nodes(self.api, slice['node_ids'])
+	nodes = GetNodes.call(self, auth, slice['node_ids'])
 	if not nodes:
 	    return []
 	
