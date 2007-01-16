@@ -30,7 +30,7 @@ class BootNotifyOwners(Method):
     def call(self, auth, message_id, include_pis, include_techs, include_support):
         messages = Messages(self.api, [message_id], enabled = True)
         if not messages:
-            print >> log, "No such message template"
+            print >> log, "No such message template '%s'" % message_id
 	    return 1
         message = messages[0]
 	
