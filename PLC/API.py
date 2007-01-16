@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.7 2006/10/30 16:37:11 mlhuang Exp $
+# $Id: API.py,v 1.8 2007/01/05 16:09:09 tmack Exp $
 #
 
 import sys
@@ -83,7 +83,6 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
-from PLC.sendmail import sendmail
 
 class PLCAPI:
     methods = PLC.Methods.methods
@@ -98,9 +97,6 @@ class PLCAPI:
         # Load configuration
         self.config = Config(config)
 	
-	# Initialize mailer
-	self.mailer = sendmail(self.config)
-        
 	# Initialize database connection
         if self.config.PLC_DB_TYPE == "postgresql":
             from PLC.PostgreSQL import PostgreSQL
