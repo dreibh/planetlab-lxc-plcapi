@@ -14,7 +14,7 @@ class AddPerson(Method):
     used, otherwise defaults are used.
 
     Accounts are disabled by default. To enable an account, use
-    SetPersonEnabled() or UpdatePerson().
+    UpdatePerson().
 
     Returns the new person_id (> 0) if successful, faults otherwise.
     """
@@ -33,6 +33,7 @@ class AddPerson(Method):
 
     def call(self, auth, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
+        person_fields['enabled'] = False
         person = Person(self.api, person_fields)
         person.sync()
 
