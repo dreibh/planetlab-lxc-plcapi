@@ -7,7 +7,7 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 from PLC.Methods.UpdateSlice import UpdateSlice 
 
-class SliceRenew(Method):
+class SliceRenew(UpdateSlice):
     """
     Deprecated. See UpdateSlice.    
 
