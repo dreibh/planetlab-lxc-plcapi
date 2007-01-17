@@ -49,6 +49,9 @@ class ResetPassword(Method):
         if person['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local account"
 
+        if not person['enabled']:
+            raise PLCInvalidArgument, "Account must be enabled"
+
         # Be paranoid and deny password resets for admins
         if 'admin' in person['roles']:
             raise PLCInvalidArgument, "Cannot reset admin passwords"
@@ -104,11 +107,11 @@ class ResetPassword(Method):
                       'email': person['email']}
 
             sendmail(self.api,
-                     To = "%s %s <%s>" % (person['first_name'], person['last_name'], person['email']),
-                     Subject = message['subject'],
+                     To = ("%s %s" % (person['first_name'], person['last_name']), person['email']),
+                     Subject = message['subject'] % params,
                      Body = message['template'] % params)
         else:
-            print >> log, "Warning: No message template '%s'" % message-id
+            print >> log, "Warning: No message template '%s'" % message_id
 
 	# Logging variables
         self.object_ids = [person['person_id']]
