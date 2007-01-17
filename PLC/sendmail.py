@@ -1,67 +1,98 @@
 import os
 import sys
+import pprint
 from types import StringTypes
-from subprocess import Popen, PIPE
+from email.MIMEText import MIMEText
+from email.Header import Header
+from smtplib import SMTP
 
 from PLC.Debug import log
 from PLC.Faults import *
 
-def sendmail(api, To, Subject, Body, From = None, Cc = "", Bcc = "", DSN = "never"):
+def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
     """
     Uses sendmail (must be installed and running locally) to send a
     message to the specified recipients. If the API is running under
     mod_python, the apache user must be listed in e.g.,
     /etc/mail/trusted-users.
 
-    If dsn is not 'never' (e.g., 'failure', 'delay', or 'success'),
-    then the current support address (PLC_MAIL_SUPPORT_ADDRESS) will
-    receive any delivery status notification messages.
+    To, Cc, and Bcc may be addresses or lists of addresses. Each
+    address may be either a plain text address or a tuple of (name,
+    address).
     """
 
     # Fix up defaults
+    if not isinstance(To, list):
+        To = [To]
+    if Cc is not None and not isinstance(Cc, list):
+        Cc = [Cc]
+    if Bcc is not None and not isinstance(Bcc, list):
+        Bcc = [Bcc]
     if From is None:
-        From = "%s Support <%s>" % \
-               (api.config.PLC_NAME, api.config.PLC_MAIL_SUPPORT_ADDRESS)
+        From = ("%s Support" % api.config.PLC_NAME,
+                api.config.PLC_MAIL_SUPPORT_ADDRESS)
 
-    header = {'From': From,
-              'version': sys.version.split(" ")[0],
-              'Subject': Subject}
+    # Create a MIME-encoded UTF-8 message
+    msg = MIMEText(Body.encode(api.encoding), _charset = api.encoding)
 
-    # Accept either a string or a list of strings for each of To, Cc, and Bcc
-    for line in 'To', 'Cc', 'Bcc':
-        addresses = locals()[line]
-        if isinstance(addresses, StringTypes):
-            header[line] = addresses
-        else:
-            header[line] = ", ".join(addresses)
+    # Unicode subject headers are automatically encoded correctly
+    msg['Subject'] = Subject
+
+    def encode_addresses(addresses, header_name = None):
+        """
+        Unicode address headers are automatically encoded by
+        email.Header, but not correctly. The correct way is to put the
+        textual name inside quotes and the address inside brackets:
+
+        To: "=?utf-8?b?encoded" <recipient@domain>
+
+        Each address in addrs may be a tuple of (name, address) or
+        just an address. Returns a tuple of (header, addrlist)
+        representing the encoded header text and the list of plain
+        text addresses.
+        """
+
+        header = []
+        addrs = []
+
+        for addr in addresses:
+            if isinstance(addr, tuple):
+                (name, addr) = addr
+                try:
+                    name = name.encode('ascii')
+                    header.append('%s <%s>' % (name, addr))
+                except:
+                    h = Header(name, charset = api.encoding, header_name = header_name)
+                    header.append('"%s" <%s>' % (h.encode(), addr))
+            else:
+                header.append(addr)
+            addrs.append(addr)
+
+        return (", ".join(header), addrs)
+
+    (msg['From'], from_addrs) = encode_addresses([From], 'From')
+    (msg['To'], to_addrs) = encode_addresses(To, 'To')
+
+    if Cc is not None:
+        (msg['Cc'], cc_addrs) = encode_addresses(Cc, 'Cc')
+        to_addrs += cc_addrs
+
+    if Bcc is not None:
+        (unused, bcc_addrs) = encode_addresses(Bcc, 'Bcc')
+        to_addrs += bcc_addrs
+
+    # Needed to pass some spam filters
+    msg['Reply-To'] = msg['From']
+    msg['X-Mailer'] = "Python/" + sys.version.split(" ")[0]
 
     if not api.config.PLC_MAIL_ENABLED:
-        print >> log, "From: %(From)s, To: %(To)s, Subject: %(Subject)s" % header
+        print >> log, "From: %(From)s, To: %(To)s, Subject: %(Subject)s" % msg
         return
 
-    p = Popen(["sendmail", "-N", DSN, "-t", "-f" + api.config.PLC_MAIL_SUPPORT_ADDRESS],
-              stdin = PIPE, stdout = PIPE, stderr = PIPE)
+    s = SMTP()
+    s.connect()
+    rejected = s.sendmail(from_addrs[0], to_addrs, msg.as_string(), rcpt_options = ["NOTIFY=NEVER"])
+    s.close()
 
-    # Write headers
-    p.stdin.write("""
-Content-type: text/plain
-From: %(From)s
-Reply-To: %(From)s
-To: %(To)s
-Cc: %(Cc)s
-Bcc: %(Bcc)s
-X-Mailer: Python/%(version)s
-Subject: %(Subject)s
-
-""".lstrip() % header)
-
-    # Write body
-    p.stdin.write(Body)
-
-    p.stdin.close()
-    err = p.stderr.read()
-    rc = p.wait()
-
-    # Done
-    if rc != 0:
-        raise PLCAPIError, err
+    if rejected:
+        raise PLCAPIError, "Error sending message to " + ", ".join(rejected.keys())
