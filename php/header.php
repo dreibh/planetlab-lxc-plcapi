@@ -8,7 +8,7 @@
 // Mark Huang <mlhuang@cs.princeton.edu>
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
-// $Id: header.php,v 1.2 2006/10/27 15:40:20 mlhuang Exp $
+// $Id: header.php,v 1.3 2006/11/10 06:31:50 mlhuang Exp $
 //
 //
 
@@ -93,8 +93,8 @@ class PLCAPI
       curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 2);
       if (!empty($this->cainfo)) {
 	curl_setopt($curl, CURLOPT_CAINFO, $this->cainfo);
-      } elseif (defined('PLC_API_SSL_CRT')) {
-        curl_setopt($curl, CURLOPT_CAINFO, PLC_API_SSL_CRT);
+      } elseif (defined('PLC_API_CA_SSL_CRT')) {
+        curl_setopt($curl, CURLOPT_CAINFO, PLC_API_CA_SSL_CRT);
       }
       $url = 'https://';
     } else {
