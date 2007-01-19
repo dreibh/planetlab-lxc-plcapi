@@ -85,7 +85,8 @@ class Slice(Row):
     def validate_expires(self, expires):
         # N.B.: Responsibility of the caller to ensure that expires is
         # not too far into the future.
-	return Row.validate_timestamp(self, expires, check_future = True)
+        check_future = not ('is_deleted' in self and self['is_deleted'])
+        return Row.validate_timestamp(self, expires, check_future = check_future)
 
     add_person = Row.add_object(Person, 'slice_person')
     remove_person = Row.remove_object(Person, 'slice_person')
