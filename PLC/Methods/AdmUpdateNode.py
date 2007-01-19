@@ -6,3 +6,5 @@ class AdmUpdateNode(UpdateNode):
     """
 
     status = "deprecated"
+
+    object_type = 'Node'

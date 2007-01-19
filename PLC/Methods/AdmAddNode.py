@@ -16,6 +16,8 @@ class AdmAddNode(AddNode):
 
     status = "deprecated"
 
+    object_type = 'Node'
+
     node_fields = dict(filter(can_update, Node.fields.items()))
 
     accepts = [

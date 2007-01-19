@@ -6,3 +6,5 @@ class AdmRebootNode(RebootNode):
     """
 
     status = "deprecated"
+
+    object_type = 'Node'
