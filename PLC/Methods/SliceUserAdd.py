@@ -24,6 +24,8 @@ class SliceUserAdd(AddPersonToSlice):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
     def call(self, auth, slice_name, user_list):
 
 	for user in user_list:

@@ -26,6 +26,8 @@ class SliceUpdate(UpdateSlice):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
     def call(self, auth, slice_name, url, description):
 
 	slice_fields = {}

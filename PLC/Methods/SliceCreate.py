@@ -17,7 +17,11 @@ class SliceCreate(AddSlice):
         Slice.fields['name'],
         AddSlice.accepts[1]
         ]
+    
+    returns = Parameter(int, 'New slice_id (> 0) if successful')
 
+    object_type = 'Slice'
+    
     def call(self, auth, name, slice_fields = {}):
         slice_fields['name'] = name
         return AddSlice.call(self, auth, slice_fields)

@@ -27,6 +27,8 @@ class UpdateSliceAttribute(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
     def call(self, auth, slice_attribute_id, value):
         slice_attributes = SliceAttributes(self.api, [slice_attribute_id])
         if not slice_attributes:

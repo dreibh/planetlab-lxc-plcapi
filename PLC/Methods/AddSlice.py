@@ -38,6 +38,8 @@ class AddSlice(Method):
 
     returns = Parameter(int, 'New slice_id (> 0) if successful')
 
+    object_type = 'Slice'
+
 
     def call(self, auth, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))

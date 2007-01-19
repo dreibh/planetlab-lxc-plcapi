@@ -25,6 +25,8 @@ class SliceRenew(UpdateSlice):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
     def call(self, auth, slice_name, slice_expires):
 
 	slice_fields = {}

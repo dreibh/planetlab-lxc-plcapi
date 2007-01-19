@@ -39,6 +39,8 @@ class UpdateSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
     def call(self, auth, slice_id_or_name, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 

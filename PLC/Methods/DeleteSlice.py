@@ -25,6 +25,8 @@ class DeleteSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Slice'
+
 
     def call(self, auth, slice_id_or_name):
         slices = Slices(self.api, [slice_id_or_name])
