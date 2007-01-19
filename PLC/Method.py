@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.20 2006/12/20 14:08:40 tmack Exp $
+# $Id: Method.py,v 1.21 2007/01/16 17:04:08 mlhuang Exp $
 #
 
 import xmlrpclib
@@ -147,6 +147,9 @@ class Method:
 	if hasattr(self, 'message'):
             event['message'] = self.message	
 	
+	if hasattr(self, 'object_type'):
+	   event['object_type'] = self.object_type
+
         # Commit
         event.sync()
 
