@@ -25,6 +25,8 @@ class DeleteSliceFromNodes(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Node'
+
 
     def call(self, auth, slice_id_or_name, node_id_or_hostname_list):
         # Get slice information

@@ -32,6 +32,8 @@ class UpdateNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Node'
+
     def call(self, auth, node_id_or_hostname, node_fields):
         node_fields = dict(filter(can_update, node_fields.items()))
 

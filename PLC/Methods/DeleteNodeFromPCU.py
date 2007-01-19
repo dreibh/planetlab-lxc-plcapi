@@ -25,6 +25,8 @@ class DeleteNodeFromPCU(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Node'
+
 
     def call(self, auth, node_id_or_hostname, pcu_id):
 	 # Get node

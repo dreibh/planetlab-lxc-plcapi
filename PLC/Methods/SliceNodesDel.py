@@ -24,6 +24,8 @@ class SliceNodesDel(DeleteSliceFromNodes):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Node'
+
 
     def call(self, auth, slice_name, nodes_list):
 

@@ -24,6 +24,8 @@ class DeleteConfFileFromNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Node'
+
 
     def call(self, auth, conf_file_id, node_id_or_hostname):
 	# Get configuration file
