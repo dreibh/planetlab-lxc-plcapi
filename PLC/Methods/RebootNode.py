@@ -66,5 +66,7 @@ class RebootNode(Method):
         except socket.error, e:
             # Ignore socket errors
             pass
-        
+
+	self.message = "RebootNode called"
+	        
         return 1
