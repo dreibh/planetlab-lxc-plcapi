@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.61 2007/01/11 05:26:34 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.62 2007/01/16 17:03:01 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -753,6 +753,7 @@ CREATE TABLE events (
     fault_code integer NOT NULL DEFAULT 0, -- Did this event result in error
     call_name text NOT NULL, -- Call responsible for this event
     call text NOT NULL, -- Call responsible for this event, including parameters
+    object_type text, -- What type of object is this event affecting
     message text, -- High level description of this event
     runtime float DEFAULT 0, -- Event run time
     time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP -- Event timestamp
