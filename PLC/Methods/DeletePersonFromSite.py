@@ -25,6 +25,8 @@ class DeletePersonFromSite(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
+
+    object_type = 'Site'
     
 
     def call(self, auth, person_id_or_email, site_id_or_login_base):

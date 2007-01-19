@@ -29,6 +29,8 @@ class AddSite(Method):
 
     returns = Parameter(int, 'New site_id (> 0) if successful')
 
+    object_type = 'Site'
+
 
     def call(self, auth, site_fields):
         site_fields = dict(filter(can_update, site_fields.items()))
