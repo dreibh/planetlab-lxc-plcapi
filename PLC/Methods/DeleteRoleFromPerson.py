@@ -27,6 +27,8 @@ class DeleteRoleFromPerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Person'
+
 
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get role

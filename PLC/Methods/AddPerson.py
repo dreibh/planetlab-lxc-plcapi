@@ -30,6 +30,8 @@ class AddPerson(Method):
 
     returns = Parameter(int, 'New person_id (> 0) if successful')
 
+    object_type = 'Person'
+
 
     def call(self, auth, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))

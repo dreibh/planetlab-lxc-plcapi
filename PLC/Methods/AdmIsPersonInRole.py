@@ -29,6 +29,8 @@ class AdmIsPersonInRole(Method):
 
     returns = Parameter(int, "1 if account has role, 0 otherwise")
 
+    object_type = 'Person'
+
     def call(self, auth, person_id_or_email, role_id_or_name):
         # This is a totally fucked up function. I have no idea why it
         # exists or who calls it, but here is how it is supposed to

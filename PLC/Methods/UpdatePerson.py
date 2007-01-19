@@ -33,6 +33,8 @@ class UpdatePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    object_type = 'Person'
+
     def call(self, auth, person_id_or_email, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
 
