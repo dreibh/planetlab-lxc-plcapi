@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Persons import Person, Persons
+from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
 hidden_fields = ['password', 'verification_key', 'verification_expires']
