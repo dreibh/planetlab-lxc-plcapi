@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.63 2007/01/19 17:46:05 tmack Exp $
+-- $Id: planetlab4.sql,v 1.64 2007/01/26 18:55:58 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ CREATE TABLE sites (
     login_base text NOT NULL, -- Site slice prefix
     name text NOT NULL, -- Site name
     abbreviated_name text NOT NULL, -- Site abbreviated name
-    enabled boolean NOT NULL Default false, -- Is this site enabled
+    enabled boolean NOT NULL Default true, -- Is this site enabled
     deleted boolean NOT NULL DEFAULT false, -- Has been deleted
     is_public boolean NOT NULL DEFAULT true, -- Shows up in public lists
     max_slices integer NOT NULL DEFAULT 0, -- Maximum number of slices
