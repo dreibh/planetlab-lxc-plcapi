@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.65 2007/01/26 19:11:41 tmack Exp $
+-- $Id: planetlab4.sql,v 1.66 2007/01/29 20:13:12 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -778,7 +778,7 @@ GROUP BY event_id;
 -- Useful views
 --------------------------------------------------------------------------------
 
-CREATE VIEW view_events AS
+CREATE OR REPLACE VIEW view_events AS
 SELECT
 events.event_id,
 events.person_id,
@@ -792,7 +792,7 @@ CAST(date_part('epoch', events.time) AS bigint) AS time,
 COALESCE((SELECT object_ids FROM event_objects WHERE event_objects.event_id = events.event_id), '{}') AS object_ids
 FROM events;
 
-CREATE VIEW view_persons AS
+CREATE OR REPLACE VIEW view_persons AS
 SELECT
 persons.person_id,
 persons.email,
@@ -819,7 +819,7 @@ COALESCE((SELECT slice_ids FROM person_slices WHERE person_slices.person_id = pe
 FROM persons
 LEFT JOIN peer_person USING (person_id);
 
-CREATE VIEW view_peers AS
+CREATE OR REPLACE VIEW view_peers AS
 SELECT 
 peers.*, 
 COALESCE((SELECT site_ids FROM peer_sites WHERE peer_sites.peer_id = peers.peer_id), '{}') AS site_ids,
@@ -834,7 +834,7 @@ COALESCE((SELECT slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.pe
 COALESCE((SELECT peer_slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.peer_id), '{}') AS peer_slice_ids
 FROM peers;
 
-CREATE VIEW view_nodes AS
+CREATE OR REPLACE VIEW view_nodes AS
 SELECT
 nodes.node_id,
 nodes.hostname,
@@ -861,28 +861,28 @@ FROM nodes
 LEFT JOIN peer_node USING (node_id)
 LEFT JOIN node_session USING (node_id);
 
-CREATE VIEW view_nodegroups AS
+CREATE OR REPLACE VIEW view_nodegroups AS
 SELECT
 nodegroups.*,
 COALESCE((SELECT node_ids FROM nodegroup_nodes WHERE nodegroup_nodes.nodegroup_id = nodegroups.nodegroup_id), '{}') AS node_ids,
 COALESCE((SELECT conf_file_ids FROM nodegroup_conf_files WHERE nodegroup_conf_files.nodegroup_id = nodegroups.nodegroup_id), '{}') AS conf_file_ids
 FROM nodegroups;
 
-CREATE VIEW view_conf_files AS
+CREATE OR REPLACE VIEW view_conf_files AS
 SELECT
 conf_files.*,
 COALESCE((SELECT node_ids FROM conf_file_nodes WHERE conf_file_nodes.conf_file_id = conf_files.conf_file_id), '{}') AS node_ids,
 COALESCE((SELECT nodegroup_ids FROM conf_file_nodegroups WHERE conf_file_nodegroups.conf_file_id = conf_files.conf_file_id), '{}') AS nodegroup_ids
 FROM conf_files;
 
-CREATE VIEW view_pcus AS
+CREATE OR REPLACE VIEW view_pcus AS
 SELECT
 pcus.*,
 COALESCE((SELECT node_ids FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS node_ids,
 COALESCE((SELECT ports FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS ports
 FROM pcus;
 
-CREATE VIEW view_sites AS
+CREATE OR REPLACE VIEW view_sites AS
 SELECT
 sites.site_id,
 sites.login_base,
@@ -908,14 +908,14 @@ COALESCE((SELECT pcu_ids FROM site_pcus WHERE site_pcus.site_id = sites.site_id)
 FROM sites
 LEFT JOIN peer_site USING (site_id);
 
-CREATE VIEW view_addresses AS
+CREATE OR REPLACE VIEW view_addresses AS
 SELECT
 addresses.*,
 COALESCE((SELECT address_type_ids FROM address_address_types WHERE address_address_types.address_id = addresses.address_id), '{}') AS address_type_ids,
 COALESCE((SELECT address_types FROM address_address_types WHERE address_address_types.address_id = addresses.address_id), '{}') AS address_types
 FROM addresses;
 
-CREATE VIEW view_keys AS
+CREATE OR REPLACE VIEW view_keys AS
 SELECT
 keys.*,
 person_key.person_id,
@@ -925,7 +925,7 @@ FROM keys
 LEFT JOIN person_key USING (key_id)
 LEFT JOIN peer_key USING (key_id);
 
-CREATE VIEW view_slices AS
+CREATE OR REPLACE VIEW view_slices AS
 SELECT
 slices.slice_id,
 slices.site_id,
@@ -946,7 +946,7 @@ COALESCE((SELECT slice_attribute_ids FROM slice_attributes WHERE slice_attribute
 FROM slices
 LEFT JOIN peer_slice USING (slice_id);
 
-CREATE VIEW view_slice_attributes AS
+CREATE OR REPLACE VIEW view_slice_attributes AS
 SELECT
 slice_attribute.slice_attribute_id,
 slice_attribute.slice_id,
@@ -959,7 +959,7 @@ slice_attribute.value
 FROM slice_attribute
 INNER JOIN slice_attribute_types USING (attribute_type_id);
 
-CREATE VIEW view_sessions AS
+CREATE OR REPLACE VIEW view_sessions AS
 SELECT
 sessions.session_id,
 CAST(date_part('epoch', sessions.expires) AS bigint) AS expires,
