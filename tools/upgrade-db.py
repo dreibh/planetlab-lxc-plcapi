@@ -152,9 +152,13 @@ def fix_row(row, table_name, table_fields):
 			row[attribute_type_index] = 10016
 		elif row[attribute_type_index] == 10006:
 			row[attribute_type_index] = 10017
+		elif row[attribute_type_index] in [10031, 10033]:
+			row[attribute_type_index] = 10037
+		elif row[attribute_type_index] in [10034, 10035]:
+			row[attribute_type_index] = 10036
 	elif table_name in ['slice_attribute_types']:
 		type_id_index = table_fields.index('attribute_type_id')
-		if row[type_id_index] in [10004, 10006]:
+		if row[type_id_index] in [10004, 10006, 10031, 10033, 10034, 10035]:
 			return None
 	return row
 	
@@ -163,7 +167,7 @@ def fix_table(table, table_name, table_fields):
 		# remove duplicate/redundant primary keys
 		type_id_index = table_fields.index('attribute_type_id')
 		for row in table:
-			if row[type_id_index] in [10004, 10006]:
+			if row[type_id_index] in [10004, 10006, 10031, 10033, 10034, 10035]:
 				table.remove(row)
 	return table
 
@@ -350,6 +354,8 @@ try:
 		# find all created objects
 		if line.startswith("CREATE"):
 			line_parts = line.split(" ")
+			if line_parts[1:3] == ['OR', 'REPLACE']:
+				line_parts = line_parts[2:]
 			item_type = line_parts[1]
 			item_name = line_parts[2]
 			schema_items_ordered.append(item_name)
