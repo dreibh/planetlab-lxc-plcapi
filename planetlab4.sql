@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.64 2007/01/26 18:55:58 tmack Exp $
+-- $Id: planetlab4.sql,v 1.65 2007/01/26 19:11:41 tmack Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -789,9 +789,8 @@ events.call,
 events.message,
 events.runtime,
 CAST(date_part('epoch', events.time) AS bigint) AS time,
-COALESCE(event_objects.object_ids, '{}') AS object_ids
-FROM events
-LEFT JOIN event_objects USING (event_id);
+COALESCE((SELECT object_ids FROM event_objects WHERE event_objects.event_id = events.event_id), '{}') AS object_ids
+FROM events;
 
 CREATE VIEW view_persons AS
 SELECT
@@ -812,37 +811,28 @@ CAST(date_part('epoch', persons.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', persons.last_updated) AS bigint) AS last_updated,
 peer_person.peer_id,
 peer_person.peer_person_id,
-COALESCE(person_roles.role_ids, '{}') AS role_ids,
-COALESCE(person_roles.roles, '{}') AS roles,
-COALESCE(person_sites.site_ids, '{}') AS site_ids,
-COALESCE(person_keys.key_ids, '{}') AS key_ids,
-COALESCE(person_slices.slice_ids, '{}') AS slice_ids
+COALESCE((SELECT role_ids FROM person_roles WHERE person_roles.person_id = persons.person_id), '{}') AS role_ids,
+COALESCE((SELECT roles FROM person_roles WHERE person_roles.person_id = persons.person_id), '{}') AS roles,
+COALESCE((SELECT site_ids FROM person_sites WHERE person_sites.person_id = persons.person_id), '{}') AS site_ids,
+COALESCE((SELECT key_ids FROM person_keys WHERE person_keys.person_id = persons.person_id), '{}') AS key_ids,
+COALESCE((SELECT slice_ids FROM person_slices WHERE person_slices.person_id = persons.person_id), '{}') AS slice_ids
 FROM persons
-LEFT JOIN peer_person USING (person_id)
-LEFT JOIN person_roles USING (person_id)
-LEFT JOIN person_sites USING (person_id)
-LEFT JOIN person_keys USING (person_id)
-LEFT JOIN person_slices USING (person_id);
+LEFT JOIN peer_person USING (person_id);
 
 CREATE VIEW view_peers AS
 SELECT 
 peers.*, 
-COALESCE(peer_sites.site_ids, '{}') AS site_ids,
-COALESCE(peer_sites.peer_site_ids, '{}') AS peer_site_ids,
-COALESCE(peer_persons.person_ids, '{}') AS person_ids,
-COALESCE(peer_persons.peer_person_ids, '{}') AS peer_person_ids,
-COALESCE(peer_keys.key_ids, '{}') AS key_ids,
-COALESCE(peer_keys.peer_key_ids, '{}') AS peer_key_ids,
-COALESCE(peer_nodes.node_ids, '{}') AS node_ids,
-COALESCE(peer_nodes.peer_node_ids, '{}') AS peer_node_ids,
-COALESCE(peer_slices.slice_ids, '{}') AS slice_ids,
-COALESCE(peer_slices.peer_slice_ids, '{}') AS peer_slice_ids
-FROM peers
-LEFT JOIN peer_sites USING (peer_id)
-LEFT JOIN peer_persons USING (peer_id)
-LEFT JOIN peer_keys USING (peer_id)
-LEFT JOIN peer_nodes USING (peer_id)
-LEFT JOIN peer_slices USING (peer_id);
+COALESCE((SELECT site_ids FROM peer_sites WHERE peer_sites.peer_id = peers.peer_id), '{}') AS site_ids,
+COALESCE((SELECT peer_site_ids FROM peer_sites WHERE peer_sites.peer_id = peers.peer_id), '{}') AS peer_site_ids,
+COALESCE((SELECT person_ids FROM peer_persons WHERE peer_persons.peer_id = peers.peer_id), '{}') AS person_ids,
+COALESCE((SELECT peer_person_ids FROM peer_persons WHERE peer_persons.peer_id = peers.peer_id), '{}') AS peer_person_ids,
+COALESCE((SELECT key_ids FROM peer_keys WHERE peer_keys.peer_id = peers.peer_id), '{}') AS key_ids,
+COALESCE((SELECT peer_key_ids FROM peer_keys WHERE peer_keys.peer_id = peers.peer_id), '{}') AS peer_key_ids,
+COALESCE((SELECT node_ids FROM peer_nodes WHERE peer_nodes.peer_id = peers.peer_id), '{}') AS node_ids,
+COALESCE((SELECT peer_node_ids FROM peer_nodes WHERE peer_nodes.peer_id = peers.peer_id), '{}') AS peer_node_ids,
+COALESCE((SELECT slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.peer_id), '{}') AS slice_ids,
+COALESCE((SELECT peer_slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.peer_id), '{}') AS peer_slice_ids
+FROM peers;
 
 CREATE VIEW view_nodes AS
 SELECT
@@ -860,47 +850,37 @@ CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
 peer_node.peer_id,
 peer_node.peer_node_id,
-COALESCE(node_nodenetworks.nodenetwork_ids, '{}') AS nodenetwork_ids,
-COALESCE(node_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids,
-COALESCE(node_slices.slice_ids, '{}') AS slice_ids,
-COALESCE(node_pcus.pcu_ids, '{}') AS pcu_ids,
-COALESCE(node_pcus.ports, '{}') AS ports,
-COALESCE(node_conf_files.conf_file_ids, '{}') AS conf_file_ids,
+COALESCE((SELECT nodenetwork_ids FROM node_nodenetworks WHERE node_nodenetworks.node_id = nodes.node_id), '{}') AS nodenetwork_ids,
+COALESCE((SELECT nodegroup_ids FROM node_nodegroups WHERE node_nodegroups.node_id = nodes.node_id), '{}') AS nodegroup_ids,
+COALESCE((SELECT slice_ids FROM node_slices WHERE node_slices.node_id = nodes.node_id), '{}') AS slice_ids,
+COALESCE((SELECT pcu_ids FROM node_pcus WHERE node_pcus.node_id = nodes.node_id), '{}') AS pcu_ids,
+COALESCE((SELECT ports FROM node_pcus WHERE node_pcus.node_id = nodes.node_id), '{}') AS ports,
+COALESCE((SELECT conf_file_ids FROM node_conf_files WHERE node_conf_files.node_id = nodes.node_id), '{}') AS conf_file_ids,
 node_session.session_id AS session
 FROM nodes
 LEFT JOIN peer_node USING (node_id)
-LEFT JOIN node_nodenetworks USING (node_id)
-LEFT JOIN node_nodegroups USING (node_id)
-LEFT JOIN node_slices USING (node_id)
-LEFT JOIN node_pcus USING (node_id)
-LEFT JOIN node_conf_files USING (node_id)
 LEFT JOIN node_session USING (node_id);
 
 CREATE VIEW view_nodegroups AS
 SELECT
 nodegroups.*,
-COALESCE(nodegroup_nodes.node_ids, '{}') AS node_ids,
-COALESCE(nodegroup_conf_files.conf_file_ids, '{}') AS conf_file_ids
-FROM nodegroups
-LEFT JOIN nodegroup_nodes USING (nodegroup_id)
-LEFT JOIN nodegroup_conf_files USING (nodegroup_id);
+COALESCE((SELECT node_ids FROM nodegroup_nodes WHERE nodegroup_nodes.nodegroup_id = nodegroups.nodegroup_id), '{}') AS node_ids,
+COALESCE((SELECT conf_file_ids FROM nodegroup_conf_files WHERE nodegroup_conf_files.nodegroup_id = nodegroups.nodegroup_id), '{}') AS conf_file_ids
+FROM nodegroups;
 
 CREATE VIEW view_conf_files AS
 SELECT
 conf_files.*,
-COALESCE(conf_file_nodes.node_ids, '{}') AS node_ids,
-COALESCE(conf_file_nodegroups.nodegroup_ids, '{}') AS nodegroup_ids
-FROM conf_files
-LEFT JOIN conf_file_nodes USING (conf_file_id)
-LEFT JOIN conf_file_nodegroups USING (conf_file_id);
+COALESCE((SELECT node_ids FROM conf_file_nodes WHERE conf_file_nodes.conf_file_id = conf_files.conf_file_id), '{}') AS node_ids,
+COALESCE((SELECT nodegroup_ids FROM conf_file_nodegroups WHERE conf_file_nodegroups.conf_file_id = conf_files.conf_file_id), '{}') AS nodegroup_ids
+FROM conf_files;
 
 CREATE VIEW view_pcus AS
 SELECT
 pcus.*,
-COALESCE(pcu_nodes.node_ids, '{}') AS node_ids,
-COALESCE(pcu_nodes.ports, '{}') AS ports
-FROM pcus
-LEFT JOIN pcu_nodes USING (pcu_id);
+COALESCE((SELECT node_ids FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS node_ids,
+COALESCE((SELECT ports FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS ports
+FROM pcus;
 
 CREATE VIEW view_sites AS
 SELECT
@@ -920,26 +900,20 @@ CAST(date_part('epoch', sites.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
 peer_site.peer_id,
 peer_site.peer_site_id,
-COALESCE(site_persons.person_ids, '{}') AS person_ids,
-COALESCE(site_nodes.node_ids, '{}') AS node_ids,
-COALESCE(site_addresses.address_ids, '{}') AS address_ids,
-COALESCE(site_slices.slice_ids, '{}') AS slice_ids,
-COALESCE(site_pcus.pcu_ids, '{}') AS pcu_ids
+COALESCE((SELECT person_ids FROM site_persons WHERE site_persons.site_id = sites.site_id), '{}') AS person_ids,
+COALESCE((SELECT node_ids FROM site_nodes WHERE site_nodes.site_id = sites.site_id), '{}') AS node_ids,
+COALESCE((SELECT address_ids FROM site_addresses WHERE site_addresses.site_id = sites.site_id), '{}') AS address_ids,
+COALESCE((SELECT slice_ids FROM site_slices WHERE site_slices.site_id = sites.site_id), '{}') AS slice_ids,
+COALESCE((SELECT pcu_ids FROM site_pcus WHERE site_pcus.site_id = sites.site_id), '{}') AS pcu_ids
 FROM sites
-LEFT JOIN peer_site USING (site_id)
-LEFT JOIN site_persons USING (site_id)
-LEFT JOIN site_nodes USING (site_id)
-LEFT JOIN site_addresses USING (site_id)
-LEFT JOIN site_slices USING (site_id)
-LEFT JOIN site_pcus USING (site_id);
+LEFT JOIN peer_site USING (site_id);
 
 CREATE VIEW view_addresses AS
 SELECT
 addresses.*,
-COALESCE(address_address_types.address_type_ids, '{}') AS address_type_ids,
-COALESCE(address_address_types.address_types, '{}') AS address_types
-FROM addresses
-LEFT JOIN address_address_types USING (address_id);
+COALESCE((SELECT address_type_ids FROM address_address_types WHERE address_address_types.address_id = addresses.address_id), '{}') AS address_type_ids,
+COALESCE((SELECT address_types FROM address_address_types WHERE address_address_types.address_id = addresses.address_id), '{}') AS address_types
+FROM addresses;
 
 CREATE VIEW view_keys AS
 SELECT
@@ -966,14 +940,11 @@ CAST(date_part('epoch', slices.created) AS bigint) AS created,
 CAST(date_part('epoch', slices.expires) AS bigint) AS expires,
 peer_slice.peer_id,
 peer_slice.peer_slice_id,
-COALESCE(slice_nodes.node_ids, '{}') AS node_ids,
-COALESCE(slice_persons.person_ids, '{}') AS person_ids,
-COALESCE(slice_attributes.slice_attribute_ids, '{}') AS slice_attribute_ids
+COALESCE((SELECT node_ids FROM slice_nodes WHERE slice_nodes.slice_id = slices.slice_id), '{}') AS node_ids,
+COALESCE((SELECT person_ids FROM slice_persons WHERE slice_persons.slice_id = slices.slice_id), '{}') AS person_ids,
+COALESCE((SELECT slice_attribute_ids FROM slice_attributes WHERE slice_attributes.slice_id = slices.slice_id), '{}') AS slice_attribute_ids
 FROM slices
-LEFT JOIN peer_slice USING (slice_id)
-LEFT JOIN slice_nodes USING (slice_id)
-LEFT JOIN slice_persons USING (slice_id)
-LEFT JOIN slice_attributes USING (slice_id);
+LEFT JOIN peer_slice USING (slice_id);
 
 CREATE VIEW view_slice_attributes AS
 SELECT
