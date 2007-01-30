@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.66 2007/01/29 20:13:12 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.67 2007/01/29 20:48:27 mlhuang Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -32,6 +32,7 @@ CREATE AGGREGATE array_accum (
 -- Database version
 CREATE TABLE plc_db_version (
 	version integer NOT NULL 
+-- subversion created on demand by plc.d/db
 ) WITH OIDS;
 
 INSERT INTO plc_db_version (version) VALUES (4);
