@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.11 2007/01/11 05:28:21 mlhuang Exp $
+# $Id: Auth.py,v 1.12 2007/01/30 23:08:58 mlhuang Exp $
 #
 
 import crypt
@@ -215,7 +215,7 @@ class BootAuth(Auth):
                     raise PLCAuthenticationFailure, "Cannot determine IP address of requestor"
 
                 if nodenetwork['ip'] != method.source[0]:
-                    raise PLCAuthenticationFailure, "Requestor IP %s does not mach node IP %s" % \
+                    raise PLCAuthenticationFailure, "Requestor IP %s does not match node IP %s" % \
                           (method.source[0], nodenetwork['ip'])
             else:
                 raise PLCAuthenticationFailure, "No node key or boot nonce"
