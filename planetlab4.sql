@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.67 2007/01/29 20:48:27 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.68 2007/01/30 11:27:12 thierry Exp $
 --
 
 --------------------------------------------------------------------------------
@@ -787,6 +787,7 @@ events.node_id,
 events.fault_code,
 events.call_name,
 events.call,
+events.object_type,
 events.message,
 events.runtime,
 CAST(date_part('epoch', events.time) AS bigint) AS time,
