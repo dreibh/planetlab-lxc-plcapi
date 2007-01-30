@@ -5,16 +5,16 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: setup.py,v 1.6 2007/01/30 11:27:12 thierry Exp $
+# $Id: setup.py,v 1.7 2007/01/30 11:37:02 thierry Exp $
 #
 
 from distutils.core import setup
+from glob import glob
 
 setup(py_modules = ['ModPython'],
       packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system'],
       scripts = ['plcsh', 'Server.py', 'Test.py'],
       data_files = [('', ['planetlab4.sql']),
                     ('php', ['php/plc_api.php']),
-#                    ('migrations', ['migrations/*.sql','migrations/README.txt']),
-                    ('migrations', ['migrations/README.txt']),
+                    ('migrations', ['migrations/README.txt'] + glob('migrations/[0-9][0-9][0-9]*.sql')),
                     ])
