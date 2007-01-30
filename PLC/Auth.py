@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.10 2007/01/04 16:01:28 mlhuang Exp $
+# $Id: Auth.py,v 1.11 2007/01/11 05:28:21 mlhuang Exp $
 #
 
 import crypt
@@ -18,6 +18,7 @@ from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
 from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
+from PLC.Boot import notify_owners
 
 class Auth(Parameter):
     """
@@ -234,7 +235,8 @@ class BootAuth(Auth):
             method.caller = node
 
         except PLCAuthenticationFailure, fault:
-            # XXX Send e-mail
+            if nodes:
+                notify_owners(method, node, 'authfail', include_pis = True, include_techs = True, fault = fault)
             raise fault
 
 class AnonymousAuth(Auth):
