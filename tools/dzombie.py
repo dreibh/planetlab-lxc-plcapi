@@ -37,8 +37,11 @@ try:
 		line = lines[index].strip()
                 # find all created objects
                 if line.startswith("CREATE"):
-                        item_type = line.split(" ")[1].strip()
-                        item_name = line.split(" ")[2].strip()
+ 			line_parts = line.split(" ")
+			if line_parts[1:3] == ['OR', 'REPLACE']:
+				line_parts = line_parts[2:]
+ 			item_type = line_parts[1].strip()
+ 			item_name = line_parts[2].strip()
 			if item_type.upper() in ['TABLE']:
 				while index < len(lines):
 					index = index + 1
