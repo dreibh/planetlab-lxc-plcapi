@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.12 2007/01/30 23:08:58 mlhuang Exp $
+# $Id: Auth.py,v 1.13 2007/01/30 23:09:55 mlhuang Exp $
 #
 
 import crypt
@@ -23,17 +23,36 @@ from PLC.Boot import notify_owners
 class Auth(Parameter):
     """
     Base class for all API authentication methods, as well as a class
-    that can be used to represent Mixed(SessionAuth(), PasswordAuth(),
-    GPGAuth()), i.e. the three principal API authentication methods.
+    that can be used to represent all supported API authentication
+    methods.
     """
 
-    def __init__(self, auth = {}):
+    def __init__(self, auth = None):
+        if auth is None:
+            auth = {'AuthMethod': Parameter(str, "Authentication method to use", optional = False)}
         Parameter.__init__(self, auth, "API authentication structure")
 
     def check(self, method, auth, *args):
-        method.type_check("auth", auth,
-                          Mixed(SessionAuth(), PasswordAuth(), GPGAuth()),
-                          (auth,) + args)
+        # Method.type_check() should have checked that all of the
+        # mandatory fields were present.
+        assert 'AuthMethod' in auth
+
+        if auth['AuthMethod'] == "session":
+            expected = SessionAuth()
+        elif auth['AuthMethod'] == "password" or \
+             auth['AuthMethod'] == "capability":
+            expected = PasswordAuth()
+        elif auth['AuthMethod'] == "gpg":
+            expected = GPGAuth()
+        elif auth['AuthMethod'] == "hmac":
+            expected = BootAuth()
+        elif auth['AuthMethod'] == "anonymous":
+            expected = AnonymousAuth()
+        else:
+            raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', or 'anonymous'", "AuthMethod")
+
+        # Re-check using the specified authentication method
+        method.type_check("auth", auth, expected, (auth,) + args)
 
 class GPGAuth(Auth):
     """
@@ -182,6 +201,9 @@ class BootAuth(Auth):
         # mandatory fields were present.
         assert auth.has_key('node_id')
 
+        if 'node' not in method.roles:
+            raise PLCAuthenticationFailure, "Not allowed to call method"
+
         try:
             nodes = Nodes(method.api, {'node_id': auth['node_id'], 'peer_id': None})
             if not nodes:
@@ -250,8 +272,10 @@ class AnonymousAuth(Auth):
             })
 
     def check(self, method, auth, *args):
-        # Sure, dude, whatever
-        return True
+        if 'anonymous' not in method.roles:
+            raise PLCAuthenticationFailure, "Not allowed to call method anonymously"
+
+        method.caller = None
 
 class PasswordAuth(Auth):
     """
@@ -260,7 +284,7 @@ class PasswordAuth(Auth):
 
     def __init__(self):
         Auth.__init__(self, {
-            'AuthMethod': Parameter(str, "Authentication method to use, typically 'password'", optional = False),
+            'AuthMethod': Parameter(str, "Authentication method to use, always 'password' or 'capability'", optional = False),
             'Username': Parameter(str, "PlanetLab username, typically an e-mail address", optional = False),
             'AuthString': Parameter(str, "Authentication string, typically a password", optional = False),
             })
