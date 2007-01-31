@@ -9,7 +9,7 @@ class AuthCheck(Method):
     """
 
     roles = ['admin', 'pi', 'user', 'tech', 'node']
-    accepts = [Mixed(Auth(), BootAuth())]
+    accepts = [Auth()]
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth):
