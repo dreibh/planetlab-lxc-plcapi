@@ -1,4 +1,5 @@
--- this is mostly sample code
--- since subversion is also created by the migration code in plc.d/db
+-- Add plc_db_version.subversion field
+ALTER TABLE plc_db_version ADD subversion integer NOT NULL DEFAULT 0;
 
-ALTER TABLE plc_db_version ADD subversion integer DEFAULT 0;
+-- Bump subversion
+UPDATE plc_db_version SET subversion = 1;
