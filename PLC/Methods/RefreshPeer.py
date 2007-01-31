@@ -351,7 +351,10 @@ class RefreshPeer(Method):
             if slice['instantiation'] not in slice_instantiations:
                 errors.append("invalid instantiation %s" % slice['instantiation'])
             if slice['creator_person_id'] not in peer_persons:
-                errors.append("invalid creator %d" % slice['creator_person_id'])
+                # Just NULL it out
+                slice['creator_person_id'] = None
+            else:
+                slice['creator_person_id'] = peer_persons[slice['creator_person_id']]['person_id']
             if errors:
                 print >> log, "Warning: Skipping invalid %s slice:" % peer['peername'], \
                       slice, ":", ", ".join(errors)
@@ -359,7 +362,6 @@ class RefreshPeer(Method):
                 continue
             else:
                 slice['site_id'] = peer_sites[slice['site_id']]['site_id']
-                slice['creator_person_id'] = peer_persons[slice['creator_person_id']]['person_id']
 
         # Synchronize new set
         peer_slices = sync(old_peer_slices, slices_at_peer, Slice)
