@@ -145,10 +145,6 @@ def fix_row(row, table_name, table_fields):
 		elif row[bwlimit_index].find('kbit') > -1:
 			row[bwlimit_index] = int(row[bwlimit_index].split('kbit')[0]) \
 					     * 1000
-	elif table_name in ['person_keys']:
-		deleted_index = table_fields.index('deleted')
-		if row[deleted_index] == True:
-			return None
 	elif table_name in ['slice_attribute']:
 		# modify some invalid foreign keys
 		attribute_type_index = table_fields.index('attribute_type_id')
