@@ -9,8 +9,10 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.68 2007/01/30 11:27:12 thierry Exp $
+-- $Id: planetlab4.sql,v 1.69 2007/01/30 23:06:54 mlhuang Exp $
 --
+
+SET client_encoding = 'UNICODE';
 
 --------------------------------------------------------------------------------
 -- Aggregates and store procedures
@@ -31,11 +33,11 @@ CREATE AGGREGATE array_accum (
 
 -- Database version
 CREATE TABLE plc_db_version (
-	version integer NOT NULL 
--- subversion created on demand by plc.d/db
+    version integer NOT NULL,
+    subversion integer NOT NULL DEFAULT 0
 ) WITH OIDS;
 
-INSERT INTO plc_db_version (version) VALUES (4);
+INSERT INTO plc_db_version (version) VALUES (4, 2);
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -518,7 +520,7 @@ CREATE TABLE slices (
 
     max_nodes integer NOT NULL DEFAULT 100, -- Maximum number of nodes that can be assigned to this slice
 
-    creator_person_id integer REFERENCES persons NOT NULL, -- Creator
+    creator_person_id integer REFERENCES persons, -- Creator
     created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Creation date
     expires timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP + '2 weeks', -- Expiration date
 
