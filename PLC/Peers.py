@@ -166,9 +166,10 @@ class Peer(Row):
 
         def wrapper(*args, **kwds):
             from PLC.GPG import gpg_sign
-            signature = gpg_sign(methodname, args,
+            signature = gpg_sign(args,
                                  self.api.config.PLC_ROOT_GPG_KEY,
-                                 self.api.config.PLC_ROOT_GPG_KEY_PUB)
+                                 self.api.config.PLC_ROOT_GPG_KEY_PUB,
+                                 methodname)
 
             auth = {'AuthMethod': "gpg",
                     'name': self.api.config.PLC_NAME,
