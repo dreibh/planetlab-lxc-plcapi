@@ -14,6 +14,82 @@ from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 
+def get_slivers(api, slice_filter, node = None):
+    # Get slice information
+    slices = Slices(api, slice_filter)
+
+    # Build up list of users and slice attributes
+    person_ids = set()
+    slice_attribute_ids = set()
+    for slice in slices:
+        person_ids.update(slice['person_ids'])
+        slice_attribute_ids.update(slice['slice_attribute_ids'])
+
+    # Get user information
+    all_persons = Persons(api, person_ids).dict()
+
+    # Build up list of keys
+    key_ids = set()
+    for person in all_persons.values():
+        key_ids.update(person['key_ids'])
+
+    # Get user account keys
+    all_keys = Keys(api, key_ids).dict()
+
+    # Get slice attributes
+    all_slice_attributes = SliceAttributes(api, slice_attribute_ids).dict()
+
+    slivers = []
+    for slice in slices:
+        keys = []
+        for person_id in slice['person_ids']:
+            if person_id in all_persons:
+                person = all_persons[person_id]
+                if not person['enabled']:
+                    continue
+                for key_id in person['key_ids']:
+                    if key_id in all_keys:
+                        key = all_keys[key_id]
+                        keys += [{'key_type': key['key_type'],
+                                  'key': key['key']}]
+
+        attributes = []
+
+        # All (per-node and global) attributes for this slice
+        slice_attributes = []
+        for slice_attribute_id in slice['slice_attribute_ids']:
+            if slice_attribute_id in all_slice_attributes:
+                slice_attributes.append(all_slice_attributes[slice_attribute_id])
+
+        # Per-node sliver attributes take precedence over global
+        # slice attributes, so set them first.
+        sliver_attributes = []
+
+        if node is not None:
+            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_attributes):
+                sliver_attributes.append(sliver_attribute['name'])
+                attributes.append({'name': sliver_attribute['name'],
+                                   'value': sliver_attribute['value']})
+
+        for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
+            # Do not set any global slice attributes for
+            # which there is at least one sliver attribute
+            # already set.
+            if slice_attribute['name'] not in sliver_attributes:
+                attributes.append({'name': slice_attribute['name'],
+                                   'value': slice_attribute['value']})
+
+        slivers.append({
+            'name': slice['name'],
+            'slice_id': slice['slice_id'],
+            'instantiation': slice['instantiation'],
+            'expires': slice['expires'],
+            'keys': keys,
+            'attributes': attributes
+            })
+
+    return slivers
+
 class GetSlivers(Method):
     """
     Returns a struct containing information about the specified node
@@ -82,34 +158,6 @@ class GetSlivers(Method):
         nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('name')
         groups = nodegroups.keys()
 
-        # Get system slices
-        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
-        system_slice_ids = system_slice_attributes.keys()
-
-        # Get slice information
-        slices = Slices(self.api, system_slice_ids + node['slice_ids'])
-
-        # Build up list of users and slice attributes
-        person_ids = set()
-        slice_attribute_ids = set()
-        for slice in slices:
-            person_ids.update(slice['person_ids'])
-            slice_attribute_ids.update(slice['slice_attribute_ids'])
-
-	# Get user information
-        all_persons = Persons(self.api, person_ids).dict()
-
-        # Build up list of keys
-        key_ids = set()
-        for person in all_persons.values():
-            key_ids.update(person['key_ids'])
-
-        # Get user account keys
-        all_keys = Keys(self.api, key_ids).dict()
-
-        # Get slice attributes
-        all_slice_attributes = SliceAttributes(self.api, slice_attribute_ids).dict()
-        
         # Get all (enabled) configuration files
         all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
         conf_files = {}
@@ -136,53 +184,12 @@ class GetSlivers(Method):
             if conf_file_id in all_conf_files:
                 conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
             
-        slivers = [] 
-        for slice in slices:
-            keys = []
-            for person_id in slice['person_ids']:
-                if person_id in all_persons:
-                    person = all_persons[person_id]
-                    if not person['enabled']:
-                        continue
-                    for key_id in person['key_ids']:
-                        if key_id in all_keys:
-                            key = all_keys[key_id]
-                            keys += [{'key_type': key['key_type'],
-                                      'key': key['key']}]
+        # Get system slices
+        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+        system_slice_ids = system_slice_attributes.keys()
 
-            attributes = []
+        slivers = get_slivers(self.api, system_slice_ids + node['slice_ids'], node)
 
-            # All (per-node and global) attributes for this slice
-            slice_attributes = []
-            for slice_attribute_id in slice['slice_attribute_ids']:
-                if slice_attribute_id in all_slice_attributes:
-                    slice_attributes.append(all_slice_attributes[slice_attribute_id])
-
-            # Per-node sliver attributes take precedence over global
-            # slice attributes, so set them first.
-            sliver_attributes = []
-            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_attributes):
-                sliver_attributes.append(sliver_attribute['name'])
-                attributes.append({'name': sliver_attribute['name'],
-                                   'value': sliver_attribute['value']})
-
-            for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
-                # Do not set any global slice attributes for
-                # which there is at least one sliver attribute
-                # already set.
-                if slice_attribute['name'] not in sliver_attributes:
-                    attributes.append({'name': slice_attribute['name'],
-                                       'value': slice_attribute['value']})
-
-            slivers.append({
-                'name': slice['name'],
-                'slice_id': slice['slice_id'],
-                'instantiation': slice['instantiation'],
-                'expires': slice['expires'],
-                'keys': keys,
-                'attributes': attributes
-                })
-	    
         return {
             'timestamp': timestamp,
             'node_id': node['node_id'],
