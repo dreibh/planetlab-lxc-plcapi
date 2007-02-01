@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Nodes import Node, Nodes
+from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
 class GetNodes(Method):
@@ -16,7 +17,7 @@ class GetNodes(Method):
     Some fields may only be viewed by admins.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node', 'anonymous']
 
     accepts = [
         Auth(),
@@ -34,7 +35,8 @@ class GetNodes(Method):
         nodes = Nodes(self.api, node_filter, return_fields)
 
         # Remove admin only fields
-        if 'admin' not in self.caller['roles']:
+        if not isinstance(self.caller, Person) or \
+           'admin' not in self.caller['roles']:
             for node in nodes:
                 for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
                     if field in node:

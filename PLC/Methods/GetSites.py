@@ -13,7 +13,7 @@ class GetSites(Method):
     specified details will be returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node', 'anonymous']
 
     accepts = [
         Auth(),
@@ -25,6 +25,5 @@ class GetSites(Method):
 
     returns = [Site.fields]
 
-	
     def call(self, auth, site_filter = None, return_fields = None):
         return Sites(self.api, site_filter, return_fields)

@@ -15,7 +15,7 @@ class GetNodeNetworks(Method):
     specified details will be returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node', 'anonymous']
 
     accepts = [
         Auth(),
@@ -26,6 +26,5 @@ class GetNodeNetworks(Method):
 
     returns = [NodeNetwork.fields]
     
-
     def call(self, auth, nodenetwork_filter = None, return_fields = None):
         return NodeNetworks(self.api, nodenetwork_filter, return_fields)

@@ -14,7 +14,7 @@ class GetNodeGroups(Method):
     is specified, only the specified details will be returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node', 'anonymous']
 
     accepts = [
         Auth(),
