@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.13 2007/01/30 23:09:55 mlhuang Exp $
+# $Id: Auth.py,v 1.14 2007/01/31 22:41:00 mlhuang Exp $
 #
 
 import crypt
@@ -92,7 +92,7 @@ class GPGAuth(Auth):
             for key in keys:
                 try:
                     from PLC.GPG import gpg_verify
-                    gpg_verify(method.name, args, auth['signature'], key)
+                    gpg_verify(args, key, auth['signature'], method.name)
                     return
                 except PLCAuthenticationFailure, fault:
                     pass
