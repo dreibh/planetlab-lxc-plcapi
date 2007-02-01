@@ -2,6 +2,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
+from PLC.Persons import Person, Persons
 from PLC.Slices import Slice, Slices
 
 class GetSlices(Method):
@@ -13,12 +14,12 @@ class GetSlices(Method):
     specified details will be returned.
 
     Users may only query slices of which they are members. PIs may
-    query any of the slices at their sites. Admins may query any
-    slice. If a slice that cannot be queried is specified in
+    query any of the slices at their sites. Admins and nodes may query
+    any slice. If a slice that cannot be queried is specified in
     slice_filter, details about that slice will not be returned.
     """
 
-    roles = ['admin', 'pi', 'user']
+    roles = ['admin', 'pi', 'user', 'node']
 
     accepts = [
         Auth(),
@@ -34,7 +35,8 @@ class GetSlices(Method):
     def call(self, auth, slice_filter = None, return_fields = None):
 	# If we are not admin, make sure to return only viewable
 	# slices.
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             # Get slices that we are able to view
             valid_slice_ids = self.caller['slice_ids']
             if 'pi' in self.caller['roles'] and self.caller['site_ids']:
@@ -51,7 +53,8 @@ class GetSlices(Method):
         slices = Slices(self.api, slice_filter, return_fields)
 
         # Filter out slices that are not viewable
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
 
         return slices

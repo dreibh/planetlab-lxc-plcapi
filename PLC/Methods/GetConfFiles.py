@@ -15,7 +15,7 @@ class GetConfFiles(Method):
     details will be returned.
     """
 
-    roles = ['admin']
+    roles = ['admin', 'node']
 
     accepts = [
         Auth(),

@@ -9,7 +9,7 @@ class GetNetworkTypes(Method):
     Returns a list of all valid network types.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth()

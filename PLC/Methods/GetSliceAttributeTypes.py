@@ -14,7 +14,7 @@ class GetSliceAttributeTypes(Method):
     specified, only the specified details will be returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),
@@ -25,7 +25,6 @@ class GetSliceAttributeTypes(Method):
         ]
 
     returns = [SliceAttributeType.fields]
-
 
     def call(self, auth, attribute_type_filter = None, return_fields = None):
         return SliceAttributeTypes(self.api, attribute_type_filter, return_fields)

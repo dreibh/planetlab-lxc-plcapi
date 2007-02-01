@@ -9,7 +9,7 @@ class GetKeyTypes(Method):
     Returns an array of all valid key types.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth()

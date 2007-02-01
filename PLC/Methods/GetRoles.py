@@ -9,7 +9,7 @@ class GetRoles(Method):
     Get an array of structs containing details about all roles.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth()
@@ -17,6 +17,5 @@ class GetRoles(Method):
 
     returns = [Role.fields]
     
-
     def call(self, auth):
 	return Roles(self.api)

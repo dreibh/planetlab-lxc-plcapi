@@ -2,6 +2,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
+from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.Auth import Auth
 
@@ -17,7 +18,7 @@ class GetKeys(Method):
     keys.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),
@@ -33,7 +34,8 @@ class GetKeys(Method):
 	keys = Keys(self.api, key_filter, return_fields)
 
 	# If we are not admin, make sure to only return our own keys       
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             keys = filter(lambda key: key['key_id'] in self.caller['key_ids'], keys)
 
         return keys

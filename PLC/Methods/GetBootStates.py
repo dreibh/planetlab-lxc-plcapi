@@ -9,7 +9,7 @@ class GetBootStates(Method):
     Returns an array of all valid node boot states.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth()

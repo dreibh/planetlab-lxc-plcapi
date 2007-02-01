@@ -2,6 +2,9 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
+from PLC.Sites import Site, Sites
+from PLC.Persons import Person, Persons
+from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
 from PLC.Auth import Auth
 
@@ -17,7 +20,7 @@ class GetPCUs(Method):
     their sites.
     """
 
-    roles = ['admin', 'pi', 'tech']
+    roles = ['admin', 'pi', 'tech', 'node']
 
     accepts = [
         Auth(),
@@ -29,14 +32,18 @@ class GetPCUs(Method):
     returns = [PCU.fields]
 
     def call(self, auth, pcu_filter = None, return_fields = None):
-	# If we are not admin, make sure to only return our own PCUs
-        if 'admin' not in self.caller['roles']:
-            # Get list of PCUs that we are able to view
+	# If we are not admin
+        if not (isinstance(self.caller, Person) and 'admin' in self.caller['roles']):
+            # Return only the PCUs at our site
             valid_pcu_ids = []
-            if self.caller['site_ids']:
-                sites = Sites(self.api, self.caller['site_ids'])
-                for site in sites:
-                    valid_pcu_ids += site['pcu_ids']
+
+            if isinstance(self.caller, Person):
+                site_ids = self.caller['site_ids']
+            elif isinstance(self.caller, Node):
+                site_ids = [self.caller['site_id']]
+
+            for site in Sites(self.api, site_ids):
+                valid_pcu_ids += site['pcu_ids']
 
             if not valid_pcu_ids:
                 return []
@@ -47,7 +54,7 @@ class GetPCUs(Method):
         pcus = PCUs(self.api, pcu_filter, return_fields)
 
         # Filter out PCUs that are not viewable
-        if 'admin' not in self.caller['roles']:
+        if not (isinstance(self.caller, Person) and 'admin' in self.caller['roles']):
             pcus = filter(lambda pcu: pcu['pcu_id'] in valid_pcu_ids, pcus)
 
         return pcus

@@ -18,10 +18,10 @@ class GetPersons(Method):
 
     Users and techs may only retrieve details about themselves. PIs
     may retrieve details about themselves and others at their
-    sites. Admins may retrieve details about all accounts.
+    sites. Admins and nodes may retrieve details about all accounts.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),
@@ -38,7 +38,8 @@ class GetPersons(Method):
     
     def call(self, auth, person_filter = None, return_fields = None):
 	# If we are not admin, make sure to only return viewable accounts
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
             valid_person_ids = [self.caller['person_id']]
             if 'pi' in self.caller['roles'] and self.caller['site_ids']:
@@ -62,7 +63,8 @@ class GetPersons(Method):
         persons = Persons(self.api, person_filter, return_fields)
 
         # Filter out accounts that are not viewable
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             persons = filter(self.caller.can_view, persons)
 
         return persons

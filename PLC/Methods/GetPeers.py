@@ -19,7 +19,7 @@ class GetPeers (Method):
     specified details will be returned.
     """
 
-    roles = ['admin']
+    roles = ['admin', 'node']
 
     accepts = [
         Auth(),

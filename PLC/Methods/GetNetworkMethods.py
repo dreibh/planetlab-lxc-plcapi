@@ -9,7 +9,7 @@ class GetNetworkMethods(Method):
     Returns a list of all valid network methods.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth()

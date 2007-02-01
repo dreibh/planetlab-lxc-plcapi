@@ -15,7 +15,7 @@ class GetAddressTypes(Method):
     returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),

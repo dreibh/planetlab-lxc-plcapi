@@ -9,13 +9,13 @@ class GetMessages(Method):
     """
     Returns an array of structs containing details about message
     templates. If message template_filter is specified and is an array
-    of message template identifiers or hostnames, or a struct of
-    message template attributes, only message templates matching the
-    filter will be returned. If return_fields is specified, only the
-    specified details will be returned.
+    of message template identifiers, or a struct of message template
+    attributes, only message templates matching the filter will be
+    returned. If return_fields is specified, only the specified
+    details will be returned.
     """
 
-    roles = ['admin']
+    roles = ['admin', 'node']
 
     accepts = [
         Auth(),

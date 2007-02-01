@@ -9,7 +9,7 @@ class GetPeerName (Method):
     Returns this peer's name, as defined in the config as PLC_NAME
     """
 
-    roles = ['admin', 'peer']
+    roles = ['admin', 'peer', 'node']
 
     accepts = [Auth()]
 
