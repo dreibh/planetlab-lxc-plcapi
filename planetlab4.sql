@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.69 2007/01/30 23:06:54 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.70 2007/01/31 19:54:42 mlhuang Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -37,7 +37,7 @@ CREATE TABLE plc_db_version (
     subversion integer NOT NULL DEFAULT 0
 ) WITH OIDS;
 
-INSERT INTO plc_db_version (version) VALUES (4, 2);
+INSERT INTO plc_db_version (version, subversion) VALUES (4, 2);
 
 --------------------------------------------------------------------------------
 -- Accounts
