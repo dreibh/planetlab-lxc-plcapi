@@ -26,9 +26,12 @@ Provides: php-xmlrpc
 # documentation generation for now.
 # BuildRequires: docbook-dtds, docbook-utils-pdf
 
-# Necessary to run the API server, but not plcsh as a client. The only
-# supported method of running the server is via MyPLC anyway.
+# PostgreSQL and SOAPpy are necessary to run the API server, but not
+# plcsh. Since the only supported method of running the server is via
+# MyPLC anyway, don't be so stringent about binary requirements, in
+# case people want to install this package just for plcsh.
 # Requires: postgresql-server, SOAPpy
+AutoReqProv: no
 
 %description
 The PLCAPI package provides an XML-RPC and SOAP API for accessing the
