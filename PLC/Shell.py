@@ -5,9 +5,10 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.2 2007/01/10 21:04:40 mlhuang Exp $
+# $Id: Shell.py,v 1.3 2007/01/16 16:25:12 thierry Exp $
 #
 
+import os
 import pydoc
 import xmlrpclib
 
@@ -57,8 +58,12 @@ class Shell:
                  config = None,
                  # XML-RPC server
                  url = None, xmlrpc = False, cacert = None,
-                 # API authentication
-                 method = None, role = None, user = None, password = None):
+                 # API authentication method
+                 method = None,
+                 # Password authentication
+                 role = None, user = None, password = None,
+                 # Session authentication
+                 session = None):
         """
         Initialize a new shell instance. Re-initializes globals.
         """
@@ -114,9 +119,14 @@ class Shell:
 
         # Set up authentication structure
 
-        # Default is to use capability authentication
+        # Default is to use session or capability authentication
         if (method, user, password) == (None, None, None):
-            method = "capability"
+            if session is not None or os.path.exists("/etc/planetlab/session"):
+                method = "session"
+                if session is None:
+                    session = "/etc/planetlab/session"
+            else:
+                method = "capability"
 
         if method == "capability":
             # Load defaults from configuration file if using capability
@@ -133,6 +143,14 @@ class Shell:
 
         if role == "anonymous" or method == "anonymous":
             self.auth = {'AuthMethod': "anonymous"}
+        elif method == "session":
+            if session is None:
+                raise Exception, "Must specify session"
+
+            if os.path.exists(session):
+                session = file(session).read()
+
+            self.auth = {'AuthMethod': "session", 'session': session}
         else:
             if user is None:
                 raise Exception, "Must specify username"
