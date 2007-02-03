@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: slice_attributes.py,v 1.2 2007/02/03 00:43:37 mlhuang Exp $
+# $Id: slice_attributes.py,v 1.3 2007/02/03 21:42:39 mlhuang Exp $
 #
 
 import re
@@ -97,6 +97,17 @@ for slice_attribute in GetSliceAttributes({'name': rename.keys()}):
 
     # Delete the old attribute
     DeleteSliceAttribute(id)
+
+# Update plc_ticket_pubkey attribute
+for slice_attribute in GetSliceAttributes({'name': "plc_ticket_pubkey"}):
+    id = slice_attribute['slice_attribute_id']
+
+    UpdateSliceAttribute(id, """
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDKXa72MEKDAnVyzEpKOB1ot2eW
+xG/TG2aa7q/2oy1xf5XMmU9H9uKwO+GoUeinp1BSxgkVRF0VhEGGaqKR9kYQzX0k
+ht4+P2hAr+UyU4cp0NxV4xfmyAbrNKuHVjawMUCu5BH0IkBUC/89ckxk71oROnak
+FbI7ojUezSGr4aVabQIDAQAB
+""".lstrip())
 
 # Delete _deleted and deprecated slice attributes and types
 for attribute_type in GetSliceAttributeTypes():
