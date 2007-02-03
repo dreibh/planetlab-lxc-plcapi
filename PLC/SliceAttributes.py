@@ -20,8 +20,7 @@ class SliceAttribute(Row):
         'name': SliceAttributeType.fields['name'],
         'description': SliceAttributeType.fields['description'],
         'min_role_id': SliceAttributeType.fields['min_role_id'],
-        # XXX Arbitrary max, make configurable
-        'value': Parameter(str, "Slice attribute value", max = 254),
+        'value': Parameter(str, "Slice attribute value"),
         }
 
 class SliceAttributes(Table):
