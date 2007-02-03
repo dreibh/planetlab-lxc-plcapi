@@ -6,10 +6,11 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: slice_attributes.py,v 1.1 2007/02/02 23:55:31 mlhuang Exp $
+# $Id: slice_attributes.py,v 1.2 2007/02/03 00:43:37 mlhuang Exp $
 #
 
 import re
+import base64
 
 # Convert nm_net_{exempt_,}{min,max}_rate (bps) to
 # net_{i2_,}{min,max}_rate and net_{i2_,}{min,max}_rate (kbps)
@@ -216,5 +217,7 @@ for slice_attribute in GetSliceAttributes({'name': 'plc_initscript'}):
         print "Warning: Missing initscript %d" % initscript_id
         continue
 
+    initscript = base64.b64decode(initscripts[initscript_id]['script'])
+
     # Add as initscript attribute
-    AddSliceAttribute(slice_id, 'initscript', initscripts[initscript_id]['script'])
+    AddSliceAttribute(slice_id, 'initscript', initscript)
