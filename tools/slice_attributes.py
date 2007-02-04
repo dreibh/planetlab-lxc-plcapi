@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: slice_attributes.py,v 1.3 2007/02/03 21:42:39 mlhuang Exp $
+# $Id: slice_attributes.py,v 1.4 2007/02/03 23:33:43 mlhuang Exp $
 #
 
 import re
@@ -232,3 +232,45 @@ for slice_attribute in GetSliceAttributes({'name': 'plc_initscript'}):
 
     # Add as initscript attribute
     AddSliceAttribute(slice_id, 'initscript', initscript)
+
+conf_file_id = AddConfFile({
+    'enabled': True,
+    'source': 'PlanetLabConf/yum.conf.php?gpgcheck=1&alpha',
+    'dest': '/etc/yum.conf',
+    'file_permissions': '644',
+    'file_owner': 'root',
+    'file_group': 'root',
+    'preinstall_cmd': '',
+    'postinstall_cmd': '',
+    'error_cmd': '',
+    'ignore_cmd_errors': False,
+    'always_update': False})
+AddConfFileToNodeGroup(conf_file_id, 'Alpha')
+
+conf_file_id = AddConfFile({
+    'enabled': True,
+    'source': 'PlanetLabConf/yum.conf.php?gpgcheck=1&beta',
+    'dest': '/etc/yum.conf',
+    'file_permissions': '644',
+    'file_owner': 'root',
+    'file_group': 'root',
+    'preinstall_cmd': '',
+    'postinstall_cmd': '',
+    'error_cmd': '',
+    'ignore_cmd_errors': False,
+    'always_update': False})
+AddConfFileToNodeGroup(conf_file_id, 'Beta')
+
+conf_file_id = AddConfFile({
+    'enabled': True,
+    'source': 'PlanetLabConf/yum.conf.php?gpgcheck=1&rollout',
+    'dest': '/etc/yum.conf',
+    'file_permissions': '644',
+    'file_owner': 'root',
+    'file_group': 'root',
+    'preinstall_cmd': '',
+    'postinstall_cmd': '',
+    'error_cmd': '',
+    'ignore_cmd_errors': False,
+    'always_update': False})
+AddConfFileToNodeGroup(conf_file_id, 'Rollout')
