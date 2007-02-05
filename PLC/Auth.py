@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.14 2007/01/31 22:41:00 mlhuang Exp $
+# $Id: Auth.py,v 1.15 2007/02/01 22:28:48 mlhuang Exp $
 #
 
 import crypt
@@ -295,7 +295,7 @@ class PasswordAuth(Auth):
         assert auth.has_key('Username')
 
         # Get record (must be enabled)
-        persons = Persons(method.api, {'email': auth['Username'], 'enabled': True, 'peer_id': None})
+        persons = Persons(method.api, {'email': auth['Username'].lower(), 'enabled': True, 'peer_id': None})
         if len(persons) != 1:
             raise PLCAuthenticationFailure, "No such account"
 
@@ -326,6 +326,6 @@ class PasswordAuth(Auth):
                 raise PLCAuthenticationFailure, "Password verification failed"
 
         if not set(person['roles']).intersection(method.roles):
-            raise PLCAuthenticationFailure, "Not allowed to call method"
+  	    raise PLCAuthenticationFailure, "Not allowed to call method"
 
         method.caller = person
