@@ -123,9 +123,11 @@ peer-push-cacert: peer-push-cacert-1 peer-push-cacert-2
 peer-push-cacert-1:
 	scp $(PLC1SSH):/etc/planetlab/api_ca_ssl.crt ./api_plc1.crt
 	scp ./api_plc1.crt $(PLC2SSH):/etc/planetlab/
+	scp ./api_plc1.crt $(PLC1SSH):/etc/planetlab/
 peer-push-cacert-2:
 	scp $(PLC2SSH):/etc/planetlab/api_ca_ssl.crt ./api_plc2.crt
 	scp ./api_plc2.crt $(PLC1SSH):/etc/planetlab/
+	scp ./api_plc2.crt $(PLC2SSH):/etc/planetlab/
 
 HELP += peers-clean
 peers-clean: peers-clean-1 peers-clean-2
