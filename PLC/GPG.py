@@ -7,7 +7,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: GPG.py,v 1.4 2007/01/10 20:18:52 mlhuang Exp $
+# $Id: GPG.py,v 1.5 2007/02/01 22:28:12 mlhuang Exp $
 #
 
 import os
@@ -55,7 +55,7 @@ def gpg_export(keyring, armor = True):
     if armor:
         args.append("--armor")
 
-    p = Popen(args, stdin = PIPE, stdout = PIPE, stderr = PIPE)
+    p = Popen(args, stdin = PIPE, stdout = PIPE, stderr = PIPE, close_fds = True)
     export = p.stdout.read()
     err = p.stderr.read()
     rc = p.wait()

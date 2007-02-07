@@ -236,7 +236,7 @@ class SliceGetTicket(GetSliceTicket):
         p = Popen(["xmlsec1", "--sign",
                    "--privkey-pem", self.api.config.PLC_API_TICKET_KEY,
                    ticket.name],
-                  stdin = PIPE, stdout = PIPE, stderr = PIPE)
+                  stdin = PIPE, stdout = PIPE, stderr = PIPE, close_fds = True)
         signed_ticket = p.stdout.read()
         err = p.stderr.read()
         rc = p.wait()
