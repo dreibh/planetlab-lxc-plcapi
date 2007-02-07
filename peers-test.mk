@@ -18,7 +18,7 @@ all:help
 ####################
 PUSH=pclean pplc1 papi1 pplc2 papi2
 #EXTRA-PUSHS= ./Shell.py ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh
-EXTRA-PUSHS=  ./TestPeers.py ./planetlab4.sql ./dummy-config ./peers-test.mk ./person-password.sh ./plcsh
+EXTRA-PUSHS=  ./TestPeers.py ./planetlab4.sql ./peers-test.mk ./person-password.sh ./plcsh
 
 push:$(PUSH)
 
