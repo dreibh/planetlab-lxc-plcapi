@@ -217,6 +217,9 @@ class RefreshPeer(Method):
         # Synchronize new set (still keyed on foreign person_id)
         peer_persons = sync(old_peer_persons, persons_at_peer, Person)
 
+	# transcoder : retrieve a local key_id from a peer_key_id
+	key_transcoder = dict ( [ (key['key_id'],key['peer_key_id']) for key in peer_keys.values()])
+
         for peer_person_id, person in peer_persons.iteritems():
             # Bind any newly cached users to peer
             if peer_person_id not in old_peer_persons:
@@ -229,22 +232,20 @@ class RefreshPeer(Method):
             peer_person = persons_at_peer[peer_person_id]
             
             # Foreign keys currently belonging to the user
-            old_person_keys = dict(filter(lambda (peer_key_id, key): \
-                                          key['key_id'] in person['key_ids'],
-                                          peer_keys.items()))
+	    old_person_key_ids = [key_transcoder[key_id] for key_id in person['key_ids']]
 
             # Foreign keys that should belong to the user
-            person_keys = dict(filter(lambda (peer_key_id, key): \
-                                      peer_key_id in peer_person['key_ids'],
-                                      peer_keys.items()))
+	    # this is basically peer_person['key_ids'], we just check it makes sense 
+	    # (e.g. we might have failed importing it)
+	    person_key_ids = [ x for x in peer_person['key_ids'] if x in peer_keys]
 
             # Remove stale keys from user
-            for peer_key_id in (set(old_person_keys.keys()) - set(person_keys.keys())):
-                person.remove_key(old_person_keys[peer_key_id], commit = False)
+	    for peer_key_id in (set(old_person_key_ids) - set(person_key_ids)):
+		person.remove_key(peer_keys[peer_key_id], commit = False)
 
             # Add new keys to user
-            for peer_key_id in (set(person_keys.keys()) - set(old_person_keys.keys())):
-                person.add_key(person_keys[peer_key_id], commit = False)
+	    for peer_key_id in (set(person_key_ids) - set(old_person_key_ids)):
+		person.add_key(peer_keys[peer_key_id], commit = False)
 
         timers['persons'] = time.time() - start
 
@@ -366,6 +367,10 @@ class RefreshPeer(Method):
         # Synchronize new set
         peer_slices = sync(old_peer_slices, slices_at_peer, Slice)
 
+	# transcoder : retrieve a local node_id from a peer_node_id
+	node_transcoder = dict ( [ (node['node_id'],node['peer_node_id']) for node in peer_nodes.values()])
+	person_transcoder = dict ( [ (person['person_id'],person['peer_person_id']) for person in peer_persons.values()])
+
         for peer_slice_id, slice in peer_slices.iteritems():
             # Bind any newly cached foreign slices to peer
             if peer_slice_id not in old_peer_slices:
@@ -379,43 +384,35 @@ class RefreshPeer(Method):
             peer_slice = slices_at_peer[peer_slice_id]
 
             # Nodes that are currently part of the slice
-            old_slice_nodes = dict(filter(lambda (peer_node_id, node): \
-                                          node['node_id'] in slice['node_ids'],
-                                          peer_nodes.items()))
+	    old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids']]
 
             # Nodes that should be part of the slice
-            slice_nodes = dict(filter(lambda (peer_node_id, node): \
-                                      peer_node_id in peer_slice['node_ids'],
-                                      peer_nodes.items()))
+	    slice_node_ids = [ x for x in peer_slice['node_ids'] if x in peer_nodes]
 
             # Remove stale nodes from slice
-            for node_id in (set(old_slice_nodes.keys()) - set(slice_nodes.keys())):
-                slice.remove_node(old_slice_nodes[node_id], commit = False)
+            for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
+                slice.remove_node(peer_nodes[node_id], commit = False)
 
             # Add new nodes to slice
-            for node_id in (set(slice_nodes.keys()) - set(old_slice_nodes.keys())):
-                slice.add_node(slice_nodes[node_id], commit = False)
+            for node_id in (set(slice_node_ids) - set(old_slice_node_ids)):
+                slice.add_node(peer_nodes[node_id], commit = False)
 
             # N.B.: Local nodes that may have been added to the slice
             # by hand, are removed. In other words, don't do this.
 
             # Foreign users that are currently part of the slice
-            old_slice_persons = dict(filter(lambda (peer_person_id, person): \
-                                            person['person_id'] in slice['person_ids'],
-                                            peer_persons.items()))
+	    old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids']]
 
             # Foreign users that should be part of the slice
-            slice_persons = dict(filter(lambda (peer_person_id, person): \
-                                        peer_person_id in peer_slice['person_ids'],
-                                        peer_persons.items()))
+	    slice_person_ids = [ x for x in peer_slice['person_ids'] if x in peer_persons]
 
             # Remove stale users from slice
-            for peer_person_id in (set(old_slice_persons.keys()) - set(slice_persons.keys())):
-                slice.remove_person(old_slice_persons[peer_person_id], commit = False)
+            for peer_person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
+                slice.remove_person(peer_persons[peer_person_id], commit = False)
 
             # Add new users to slice
-            for peer_person_id in (set(slice_persons.keys()) - set(old_slice_persons.keys())):
-                slice.add_person(slice_persons[peer_person_id], commit = False)
+            for peer_person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
+                slice.add_person(peer_persons[peer_person_id], commit = False)
 
             # N.B.: Local users that may have been added to the slice
             # by hand, are not touched.
