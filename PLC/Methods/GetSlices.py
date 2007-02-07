@@ -3,6 +3,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Persons import Person, Persons
+from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 
 class GetSlices(Method):
