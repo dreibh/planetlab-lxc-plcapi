@@ -826,8 +826,8 @@ def test05_sa (args=[1,2]):
     for i in args:
         test05_sa_atom (slice_name(i,1),sat_name(i),'custom sat/all nodes',None,i)
         test05_sa_atom (slice_name(i,1),sat_name(i),'custom sat/node1',node_name(i,1),i)
-        test05_sa_atom (slice_name(i,1),'net_max','predefined sat/all nodes',None,i)
-        test05_sa_atom (slice_name(i,1),'net_max','predefined sat/node1',node_name(i,1),i)
+        test05_sa_atom (slice_name(i,1),'vref','predefined sat/all nodes',None,i)
+        test05_sa_atom (slice_name(i,1),'vref','predefined sat/node1',node_name(i,1),i)
         
 ##############################
 # readable dumps
