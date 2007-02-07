@@ -38,9 +38,6 @@ class RefreshPeer(Method):
     returns = Parameter(int, "1 if successful")
 
     def call(self, auth, peer_id_or_peername):
-
-        start = time.time()
-
         # Get peer
 	peers = Peers(self.api, [peer_id_or_peername])
         if not peers:
@@ -54,15 +51,12 @@ class RefreshPeer(Method):
         timers = {}
 
         # Get peer data
+        start = time.time()
         peer_tables = peer.GetPeerData()
         timers['transport'] = time.time() - start - peer_tables['db_time']
         timers['peer_db'] = peer_tables['db_time']
 
-        now=time.time()
-        timers['prepare'] = now-start-timers['peer_db']-timers['transport']
-        start=now
-
-        def sync(objects, peer_objects, classobj,debug_dict={}):
+        def sync(objects, peer_objects, classobj):
             """
             Synchronizes two dictionaries of objects. objects should
             be a dictionary of local objects keyed on their foreign
@@ -72,32 +66,17 @@ class RefreshPeer(Method):
             keyed on their foreign identifiers.
             """
 
-            for key in ['delete','sync','process','focus','added','deleted','updated','unchanged','synced','screwed']:
-                debug_dict[key]=0
-
             synced = {}
 
-            xstart=time.time()
             # Delete stale objects
             for peer_object_id, object in objects.iteritems():
                 if peer_object_id not in peer_objects:
                     object.delete(commit = False)
                     print classobj, "object %d deleted" % object[object.primary_key]
-                    debug_dict['deleted'] += 1
-
-            xnow=time.time()
-            debug_dict['delete']=xnow-xstart
-            xstart=xnow
 
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
-
-                xnow=time.time()
-                debug_dict['sync'] += (xnow-xstart)
-                xstart=xnow
-
-                #if peer_object_id in objects:
-                if objects.has_key(peer_object_id):
+                if peer_object_id in objects:
                     # Update existing object
                     object = objects[peer_object_id]
 
@@ -114,11 +93,9 @@ class RefreshPeer(Method):
                         object.update(object.db_fields(peer_object))
                         sync = True
                         dbg = "changed"
-                        debug_dict['updated'] += 1
                     else:
                         sync = False
                         dbg = None
-                        debug_dict['unchanged'] += 1
 
                     # Restore foreign identifier
                     peer_object[object.primary_key] = peer_object_id
@@ -129,23 +106,16 @@ class RefreshPeer(Method):
                     del object[object.primary_key]
                     sync = True
                     dbg = "added"
-                    debug_dict['added'] += 1
-
-                xnow=time.time()
-                debug_dict['process'] += (xnow-xstart)
-                xstart=xnow
 
                 if sync:
                     try:
                         object.sync(commit = False)
-                        debug_dict['synced'] += 1
                     except PLCInvalidArgument, err:
                         # Skip if validation fails
                         # XXX Log an event instead of printing to logfile
                         print >> log, "Warning: Skipping invalid", \
                               peer['peername'], object.__class__.__name__, \
                               ":", peer_object, ":", err
-                        debug_dict['screwed'] += 1
                         continue
 
                 synced[peer_object_id] = object
@@ -153,15 +123,13 @@ class RefreshPeer(Method):
                 if dbg:
                     print >> log, peer['peername'], classobj(self.api).__class__.__name__, object[object.primary_key], dbg
 
-            xnow=time.time()
-            debug_dict['sync'] += (xnow-xstart)
-            xstart=xnow
-
             return synced
 
         #
         # Synchronize foreign sites
         #
+
+        start = time.time()
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Sites']:
@@ -183,9 +151,7 @@ class RefreshPeer(Method):
                 site['peer_id'] = peer_id
                 site['peer_site_id'] = peer_site_id
 
-        now=time.time()
-        timers['site'] = now - start
-        start = now
+        timers['site'] = time.time() - start
 
         #
         # XXX Synchronize foreign key types
@@ -197,6 +163,7 @@ class RefreshPeer(Method):
         # Synchronize foreign keys
         #
 
+        start = time.time()
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Keys']:
@@ -233,7 +200,6 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
-        substart = start
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Persons']:
@@ -246,47 +212,18 @@ class RefreshPeer(Method):
         persons_at_peer = dict([(peer_person['person_id'], peer_person) \
                                 for peer_person in peer_tables['Persons']])
 
-        now=time.time()
-        timers [ 'persons-1' ] = now - substart
-        substart=now
-
         # XXX Do we care about membership in foreign site(s)?
 
         # Synchronize new set (still keyed on foreign person_id)
-        yyy={}
-        peer_persons = sync(old_peer_persons, persons_at_peer, Person,yyy)
-        for key in yyy:
-            timers[ 'persons-'+key ] = yyy[key]
-
-        now=time.time()
-        timers [ 'persons-2' ] = now - substart
-        substart=now
-        subsubstart=now
-        
-        for key in ['persons-31','persons-32','persons-33','persons-34','persons-35','persons-36','person3-added']:
-            timers[key]=0
-
-        # allows to retrieve local_key_id from a peer_key_id, if any
-        peer_key_id_from_local_key_id = dict( \
-            [ (key['key_id'],peer_key_id) for (peer_key_id,key) in peer_keys.items()])
+        peer_persons = sync(old_peer_persons, persons_at_peer, Person)
 
         for peer_person_id, person in peer_persons.iteritems():
-
-            now=time.time()
-            timers [ 'persons-36' ] += (now - subsubstart)
-            subsubstart=now
-
             # Bind any newly cached users to peer
             if peer_person_id not in old_peer_persons:
                 peer.add_person(person, peer_person_id, commit = False)
                 person['peer_id'] = peer_id
                 person['peer_person_id'] = peer_person_id
                 person['key_ids'] = []
-                timers['person3-added'] += 1
-
-            now=time.time()
-            timers [ 'persons-31' ] += (now - subsubstart)
-            subsubstart=now
 
             # User as viewed by peer
             peer_person = persons_at_peer[peer_person_id]
@@ -295,53 +232,19 @@ class RefreshPeer(Method):
             old_person_keys = dict(filter(lambda (peer_key_id, key): \
                                           key['key_id'] in person['key_ids'],
                                           peer_keys.items()))
-            print 'old_person_keys',old_person_keys.keys()
-
-            old_person_key_ids_set = set(\
-                [ peer_key_id_from_local_key_id[local_key_id] for local_key_id in person['key_ids']])
-            print 'old_person_keys_set',old_person_key_ids_set
-
-
-            now=time.time()
-            timers [ 'persons-33' ] += (now - subsubstart)
-            subsubstart=now
 
             # Foreign keys that should belong to the user
             person_keys = dict(filter(lambda (peer_key_id, key): \
                                       peer_key_id in peer_person['key_ids'],
                                       peer_keys.items()))
-            print 'person_keys',person_keys.keys()
-
-            person_keys_new = dict( [ (peer_key_id,peer_keys[peer_key_id]) \
-                                  for peer_key_id in peer_person['key_ids'] ])
-            print 'person_keys_new',person_keys_new.keys()
-
-
-            now=time.time()
-            timers [ 'persons-34' ] += (now - subsubstart)
-            subsubstart=now
 
             # Remove stale keys from user
             for peer_key_id in (set(old_person_keys.keys()) - set(person_keys.keys())):
-#            for peer_key_id in (old_person_key_ids_set - set(person_keys.keys())):
                 person.remove_key(old_person_keys[peer_key_id], commit = False)
-
-            now=time.time()
-            timers [ 'persons-35' ] += (now - subsubstart)
-            subsubstart=now
 
             # Add new keys to user
             for peer_key_id in (set(person_keys.keys()) - set(old_person_keys.keys())):
-#            for peer_key_id in (set(person_keys.keys()) - old_person_key_ids_set):
                 person.add_key(person_keys[peer_key_id], commit = False)
-
-            now=time.time()
-            timers [ 'persons-36' ] += (now - subsubstart)
-            subsubstart=now
-
-        now=time.time()
-        timers [ 'persons-3' ] = now - substart
-        substart=now
 
         timers['persons'] = time.time() - start
 
@@ -349,14 +252,13 @@ class RefreshPeer(Method):
         # XXX Synchronize foreign boot states
         #
 
-        start = time.time()
-
         boot_states = BootStates(self.api).dict()
 
         #
         # Synchronize foreign nodes
         #
 
+        start = time.time()
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Nodes']:
@@ -422,13 +324,13 @@ class RefreshPeer(Method):
         # XXX Synchronize foreign slice instantiation states
         #
 
-        start = time.time()
-
         slice_instantiations = SliceInstantiations(self.api).dict()
 
         #
         # Synchronize foreign slices
         #
+
+        start = time.time()
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Slices']:
@@ -519,11 +421,8 @@ class RefreshPeer(Method):
             # by hand, are not touched.
 
         timers['slices'] = time.time() - start
-        start=time.time()
 
         # Update peer itself and commit
         peer.sync(commit = True)
-
-        timers['sync'] = time.time() - start
 
         return timers
