@@ -51,10 +51,22 @@ class GetPCUs(Method):
             if pcu_filter is None:
                 pcu_filter = valid_pcu_ids
 
+        # Must query at least slice_id (see below)
+        if return_fields is not None and 'pcu_id' not in return_fields:
+            return_fields.append('pcu_id')
+            added_fields = True
+        else:
+            added_fields = False
+
         pcus = PCUs(self.api, pcu_filter, return_fields)
 
         # Filter out PCUs that are not viewable
         if not (isinstance(self.caller, Person) and 'admin' in self.caller['roles']):
             pcus = filter(lambda pcu: pcu['pcu_id'] in valid_pcu_ids, pcus)
+
+        # Remove pcu_id if not specified
+        if added_fields:
+            for pcu in pcus:
+                del pcu['pcu_id']
 
         return pcus

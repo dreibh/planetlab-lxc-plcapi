@@ -60,11 +60,25 @@ class GetPersons(Method):
 	else:
 	    return_fields = self.return_fields.keys()
 
+        # Must query at least person_id, site_ids, and role_ids (see
+        # Person.can_view() and below).
+        if return_fields is not None:
+            added_fields = set(['person_id', 'site_ids', 'role_ids']).difference(return_fields)
+            return_fields += added_fields
+        else:
+            added_fields = []
+
         persons = Persons(self.api, person_filter, return_fields)
 
         # Filter out accounts that are not viewable
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
             persons = filter(self.caller.can_view, persons)
+
+        # Remove added fields if not specified
+        if added_fields:
+            for person in persons:
+                for field in added_fields:
+                    del person[field]
 
         return persons

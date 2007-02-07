@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
@@ -23,7 +24,7 @@ class GetSliceAttributes(Method):
     attributes of any slice or sliver.
     """
 
-    roles = ['admin', 'pi', 'user']
+    roles = ['admin', 'pi', 'user', 'node']
 
     accepts = [
         Auth(),
@@ -38,7 +39,8 @@ class GetSliceAttributes(Method):
     def call(self, auth, slice_attribute_filter = None, return_fields = None):
 	# If we are not admin, make sure to only return our own slice
 	# and sliver attributes.
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             # Get slices that we are able to view
             valid_slice_ids = self.caller['slice_ids']
             if 'pi' in self.caller['roles'] and self.caller['site_ids']:
@@ -61,12 +63,25 @@ class GetSliceAttributes(Method):
             if slice_attribute_filter is None:
                 slice_attribute_filter = valid_slice_attribute_ids
 
+        # Must query at least slice_attribute_id (see below)
+        if return_fields is not None and 'slice_attribute_id' not in return_fields:
+            return_fields.append('slice_attribute_id')
+            added_fields = True
+        else:
+            added_fields = False
+
         slice_attributes = SliceAttributes(self.api, slice_attribute_filter, return_fields)
 
         # Filter out slice attributes that are not viewable
-        if 'admin' not in self.caller['roles']:
+        if isinstance(self.caller, Person) and \
+           'admin' not in self.caller['roles']:
             slice_attributes = filter(lambda slice_attribute: \
                                       slice_attribute['slice_attribute_id'] in valid_slice_attribute_ids,
                                       slice_attributes)
+
+        # Remove slice_attribute_id if not specified
+        if added_fields:
+            for slice_attribute in slice_attributes:
+                del slice_attribute['slice_attribute_id']
 
         return slice_attributes

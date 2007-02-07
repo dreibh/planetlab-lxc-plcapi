@@ -31,7 +31,6 @@ class GetSlices(Method):
         ]
 
     returns = [Slice.fields]
-    
 
     def call(self, auth, slice_filter = None, return_fields = None):
 	# If we are not admin, make sure to return only viewable
@@ -51,11 +50,23 @@ class GetSlices(Method):
             if slice_filter is None:
                 slice_filter = valid_slice_ids
 
+        # Must query at least slice_id (see below)
+        if return_fields is not None and 'slice_id' not in return_fields:
+            return_fields.append('slice_id')
+            added_fields = True
+        else:
+            added_fields = False
+
         slices = Slices(self.api, slice_filter, return_fields)
 
         # Filter out slices that are not viewable
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
             slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
+
+        # Remove slice_id if not specified
+        if added_fields:
+            for slice in slices:
+                del slice['slice_id']
 
         return slices
