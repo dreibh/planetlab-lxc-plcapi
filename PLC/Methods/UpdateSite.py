@@ -58,7 +58,8 @@ class UpdateSite(Method):
 
             # Remove admin only fields
             for key in 'max_slices', 'max_slivers', 'login_base':
-                del site_fields[key]
+                if key in site_fields:
+                    del site_fields[key]
 
         site.update(site_fields)
 	site.sync()
