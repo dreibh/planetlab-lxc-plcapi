@@ -22,6 +22,8 @@ class SliceInfo(Method):
     slice_filter, details about that slice will not be returned.
     """
 
+    status = "deprecated"
+
     roles = ['admin', 'pi', 'user']
 
     accepts = [

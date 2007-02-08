@@ -16,6 +16,8 @@ class SliceUserDel(Method):
     Returns 1 if successful, faults otherwise.
     """
 
+    status = "deprecated"
+
     roles = ['admin', 'pi']
 
     accepts = [

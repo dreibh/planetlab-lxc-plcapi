@@ -19,6 +19,8 @@ class SliceUsersList(GetSlices, GetPersons):
     about that slice will not be returned.
     """
 
+    status = "deprecated"
+
     roles = ['admin', 'pi', 'user']
 
     accepts = [
