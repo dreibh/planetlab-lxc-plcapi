@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.3 2007/01/16 16:25:12 thierry Exp $
+# $Id: Shell.py,v 1.4 2007/02/02 04:38:28 mlhuang Exp $
 #
 
 import os
@@ -108,8 +108,8 @@ class Shell:
                       ":" + str(self.config.PLC_API_PORT) + \
                       "/" + self.config.PLC_API_PATH + "/"
 
-            if cacert is None and self.config is not None:
-                cacert = self.config.PLC_API_CA_SSL_CRT
+                if cacert is None:
+                    cacert = self.config.PLC_API_CA_SSL_CRT
 
             self.url = url
             if cacert is not None:
