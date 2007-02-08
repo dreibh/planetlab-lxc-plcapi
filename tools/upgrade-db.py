@@ -201,17 +201,16 @@ def generate_temp_table(table_name, db):
 				if body_line.find(field) > -1 and \
 				   body_line.upper().find("NOT NULL") > -1:
 					not_null_indices.append(table_fields.index(field))
-
 		# get index of primary key
 		primary_key_indices = []
 		for body_line in body_list:
 			if body_line.find("PRIMARY KEY") > -1:
 				primary_key = body_line
 				for field in table_fields:
-					if primary_key.find(field) > -1:
+					if primary_key.find(" "+field+" ") > -1:
 						primary_key_indices.append(table_fields.index(field))
-				break
-
+				#break
+	
                 # get old data
                 get_old_data = "SELECT DISTINCT %s FROM %s" % \
                       (", ".join(old_fields), old_fields[0].split(".")[0])
@@ -351,6 +350,9 @@ try:
 	lines = file.readlines()
 	while index < len(lines):
 		line = lines[index] 
+		if line.find("--") > -1:
+                	line_parts = line.split("--")
+                        line = line_parts[0]
 		# find all created objects
 		if line.startswith("CREATE"):
 			line_parts = line.split(" ")
@@ -369,6 +371,9 @@ try:
 				while index < len(lines):
 					index = index + 1
 					nextline =lines[index]
+					if nextline.find("--") > -1:
+                                                new_line_parts = nextline.split("--")
+                                                nextline = new_line_parts[0]
 					# look for any sequences
 					if item_type in ['TABLE'] and nextline.find('serial') > -1:
 						sequences[item_name] = nextline.strip().split()[0]
@@ -444,9 +449,9 @@ except:
                        " 'ALTER DATABASE %s RENAME TO %s;';  > /dev/null" % \
                        (config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived', config['PLC_DB_NAME'])
 	os.system(undo_command) 
-	remove_temp_tables()
+	#remove_temp_tables()
 	raise
 	
-remove_temp_tables()
+#remove_temp_tables()
 
 print "upgrade complete"
