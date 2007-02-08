@@ -5,7 +5,7 @@ from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field not in ['key_id']
+can_update = lambda (field, value): field in ['key_type','key']
 
 class AddPersonKey(Method):
     """

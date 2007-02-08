@@ -6,7 +6,7 @@ from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field not in \
-             ['nodenetwork_id']
+             ['nodenetwork_id','node_id']
 
 class UpdateNodeNetwork(Method):
     """
