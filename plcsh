@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: plcsh,v 1.4 2007/01/17 22:14:38 mlhuang Exp $
+# $Id: plcsh,v 1.5 2007/02/02 04:39:03 mlhuang Exp $
 #
 
 import os
@@ -22,6 +22,7 @@ parser = OptionParser(add_help_option = False)
 parser.add_option("-f", "--config", help = "PLC configuration file")
 parser.add_option("-h", "--url", help = "API URL")
 parser.add_option("-c", "--cacert", help = "API SSL certificate")
+parser.add_option("-k", "--insecure", help = "Do not check SSL certificate")
 parser.add_option("-m", "--method", help = "API authentication method")
 parser.add_option("-s", "--session", help = "API session key")
 parser.add_option("-u", "--user", help = "API user name")
