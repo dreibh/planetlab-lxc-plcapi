@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.10 2006/11/09 19:34:04 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.11 2006/12/04 19:10:47 mlhuang Exp $
 #
 
 import psycopg2
@@ -51,6 +51,7 @@ if not psycopg2:
 class PostgreSQL:
     def __init__(self, api):
         self.api = api
+        self.debug = False
 
         # Initialize database connection
         if psycopg2:
@@ -140,6 +141,13 @@ class PostgreSQL:
     def execute_array(self, query, param_seq):
         cursor = self.cursor
         try:
+            if self.debug:
+                for params in param_seq:
+                    if params:
+                        print >> log, query % params
+                    else:
+                        print >> log, query
+
             # psycopg2 requires %()s format for all parameters,
             # regardless of type.
             if psycopg2:
@@ -198,6 +206,12 @@ class PostgreSQL:
         Return the names of the fields of the specified table.
         """
 
+        if hasattr(self, 'fields_cache'):
+            if self.fields_cache.has_key((table, notnull, hasdef)):
+                return self.fields_cache[(table, notnull, hasdef)]
+        else:
+            self.fields_cache = {}
+
         sql = "SELECT attname FROM pg_attribute, pg_class" \
               " WHERE pg_class.oid = attrelid" \
               " AND attnum > 0 AND relname = %(table)s"
@@ -210,4 +224,6 @@ class PostgreSQL:
 
         rows = self.selectall(sql, locals(), hashref = False)
 
-        return [row[0] for row in rows]
+        self.fields_cache[(table, notnull, hasdef)] = [row[0] for row in rows]
+
+        return self.fields_cache[(table, notnull, hasdef)]
