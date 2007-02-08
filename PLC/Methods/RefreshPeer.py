@@ -240,12 +240,14 @@ class RefreshPeer(Method):
 	    person_key_ids = [ x for x in peer_person['key_ids'] if x in peer_keys]
 
             # Remove stale keys from user
-	    for peer_key_id in (set(old_person_key_ids) - set(person_key_ids)):
-		person.remove_key(peer_keys[peer_key_id], commit = False)
+	    for key_id in (set(old_person_key_ids) - set(person_key_ids)):
+		person.remove_key(peer_keys[key_id], commit = False)
+		print >> log, peer['peername'], 'Key', key_id, 'removed from', person['email']
 
             # Add new keys to user
-	    for peer_key_id in (set(person_key_ids) - set(old_person_key_ids)):
-		person.add_key(peer_keys[peer_key_id], commit = False)
+	    for key_id in (set(person_key_ids) - set(old_person_key_ids)):
+		person.add_key(peer_keys[key_id], commit = False)
+		print >> log, peer['peername'], 'Key', key_id, 'added into', person['email']
 
         timers['persons'] = time.time() - start
 
@@ -392,10 +394,12 @@ class RefreshPeer(Method):
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
                 slice.remove_node(peer_nodes[node_id], commit = False)
+		print >> log, peer['peername'], 'Node', node_id, 'removed from', slice['name']
 
             # Add new nodes to slice
             for node_id in (set(slice_node_ids) - set(old_slice_node_ids)):
                 slice.add_node(peer_nodes[node_id], commit = False)
+		print >> log, peer['peername'], 'Node', node_id, 'added into', slice['name']
 
             # N.B.: Local nodes that may have been added to the slice
             # by hand, are removed. In other words, don't do this.
@@ -404,15 +408,17 @@ class RefreshPeer(Method):
 	    old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids']]
 
             # Foreign users that should be part of the slice
-	    slice_person_ids = [ x for x in peer_slice['person_ids'] if x in peer_persons]
+	    slice_person_ids = [ x for x in peer_slice['person_ids'] if x in peer_persons ]
 
             # Remove stale users from slice
-            for peer_person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
-                slice.remove_person(peer_persons[peer_person_id], commit = False)
+            for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
+                slice.remove_person(peer_persons[person_id], commit = False)
+		print >> log, peer['peername'], 'User', person_id, 'removed from', slice['name']
 
             # Add new users to slice
-            for peer_person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
-                slice.add_person(peer_persons[peer_person_id], commit = False)
+            for person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
+                slice.add_person(peer_persons[person_id], commit = False)
+		print >> log, peer['peername'], 'User', person_id, 'added into', slice['name']
 
             # N.B.: Local users that may have been added to the slice
             # by hand, are not touched.
