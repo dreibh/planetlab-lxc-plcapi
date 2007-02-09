@@ -219,7 +219,8 @@ class RefreshPeer(Method):
         peer_persons = sync(old_peer_persons, persons_at_peer, Person)
 
 	# transcoder : retrieve a local key_id from a peer_key_id
-	key_transcoder = dict ( [ (key['key_id'],key['peer_key_id']) for key in peer_keys.values()])
+	key_transcoder = dict ( [ (key['key_id'],peer_key_id) \
+				  for peer_key_id,key in peer_keys.iteritems()])
 
         for peer_person_id, person in peer_persons.iteritems():
             # Bind any newly cached users to peer
@@ -372,8 +373,10 @@ class RefreshPeer(Method):
         peer_slices = sync(old_peer_slices, slices_at_peer, Slice)
 
 	# transcoder : retrieve a local node_id from a peer_node_id
-	node_transcoder = dict ( [ (node['node_id'],node['peer_node_id']) for node in peer_nodes.values()])
-	person_transcoder = dict ( [ (person['person_id'],person['peer_person_id']) for person in peer_persons.values()])
+	node_transcoder = dict ( [ (node['node_id'],peer_node_id) \
+				   for peer_node_id,node in peer_nodes.iteritems()])
+	person_transcoder = dict ( [ (person['person_id'],peer_person_id) \
+				     for peer_person_id,person in peer_persons.iteritems()])
 
         for peer_slice_id, slice in peer_slices.iteritems():
             # Bind any newly cached foreign slices to peer
