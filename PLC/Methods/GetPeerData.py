@@ -57,7 +57,8 @@ class GetPeerData(Method):
         # necessary for slice creation on the calling peer's nodes.
 
 	# filter out special person
-	persons = Persons(self.api, {'~email':self.api.config.PLC_API_MAINTENANCE_USER,
+	persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER,
+					       self.api.config.PLC_ROOT_USER],
 				     'peer_id': None}, person_fields)
 
 	# filter out system slices
