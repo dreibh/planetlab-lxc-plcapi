@@ -137,10 +137,10 @@ class Slices(Table):
 
         if expires is not None:
             if expires >= 0:
-                sql += " AND expires > %(expires)d"
+                sql += " AND expires > %d" % expires
             else:
                 expires = -expires
-                sql += " AND expires < %(expires)d"
+                sql += " AND expires < %d" % expires
 
         if slice_filter is not None:
             if isinstance(slice_filter, (list, tuple, set)):
@@ -153,4 +153,4 @@ class Slices(Table):
                 slice_filter = Filter(Slice.fields, slice_filter)
                 sql += " AND (%s)" % slice_filter.sql(api, "AND")
 
-        self.selectall(sql, locals())
+        self.selectall(sql)
