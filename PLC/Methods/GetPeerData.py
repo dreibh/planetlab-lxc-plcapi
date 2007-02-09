@@ -16,6 +16,7 @@ from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.Slices import Slice, Slices
+from PLC.SliceAttributes import SliceAttributes
 
 class GetPeerData(Method):
     """
@@ -54,12 +55,22 @@ class GetPeerData(Method):
 
         # XXX Optimize to return only those Persons, Keys, and Slices
         # necessary for slice creation on the calling peer's nodes.
+
+	# filter out special person
+	persons = Persons(self.api, {'~email':self.api.config.PLC_API_MAINTENANCE_USER,
+				     'peer_id': None}, person_fields)
+
+	# filter out system slices
+        system_slice_ids = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+	slices = Slices(self.api, {'peer_id': None,
+				   '~slice_id':system_slice_ids.keys()})
+	
         result = {
             'Sites': Sites(self.api, {'peer_id': None}),
             'Keys': Keys(self.api, {'peer_id': None}),
             'Nodes': Nodes(self.api, {'peer_id': None}, node_fields),
-            'Persons': Persons(self.api, {'peer_id': None}, person_fields),
-            'Slices': Slices(self.api, {'peer_id': None}),
+            'Persons': persons,
+            'Slices': slices,
             }
 
         if isinstance(self.caller, Peer):
