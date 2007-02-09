@@ -72,7 +72,7 @@ class RefreshPeer(Method):
             for peer_object_id, object in objects.iteritems():
                 if peer_object_id not in peer_objects:
                     object.delete(commit = False)
-                    print classobj, "object %d deleted" % object[object.primary_key]
+                    print classobj(self.api).__class__.__name__, "object %s deleted" % object[object.class_key]
 
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
@@ -233,12 +233,13 @@ class RefreshPeer(Method):
             peer_person = persons_at_peer[peer_person_id]
             
             # Foreign keys currently belonging to the user
-	    old_person_key_ids = [key_transcoder[key_id] for key_id in person['key_ids']]
+	    old_person_key_ids = [key_transcoder[key_id] for key_id in person['key_ids'] \
+				  if key_transcoder[key_id] in peer_keys]
 
             # Foreign keys that should belong to the user
 	    # this is basically peer_person['key_ids'], we just check it makes sense 
 	    # (e.g. we might have failed importing it)
-	    person_key_ids = [ x for x in peer_person['key_ids'] if x in peer_keys]
+	    person_key_ids = [ key_id for key_id in peer_person['key_ids'] if key_id in peer_keys]
 
             # Remove stale keys from user
 	    for key_id in (set(old_person_key_ids) - set(person_key_ids)):
@@ -387,10 +388,11 @@ class RefreshPeer(Method):
             peer_slice = slices_at_peer[peer_slice_id]
 
             # Nodes that are currently part of the slice
-	    old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids']]
+	    old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids'] \
+				   if node_transcoder[node_id] in peer_nodes]
 
             # Nodes that should be part of the slice
-	    slice_node_ids = [ x for x in peer_slice['node_ids'] if x in peer_nodes]
+	    slice_node_ids = [ node_id for node_id in peer_slice['node_ids'] if node_id in peer_nodes]
 
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
@@ -406,10 +408,11 @@ class RefreshPeer(Method):
             # by hand, are removed. In other words, don't do this.
 
             # Foreign users that are currently part of the slice
-	    old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids']]
+	    old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids'] \
+				     if person_transcoder[person_id] in peer_persons]
 
             # Foreign users that should be part of the slice
-	    slice_person_ids = [ x for x in peer_slice['person_ids'] if x in peer_persons ]
+	    slice_person_ids = [ person_id for person_id in peer_slice['person_ids'] if person_id in peer_persons ]
 
             # Remove stale users from slice
             for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
