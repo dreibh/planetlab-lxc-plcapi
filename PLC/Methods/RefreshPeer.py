@@ -121,7 +121,8 @@ class RefreshPeer(Method):
                 synced[peer_object_id] = object
 
                 if dbg:
-                    print >> log, peer['peername'], classobj(self.api).__class__.__name__, object[object.primary_key], dbg
+                    print >> log, peer['peername'], classobj(self.api).__class__.__name__, \
+			object[object.class_key], object[object.primary_key], dbg
 
             return synced
 
@@ -394,12 +395,12 @@ class RefreshPeer(Method):
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
                 slice.remove_node(peer_nodes[node_id], commit = False)
-		print >> log, peer['peername'], 'Node', node_id, 'removed from', slice['name']
+		print >> log, peer['peername'], 'Node', peer_nodes[node_id]['hostname'], 'removed from', slice['name']
 
             # Add new nodes to slice
             for node_id in (set(slice_node_ids) - set(old_slice_node_ids)):
                 slice.add_node(peer_nodes[node_id], commit = False)
-		print >> log, peer['peername'], 'Node', node_id, 'added into', slice['name']
+		print >> log, peer['peername'], 'Node', peer_nodes[node_id]['hostname'], 'added into', slice['name']
 
             # N.B.: Local nodes that may have been added to the slice
             # by hand, are removed. In other words, don't do this.
@@ -413,12 +414,12 @@ class RefreshPeer(Method):
             # Remove stale users from slice
             for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
                 slice.remove_person(peer_persons[person_id], commit = False)
-		print >> log, peer['peername'], 'User', person_id, 'removed from', slice['name']
+		print >> log, peer['peername'], 'User', peer_persons[person_id]['email'], 'removed from', slice['name']
 
             # Add new users to slice
             for person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
                 slice.add_person(peer_persons[person_id], commit = False)
-		print >> log, peer['peername'], 'User', person_id, 'added into', slice['name']
+		print >> log, peer['peername'], 'User', peer_persons[person_id]['email'], 'added into', slice['name']
 
             # N.B.: Local users that may have been added to the slice
             # by hand, are not touched.
