@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.15 2007/02/01 22:28:48 mlhuang Exp $
+# $Id: Auth.py,v 1.16 2007/02/05 19:20:38 tmack Exp $
 #
 
 import crypt
@@ -16,6 +16,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
+from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Boot import notify_owners
