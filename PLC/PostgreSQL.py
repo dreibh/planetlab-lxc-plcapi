@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.11 2006/12/04 19:10:47 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.12 2007/02/08 15:15:21 mlhuang Exp $
 #
 
 import psycopg2
@@ -153,7 +153,13 @@ class PostgreSQL:
             if psycopg2:
                 query = re.sub(r'(%\([^)]*\)|%)[df]', r'\1s', query)
 
-            cursor.executemany(query, param_seq)
+            try:
+                cursor.executemany(query, param_seq)
+            except InterfaceError:
+                # Try one more time with another cursor
+                cursor = self.cursor = self.db.cursor()
+                cursor.executemany(query, param_seq)
+
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
         except Exception, e:
