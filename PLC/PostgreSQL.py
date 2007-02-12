@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.13 2007/02/11 04:53:40 mlhuang Exp $
+# $Id: PostgreSQL.py,v 1.14 2007/02/11 18:34:06 mlhuang Exp $
 #
 
 import psycopg2
@@ -130,7 +130,8 @@ class PostgreSQL:
         self.connection.rollback()
 
     def do(self, query, params = None):
-        self.execute(query, params)
+        cursor = self.execute(query, params)
+        cursor.close()
         return self.rowcount
 
     def last_insert_id(self, table_name, primary_key):
@@ -194,7 +195,9 @@ class PostgreSQL:
         to the query.
         """
 
-        rows = self.execute(query, params).fetchall()
+        cursor = self.execute(query, params)
+        rows = cursor.fetchall()
+        cursor.close()
 
         if hashref or key_field is not None:
             # Return each row as a dictionary keyed on field name
