@@ -25,7 +25,7 @@ class AdmGetPersonKeys(GetKeys):
 
     returns = [Key.fields]
 
-    def call(auth, person_id_or_email):
+    def call(self, auth, person_id_or_email):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
