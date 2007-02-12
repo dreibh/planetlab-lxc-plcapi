@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: ModPython.py,v 1.3 2006/10/30 16:39:24 mlhuang Exp $
+# $Id: ModPython.py,v 1.4 2007/01/11 22:05:15 mlhuang Exp $
 #
 
 import sys
@@ -44,6 +44,10 @@ def handler(req):
 
         # Handle request
         response = api.handle(remote_addr, request)
+
+        # Shut down database connection, otherwise up to MaxClients DB
+        # connections will remain open.
+        api.db.close()
 
         # Write response
         req.content_type = "text/xml; charset=" + api.encoding
