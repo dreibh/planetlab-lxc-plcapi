@@ -67,14 +67,34 @@ class VerifyPerson(Method):
         # Base64 encode their string representation
         random_key = base64.b64encode("".join(map(chr, bytes)))
 
-        if verification_key is not None:
+        if verification_key is None or \
+	(verification_key is not None and person['verification_expires'] and \
+	person['verification_expires'] < time.time()):
+	    # Only allow one verification at a time
+            if person['verification_expires'] is not None and \
+               person['verification_expires'] > time.time():
+                raise PLCPermissionDenied, "Verification request already pending"
+
+            if verification_expires is None:
+                verification_expires = int(time.time() + (24 * 60 * 60))
+
+            person['verification_key'] = random_key
+            person['verification_expires'] = verification_expires
+            person.sync()
+
+            # Send e-mail to user
+            To = ("%s %s" % (person['first_name'], person['last_name']), person['email'])
+            Cc = None
+
+            message_id = 'Verify account'
+
+
+	elif verification_key is not None:
             if person['verification_key'] is None or \
-               person['verification_expires'] is None or \
-               person['verification_expires'] < time.time():
-                person.delete()
-                raise PLCPermissionDenied, "Verification key has expired. Please re-register."
+               person['verification_expires'] is None:
+                raise PLCPermissionDenied, "Invalid Verification key"
             elif person['verification_key'] != verification_key:
-                raise PLCPermissionDenied, "Verification key incorrect"
+		raise PLCPermissionDenied, "Verification key incorrect"
             else:
                 person['verification_key'] = None
                 person['verification_expires'] = None
@@ -98,24 +118,6 @@ class VerifyPerson(Method):
                     message_id = 'New PI account'
                 else:
                     message_id = 'New account'
-        else:
-            # Only allow one verification at a time
-            if person['verification_expires'] is not None and \
-               person['verification_expires'] > time.time():
-                raise PLCPermissionDenied, "Verification request already pending"
-
-            if verification_expires is None:
-                verification_expires = int(time.time() + (24 * 60 * 60))
-
-            person['verification_key'] = random_key
-            person['verification_expires'] = verification_expires
-            person.sync()
-
-            # Send e-mail to user
-            To = ("%s %s" % (person['first_name'], person['last_name']), person['email'])
-            Cc = None
-
-            message_id = 'Verify account'
 
         messages = Messages(self.api, [message_id])
         if messages:
@@ -146,5 +148,9 @@ class VerifyPerson(Method):
 	# Logging variables
         self.object_ids = [person['person_id']]
         self.message = message_id
+	
+	if verification_key is not None and person['verification_expires'] and \
+        person['verification_expires'] < time.time():
+	    raise PLCPermissionDenied, "Verification key has expired. Another email has been sent."
 
         return 1
