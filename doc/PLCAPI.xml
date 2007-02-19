@@ -7,11 +7,220 @@
 <book>
   <bookinfo>
     <title>PlanetLab Central API Documentation</title>
-    <authorgroup>
-      <author><firstname>Aaron</firstname><surname>Klingaman</surname></author>
-      <author><firstname>Mark</firstname><surname>Huang</surname></author>
-    </authorgroup>
   </bookinfo>
+
+  <chapter id="Introduction">
+    <title>Introduction</title>
+
+    <para>The PlanetLab Central API (PLCAPI) is the interface through
+    which the PlanetLab Central database should be accessed and
+    maintained. The API is used by the website, by nodes, by automated
+    scripts, and by users to access and update information about
+    users, nodes, sites, slices, and other entities maintained by the
+    database.</para>
+
+    <section id="Authentication">
+      <title>Authentication</title>
+
+      <para>The API should be accessed via XML-RPC over HTTPS. The API
+      supports the standard introspection calls <link
+      linkend="system.listMethods">system.listMethods</link>, <link
+      linkend="system.methodSignature">system.methodSignature</link>,
+      and <link linkend="system.methodHelp">system.methodHelp</link>,
+      and the standard batching call <link
+      linkend="system.multicall">system.multicall</link>. With the
+      exception of these calls, all PLCAPI calls take an
+      authentication structure as their first argument. All
+      authentication structures require the specification of
+      <parameter>AuthMethod</parameter>. If the documentation for a
+      call does not further specify the authentication structure, then
+      any of (but only) the following authentication structures may be
+      used:</para>
+
+      <itemizedlist>
+	<listitem>
+	  <para>Session authentication. User sessions are typically
+	  valid for 24 hours. Node sessions are valid until the next
+	  reboot. Obtain a session key with <link
+	  linkend="GetSession">GetSession</link> using another form of
+	  authentication, such as password or GnuPG
+	  authentication.</para>
+	  <informaltable frame="none" rules="rows">
+	    <tgroup cols="3">
+	      <tbody>
+		<row><entry>AuthMethod</entry><entry><literal>session</literal></entry></row>
+		<row><entry>session</entry><entry>Session key</entry></row>
+	      </tbody>
+	    </tgroup>
+	  </informaltable>
+	</listitem>
+	<listitem>
+	  <para>Password authentication.</para>
+	  <informaltable frame="none" rules="rows">
+	    <tgroup cols="3">
+	      <tbody>
+		<row><entry>AuthMethod</entry><entry><literal>password</literal></entry></row>
+		<row><entry>Username</entry><entry>Username, typically an e-mail address</entry></row>
+		<row><entry>AuthString</entry><entry>Authentication string, typically a password</entry></row>
+	      </tbody>
+	    </tgroup>
+	  </informaltable>
+	</listitem>
+	<listitem>
+	  <para>GnuPG authentication. Users may upload a GPG public key
+	  using <link linkend="AddPersonKey">AddPersonKey</link>. Peer
+	  GPG keys should be added with <link
+	  linkend="AddPeer">AddPeer</link> or <link
+	  linkend="UpdatePeer">UpdatePeer</link>.
+	  </para>
+	  <informaltable frame="none" rules="rows">
+	    <tgroup cols="3">
+	      <tbody>
+		<row><entry>AuthMethod</entry><entry><literal>gpg</literal></entry></row>
+		<row><entry>name</entry><entry>Peer or user name</entry></row>
+		<row><entry>signature</entry><entry>GnuPG signature of
+		the <ulink
+		url="http://www.w3.org/TR/xml-c14n">canonicalized</ulink>
+		<ulink url="http://www.xmlrpc.com/spec">XML-RPC</ulink>
+		representation of the rest of the arguments to the
+		call.</entry></row>
+	      </tbody>
+	    </tgroup>
+	  </informaltable>
+	</listitem>
+	<listitem>
+	  <para>Anonymous authentication.</para>
+	  <informaltable frame="none" rules="rows">
+	    <tgroup cols="3">
+	      <tbody>
+		<row><entry>AuthMethod</entry><entry><literal>anonymous</literal></entry></row>
+	      </tbody>
+	    </tgroup>
+	  </informaltable>
+	</listitem>
+      </itemizedlist>
+    </section>
+
+    <section id="Roles">
+      <title>Roles</title>
+
+      <para>Some functions may only be called by users with certain
+      roles (see <link linkend="GetRoles">GetRoles</link>), and others
+      may return different information to different callers depending
+      on the role(s) of the caller.</para>
+
+      <para>The <literal>node</literal> and
+      <literal>anonymous</literal> roles are pseudo-roles. A function
+      that allows the <literal>node</literal> role may be called by
+      automated scripts running on a node, such as the Boot and Node
+      Managers. A function that allows the
+      <literal>anonymous</literal> role may be called by anyone; an
+      API authentication structure must still be specified (see <xref
+      linkend="Authentication"/>).</para>
+    </section>
+
+    <section id="Filters">
+      <title>Filters</title>
+
+      <para>Most of the <function>Get</function> functions take a
+      filter argument. Filters may be arrays of integer (and sometimes
+      string) identifiers, or a struct representing a filter on the
+      attributes of the entities being queried. For example,</para>
+
+<programlisting>
+# plcsh code fragment (see below)
+GetNodes([1,2,3])
+GetNodes({'node_id': [1,2,3]})
+GetNodes({'node_id': 1}) + GetNodes({'node_id': 2}) + GetNodes({'node_id': 3})
+</programlisting>
+
+      <para>Would all be equivalent queries. Attributes that are
+      themselves arrays (such as <literal>nodenetwork_ids</literal>
+      and <literal>slice_ids</literal> for nodes) cannot be used in
+      filters.</para>
+    </section>
+
+    <section>
+      <title>PlanetLab shell</title>
+
+      <para>A command-line program called <command>plcsh</command>
+      simplifies authentication structure handling, and is useful for
+      scripting. This program is distributed as a Linux RPM called
+      PLCAPI and requires Python &ge;2.4.</para>
+
+      <programlisting>
+usage: plcsh [options]
+
+options:
+  -f CONFIG, --config=CONFIG
+                        PLC configuration file
+  -h URL, --url=URL     API URL
+  -c CACERT, --cacert=CACERT
+                        API SSL certificate
+  -k INSECURE, --insecure=INSECURE
+                        Do not check SSL certificate
+  -m METHOD, --method=METHOD
+                        API authentication method
+  -s SESSION, --session=SESSION
+                        API session key
+  -u USER, --user=USER  API user name
+  -p PASSWORD, --password=PASSWORD
+                        API password
+  -r ROLE, --role=ROLE  API role
+  -x, --xmlrpc          Use XML-RPC interface
+  --help                show this help message and exit
+      </programlisting>
+
+      <para>Specify at least the API URL and your user name:</para>
+
+      <programlisting>
+plcsh --url https://www.planet-lab.org/PLCAPI/ -u user@site.edu
+      </programlisting>
+
+      <para>You will be presented with a prompt. From here, you can
+      invoke API calls and omit the authentication structure, as it will
+      be filled in automatically.</para>
+
+      <programlisting>
+user@site.edu connected using password authentication
+Type "system.listMethods()" or "help(method)" for more information.
+[user@site.edu]>>> AuthCheck()
+1
+[user@site.edu]>>> GetNodes([121], ['node_id', 'hostname'])
+[{'node_id': 121, 'hostname': 'planetlab-1.cs.princeton.edu'}]
+      </programlisting>
+
+      <para>As this program is actually a Python interpreter, you may
+      create variables, execute for loops, import other packages, etc.,
+      directly on the command line as you would using the regular Python
+      shell.</para>
+
+      <para>To use <command>plcsh</command> programmatically, import
+      the <function>PLC.Shell</function> module:</para>
+
+      <programlisting>
+#!/usr/bin/python
+
+import sys
+
+# Default location that the PLCAPI RPM installs the PLC class
+sys.path.append('/usr/share/plc_api')
+
+# Initialize shell environment. Shell() will define all PLCAPI methods
+# in the specified namespace (specifying globals() will define them
+# globally).
+from PLC.Shell import Shell
+plc = Shell(globals(),
+            url = "https://www.planet-lab.org/PLCAPI/",
+            user = "user@site.edu",
+            password = "password")
+
+# Both are equivalent
+nodes = GetNodes([121], ['node_id', 'hostname'])
+nodes = plc.GetNodes([121], ['node_id', 'hostname'])
+      </programlisting>
+    </section>
+  </chapter>
 
   <chapter id="Methods">
     <title>PlanetLab API Methods</title>
@@ -21,3 +230,10 @@
   </chapter>
 
 </book>
+
+<!-- LocalWords:  PlanetLab API PLCAPI RPC HTTPS listMethods methodSignature
+-->
+<!-- LocalWords:  methodHelp multicall AuthMethod GetSession GnuPG Username GPG
+-->
+<!-- LocalWords:  AuthString AddPersonKey AddPeer UpdatePeer gpg
+-->
