@@ -43,6 +43,7 @@ class Site(Row):
         'node_ids': Parameter([int], "List of site node identifiers"),
         'peer_id': Parameter(int, "Peer to which this site belongs", nullok = True),
         'peer_site_id': Parameter(int, "Foreign site identifier at peer", nullok = True),
+	'ext_consortium_id': Parameter(int, "external consortium id", nullok = True)
         }
 
     # for Cache
