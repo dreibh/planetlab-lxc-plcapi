@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.70 2007/01/31 19:54:42 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.71 2007/02/01 23:05:59 mlhuang Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -91,6 +91,7 @@ CREATE TABLE sites (
     latitude real,
     longitude real,
     url text,
+    ext_consortium_id integer,	-- external consortium id     
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -900,6 +901,7 @@ sites.max_slivers,
 sites.latitude,
 sites.longitude,
 sites.url,
+sites.ext_consortium_id,
 CAST(date_part('epoch', sites.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', sites.last_updated) AS bigint) AS last_updated,
 peer_site.peer_id,
