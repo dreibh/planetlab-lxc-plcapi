@@ -40,7 +40,8 @@ class UpdateNode(Method):
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
             for key in 'key', 'session', 'boot_nonce':
-                del node_fields[key]
+                if node_fields.has_key(key):
+                    del node_fields[key]
 
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
