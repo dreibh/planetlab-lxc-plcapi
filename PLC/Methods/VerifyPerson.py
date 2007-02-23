@@ -105,7 +105,7 @@ class VerifyPerson(Method):
                 for site in person_sites:
                     person_ids.update(site['person_ids'])
                 persons = Persons(self.api, person_ids)
-                pis = filter(lambda person: 'pi' in person['roles'], persons)
+                pis = filter(lambda person: 'pi' in person['roles'] and person['enabled'], persons)
 
                 # Send e-mail to PI(s) and copy the user
                 To = [("%s %s" % (pi['first_name'], pi['last_name']), pi['email']) for pi in pis]
