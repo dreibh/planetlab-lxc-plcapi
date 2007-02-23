@@ -11,8 +11,9 @@ from PLC.Parameter import Parameter, Mixed, python_type
 class Filter(Parameter, dict):
     """
     A type of parameter that represents a filter on one or more
-    columns of a database table. fields should be a dictionary of
-    field names and types, e.g.
+    columns of a database table.
+
+    field should be a dictionary of field names and types, e.g.
 
     {'node_id': Parameter(int, "Node identifier"),
      'hostname': Parameter(int, "Fully qualified hostname", max = 255),
@@ -24,6 +25,14 @@ class Filter(Parameter, dict):
     representing an intersection (if join_with is AND) or union (if
     join_with is OR) filter. If a value is a sequence type, then it
     should represent a list of possible values for that field.
+
+    Special forms:
+    * a field starting with the ~ character means negation.
+    example :  { '~peer_id' : None }
+    * a (string) value containing either a * or a % character is
+      treated as a (sql) pattern; * are replaced with % that is the
+      SQL wildcard character.
+    example :  { 'hostname' : '*.jp' } 
     """
 
     def __init__(self, fields = {}, filter = {}, doc = "Attribute filter"):
