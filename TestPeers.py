@@ -845,16 +845,18 @@ def p_node(n):
     print n['node_id'],n['peer_id'],n['hostname'],'sls=',n['slice_ids'],'site=',n['site_id']
 
 def p_slice(s):
-    print s['slice_id'],s['peer_id'],s['name'],'nodes=',s['node_ids'],'persons=',s['person_ids']
-    print '---','sas=',s['slice_attribute_ids'],s['name'],'crp=',s['creator_person_id']
+    print 'name: %-12s'%s['name'],'id: %02d'%s['slice_id'],'peer:',s['peer_id'],'nodes=',s['node_ids'],'persons=',s['person_ids']
+    print '---','sa_ids=',s['slice_attribute_ids'],'creator: %03d'%s['creator_person_id']
     print "--- 'expires':",s['expires']
 
 def p_sat(sat):
-    print sat['attribute_type_id'], sat['name'], sat['min_role_id'], sat['description']
+    print 'sat_id: %02d'%sat['attribute_type_id'], 'min_role_id:',sat['min_role_id'],
+    print 'name:', sat['name'],'<',sat['description'],'>'
 
 def p_sa (sa):
-        print sa['slice_attribute_id'],sa['name'],'AT_id:',sa['attribute_type_id']
-        print '---','v=',sa['value'],'sl=',sa['slice_id'],'n=',sa['node_id']
+        print 'name: %-12s'%sa['name'], 
+        print 'sa_id: %02d'%sa['slice_attribute_id'],'sat_id: %02d'%sa['attribute_type_id'],
+        print 'sl=%02d'%sa['slice_id'],'v=',sa['value'],'n=',sa['node_id']
 
 import pprint
 pretty_printer=pprint.PrettyPrinter(5)
