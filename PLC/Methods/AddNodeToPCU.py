@@ -27,8 +27,6 @@ class AddNodeToPCU(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
     def call(self, auth, node_id_or_hostname, pcu_id, port):
 	 # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
@@ -68,7 +66,8 @@ class AddNodeToPCU(Method):
         pcu.add_node(node, port)
 
 	# Logging variables
-	self.object_ids = [node['node_id'], pcu['pcu_id']]
+	self.event_objects = {'Node': [node['node_id']],
+			      'PCU': [pcu['pcu_id']]}
 	self.message = 'Node %d added to pcu %d on port %d' % \
 		(node['node_id'], pcu['pcu_id'], port)
         return 1

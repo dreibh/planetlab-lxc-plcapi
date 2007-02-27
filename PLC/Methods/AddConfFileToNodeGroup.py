@@ -44,6 +44,7 @@ class AddConfFileToNodeGroup(Method):
             conf_file.add_nodegroup(nodegroup)
 
         # Log affected objects
-        self.object_ids = [conf_file_id, nodegroup['nodegroup_id']]
+        self.event_objects = {'ConfFile': [conf_file_id], 
+			      'NodeGroup': [nodegroup['nodegroup_id']] }
 
         return 1

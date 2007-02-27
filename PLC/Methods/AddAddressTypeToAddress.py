@@ -42,6 +42,6 @@ class AddAddressTypeToAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address.add_address_type(address_type)
-	self.object_ids = [address['address_id']]
+	self.event_objects = {'Address': [address['address_id']]}
 
         return 1

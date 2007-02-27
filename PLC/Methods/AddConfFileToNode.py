@@ -24,9 +24,6 @@ class AddConfFileToNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
-
     def call(self, auth, conf_file_id, node_id_or_hostname):
 	# Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
@@ -48,6 +45,7 @@ class AddConfFileToNode(Method):
             conf_file.add_node(node)
 
         # Log affected objects
-        self.object_ids = [conf_file_id, node['node_id']]
+        self.event_objects = {'ConfFile': [conf_file_id], 
+		              'Node': [node['node_id']] }
 
         return 1

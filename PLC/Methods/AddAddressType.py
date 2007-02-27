@@ -31,6 +31,6 @@ class AddAddressType(Method):
         address_type = AddressType(self.api, address_type_fields)
         address_type.sync()
 
-	self.object_ids = [address_type['address_type_id']]
+	self.event_objects = {'AddressType' : [address_type['address_type_id']]}
         
 	return address_type['address_type_id']

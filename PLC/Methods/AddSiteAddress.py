@@ -32,9 +32,6 @@ class AddSiteAddress(Method):
 
     returns = Parameter(int, 'New address_id (> 0) if successful')
 
-    object_type = 'Site'
-
-
     def call(self, auth, site_id_or_login_base, address_fields):
         address_fields = dict(filter(can_update, address_fields.items()))
 
@@ -53,7 +50,8 @@ class AddSiteAddress(Method):
         site.add_address(address, commit = True)
 
 	# Logging variables
-	self.object_ids = [site['site_id'], address['address_id']]
+	self.event_objects = {'Site': [site['site_id']], 
+			      'Address': [address['address_id']]}
 	self.message = 'Address %d assigned to Site %d' % \
 		(address['address_id'], site['site_id'])
 

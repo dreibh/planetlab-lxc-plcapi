@@ -26,8 +26,6 @@ class AddPersonToSite(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Site'
-
     def call(self, auth, person_id_or_email, site_id_or_login_base):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -51,7 +49,8 @@ class AddPersonToSite(Method):
             site.add_person(person)
 
 	# Logging variables
-	self.object_ids = [site['site_id']]
+	self.event_objects = {'Site': [site['site_id']],
+			      'Person': [person['person_id']]}
 	self.message = 'Person %d added to site %d' % \
 		(person['person_id'], site['site_id'])
         return 1

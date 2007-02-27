@@ -30,9 +30,6 @@ class AddPerson(Method):
 
     returns = Parameter(int, 'New person_id (> 0) if successful')
 
-    object_type = 'Person'
-
-
     def call(self, auth, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
         person_fields['enabled'] = False
@@ -40,7 +37,7 @@ class AddPerson(Method):
         person.sync()
 
 	# Logging variables
-	self.object_ids = [person['person_id']]
+	self.event_objects = {'Person': [person['person_id']]}
 	self.message = 'Person %d added' % person['person_id']	
 
         return person['person_id']

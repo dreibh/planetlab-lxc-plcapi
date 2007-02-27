@@ -32,6 +32,6 @@ class AddConfFile(Method):
         conf_file = ConfFile(self.api, conf_file_fields)
         conf_file.sync()
 
-	self.object_ids = [conf_file['conf_file_id']]
+	self.event_objects = {'ConfFile': [conf_file['conf_file_id']]}
 
         return conf_file['conf_file_id']

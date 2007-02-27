@@ -25,8 +25,6 @@ class AddPersonToSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
     def call(self, auth, person_id_or_email, slice_id_or_name):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -56,6 +54,8 @@ class AddPersonToSlice(Method):
             slice.add_person(person)
 
         # Logging variables
+	self.event_objects = {'Person': [person['person_id']],
+			      'Slice': [slice['slice_id']]}	
 	self.object_ids = [slice['slice_id']]
 
         return 1

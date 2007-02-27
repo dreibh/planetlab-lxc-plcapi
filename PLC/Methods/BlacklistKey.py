@@ -24,10 +24,6 @@ class BlacklistKey(Method):
 
     returns = Parameter(int, '1 if successful')
    
-    event_type = 'Update'
-    object_type = 'Key'
-    object_ids = []
-
     def call(self, auth, key_id):
         # Get associated key details
         keys = Keys(self.api, [key_id])
@@ -40,7 +36,7 @@ class BlacklistKey(Method):
         key.blacklist()
 	
 	# Logging variables
-	self.object_ids = [key['key_id']]
+	self.event_objects = {'Key': [key['key_id']]}
 	self.message = 'Key %d blacklisted' % key['key_id']
 
         return 1

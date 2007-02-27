@@ -29,16 +29,13 @@ class AddSite(Method):
 
     returns = Parameter(int, 'New site_id (> 0) if successful')
 
-    object_type = 'Site'
-
-
     def call(self, auth, site_fields):
         site_fields = dict(filter(can_update, site_fields.items()))
         site = Site(self.api, site_fields)
         site.sync()
 	
 	# Logging variables 
-	self.object_ids = [site['site_id']]
+	self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d created' % site['site_id']
  	
 	return site['site_id']

@@ -33,6 +33,6 @@ class AddSliceAttributeType(Method):
         attribute_type = SliceAttributeType(self.api, attribute_type_fields)
         attribute_type.sync()
 
-	self.object_ids = [attribute_type['attribute_type_id']]
+	self.event_objects = {'AttributeType': [attribute_type['attribute_type_id']]}
 
         return attribute_type['attribute_type_id']

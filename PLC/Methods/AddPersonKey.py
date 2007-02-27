@@ -29,9 +29,6 @@ class AddPersonKey(Method):
 
     returns = Parameter(int, 'New key_id (> 0) if successful')
 
-    object_type = 'Person'
-
-
     def call(self, auth, person_id_or_email, key_fields):
         key_fields = dict(filter(can_update, key_fields.items()))
 
@@ -54,7 +51,8 @@ class AddPersonKey(Method):
         person.add_key(key, commit = True)
 
         # Logging variables
-	self.object_ids = [person['person_id'], key['key_id']]
+	self.event_objects = {'Person': [person['person_id']],
+			      'Key': [key['key_id']]}
 	self.message = 'Key %d added to person %d' % \
 		(key['key_id'], person['person_id'])
 

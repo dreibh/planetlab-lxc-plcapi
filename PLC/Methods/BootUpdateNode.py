@@ -30,8 +30,6 @@ class BootUpdateNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
     def call(self, auth, node_fields):
         # Update node state
         if node_fields.has_key('boot_state'):
