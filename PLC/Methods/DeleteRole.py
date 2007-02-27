@@ -33,6 +33,6 @@ class DeleteRole(Method):
         role = roles[0]
 
         role.delete()
-	self.object_ids = [role['role_id']]
+	self.event_objects = {'Role': [role['role_id']]}
 
         return 1

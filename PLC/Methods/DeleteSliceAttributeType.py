@@ -29,6 +29,6 @@ class DeleteSliceAttributeType(Method):
         attribute_type = attribute_types[0]
 
         attribute_type.delete()
-	self.object_ids = [attribute_type['attribute_type_id']]
+	self.event_objects = {'AttributeType': [attribute_type['attribute_type_id']]}
 
         return 1

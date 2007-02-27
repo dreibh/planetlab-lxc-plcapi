@@ -42,8 +42,7 @@ class NotifyPersons(Method):
                  Body = body)
 
         # Logging variables
-        self.object_type = "Person"
-        self.object_ids = [person['person_id'] for person in persons]
+        self.event_objects = {'Person': [person['person_id'] for person in persons]}
         self.message = subject
 
         return 1

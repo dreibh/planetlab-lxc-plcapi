@@ -24,9 +24,6 @@ class SliceDelete(DeleteSlice):
 
     returns = Parameter(int, 'Returns 1 if successful, a fault otherwise.')
 
-    object_type = 'Slice'
-
-
     def call(self, auth, slice_name):
 
 	return DeleteSlice.call(self, auth, slice_name)

@@ -28,9 +28,6 @@ class DeleteSliceAttribute(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
-
     def call(self, auth, slice_attribute_id):
         slice_attributes = SliceAttributes(self.api, [slice_attribute_id])
         if not slice_attributes:
@@ -60,6 +57,6 @@ class DeleteSliceAttribute(Method):
                 raise PLCPermissioinDenied, "Not allowed to delete the specified attribute"
 
         slice_attribute.delete()
-	self.object_ids = [slice_attribute['slice_attribute_id']]
+	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
 
         return 1

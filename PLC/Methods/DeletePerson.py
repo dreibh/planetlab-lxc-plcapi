@@ -25,9 +25,6 @@ class DeletePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Person'
-
-
     def call(self, auth, person_id_or_email):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -48,7 +45,7 @@ class DeletePerson(Method):
         person.delete()
 	
 	# Logging variables
-	self.object_ids = [person['person_id']]
+	self.event_objects = {'Person': [person['person_id']]}
 	self.message = 'Person %d deleted' % person['person_id']
 
         return 1

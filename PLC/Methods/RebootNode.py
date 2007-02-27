@@ -30,8 +30,6 @@ class RebootNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
     def call(self, auth, node_id_or_hostname):
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
@@ -69,6 +67,7 @@ class RebootNode(Method):
             # Ignore socket errors
             pass
 
+	self.event_objects = {'Node': [node['node_id']]}
 	self.message = "RebootNode called"
 	        
         return 1

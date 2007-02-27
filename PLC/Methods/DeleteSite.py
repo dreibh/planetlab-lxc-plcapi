@@ -27,9 +27,6 @@ class DeleteSite(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Site'
-
-
     def call(self, auth, site_id_or_login_base):
         # Get account information
         sites = Sites(self.api, [site_id_or_login_base])
@@ -43,7 +40,7 @@ class DeleteSite(Method):
         site.delete()
 	
 	# Logging variables
-	self.object_ids = [site['site_id']]
+	self.event_objects = {'Site': [site['site_id']]}
 	self.message = 'Site %d deleted' % site['site_id']	
 
         return 1

@@ -37,7 +37,7 @@ class DeletePCU(Method):
         pcu.delete()
 	
 	# Logging variables
-	self.object_ids = [pcu['pcu_id']]
+	self.event_objects = {'PCU': [pcu['pcu_id']]}
 	self.message = 'PCU %d deleted' % pcu['pcu_id']
 
         return 1

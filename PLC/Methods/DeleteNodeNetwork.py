@@ -51,7 +51,7 @@ class DeleteNodeNetwork(Method):
         nodenetwork.delete()
 
 	# Logging variables
-	self.object_ids = [nodenetwork['nodenetwork_id']]
+	self.event_objects = {'NodeNetwork': [nodenetwork['nodenetwork_id']]}
 	self.message = "Node network %d deleted" % nodenetwork['nodenetwork_id']
 
         return 1

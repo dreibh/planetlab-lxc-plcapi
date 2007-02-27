@@ -25,9 +25,6 @@ class DeleteSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
-
     def call(self, auth, slice_id_or_name):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
@@ -46,6 +43,6 @@ class DeleteSlice(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
         slice.delete()
-        self.object_ids = [slice['slice_id']]
+        self.event_objects = {'Slice': [slice['slice_id']]}
 
         return 1

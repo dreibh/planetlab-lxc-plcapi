@@ -24,9 +24,6 @@ class DeleteNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
-
     def call(self, auth, node_id_or_hostname):
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
@@ -49,7 +46,7 @@ class DeleteNode(Method):
         node.delete()
 
 	# Logging variables
-	self.object_ids = [node['node_id']]
+	self.event_objects = {'Node': [node['node_id']]}
 	self.message = "Node %d deleted" % node['node_id']
 
         return 1

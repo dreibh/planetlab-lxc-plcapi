@@ -35,7 +35,7 @@ class DeleteNodeGroup(Method):
         nodegroup.delete()
 
 	# Logging variables
-	self.object_ids = [nodegroup['nodegroup_id']]
+	self.event_objects = {'NodeGroup': [nodegroup['nodegroup_id']]}
 	self.message  = 'Node group %d deleted' % nodegroup['nodegroup_id']
  
         return 1

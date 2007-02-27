@@ -24,11 +24,6 @@ class SliceNodesAdd(AddSliceToNodes):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
-
-
-
     def call(self, auth, slice_name, nodes_list):
 
 	return AddSliceToNodes.call(self, auth, slice_name, nodes_list)

@@ -25,9 +25,6 @@ class DeletePersonFromSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
-
     def call(self, auth, person_id_or_email, slice_id_or_name):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -56,6 +53,7 @@ class DeletePersonFromSlice(Method):
 	if slice['slice_id'] in person['slice_ids']:
             slice.remove_person(person)
 	
-	self.object_ids = [slice['slice_id']]
+	self.event_objects = {'Slice': [slice['slice_id']],
+			      'Person': [person['person_id']]}	
 
         return 1

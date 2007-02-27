@@ -39,8 +39,6 @@ class ResetPassword(Method):
 
     returns = Parameter(int, '1 if verification_key is valid')
 
-    object_type = 'Person'
-
     def call(self, auth, person_id_or_email, verification_key = None, verification_expires = None):
 	# Get account information
         persons = Persons(self.api, [person_id_or_email])
@@ -116,7 +114,7 @@ class ResetPassword(Method):
             print >> log, "Warning: No message template '%s'" % message_id
 
 	# Logging variables
-        self.object_ids = [person['person_id']]
+        self.event_objects = {'Person': [person['person_id']]}
         self.message = message_id
 
         return 1

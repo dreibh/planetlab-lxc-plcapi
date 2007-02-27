@@ -27,9 +27,6 @@ class DeleteRoleFromPerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Person'
-
-
     def call(self, auth, role_id_or_name, person_id_or_email):
         # Get role
         roles = Roles(self.api, [role_id_or_name])
@@ -62,7 +59,8 @@ class DeleteRoleFromPerson(Method):
             person.remove_role(role)
 	
 	# Logging variables
-	self.object_ids = [person['person_id']]
+	self.event_objects = {'Person': [person['person_id']],
+			      'Role': [role['role_id']]}	
 	self.message = "Role %d revoked from person %d" % \
                        (role['role_id'], person['person_id'])
 

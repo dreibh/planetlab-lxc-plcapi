@@ -45,7 +45,8 @@ class DeleteNodeFromNodeGroup(Method):
             nodegroup.remove_node(node)
 	
 	# Logging variables
-	self.object_ids = [nodegroup['nodegroup_id']]
+	self.event_objects = {'NodeGroup': [nodegroup['nodegroup_id']],
+			      'Node': [node['node_id']]}
 	self.message = 'node %d deleted from node group %d' % \
 		(node['node_id'], nodegroup['nodegroup_id'])
 
