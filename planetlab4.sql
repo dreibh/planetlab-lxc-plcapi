@@ -91,7 +91,7 @@ CREATE TABLE sites (
     latitude real,
     longitude real,
     url text,
-    ext_consortium_id integer,	-- external consortium id     
+    ext_consortium_id integer,	-- external consortium id
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -758,7 +758,6 @@ CREATE TABLE events (
     fault_code integer NOT NULL DEFAULT 0, -- Did this event result in error
     call_name text NOT NULL, -- Call responsible for this event
     call text NOT NULL, -- Call responsible for this event, including parameters
-    object_type text, -- What type of object is this event affecting
     message text, -- High level description of this event
     runtime float DEFAULT 0, -- Event run time
     time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP -- Event timestamp
@@ -767,14 +766,17 @@ CREATE TABLE events (
 -- Database object(s) that may have been affected by a particular event
 CREATE TABLE event_object (
     event_id integer REFERENCES events NOT NULL, -- Event identifier
-    object_id integer NOT NULL -- Object identifier
+    object_id integer NOT NULL, -- Object identifier
+    object_type text -- What type of object is this event affecting
 ) WITH OIDS;
 CREATE INDEX event_object_event_id_idx ON event_object (event_id);
 CREATE INDEX event_object_object_id_idx ON event_object (object_id);
+CREATE INDEX event_object_object_type_idx ON event_object (object_type);
 
 CREATE VIEW event_objects AS
 SELECT event_id,
-array_accum(object_id) AS object_ids
+array_accum(object_id) AS object_ids,
+array_accum(object_type) AS object_types
 FROM event_object
 GROUP BY event_id;
 
@@ -790,11 +792,11 @@ events.node_id,
 events.fault_code,
 events.call_name,
 events.call,
-events.object_type,
 events.message,
 events.runtime,
 CAST(date_part('epoch', events.time) AS bigint) AS time,
-COALESCE((SELECT object_ids FROM event_objects WHERE event_objects.event_id = events.event_id), '{}') AS object_ids
+COALESCE((SELECT object_ids FROM event_objects WHERE event_objects.event_id = events.event_id), '{}') AS object_ids,
+COALESCE((SELECT object_types FROM event_objects WHERE event_objects.event_id = events.event_id), '{}') AS object_types
 FROM events;
 
 CREATE OR REPLACE VIEW view_persons AS
