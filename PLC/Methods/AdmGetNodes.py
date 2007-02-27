@@ -7,7 +7,5 @@ class AdmGetNodes(GetNodes):
 
     status = "deprecated"
 
-    object_type = 'Node'
-
     def call(self, auth, node_id_or_hostname_list = None, return_fields = None):
         return GetNodes.call(self, auth, node_id_or_hostname_list)

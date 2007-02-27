@@ -15,8 +15,6 @@ class AdmQueryNode(Method):
 
     status = "deprecated"
 
-    object_type = 'Node'
-
     roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [

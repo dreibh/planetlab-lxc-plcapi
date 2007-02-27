@@ -30,8 +30,6 @@ class AdmDeleteAllPersonKeys(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Person'
-
     def call(self, auth, person_id_or_email):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])

@@ -7,4 +7,3 @@ class AdmDeleteNode(DeleteNode):
 
     status = "deprecated"
 
-    object_type = 'Node'
