@@ -146,7 +146,7 @@ class VerifyPerson(Method):
             print >> log, "Warning: No message template '%s'" % message_id
 
 	# Logging variables
-        self.object_ids = [person['person_id']]
+        self.event_objects = {'Person': [person['person_id']]}
         self.message = message_id
 	
 	if verification_key is not None and person['verification_expires'] and \

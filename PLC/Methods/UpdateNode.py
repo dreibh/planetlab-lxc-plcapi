@@ -32,8 +32,6 @@ class UpdateNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
     def call(self, auth, node_id_or_hostname, node_fields):
         node_fields = dict(filter(can_update, node_fields.items()))
 
@@ -65,7 +63,7 @@ class UpdateNode(Method):
         node.sync()
 	
 	# Logging variables
-	self.object_ids = [node['node_id']]
+	self.event_objects = {'Node': [node['node_id']]}
 	self.message = 'Node %d updated: %s.' % \
 		(node['node_id'], ", ".join(node_fields.keys()))
 	if 'boot_state' in node_fields.keys():

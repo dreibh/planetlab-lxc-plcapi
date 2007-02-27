@@ -37,6 +37,6 @@ class UpdateAddressType(Method):
 
         address_type.update(address_type_fields)
         address_type.sync()
-	self.object_ids = [address_type['address_type_id']]
+	self.event_objects = {'AddressType': [address_type['address_type_id']]}
 
         return 1

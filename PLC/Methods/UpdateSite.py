@@ -33,8 +33,6 @@ class UpdateSite(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Site'
-
     def call(self, auth, site_id_or_login_base, site_fields):
         site_fields = dict(filter(can_update, site_fields.items()))
 
@@ -65,7 +63,7 @@ class UpdateSite(Method):
 	site.sync()
 	
 	# Logging variables
-	self.object_ids = [site['site_id']]
+	self.event_objects = {'Site': [site['site_id']]}
 	self.message = 'Site %d updated: %s' % \
 		(site['site_id'], ", ".join(site_fields.keys()))  	
 	

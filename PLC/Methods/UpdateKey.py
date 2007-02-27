@@ -49,7 +49,7 @@ class UpdateKey(Method):
         key.sync()
 	
 	# Logging variables
-	self.object_ids = [key['key_id']]
+	self.event_objects = {'Key': [key['key_id']]}
 	self.message = 'key %d updated: %s' % \
 		(key['key_id'], ", ".join(key_fields.keys()))
         return 1

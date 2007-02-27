@@ -39,8 +39,6 @@ class UpdateSlice(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Slice'
-
     def call(self, auth, slice_id_or_name, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 
@@ -89,6 +87,6 @@ class UpdateSlice(Method):
             raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
 
         slice.sync()
-	self.object_ids = [slice['slice_id']]
+	self.event_objects = {'Slice': [slice['slice_id']]}
 
         return 1

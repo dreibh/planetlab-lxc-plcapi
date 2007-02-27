@@ -33,8 +33,6 @@ class UpdatePerson(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Person'
-
     def call(self, auth, person_id_or_email, person_fields):
         person_fields = dict(filter(can_update, person_fields.items()))
 
@@ -58,7 +56,7 @@ class UpdatePerson(Method):
         person.sync()
 	
 	# Logging variables
-	self.object_ids = [person['person_id']]
+	self.event_objects = {'Person': [person['person_id']]}
 
         # Redact password
         if 'password' in person_fields:

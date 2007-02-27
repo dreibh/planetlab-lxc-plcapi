@@ -62,7 +62,7 @@ class UpdateNodeNetwork(Method):
 	nodenetwork.update(nodenetwork_fields)
         nodenetwork.sync()
 	
-	self.object_ids = [nodenetwork['nodenetwork_id']]
+	self.event_objects = {'NodeNetwork': [nodenetwork['nodenetwork_id']]}
 	self.message = "Node network %d updated: %s " % \
 	    (nodenetwork['nodenetwork_id'], ", ".join(nodenetwork_fields.keys()))
 
