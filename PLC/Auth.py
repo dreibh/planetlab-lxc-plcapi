@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.16 2007/02/05 19:20:38 tmack Exp $
+# $Id: Auth.py,v 1.17 2007/02/10 18:39:09 mlhuang Exp $
 #
 
 import crypt
@@ -147,7 +147,7 @@ class SessionAuth(Auth):
                 person = persons[0]
 
                 if not set(person['roles']).intersection(method.roles):
-                    raise PLCAuthenticationFailure, "Not allowed to call method"
+                    raise PLCPermissionDenied, "Not allowed to call method"
 
                 method.caller = persons[0]
 
