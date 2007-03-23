@@ -20,11 +20,14 @@ from PLC.Nodes import Node, Nodes
 from PLC.SliceInstantiations import SliceInstantiations
 from PLC.Slices import Slice, Slices
 
+verbose=False
+
 class RefreshPeer(Method):
     """
-    Fetches node and slice data from the specified peer and caches it
-    locally; also deletes stale entries. Returns 1 if successful,
-    faults otherwise.
+    Fetches site, node, slice, person and key data from the specified peer
+    and caches it locally; also deletes stale entries.
+    Upon successful completion, returns a dict reporting various timers.
+    Faults otherwise.
     """
 
     roles = ['admin']
@@ -52,9 +55,12 @@ class RefreshPeer(Method):
 
         # Get peer data
         start = time.time()
+	print >>log, 'Issuing GetPeerData'
         peer_tables = peer.GetPeerData()
         timers['transport'] = time.time() - start - peer_tables['db_time']
         timers['peer_db'] = peer_tables['db_time']
+        if verbose:
+            print >>log, 'GetPeerData returned -> db=%d transport=%d'%(timers['peer_db'],timers['transport'])
 
         def sync(objects, peer_objects, classobj):
             """
@@ -66,13 +72,16 @@ class RefreshPeer(Method):
             keyed on their foreign identifiers.
             """
 
+            if verbose:
+                print >>log, 'Entering sync on',classobj(self.api).__class__.__name__
+
             synced = {}
 
             # Delete stale objects
             for peer_object_id, object in objects.iteritems():
                 if peer_object_id not in peer_objects:
                     object.delete(commit = False)
-                    print classobj(self.api).__class__.__name__, "object %s deleted" % object[object.class_key]
+                    print >> log, peer['peername'],classobj(self.api).__class__.__name__, object[object.primary_key],"deleted" 
 
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
@@ -121,8 +130,10 @@ class RefreshPeer(Method):
                 synced[peer_object_id] = object
 
                 if dbg:
-                    print >> log, peer['peername'], classobj(self.api).__class__.__name__, \
-			object[object.class_key], object[object.primary_key], dbg
+                    print >> log, peer['peername'], classobj(self.api).__class__.__name__, object[object.primary_key], dbg
+
+            if verbose:
+                print >>log, 'Exiting sync on',classobj(self.api).__class__.__name__
 
             return synced
 
@@ -131,6 +142,8 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
+
+	print >>log, 'Dealing with Sites'
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Sites']:
@@ -157,6 +170,8 @@ class RefreshPeer(Method):
         #
         # XXX Synchronize foreign key types
         #
+
+	print >>log, 'Dealing with Keys'
 
         key_types = KeyTypes(self.api).dict()
 
@@ -201,6 +216,8 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
+
+	print >>log, 'Dealing with Persons'
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Persons']:
@@ -265,6 +282,8 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
+
+	print >>log, 'Dealing with Nodes'
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Nodes']:
@@ -337,6 +356,8 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
+
+	print >>log, 'Dealing with Slices'
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Slices']:
@@ -411,8 +432,19 @@ class RefreshPeer(Method):
             # by hand, are removed. In other words, don't do this.
 
             # Foreign users that are currently part of the slice
-	    old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids'] \
-				     if person_transcoder[person_id] in peer_persons]
+	    #old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids'] \
+	    #		     if person_transcoder[person_id] in peer_persons]
+	    # An issue occurred with a user who registered on both sites (same email)
+	    # So the remote person could not get cached locally
+	    # The one-line map/filter style is nicer but ineffective here
+	    old_slice_person_ids = []
+	    for person_id in slice['person_ids']:
+		if not person_transcoder.has_key(person_id):
+		    print >> log, 'WARNING : person_id %d in %s not transcodable (1) - skipped'%(person_id,slice['name'])
+		elif person_transcoder[person_id] not in peer_persons:
+		    print >> log, 'WARNING : person_id %d in %s not transcodable (2) - skipped'%(person_id,slice['name'])
+		else:
+		    old_slice_person_ids += [person_transcoder[person_id]]
 
             # Foreign users that should be part of the slice
 	    slice_person_ids = [ person_id for person_id in peer_slice['person_ids'] if person_id in peer_persons ]
