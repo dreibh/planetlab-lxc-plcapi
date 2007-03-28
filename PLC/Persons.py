@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.32 2007/01/11 05:37:55 mlhuang Exp $
+# $Id: Persons.py,v 1.33 2007/01/16 17:05:41 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -237,10 +237,67 @@ class Persons(Table):
 
     def __init__(self, api, person_filter = None, columns = None):
         Table.__init__(self, api, Person, columns)
+        #sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
+        #      ", ".join(self.columns)
+	foreign_fields = {'role_ids': ('role_id', 'person_role'),
+			  'roles': ('name', 'roles'),
+                          'site_ids': ('site_id', 'person_site'),
+                          'key_ids': ('key_id', 'person_key'),
+                          'slice_ids': ('slice_id', 'slice_person')
+                          }
+	foreign_keys = {}
+	db_fields = Person(api, Person.fields).db_fields().keys() + \
+		    ['last_updated', 'date_created', 'password', 'verification_key', 'verification_expires']
+	all_fields = db_fields + [value[0] for value in foreign_fields.values()]
+	fields = []
+	_select = "SELECT "
+	_from = " FROM persons "
+	_join = " LEFT JOIN peer_person USING (person_id) "  
+	_where = " WHERE deleted IS False "
 
-        sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
-              ", ".join(self.columns)
+	if not columns:
+	    # include all columns	
+	    fields = all_fields
+	    tables = [value[1] for value in foreign_fields.values()]
+	    tables.sort()
+	    for key in foreign_fields.keys():
+		foreign_keys[foreign_fields[key][0]] = key  
+	    for table in tables:
+		if table in ['roles']:
+		    _join += " LEFT JOIN roles USING(role_id) "
+		else:	
+	    	    _join += " LEFT JOIN %s USING (person_id) " % (table)
+	else: 
+	    tables = set()
+	    columns = filter(lambda column: column in db_fields+foreign_fields.keys(), columns)
+	    columns.sort()
+	    for column in columns: 
+	        if column in foreign_fields.keys():
+		    (field, table) = foreign_fields[column]
+		    foreign_keys[field] = column
+		    fields += [field]
+		    tables.add(table)
+		    if column in ['roles']:
+			_join += " LEFT JOIN roles USING(role_id) "
+		    else:
+		    	_join += " LEFT JOIN %s USING (person_id)" % \
+				(foreign_fields[column][1])
+		
+		else:
+		    fields += [column]	
+	
+	# postgres will return timestamps as datetime objects. 
+	# XMLPRC cannot marshal datetime so convert to int
+	timestamps = ['date_created', 'last_updated']
+	for field in fields:
+	    if field in timestamps:
+		fields[fields.index(field)] = \
+		 "CAST(date_part('epoch', %s) AS bigint) AS %s" % (field, field)
 
+	_select += ", ".join(fields)
+	sql = _select + _from + _join + _where
+
+	# deal with filter			
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
@@ -252,4 +309,29 @@ class Persons(Table):
                 person_filter = Filter(Person.fields, person_filter)
                 sql += " AND (%s)" % person_filter.sql(api, "AND")
 
-        self.selectall(sql)
+	# aggregate data
+	all_persons = {}
+	for row in self.api.db.selectall(sql):
+	    person_id = row['person_id']
+
+	    if all_persons.has_key(person_id):
+		for (key, key_list) in foreign_keys.items():
+		    data = row.pop(key)
+		    row[key_list] = [data]
+		    if data and data not in all_persons[person_id][key_list]:
+		    	all_persons[person_id][key_list].append(data)
+            else:
+		for key in foreign_keys.keys():
+                    value = row.pop(key)
+		    if value:	
+                    	row[foreign_keys[key]] = [value]
+		    else:
+			row[foreign_keys[key]] = []
+		if row: 
+            	    all_persons[person_id] = row
+            	
+	# populate self
+	for row in all_persons.values():
+	    obj = self.classobj(self.api, row)
+            self.append(obj)
+
