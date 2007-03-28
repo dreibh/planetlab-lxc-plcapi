@@ -1,6 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
+# $Id$
 
 import time
 
