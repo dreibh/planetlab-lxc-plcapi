@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.33 2007/01/16 17:05:41 mlhuang Exp $
+# $Id: Persons.py,v 1.34 2007/03/28 19:15:34 tmack Exp $
 #
 
 from types import StringTypes
@@ -246,8 +246,7 @@ class Persons(Table):
                           'slice_ids': ('slice_id', 'slice_person')
                           }
 	foreign_keys = {}
-	db_fields = Person(api, Person.fields).db_fields().keys() + \
-		    ['last_updated', 'date_created', 'password', 'verification_key', 'verification_expires']
+	db_fields = filter(lambda field: field not in foreign_fields.keys(), Person.fields.keys())
 	all_fields = db_fields + [value[0] for value in foreign_fields.values()]
 	fields = []
 	_select = "SELECT "
