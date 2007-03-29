@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.34 2007/03/28 19:15:34 tmack Exp $
+# $Id: Persons.py,v 1.35 2007/03/29 13:17:09 tmack Exp $
 #
 
 from types import StringTypes
@@ -287,7 +287,7 @@ class Persons(Table):
 	
 	# postgres will return timestamps as datetime objects. 
 	# XMLPRC cannot marshal datetime so convert to int
-	timestamps = ['date_created', 'last_updated']
+	timestamps = ['date_created', 'last_updated', 'verification_expires']
 	for field in fields:
 	    if field in timestamps:
 		fields[fields.index(field)] = \
