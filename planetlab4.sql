@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.71 2007/02/01 23:05:59 mlhuang Exp $
+-- $Id: planetlab4.sql,v 1.73 2007/02/27 18:41:24 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -282,7 +282,8 @@ CREATE TABLE nodes (
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_contact timestamp without time zone 	
 ) WITH OIDS;
 CREATE INDEX nodes_hostname_idx ON nodes (hostname) WHERE deleted IS false;
 CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
@@ -618,6 +619,21 @@ FROM slice_attribute
 GROUP BY slice_id;
 
 --------------------------------------------------------------------------------
+-- Initscripts
+--------------------------------------------------------------------------------
+
+-- Initscripts
+CREATE TABLE initscripts (
+    initscript_id serial PRIMARY KEY, -- Initscript identifier
+    name text NOT NULL, -- Initscript name
+    enabled bool NOT NULL DEFAULT true, -- Initscript is active
+    script text NOT NULL, -- Initscript
+    UNIQUE (name)
+) WITH OIDS;
+CREATE INDEX initscripts_name_idx ON initscripts (name);
+
+
+--------------------------------------------------------------------------------
 -- Peers
 --------------------------------------------------------------------------------
 
@@ -855,6 +871,7 @@ nodes.ssh_rsa_key,
 nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
+CAST(date_part('epoch', nodes.last_contact) AS bigint) AS last_contact,  
 peer_node.peer_id,
 peer_node.peer_node_id,
 COALESCE((SELECT nodenetwork_ids FROM node_nodenetworks WHERE node_nodenetworks.node_id = nodes.node_id), '{}') AS nodenetwork_ids,
