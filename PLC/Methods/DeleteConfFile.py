@@ -28,6 +28,6 @@ class DeleteConfFile(Method):
 
         conf_file = conf_files[0]
         conf_file.delete()
-	self.object_ids = [conf_file['conf_file_id']]
+	self.event_objects = {'ConfFile': [conf_file['conf_file_id']]}
 
         return 1
