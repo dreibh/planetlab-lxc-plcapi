@@ -5,6 +5,7 @@ from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
 
 class AddSliceAttribute(Method):
@@ -30,7 +31,8 @@ class AddSliceAttribute(Method):
               SliceAttribute.fields['name']),
         Mixed(SliceAttribute.fields['attribute_type_id'],
               SliceAttribute.fields['name']),
-        SliceAttribute.fields['value'],
+        Mixed(SliceAttribute.fields['value'],
+	      InitScript.fields['initscript_id']),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])
         ]
@@ -59,6 +61,12 @@ class AddSliceAttribute(Method):
             if attribute_type['min_role_id'] is not None and \
                min(self.caller['role_ids']) > attribute_type['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
+
+	# if initscript is specified, validate value
+	if attribute_type['name'] in ['plc_initscript_id']:
+	    initscripts = InitScripts(self.api, [value])
+	    if not initscripts:	
+		raise PLCInvalidArgument, "No such plc initscript" 	
 
         slice_attribute = SliceAttribute(self.api)
         slice_attribute['slice_id'] = slice['slice_id']
