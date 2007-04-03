@@ -26,7 +26,7 @@ def get_slivers(api, slice_filter, node = None):
         slice_attribute_ids.update(slice['slice_attribute_ids'])
 
     # Get user information
-    all_persons = Persons(api, person_ids).dict()
+    all_persons = Persons(api, person_ids, ['person_id', 'enabled', 'key_ids']).dict()
 
     # Build up list of keys
     key_ids = set()
@@ -34,7 +34,7 @@ def get_slivers(api, slice_filter, node = None):
         key_ids.update(person['key_ids'])
 
     # Get user account keys
-    all_keys = Keys(api, key_ids).dict()
+    all_keys = Keys(api, key_ids, ['key_id', 'key', 'key_type']).dict()
 
     # Get slice attributes
     all_slice_attributes = SliceAttributes(api, slice_attribute_ids).dict()
@@ -189,6 +189,8 @@ class GetSlivers(Method):
         system_slice_ids = system_slice_attributes.keys()
 
         slivers = get_slivers(self.api, system_slice_ids + node['slice_ids'], node)
+
+	node.update_last_contact()
 
         return {
             'timestamp': timestamp,
