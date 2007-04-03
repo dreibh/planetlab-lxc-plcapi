@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.29 2007/01/09 16:13:36 mlhuang Exp $
+# $Id: Nodes.py,v 1.31 2007/01/11 05:31:33 mlhuang Exp $
 #
 
 from types import StringTypes
@@ -50,6 +50,7 @@ class Node(Row):
         'ssh_rsa_key': Parameter(str, "Last known SSH host key", max = 1024),
         'date_created': Parameter(int, "Date and time when node entry was created", ro = True),
         'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
+	'last_contact': Parameter(int, "Date and time when node last contacted plc", ro = True), 
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
         'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has"),
@@ -95,6 +96,18 @@ class Node(Row):
     validate_date_created = Row.validate_timestamp
     validate_last_updated = Row.validate_timestamp
 
+    def update_last_contact(self, commit = True):
+	"""
+	Update last_contact field with current time
+	"""
+	
+	assert 'node_id' in self
+	assert self.table_name
+
+	self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
+		       " where node_id = %d" % ( self['node_id']) )
+	self.sync(commit)
+		
     def delete(self, commit = True):
         """
         Delete existing node.
