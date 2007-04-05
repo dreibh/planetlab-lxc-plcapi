@@ -13,6 +13,7 @@ from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.InitScripts import InitScript, InitScripts
 
 def get_slivers(api, slice_filter, node = None):
     # Get slice information
@@ -117,6 +118,7 @@ class GetSlivers(Method):
         'networks': [NodeNetwork.fields],
         'groups': [NodeGroup.fields['name']],
         'conf_files': [ConfFile.fields],
+	'initscripts': [InitScript.fields],
         'slivers': [{
             'name': Slice.fields['name'],
             'slice_id': Slice.fields['slice_id'],
@@ -184,13 +186,17 @@ class GetSlivers(Method):
             if conf_file_id in all_conf_files:
                 conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
             
+
+	# Get all (enabled) initscripts
+	initscripts = InitScripts(self.api, {'enabled': True})	
+
         # Get system slices
         system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
         system_slice_ids = system_slice_attributes.keys()
 
         slivers = get_slivers(self.api, system_slice_ids + node['slice_ids'], node)
 
-	node.update_last_contact()
+	#node.update_last_contact()
 
         return {
             'timestamp': timestamp,
@@ -199,5 +205,6 @@ class GetSlivers(Method):
             'networks': networks,
             'groups': groups,
             'conf_files': conf_files.values(),
+	    'initscripts': initscripts,
             'slivers': slivers
             }
