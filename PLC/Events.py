@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.11 2007/01/19 17:50:46 tmack Exp $
+# $Id: Events.py,v 1.12 2007/02/27 18:52:14 tmack Exp $
 #
 
 from PLC.Faults import *
@@ -24,6 +24,7 @@ class Event(Row):
         'event_id': Parameter(int, "Event identifier"),
         'person_id': Parameter(int, "Identifier of person responsible for event, if any"),
         'node_id': Parameter(int, "Identifier of node responsible for event, if any"),
+	'auth_type': Parameter(int, "Type of auth used. i.e. AuthMethod"),
         'fault_code': Parameter(int, "Event fault code"),
 	'call_name': Parameter(str, "Call responsible for this event"),
 	'call': Parameter(str, "Call responsible for this event, including paramters"),
