@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.73 2007/02/27 18:41:24 tmack Exp $
+-- $Id: planetlab4.sql,v 1.74 2007/04/02 20:45:49 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -771,6 +771,7 @@ CREATE TABLE events (
     event_id serial PRIMARY KEY,  -- Event identifier
     person_id integer REFERENCES persons, -- Person responsible for event, if any
     node_id integer REFERENCES nodes, -- Node responsible for event, if any
+    auth_type text, -- Type of auth used. i.e. AuthMethod
     fault_code integer NOT NULL DEFAULT 0, -- Did this event result in error
     call_name text NOT NULL, -- Call responsible for this event
     call text NOT NULL, -- Call responsible for this event, including parameters
@@ -805,6 +806,7 @@ SELECT
 events.event_id,
 events.person_id,
 events.node_id,
+events.auth_type,
 events.fault_code,
 events.call_name,
 events.call,
