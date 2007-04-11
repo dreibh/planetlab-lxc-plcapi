@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.74 2007/04/02 20:45:49 tmack Exp $
+-- $Id: planetlab4.sql,v 1.75 2007/04/11 20:31:15 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -784,7 +784,7 @@ CREATE TABLE events (
 CREATE TABLE event_object (
     event_id integer REFERENCES events NOT NULL, -- Event identifier
     object_id integer NOT NULL, -- Object identifier
-    object_type text -- What type of object is this event affecting
+    object_type text NOT NULL Default 'Unknown' -- What type of object is this event affecting
 ) WITH OIDS;
 CREATE INDEX event_object_event_id_idx ON event_object (event_id);
 CREATE INDEX event_object_object_id_idx ON event_object (object_id);
