@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.22 2007/01/19 17:49:02 tmack Exp $
+# $Id: Method.py,v 1.23 2007/02/27 18:46:23 tmack Exp $
 #
 
 import xmlrpclib
@@ -110,8 +110,8 @@ class Method:
         """	
 
 	# Do not log system or Get calls
-        if self.name.startswith('system') or self.name.startswith('Get'):
-            return False
+        #if self.name.startswith('system') or self.name.startswith('Get'):
+        #    return False
 
         # Create a new event
         event = Event(self.api)
@@ -120,6 +120,12 @@ class Method:
 
         # Redact passwords and sessions
         if args and isinstance(args[0], dict):
+	    # what type of auth this is
+	    if args[0].has_key('AuthMethod'):
+	        auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
+	    	auth_method = args[0]['AuthMethod']
+		if auth_method in auth_methods:
+		    event['auth_method'] = auth_method
             for password in 'AuthString', 'session':
                 if args[0].has_key(password):
                     auth = args[0].copy()
