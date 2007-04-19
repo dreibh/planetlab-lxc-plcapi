@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Slices import Slice, Slices
+from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
 
 class UpdateSliceAttribute(Method):
@@ -22,7 +23,8 @@ class UpdateSliceAttribute(Method):
     accepts = [
         Auth(),
         SliceAttribute.fields['slice_attribute_id'],
-        SliceAttribute.fields['value']
+	Mixed(SliceAttribute.fields['value'],
+              InitScript.fields['initscript_id'])
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -54,8 +56,13 @@ class UpdateSliceAttribute(Method):
             if slice_attribute['min_role_id'] is not None and \
                min(self.caller['role_ids']) > slice_attribute['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to update the specified attribute"
+	
+	if slice_attribute['name'] in ['plc_initscript_id']:
+            initscripts = InitScripts(self.api, {'enabled': True, 'initscript_id': int(value)})
+            if not initscripts:
+                raise PLCInvalidArgument, "No such plc initscript"	
 
-        slice_attribute['value'] = value
+        slice_attribute['value'] = unicode(value)
         slice_attribute.sync()
 	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
         return 1
