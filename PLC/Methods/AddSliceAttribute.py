@@ -64,7 +64,7 @@ class AddSliceAttribute(Method):
 
 	# if initscript is specified, validate value
 	if attribute_type['name'] in ['plc_initscript_id']:
-	    initscripts = InitScripts(self.api, [int(value)])
+	    initscripts = InitScripts(self.api, {'enabled': True, 'initscript_id': int(value)})
 	    if not initscripts:	
 		raise PLCInvalidArgument, "No such plc initscript" 	
 
