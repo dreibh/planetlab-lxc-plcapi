@@ -46,7 +46,7 @@ class AddSlice(Method):
         # 3. Then single underscore after login_base.
         # 4. Then letters, numbers, or underscores.
         name = slice_fields['name']
-        good_name = r'^[a-z]+_[a-z0-9_]+$'
+        good_name = r'^[a-z0-9]+_[a-z0-9_]+$'
         if not name or \
            not re.match(good_name, name):
             raise PLCInvalidArgument, "Invalid slice name"
