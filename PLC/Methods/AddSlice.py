@@ -42,11 +42,11 @@ class AddSlice(Method):
         slice_fields = dict(filter(can_update, slice_fields.items()))
 
         # 1. Lowercase.
-        # 2. Begins with login_base (only letters).
+        # 2. Begins with login_base (letters or numbers).
         # 3. Then single underscore after login_base.
         # 4. Then letters, numbers, or underscores.
         name = slice_fields['name']
-        good_name = r'^[a-z0-9]+_[a-z0-9_]+$'
+        good_name = r'^[a-z0-9]+_[a-zA-Z0-9_]+$'
         if not name or \
            not re.match(good_name, name):
             raise PLCInvalidArgument, "Invalid slice name"
