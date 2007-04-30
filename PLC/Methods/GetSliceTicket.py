@@ -6,6 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 from PLC.GPG import gpg_sign, gpg_verify
+from PLC.InitScripts import InitScript, InitScripts
 
 from PLC.Methods.GetSlivers import get_slivers
 
@@ -53,9 +54,12 @@ class GetSliceTicket(Method):
 
         # Tickets are the canonicalized XML-RPC methodResponse
         # representation of a partial GetSlivers() response, i.e.,
+	
+	initscripts = InitScripts(self.api, {'enabled': True})
 
         data = {
             'timestamp': int(time.time()),
+	    'initscripts': initscripts,
             'slivers': get_slivers(self.api, [slice['slice_id']]),
             }
 
