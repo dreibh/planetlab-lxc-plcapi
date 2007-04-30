@@ -72,6 +72,15 @@ def get_slivers(api, slice_filter, node = None):
                 attributes.append({'name': sliver_attribute['name'],
                                    'value': sliver_attribute['value']})
 
+	# set nodegroup slice attributes
+	for slice_attribute in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_attributes):
+	    # Do not set any nodegroup slice attributes for
+            # which there is at least one sliver attribute
+            # already set.
+	    if slice_attribute['name'] not in slice_attributes:
+		attributes.append({'name': slice_attribute['name'],
+				   'value': slice_attribute['value']})
+
         for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
             # Do not set any global slice attributes for
             # which there is at least one sliver attribute
@@ -196,7 +205,7 @@ class GetSlivers(Method):
 
         slivers = get_slivers(self.api, system_slice_ids + node['slice_ids'], node)
 
-	#node.update_last_contact()
+	node.update_last_contact()
 
         return {
             'timestamp': timestamp,
