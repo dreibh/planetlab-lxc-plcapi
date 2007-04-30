@@ -5,6 +5,7 @@ from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
 
@@ -34,12 +35,15 @@ class AddSliceAttribute(Method):
         Mixed(SliceAttribute.fields['value'],
 	      InitScript.fields['initscript_id']),
         Mixed(Node.fields['node_id'],
-              Node.fields['hostname'])
+              Node.fields['hostname'],
+	      None),
+	Mixed(NodeGroup.fields['nodegroup_id'],
+              NodeGroup.fields['name'])
         ]
 
     returns = Parameter(int, 'New slice_attribute_id (> 0) if successful')
 
-    def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None):
+    def call(self, auth, slice_id_or_name, attribute_type_id_or_name, value, node_id_or_hostname = None, nodegroup_id_or_name = None):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
@@ -84,6 +88,15 @@ class AddSliceAttribute(Method):
                 raise PLCInvalidArgument, "Node not in the specified slice"
 
             slice_attribute['node_id'] = node['node_id']
+
+	# Sliver attribute shared accross nodes if nodegroup is sepcified
+	if nodegroup_id_or_name is not None:
+	    nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
+	    if not nodegroups:
+		raise PLCInvalidArgument, "No such nodegroup"
+	    nodegroup = nodegroups[0]
+	
+	    slice_attribute['nodegroup_id'] = nodegroup['nodegroup_id']
 
         slice_attribute.sync()
 	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
