@@ -16,6 +16,7 @@ class SliceAttribute(Row):
         'slice_attribute_id': Parameter(int, "Slice attribute identifier"),
         'slice_id': Parameter(int, "Slice identifier"),
         'node_id': Parameter(int, "Node identifier, if a sliver attribute"),
+	'nodegroup_id': Parameter(int, "Nodegroup identifier, if a sliver attribute"),
         'attribute_type_id': SliceAttributeType.fields['attribute_type_id'],
         'name': SliceAttributeType.fields['name'],
         'description': SliceAttributeType.fields['description'],
