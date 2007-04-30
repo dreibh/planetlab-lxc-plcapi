@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.75 2007/04/11 20:31:15 tmack Exp $
+-- $Id: planetlab4.sql,v 1.76 2007/04/11 20:37:23 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -606,11 +606,13 @@ CREATE TABLE slice_attribute (
     slice_attribute_id serial PRIMARY KEY, -- Slice attribute identifier
     slice_id integer REFERENCES slices NOT NULL, -- Slice identifier
     node_id integer REFERENCES nodes, -- Sliver attribute if set
+    nodegroup_id integer REFERENCES nodegroups, -- Node group attribute if set
     attribute_type_id integer REFERENCES slice_attribute_types NOT NULL, -- Attribute type identifier
     value text
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
 CREATE INDEX slice_attribute_node_id_idx ON slice_attribute (node_id);
+CREATE INDEX slice_attribute_nodegroup_id_idx ON slice_attribute (nodegroup_id);
 
 CREATE VIEW slice_attributes AS
 SELECT slice_id,
@@ -978,6 +980,7 @@ SELECT
 slice_attribute.slice_attribute_id,
 slice_attribute.slice_id,
 slice_attribute.node_id,
+slice_attribute.nodegroup_id,
 slice_attribute_types.attribute_type_id,
 slice_attribute_types.name,
 slice_attribute_types.description,
