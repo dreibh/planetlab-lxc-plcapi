@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Events.py,v 1.11 2007/01/19 17:50:46 tmack Exp $
+# $Id: EventObjects.py,v 1.1 2007/02/27 18:54:32 tmack Exp $
 #
 
 from PLC.Faults import *
@@ -21,7 +21,7 @@ class EventObject(Row):
     table_name = 'event_object'
     primary_key = 'event_id'
     fields = {
-        'event_object.event_id': Parameter(int, "Event identifier"),
+        'event_id': Parameter(int, "Event identifier"),
         'person_id': Parameter(int, "Identifier of person responsible for event, if any"),
         'node_id': Parameter(int, "Identifier of node responsible for event, if any"),
         'fault_code': Parameter(int, "Event fault code"),
@@ -41,14 +41,36 @@ class EventObjects(Table):
 
     def __init__(self, api, event_filter = None, columns = None):
         Table.__init__(self, api, EventObject, columns)
+	
+	# Since we are querying a table (not a view) ensure that timestamps
+	# are converted to ints in the db before being returned
+	timestamps = ['time']
+	for col in self.columns:
+	    if col in timestamps:
+	        if isinstance(self.columns, (list, tuple, set)): 
+		    index = self.columns.index(col)
+	            self.columns[index] = "CAST(date_part('epoch', events.time) AS bigint) AS time"
+		elif isinstance(self.columns, dict):
+		    type = self.columns.pop(col)
+		    self.columns["CAST(date_part('epoch', events.time) AS bigint) AS time"] = type
+	    elif col in [EventObject.primary_key]:
+	       	if isinstance(self.columns, (list, tuple, set)):
+                    index = self.columns.index(col)
+                    self.columns[index] = EventObject.table_name+"."+EventObject.primary_key
+                elif isinstance(self.columns, dict):
+                    type = self.columns.pop(col)
+                    self.columns[EventObject.table_name+"."+EventObject.primary_key] = type
+			 
 	sql = "SELECT %s FROM event_object, events WHERE True" % \
             ", ".join(self.columns)
-        if event_filter is not None:
+        
+	if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):
                 event_filter = Filter(EventObject.fields, {'event_id': event_filter})
             elif isinstance(event_filter, dict):
                 event_filter = Filter(EventObject.fields, event_filter)
             sql += " AND (%s) " % event_filter.sql(api)
 	sql += " AND events.event_id = event_object.event_id " 
-	sql += " ORDER BY %s" % EventObject.primary_key
-        self.selectall(sql)
+	sql += " ORDER BY %s" % EventObject.table_name+"."+EventObject.primary_key
+        
+	self.selectall(sql)
