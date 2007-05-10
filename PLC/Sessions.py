@@ -1,9 +1,12 @@
+from types import StringTypes
 import random
 import base64
 import time
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+from PLC.Filter import Filter
+from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.Persons import Person, Persons
 from PLC.Nodes import Node, Nodes
@@ -61,14 +64,22 @@ class Sessions(Table):
     Representation of row(s) from the session table in the database.
     """
 
-    def __init__(self, api, session_ids = None, expires = int(time.time())):
+    def __init__(self, api, session_filter = None, expires = int(time.time())):
 	Table.__init__(self, api, Session)
 
         sql = "SELECT %s FROM view_sessions WHERE True" % \
               ", ".join(Session.fields)
 
-        if session_ids:
-            sql += " AND session_id IN (%s)" % ", ".join(map(api.db.quote, session_ids))
+	if session_filter is not None:
+	    if isinstance(session_filter, (list, tuple, set)):
+		# Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), session_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), session_filter)
+                session_filter = Filter(Session.fields, {'person_id': ints, 'session_id': strs})
+                sql += " AND (%s)" % session_filter.sql(api, "OR")
+	    elif isinstance(session_filter, dict):
+		session_filter = Filter(Session.fields, session_filter)
+		sql += " AND (%s)" % session_filter.sql(api, "AND")
 
         if expires is not None:
             if expires >= 0:
