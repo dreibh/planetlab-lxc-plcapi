@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.15 2006/11/09 19:43:55 mlhuang Exp $
+# $Id: NodeNetworks.py,v 1.16 2006/11/25 09:41:14 thierry Exp $
 #
 
 from types import StringTypes
@@ -108,6 +108,15 @@ class NodeNetwork(Row):
     validate_netmask = validate_ip
     validate_dns1 = validate_ip
     validate_dns2 = validate_ip
+
+    def validate_bwlimit(self, bwlimit):
+	if not bwlimit:
+	    return bwlimit
+
+	if bwlimit < 500000:
+	    raise PLCInvalidArgument, 'Minimum bw is 500 kbs'
+
+	return bwlimit	
 
     def validate_hostname(self, hostname):
         # Optional
