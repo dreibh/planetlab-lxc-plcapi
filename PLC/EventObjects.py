@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: EventObjects.py,v 1.1 2007/02/27 18:54:32 tmack Exp $
+# $Id: EventObjects.py,v 1.2 2007/05/07 20:07:42 tmack Exp $
 #
 
 from PLC.Faults import *
@@ -42,27 +42,25 @@ class EventObjects(Table):
     def __init__(self, api, event_filter = None, columns = None):
         Table.__init__(self, api, EventObject, columns)
 	
+	all_fields = EventObject.fields.keys()
+	if not columns:
+	    columns = all_fields
+	else:
+	    columns = filter(lambda column: column in all_fields, columns)
+	
 	# Since we are querying a table (not a view) ensure that timestamps
 	# are converted to ints in the db before being returned
 	timestamps = ['time']
-	for col in self.columns:
+	for col in columns:
 	    if col in timestamps:
-	        if isinstance(self.columns, (list, tuple, set)): 
-		    index = self.columns.index(col)
-	            self.columns[index] = "CAST(date_part('epoch', events.time) AS bigint) AS time"
-		elif isinstance(self.columns, dict):
-		    type = self.columns.pop(col)
-		    self.columns["CAST(date_part('epoch', events.time) AS bigint) AS time"] = type
+		index = columns.index(col)
+	        columns[index] = "CAST(date_part('epoch', events.time) AS bigint) AS time"
 	    elif col in [EventObject.primary_key]:
-	       	if isinstance(self.columns, (list, tuple, set)):
-                    index = self.columns.index(col)
-                    self.columns[index] = EventObject.table_name+"."+EventObject.primary_key
-                elif isinstance(self.columns, dict):
-                    type = self.columns.pop(col)
-                    self.columns[EventObject.table_name+"."+EventObject.primary_key] = type
+                index = columns.index(col)
+                columns[index] = EventObject.table_name+"."+EventObject.primary_key
 			 
 	sql = "SELECT %s FROM event_object, events WHERE True" % \
-            ", ".join(self.columns)
+            ", ".join(columns)
         
 	if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):
