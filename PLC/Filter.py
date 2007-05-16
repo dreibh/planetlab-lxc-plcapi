@@ -5,6 +5,8 @@ except NameError:
     from sets import Set
     set = Set
 
+import time
+
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type
 
@@ -29,6 +31,13 @@ class Filter(Parameter, dict):
     Special forms:
     * a field starting with the ~ character means negation.
     example :  { '~peer_id' : None }
+    * a field starting with < [  ] or > means lower than or greater than
+      < > uses strict comparison
+      [ ] is for using <= or >= instead
+    example :  { '>time' : 1178531418 }
+    example :  { ']event_id' : 2305 }
+    * a field starting with [ or ] means older than or more recent than
+      the associated value should be a given unix timestamp
     * a (string) value containing either a * or a % character is
       treated as a (sql) pattern; * are replaced with % that is the
       SQL wildcard character.
@@ -55,6 +64,15 @@ class Filter(Parameter, dict):
         # Null filter means no filter
         Parameter.__init__(self, self.fields, doc = doc, nullok = True)
 
+    # this code is not used anymore
+    # at some point the select in the DB for event objects was done on
+    # the events table directly, that is stored as a timestamp, thus comparisons
+    # needed to be done based on SQL timestamps as well
+    def unix2timestamp (self,unix):
+	s = time.gmtime(unix)
+	return "TIMESTAMP'%04d-%02d-%02d %02d:%02d:%02d'" % (s.tm_year,s.tm_mon,s.tm_mday,
+							     s.tm_hour,s.tm_min,s.tm_sec)
+
     def sql(self, api, join_with = "AND"):
         """
         Returns a SQL conditional that represents this filter.
@@ -69,13 +87,22 @@ class Filter(Parameter, dict):
             assert join_with in ("AND", "OR")
 
         for field, value in self.iteritems():
-            # provide for negation with a field starting with ~
-            negation=False
-            if field[0] == '~':
-                negation = True
-                field = field[1:]
+	    # handle negation, numeric comparisons
+	    # simple, 1-depth only mechanism
+
+	    modifiers={'~' : False, 
+		       '<' : False, '>' : False,
+		       '[' : False, ']' : False,
+		       }
+
+	    for char in modifiers.keys():
+		if field[0] == char:
+		    modifiers[char]=True;
+		    field = field[1:]
+		    break
 
             if field not in self.fields:
+#		print 'current fields',self.fields
                 raise PLCInvalidArgument, "Invalid filter field '%s'" % field
 
             if isinstance(value, (list, tuple, set)):
@@ -96,12 +123,23 @@ class Filter(Parameter, dict):
                     value = str(api.db.quote(value.replace("*", "%")))
 		else:
                     operator = "="
-                    value = str(api.db.quote(value))
+		    if modifiers['<']:
+			operator='<'
+		    if modifiers['>']:
+			operator='>'
+		    if modifiers['[']:
+			operator='<='
+		    if modifiers[']']:
+			operator='>='
+		    else:
+			value = str(api.db.quote(value))
 
             clause = "%s %s %s" % (field, operator, value)
-            if negation:
-                clause = " ( NOT %s ) "%clause
-                
+
+	    if modifiers['~']:
+		clause = " ( NOT %s ) " % (clause)
+
             conditionals.append(clause)
 
+#	print 'sql=',(" %s " % join_with).join(conditionals)
         return (" %s " % join_with).join(conditionals)
