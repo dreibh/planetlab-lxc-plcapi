@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.24 2007/04/11 20:28:28 tmack Exp $
+# $Id: Method.py,v 1.25 2007/05/16 16:11:10 tmack Exp $
 #
 
 import xmlrpclib
@@ -131,8 +131,9 @@ class Method:
 	    if args[0].has_key('AuthMethod'):
 	        auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
 	    	auth_method = args[0]['AuthMethod']
+		print auth_method
 		if auth_method in auth_methods:
-		    event['auth_method'] = auth_method
+		    event['auth_type'] = auth_method
             for password in 'AuthString', 'session':
                 if args[0].has_key(password):
                     auth = args[0].copy()
