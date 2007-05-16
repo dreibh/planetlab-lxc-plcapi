@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.23 2007/02/27 18:46:23 tmack Exp $
+# $Id: Method.py,v 1.24 2007/04/11 20:28:28 tmack Exp $
 #
 
 import xmlrpclib
@@ -98,8 +98,15 @@ class Method:
 	    return result
 
         except PLCFault, fault:
-            # Prepend method name to expected faults
-            fault.faultString = self.name + ": " + fault.faultString
+	
+	    caller = ""
+	    if isinstance(self.caller, Person):
+            	caller = 'person_id %s'  % self.caller['person_id']
+            elif isinstance(self.caller, Node):
+                caller = 'node_id %s'  % self.caller['node_id']
+
+            # Prepend caller and method name to expected faults
+            fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
 	    runtime = time.time() - start
 	    self.log(fault.faultCode, runtime, *args)
             raise fault
