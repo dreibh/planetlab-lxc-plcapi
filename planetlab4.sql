@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.76 2007/04/11 20:37:23 tmack Exp $
+-- $Id: planetlab4.sql,v 1.77 2007/04/30 18:53:50 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -509,6 +509,7 @@ CREATE TABLE slice_instantiations (
 INSERT INTO slice_instantiations (instantiation) VALUES ('not-instantiated'); -- Placeholder slice
 INSERT INTO slice_instantiations (instantiation) VALUES ('plc-instantiated'); -- Instantiated by Node Manager
 INSERT INTO slice_instantiations (instantiation) VALUES ('delegated'); -- Manually instantiated
+INSERT INTO slice_instantiations (instantiation) VALUES ('nm-controller'); -- NM Controller
 
 -- Slices
 CREATE TABLE slices (
