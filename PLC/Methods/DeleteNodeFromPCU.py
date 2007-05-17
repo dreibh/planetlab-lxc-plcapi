@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
+from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
 class DeleteNodeFromPCU(Method):
