@@ -204,9 +204,9 @@ class GetSlivers(Method):
         system_slice_ids = system_slice_attributes.keys()
 	
 	# Get nm-controller slices
-	nm_controller_slices = Slices(self.api, {'instantiation': 'nm-controller'}, ['slice_id']).dict('slice_id')
-	nm_controller_slice_ids = nm_controller_slices.keys()
-	slice_ids = system_slice_ids + nm_controller_slice_ids + node['slice_ids']
+	controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')
+	controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
+	slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
 
 	slivers = get_slivers(self.api, slice_ids, node)
 
