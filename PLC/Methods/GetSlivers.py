@@ -64,6 +64,8 @@ def get_slivers(api, slice_filter, node = None):
 
         # Per-node sliver attributes take precedence over global
         # slice attributes, so set them first.
+        # Then comes nodegroup slice attributes
+	# Followed by global slice attributes
         sliver_attributes = []
 
         if node is not None:
@@ -72,13 +74,13 @@ def get_slivers(api, slice_filter, node = None):
                 attributes.append({'name': sliver_attribute['name'],
                                    'value': sliver_attribute['value']})
 
-	# set nodegroup slice attributes
-	for slice_attribute in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_attributes):
-	    # Do not set any nodegroup slice attributes for
-            # which there is at least one sliver attribute
-            # already set.
-	    if slice_attribute['name'] not in slice_attributes:
-		attributes.append({'name': slice_attribute['name'],
+	    # set nodegroup slice attributes
+	    for slice_attribute in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_attributes):
+	        # Do not set any nodegroup slice attributes for
+                # which there is at least one sliver attribute
+                # already set.
+	        if slice_attribute['name'] not in slice_attributes:
+		    attributes.append({'name': slice_attribute['name'],
 				   'value': slice_attribute['value']})
 
         for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
