@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.31 2007/01/11 05:31:33 mlhuang Exp $
+# $Id: Nodes.py,v 1.32 2007/04/03 19:14:45 tmack Exp $
 #
 
 from types import StringTypes
@@ -95,6 +95,7 @@ class Node(Row):
 
     validate_date_created = Row.validate_timestamp
     validate_last_updated = Row.validate_timestamp
+    validate_last_contact = Row.validate_timestamp
 
     def update_last_contact(self, commit = True):
 	"""
