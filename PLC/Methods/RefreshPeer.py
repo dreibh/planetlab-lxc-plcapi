@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
-# $Id$
+# $Id: RefreshPeer.py,v 1.23 2007/03/23 19:05:16 thierry Exp $
 
 import time
 
@@ -228,6 +228,11 @@ class RefreshPeer(Method):
 
         # Keyed on foreign person_id
         old_peer_persons = Persons(self.api, {'peer_id': peer_id}, columns).dict('peer_person_id')
+
+	# artificially attach the persons returned by GetPeerData to the new peer 
+	# this is because validate_email needs peer_id to be correct when checking for duplicates 
+	for person in peer_tables['Persons']: 
+	    person['peer_id']=peer_id
         persons_at_peer = dict([(peer_person['person_id'], peer_person) \
                                 for peer_person in peer_tables['Persons']])
 

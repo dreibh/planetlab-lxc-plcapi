@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.35 2007/03/29 13:17:09 tmack Exp $
+# $Id: Persons.py,v 1.36 2007/03/29 20:14:46 tmack Exp $
 #
 
 from types import StringTypes
@@ -100,8 +100,15 @@ class Person(Row):
         if len(domain) < 2:
             raise invalid_email
 
-        conflicts = Persons(self.api, [email])
-        for person in conflicts:
+       	# check only against users on the same peer  
+	if 'peer_id' in self:
+            namespace_peer_id = self['peer_id']
+        else:
+            namespace_peer_id = None
+         
+	conflicts = Persons(self.api, {'email':email,'peer_id':namespace_peer_id}) 
+	
+	for person in conflicts:
             if 'person_id' not in self or self['person_id'] != person['person_id']:
                 raise PLCInvalidArgument, "E-mail address already in use"
 
