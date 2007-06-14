@@ -67,6 +67,9 @@ class AddSlice(Method):
                                                                                                          len(site['slice_ids']),
                                                                                                          site['max_slices'])
 
+	if not site['enabled']:
+	    raise PLCInvalidArgument, "Site %s is disabled can cannot create slices" % (site['name'])
+	 
         slice = Slice(self.api, slice_fields)
         slice['creator_person_id'] = self.caller['person_id']
         slice['site_id'] = site['site_id']
