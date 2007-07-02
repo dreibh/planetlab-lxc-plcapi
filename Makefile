@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.10 2006/12/15 16:20:20 mlhuang Exp $
+# $Id: Makefile,v 1.11 2006/12/18 17:55:58 mlhuang Exp $
 #
 
 # Metafiles
@@ -42,6 +42,7 @@ install: $(modules-install)
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
+	install -D -m 755 refresh-peer.py $(DESTDIR)/$(bindir)/refresh-peer.py
 
 $(subdirs): $(init) $(modules)
 
