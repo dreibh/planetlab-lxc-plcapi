@@ -41,6 +41,8 @@ class AddSliceToNodesWhitelist(Method):
         # Get specified nodes, add them to the slice         
         nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
+	    if node['peer_id'] is not None:
+                raise PLCInvalidArgument, "%s not a local node" % node['hostname']
             if slice['slice_id'] not in node['slice_ids_whitelist']:
                 slice.add_to_node_whitelist(node, commit = False)
 	    
