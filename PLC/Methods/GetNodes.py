@@ -37,7 +37,13 @@ class GetNodes(Method):
         # Remove admin only fields
         if not isinstance(self.caller, Person) or \
            'admin' not in self.caller['roles']:
+	    slice_ids = set(self.caller['slice_ids'])
             for node in nodes:
+		# if node has whitelist, make sure the user has a slice on the whitelist 
+	        if node['slice_ids_whitelist'] and \
+		   not slice_ids.intersection(node['slice_ids_whitelist']):
+	 	    nodes.remove(node)
+		    continue 
                 for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
                     if field in node:
                         del node[field]
