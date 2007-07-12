@@ -8,7 +8,7 @@ from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiation, SliceInstantiations
-from PLC.Nodes import Node, Nodes
+from PLC.Nodes import Node
 from PLC.Persons import Person, Persons
 
 class Slice(Row):
@@ -21,7 +21,7 @@ class Slice(Row):
 
     table_name = 'slices'
     primary_key = 'slice_id'
-    join_tables = ['slice_node', 'slice_person', 'slice_attribute', 'peer_slice']
+    join_tables = ['slice_node', 'slice_person', 'slice_attribute', 'peer_slice', 'node_slice_whitelist']
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
@@ -93,6 +93,9 @@ class Slice(Row):
 
     add_node = Row.add_object(Node, 'slice_node')
     remove_node = Row.remove_object(Node, 'slice_node')
+
+    add_to_node_whitelist = Row.add_object(Node, 'node_slice_whitelist')
+    delete_from_node_whitelist = Row.remove_object(Node, 'node_slice_whitelist')
 
     def sync(self, commit = True):
         """
