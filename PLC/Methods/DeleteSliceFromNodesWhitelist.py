@@ -41,7 +41,9 @@ class DeleteSliceFromNodesWhitelist(Method):
         # Get specified nodes, add them to the slice         
         nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
-            if slice['slice_id'] in node['slice_ids_whitelist']:
+            if node['peer_id'] is not None:
+                raise PLCInvalidArgument, "%s not a local node" % node['hostname']
+	    if slice['slice_id'] in node['slice_ids_whitelist']:
                 slice.delete_from_node_whitelist(node, commit = False)
 
         slice.sync()
