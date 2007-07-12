@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.32 2007/04/03 19:14:45 tmack Exp $
+# $Id: Nodes.py,v 1.33 2007/06/08 17:59:53 tmack Exp $
 #
 
 from types import StringTypes
@@ -17,6 +17,7 @@ from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.BootStates import BootStates
+#from PLC.Slices import Slice, Slices
 
 def valid_hostname(hostname):
     # 1. Each part begins and ends with a letter or number.
@@ -38,7 +39,7 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node']
+    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node', 'node_slice_whitelist']
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
@@ -58,6 +59,7 @@ class Node(Row):
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
         'slice_ids': Parameter([int], "List of slices on this node"),
+	'slice_ids_whitelist': Parameter([int], "List of slices allowed on this node"),
         'pcu_ids': Parameter([int], "List of PCUs that control this node"),
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
@@ -108,7 +110,7 @@ class Node(Row):
 	self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
 		       " where node_id = %d" % ( self['node_id']) )
 	self.sync(commit)
-		
+
     def delete(self, commit = True):
         """
         Delete existing node.
