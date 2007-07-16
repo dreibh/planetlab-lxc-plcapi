@@ -40,7 +40,7 @@ class GetNodes(Method):
 	    slice_ids = set(self.caller['slice_ids'])
             for node in nodes:
 		# if node has whitelist, make sure the user has a slice on the whitelist 
-	        if node['slice_ids_whitelist'] and \
+	        if 'slice_ids_whitelist' in node and \
 		   not slice_ids.intersection(node['slice_ids_whitelist']):
 	 	    nodes.remove(node)
 		    continue 
