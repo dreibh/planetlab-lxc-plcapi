@@ -43,6 +43,7 @@ class GetNodes(Method):
             for node in nodes:
 		# if node has whitelist, make sure the user has a slice on the whitelist 
 	        if 'slice_ids_whitelist' in node and \
+		   node['slice_ids_whitelist'] and \
 		   not slice_ids.intersection(node['slice_ids_whitelist']):
 	 	    nodes.remove(node)
 		    continue 
