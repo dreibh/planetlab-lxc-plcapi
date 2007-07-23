@@ -31,7 +31,15 @@ class GetNodes(Method):
 
 
     def call(self, auth, node_filter = None, return_fields = None):
-        # Get node information
+        
+	# Must query at least slice_ids_whitelist
+	if return_fields is not None:
+	    added_fields = set(['slice_ids_whitelist']).difference(return_fields)
+	    return_fields += added_fields
+	else:
+	    added_fields =[]	
+
+	# Get node information
         nodes = Nodes(self.api, node_filter, return_fields)
 
         # Remove admin only fields
@@ -40,15 +48,21 @@ class GetNodes(Method):
 	    slice_ids = set()
 	    if self.caller:
 	        slice_ids.update(self.caller['slice_ids'])
-            for node in nodes:
-		# if node has whitelist, make sure the user has a slice on the whitelist 
+	    # if node has whitelist, make sure the user has a slice on the whitelist 
+            for node in nodes[:]:
 	        if 'slice_ids_whitelist' in node and \
 		   node['slice_ids_whitelist'] and \
 		   not slice_ids.intersection(node['slice_ids_whitelist']):
 	 	    nodes.remove(node)
-		    continue 
-                for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
+            for node in nodes:    
+		for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
                     if field in node:
                         del node[field]
+	
+	# remove added fields if not specified
+	if added_fields:
+	    for node in nodes:
+		for field in added_fields:
+		    del node[field]	
 
         return nodes
