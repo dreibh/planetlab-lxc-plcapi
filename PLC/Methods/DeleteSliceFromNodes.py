@@ -17,7 +17,7 @@ class DeleteSliceFromNodes(Method):
 
     accepts = [
         Auth(),
-        Mixed(Slice.fields['slice_id'],
+       Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
 	[Mixed(Node.fields['node_id'],
                Node.fields['hostname'])]
@@ -32,9 +32,6 @@ class DeleteSliceFromNodes(Method):
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
 
-        if slice['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local slice"
-
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
                 pass
@@ -48,6 +45,8 @@ class DeleteSliceFromNodes(Method):
 	# Get specified nodes
         nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
+	    if slice['peer_id'] is not None and node['peer_id'] is not None:
+		raise PLCPermissionDenied, "Not allowed to remove peer slice from peer node"
             if slice['slice_id'] in node['slice_ids']:
                 slice.remove_node(node, commit = False)
 
