@@ -49,6 +49,11 @@ class AddSliceToNodes(Method):
         # Get specified nodes, add them to the slice         
         nodes = Nodes(self.api, node_id_or_hostname_list)
 	for node in nodes:
+	    # check the slice whitelist on each node first
+	    if node['slice_ids_whitelist'] and \
+	       slice['slice_id'] not in node['slice_ids_whitelist']:
+		raise PLCInvalidArgument, "%s is not on %s's whitelist" % \
+		  (slice['name'], node['hostname'])
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
 
