@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.78 2007/05/17 16:06:46 tmack Exp $
+-- $Id: planetlab4.sql,v 1.79 2007/07/12 17:48:19 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -293,6 +293,7 @@ CREATE VIEW site_nodes AS
 SELECT site_id,
 array_accum(node_id) AS node_ids
 FROM nodes
+WHERE deleted IS false
 GROUP BY site_id;
 
 -- slice whitelist on nodes
