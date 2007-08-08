@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql,v 1.79 2007/07/12 17:48:19 tmack Exp $
+-- $Id: planetlab4.sql,v 1.80 2007/08/01 17:01:01 tmack Exp $
 --
 
 SET client_encoding = 'UNICODE';
@@ -295,22 +295,6 @@ array_accum(node_id) AS node_ids
 FROM nodes
 WHERE deleted IS false
 GROUP BY site_id;
-
--- slice whitelist on nodes
-CREATE TABLE node_slice_whitelist (
-    node_id integer REFERENCES nodes NOT NULL, -- Node id of whitelist
-    slice_id integer REFERENCES slices NOT NULL, -- Slice id thats allowd on this node
-    PRIMARY KEY (node_id, slice_id)
-) WITH OIDS;
-CREATE INDEX node_slice_whitelist_node_id_idx ON node_slice_whitelist (node_id);
-CREATE INDEX node_slice_whitelist_slice_id_idx ON node_slice_whitelist (slice_id);
-
--- Slices on each node
-CREATE VIEW node_slices_whitelist AS
-SELECT node_id, 
-array_accum(slice_id) AS slice_ids_whitelist
-FROM node_slice_whitelist
-GROUP BY node_id;
 
 --------------------------------------------------------------------------------
 -- Node groups
@@ -606,6 +590,25 @@ SELECT person_id,
 array_accum(slice_id) AS slice_ids
 FROM slice_person
 GROUP BY person_id;
+
+--------------------------------------------------------------------------------
+-- Slice whitelist
+--------------------------------------------------------------------------------
+-- slice whitelist on nodes
+CREATE TABLE node_slice_whitelist (
+    node_id integer REFERENCES nodes NOT NULL, -- Node id of whitelist
+    slice_id integer REFERENCES slices NOT NULL, -- Slice id thats allowd on this node
+    PRIMARY KEY (node_id, slice_id)
+) WITH OIDS;
+CREATE INDEX node_slice_whitelist_node_id_idx ON node_slice_whitelist (node_id);
+CREATE INDEX node_slice_whitelist_slice_id_idx ON node_slice_whitelist (slice_id);
+
+-- Slices on each node
+CREATE VIEW node_slices_whitelist AS
+SELECT node_id,
+array_accum(slice_id) AS slice_ids_whitelist
+FROM node_slice_whitelist
+GROUP BY node_id;
 
 --------------------------------------------------------------------------------
 -- Slice attributes
