@@ -1,7 +1,7 @@
 Summary: PlanetLab Central API
 Name: PLCAPI
-Version: 4.0
-Release: 1%{?pldistro:.%{pldistro}}%{?date:.%{date}}
+Version: 4.1
+Release: 2%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 License: PlanetLab
 Group: System Environment/Daemons
 URL: http://cvs.planet-lab.org/cvs/new_plc_api
