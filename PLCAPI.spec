@@ -74,7 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/plcsh
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
-%{_bindir}/refresh-peer.py
+%{_bindir}/refresh-peer.py*
 
 %changelog
 * Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> - 
