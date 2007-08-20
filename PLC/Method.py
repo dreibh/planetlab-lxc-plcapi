@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.27 2007/05/16 18:56:03 tmack Exp $
+# $Id: Method.py,v 1.28 2007/08/20 19:11:08 tmack Exp $
 #
 
 import xmlrpclib
@@ -93,7 +93,7 @@ class Method:
 	    runtime = time.time() - start
 
             if self.api.config.PLC_API_DEBUG: #or hasattr(self, 'message'):
-		self.log(0, runtime, *args)
+		self.log(None, runtime, *args)
 	    	
 	    return result
 
@@ -108,10 +108,10 @@ class Method:
             # Prepend caller and method name to expected faults
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
 	    runtime = time.time() - start
-	    self.log(fault.faultCode, runtime, *args)
+	    self.log(fault, runtime, *args)
             raise fault
 
-    def log(self, fault_code, runtime, *args):
+    def log(self, fault, runtime, *args):
         """
         Log the transaction 
         """	
@@ -122,7 +122,9 @@ class Method:
 
         # Create a new event
         event = Event(self.api)
-        event['fault_code'] = fault_code
+	event['fault_code'] = 0
+	if fault:
+            event['fault_code'] = fault.faultCode
         event['runtime'] = runtime
 
         # Redact passwords and sessions
@@ -159,7 +161,9 @@ class Method:
 	
 
 	# Set the message for this event
-	if hasattr(self, 'message'):
+	if fault:
+	    event['message'] = fault.faultString
+	elif hasattr(self, 'message'):
             event['message'] = self.message	
 	
         # Commit
