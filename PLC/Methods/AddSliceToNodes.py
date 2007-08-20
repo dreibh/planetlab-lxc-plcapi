@@ -47,7 +47,7 @@ class AddSliceToNodes(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 	
         # Get specified nodes, add them to the slice         
-        nodes = Nodes(self.api, node_id_or_hostname_list)
+        nodes = Nodes(self.api, node_id_or_hostname_list, ['node_id', 'hostname', 'slice_ids', 'slice_ids_whitelist'])
 	for node in nodes:
 	    # check the slice whitelist on each node first
 	    if node['slice_ids_whitelist'] and \
