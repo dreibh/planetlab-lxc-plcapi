@@ -1,7 +1,7 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import Auth, BootAuth
+from PLC.Auth import Auth, BootAuth, SessionAuth
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 
@@ -22,7 +22,7 @@ class BootUpdateNode(Method):
     nodenetwork_fields = dict(filter(can_update, NodeNetwork.fields.items()))
 
     accepts = [
-        BootAuth(),
+        Mixed(BootAuth(), SessionAuth()),
         {'boot_state': Node.fields['boot_state'],
          'primary_network': nodenetwork_fields,
          'ssh_host_key': Node.fields['ssh_rsa_key']}
