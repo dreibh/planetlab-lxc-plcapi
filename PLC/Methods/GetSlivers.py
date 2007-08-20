@@ -17,7 +17,7 @@ from PLC.InitScripts import InitScript, InitScripts
 
 def get_slivers(api, slice_filter, node = None):
     # Get slice information
-    slices = Slices(api, slice_filter)
+    slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_attribute_ids'])
 
     # Build up list of users and slice attributes
     person_ids = set()
