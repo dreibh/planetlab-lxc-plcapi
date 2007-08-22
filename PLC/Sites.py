@@ -101,6 +101,18 @@ class Site(Row):
     add_address = Row.add_object(Address, 'site_address')
     remove_address = Row.remove_object(Address, 'site_address')
 
+    def update_last_updated(self, commit = True):
+        """
+        Update last_updated field with current time
+        """
+
+        assert 'site_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+                       " where site_id = %d" % (self['site_id']) )
+        self.sync(commit)    
+
     def delete(self, commit = True):
         """
         Delete existing site.

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.36 2007/03/29 20:14:46 tmack Exp $
+# $Id: Persons.py,v 1.37 2007/06/14 16:26:01 tmack Exp $
 #
 
 from types import StringTypes
@@ -216,6 +216,18 @@ class Person(Row):
         # Make sure that the primary site is first in the list
         self['site_ids'].remove(site_id)
         self['site_ids'].insert(0, site_id)
+
+    def update_last_updated(self, commit = True):
+        """
+        Update last_updated field with current time
+        """
+	
+	assert 'person_id' in self
+	assert self.table_name
+	
+	self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+                       " where person_id = %d" % (self['person_id']) )
+        self.sync(commit)
 
     def delete(self, commit = True):
         """

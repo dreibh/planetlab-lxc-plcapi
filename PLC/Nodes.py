@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.33 2007/06/08 17:59:53 tmack Exp $
+# $Id: Nodes.py,v 1.34 2007/07/12 17:55:02 tmack Exp $
 #
 
 from types import StringTypes
@@ -108,7 +108,19 @@ class Node(Row):
 	assert self.table_name
 
 	self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
-		       " where node_id = %d" % ( self['node_id']) )
+		       " where node_id = %d" % (self['node_id']) )
+	self.sync(commit)
+
+    def update_last_updated(self, commit = True):
+	"""
+	Update last_updated field with current time
+	"""
+	
+	assert 'node_id' in self
+	assert self.table_name
+	
+	self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+		       " where node_id = %d" % (self['node_id']) )
 	self.sync(commit)
 
     def delete(self, commit = True):
