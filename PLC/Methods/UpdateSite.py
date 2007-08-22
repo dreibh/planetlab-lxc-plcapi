@@ -60,6 +60,7 @@ class UpdateSite(Method):
                     del site_fields[key]
 
         site.update(site_fields)
+	site.update_last_updated(False)
 	site.sync()
 	
 	# Logging variables

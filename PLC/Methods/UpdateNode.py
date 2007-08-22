@@ -60,6 +60,7 @@ class UpdateNode(Method):
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
         node.update(node_fields)
+	node.update_last_updated(False)
         node.sync()
 	
 	# Logging variables

@@ -53,6 +53,7 @@ class UpdatePerson(Method):
             raise PLCPermissionDenied, "Not allowed to update specified account"
 
         person.update(person_fields)
+	person.update_last_updated(False)
         person.sync()
 	
 	# Logging variables
