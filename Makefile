@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.12 2007/07/02 19:28:52 tmack Exp $
+# $Id: Makefile,v 1.13 2007/08/31 02:46:47 mef Exp $
 #
 
 # Metafiles
@@ -16,7 +16,7 @@ modules := psycopg2
 # Temporarily until we can kill the Fedora Core 2 build
 curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
 pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
-pycurl_incompatnum := $(shell printf %d 0x070f00) # 7.16.0
+pycurl_incompatnum := $(shell printf %d 0x071000) # 7.16.0
 ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
 ifeq ($(shell test $(curl_vernum) -ge $(pycurl_incompatnum) && echo 0),1)
 modules += pycurl
