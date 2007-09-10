@@ -7,18 +7,14 @@ from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 from PLC.Keys import Key, Keys
 
-
-slice_fields = ['slice_id', 'name']
-person_fields = ['person_id', 'email']
-key_fields = ['key']
-
 class GetSliceKeys(Method):
     """
-    Returns an array of structs containing details about users/public keys 
-    in slices. If slice_filter is specified and is an array of slice 
-    identifiers or slice names, or a struct of slice attributes, only 
-    slices matching the filter will be returned. If return_fields is 
-    specified, only the specified details will be returned.
+    Returns an array of structs containing public key info for users in 
+    the specified slices. If slice_filter is specified and is an array 
+    of slice identifiers or slice names, or a struct of slice 
+    attributes, only slices matching the filter will be returned. If 
+    return_fields is specified, only the specified details will be 
+    returned.
 
     Users may only query slices of which they are members. PIs may
     query any of the slices at their sites. Admins and nodes may query
