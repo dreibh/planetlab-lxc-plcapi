@@ -27,7 +27,7 @@ def get_slivers(api, slice_filter, node = None):
         slice_attribute_ids.update(slice['slice_attribute_ids'])
 
     # Get user information
-    all_persons = Persons(api, person_ids, ['person_id', 'enabled', 'key_ids']).dict()
+    all_persons = Persons(api, {'person_id':person_ids,'enabled':True}, ['person_id', 'enabled', 'key_ids']).dict()
 
     # Build up list of keys
     key_ids = set()

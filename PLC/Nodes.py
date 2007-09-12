@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py,v 1.34 2007/07/12 17:55:02 tmack Exp $
+# $Id: Nodes.py 800 2007-08-30 03:49:35Z thierry $
 #
 
 from types import StringTypes
@@ -17,7 +17,6 @@ from PLC.Debug import profile
 from PLC.Table import Row, Table
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.BootStates import BootStates
-#from PLC.Slices import Slice, Slices
 
 def valid_hostname(hostname):
     # 1. Each part begins and ends with a letter or number.
@@ -39,7 +38,8 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    join_tables = ['nodegroup_node', 'conf_file_node', 'nodenetworks', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node', 'node_slice_whitelist']
+    # Thierry -- we use delete on nodenetworks so the related NodeNetworkSettings get deleted too
+    join_tables = ['nodegroup_node', 'conf_file_node', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node','node_slice_whitelist']
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
@@ -108,19 +108,7 @@ class Node(Row):
 	assert self.table_name
 
 	self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
-		       " where node_id = %d" % (self['node_id']) )
-	self.sync(commit)
-
-    def update_last_updated(self, commit = True):
-	"""
-	Update last_updated field with current time
-	"""
-	
-	assert 'node_id' in self
-	assert self.table_name
-	
-	self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
-		       " where node_id = %d" % (self['node_id']) )
+		       " where node_id = %d" % ( self['node_id']) )
 	self.sync(commit)
 
     def delete(self, commit = True):
@@ -129,6 +117,11 @@ class Node(Row):
         """
 
         assert 'node_id' in self
+	assert 'nodenetwork_ids' in self
+
+	# we need to clean up NodeNetworkSettings, so handling nodenetworks as part of join_tables does not work
+	for nodenetwork in NodeNetworks(self.api,self['nodenetwork_ids']):
+	    nodenetwork.delete()
 
         # Clean up miscellaneous join tables
         for table in self.join_tables:
@@ -162,5 +155,13 @@ class Nodes(Table):
             elif isinstance(node_filter, dict):
                 node_filter = Filter(Node.fields, node_filter)
                 sql += " AND (%s)" % node_filter.sql(api, "AND")
+            elif isinstance (node_filter, StringTypes):
+                node_filter = Filter(Node.fields, {'hostname':[node_filter]})
+                sql += " AND (%s)" % node_filter.sql(api, "AND")
+            elif isinstance (node_filter, int):
+                node_filter = Filter(Node.fields, {'node_id':[node_filter]})
+                sql += " AND (%s)" % node_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong node filter %r"%node_filter
 
         self.selectall(sql)

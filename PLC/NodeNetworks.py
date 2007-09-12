@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py,v 1.16 2006/11/25 09:41:14 thierry Exp $
+# $Id: NodeNetworks.py 793 2007-08-28 15:21:17Z thierry $
 #
 
 from types import StringTypes
@@ -48,6 +48,7 @@ class NodeNetwork(Row):
 
     table_name = 'nodenetworks'
     primary_key = 'nodenetwork_id'
+    join_tables = ['nodenetwork_setting']
     fields = {
         'nodenetwork_id': Parameter(int, "Node interface identifier"),
         'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')"),
@@ -64,6 +65,7 @@ class NodeNetwork(Row):
         'hostname': Parameter(str, "(Optional) Hostname", nullok = True),
         'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
+        'nodenetwork_setting_ids' : Parameter([int], "List of nodenetwork settings"),
         }
 
     def validate_method(self, method):
@@ -207,7 +209,7 @@ class NodeNetworks(Table):
     def __init__(self, api, nodenetwork_filter = None, columns = None):
         Table.__init__(self, api, NodeNetwork, columns)
 
-        sql = "SELECT %s FROM nodenetworks WHERE True" % \
+        sql = "SELECT %s FROM view_nodenetworks WHERE True" % \
               ", ".join(self.columns)
 
         if nodenetwork_filter is not None:
@@ -215,6 +217,10 @@ class NodeNetworks(Table):
                 nodenetwork_filter = Filter(NodeNetwork.fields, {'nodenetwork_id': nodenetwork_filter})
             elif isinstance(nodenetwork_filter, dict):
                 nodenetwork_filter = Filter(NodeNetwork.fields, nodenetwork_filter)
+            elif isinstance(nodenetwork_filter, int):
+                nodenetwork_filter = Filter(NodeNetwork.fields, {'nodenetwork_id': [nodenetwork_filter]})
+            else:
+                raise PLCInvalidArgument, "Wrong node network filter %r"%nodenetwork_filter
             sql += " AND (%s)" % nodenetwork_filter.sql(api)
 
         self.selectall(sql)

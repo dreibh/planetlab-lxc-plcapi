@@ -7,27 +7,71 @@
 ### two separate instances of myplc
 ### for now they are located on the same box on lurch
 ###
-### expectations :
+### requirements :
 ### your myplcs should more or less come out of the box, 
 ### I prefer not to alter the default PLC_ROOT_USER value,
 ### instead we create a PI account on the site_id=1
 ###
 ##############################
 
-### xxx todo
-# check sites
-# check persons
+subversion_id="$Id: TestPeers.py 560 2007-06-20 13:23:09Z thierry $"
 
-# support reloading without wiping everything off
-# dunno how to do (defvar plc)
-
-import getopt
 import sys
 import time
+import os
+
+sys.path.append("..")
 
 from PLC.Shell import Shell
 import PLC.Methods
 
+####################
+
+## try to support reload
+try:
+    globals()['plc']
+except:
+    plc=[None,None,None]
+try:
+    globals()['s']
+except:
+    s=[None,None,None]
+    
+####################
+plc[1]={ 'plcname':'FederationTestPlc1',
+         'hostname':'caicol.inria.fr',
+         'url-format':'https://%s:443/PLCAPI/',
+         'builtin-admin-id':'root@plc1.inria.fr',
+         'builtin-admin-password':'root',
+         'peer-admin-name':'peer1@planet-lab.org',
+         'peer-admin-password':'peer',
+         'node-format':'n1-%03d.plc1.org',
+         'plainname' : 'one',
+         'site-format':'one%s',
+         'person-format' : 'user-%d@plc.org',
+         'key-format':'ssh-rsa somekey4plctestbed user%d-key%d',
+         'person-password' : 'password1',
+	 'gpg-keyring':'gpg_plc2.pub',
+	 'api-cacert':'api_plc2.crt',
+       }
+plc[2]={ 'plcname':'FederationTestPlc2',
+         'hostname':'jamaica.inria.fr',
+         'url-format':'https://%s:443/PLCAPI/',
+         'builtin-admin-id':'root@plc2.inria.fr',
+         'builtin-admin-password':'root',
+         'peer-admin-name':'peer2@planet-lab.org',
+         'peer-admin-password':'peer',
+         'node-format':'n2-%03d.plc2.org',
+         'plainname' : 'two',
+         'site-format':'two%s',
+         'person-format' : 'user-%d@plc.org',
+         'key-format':'ssh-rsa somekey4plctestbed user%d-key%d',
+         'person-password' : 'password2',
+	 'gpg-keyring':'gpg_plc1.pub',
+	 'api-cacert':'api_plc1.crt',
+       }
+
+####################
 # when running locally, we might wish to run only our local stuff
 dummy_print_methods = [ 'RefreshPeer' ]
 class DummyShell:
@@ -49,25 +93,11 @@ class DummyShell:
                 setattr(self,method,DummyShell.Callable(method,self.index))
         
 ####################
-#import xmlrpclib
-import os
-
-## try to support reload
-try:
-    globals()['plc']
-except:
-    plc=[None,None,None]
-try:
-    globals()['s']
-except:
-    s=[None,None,None]
-    
-####################
 # predefined stuff
 # number of 'system' persons
-# builtin maint, local root, 2 persons for the peering
-system_persons = 4
-# among that, 1 gets refreshed - other ones have conflicting names
+# builtin maint, local root, 1 person for the peering
+system_persons = 3
+# among that, 1 gets refreshed - other ones are considered 'system'
 system_persons_cross = 1
 
 system_slices_ids = (1,)
@@ -174,40 +204,6 @@ mini()
 plain_numbers=['zero','one','two','three','four','five','six','seven','eight','nine','ten',
 	       'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty']
 plain_digits=['a','b','c','d','e','f','g','h','i','j']
-####################
-plc[1]={ 'plcname':'Thierry plc1',
-         'hostname':'planetlab-devbox.inria.fr',
-         'url-format':'https://%s:443/PLCAPI/',
-         'builtin-admin-id':'root@plc1.org',
-         'builtin-admin-password':'root',
-         'peer-admin-name':'peer1@planet-lab.org',
-         'peer-admin-password':'peer',
-         'node-format':'n1-%03d.plc1.org',
-         'plainname' : 'one',
-         'site-format':'one%s',
-         'person-format' : 'user1-%d@plc1.org',
-         'key-format':'ssh-rsa 11key4plc11 user%d-key%d',
-         'person-password' : 'password1',
-	 'gpg-keyring':'gpg_plc2.pub',
-	 'api-cacert':'api_plc2.crt',
-       }
-plc[2]={ 'plcname':'Thierry plc2',
-         'hostname':'lurch.cs.princeton.edu',
-         'url-format':'https://%s:443/PLCAPI/',
-         'builtin-admin-id':'root@plc2.org',
-         'builtin-admin-password':'root',
-         'peer-admin-name':'peer2@planet-lab.org',
-         'peer-admin-password':'peer',
-         'node-format':'n2-%03d.plc2.org',
-         'plainname' : 'two',
-         'site-format':'two%s',
-         'person-format' : 'user2-%d@plc2.org',
-         'key-format':'ssh-rsa 22key4plc22 user%d-key%d',
-         'person-password' : 'password2',
-	 'gpg-keyring':'gpg_plc1.pub',
-	 'api-cacert':'api_plc1.crt',
-       }
-
 ####################
 def peer_index(i):
     return 3-i
@@ -526,39 +522,6 @@ def test00_peer (args=[1,2]):
             except Exception,e:
                 print 'Could not create peer,',e
     
-# push various stuff across hosts through external ssh/scp
-# this is broken, use peers-test.mk instead
-#def test00_push_public_peer_material (args=[1,2]):
-#    for i in args:
-#	peer=peer_index(i)
-#
-#	### the gpg keyring
-#	# refresh
-#	local_keyring="/etc/planetlab/gpg_keyring.pub"
-#	command="ssh root@%s gpg --homedir=/etc/planetlab --export --armor > %s"\
-#	       %(plc[i]['hostname'],local_keyring)
-#	retcod=os.system(command)
-#	print '#',command,'->',retcod
-#
-#    for i in args:
-#	peer=peer_index(i)
-#	# push
-#	src_url='root@%s:%s'%(plc[i]['hostname'],local_keyring)
-#	dst_url='root@%s:%s'%(plc[peer]['hostname'], plc[i]['gpg-keyring'])
-#	command = 'scp %s %s'%(src_url,dst_url)
-#	retcod=os.system(command)
-#	print '#',command,'->',retcod
-#	
-#    for i in args:
-#	peer=peer_index(i)
-#	# push cacert
-#	local_cacert='/etc/planetlab/api_ca_ssl.crt'
-#	src_url='root@%s:%s'%(plc[i]['hostname'],local_cacert)
-#	dst_url='root@%s:%s'%(plc[peer]['hostname'], plc[i]['api-cacert'])
-#	command = 'scp %s %s'%(src_url,dst_url)
-#	retcod=os.system(command)
-#	print '#',command,'->',retcod
-
 # this one gets cached 
 def get_peer_id (i):
     try:
@@ -574,17 +537,9 @@ def test00_refresh (message,args=[1,2]):
     print '=== refresh',message
     timer_show()
     for i in args:
-        print '%02d:== Refreshing peer'%(i),
-        retcod=s[i].RefreshPeer(get_peer_id(i))
-        keys=retcod.keys()
-        keys.sort()
-        print "Result: {",
-        for key in keys:
-            if "time" not in key:
-                print key,retcod[key],
-        print "}"
+        print '%02d:== Refreshing peer'%(i)
+        timers=s[i].RefreshPeer(get_peer_id(i))
         print "+++ ellapsed: {",
-        timers=retcod
         keys=timers.keys()
         keys.sort()
         for key in keys:
@@ -846,7 +801,7 @@ def p_node(n):
 
 def p_slice(s):
     print 'name: %-12s'%s['name'],'id: %02d'%s['slice_id'],'peer:',s['peer_id'],'nodes=',s['node_ids'],'persons=',s['person_ids']
-    print '---','sa_ids=',s['slice_attribute_ids'],'creator: %03d'%s['creator_person_id']
+    print '---','sa_ids=',s['slice_attribute_ids'],'creator: %03r'%s['creator_person_id']
     print "--- 'expires':",s['expires']
 
 def p_sat(sat):
@@ -1031,11 +986,11 @@ def test_all_addslices ():
     message ("CREATING SLICES on plc1")
     test04_slice ([1])
 
-    check_slices (total_slices(),system_slices(),[1])
-    check_slices (system_slices(),system_slices(),[2])
+    check_slices (total_slices(),0,[1])
+    check_slices (system_slices(),0,[2])
     test00_refresh ("after slice created on plc1")
-    check_slices (total_slices(),system_slices(),[1])
-    check_slices (system_slices(),total_slices(),[2])
+    check_slices (total_slices(),0,[1])
+    check_slices (system_slices(),number_slices,[2])
     # no slice has any node yet
     check_local_slice_nodes(0,[1])
     check_foreign_slice_nodes(0,[2])
@@ -1091,10 +1046,10 @@ def test_all_delslices ():
 
     message ("CHECKING SLICES CLEAN UP")
     clean_all_slices([1])
-    check_slices (system_slices(),system_slices(),[1])
-    check_slices (system_slices(),total_slices(),[2])
+    check_slices (system_slices(),0,[1])
+    check_slices (system_slices(),number_slices,[2])
     test00_refresh ("After slices clenaup")
-    check_slices(system_slices(),system_slices())
+    check_slices(system_slices(),0)
 
 def test_all_slices ():
     test_all_addslices ()
@@ -1170,60 +1125,81 @@ def test_now ():
 #    clean_all_slices()
 #    populate()
 
-#####
-def usage ():
-    print "Usage: %s [-n] [-f]"%sys.argv[0]
-    print " -n runs test_now instead of test_all"
-    print " -p runs populate instead of test_all"
-    print " -e runs populate_end of test_all"
-    print " -m run in mini mode (1 instance of each class)"
-    print " -b performs big run"
-    print " -H performs huge run"
-    print " -f n : increases normal sizes by <n>"
-    print " -l n : tester runs locally for peer <n>, rather than through xmlrpc"
-    
-    sys.exit(1)
-
+from optparse import OptionParser
 def main ():
-    try:
-        (o,a) = getopt.getopt(sys.argv[1:], "emnpbHf:l:")
-    except:
-        usage()
-    func = test_all
-    for (opt,val) in o:
-        if opt=='-n':
-	    print 'Running test_now'
-            func = test_now
-        elif opt=='-p':
-	    print 'Running populate'
-            func = populate
-        elif opt=='-e':
-	    print 'Running populate_end'
-            func = populate_end
-        elif opt=='-m':
-            mini()
-	elif opt=='-b':
-            big()
-	elif opt=='-H':
-            huge()
-        elif opt=='-f':
-            factor=int(val)
-            apply_factor(factor)
-        elif opt=='-l':
-            global local_peer
-            local_peer=int(val)
-            if local_peer not in (1,2):
-                usage()
-        else:
-            usage()
-    if a:
-        usage()
+    usage = "Usage: %prog [options] [ [function1] .. fn]"
+
+    parser=OptionParser(usage=usage,version="%prog "+subversion_id)
+    parser.add_option("-m","--mini",action="store_const", const="mini",dest="size", 
+		      help="run in mini mode (1 instance of each class)")
+    parser.add_option("-n","--normal",action="store_const", const="normal",dest="size", 
+		      default="normal",
+		      help="performs big run")
+    parser.add_option("-b","--big",action="store_const", const="big",dest="size", 
+		      help="performs big run")
+    parser.add_option("-H","--huge",action="store_const", const="huge",dest="size", 
+		      help="performs huge run")
+    parser.add_option("-f","--factor",action="store", dest="factor",default=1,
+		      help="multiply size by FACTOR")
+
+    parser.add_option("-l","--local",action="store", dest="local_peer",
+		      help="tester runs locally for peer LOCAL_PEER, rather than through xmlrpc")
+    parser.add_option("-1",action="store_const", const=1, dest="local_peer",
+		      help="shortcut for -l 1")
+    parser.add_option("-2",action="store_const", const=2, dest="local_peer",
+		      help="shortcut for -l 2")
+
+    parser.add_option("--plc1",action="store",dest="plc1", default="",
+		      help="specifies plc1 hostname")
+    parser.add_option("--plc2",action="store",dest="plc2", default="",
+		      help="specifies plc2 hostname")
+
+    parser.add_option("-d","--debug",dest="debug",action="store_true",default=False,
+		      help="Just shows what would be done")
+
+    (options,args) = parser.parse_args()
+
+    print 'options',options,'args',args
+
+    steps = []
+    if len(args) > 0:
+	steps=args
+    else:
+	steps = [ 'test_all']
+
+    # perform size initialisation
+    size_func=globals()[options.size]
+    size_func()
+    # apply factor
+    apply_factor(int(options.factor))
+    
+    # support for the --plc options
+    global plc
+    if options.plc1:
+	plc[1]['hostname']=options.plc1
+    if options.plc2:
+	plc[2]['hostname']=options.plc2
+
+    # update global local_peer
+    global local_peer
+    local_peer=options.local_peer
+    
     show_test()
-    func()   
-    timer_show()
-    epilogue
+		
+    for funcname in steps:
+	print 'funcname',funcname
+	print 'dir()',dir()
+	if funcname not in globals():
+	    print 'Unknown step',funcname,'skipped'
+	else:
+	    if options.debug:
+		print "Would invoke function",funcname
+	    else:
+		func = globals()[funcname]
+		func()
+		timer_show()
+		epilogue()
 
 if __name__ == '__main__':
-    normal()
     main()
     

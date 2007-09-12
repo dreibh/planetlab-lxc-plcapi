@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py,v 1.1 2007/01/11 21:27:49 mlhuang Exp $
+# $Id: Test.py 250 2007-04-17 15:14:57Z thierry $
 #
 
 from pprint import pprint
@@ -371,7 +371,8 @@ class Test:
             # Update site
             site_fields = random_site()
             # Do not change login_base
-            del site_fields['login_base']
+	    if 'login_base' in site_fields:
+		del site_fields['login_base']
             self.api.UpdateSite(site_id, site_fields)
 
             if self.check:
@@ -1156,7 +1157,8 @@ class Test:
             # Update configuration file
             conf_file_fields = random_conf_file()
             # Do not update dest so that it remains an override if set
-            del conf_file_fields['dest']
+	    if 'dest' in conf_file_fields:
+		del conf_file_fields['dest']
             self.api.UpdateConfFile(conf_file_id, conf_file_fields)
 
             if self.check:
@@ -1308,7 +1310,8 @@ class Test:
             # Update slice
             slice_fields = random_slice("unused")
             # Cannot change slice name
-            del slice_fields['name']
+	    if 'name' in slice_fields:
+		del slice_fields['name']
             self.api.UpdateSlice(slice_id, slice_fields)
 
             slice = self.api.GetSlices([slice_id])[0]

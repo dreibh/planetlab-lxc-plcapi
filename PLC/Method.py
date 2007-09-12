@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.28 2007/08/20 19:11:08 tmack Exp $
+# $Id: Method.py,v 1.29 2007/08/20 20:31:47 tmack Exp $
 #
 
 import xmlrpclib
@@ -92,7 +92,7 @@ class Method:
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
 
-            if self.api.config.PLC_API_DEBUG: #or hasattr(self, 'message'):
+            if self.api.config.PLC_API_DEBUG or hasattr(self, 'message'):
 		self.log(None, runtime, *args)
 	    	
 	    return result

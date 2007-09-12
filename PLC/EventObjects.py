@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: EventObjects.py,v 1.2 2007/05/07 20:07:42 tmack Exp $
+# $Id: EventObjects.py 348 2007-05-10 14:13:51Z thierry $
 #
 
 from PLC.Faults import *
@@ -42,33 +42,21 @@ class EventObjects(Table):
     def __init__(self, api, event_filter = None, columns = None):
         Table.__init__(self, api, EventObject, columns)
 	
-	all_fields = EventObject.fields.keys()
-	if not columns:
-	    columns = all_fields
-	else:
-	    columns = filter(lambda column: column in all_fields, columns)
-	
-	# Since we are querying a table (not a view) ensure that timestamps
-	# are converted to ints in the db before being returned
-	timestamps = ['time']
-	for col in columns:
-	    if col in timestamps:
-		index = columns.index(col)
-	        columns[index] = "CAST(date_part('epoch', events.time) AS bigint) AS time"
-	    elif col in [EventObject.primary_key]:
-                index = columns.index(col)
-                columns[index] = EventObject.table_name+"."+EventObject.primary_key
-			 
-	sql = "SELECT %s FROM event_object, events WHERE True" % \
-            ", ".join(columns)
+	sql = "SELECT %s FROM view_event_objects WHERE True" % \
+            ", ".join(self.columns)
         
 	if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):
                 event_filter = Filter(EventObject.fields, {'event_id': event_filter})
+                sql += " AND (%s)" % event_filter.sql(api, "OR")
             elif isinstance(event_filter, dict):
                 event_filter = Filter(EventObject.fields, event_filter)
-            sql += " AND (%s) " % event_filter.sql(api)
-	sql += " AND events.event_id = event_object.event_id " 
-	sql += " ORDER BY %s" % EventObject.table_name+"."+EventObject.primary_key
+                sql += " AND (%s)" % event_filter.sql(api, "AND")
+            elif isinstance (event_filter, int):
+                event_filter = Filter(EventObject.fields, {'event_id':[event_filter]})
+                sql += " AND (%s)" % event_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong event object filter %r"%event_filter
+	sql += " ORDER BY %s" % EventObject.primary_key
         
 	self.selectall(sql)

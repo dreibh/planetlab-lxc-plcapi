@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
+# $Id: PyCurl.py,v 1.1 2006/12/15 18:21:39 mlhuang Exp $
 #
 
 import os
@@ -68,9 +68,9 @@ class PyCurlTransport(xmlrpclib.Transport):
             (errcode, errmsg) = err
 
         if errcode == 60:
-            raise Exception, "SSL certificate validation failed"
+            raise Exception, "PyCurl: SSL certificate validation failed"
         elif errcode != 200:
-            raise Exception, "HTTP error %d" % errcode
+            raise Exception, "PyCurl: HTTP error %d" % errcode
 
         # Parse response
         p, u = self.getparser()

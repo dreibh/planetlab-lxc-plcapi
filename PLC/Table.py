@@ -92,7 +92,7 @@ class Row(dict):
             assert isinstance(obj, classobj)
             assert isinstance(obj, Row)
             assert obj.primary_key in obj
-            assert join_table in obj.join_tables
+	    assert join_table in obj.join_tables
 
             # By default, just insert the primary keys of each object
             # into the join table.
