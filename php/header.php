@@ -8,7 +8,7 @@
 // Mark Huang <mlhuang@cs.princeton.edu>
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
-// $Id: header.php,v 1.3 2006/11/10 06:31:50 mlhuang Exp $
+// $Id: header.php 170 2007-03-30 12:44:11Z thierry $
 //
 //
 
@@ -169,6 +169,16 @@ class PLCAPI
             $this->error_log('Fault Code ' . $result['faultCode'] . ': ' .
                              $result['faultString'], 1, true);
             $ret[] = NULL;
+	    // Thierry - march 30 2007 
+	    // using $adm->error() is broken with begin/commit style 
+	    // this is because error() uses last item in trace and checks for ['errors']
+	    // when using begin/commit we do run internal_call BUT internal_call checks for 
+	    // multicall's result globally, not individual results, so ['errors'] comes empty
+	    // I considered hacking internal_call 
+	    // to *NOT* maintain this->trace at all when invoked with multicall
+	    // but it is too complex to get all values right
+	    // so let's go for the hacky way, and just record individual errors at the right place
+            $this->trace[count($this->trace)-1]['errors'][] = end($this->errors);
           } else {
             $ret[] = $result[0];
           }
