@@ -34,7 +34,7 @@ class GetNodes(Method):
         
 	# Must query at least slice_ids_whitelist
 	if return_fields is not None:
-	    added_fields = set(['slice_ids_whitelist']).difference(return_fields)
+	    added_fields = set(['slice_ids_whitelist', 'site_id']).difference(return_fields)
 	    return_fields += added_fields
 	else:
 	    added_fields =[]	
@@ -46,14 +46,23 @@ class GetNodes(Method):
         if not isinstance(self.caller, Person) or \
            'admin' not in self.caller['roles']:
 	    slice_ids = set()
+	    site_ids = set()
 	    if self.caller:
 	        slice_ids.update(self.caller['slice_ids'])
-	    # if node has whitelist, make sure the user has a slice on the whitelist 
+		site_ids.update(self.caller['site_ids'])
+
+	    # if node has whitelist, only return it if users is at
+	    # the same site or user has a slice on the whitelist 
             for node in nodes[:]:
+		if 'site_id' in node and \
+		   site_ids.intersection([node['site_id']]):
+		    continue	
 	        if 'slice_ids_whitelist' in node and \
 		   node['slice_ids_whitelist'] and \
 		   not slice_ids.intersection(node['slice_ids_whitelist']):
 	 	    nodes.remove(node)
+
+	    # remove remaining admin only fields
             for node in nodes:    
 		for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
                     if field in node:
