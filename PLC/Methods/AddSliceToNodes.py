@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.Slices import Slice, Slices
+from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
 class AddSliceToNodes(Method):
@@ -50,14 +51,11 @@ class AddSliceToNodes(Method):
         nodes = Nodes(self.api, node_id_or_hostname_list, ['node_id', 'hostname', 'slice_ids', 'slice_ids_whitelist', 'site_id'])
 	
 	for node in nodes:
-	    # allow  users at site to add node to slice, ignoring whitelist
-	    if isinstance(self.caller, Person) and \
-	       set(self.caller['site_ids']).intersection(node['site_id']):
-	        slice.add_node(node, commit = False)
-		continue
 	    # check the slice whitelist on each node first
+	    # allow  users at site to add node to slice, ignoring whitelist
 	    if node['slice_ids_whitelist'] and \
-	       slice['slice_id'] not in node['slice_ids_whitelist']:
+	       slice['slice_id'] not in node['slice_ids_whitelist'] and \
+	       not set(self.caller['site_ids']).intersection([node['site_id']]):
 		raise PLCInvalidArgument, "%s is not allowed on %s (not on the whitelist)" % \
 		  (slice['name'], node['hostname'])
             if slice['slice_id'] not in node['slice_ids']:
