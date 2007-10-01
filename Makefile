@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.13 2007/08/31 02:46:47 mef Exp $
+# $Id: Makefile 793 2007-08-28 15:21:17Z thierry $
 #
 
 # Metafiles
@@ -16,11 +16,8 @@ modules := psycopg2
 # Temporarily until we can kill the Fedora Core 2 build
 curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
 pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
-pycurl_incompatnum := $(shell printf %d 0x071000) # 7.16.0
 ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
-ifeq ($(shell test $(curl_vernum) -ge $(pycurl_incompatnum) && echo 0),1)
 modules += pycurl
-endif
 endif
 
 modules-install := $(foreach module, $(modules), $(module)-install)
@@ -73,31 +70,70 @@ clean: $(modules-clean)
 
 index: $(init)
 
+index-clean:
+	rm $(init)
+
 tags:
 	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile ')' | xargs etags
 
+########## make sync PLCHOST=hostname
+ifdef PLCHOST
+PLCSSH:=root@$(PLCHOST)
+endif
+
+LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
+RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
+RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
+RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
+
+sync:
+ifeq (,$(PLCSSH))
+	echo "sync: You must define target host as PLCHOST on the command line"
+	echo " e.g. make sync PLCHOST=private.one-lab.org" ; exit 1
+else
+	+$(RSYNC) PLC planetlab4.sql migrations $(PLCSSH):/plc/root/usr/share/plc_api/
+	ssh $(PLCSSH) chroot /plc/root apachectl graceful
+endif
+
+####################
 # All .py files in PLC/
-PLC := $(filter-out %/__init__.py, $(wildcard PLC/*.py))
-PLC_init := all = '$(notdir $(PLC:.py=))'.split()
 
-PLC/__init__.py:
-	echo "$(PLC_init)" >$@
+# the current content of __init__.py
+PLC_now := $(sort $(shell fgrep -v '"' PLC/__init__.py 2>/dev/null))
+# what should be declared
+PLC_paths := $(filter-out %/__init__.py, $(wildcard PLC/*.py))
+PLC_files := $(sort $(notdir $(PLC_paths:.py=)))
 
-ifneq ($(sort $(PLC_init)), $(sort $(shell cat PLC/__init__.py 2>/dev/null)))
+ifneq ($(PLC_now),$(PLC_files))
 PLC/__init__.py: force
 endif
+PLC/__init__.py: 
+	(echo 'all = """' ; cd PLC; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
 
-# All .py files in PLC/Methods/ and PLC/Methods/system/
-METHODS := $(filter-out %/__init__.py, $(wildcard PLC/Methods/*.py PLC/Methods/system/*.py))
-Methods_init := methods = '$(notdir $(subst system/, system., $(METHODS:.py=)))'.split()
 
-PLC/Methods/__init__.py:
-	echo "$(Methods_init)" >$@
+# the current content of __init__.py
+METHODS_now := $(sort $(shell fgrep -v '"' PLC/Methods/__init__.py 2>/dev/null))
+# what should be declared
+METHODS_paths := $(filter-out %/__init__.py, $(wildcard PLC/Methods/*.py PLC/Methods/system/*.py))
+METHODS_files := $(sort $(notdir $(subst system/, system., $(METHODS_paths:.py=))))
 
-ifneq ($(sort $(Methods_init)), $(sort $(shell cat PLC/Methods/__init__.py 2>/dev/null)))
+ifneq ($(METHODS_now),$(METHODS_files))
 PLC/Methods/__init__.py: force
 endif
+PLC/Methods/__init__.py: 
+	(echo 'methods = """' ; cd PLC/Methods; ls -1 *.py system/*.py | grep -v __init__ | sed -e 's,.py$$,,' -e 's,system/,system.,' ; echo '""".split()') > $@
 
 force:
 
 .PHONY: all install force clean index tags $(subdirs) $(modules)
+
+#################### convenience, for debugging only
+# make +foo : prints the value of $(foo)
+# make ++foo : idem but verbose, i.e. foo=$(foo)
+++%: varname=$(subst +,,$@)
+++%:
+	@echo "$(varname)=$($(varname))"
++%: varname=$(subst +,,$@)
++%:
+	@echo "$($(varname))"
+

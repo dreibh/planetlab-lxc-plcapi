@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.37 2007/06/14 16:26:01 tmack Exp $
+# $Id: Persons.py,v 1.38 2007/08/22 19:54:07 tmack Exp $
 #
 
 from types import StringTypes
@@ -326,6 +326,14 @@ class Persons(Table):
             elif isinstance(person_filter, dict):
                 person_filter = Filter(Person.fields, person_filter)
                 sql += " AND (%s)" % person_filter.sql(api, "AND")
+	    elif isinstance (person_filter, StringTypes):
+                person_filter = Filter(Person.fields, {'email':[person_filter]})
+                sql += " AND (%s)" % person_filter.sql(api, "AND")
+            elif isinstance (person_filter, int):
+                person_filter = Filter(Person.fields, {'person_id':[person_filter]})
+                sql += " AND (%s)" % person_filter.sql(api, "AND")
+	    else:
+                raise PLCInvalidArgument, "Wrong person filter %r"%person_filter	    
 
 	# aggregate data
 	all_persons = {}

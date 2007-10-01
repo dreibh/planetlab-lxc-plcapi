@@ -186,5 +186,13 @@ class Sites(Table):
             elif isinstance(site_filter, dict):
                 site_filter = Filter(Site.fields, site_filter)
                 sql += " AND (%s)" % site_filter.sql(api, "AND")
+	    elif isinstance (site_filter, StringTypes):
+                site_filter = Filter(Site.fields, {'login_base':[site_filter]})
+                sql += " AND (%s)" % site_filter.sql(api, "AND")
+            elif isinstance (site_filter, int):
+                site_filter = Filter(Site.fields, {'site_id':[site_filter]})
+                sql += " AND (%s)" % site_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong site filter %r"%site_filter
 
         self.selectall(sql)

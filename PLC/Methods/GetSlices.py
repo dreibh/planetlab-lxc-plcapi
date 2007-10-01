@@ -26,6 +26,8 @@ class GetSlices(Method):
         Auth(),
         Mixed([Mixed(Slice.fields['slice_id'],
                      Slice.fields['name'])],
+	      Parameter(str,"name"),
+              Parameter(int,"slice_id"),
               Filter(Slice.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]

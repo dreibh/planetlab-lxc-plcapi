@@ -155,5 +155,13 @@ class Slices(Table):
             elif isinstance(slice_filter, dict):
                 slice_filter = Filter(Slice.fields, slice_filter)
                 sql += " AND (%s)" % slice_filter.sql(api, "AND")
+	    elif isinstance (slice_filter, StringTypes):
+                slice_filter = Filter(Slice.fields, {'name':[slice_filter]})
+                sql += " AND (%s)" % slice_filter.sql(api, "AND")
+            elif isinstance (slice_filter, int):
+                slice_filter = Filter(Slice.fields, {'slice_id':[slice_filter]})
+                sql += " AND (%s)" % slice_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong slice filter %r"%slice_filter
 
         self.selectall(sql)

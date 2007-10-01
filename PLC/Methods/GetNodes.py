@@ -23,6 +23,8 @@ class GetNodes(Method):
         Auth(),
         Mixed([Mixed(Node.fields['node_id'],
                      Node.fields['hostname'])],
+	      Parameter(str,"hostname"),
+              Parameter(int,"node_id"),
               Filter(Node.fields)),
         Parameter([str], "List of fields to return", nullok = True),
         ]

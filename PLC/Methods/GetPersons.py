@@ -27,6 +27,8 @@ class GetPersons(Method):
         Auth(),
         Mixed([Mixed(Person.fields['person_id'],
                      Person.fields['email'])],
+	      Parameter(str,"email"),
+              Parameter(int,"person_id"), 
               Filter(Person.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]
