@@ -86,7 +86,6 @@ class AddSliceAttribute(Method):
             
             if node['node_id'] not in slice['node_ids']:
                 raise PLCInvalidArgument, "Node not in the specified slice"
-
             slice_attribute['node_id'] = node['node_id']
 
 	# Sliver attribute shared accross nodes if nodegroup is sepcified
@@ -97,6 +96,18 @@ class AddSliceAttribute(Method):
 	    nodegroup = nodegroups[0]
 	
 	    slice_attribute['nodegroup_id'] = nodegroup['nodegroup_id']
+
+	# Check if slice attribute alreay exists
+        slice_attribute_check = None
+        slice_attributes_check = SliceAttributes(self.api, {'slice_id': slice['slice_id'], 'name': attribute_type['name'], 'value': value})
+        for slice_attribute_check in slice_attributes_check:
+	    print slice_attribute_check
+            if 'node_id' in slice_attribute and slice_attribute['node_id'] == slice_attribute_check['node_id']:
+		raise PLCInvalidArgument, "Sliver attribute already exists"
+	    if 'nodegroup_id' in slice_attribute and slice_attribute['nodegroup_id'] == slice_attribute_check['nodegroup_id']:
+		raise PLCInvalidArgument, "Slice attribute already exists for this nodegroup"
+            if node_id_or_hostname is None and nodegroup_id_or_name is None:
+                raise PLCInvalidArgument, "Slice attribute already exists"
 
         slice_attribute.sync()
 	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
