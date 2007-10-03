@@ -98,10 +98,8 @@ class AddSliceAttribute(Method):
 	    slice_attribute['nodegroup_id'] = nodegroup['nodegroup_id']
 
 	# Check if slice attribute alreay exists
-        slice_attribute_check = None
         slice_attributes_check = SliceAttributes(self.api, {'slice_id': slice['slice_id'], 'name': attribute_type['name'], 'value': value})
         for slice_attribute_check in slice_attributes_check:
-	    print slice_attribute_check
             if 'node_id' in slice_attribute and slice_attribute['node_id'] == slice_attribute_check['node_id']:
 		raise PLCInvalidArgument, "Sliver attribute already exists"
 	    if 'nodegroup_id' in slice_attribute and slice_attribute['nodegroup_id'] == slice_attribute_check['nodegroup_id']:
