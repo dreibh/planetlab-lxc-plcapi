@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
-# $Id$
+# $Id: GetPeerData.py 904 2007-10-08 14:28:06Z thierry $
 
 import time
 
@@ -49,6 +49,10 @@ class GetPeerData(Method):
         node_fields = filter(lambda field: field not in \
                              ['boot_nonce', 'key', 'session', 'root_person_ids'],
                              Node.fields)
+        nodes = Nodes(self.api, {'peer_id': None}, node_fields);
+        # filter out whitelisted nodes
+        nodes = [ n for n in nodes if not n['slice_ids_whitelist']] 
+        
 
         person_fields = filter(lambda field: field not in \
                                ['password', 'verification_key', 'verification_expires'],
@@ -70,7 +74,7 @@ class GetPeerData(Method):
         result = {
             'Sites': Sites(self.api, {'peer_id': None}),
             'Keys': Keys(self.api, {'peer_id': None}),
-            'Nodes': Nodes(self.api, {'peer_id': None}, node_fields),
+            'Nodes': nodes,
             'Persons': persons,
             'Slices': slices,
             }
