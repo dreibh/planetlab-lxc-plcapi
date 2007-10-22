@@ -111,6 +111,19 @@ class Node(Row):
 		       " where node_id = %d" % ( self['node_id']) )
 	self.sync(commit)
 
+
+    def update_last_updated(self, commit = True):
+        """
+        Update last_updated field with current time
+        """
+
+        assert 'node_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+                       " where node_id = %d" % (self['node_id']) )
+        self.sync(commit)
+
     def delete(self, commit = True):
         """
         Delete existing node.
