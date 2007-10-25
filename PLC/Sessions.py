@@ -76,10 +76,10 @@ class Sessions(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), session_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), session_filter)
                 session_filter = Filter(Session.fields, {'person_id': ints, 'session_id': strs})
-                sql += " AND (%s)" % session_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % session_filter.sql(api, "OR")
 	    elif isinstance(session_filter, dict):
 		session_filter = Filter(Session.fields, session_filter)
-		sql += " AND (%s)" % session_filter.sql(api, "AND")
+		sql += " AND (%s) %s" % session_filter.sql(api, "AND")
 
         if expires is not None:
             if expires >= 0:

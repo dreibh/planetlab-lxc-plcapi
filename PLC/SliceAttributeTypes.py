@@ -64,9 +64,9 @@ class SliceAttributeTypes(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), attribute_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), attribute_type_filter)
                 attribute_type_filter = Filter(SliceAttributeType.fields, {'attribute_type_id': ints, 'name': strs})
-                sql += " AND (%s)" % attribute_type_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % attribute_type_filter.sql(api, "OR")
             elif isinstance(attribute_type_filter, dict):
                 attribute_type_filter = Filter(SliceAttributeType.fields, attribute_type_filter)
-                sql += " AND (%s)" % attribute_type_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % attribute_type_filter.sql(api, "AND")
 
         self.selectall(sql)

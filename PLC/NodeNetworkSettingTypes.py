@@ -70,13 +70,13 @@ class NodeNetworkSettingTypes(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), nodenetwork_setting_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), nodenetwork_setting_type_filter)
                 nodenetwork_setting_type_filter = Filter(NodeNetworkSettingType.fields, {'nodenetwork_setting_type_id': ints, 'name': strs})
-                sql += " AND (%s)" % nodenetwork_setting_type_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % nodenetwork_setting_type_filter.sql(api, "OR")
             elif isinstance(nodenetwork_setting_type_filter, dict):
                 nodenetwork_setting_type_filter = Filter(NodeNetworkSettingType.fields, nodenetwork_setting_type_filter)
-                sql += " AND (%s)" % nodenetwork_setting_type_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % nodenetwork_setting_type_filter.sql(api, "AND")
             elif isinstance (nodenetwork_setting_type_filter, StringTypes):
                 nodenetwork_setting_type_filter = Filter(NodeNetworkSettingType.fields, {'name':[nodenetwork_setting_type_filter]})
-                sql += " AND (%s)" % nodenetwork_setting_type_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % nodenetwork_setting_type_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong nodenetwork setting type filter %r"%nodenetwork_setting_type_filter
 

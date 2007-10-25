@@ -41,6 +41,6 @@ class SliceAttributes(Table):
                 slice_attribute_filter = Filter(SliceAttribute.fields, {'slice_attribute_id': slice_attribute_filter})
             elif isinstance(slice_attribute_filter, dict):
                 slice_attribute_filter = Filter(SliceAttribute.fields, slice_attribute_filter)
-            sql += " AND (%s)" % slice_attribute_filter.sql(api)
+            sql += " AND (%s) %s" % slice_attribute_filter.sql(api)
 
         self.selectall(sql)

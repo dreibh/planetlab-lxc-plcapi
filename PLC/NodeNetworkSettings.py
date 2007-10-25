@@ -51,7 +51,7 @@ class NodeNetworkSettings(Table):
                 nodenetwork_setting_filter = Filter(NodeNetworkSetting.fields, {'nodenetwork_setting_id': [nodenetwork_setting_filter]})
             else:
                 raise PLCInvalidArgument, "Wrong nodenetwork setting filter %r"%nodenetwork_setting_filter
-            sql += " AND (%s)" % nodenetwork_setting_filter.sql(api)
+            sql += " AND (%s) %s" % nodenetwork_setting_filter.sql(api)
 
 
         self.selectall(sql)

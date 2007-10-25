@@ -117,6 +117,6 @@ class Keys(Table):
                 key_filter = Filter(Key.fields, {'key_id': key_filter})
             elif isinstance(key_filter, dict):
                 key_filter = Filter(Key.fields, key_filter)
-            sql += " AND (%s)" % key_filter.sql(api)
+            sql += " AND (%s) %s" % key_filter.sql(api)
 
 	self.selectall(sql)

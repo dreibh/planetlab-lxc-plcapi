@@ -58,9 +58,9 @@ class InitScripts(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), initscript_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), initscript_filter)
                 initscript_filter = Filter(InitScript.fields, {'initscript_id': ints, 'name': strs })
-		sql += " AND (%s)" % initscript_filter.sql(api, "OR")
+		sql += " AND (%s) %s" % initscript_filter.sql(api, "OR")
             elif isinstance(initscript_filter, dict):
                 initscript_filter = Filter(InitScript.fields, initscript_filter)
-            	sql += " AND (%s)" % initscript_filter.sql(api, "AND")
+            	sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
 
         self.selectall(sql)

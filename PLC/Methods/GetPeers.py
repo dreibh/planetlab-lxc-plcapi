@@ -8,6 +8,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 
+from PLC.Persons import Person
 from PLC.Peers import Peer, Peers
 
 class GetPeers (Method):
@@ -19,7 +20,7 @@ class GetPeers (Method):
     specified details will be returned.
     """
 
-    roles = ['admin', 'node']
+    roles = ['admin', 'node','pi','user']
 
     accepts = [
         Auth(),
@@ -32,4 +33,15 @@ class GetPeers (Method):
     returns = [Peer.fields]
 
     def call (self, auth, peer_filter = None, return_fields = None):
-	return Peers(self.api, peer_filter, return_fields)
+        
+        peers = Peers(self.api, peer_filter, return_fields)
+
+        # Remove admin only fields
+        if not isinstance(self.caller, Person) or \
+                'admin' not in self.caller['roles']:
+            for peer in peers:    
+		for field in ['key', 'cacert']:
+                    if field in peer:
+                        del peer[field]
+
+        return peers

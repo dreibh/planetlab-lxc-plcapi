@@ -150,6 +150,6 @@ class ConfFiles(Table):
                 conf_file_filter = Filter(ConfFile.fields, {'conf_file_id': conf_file_filter})
             elif isinstance(conf_file_filter, dict):
                 conf_file_filter = Filter(ConfFile.fields, conf_file_filter)
-            sql += " AND (%s)" % conf_file_filter.sql(api)
+            sql += " AND (%s) %s" % conf_file_filter.sql(api)
 
         self.selectall(sql)

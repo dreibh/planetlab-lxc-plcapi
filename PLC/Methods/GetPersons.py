@@ -81,6 +81,7 @@ class GetPersons(Method):
         if added_fields:
             for person in persons:
                 for field in added_fields:
-                    del person[field]
+		    if field in person:
+			del person[field]
 
         return persons

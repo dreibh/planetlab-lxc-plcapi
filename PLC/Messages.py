@@ -42,9 +42,9 @@ class Messages(Table):
         if message_filter is not None:
             if isinstance(message_filter, (list, tuple, set)):
                 message_filter = Filter(Message.fields, {'message_id': message_filter})
-                sql += " AND (%s)" % message_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % message_filter.sql(api, "OR")
             elif isinstance(message_filter, dict):
                 message_filter = Filter(Message.fields, message_filter)
-                sql += " AND (%s)" % message_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % message_filter.sql(api, "AND")
 
         self.selectall(sql)

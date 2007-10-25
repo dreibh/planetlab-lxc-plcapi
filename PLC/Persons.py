@@ -322,18 +322,18 @@ class Persons(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), person_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), person_filter)
                 person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
-                sql += " AND (%s)" % person_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
                 person_filter = Filter(Person.fields, person_filter)
-                sql += " AND (%s)" % person_filter.sql(api, "AND")
-	    elif isinstance (person_filter, StringTypes):
+                sql += " AND (%s) %s" % person_filter.sql(api, "AND")
+            elif isinstance (person_filter, StringTypes):
                 person_filter = Filter(Person.fields, {'email':[person_filter]})
-                sql += " AND (%s)" % person_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, int):
                 person_filter = Filter(Person.fields, {'person_id':[person_filter]})
-                sql += " AND (%s)" % person_filter.sql(api, "AND")
-	    else:
-                raise PLCInvalidArgument, "Wrong person filter %r"%person_filter	    
+                sql += " AND (%s) %s" % person_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong person filter %r"%person_filter
 
 	# aggregate data
 	all_persons = {}

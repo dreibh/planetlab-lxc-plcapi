@@ -67,6 +67,7 @@ class GetPCUs(Method):
         # Remove pcu_id if not specified
         if added_fields:
             for pcu in pcus:
-                del pcu['pcu_id']
+		if 'pcu_id' in pcu:
+		    del pcu['pcu_id']
 
         return pcus

@@ -94,6 +94,6 @@ class Addresses(Table):
                 address_filter = Filter(Address.fields, {'address_id': address_filter})
             elif isinstance(address_filter, dict):
                 address_filter = Filter(Address.fields, address_filter)
-            sql += " AND (%s)" % address_filter.sql(api)
+            sql += " AND (%s) %s" % address_filter.sql(api)
 
         self.selectall(sql)

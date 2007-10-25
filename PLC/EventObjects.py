@@ -48,15 +48,16 @@ class EventObjects(Table):
 	if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):
                 event_filter = Filter(EventObject.fields, {'event_id': event_filter})
-                sql += " AND (%s)" % event_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % event_filter.sql(api, "OR")
             elif isinstance(event_filter, dict):
                 event_filter = Filter(EventObject.fields, event_filter)
-                sql += " AND (%s)" % event_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % event_filter.sql(api, "AND")
             elif isinstance (event_filter, int):
                 event_filter = Filter(EventObject.fields, {'event_id':[event_filter]})
-                sql += " AND (%s)" % event_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % event_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong event object filter %r"%event_filter
-	sql += " ORDER BY %s" % EventObject.primary_key
+# with new filtering, caller needs to set this explicitly
+#	sql += " ORDER BY %s" % EventObject.primary_key
         
 	self.selectall(sql)

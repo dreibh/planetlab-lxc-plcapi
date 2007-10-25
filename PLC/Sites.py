@@ -182,16 +182,16 @@ class Sites(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), site_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), site_filter)
                 site_filter = Filter(Site.fields, {'site_id': ints, 'login_base': strs})
-                sql += " AND (%s)" % site_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % site_filter.sql(api, "OR")
             elif isinstance(site_filter, dict):
                 site_filter = Filter(Site.fields, site_filter)
-                sql += " AND (%s)" % site_filter.sql(api, "AND")
-	    elif isinstance (site_filter, StringTypes):
+                sql += " AND (%s) %s" % site_filter.sql(api, "AND")
+            elif isinstance (site_filter, StringTypes):
                 site_filter = Filter(Site.fields, {'login_base':[site_filter]})
-                sql += " AND (%s)" % site_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             elif isinstance (site_filter, int):
                 site_filter = Filter(Site.fields, {'site_id':[site_filter]})
-                sql += " AND (%s)" % site_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong site filter %r"%site_filter
 

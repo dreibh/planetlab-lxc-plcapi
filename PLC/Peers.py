@@ -227,9 +227,9 @@ class Peers (Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), peer_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), peer_filter)
                 peer_filter = Filter(Peer.fields, {'peer_id': ints, 'peername': strs})
-                sql += " AND (%s)" % peer_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % peer_filter.sql(api, "OR")
             elif isinstance(peer_filter, dict):
                 peer_filter = Filter(Peer.fields, peer_filter)
-                sql += " AND (%s)" % peer_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
 
 	self.selectall(sql)

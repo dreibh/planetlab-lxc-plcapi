@@ -46,14 +46,14 @@ class VerifyPerson(Method):
 	# Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument, "No such account %r"%person_id_or_email
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument, "Not a local account %r"%person_id_or_email
 
         if person['enabled']:
-            raise PLCInvalidArgument, "Account must be new (disabled)"
+            raise PLCInvalidArgument, "Account %r must be new (disabled)"%person_id_or_email
 
         # Get the primary site name
         person_sites = Sites(self.api, person['site_ids'])

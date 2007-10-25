@@ -221,6 +221,6 @@ class NodeNetworks(Table):
                 nodenetwork_filter = Filter(NodeNetwork.fields, {'nodenetwork_id': [nodenetwork_filter]})
             else:
                 raise PLCInvalidArgument, "Wrong node network filter %r"%nodenetwork_filter
-            sql += " AND (%s)" % nodenetwork_filter.sql(api)
+            sql += " AND (%s) %s" % nodenetwork_filter.sql(api)
 
         self.selectall(sql)

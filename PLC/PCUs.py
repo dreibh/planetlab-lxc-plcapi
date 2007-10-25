@@ -111,6 +111,6 @@ class PCUs(Table):
                 pcu_filter = Filter(PCU.fields, {'pcu_id': pcu_filter})
             elif isinstance(pcu_filter, dict):
                 pcu_filter = Filter(PCU.fields, pcu_filter)
-            sql += " AND (%s)" % pcu_filter.sql(api)
+            sql += " AND (%s) %s" % pcu_filter.sql(api)
 
         self.selectall(sql)

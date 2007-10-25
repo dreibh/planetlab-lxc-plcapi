@@ -82,6 +82,7 @@ class GetSliceAttributes(Method):
         # Remove slice_attribute_id if not specified
         if added_fields:
             for slice_attribute in slice_attributes:
-                del slice_attribute['slice_attribute_id']
+		if 'slice_attribute_id' in slice_attribute:
+		    del slice_attribute['slice_attribute_id']
 
         return slice_attributes

@@ -1,10 +1,20 @@
+#
+# $Id$
+#
+
+%define name PLCAPI
+%define version 4.1
+%define subversion 2
+
+%define release %{subversion}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
+
 Summary: PlanetLab Central API
-Name: PLCAPI
-Version: 4.1
-Release: 2%{?pldistro:.%{pldistro}}%{?date:.%{date}}
+Name: %{name}
+Version: %{version}
+Release: %{release}
 License: PlanetLab
 Group: System Environment/Daemons
-URL: http://cvs.planet-lab.org/cvs/new_plc_api
+URL: $URL$
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -43,13 +53,21 @@ through Apache mod_python.
 %setup -q
 
 %build
-# Build __init__.py metafiles and PHP API. Do not build documentation
-# for now.
+# Build __init__.py metafiles and PHP API. 
 %{__make} %{?_smp_mflags} subdirs="php php/xmlrpc"
+# Build documentation
+# beware that making the pdf file somehow overwrites the html
+%{__make} -C doc PLCAPI.pdf
+rm -f doc/PLCAPI.html
+%{__make} -C doc PLCAPI.html
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}"
+#someone out there skips doc installation - we DO want this installed
+for doc in PLCAPI.html PLCAPI.pdf ; do
+    install -D -m 644 doc/$doc $RPM_BUILD_ROOT/"%{_datadir}"/plc_api/doc/$doc
+done
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
@@ -68,7 +86,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc doc/PLCAPI.xml doc/PLCAPI.pdf doc/PLCAPI.html
+#someone out there skips doc installation - we DO want this installed
+#%doc doc/PLCAPI.xml doc/PLCAPI.pdf doc/PLCAPI.html
 %dir %{_datadir}/plc_api
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
@@ -79,4 +98,3 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> - 
 - Initial build.
-

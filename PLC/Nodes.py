@@ -164,16 +164,16 @@ class Nodes(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), node_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), node_filter)
                 node_filter = Filter(Node.fields, {'node_id': ints, 'hostname': strs})
-                sql += " AND (%s)" % node_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % node_filter.sql(api, "OR")
             elif isinstance(node_filter, dict):
                 node_filter = Filter(Node.fields, node_filter)
-                sql += " AND (%s)" % node_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             elif isinstance (node_filter, StringTypes):
                 node_filter = Filter(Node.fields, {'hostname':[node_filter]})
-                sql += " AND (%s)" % node_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             elif isinstance (node_filter, int):
                 node_filter = Filter(Node.fields, {'node_id':[node_filter]})
-                sql += " AND (%s)" % node_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong node filter %r"%node_filter
 

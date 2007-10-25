@@ -58,9 +58,9 @@ class AddressTypes(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), address_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), address_type_filter)
                 address_type_filter = Filter(AddressType.fields, {'address_type_id': ints, 'name': strs})
-                sql += " AND (%s)" % address_type_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % address_type_filter.sql(api, "OR")
             elif isinstance(address_type_filter, dict):
                 address_type_filter = Filter(AddressType.fields, address_type_filter)
-                sql += " AND (%s)" % address_type_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
 
         self.selectall(sql)

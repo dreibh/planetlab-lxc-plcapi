@@ -26,7 +26,7 @@ class GetSlices(Method):
         Auth(),
         Mixed([Mixed(Slice.fields['slice_id'],
                      Slice.fields['name'])],
-	      Parameter(str,"name"),
+              Parameter(str,"name"),
               Parameter(int,"slice_id"),
               Filter(Slice.fields)),
         Parameter([str], "List of fields to return", nullok = True)
@@ -69,6 +69,7 @@ class GetSlices(Method):
         # Remove slice_id if not specified
         if added_fields:
             for slice in slices:
-                del slice['slice_id']
+		if 'slice_id' in slice:
+		    del slice['slice_id']
 
         return slices

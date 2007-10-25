@@ -116,9 +116,9 @@ class NodeGroups(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), nodegroup_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), nodegroup_filter)
                 nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'name': strs})
-                sql += " AND (%s)" % nodegroup_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % nodegroup_filter.sql(api, "OR")
             elif isinstance(nodegroup_filter, dict):
                 nodegroup_filter = Filter(NodeGroup.fields, nodegroup_filter)
-                sql += " AND (%s)" % nodegroup_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
 
         self.selectall(sql)

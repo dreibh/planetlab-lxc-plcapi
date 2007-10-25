@@ -64,9 +64,9 @@ class Roles(Table):
                 ints = filter(lambda x: isinstance(x, (int, long)), role_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), role_filter)
                 role_filter = Filter(Role.fields, {'role_id': ints, 'name': strs})
-                sql += " AND (%s)" % role_filter.sql(api, "OR")
+                sql += " AND (%s) %s" % role_filter.sql(api, "OR")
             elif isinstance(role_filter, dict):
                 role_filter = Filter(Role.fields, role_filter)
-                sql += " AND (%s)" % role_filter.sql(api, "AND")
+                sql += " AND (%s) %s" % role_filter.sql(api, "AND")
 
         self.selectall(sql)
