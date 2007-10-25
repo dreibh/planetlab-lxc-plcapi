@@ -14,7 +14,8 @@ Version: %{version}
 Release: %{release}
 License: PlanetLab
 Group: System Environment/Daemons
-URL: $URL$
+# too bad the spec syntax does not like this 
+#URL: $URL$
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
