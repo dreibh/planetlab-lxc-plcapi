@@ -2,6 +2,8 @@
 # $Id$
 #
 
+%define url $URL$
+
 %define name PLCAPI
 %define version 4.1
 %define subversion 2
@@ -14,10 +16,9 @@ Version: %{version}
 Release: %{release}
 License: PlanetLab
 Group: System Environment/Daemons
-# too bad the spec syntax does not like this 
-#URL: $URL$
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+URL: %(echo %{url} | cut -d ' ' -f 2)
 
 Obsoletes: plcapilib
 
