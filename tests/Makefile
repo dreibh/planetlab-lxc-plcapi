@@ -1,7 +1,7 @@
 ### -*-Makefile-*-
 # $Id: Makefile 566 2007-06-20 14:44:13Z thierry $
-PLC1=caicol.inria.fr
-PLC2=jamaica.inria.fr
+PLC1=plc1.inria.fr
+PLC2=plc2.inria.fr
 
 CHROOTJAIL=/plc/root
 CHROOT=chroot $(CHROOTJAIL)
