@@ -13,10 +13,8 @@ import xml.dom.minidom
 from xml.dom.minidom import Element, Text
 import codecs
 
-from PLC.API import PLCAPI
 from PLC.Method import *
-
-api = PLCAPI(None)
+import DocBookLocal
 
 # xml.dom.minidom.Text.writexml adds surrounding whitespace to textual
 # data when pretty-printing. Override this behavior.
@@ -105,8 +103,9 @@ class paramElement(Element):
             for subparam in param:
                 itemizedlist.appendChild(paramElement(None, subparam))
 
-for method in api.methods:
-    func = api.callable(method)
+api_func_list = DocBookLocal.get_func_list()
+for func in api_func_list:
+    method = func.name
 
     if func.status == "deprecated":
         continue
