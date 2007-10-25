@@ -13,7 +13,7 @@ class TestNode:
 	self.node_spec=node_spec
         self.timset=time.strftime("%H:%M:%S", time.localtime())
     def create_node (self,role):
-        auth = self.test_site.anyuser_auth (role+"_spec")
+        auth = self.test_site.anyuser_auth (role)
         filter={'boot_state':'rins'}
         try:
             if (role=='pi' and self.node_spec['owned']=='pi'):
@@ -36,24 +36,24 @@ class TestNode:
         except Exception, e:
                 print str(e)
 
-    def create_slice(self, role, liste_nodes_spec):
-        print '========>Creating slice at :'+self.timset+' : ',TestConfig.slice_spec
-        auth = self.test_site.anyuser_auth (role+"_spec")
+    def create_slice(self, role):
+        auth = self.test_site.anyuser_auth (role)
         liste_hosts=[]
-        for l in liste_nodes_spec :
-            liste_hosts.append(l['hostname'])
+        #for l in liste_nodes_spec :
+        #    liste_hosts.append(l['hostname'])
         try:
-            slice_id=self.test_plc.server.AddSlice(auth, TestConfig.slice_spec)
-            self.test_plc.server.AddSliceToNodes(auth, slice_id, liste_hosts)
-            self.test_plc.server.AddPersonToSlice(auth, self.test_site.site_spec['pi_spec']['email'], slice_id)
-            self.test_plc.server.AddPersonToSlice(auth, self.test_site.site_spec['tech_spec']['email'], slice_id)
-            self.test_plc.server.AddPersonToSlice(auth, self.test_site.site_spec['tech_user_spec']['email'], slice_id)
+            for slicespec in TestConfig.slices_specs :
+                print '========>Creating slice at :'+self.timset+' : ',slicespec
+                slice_id=self.test_plc.server.AddSlice(auth,slicespec['slice_spec'])
+                for sliceuser in slicespec['slice_users']:
+                    self.test_plc.server.AddPersonToSlice(auth, sliceuser['email'], slice_id)##affecting person to the slice
+                for slicenode in slicespec['slice_nodes']:
+                    liste_hosts.append(slicenode['hostname'])
+                self.test_plc.server.AddSliceToNodes(auth, slice_id, liste_hosts)##add slice to the spec nodes
             print 'fin creation slices'
         except Exception, e:
             print str(e)
             sys.exit(1)
-
-
         
     def conffile(self,image,hostname,path):
         try:
@@ -76,25 +76,19 @@ class TestNode:
         except Exception, e:
             print str(e)
 
-
-
     def create_boot_cd(self,node_spec,path):
         try:
-            os.system('mkdir  -p  %s/VirtualFile-%s  &&  cp  %s/My-Virtual-Machine-model/*  %s/VirtualFile-%s'%(path, node_spec['hostname'], path, path, node_spec['hostname']))
-            
+            os.system('mkdir  -p  %s/VirtualFile-%s  &&  cp  %s/My-Virtual-Machine-model/*  %s/VirtualFile-%s'
+                      %(path, node_spec['hostname'], path, path, node_spec['hostname']))
             link1=self.test_plc.server.GetBootMedium(self.test_plc.auth_root(),
                                                      node_spec['hostname'], 'node-iso', '')
             if (link1 == ''):
                 raise Exception, 'boot.iso not found'
-            
             file1=open(path+'/VirtualFile-'+node_spec['hostname']+'/boot_file.iso','w')
             file1.write(base64.b64decode(link1))
-            
-            
             file1.close()
             print '========> boot cd created for :',self.node_spec['hostname']
             self.conffile('boot_file.iso',self.node_spec['hostname'], path) #create 2 conf file for the vmware based
-
         except Exception, e:
             print str(e)
             sys.exit(1)

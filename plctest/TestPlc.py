@@ -43,7 +43,6 @@ class TestPlc:
                      'PLC_MAIL_ENABLED',
                      'PLC_MAIL_SUPPORT_ADDRESS',
                      'PLC_DB_HOST',
-                     'PLC_API_DEBUG',
                      'PLC_API_HOST',
                      'PLC_WWW_HOST',
                      'PLC_BOOT_HOST',
@@ -67,8 +66,6 @@ class TestPlc:
         ##### Clean up the /plc directory
         os.system('set -x; rm -rf  /plc/data')
         print "=======================>Clean up  DONE!"
-
-
         
     def install_plc(self,url):
         print url
@@ -78,10 +75,10 @@ class TestPlc:
     def init_site (self,site_spec):
         test_site = TestSite (self,site_spec)
         test_site.create_site()
-        for key in ['pi_spec','tech_spec','user_spec','tech_user_spec','pi_tech_spec']:
-            test_site.create_user(site_spec[key])
-            test_site.enable_user(site_spec[key])
-            test_site.add_key_user(site_spec[key])            
+        for key in site_spec['users']:
+            test_site.create_user(key)
+            test_site.enable_user(key)
+            test_site.add_key_user(key)            
         return test_site
 
     def init_node (self,test_site,node_spec,path):
@@ -90,10 +87,7 @@ class TestPlc:
         test_node.create_node ("pi")
         test_node.create_node ("tech")
         test_node.create_boot_cd(node_spec,path)
-       
-
         return test_node
-
     
     def db_dump(self):
         
