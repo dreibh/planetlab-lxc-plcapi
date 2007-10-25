@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustess of Princeton University
 #
-# $Id: methods.py,v 1.4 2006/11/29 19:43:17 mlhuang Exp $
+# $Id$
 #
 
 import os, sys

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NetworkMethods.py,v 1.3 2006/10/24 20:02:22 mlhuang Exp $
+# $Id$
 #
 
 from PLC.Faults import *

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Makefile 793 2007-08-28 15:21:17Z thierry $
+# $Id$
 #
 
 # Metafiles

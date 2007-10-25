@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.2 2006/11/03 20:36:05 thierry Exp $
+# $Id$
 #
 
 all: PLCAPI.pdf

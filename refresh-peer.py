@@ -1,5 +1,5 @@
 #!/usr/bin/env plcsh
-# $Id: refresh-peer.py 154 2007-03-28 14:15:55Z thierry $
+# $Id$
 
 import sys,os,time
 

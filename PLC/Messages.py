@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Messages.py,v 1.4 2006/11/16 17:03:36 mlhuang Exp $
+# $Id$
 #
 
 from PLC.Parameter import Parameter

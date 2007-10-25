@@ -4,7 +4,7 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: EventObjects.py 348 2007-05-10 14:13:51Z thierry $
+# $Id$
 #
 
 from PLC.Faults import *

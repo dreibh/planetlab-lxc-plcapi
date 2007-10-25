@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_post2.py,v 1.13 2005/03/03 10:00:40 kjetilja Exp $
+# $Id$
 
 import pycurl
 

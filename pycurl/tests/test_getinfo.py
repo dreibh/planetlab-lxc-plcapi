@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_getinfo.py,v 1.18 2003/05/01 19:35:01 mfx Exp $
+# $Id$
 
 import time
 import pycurl

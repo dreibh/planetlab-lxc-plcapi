@@ -1,5 +1,5 @@
 dnl
-dnl $Id: config.m4,v 1.21 2003/10/01 02:53:15 sniper Exp $
+dnl $Id$
 dnl
 
 sinclude(ext/xmlrpc/libxmlrpc/acinclude.m4)

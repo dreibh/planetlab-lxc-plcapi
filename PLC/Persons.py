@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Persons.py,v 1.38 2007/08/22 19:54:07 tmack Exp $
+# $Id$
 #
 
 from types import StringTypes

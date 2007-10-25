@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeNetworks.py 793 2007-08-28 15:21:17Z thierry $
+# $Id$
 #
 
 from types import StringTypes

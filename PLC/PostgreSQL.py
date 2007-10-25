@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PostgreSQL.py,v 1.14 2007/02/11 18:34:06 mlhuang Exp $
+# $Id$
 #
 
 import psycopg2

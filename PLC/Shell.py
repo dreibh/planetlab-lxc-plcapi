@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id: Shell.py,v 1.4 2007/02/02 04:38:28 mlhuang Exp $
+# $Id$
 #
 
 import os

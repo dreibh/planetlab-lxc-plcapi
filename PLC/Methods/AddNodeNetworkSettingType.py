@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 #
-# $Revision: 88 $
+# $Revision$
 #
 
 

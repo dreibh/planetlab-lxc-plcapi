@@ -7,7 +7,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: GPG.py,v 1.5 2007/02/01 22:28:12 mlhuang Exp $
+# $Id$
 #
 
 import os

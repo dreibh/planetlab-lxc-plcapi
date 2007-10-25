@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: slice_attributes.py,v 1.5 2007/02/04 04:34:26 mlhuang Exp $
+# $Id$
 #
 
 import re

@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
-# $Id: GetPeerData.py 904 2007-10-08 14:28:06Z thierry $
+# $Id$
 
 import time
 

@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: ModPython.py,v 1.4 2007/01/11 22:05:15 mlhuang Exp $
+# $Id$
 #
 
 import sys

@@ -14,7 +14,7 @@
 ###
 ##############################
 
-subversion_id="$Id: TestPeers.py 560 2007-06-20 13:23:09Z thierry $"
+subversion_id="$Id$"
 
 import sys
 import time

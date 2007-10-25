@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test.py,v 1.16 2004/12/26 17:31:53 mfx Exp $
+# $Id$
 
 import sys, threading, time
 import pycurl

@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 #
-# $Revision: 88 $
+# $Revision$
 #
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed

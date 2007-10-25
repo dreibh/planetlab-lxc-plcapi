@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_multi6.py,v 1.5 2003/04/21 18:46:10 mfx Exp $
+# $Id$
 
 import sys, select, time
 import pycurl

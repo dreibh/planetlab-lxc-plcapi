@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 #
-# $Revision: 90 $
+# $Revision$
 #
 from PLC.Faults import *
 from PLC.Method import Method

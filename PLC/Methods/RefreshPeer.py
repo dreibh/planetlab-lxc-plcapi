@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 # 
-# $Id: RefreshPeer.py,v 1.23 2007/03/23 19:05:16 thierry Exp $
+# $Id$
 
 import time
 

@@ -11,8 +11,8 @@
     -- Ian Bicking
 '''
 
-__rcs_id__  = '$Id: dbapi20.py,v 1.10 2003/10/09 03:14:14 zenzen Exp $'
-__version__ = '$Revision: 1.10 $'[11:-2]
+__rcs_id__  = '$Id$'
+__version__ = '$Revision$'[11:-2]
 __author__ = 'Stuart Bishop <zen@shangri-la.dropbear.id.au>'
 
 import unittest

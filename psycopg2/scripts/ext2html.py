@@ -2,7 +2,7 @@
 
 # Author: Daniele Varrazzo
 # Contact: daniele dot varrazzo at gmail dot com
-# Revision: $Revision: 711 $
+# Revision: $Revision$
 # Date: $Date$
 # Copyright: This module has been placed in the public domain.
 

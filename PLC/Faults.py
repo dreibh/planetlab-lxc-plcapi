@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: Faults.py,v 1.2 2006/12/07 09:13:55 thierry Exp $
+# $Id$
 #
 
 import xmlrpclib

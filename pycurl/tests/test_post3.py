@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_post3.py,v 1.1 2004/06/21 11:24:18 kjetilja Exp $
+# $Id$
 
 import urllib
 POSTSTRING = urllib.urlencode({'field1':'value1', 'field2':'value2 with blanks', 'field3':'value3'})

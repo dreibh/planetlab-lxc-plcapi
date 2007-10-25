@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_xmlrpc.py,v 1.7 2003/04/21 18:46:11 mfx Exp $
+# $Id$
 
 ## XML-RPC lib included in python2.2
 import xmlrpclib

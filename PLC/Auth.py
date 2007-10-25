@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Auth.py,v 1.17 2007/02/10 18:39:09 mlhuang Exp $
+# $Id$
 #
 
 import crypt

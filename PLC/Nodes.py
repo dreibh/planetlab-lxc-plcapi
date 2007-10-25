@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Nodes.py 800 2007-08-30 03:49:35Z thierry $
+# $Id$
 #
 
 from types import StringTypes

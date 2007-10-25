@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py 250 2007-04-17 15:14:57Z thierry $
+# $Id$
 #
 
 from pprint import pprint

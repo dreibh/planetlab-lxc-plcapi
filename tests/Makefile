@@ -1,5 +1,5 @@
 ### -*-Makefile-*-
-# $Id: Makefile 566 2007-06-20 14:44:13Z thierry $
+# $Id$
 PLC1=plc1.inria.fr
 PLC2=plc2.inria.fr
 

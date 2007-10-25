@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: API.py,v 1.8 2007/01/05 16:09:09 tmack Exp $
+# $Id$
 #
 
 import sys

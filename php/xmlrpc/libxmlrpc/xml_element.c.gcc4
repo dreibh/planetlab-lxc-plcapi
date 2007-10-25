@@ -31,7 +31,7 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id: xml_element.c,v 1.6 2004/06/01 20:16:06 iliaa Exp $";
+static const char rcsid[] = "#(@) $Id$";
 
 
 

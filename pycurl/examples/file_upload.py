@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: file_upload.py,v 1.5 2005/02/13 08:53:13 mfx Exp $
+# $Id$
 
 import os, sys
 import pycurl

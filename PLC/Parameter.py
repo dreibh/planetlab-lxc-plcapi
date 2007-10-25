@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py,v 1.6 2006/11/08 22:10:00 mlhuang Exp $
+# $Id$
 #
 
 from types import *

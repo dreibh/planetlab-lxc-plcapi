@@ -6,7 +6,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: DocBook.py,v 1.3 2006/10/25 19:35:36 mlhuang Exp $
+# $Id$
 #
 
 import xml.dom.minidom

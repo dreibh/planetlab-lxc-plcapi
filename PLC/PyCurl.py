@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: PyCurl.py,v 1.2 2007/09/12 17:52:27 tmack Exp $
+# $Id$
 #
 
 import os

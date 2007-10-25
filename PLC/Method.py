@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Method.py,v 1.29 2007/08/20 20:31:47 tmack Exp $
+# $Id$
 #
 
 import xmlrpclib

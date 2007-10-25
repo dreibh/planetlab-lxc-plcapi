@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Makefile,v 1.2 2006/10/27 15:40:37 mlhuang Exp $
+# $Id$
 #
 
 all: plc_api.php

@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Roles.py,v 1.7 2006/11/08 23:02:01 mlhuang Exp $
+# $Id$
 #
 
 from types import StringTypes

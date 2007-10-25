@@ -10,7 +10,7 @@ import threading
 
 class TestMain:
 
-    subversion_id = "$Id: TestMain.py 767 2007-08-06 08:32:04Z amine $"
+    subversion_id = "$Id$"
 
     def __init__ (self):
 	self.path=os.path.dirname(sys.argv[0])

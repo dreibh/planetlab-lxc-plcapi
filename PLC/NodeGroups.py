@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: NodeGroups.py,v 1.18 2006/11/09 03:07:42 mlhuang Exp $
+# $Id$
 #
 
 from types import StringTypes

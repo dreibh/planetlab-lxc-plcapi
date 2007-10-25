@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Test.py 502 2007-06-11 14:41:07Z thierry $
+# $Id$
 #
 
 """

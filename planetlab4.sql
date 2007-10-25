@@ -9,7 +9,7 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
--- $Id: planetlab4.sql 793 2007-08-28 15:21:17Z thierry $
+-- $Id$
 --
 
 SET client_encoding = 'UNICODE';

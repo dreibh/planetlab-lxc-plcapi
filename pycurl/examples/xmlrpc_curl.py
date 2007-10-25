@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: xmlrpc_curl.py,v 1.10 2005/02/11 11:09:12 mfx Exp $
+# $Id$
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
 # the libcurl tutorial for more info.

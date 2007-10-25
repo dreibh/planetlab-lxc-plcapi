@@ -5,7 +5,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Server.py,v 1.3 2006/10/25 20:33:07 mlhuang Exp $
+# $Id$
 #
 
 import os

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # vi:ts=4:et
-# $Id: test_internals.py,v 1.17 2003/05/01 16:48:54 mfx Exp $
+# $Id$
 
 #
 # a simple self-test

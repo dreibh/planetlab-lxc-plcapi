@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: BootStates.py,v 1.6 2006/10/24 20:02:22 mlhuang Exp $
+# $Id$
 #
 
 from PLC.Faults import *

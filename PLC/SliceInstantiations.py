@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: SliceInstantiations.py,v 1.2 2006/10/03 19:27:28 mlhuang Exp $
+# $Id$
 #
 
 from PLC.Faults import *

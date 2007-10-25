@@ -1,4 +1,4 @@
-/* $Id: pycurl.c,v 1.86 2005/03/04 08:39:30 kjetilja Exp $ */
+/* $Id$ */
 
 /* PycURL -- cURL Python module
  *
