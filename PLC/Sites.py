@@ -2,7 +2,7 @@ from types import StringTypes
 import string
 
 from PLC.Faults import *
-from PLC.Parameter import Parameter
+from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
@@ -45,7 +45,12 @@ class Site(Row):
         'peer_site_id': Parameter(int, "Foreign site identifier at peer", nullok = True),
 	'ext_consortium_id': Parameter(int, "external consortium id", nullok = True)
         }
-
+    related_fields = {
+ 	'persons': [Mixed(Parameter(int, "Person identifier"),
+                          Parameter(str, "Email address"))],
+	'addresses': [Mixed(Parameter(int, "Address identifer"),
+                            Filter(Address.fields))]
+	}
     # for Cache
     class_key = 'login_base'
     foreign_fields = ['abbreviated_name', 'name', 'is_public', 'latitude', 'longitude',
@@ -112,6 +117,74 @@ class Site(Row):
         self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
                        " where site_id = %d" % (self['site_id']) )
         self.sync(commit)    
+
+
+    def associate_persons(self, auth, field, value):
+	"""
+	Adds persons found in value list to this site (using AddPersonToSite).
+	Deletes persons not found in value list from this site (using DeletePersonFromSite).
+	"""
+	
+	assert 'person_ids' in self
+	assert 'site_id' in self
+	assert isinstance(value, list)
+
+	(person_ids, emails) = self.separate_types(value)[0:2]
+
+	# Translate emails into person_ids
+	if emails:
+	    persons = Persons(self.api, emails, ['person_id']).dict('person_id')
+	    person_ids += persons.keys()
+
+	# Add new ids, remove stale ids
+	if self['person_ids'] != person_ids:
+	    from PLC.Methods.AddPersonToSite import AddPersonToSite
+	    from PLC.Methods.DeletePersonFromSite import DeletePersonFromSite
+	    new_persons = set(person_ids).difference(self['person_ids'])
+	    stale_persons = set(self['person_ids']).difference(person_ids)
+	 
+	    for new_person in new_persons:
+		AddPersonToSite.__call__(AddPersonToSite(self.api), auth, new_person, self['site_id'])
+	    for stale_person in stale_persons:
+		DeletePersonFromSite.__call__(DeletePersonFromSite(self.api), auth, stale_person, self['site_id'])		
+
+    def associate_addresses(self, auth, field, value):
+	"""
+	Deletes addresses_ids not found in value list (using DeleteAddress).  
+	Adds address if slice_fields w/o address_id found in value list (using AddSiteAddress).
+	Update address if slice_fields w/ address_id found in value list (using UpdateAddress).
+	"""
+	
+	assert 'address_ids' in self
+	assert 'site_id' in self
+        assert isinstance(value, list)
+
+        (address_ids, blank, addresses) = self.separate_types(value)
+
+	for address in addresses:
+	    if 'address_id' in address:
+		address_ids.append(address['address_id']) 		
+
+        # Add new ids, remove stale ids
+        if self['address_ids'] != address_ids:
+            from PLC.Methods.DeleteAddress import DeleteAddress
+            stale_addresses = set(self['address_ids']).difference(address_ids)
+
+            for stale_address in stale_addresses:
+                DeleteAddress.__call__(DeleteAddress(self.api), auth, stale_address)	
+	
+	if addresses:
+	    from PLC.Methods.AddSiteAddress import AddSiteAddress
+	    from PLC.Methods.UpdateAddress import UpdateAddress
+		
+	    updated_addresses = filter(lambda address: 'address_id' in address, addresses)
+	    added_addresses = filter(lambda address: 'address_id' not in address, addresses)
+		
+	    for address in added_addresses:
+		AddSiteAddress.__call__(AddSiteAddress(self.api), auth, self['site_id'], address)	
+    	    for address in updated_addresses:
+		address_id = address.pop('address_id')
+		UpdateAddress.__call__(UpdateAddress(self.api), auth, address_id, address)
 
     def delete(self, commit = True):
         """
