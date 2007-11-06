@@ -7,8 +7,11 @@ from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
+related_fields = Slice.related_fields.keys() 
 can_update = lambda (field, value): field in \
-             ['instantiation', 'url', 'description', 'max_nodes', 'expires']
+             ['instantiation', 'url', 'description', 'max_nodes', 'expires'] + \
+	     related_fields
+
 
 class UpdateSlice(Method):
     """
@@ -28,7 +31,7 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    slice_fields = dict(filter(can_update, Slice.fields.items()))
+    slice_fields = dict(filter(can_update, Slice.fields.items() + Slice.related_fields.items()))
 
     accepts = [
         Auth(),
@@ -41,8 +44,8 @@ class UpdateSlice(Method):
 
     def call(self, auth, slice_id_or_name, slice_fields):
         slice_fields = dict(filter(can_update, slice_fields.items()))
-
-        slices = Slices(self.api, [slice_id_or_name])
+        
+	slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
@@ -79,14 +82,20 @@ class UpdateSlice(Method):
                'pi' not in self.caller['roles']:
                 raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
 
-        slice.update(slice_fields)
-
         # XXX Make this a configurable policy
         if slice['description'] is None or not slice['description'].strip() or \
            slice['url'] is None or not slice['url'].strip():
             raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
 
+	# Make requested associations
+	for field in related_fields:
+	    if field in slice_fields:
+		slice.associate(auth, field, slice_fields[field])
+		slice_fields.pop(field)
+
+	slice.update(slice_fields)
         slice.sync()
+
 	self.event_objects = {'Slice': [slice['slice_id']]}
 
         return 1
