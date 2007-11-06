@@ -50,6 +50,35 @@ class Row(dict):
             if value is not None and hasattr(self, 'validate_' + key):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
+	
+    def separate_types(self, items):
+	"""
+	Separate a list of different typed objects. 
+	Return a list for each type (ints, strs and dicts)
+	"""
+	
+	if isinstance(items, (list, tuple, set)):
+	    ints = filter(lambda x: isinstance(x, (int, long)), items)
+	    strs = filter(lambda x: isinstance(x, StringTypes), items)
+	    dicts = filter(lambda x: isinstance(x, dict), items)
+	    return (ints, strs, dicts)	 	
+	else:
+	    raise PLCInvalidArgument, "Can only separate list types" 
+	  	
+
+    def associate(self, *args):
+    	"""
+	Provides a means for high lvl api calls to associate objects
+        using low lvl calls.
+	"""
+
+	if len(args) < 3:
+	    raise PLCInvalidArgumentCount, "auth, field, value must be specified"
+	elif hasattr(self, 'associate_' + args[1]):
+	    associate = getattr(self, 'associate_'+args[1])
+	    associate(*args)
+	else:
+	    raise PLCInvalidArguemnt, "No such associate function associate_%s" % args[1]
 
     def validate_timestamp(self, timestamp, check_future = False):
         """
