@@ -4,10 +4,11 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
+related_fields = Person.related_fields.keys()
 can_update = lambda (field, value): field in \
              ['first_name', 'last_name', 'title', 'email',
               'password', 'phone', 'url', 'bio', 'accepted_aup',
-              'enabled']
+              'enabled'] + related_fields
 
 class UpdatePerson(Method):
     """
@@ -22,7 +23,7 @@ class UpdatePerson(Method):
 
     roles = ['admin', 'pi', 'user', 'tech']
 
-    person_fields = dict(filter(can_update, Person.fields.items()))
+    person_fields = dict(filter(can_update, Person.fields.items() + Person.related_fields.items()))
 
     accepts = [
         Auth(),
@@ -51,6 +52,12 @@ class UpdatePerson(Method):
         # Check if we can update this account
         if not self.caller.can_update(person):
             raise PLCPermissionDenied, "Not allowed to update specified account"
+	
+	# Make requested associations
+        for field in related_fields:
+            if field in person_fields:
+                person.associate(auth, field, person_fields[field])
+                person_fields.pop(field)
 
         person.update(person_fields)
 	person.update_last_updated(False)
