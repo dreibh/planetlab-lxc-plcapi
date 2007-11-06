@@ -11,7 +11,7 @@ from types import StringTypes
 import re
 
 from PLC.Faults import *
-from PLC.Parameter import Parameter
+from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
@@ -65,7 +65,17 @@ class Node(Row):
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
         'peer_node_id': Parameter(int, "Foreign node identifier at peer", nullok = True),
         }
-
+    related_fields = {
+	'nodenetworks': [Mixed(Parameter(int, "NodeNetwork identifier"),
+                       	       Filter(NodeNetwork.fields))],
+	'nodegroups': [Mixed(Parameter(int, "NodeGroup identifier"),
+                             Parameter(str, "NodeGroup name"))],
+	'conf_files': [Parameter(int, "ConfFile identifier")],
+	'slices': [Mixed(Parameter(int, "Slice identifier"),
+                         Parameter(str, "Slice name"))],
+	'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
+                                   Parameter(str, "Slice name"))]
+	}
     # for Cache
     class_key = 'hostname'
     foreign_fields = ['boot_state','model','version']
@@ -123,6 +133,142 @@ class Node(Row):
         self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
                        " where node_id = %d" % (self['node_id']) )
         self.sync(commit)
+
+    def associate_nodenetworks(self, auth, field, value):
+	"""
+	Delete nodenetworks not found in value list (using DeleteNodeNetwor)k	
+	Add nodenetworks found in value list (using AddNodeNetwork)
+	Updates nodenetworks found w/ nodenetwork_id in value list (using UpdateNodeNetwork) 
+	"""
+
+	assert 'nodenetworkp_ids' in self
+        assert 'node_id' in self
+        assert isinstance(value, list)
+
+        (nodenetwork_ids, blank, nodenetworks) = self.separate_types(value)
+
+        if self['nodenetwork_ids'] != nodenetwork_ids:
+            from PLC.Methods.DeleteNodeNetwork import DeleteNodeNetwork
+
+            stale_nodenetworks = set(self['nodenetwork_ids']).difference(nodenetwork_ids)
+
+            for stale_nodenetwork in stale_nodenetworks:
+                DeleteNodeNetwork.__call__(DeleteNodeNetwork(self.api), auth, stale_nodenetwork['nodenetwork_id'])
+
+    def associate_nodegroups(self, auth, field, value):
+	"""
+	Add node to nodegroups found in value list (AddNodeToNodegroup)
+	Delete node from nodegroup not found in value list (DeleteNodeFromNodegroup)
+	"""
+	
+	from PLC.NodeGroups import NodeGroups
+	
+	assert 'nodegroup_ids' in self
+	assert 'node_id' in self
+	assert isinstance(value, list)
+
+	(nodegroup_ids, nodegroup_names) = self.separate_types(value)[0:2]
+	
+	if nodegroup_names:
+	    nodegroups = NodeGroups(self.api, nodegroup_names, ['nodegroup_id']).dict('nodegroup_id')
+	    nodegroup_ids += nodegroups.keys()
+
+	if self['nodegroup_ids'] != nodegroup_ids:
+	    from PLC.Methods.AddNodeToNodeGroup import AddNodeToNodeGroup
+	    from PLC.Methods.DeleteNodeFromNodeGroup import DeleteNodeFromNodeGroup
+	
+	    new_nodegroups = set(nodegroup_ids).difference(self['nodegroup_ids'])
+	    stale_nodegroups = set(self['nodegroup_ids']).difference(nodegroup_ids)
+	
+	    for new_nodegroup in new_nodegroups:
+		AddNodeToNodeGroup.__call__(AddNodeToNodeGroup(self.api), auth, self['node_id'], new_nodegroup)
+	    for stale_nodegroup in stale_nodegroups:
+		DeleteNodeFromNodeGroup.__call__(DeleteNodeFromNodeGroup(self.api), auth, self['node_id'], stale_nodegroup)
+	  
+
+ 
+    def associate_conf_files(self, auth, field, value):
+	"""
+	Add conf_files found in value list (AddConfFileToNode)
+	Delets conf_files not found in value list (DeleteConfFileFromNode)
+	"""
+	
+	assert 'conf_file_ids' in self
+	assert 'node_id' in self
+	assert isinstance(value, list)
+	
+	conf_file_ids = self.separate_types(value)[0]
+	
+	if self['conf_file_ids'] != conf_file_ids:
+	    from PLC.Methods.AddConfFileToNode import AddConfFileToNode
+	    from PLC.Methods.DeleteConfFileFromNode import DeleteConfFileFromNode
+	    new_conf_files = set(conf_file_ids).difference(self['conf_file_ids'])
+	    stale_conf_files = set(self['conf_file_ids']).difference(conf_file_ids)
+	
+	    for new_conf_file in new_conf_files:
+		AddConfFileToNode.__call__(AddConfFileToNode(self.api), auth, new_conf_file, self['node_id'])
+	    for stale_conf_file in stale_conf_files:
+		DeleteConfFileFromNode.__call__(DeleteConfFileFromNode(self.api), auth, stale_conf_file, self['node_id'])
+
+ 
+    def associate_slices(self, auth, field, value):
+	"""
+	Add slices found in value list to (AddSliceToNode)
+	Delete slices not found in value list (DeleteSliceFromNode)
+	"""
+	
+	from PLC.Slices import Slices
+	
+	assert 'slice_ids' in self
+	assert 'node_id' in self
+	assert isinstance(value, list)
+	
+	(slice_ids, slice_names) = self.separate_types(value)[0:2]
+
+	if slice_names:
+	    slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
+	    slice_ids += slices.keys()
+
+	if self['slice_ids'] != slice_ids:
+	    from PLC.Methods.AddSliceToNodes import AddSliceToNodes
+	    from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
+	    new_slices = set(slice_ids).difference(self['slice_ids'])
+	    stale_slices = set(self['slice_ids']).difference(slice_ids)
+	
+	for new_slice in new_slices:
+	    AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, new_slice, [self['node_id']])
+	for stale_slice in stale_slices:
+	    DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, stale_slice, [self['node_id']]) 		 	
+
+    def associate_slices_whitelist(self, auth, field, value):
+	"""
+	Add slices found in value list to whitelist (AddSliceToNodesWhitelist)
+	Delete slices not found in value list from whitelist (DeleteSliceFromNodesWhitelist)
+	"""
+
+	from PLC.Slices import Slices
+
+	assert 'slice_ids_whitelist' in self
+        assert 'node_id' in self
+        assert isinstance(value, list)
+
+	(slice_ids, slice_names) = self.separate_types(value)[0:2]
+
+        if slice_names:
+            slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
+            slice_ids += slices.keys()
+
+        if self['slice_ids_whitelist'] != slice_ids:
+            from PLC.Methods.AddSliceToNodesWhitelist import AddSliceToNodesWhitelist
+            from PLC.Methods.DeleteSliceFromNodesWhitelist import DeleteSliceFromNodesWhitelist
+            new_slices = set(slice_ids).difference(self['slice_ids_whitelist'])
+            stale_slices = set(self['slice_ids_whitelist']).difference(slice_ids)
+
+        for new_slice in new_slices:
+            AddSliceToNodesWhitelist.__call__(AddSliceToNodesWhitelist(self.api), auth, new_slice, [self['node_id']])
+        for stale_slice in stale_slices:
+            DeleteSliceFromNodesWhitelist.__call__(DeleteSliceFromNodesWhitelist(self.api), auth, stale_slice, [self['node_id']]) 
+		
 
     def delete(self, commit = True):
         """
