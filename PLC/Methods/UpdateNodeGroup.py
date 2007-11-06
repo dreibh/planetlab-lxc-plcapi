@@ -4,8 +4,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import Auth
 
+related_fields = NodeGroup.related_fields.keys()
 can_update = lambda (field, value): field in \
-             ['name', 'description']
+             ['name', 'description'] + \
+	     related_fields
 
 class UpdateNodeGroup(Method):
     """
@@ -16,7 +18,7 @@ class UpdateNodeGroup(Method):
 
     roles = ['admin']
 
-    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items() + NodeGroup.related_fields.items()))
 
     accepts = [
         Auth(),
@@ -35,6 +37,12 @@ class UpdateNodeGroup(Method):
 	if not nodegroups:
             raise PLCInvalidArgument, "No such nodegroup"
 	nodegroup = nodegroups[0]
+
+	# Make requested associations
+        for field in related_fields:
+            if field in nodegroup_fields:
+                nodegroup.associate(auth, field, nodegroup_fields[field])
+                nodegroup_fields.pop(field)
 	
 	nodegroup.update(nodegroup_fields)
         nodegroup.sync()
