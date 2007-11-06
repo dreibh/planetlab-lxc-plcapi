@@ -17,7 +17,7 @@ import crypt
 
 from PLC.Faults import *
 from PLC.Debug import log
-from PLC.Parameter import Parameter
+from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Roles import Role, Roles
@@ -57,6 +57,18 @@ class Person(Row):
         'peer_id': Parameter(int, "Peer to which this user belongs", nullok = True),
         'peer_person_id': Parameter(int, "Foreign user identifier at peer", nullok = True),
         }
+    related_fields = {
+	'roles': [Mixed(Parameter(int, "Role identifier"),
+			Parameter(str, "Role name"))],
+	'sites': [Mixed(Parameter(int, "Site identifier"),
+			Parameter(str, "Site name"))],
+	'keys': [Mixed(Parameter(int, "Key identifier"),
+		       Filter(Key.fields))],
+	'slices': [Mixed(Parameter(int, "Slice identifier"),
+			 Parameter(str, "Slice name"))]
+	}	
+
+	
 
     # for Cache
     class_key = 'email'
@@ -228,6 +240,132 @@ class Person(Row):
 	self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
                        " where person_id = %d" % (self['person_id']) )
         self.sync(commit)
+
+    def associate_roles(self, auth, field, value):
+	"""
+	Adds roles found in value list to this person (using AddRoleToPerson).
+	Deletes roles not found in value list from this person (using DeleteRoleFromPerson).
+	"""
+	
+	assert 'role_ids' in self
+	assert 'person_id' in self
+	assert isinstance(value, list)
+	
+	(role_ids, roles_names) = self.separate_types(value)[0:2]
+	
+	# Translate roles into role_ids
+	if roles_names:
+	    roles = Roles(self.api, role_names, ['role_id']).dict('role_id')
+	    role_ids += roles.keys()
+	
+	# Add new ids, remove stale ids
+	if self['role_ids'] != role_ids:
+	    from PLC.Methods.AddRoleToPerson import AddRoleToPerson
+	    from PLC.Methods.DeleteRoleFromPerson import DeleteRoleFromPerson
+	    new_roles = set(role_ids).difference(self['role_ids'])
+	    stale_roles = set(self['role_ids']).difference(role_ids)
+
+	    for new_role in new_roles:
+		AddRoleToPerson.__call__(AddRoleToPerson(self.api), auth, new_role, self['person_id'])
+	    for stale_role in stale_roles:
+		DeleteRoleFromPerson.__call__(DeleteRoleFromPerson(self.api), auth, stale_role, self['person_id'])
+
+
+    def associate_sites(self, auth, field, value):
+        """
+        Adds person to sites found in value list (using AddPersonToSite).
+        Deletes person from site not found in value list (using DeletePersonFromSite).
+        """
+
+	from PLC.Sites import Sites
+
+        assert 'site_ids' in self
+        assert 'person_id' in self
+        assert isinstance(value, list)
+
+        (site_ids, site_names) = self.separate_types(value)[0:2]
+
+        # Translate roles into role_ids
+        if site_names:
+            sites = Sites(self.api, site_names, ['site_id']).dict('site_id')
+            site_ids += sites.keys()
+
+        # Add new ids, remove stale ids
+        if self['site_ids'] != site_ids:
+            from PLC.Methods.AddPersonToSite import AddPersonToSite
+            from PLC.Methods.DeletePersonFromSite import DeletePersonFromSite
+            new_sites = set(site_ids).difference(self['site_ids'])
+            stale_sites = set(self['site_ids']).difference(site_ids)
+
+            for new_site in new_sites:
+                AddPersonToSite.__call__(AddPersonToSite(self.api), auth, self['person_id'], new_site)
+            for stale_site in stale_sites:
+                DeletePersonFromSite.__call__(DeletePersonFromSite(self.api), auth, self['person_id'], stale_site)
+
+
+    def associate_keys(self, auth, field, value):
+	"""
+        Deletes key_ids not found in value list (using DeleteKey).
+        Adds key if key_fields w/o key_id is found (using AddPersonKey).
+        Updates key if key_fields w/ key_id is found (using UpdateKey).
+        """
+	assert 'key_ids' in self
+	assert 'person_id' in self
+	assert isinstance(value, list)
+	
+	(key_ids, blank, keys) = self.separate_types(value)
+	
+	if self['key_ids'] != key_ids:
+	    from PLC.Methods.DeleteKey import DeleteKey
+	    stale_keys = set(self['key_ids']).difference(key_ids)
+	
+	    for stale_key in stale_keys:
+		DeleteKey.__call__(DeleteKey(self.api), auth, stale_key) 
+
+	if keys:
+	    from PLC.Methods.AddPersonKey import AddPersonKey
+	    from PLC.Methods.UpdateKey import UpdateKey		
+	    updated_keys = filter(lambda key: 'key_id' in key, keys)
+	    added_keys = filter(lambda key: 'key_id' not in key, keys)
+		
+	    for key in added_keys:
+		AddPersonKey.__call__(AddPersonKey(self.api), auth, self['person_id'], key)
+	    for key in updated_keys:
+		key_id = key.pop('key_id')
+		UpdateKey.__call__(UpdateKey(self.api), auth, key_id, key)
+		  
+	
+    def associate_slices(self, auth, field, value):
+        """
+        Adds person to slices found in value list (using AddPersonToSlice).
+        Deletes person from slices found in value list (using DeletePersonFromSlice).
+        """
+
+	from PLC.Slices import Slices
+
+        assert 'slice_ids' in self
+        assert 'person_id' in self
+        assert isinstance(value, list)
+
+        (slice_ids, slice_names) = self.separate_types(value)[0:2]
+
+        # Translate roles into role_ids
+        if slice_names:
+            slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
+            slice_ids += slices.keys()
+
+        # Add new ids, remove stale ids
+        if self['slice_ids'] != slice_ids:
+            from PLC.Methods.AddPersonToSlice import AddPersonToSlice
+            from PLC.Methods.DeletePersonFromSlice import DeletePersonFromSlice
+            new_slices = set(slice_ids).difference(self['slice_ids'])
+            stale_slices = set(self['slice_ids']).difference(slice_ids)
+
+            for new_slice in new_slices:
+                AddPersonToSlice.__call__(AddPersonToSlice(self.api), auth, self['person_id'], new_slice)
+            for stale_slice in stale_slices:
+                DeletePersonFromSlice.__call__(DeletePersonFromSlice(self.api), auth, self['person_id'], stale_slice)
+    
 
     def delete(self, commit = True):
         """
