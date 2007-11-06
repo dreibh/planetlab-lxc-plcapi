@@ -4,10 +4,12 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
+related_fields = Site.related_fields.keys()
 can_update = lambda (field, value): field in \
              ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
-              'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id']
+              'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id'] + \
+	      related_fields	
 
 class UpdateSite(Method):
     """
@@ -22,7 +24,7 @@ class UpdateSite(Method):
 
     roles = ['admin', 'pi']
 
-    site_fields = dict(filter(can_update, Site.fields.items()))
+    site_fields = dict(filter(can_update, Site.fields.items() + Site.related_fields.items()))
 
     accepts = [
         Auth(),
@@ -59,6 +61,12 @@ class UpdateSite(Method):
                 if key in site_fields:
                     del site_fields[key]
 
+	# Make requested associations
+	for field in related_fields:
+	    if field in site_fields:
+		site.associate(auth, field, site_fields[field])
+		site_fields.pop(field)	
+	
         site.update(site_fields)
 	site.update_last_updated(False)
 	site.sync()
