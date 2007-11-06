@@ -4,9 +4,11 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
 
+related_fields = Node.related_fields.keys()
 can_update = lambda (field, value): field in \
              ['hostname', 'boot_state', 'model', 'version',
-              'key', 'session', 'boot_nonce']
+              'key', 'session', 'boot_nonce'] + \
+	     related_fields
 
 class UpdateNode(Method):
     """
@@ -21,7 +23,7 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    node_fields = dict(filter(can_update, Node.fields.items()))
+    node_fields = dict(filter(can_update, Node.fields.items() + Node.related_fields.items()))
 
     accepts = [
         Auth(),
@@ -59,7 +61,13 @@ class UpdateNode(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
-        node.update(node_fields)
+        # Make requested associations
+        for field in related_fields:
+            if field in node_fields:
+                node.associate(auth, field, node_fields[field])
+                node_fields.pop(field)
+
+	node.update(node_fields)
 	node.update_last_updated(False)
         node.sync()
 	
