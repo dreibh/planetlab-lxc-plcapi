@@ -11,7 +11,8 @@
 init := PLC/__init__.py PLC/Methods/__init__.py
 
 # Python modules
-modules := psycopg2
+#modules := psycopg2
+modules := pycurl
 
 # Temporarily until we can kill the Fedora Core 2 build
 curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))

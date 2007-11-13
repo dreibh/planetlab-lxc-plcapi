@@ -15,6 +15,7 @@ import codecs
 
 from PLC.Method import *
 import DocBookLocal
+import groups
 
 # xml.dom.minidom.Text.writexml adds surrounding whitespace to textual
 # data when pretty-printing. Override this behavior.
@@ -103,12 +104,13 @@ class paramElement(Element):
             for subparam in param:
                 itemizedlist.appendChild(paramElement(None, subparam))
 
-api_func_list = DocBookLocal.get_func_list()
-for func in api_func_list:
+
+def get_method_doc(func):
+
     method = func.name
 
     if func.status == "deprecated":
-        continue
+        return
 
     (min_args, max_args, defaults) = func.args()
 
@@ -145,4 +147,53 @@ for func in api_func_list:
     returns.appendChild(paramElement(None, func.returns))
     section.appendChild(returns)
 
-    print section.toprettyxml(encoding = "UTF-8")
+    #print section.toprettyxml(encoding = "UTF-8")
+    return section
+
+
+def get_section(fields, field_list = None):
+    if not field_list:
+	field_list = fields.keys()
+	field_list.sort()
+
+    for field in field_list:
+	value = fields[field]
+	section = Element('section')
+	section.setAttribute('id', field.title())
+	section.appendChild(simpleElement('title', field.title()))
+	# if list of methods, append method docs
+	# else if dict, make a new section group
+        if isinstance(value, dict):
+	    section.appendChild(get_section(value))
+	elif isinstance(value, list):
+	    methods = DocBookLocal.get_func_list(value)
+	    for method in methods:
+		method_doc = get_method_doc(method)
+	        section.appendChild(method_doc)   	      
+
+    return section
+ 	
+# write full list of methods to Methods.xml
+#api_func_list = DocBookLocal.get_func_list()
+#methods_xml = file('Methods.xml',  'w')
+#for func in api_func_list:
+#    section = get_method_doc(func)
+#    if section:		
+#        methods_xml.write(section)
+#methods_xml.close()
+
+# write methods grouped into interfaces
+interfaces = ['Registry_Interface', 'Management_Interface', 'Slice_Interface']
+for interface in interfaces:
+    interface_file = file(interface+'.xml', 'w')
+    interface_methods = groups.interfaces[interface]
+    section =  get_section(interface_methods, ['public', 'admin'])
+    if section:    
+	interface_file.write(section.toprettyxml(encoding = "UTF-8"))
+    interface_file.close() 	
+    	
+ 	
+
+    	
+    		
+ 	
