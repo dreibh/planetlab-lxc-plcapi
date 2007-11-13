@@ -54,7 +54,6 @@ try:
     api = shell.api
     config = shell.config
 except Exception, err:
-    print_exc()	
     print "Error:", err
     print
     parser.print_help()
