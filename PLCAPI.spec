@@ -5,8 +5,8 @@
 %define url $URL$
 
 %define name PLCAPI
-%define version 4.1
-%define subversion 2
+%define version 4.2
+%define subversion 0
 
 %define release %{subversion}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
