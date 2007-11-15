@@ -59,10 +59,10 @@ class Filter(Parameter, dict):
     example : filter = { '-SORT' : [ '+node_id', '-hostname' ] }
     * '-OFFSET' : the number of first rows to be ommitted
     * '-LIMIT' : the amount of rows to be returned 
-    example : filter = { '-OFFSET' : 100, '-PAGE':25}
+    example : filter = { '-OFFSET' : 100, 'LIMIT':25}
 
     A realistic example would read
-    GetNodes ( { 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-PAGE' : 25 } )
+    GetNodes ( { 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
     and that would return nodes matching '*.edu' in alphabetical order from 31th to 55th
     """
 
