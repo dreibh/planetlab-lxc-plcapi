@@ -40,8 +40,8 @@ def notify_owners(method, node, message_id,
 
         persons = Persons(method.api, site['person_ids'])
         for person in persons:
-            if include_pis and 'pi' in person['roles'] or \
-               include_techs and 'tech' in person['roles']:
+            if (include_pis and 'pi' in person['roles'] and person['enabled']) or \
+               (include_techs and 'tech' in person['roles'] and person['enabled']) :
                 To.append(("%s %s" % (person['first_name'], person['last_name']), person['email']))
 
     # Send email
