@@ -347,7 +347,7 @@ CREATE TABLE conf_files (
     error_cmd text, -- Shell command to execute if any error occurs
     ignore_cmd_errors bool NOT NULL DEFAULT false, -- Install file anyway even if an error occurs
     always_update bool NOT NULL DEFAULT false -- Always attempt to install file even if unchanged
-);
+) WITH OIDS;
 
 CREATE TABLE conf_file_node (
     conf_file_id integer REFERENCES conf_files NOT NULL, -- Configuration file identifier
