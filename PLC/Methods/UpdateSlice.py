@@ -77,15 +77,21 @@ class UpdateSlice(Method):
             if 'admin' not in self.caller['roles'] and slice_fields['expires'] > max_expires:
                 raise PLCInvalidArgument, "Cannot renew a slice beyond 8 weeks from now"
 
+	    # XXX Make this a configurable policy
+            if slice['description'] is None or not slice['description'].strip():
+		if 'description' not in slice_fields or slice_fields['description'] is None or \
+		   not slice_fields['description'].strip():
+		     raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"	
+               
+	    if slice['url'] is None or not slice['url'].strip():
+		if 'url' not in slice_fields or slice_fields['url'] is None or \
+		   not slice_fields['url'].strip():
+                    raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
+	    
         if 'max_nodes' in slice_fields and slice_fields['max_nodes'] != slice['max_nodes']:
             if 'admin' not in self.caller['roles'] and \
                'pi' not in self.caller['roles']:
                 raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
-
-        # XXX Make this a configurable policy
-        if slice['description'] is None or not slice['description'].strip() or \
-           slice['url'] is None or not slice['url'].strip():
-            raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
 
 	# Make requested associations
 	for field in related_fields:
