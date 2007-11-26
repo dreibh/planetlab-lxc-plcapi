@@ -55,8 +55,15 @@ through Apache mod_python.
 %setup -q
 
 %build
+# python-pycurl and python-psycopg2 avail. from fedora 5
+# make sure to check myplc/<pldistro>-plc.lst
+if [ "%{distrorelease}" -le 4 ] ; then
+    modules="build_psycopg2=true build_pycurl=true"
+else
+    modules=""
+fi
 # Build __init__.py metafiles and PHP API. 
-%{__make} %{?_smp_mflags} subdirs="php php/xmlrpc"
+%{__make} %{?_smp_mflags} subdirs="php php/xmlrpc" modules="$modules"
 # Build documentation
 # beware that making the pdf file somehow overwrites the html
 %{__make} -C doc PLCAPI.pdf

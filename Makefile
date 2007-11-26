@@ -11,17 +11,18 @@
 init := PLC/__init__.py PLC/Methods/__init__.py
 
 # Python modules
-modules := psycopg2
+# see PLCAPI.spec for the settings of modules
+# default is : no extra module get built
 
-# Temporarily until we can kill the Fedora Core 2 build
-curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
-pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
-pycurl_incompatnum := $(shell printf %d 0x071000) # 7.16.0
-ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
-ifeq ($(shell test $(curl_vernum) -ge $(pycurl_incompatnum) && echo 0),1)
-modules += pycurl
-endif
-endif
+## Temporarily until we can kill the Fedora Core 2 build
+#curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
+#pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
+#pycurl_incompatnum := $(shell printf %d 0x071000) # 7.16.0
+#ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
+#ifeq ($(shell test $(curl_vernum) -ge $(pycurl_incompatnum) && echo 0),1)
+#modules += pycurl
+#endif
+#endif
 
 modules-install := $(foreach module, $(modules), $(module)-install)
 modules-clean := $(foreach module, $(modules), $(module)-clean)
