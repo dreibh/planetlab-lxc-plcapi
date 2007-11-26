@@ -24,8 +24,8 @@ class PCUProtocolType(Row):
     fields = {
 	'pcu_protocol_type_id': Parameter(int, "PCU protocol type identifier"),
 	'pcu_type_id': Parameter(int, "PCU type identifier"), 
-	'port': Parameter(int, "PCU port", max = 254),
-	'protocol': Parameter(str, "Protocol", max = 254),
+	'port': Parameter(int, "PCU port"),
+	'protocol': Parameter(str, "Protocol"),
 	'supported': Parameter(bool, "Is the port/protocol supported by PLC") 
         }
 
