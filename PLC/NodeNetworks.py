@@ -182,10 +182,12 @@ class NodeNetwork(Row):
             # DHCP!
 
         elif method == "static":
-  	    if 'gateway' not in self or self['gateway'] is None:
-		if 'is_primary' in self and self['is_primary'] is True:
-		    raise PLCInvalidArgument, "For static method primary network, gateway is required"
-            for key in ['ip', 'network', 'broadcast', 'netmask', 'dns1']:
+            if 'is_primary' in self and self['is_primary'] is True:
+                for key in ['gateway', 'dns1']:
+                    if key not in self or not self[key]:
+                        raise PLCInvalidArgument, "For static method primary network, %s is required" % key
+                    globals()[key] = self[key]
+            for key in ['ip', 'network', 'broadcast', 'netmask']:
                 if key not in self or not self[key]:
                     raise PLCInvalidArgument, "For static method, %s is required" % key
                 globals()[key] = self[key]
