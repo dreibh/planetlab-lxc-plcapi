@@ -112,6 +112,7 @@ class GetBootMedium(Method):
               Node.fields['hostname']),
         Parameter (str, "Action mode, expected in " + "|".join(boot_medium_actions)),
         Parameter (str, "Empty string for verbatim result, resulting file full path otherwise"),
+        Parameter ([str], "Options"),
         ]
 
     returns = Parameter(str, "Node boot medium, either inlined, or filename, depending to the filename parameter")
@@ -230,19 +231,32 @@ class GetBootMedium(Method):
         if not self.DEBUG:
             os.system("rm -rf %s"%tempdir)
 
-    def call(self, auth, node_id_or_hostname, action, filename):
+    def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
         ### check action
         if action not in boot_medium_actions:
             raise PLCInvalidArgument, "Unknown action %s"%action
 
-        ### compute file suffix 
+        ### compute file suffix and type
         if action.find("-iso") >= 0 :
             suffix=".iso"
+            type = ["iso"]
         elif action.find("-usb") >= 0:
             suffix=".usb"
+            type = ["usb"]
         else:
             suffix=".txt"
+            type = ["txt"]
+
+        if type != "txt":
+            if 'serial' in options:
+                suffix = "-serial" + suffix
+                type.insert(1, "serial")
+            if 'cramfs' in options:
+                suffix = "-cramfs" + suffix
+                # XXX must be the same index as above
+                type.insert(1, "cramfs")
+        type = "_".join(type)
 
         ### compute a 8 bytes random number
         tempbytes = random.sample (xrange(0,256), 8);
@@ -337,12 +351,6 @@ class GetBootMedium(Method):
 
             ### check we've got required material
             version = self.bootcd_version()
-            generic_name = "%s-BootCD-%s%s"%(self.api.config.PLC_NAME,
-                                             version,
-                                             suffix)
-            generic_path = "%s/%s" % (self.GENERICDIR,generic_name)
-            if not os.path.isfile(generic_path):
-                raise PLCAPIError, "Cannot locate generic medium %s"%generic_path
             
             if not os.path.isfile(self.BOOTCDBUILD):
                 raise PLCAPIError, "Cannot locate bootcd/build.sh script %s"%self.BOOTCDBUILD
@@ -370,7 +378,7 @@ class GetBootMedium(Method):
                 build_command = '%s -f "%s" -O "%s" -t "%s" &> %s.log' % (self.BOOTCDBUILD,
                                                                           node_floppy,
                                                                           node_image,
-                                                                          suffix[1:],
+                                                                          type,
                                                                           node_image)
                 if self.DEBUG:
                     print 'build command:',build_command
