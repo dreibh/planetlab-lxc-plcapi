@@ -117,7 +117,7 @@ class GetBootMedium(Method):
     returns = Parameter(str, "Node boot medium, either inlined, or filename, depending to the filename parameter")
 
     BOOTCDDIR = "/usr/share/bootcd/"
-    BOOTCUSTOM = "/usr/share/bootcd/bootcustom.sh"
+    BOOTCDBUILD = "/usr/share/bootcd/build.sh"
     GENERICDIR = "/var/www/html/download/"
     NODEDIR = "/var/tmp/bootmedium/results"
     WORKDIR = "/var/tmp/bootmedium/work"
@@ -344,8 +344,8 @@ class GetBootMedium(Method):
             if not os.path.isfile(generic_path):
                 raise PLCAPIError, "Cannot locate generic medium %s"%generic_path
             
-            if not os.path.isfile(self.BOOTCUSTOM):
-                raise PLCAPIError, "Cannot locate bootcustom script %s"%self.BOOTCUSTOM
+            if not os.path.isfile(self.BOOTCDBUILD):
+                raise PLCAPIError, "Cannot locate bootcd/build.sh script %s"%self.BOOTCDBUILD
 
             # need a temporary area
             tempdir = "%s/%s"%(self.WORKDIR,nodename)
@@ -365,20 +365,22 @@ class GetBootMedium(Method):
                 except:
                     raise PLCPermissionDenied, "Could not write into %s"%node_floppy
 
-                # invoke bootcustom
-                bootcustom_command = 'sudo %s -C "%s" "%s" "%s"'%(self.BOOTCUSTOM,
-                                                                  tempdir,
-                                                                  generic_path,
-                                                                  node_floppy)
+                node_image = "%s/%s"%(tempdir,nodename)
+                # invoke build.sh
+                build_command = '%s -f "%s" -O "%s" -t "%s" &> %s.log' % (self.BOOTCDBUILD,
+                                                                          node_floppy,
+                                                                          node_image,
+                                                                          suffix[1:],
+                                                                          node_image)
                 if self.DEBUG:
-                    print 'bootcustom command:',bootcustom_command
-                ret=os.system(bootcustom_command)
+                    print 'build command:',build_command
+                ret=os.system(build_command)
                 if ret != 0:
-                    raise PLCPermissionDenied,"bootcustom.sh failed to create node-specific medium"
+                    raise PLCPermissionDenied,"build.sh failed to create node-specific medium"
 
-                node_image = "%s/%s%s"%(tempdir,nodename,suffix)
+                node_image += suffix
                 if not os.path.isfile (node_image):
-                    raise PLCAPIError,"Unexpected location of bootcustom output - %s"%node_image
+                    raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
             
                 # cache result
                 if filename:
