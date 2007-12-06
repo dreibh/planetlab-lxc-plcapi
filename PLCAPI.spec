@@ -56,7 +56,7 @@ through Apache mod_python.
 
 %build
 # python-pycurl and python-psycopg2 avail. from fedora 5
-# make sure to check myplc/<pldistro>-plc.lst
+# make sure to check build/<pldistro>/plc.pkgs
 if [ "%{distrorelease}" -le 4 ] ; then
     modules="psycopg2 pycurl"
 else
