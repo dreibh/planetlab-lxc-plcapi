@@ -72,7 +72,7 @@ rm -f doc/PLCAPI.html
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}"
+%{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}" modules="$modules"
 #someone out there skips doc installation - we DO want this installed
 for doc in PLCAPI.html PLCAPI.pdf ; do
     install -D -m 644 doc/$doc $RPM_BUILD_ROOT/"%{_datadir}"/plc_api/doc/$doc
