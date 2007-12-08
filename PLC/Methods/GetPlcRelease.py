@@ -7,7 +7,9 @@ import re
 comment_regexp = '\A\s*#.|\A\s*\Z|\Axxxxx' 
 
 regexps = { 'build'   : '\A[bB]uild\s+(?P<key>[^:]+)\s*:\s*(?P<value>.*)\Z',
-	    'tags'    : '\A(?P<key>[^:]+)\s*:=\s*(?P<value>.*)\Z'}
+	    'tags'    : '\A(?P<key>[^:]+)\s*:=\s*(?P<value>.*)\Z',
+            'rpms'    : '\A(?P<key>[^:]+)\s*::\s*(?P<value>.*)\Z',
+}
 
 class GetPlcRelease(Method):
     """
@@ -34,7 +36,6 @@ class GetPlcRelease(Method):
 	for field in regexps.keys():
 	    matchers[field] = re.compile(regexps[field])
 	    result[field]={}
-	result['rpms']="Not implemented yet"
 
 	try:
 	    release = open('/etc/myplc-release')
