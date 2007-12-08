@@ -72,6 +72,11 @@ rm -f doc/PLCAPI.html
 
 %install
 rm -rf $RPM_BUILD_ROOT
+if [ "%{distrorelease}" -le 4 ] ; then
+    modules="psycopg2 pycurl"
+else
+    modules=""
+fi
 %{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}" modules="$modules"
 #someone out there skips doc installation - we DO want this installed
 for doc in PLCAPI.html PLCAPI.pdf ; do
