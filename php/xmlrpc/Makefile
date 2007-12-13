@@ -15,6 +15,12 @@ CFLAGS += $(shell xml2-config --cflags)
 LDFLAGS := -shared --export-dynamic
 LIBS := -lexpat
 
+# for building on fedora 8
+ifneq "$(shell ld --help | grep build-id)" ""
+#not needed# CFLAGS += -Wl,--build-id
+LD += --build-id
+endif
+
 all: xmlrpc.so
 
 xmlrpc.so: xmlrpc-epi-php.o $(patsubst %.c, %.o, $(wildcard libxmlrpc/*.c))
