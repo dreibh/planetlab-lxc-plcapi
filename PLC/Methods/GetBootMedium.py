@@ -93,11 +93,15 @@ class GetBootMedium(Method):
         of the result file; it is the caller's responsability to remove 
         this file after use.
 
-        Security:
+    Options: an optional array of keywords. Currently supported are
+        - 'serial'
+        - 'cramfs'
+
+    Security:
         When the user's role is not admin, the provided directory *must* be under
         the %d area
 
-        Housekeeping: 
+   Housekeeping: 
         Whenever needed, the method stores intermediate files in a
         private area, typically not located under the web server's
         accessible area, and are cleaned up by the method.
