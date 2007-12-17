@@ -65,6 +65,7 @@ class PyCurlTransport(xmlrpclib.Transport):
             errcode = self.curl.getinfo(pycurl.HTTP_CODE)
             response = self.body
             self.body = ""
+            errmsg="<no known errmsg>"
         except pycurl.error, err:
             (errcode, errmsg) = err
 
