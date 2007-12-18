@@ -21,7 +21,7 @@ class PCUType(Row):
 
     table_name = 'pcu_types'
     primary_key = 'pcu_type_id'
-    join_tables = ['pcu_port_type']
+    join_tables = ['pcu_protocol_type']
     fields = {
         'pcu_type_id': Parameter(int, "PCU Type Identifier"),
 	'model': Parameter(str, "PCU model", max = 254),
