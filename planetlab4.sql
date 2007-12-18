@@ -258,9 +258,10 @@ CREATE TABLE boot_states (
 ) WITH OIDS;
 INSERT INTO boot_states (boot_state) VALUES ('boot');
 INSERT INTO boot_states (boot_state) VALUES ('dbg');
+INSERT INTO boot_states (boot_state) VALUES ('diag');
+INSERT INTO boot_states (boot_state) VALUES ('disable');
 INSERT INTO boot_states (boot_state) VALUES ('inst');
 INSERT INTO boot_states (boot_state) VALUES ('rins');
-INSERT INTO boot_states (boot_state) VALUES ('rcnf');
 INSERT INTO boot_states (boot_state) VALUES ('new');
 
 -- Nodes
