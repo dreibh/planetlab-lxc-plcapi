@@ -33,7 +33,7 @@ class AddSliceAttribute(Method):
         Mixed(SliceAttribute.fields['attribute_type_id'],
               SliceAttribute.fields['name']),
         Mixed(SliceAttribute.fields['value'],
-	      InitScript.fields['initscript_id']),
+	      InitScript.fields['name']),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'],
 	      None),
@@ -67,15 +67,15 @@ class AddSliceAttribute(Method):
                 raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
 
 	# if initscript is specified, validate value
-	if attribute_type['name'] in ['plc_initscript_id']:
-	    initscripts = InitScripts(self.api, {'enabled': True, 'initscript_id': int(value)})
+	if attribute_type['name'] in ['initscript']:
+	    initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
 	    if not initscripts:	
 		raise PLCInvalidArgument, "No such plc initscript" 	
 
         slice_attribute = SliceAttribute(self.api)
         slice_attribute['slice_id'] = slice['slice_id']
         slice_attribute['attribute_type_id'] = attribute_type['attribute_type_id']
-        slice_attribute['value'] = value
+        slice_attribute['value'] = unicode(value)
 
         # Sliver attribute if node is specified
         if node_id_or_hostname is not None:

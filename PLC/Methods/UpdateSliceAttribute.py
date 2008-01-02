@@ -24,7 +24,7 @@ class UpdateSliceAttribute(Method):
         Auth(),
         SliceAttribute.fields['slice_attribute_id'],
 	Mixed(SliceAttribute.fields['value'],
-              InitScript.fields['initscript_id'])
+              InitScript.fields['name'])
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -57,8 +57,8 @@ class UpdateSliceAttribute(Method):
                min(self.caller['role_ids']) > slice_attribute['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to update the specified attribute"
 	
-	if slice_attribute['name'] in ['plc_initscript_id']:
-            initscripts = InitScripts(self.api, {'enabled': True, 'initscript_id': int(value)})
+	if slice_attribute['name'] in ['initscript']:
+            initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
             if not initscripts:
                 raise PLCInvalidArgument, "No such plc initscript"	
 
