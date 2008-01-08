@@ -6,9 +6,9 @@
 
 %define name PLCAPI
 %define version 4.2
-%define subversion 0
+%define taglevel 0
 
-%define release %{subversion}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
+%define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
 Summary: PlanetLab Central API
 Name: %{name}
@@ -18,6 +18,10 @@ License: PlanetLab
 Group: System Environment/Daemons
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+Vendor: PlanetLab
+Packager: PlanetLab Central <support@planet-lab.org>
+Distribution: PlanetLab %{plrelease}
 URL: %(echo %{url} | cut -d ' ' -f 2)
 
 Obsoletes: plcapilib
