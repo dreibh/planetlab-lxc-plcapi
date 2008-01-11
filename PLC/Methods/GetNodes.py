@@ -49,9 +49,13 @@ class GetNodes(Method):
            'admin' not in self.caller['roles']:
 	    slice_ids = set()
 	    site_ids = set()
+	    
 	    if self.caller:
 	        slice_ids.update(self.caller['slice_ids'])
-		site_ids.update(self.caller['site_ids'])
+	        if isinstance(self.caller, Node):
+		    site_ids.update([self.caller['site_id']])
+		else:  
+		    site_ids.update(self.caller['site_ids'])
 
 	    # if node has whitelist, only return it if users is at
 	    # the same site or user has a slice on the whitelist 
