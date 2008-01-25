@@ -59,11 +59,15 @@ except Exception, err:
     parser.print_help()
     sys.exit(1)
 
-# If called by a script
-if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+# If called by a script or api call is passed
+if len(sys.argv) > 1:
     # Pop us off the argument stack
     sys.argv.pop(0)
-    execfile(sys.argv[0])
+    if os.path.exists(sys.argv[0]) and os.path.isfile(sys.argv[0]):
+        execfile(sys.argv[0])
+    else:
+        print eval(sys.argv[0])
+        sys.exit(0)
 
 # Otherwise, run an interactive shell environment
 else:
