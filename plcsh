@@ -64,11 +64,10 @@ if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
     # Pop us off the argument stack
     sys.argv.pop(0)
     script = sys.argv[0]
+    
     # Add of script to sys.path 
     path = os.path.dirname(os.path.abspath(script))
     sys.path.append(path)
-    from pprint import pprint
-    pprint(sys.path)	 	 	
     execfile(sys.argv[0])
 
 # Otherwise, run an interactive shell environment
