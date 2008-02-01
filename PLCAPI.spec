@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.2
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -114,6 +114,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/refresh-peer.py*
 
 %changelog
+* Fri Feb 01 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-1 PLCAPI-4.2-2
+- refresh peer script to use a month-dependent logfile
+- tracking the starting point for UniPi integration of the dummynet boxes
+
 * Thu Jan 31 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-0 PLCAPI-4.2-1
 - plcsh adds its own path to sys.path
 - fix so GetNodes can be called from a Node
