@@ -23,7 +23,8 @@ def Run (peername):
     sys.stderr.flush()
 
 def RunInLog (peername):
-    logname="/var/log/refresh-peer-%s.log"%(peername)
+    monthstring=time.strftime("%Y-%m")
+    logname="/var/log/refresh-peer-%s-%s.log"%(peername,monthstring)
     sys.stdout=open(logname,'a')
     sys.stderr=sys.stdout
     Run(peername)
