@@ -327,28 +327,19 @@ class GetBootMedium(Method):
                 ### return the generic medium content as-is, just base64 encoded
                 return base64.b64encode(file(generic_path).read())
 
-        ### floppy preview
-        if action == 'node-preview':
-            floppy = self.floppy_contents (node,False)
-            if filename:
-                try:
-                    file(filename,'w').write(floppy)
-                except:
-                    raise PLCPermissionDenied, "Could not write into %s"%filename
-                return filename
-            else:
-                return floppy
-
-        if action == 'node-floppy':
-            floppy = self.floppy_contents (node,True)
-            if filename:
-                try:
-                    file(filename,'w').write(floppy)
-                except:
-                    raise PLCPermissionDenied, "Could not write into %s"%filename
-                return filename
-            else:
-                return floppy
+	### config file preview or regenerated
+	if action == 'node-preview' or action == 'node-floppy':
+            if action == 'node-preview': bo=False
+            else bo=True
+            floppy = self.floppy_contents (node,bo)
+	    if filename:
+		try:
+		    file(filename,'w').write(floppy)
+		except:
+		    raise PLCPermissionDenied, "Could not write into %s"%filename
+		return filename
+	    else:
+		return floppy
 
         ### we're left with node-iso and node-usb
         if action == 'node-iso' or action == 'node-usb':
