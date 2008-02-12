@@ -238,7 +238,13 @@ class GetBootMedium(Method):
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
         ### check action
-        if action not in boot_medium_actions:
+        found=False
+        for boot_medium_action in boot_medium_actions:
+            if action.startswith(boot_medium_action): 
+                found=True
+                break
+
+        if not found:
             raise PLCInvalidArgument, "Unknown action %s"%action
 
         ### compute file suffix and type
@@ -330,7 +336,7 @@ class GetBootMedium(Method):
 	### config file preview or regenerated
 	if action == 'node-preview' or action == 'node-floppy':
             if action == 'node-preview': bo=False
-            else bo=True
+            else: bo=True
             floppy = self.floppy_contents (node,bo)
 	    if filename:
 		try:
@@ -342,7 +348,7 @@ class GetBootMedium(Method):
 		return floppy
 
         ### we're left with node-iso and node-usb
-        if action == 'node-iso' or action == 'node-usb':
+        if action.startswith('node-iso') or action.startswith('node-usb'):
 
             ### check we've got required material
             version = self.bootcd_version()
@@ -370,11 +376,22 @@ class GetBootMedium(Method):
 
                 node_image = "%s/%s"%(tempdir,nodename)
                 # invoke build.sh
-                build_command = '%s -f "%s" -O "%s" -t "%s" &> %s.log' % (self.BOOTCDBUILD,
-                                                                          node_floppy,
-                                                                          node_image,
-                                                                          type,
-                                                                          node_image)
+                if action.find("-serial") > 0:
+                    serial_info = action[action.find("-serial")+len("-serial"):]
+                    if len(serial_info) > 0:
+                        serial_info = serial_info[1:]
+                    else:
+                        serial_info = "ttyS0:115200:n:8"
+                    serial_arg='-s "%s"' % serial_info
+                else:
+                    serial_arg=""
+
+                build_command = '%s -f "%s" -O "%s" -t "%s" %s &> %s.log' % (self.BOOTCDBUILD,
+                                                                             node_floppy,
+                                                                             node_image,
+                                                                             type,
+                                                                             serial_arg,
+                                                                             node_image)
                 if self.DEBUG:
                     print 'build command:',build_command
                 ret=os.system(build_command)
