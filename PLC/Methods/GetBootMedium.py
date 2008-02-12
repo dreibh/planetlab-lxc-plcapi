@@ -1,3 +1,4 @@
+# $Id$
 import random
 import base64
 import os
@@ -11,28 +12,6 @@ from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeNetworkSettings import NodeNetworkSetting, NodeNetworkSettings
-
-#
-# xxx todo
-# Thierry on june 5 2007
-# 
-# it turns out that having either apache (when invoked through xmlrpc)
-# or root (when running plcsh directly) run this piece of code is
-# problematic. In fact although we try to create intermediate dirs
-# with mode 777, what happens is that root's umask in the plc chroot
-# jail is set to 0022.
-# 
-# the bottom line is, depending on who (apache or root) runs this for
-# the first time, we can access denied issued (when root comes first)
-# so probably we'd better implement a scheme where files are stored
-# directly under /var/tmp or something
-# 
-# in addition the sequels of a former run (e.g. with a non-empty
-# filename) can prevent subsequent runs if the file is not properly
-# cleaned up after use, which is generally the case if someone invokes
-# this through plcsh and does not clean up
-# so maybe a dedicated cleanup method could be useful just in case
-# 
 
 # could not define this in the class..
 boot_medium_actions = [ 'node-preview',
@@ -50,7 +29,7 @@ class GetBootMedium(Method):
 
     As compared with its ancestor, this method provides a much more detailed
     detailed interface, that allows to
-    (*) either just preview the node config file (in which case 
+    (*) either just preview the node config file -- in which case 
         the node key is NOT recomputed, and NOT provided in the output
     (*) or regenerate the node config file for storage on a floppy 
         that is, exactly what the ancestor method used todo, 
@@ -70,8 +49,6 @@ class GetBootMedium(Method):
     Apart for the preview mode, this method generates a new node key for the
     specified node, effectively invalidating any old boot medium.
 
-    Non-admins can only generate files for nodes at their sites.
-
     In addition, two return mechanisms are supported.
     (*) The default behaviour is that the file's content is returned as a 
         base64-encoded string. This is how the ancestor method used to work.
@@ -90,16 +67,22 @@ class GetBootMedium(Method):
         - %v : the bootcd version string (e.g. 4.0)
         - %p : the PLC name
         With the file-based return mechanism, the method returns the full pathname 
-        of the result file; it is the caller's responsability to remove 
-        this file after use.
+        of the result file; 
+        ** WARNING **
+        It is the caller's responsability to remove this file after use.
 
     Options: an optional array of keywords. Currently supported are
         - 'serial'
         - 'cramfs'
+        - 'console:<console_spec>'
+        console_spec is passed as-is to bootcd/build.sh
+        it is expected to be a colon separated string denoting
+        tty - baudrate - parity - bits
+        e.g. ttyS0:115200:n:8
 
     Security:
-        When the user's role is not admin, the provided directory *must* be under
-        the %d area
+        - Non-admins can only generate files for nodes at their sites.
+        - Non-admins, when they provide a filename, *must* specify it in the %d area
 
    Housekeeping: 
         Whenever needed, the method stores intermediate files in a
@@ -119,13 +102,12 @@ class GetBootMedium(Method):
         Parameter ([str], "Options"),
         ]
 
-    returns = Parameter(str, "Node boot medium, either inlined, or filename, depending to the filename parameter")
+    returns = Parameter(str, "Node boot medium, either inlined, or filename, depending on the filename parameter")
 
     BOOTCDDIR = "/usr/share/bootcd/"
     BOOTCDBUILD = "/usr/share/bootcd/build.sh"
     GENERICDIR = "/var/www/html/download/"
-    NODEDIR = "/var/tmp/bootmedium/results"
-    WORKDIR = "/var/tmp/bootmedium/work"
+    WORKDIR = "/var/tmp/bootmedium"
     DEBUG = False
     # uncomment this to preserve temporary area and bootcustom logs
     #DEBUG = True
@@ -230,21 +212,19 @@ class GetBootMedium(Method):
         finally:
             f.close()
         return version
-
-    def cleandir (self,tempdir):
-        if not self.DEBUG:
-            os.system("rm -rf %s"%tempdir)
+    
+    def cleantrash (self):
+        for file in self.trash:
+            if self.DEBUG:
+                print 'DEBUG -- preserving',file
+            else:
+                os.unlink(file)
 
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
+        self.trash=[]
         ### check action
-        found=False
-        for boot_medium_action in boot_medium_actions:
-            if action.startswith(boot_medium_action): 
-                found=True
-                break
-
-        if not found:
+        if action not in boot_medium_actions:
             raise PLCInvalidArgument, "Unknown action %s"%action
 
         ### compute file suffix and type
@@ -258,7 +238,7 @@ class GetBootMedium(Method):
             suffix=".txt"
             type = ["txt"]
 
-        if type != "txt":
+        if "txt" not in type:
             if 'serial' in options:
                 suffix = "-serial" + suffix
                 type.insert(1, "serial")
@@ -287,7 +267,7 @@ class GetBootMedium(Method):
             nodename = temp
             
         ### handle filename
-        filename = filename.replace ("%d",self.NODEDIR)
+        filename = filename.replace ("%d",self.WORKDIR)
         filename = filename.replace ("%n",nodename)
         filename = filename.replace ("%s",suffix)
         filename = filename.replace ("%p",self.api.config.PLC_NAME)
@@ -298,8 +278,8 @@ class GetBootMedium(Method):
         ### Check filename location
         if filename != '':
             if 'admin' not in self.caller['roles']:
-                if ( filename.index(self.NODEDIR) != 0):
-                    raise PLCInvalidArgument, "File %s not under %s"%(filename,self.NODEDIR)
+                if ( filename.index(self.WORKDIR) != 0):
+                    raise PLCInvalidArgument, "File %s not under %s"%(filename,self.WORKDIR)
 
             ### output should not exist (concurrent runs ..)
             if os.path.exists(filename):
@@ -335,9 +315,8 @@ class GetBootMedium(Method):
 
 	### config file preview or regenerated
 	if action == 'node-preview' or action == 'node-floppy':
-            if action == 'node-preview': bo=False
-            else: bo=True
-            floppy = self.floppy_contents (node,bo)
+            renew_key = (action == 'node-floppy')
+            floppy = self.floppy_contents (node,renew_key)
 	    if filename:
 		try:
 		    file(filename,'w').write(floppy)
@@ -348,7 +327,7 @@ class GetBootMedium(Method):
 		return floppy
 
         ### we're left with node-iso and node-usb
-        if action.startswith('node-iso') or action.startswith('node-usb'):
+        if action == 'node-iso' or action == 'node-usb':
 
             ### check we've got required material
             version = self.bootcd_version()
@@ -356,38 +335,37 @@ class GetBootMedium(Method):
             if not os.path.isfile(self.BOOTCDBUILD):
                 raise PLCAPIError, "Cannot locate bootcd/build.sh script %s"%self.BOOTCDBUILD
 
-            # need a temporary area
-            tempdir = "%s/%s"%(self.WORKDIR,nodename)
-            if not os.path.isdir(tempdir):
+            # create the workdir if needed
+            if not os.path.isdir(self.WORKDIR):
                 try:
-                    os.makedirs(tempdir,0777)
+                    os.makedirs(self.WORKDIR,0777)
+                    os.chmod(self.WORKDIR,0777)
                 except:
-                    raise PLCPermissionDenied, "Could not create dir %s"%tempdir
+                    raise PLCPermissionDenied, "Could not create dir %s"%self.WORKDIR
             
             try:
                 # generate floppy config
-                floppy = self.floppy_contents(node,True)
+                floppy_text = self.floppy_contents(node,True)
                 # store it
-                node_floppy = "%s/%s"%(tempdir,nodename)
+                floppy_file = "%s/%s.txt"%(self.WORKDIR,nodename)
                 try:
-                    file(node_floppy,"w").write(floppy)
+                    file(floppy_file,"w").write(floppy_text)
                 except:
-                    raise PLCPermissionDenied, "Could not write into %s"%node_floppy
+                    raise PLCPermissionDenied, "Could not write into %s"%floppy_file
 
-                node_image = "%s/%s"%(tempdir,nodename)
+                self.trash.append(floppy_file)
+
+                node_image = "%s/%s"%(self.WORKDIR,nodename)
+
+                # handle console
+                serial_arg=""
+                for option in options:
+                    console=option.replace("console:","")
+                    if option != console:
+                        serial_arg="-s %s"%console
                 # invoke build.sh
-                if action.find("-serial") > 0:
-                    serial_info = action[action.find("-serial")+len("-serial"):]
-                    if len(serial_info) > 0:
-                        serial_info = serial_info[1:]
-                    else:
-                        serial_info = "ttyS0:115200:n:8"
-                    serial_arg='-s "%s"' % serial_info
-                else:
-                    serial_arg=""
-
                 build_command = '%s -f "%s" -O "%s" -t "%s" %s &> %s.log' % (self.BOOTCDBUILD,
-                                                                             node_floppy,
+                                                                             floppy_file,
                                                                              node_image,
                                                                              type,
                                                                              serial_arg,
@@ -398,23 +376,27 @@ class GetBootMedium(Method):
                 if ret != 0:
                     raise PLCPermissionDenied,"build.sh failed to create node-specific medium"
 
+                self.trash.append("%s.log"%node_image)
                 node_image += suffix
                 if not os.path.isfile (node_image):
                     raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
             
-                # cache result
+                # handle result
                 if filename:
                     ret=os.system("mv %s %s"%(node_image,filename))
                     if ret != 0:
+                        self.trash.append(node_image)
+                        self.cleantrash()
                         raise PLCAPIError, "Could not move node image %s into %s"%(node_image,filename)
-                    self.cleandir(tempdir)
+                    self.cleantrash()
                     return filename
                 else:
                     result = file(node_image).read()
-                    self.cleandir(tempdir)
+                    self.trash.append(node_image)
+                    self.cleantrash()
                     return base64.b64encode(result)
             except:
-                self.cleandir(tempdir)
+                self.cleantrash()
                 raise
                 
         # we're done here, or we missed something
