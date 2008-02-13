@@ -71,11 +71,13 @@ class GetBootMedium(Method):
         ** WARNING **
         It is the caller's responsability to remove this file after use.
 
-    Options: an optional array of keywords. Currently supported are
-        - 'serial'
+    Options: an optional array of keywords. 
+        options are not supported for generic images
+    Currently supported are
+        - 'partition' - for USB actions only
         - 'cramfs'
-        - 'console:<console_spec>'
-        console_spec is passed as-is to bootcd/build.sh
+        - 'serial' or 'serial:<console_spec>'
+        console_spec (or 'default') is passed as-is to bootcd/build.sh
         it is expected to be a colon separated string denoting
         tty - baudrate - parity - bits
         e.g. ttyS0:115200:n:8
@@ -230,23 +232,35 @@ class GetBootMedium(Method):
         ### compute file suffix and type
         if action.find("-iso") >= 0 :
             suffix=".iso"
-            type = ["iso"]
+            type = "iso"
         elif action.find("-usb") >= 0:
             suffix=".usb"
-            type = ["usb"]
+            type = "usb"
         else:
             suffix=".txt"
-            type = ["txt"]
+            type = "txt"
 
-        if "txt" not in type:
-            if 'serial' in options:
-                suffix = "-serial" + suffix
-                type.insert(1, "serial")
-            if 'cramfs' in options:
-                suffix = "-cramfs" + suffix
-                # XXX must be the same index as above
-                type.insert(1, "cramfs")
-        type = "_".join(type)
+        # handle / caconicalize options
+        if type is "txt":
+            if options:
+                raise PLCInvalidArgument, "Options are not supported for node configs"
+        else:
+            # create a dict for build.sh 
+            optdict={}
+            for option in options:
+                if option is "cramfs":
+                    optdict['cramfs']=True
+                elif option is 'partition':
+                    if type is not "usb":
+                        raise PLCInvalidArgument, "option 'partition' is for USB images only"
+                    else:
+                        type="usb_partition"
+                elif option is "serial":
+                    optdict['serial']='default'
+                elif option.find("serial:") == 0:
+                    optdict['serial']=option.replace("serial:","")
+                else:
+                    raise PLCInvalidArgument, "unknown option %s"%option
 
         ### compute a 8 bytes random number
         tempbytes = random.sample (xrange(0,256), 8);
@@ -296,6 +310,8 @@ class GetBootMedium(Method):
         
         ### generic media
         if action == 'generic-iso' or action == 'generic-usb':
+            if options:
+                raise PLCInvalidArgument, "Options are not supported for generic images"
             # this raises an exception if bootcd is missing
             version = self.bootcd_version()
             generic_name = "%s-BootCD-%s%s"%(self.api.config.PLC_NAME,
@@ -355,29 +371,28 @@ class GetBootMedium(Method):
 
                 self.trash.append(floppy_file)
 
-                node_image = "%s/%s"%(self.WORKDIR,nodename)
+                node_image = "%s/%s%s"%(self.WORKDIR,nodename,suffix)
 
-                # handle console
+                # make build's arguments
                 serial_arg=""
-                for option in options:
-                    console=option.replace("console:","")
-                    if option != console:
-                        serial_arg="-s %s"%console
+                if "cramfs" in optdict: type += "_cramfs"
+                if "serial" in optdict: serial_arg = "-s %s"%optdict['serial']
+                log_file="%s.log"%node_image
                 # invoke build.sh
-                build_command = '%s -f "%s" -O "%s" -t "%s" %s &> %s.log' % (self.BOOTCDBUILD,
-                                                                             floppy_file,
-                                                                             node_image,
-                                                                             type,
-                                                                             serial_arg,
-                                                                             node_image)
+                build_command = '%s -f "%s" -o "%s" -t "%s" %s &> %s' % (self.BOOTCDBUILD,
+                                                                         floppy_file,
+                                                                         node_image,
+                                                                         type,
+                                                                         serial_arg,
+                                                                         log_file)
                 if self.DEBUG:
                     print 'build command:',build_command
                 ret=os.system(build_command)
                 if ret != 0:
-                    raise PLCPermissionDenied,"build.sh failed to create node-specific medium"
+                    raise PLCAPIError,"bootcd/build.sh failed\n%s\n%s"%(
+                        build_command,file(log_file).read())
 
-                self.trash.append("%s.log"%node_image)
-                node_image += suffix
+                self.trash.append(log_file)
                 if not os.path.isfile (node_image):
                     raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
             
