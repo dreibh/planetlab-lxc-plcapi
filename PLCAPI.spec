@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.2
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -114,6 +114,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/refresh-peer.py*
 
 %changelog
+* Thu Feb 14 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-2 PLCAPI-4.2-3
+- GetBootMedium support for build.sh full options, incl. serial & console_spec 
+- GetBootMedium simpler, cleaner and safer use of tmpdirs in (dated from bootcustom.sh)
+
 * Fri Feb 01 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-1 PLCAPI-4.2-2
 - refresh peer script to use a month-dependent logfile
 - tracking the starting point for UniPi integration of the dummynet boxes
