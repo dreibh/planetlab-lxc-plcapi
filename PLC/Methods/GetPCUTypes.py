@@ -14,8 +14,10 @@ class GetPCUTypes(Method):
 
     accepts = [
         Auth(),
-	Mixed([PCUType.fields['pcu_type_id'],
-               PCUType.fields['model']],
+	Mixed([Mixed(PCUType.fields['pcu_type_id'],
+                     PCUType.fields['model'])],
+	       Parameter(str, 'model'),
+	       Parameter(int, 'node_id'), 		
                Filter(PCUType.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]
