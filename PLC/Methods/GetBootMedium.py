@@ -241,21 +241,21 @@ class GetBootMedium(Method):
             type = "txt"
 
         # handle / caconicalize options
-        if type is "txt":
+        if type == "txt":
             if options:
                 raise PLCInvalidArgument, "Options are not supported for node configs"
         else:
             # create a dict for build.sh 
             optdict={}
             for option in options:
-                if option is "cramfs":
+                if option == "cramfs":
                     optdict['cramfs']=True
-                elif option is 'partition':
-                    if type is not "usb":
+                elif option == 'partition':
+                    if type != "usb":
                         raise PLCInvalidArgument, "option 'partition' is for USB images only"
                     else:
                         type="usb_partition"
-                elif option is "serial":
+                elif option == "serial":
                     optdict['serial']='default'
                 elif option.find("serial:") == 0:
                     optdict['serial']=option.replace("serial:","")
