@@ -18,7 +18,13 @@ from traceback import print_exc
 sys.path.append(os.path.dirname(os.path.realpath(sys.argv[0])))
 from PLC.Shell import Shell
 
-parser = OptionParser(add_help_option = False)
+usage="""Usage: %prog [options]
+   runs an interactive shell
+Usage: %prog [options] script script-arguments
+Usage: %prog script [plcsh-options --] script arguments
+   run a script"""
+
+parser = OptionParser(usage=usage,add_help_option = False)
 parser.add_option("-f", "--config", help = "PLC configuration file")
 parser.add_option("-h", "--url", help = "API URL")
 parser.add_option("-c", "--cacert", help = "API SSL certificate")
@@ -29,8 +35,14 @@ parser.add_option("-u", "--user", help = "API user name")
 parser.add_option("-p", "--password", help = "API password")
 parser.add_option("-r", "--role", help = "API role")
 parser.add_option("-x", "--xmlrpc", action = "store_true", default = False, help = "Use XML-RPC interface")
-parser.add_option("--help", action = "help", help = "show this help message and exit")
+# pass this to the invoked shell if any
+parser.add_option("--help", action = "store_true", dest="help", default=False,
+                  help = "show this help message and exit")
 (options, args) = parser.parse_args()
+
+if not args and options.help:
+    parser.print_help()
+    sys.exit(1)    
 
 # If user is specified but password is not
 if options.user is not None and options.password is None:
@@ -60,15 +72,22 @@ except Exception, err:
     sys.exit(1)
 
 # If called by a script 
-if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
-    # Pop us off the argument stack
-    sys.argv.pop(0)
-    script = sys.argv[0]
-    
-    # Add of script to sys.path 
-    path = os.path.dirname(os.path.abspath(script))
-    sys.path.append(path)
-    execfile(sys.argv[0])
+if args:
+    if not os.path.exists(args[0]):
+        print 'File %s not found'%args[0]
+        parser.print_help()
+        sys.exit(1)
+    else:
+        # re-append --help if provided
+        if options.help:
+            args.append('--help')
+        # use args as sys.argv for the next shell, so our own options get removed for the next script
+        sys.argv = args
+        script = sys.argv[0]
+        # Add of script to sys.path 
+        path = os.path.dirname(os.path.abspath(script))
+        sys.path.append(path)
+        execfile(script)
 
 # Otherwise, run an interactive shell environment
 else:
