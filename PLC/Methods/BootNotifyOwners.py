@@ -1,6 +1,6 @@
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Auth import Auth, BootAuth
+from PLC.Auth import Auth, BootAuth, SessionAuth
 from PLC.Nodes import Node, Nodes
 from PLC.Messages import Message, Messages
 
