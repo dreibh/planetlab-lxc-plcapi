@@ -22,6 +22,18 @@ boot_medium_actions = [ 'node-preview',
                         'generic-usb',
                         ]
 
+# compute a new key
+# xxx used by GetDummyBoxMedium
+def compute_key():
+    # Generate 32 random bytes
+    bytes = random.sample(xrange(0, 256), 32)
+    # Base64 encode their string representation
+    key = base64.b64encode("".join(map(chr, bytes)))
+    # Boot Manager cannot handle = in the key
+    # XXX this sounds wrong, as it might prevent proper decoding
+    key = key.replace("=", "")
+    return key
+
 class GetBootMedium(Method):
     """
     This method is a redesign based on former, supposedly dedicated, 
@@ -149,12 +161,7 @@ class GetBootMedium(Method):
         ( host, domain ) = self.split_hostname (node)
 
         if renew_key:
-            # Generate 32 random bytes
-            bytes = random.sample(xrange(0, 256), 32)
-            # Base64 encode their string representation
-            node['key'] = base64.b64encode("".join(map(chr, bytes)))
-            # XXX Boot Manager cannot handle = in the key
-            node['key'] = node['key'].replace("=", "")
+            node['key'] = compute_key()
             # Save it
             node.sync()
 
