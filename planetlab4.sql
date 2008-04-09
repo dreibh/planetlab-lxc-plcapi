@@ -68,7 +68,7 @@ CREATE TABLE persons (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
-CREATE INDEX persons_email_idx ON persons (email) WHERE deleted IS false;
+CREATE INDEX persons_email_idx ON persons (email);
 
 --------------------------------------------------------------------------------
 -- Sites
@@ -97,7 +97,7 @@ CREATE TABLE sites (
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
-CREATE INDEX sites_login_base_idx ON sites (login_base) WHERE deleted IS false;
+CREATE INDEX sites_login_base_idx ON sites (login_base);
 
 -- Account site membership
 CREATE TABLE person_site (
@@ -286,8 +286,8 @@ CREATE TABLE nodes (
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_contact timestamp without time zone 	
 ) WITH OIDS;
-CREATE INDEX nodes_hostname_idx ON nodes (hostname) WHERE deleted IS false;
-CREATE INDEX nodes_site_id_idx ON nodes (site_id) WHERE deleted IS false;
+CREATE INDEX nodes_hostname_idx ON nodes (hostname);
+CREATE INDEX nodes_site_id_idx ON nodes (site_id);
 
 -- Nodes at each site
 CREATE VIEW site_nodes AS
@@ -592,8 +592,8 @@ CREATE TABLE slices (
 
     is_deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
-CREATE INDEX slices_site_id_idx ON slices (site_id) WHERE is_deleted IS false;
-CREATE INDEX slices_name_idx ON slices (name) WHERE is_deleted IS false;
+CREATE INDEX slices_site_id_idx ON slices (site_id);
+CREATE INDEX slices_name_idx ON slices (name);
 
 -- Slivers
 CREATE TABLE slice_node (
