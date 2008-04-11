@@ -288,6 +288,8 @@ class GetBootMedium(Method):
             nodename = temp
             
         ### handle filename
+        # allow to set filename to None or any other empty value
+        if not filename: filename=''
         filename = filename.replace ("%d",self.WORKDIR)
         filename = filename.replace ("%n",nodename)
         filename = filename.replace ("%s",suffix)
@@ -308,11 +310,14 @@ class GetBootMedium(Method):
 
             ### we can now safely create the file, 
             ### either we are admin or under a controlled location
-            if not os.path.exists(os.path.dirname(filename)):
-                try:
-                    os.makedirs (os.path.dirname(filename),0777)
-                except:
-                    raise PLCPermissionDenied, "Could not create dir %s"%os.path.dirname(filename)
+            filedir=os.path.dirname(filename)
+            # dirname does not return "." for a local filename like its shell counterpart
+            if filedir:
+                if not os.path.exists(filedir):
+                    try:
+                        os.makedirs (dirname,0777)
+                    except:
+                        raise PLCPermissionDenied, "Could not create dir %s"%dirname
 
         
         ### generic media
