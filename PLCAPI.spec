@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.2
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -114,6 +114,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/refresh-peer.py*
 
 %changelog
+* Wed Apr 23 2008 Stephen Soltesz <soltesz@cs.princeton.edu> - PLCAPI-4.2-5
+- Removed conditions on the persons, site, and nodes indexes.  previsouly only
+- the non-deleted fields were index, resulting in massivly slow queries.
+- 
+
 * Wed Mar 26 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-3 PLCAPI-4.2-4
 - plcsh: better handling of options when running as a shell script
 - getbootmedium exports compute_key
