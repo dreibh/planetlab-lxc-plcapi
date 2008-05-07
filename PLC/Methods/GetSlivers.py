@@ -189,14 +189,15 @@ class GetSlivers(Method):
         for nodegroup in nodegroups.values():
             for conf_file_id in nodegroup['conf_file_ids']:
                 if conf_file_id in all_conf_files:
-                    conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
+                    conf_file = all_conf_files[conf_file_id]
+                    conf_files[conf_file['dest']] = conf_file
         
         # Node configuration files take precedence over node group
         # configuration files.
         for conf_file_id in node['conf_file_ids']:
             if conf_file_id in all_conf_files:
-                conf_files[conf_file['dest']] = all_conf_files[conf_file_id]
-            
+                conf_file = all_conf_files[conf_file_id]
+                conf_files[conf_file['dest']] = conf_file            
 
 	# Get all (enabled) initscripts
 	initscripts = InitScripts(self.api, {'enabled': True})	
