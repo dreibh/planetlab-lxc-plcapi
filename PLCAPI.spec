@@ -37,11 +37,6 @@ BuildRequires: php-devel
 Obsoletes: php-xmlrpc
 Provides: php-xmlrpc
 
-# OpenJade does not honor XML catalog files and tries to access
-# www.oasis-open.org even if DTDs are locally installed. Disable
-# documentation generation for now.
-# BuildRequires: docbook-dtds, docbook-utils-pdf
-
 # PostgreSQL and SOAPpy are necessary to run the API server, but not
 # plcsh. Since the only supported method of running the server is via
 # MyPLC anyway, don't be so stringent about binary requirements, in
@@ -68,11 +63,6 @@ else
 fi
 # Build __init__.py metafiles and PHP API. 
 %{__make} %{?_smp_mflags} subdirs="php php/xmlrpc" modules="$modules"
-# Build documentation
-# beware that making the pdf file somehow overwrites the html
-%{__make} -C doc PLCAPI.pdf
-rm -f doc/PLCAPI.html
-%{__make} -C doc PLCAPI.html
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -82,10 +72,6 @@ else
     modules=""
 fi
 %{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}" modules="$modules"
-#someone out there skips doc installation - we DO want this installed
-for doc in PLCAPI.html PLCAPI.pdf ; do
-    install -D -m 644 doc/$doc $RPM_BUILD_ROOT/"%{_datadir}"/plc_api/doc/$doc
-done
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
@@ -104,8 +90,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-#someone out there skips doc installation - we DO want this installed
-#%doc doc/PLCAPI.xml doc/PLCAPI.pdf doc/PLCAPI.html
 %dir %{_datadir}/plc_api
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
