@@ -13,8 +13,7 @@ import xml.dom.minidom
 from xml.dom.minidom import Element, Text
 import codecs
 
-from PLC.Method import *
-import DocBookLocal
+from PLC.Parameter import Parameter, Mixed, xmlrpc_type, python_type
 
 # xml.dom.minidom.Text.writexml adds surrounding whitespace to textual
 # data when pretty-printing. Override this behavior.
@@ -103,46 +102,52 @@ class paramElement(Element):
             for subparam in param:
                 itemizedlist.appendChild(paramElement(None, subparam))
 
-api_func_list = DocBookLocal.get_func_list()
-for func in api_func_list:
-    method = func.name
+class DocBook:
+    
+    def __init__ (self,functions_list):
+        self.functions_list = functions_list
 
-    if func.status == "deprecated":
-        continue
+    def Process (self):
+        
+        for func in self.functions_list:
+            method = func.name
 
-    (min_args, max_args, defaults) = func.args()
+            if func.status == "deprecated":
+                continue
 
-    section = Element('section')
-    section.setAttribute('id', func.name)
-    section.appendChild(simpleElement('title', func.name))
+            (min_args, max_args, defaults) = func.args()
 
-    prototype = "%s (%s)" % (method, ", ".join(max_args))
-    para = paraElement('Prototype:')
-    para.appendChild(blockquoteElement(prototype))
-    section.appendChild(para)
+            section = Element('section')
+            section.setAttribute('id', func.name)
+            section.appendChild(simpleElement('title', func.name))
 
-    para = paraElement('Description:')
-    para.appendChild(blockquoteElement(func.__doc__))
-    section.appendChild(para)
+            prototype = "%s (%s)" % (method, ", ".join(max_args))
+            para = paraElement('Prototype:')
+            para.appendChild(blockquoteElement(prototype))
+            section.appendChild(para)
 
-    para = paraElement('Allowed Roles:')
-    para.appendChild(blockquoteElement(", ".join(func.roles)))
-    section.appendChild(para)
+            para = paraElement('Description:')
+            para.appendChild(blockquoteElement(func.__doc__))
+            section.appendChild(para)
 
-    section.appendChild(paraElement('Parameters:'))
-    params = Element('itemizedlist')
-    if func.accepts:
-        for name, param, default in zip(max_args, func.accepts, defaults):
-            params.appendChild(paramElement(name, param))
-    else:
-        listitem = Element('listitem')
-        listitem.appendChild(paraElement('None'))
-        params.appendChild(listitem)
-    section.appendChild(params)
+            para = paraElement('Allowed Roles:')
+            para.appendChild(blockquoteElement(", ".join(func.roles)))
+            section.appendChild(para)
 
-    section.appendChild(paraElement('Returns:'))
-    returns = Element('itemizedlist')
-    returns.appendChild(paramElement(None, func.returns))
-    section.appendChild(returns)
+            section.appendChild(paraElement('Parameters:'))
+            params = Element('itemizedlist')
+            if func.accepts:
+                for name, param, default in zip(max_args, func.accepts, defaults):
+                    params.appendChild(paramElement(name, param))
+            else:
+                listitem = Element('listitem')
+                listitem.appendChild(paraElement('None'))
+                params.appendChild(listitem)
+            section.appendChild(params)
 
-    print section.toprettyxml(encoding = "UTF-8")
+            section.appendChild(paraElement('Returns:'))
+            returns = Element('itemizedlist')
+            returns.appendChild(paramElement(None, func.returns))
+            section.appendChild(returns)
+
+            print section.toprettyxml(encoding = "UTF-8")

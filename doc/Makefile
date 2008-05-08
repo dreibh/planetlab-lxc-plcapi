@@ -7,12 +7,14 @@
 # $Id$
 #
 
-all: PLCAPI.pdf
+all: PLCAPI.html
 
 .PLCAPI.xml.valid: Methods.xml
 
-Methods.xml: DocBook.py ../PLC/__init__.py ../PLC/Methods/__init__.py
-	PYTHONPATH=.. python $< > $@
+API_SOURCES = ../PLC/__init__.py ../PLC/Methods/__init__.py
+
+Methods.xml: DocBook.py DocBookLocal.py $(API_SOURCES)
+	PYTHONPATH=.. DocBookLocal.py > $@
 
 #
 # Documentation
@@ -40,6 +42,4 @@ $(foreach format,$(FORMATS),$(eval $(call docbook2,$(format))))
 clean:
 	rm -f $(patsubst %,*.%,$(FORMATS)) .*.xml.valid Methods.xml
 
-force:
-
-.PHONY: force clean docclean
+.PHONY: clean all

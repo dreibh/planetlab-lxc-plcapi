@@ -1,8 +1,11 @@
+#!/usr/bin/env python
 
 from PLC.API import PLCAPI
+from DocBook import DocBook
 
-def get_func_list(methods = None):
-	api = PLCAPI(None)
-	if not methods:
-	    methods = api.methods
-	return [api.callable(method) for method in methods]
+def api_methods():
+    api = PLCAPI(None)
+    methods = api.methods
+    return [api.callable(method) for method in methods]
+
+DocBook(api_methods ()).Process()

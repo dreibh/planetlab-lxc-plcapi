@@ -55,11 +55,11 @@ class Filter(Parameter, dict):
 
     * fields starting with - are special and relate to row selection, i.e. sorting and clipping
     * '-SORT' : a field name, or an ordered list of field names that are used for sorting
-    * these fields may start with + (default) or - for denoting increasing or decreasing order
+      these fields may start with + (default) or - for denoting increasing or decreasing order
     example : filter = { '-SORT' : [ '+node_id', '-hostname' ] }
     * '-OFFSET' : the number of first rows to be ommitted
     * '-LIMIT' : the amount of rows to be returned 
-    example : filter = { '-OFFSET' : 100, 'LIMIT':25}
+    example : filter = { '-OFFSET' : 100, '-LIMIT':25}
 
     A realistic example would read
     GetNodes ( { 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )

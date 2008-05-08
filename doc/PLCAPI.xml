@@ -131,13 +131,33 @@
 # plcsh code fragment (see below)
 GetNodes([1,2,3])
 GetNodes({'node_id': [1,2,3]})
-GetNodes({'node_id': 1}) + GetNodes({'node_id': 2}) + GetNodes({'node_id': 3})
 </programlisting>
 
-      <para>Would all be equivalent queries. Attributes that are
+      <para>Would be equivalent queries. Attributes that are
       themselves arrays (such as <literal>nodenetwork_ids</literal>
       and <literal>slice_ids</literal> for nodes) cannot be used in
       filters.</para>
+
+      <para> Filters support a few extra features illustrated in the following examples.</para>
+      <itemizedlist>
+	<listitem>
+	  <para> <emphasis> Pattern Matching </emphasis> </para>
+	  <programlisting>GetNodes ( { 'hostname' : '*.fr' } ) </programlisting>
+	</listitem>
+	<listitem>
+	  <para> <emphasis> Negation </emphasis> </para>
+	  <programlisting>GetNodes( { '~peer_id' : None } ) </programlisting>
+	</listitem>
+	<listitem>
+	  <para> <emphasis> Numeric comparisons </emphasis> </para>
+	  <programlisting>GetEvents( { '>time' : 1178531418 } ) </programlisting>
+	  <programlisting>GetEvents( { ']event_id' : 2305 } ) </programlisting>
+	</listitem>
+	<listitem>
+	  <para> <emphasis> Sorting and Clipping </emphasis> </para>
+	  <programlisting> GetNodes( { '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 }</programlisting>
+	</listitem>
+      </itemizedlist>
     </section>
 
     <section>
