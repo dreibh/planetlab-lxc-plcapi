@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.2
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -98,6 +98,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/refresh-peer.py*
 
 %changelog
+* Fri May 09 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-7
+- no more doc packaged outside of myplc-docs - doc/ cleaned up
+- enhancements in doc on filters 
+- bootcd-aware GetBootMedium merged from onelab
+
 * Thu May 08 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-6
 - checkpoint while the new myplc-docs package is underway
 - bugfix: GetSlivers & conf files
