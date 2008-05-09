@@ -14,7 +14,7 @@ all: PLCAPI.html
 API_SOURCES = ../PLC/__init__.py ../PLC/Methods/__init__.py
 
 Methods.xml: DocBook.py DocBookLocal.py $(API_SOURCES)
-	PYTHONPATH=.. DocBookLocal.py > $@
+	PYTHONPATH=.. ./DocBookLocal.py > $@
 
 #
 # Documentation
