@@ -12,6 +12,7 @@ from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.NodeNetworks import NodeNetwork, NodeNetworks
 from PLC.NodeNetworkSettings import NodeNetworkSetting, NodeNetworkSettings
+from PLC.NodeGroups import NodeGroup, NodeGroups
 
 # could not define this in the class..
 boot_medium_actions = [ 'node-preview',
@@ -78,6 +79,8 @@ class GetBootMedium(Method):
         - %s : a file suffix appropriate in the context (.txt, .iso or the like)
         - %v : the bootcd version string (e.g. 4.0)
         - %p : the PLC name
+        - %f : the nodefamily
+        - %a : arch
         With the file-based return mechanism, the method returns the full pathname 
         of the result file; 
         ** WARNING **
@@ -118,9 +121,9 @@ class GetBootMedium(Method):
 
     returns = Parameter(str, "Node boot medium, either inlined, or filename, depending on the filename parameter")
 
-    BOOTCDDIR = "/usr/share/bootcd/"
-    BOOTCDBUILD = "/usr/share/bootcd/build.sh"
-    GENERICDIR = "/var/www/html/download/"
+    BOOTCDDIR = "/usr/share/bootcd-@NODEFAMILY@/"
+    BOOTCDBUILD = "/usr/share/bootcd-@NODEFAMILY@/build.sh"
+    GENERICDIR = "/var/www/html/download-@NODEFAMILY@/"
     WORKDIR = "/var/tmp/bootmedium"
     DEBUG = False
     # uncomment this to preserve temporary area and bootcustom logs
@@ -214,13 +217,41 @@ class GetBootMedium(Method):
 
         return file
 
+    # see also InstallBootstrapFS in bootmanager that does similar things
+    def get_nodefamily (self, node):
+        try:
+            (pldistro,arch) = file("/etc/planetlab/nodefamily").read().strip().split("-")
+        except:
+            (pldistro,arch) = ("planetlab","i386")
+            
+        if not node:
+            return (pldistro,arch)
+
+        known_archs = [ 'i386', 'x86_64' ]
+        nodegroupnames = [ ng['name'] for ng in NodeGroups (self.api, node['nodegroup_ids'],['name'])]
+        # (1) if groupname == arch, nodefamily becomes pldistro-groupname
+        # (2) else if groupname looks like pldistro-arch, it is taken as a nodefamily
+        # (3) otherwise groupname is taken as an extension
+        for nodegroupname in nodegroupnames:
+            if nodegroupname in known_archs:
+                arch = nodegroupname
+            else:
+                for known_arch in known_archs:
+                    try:
+                        (api_pldistro,api_arch)=nodegroupname.split("-")
+                        # sanity check
+                        if api_arch != known_arch: raise Exception,"mismatch"
+                        (pldistro,arch) = (api_pldistro, api_arch)
+                        break
+                    except:
+                        pass
+        return (pldistro,arch)
+
     def bootcd_version (self):
         try:
-            f = open (self.BOOTCDDIR + "/build/version.txt")
-            version=f.readline().strip()
-        finally:
-            f.close()
-        return version
+            return file(self.BOOTCDDIR + "/build/version.txt").readline().strip()
+        except:
+            raise Exception,"Unknown boot cd version - probably wrong bootcd dir : %s"%self.BOOTCDDIR
     
     def cleantrash (self):
         for file in self.trash:
@@ -269,12 +300,6 @@ class GetBootMedium(Method):
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
-        ### compute a 8 bytes random number
-        tempbytes = random.sample (xrange(0,256), 8);
-        def hexa2 (c):
-            return chr((c>>4)+65) + chr ((c&16)+65)
-        temp = "".join(map(hexa2,tempbytes))
-
         ### check node if needed
         if action.find("node-") == 0:
             nodes = Nodes(self.api, [node_id_or_hostname])
@@ -282,10 +307,20 @@ class GetBootMedium(Method):
                 raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
             node = nodes[0]
             nodename = node['hostname']
-            
+
         else:
             node = None
-            nodename = temp
+            # compute a 8 bytes random number
+            tempbytes = random.sample (xrange(0,256), 8);
+            def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
+            nodename = "".join(map(hexa2,tempbytes))
+
+        # get nodefamily
+        (pldistro,arch) = self.get_nodefamily(node)
+        self.nodefamily="%s-%s"%(pldistro,arch)
+        # apply on globals
+        for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
+            setattr(self,attr,getattr(self,attr).replace("@NODEFAMILY@",self.nodefamily))
             
         ### handle filename
         # allow to set filename to None or any other empty value
@@ -294,9 +329,13 @@ class GetBootMedium(Method):
         filename = filename.replace ("%n",nodename)
         filename = filename.replace ("%s",suffix)
         filename = filename.replace ("%p",self.api.config.PLC_NAME)
-        # only if filename contains "%v", bootcd is maybe not avail ?
-        if filename.find("%v") >=0:
-            filename = filename.replace ("%v",self.bootcd_version())
+        # let's be cautious
+        try: filename = filename.replace ("%f", self.nodefamily)
+        except: pass
+        try: filename = filename.replace ("%a", arch)
+        except: pass
+        try: filename = filename.replace ("%v",self.bootcd_version())
+        except: pass
 
         ### Check filename location
         if filename != '':
