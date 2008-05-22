@@ -10,8 +10,8 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.NodeNetworkSettings import NodeNetworkSetting, NodeNetworkSettings
+from PLC.Interfaces import Interface, Interfaces
+from PLC.InterfaceSettings import InterfaceSetting, InterfaceSettings
 from PLC.NodeGroups import NodeGroup, NodeGroups
 
 # could not define this in the class..
@@ -153,10 +153,10 @@ class GetBootMedium(Method):
 
         # Get node networks for this node
         primary = None
-        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
-        for nodenetwork in nodenetworks:
-            if nodenetwork['is_primary']:
-                primary = nodenetwork
+        interfaces = Interfaces(self.api, node['interface_ids'])
+        for interface in interfaces:
+            if interface['is_primary']:
+                primary = interface
                 break
         if primary is None:
             raise PLCInvalidArgument, "No primary network configured on %s"%node['hostname']
@@ -192,8 +192,8 @@ class GetBootMedium(Method):
         file += 'HOST_NAME="%s"\n' % host
         file += 'DOMAIN_NAME="%s"\n' % domain
 
-        # define various nodenetwork settings attached to the primary nodenetwork
-        settings = NodeNetworkSettings (self.api, {'nodenetwork_id':nodenetwork['nodenetwork_id']})
+        # define various interface settings attached to the primary interface
+        settings = InterfaceSettings (self.api, {'interface_id':interface['interface_id']})
 
         categories = set()
         for setting in settings:
@@ -201,18 +201,18 @@ class GetBootMedium(Method):
                 categories.add(setting['category'])
         
         for category in categories:
-            category_settings = NodeNetworkSettings(self.api,{'nodenetwork_id':nodenetwork['nodenetwork_id'],
+            category_settings = InterfaceSettings(self.api,{'interface_id':interface['interface_id'],
                                                               'category':category})
             if category_settings:
                 file += '### Category : %s\n'%category
                 for setting in category_settings:
                     file += '%s_%s="%s"\n'%(category.upper(),setting['name'].upper(),setting['value'])
 
-        for nodenetwork in nodenetworks:
-            if nodenetwork['method'] == 'ipmi':
-                file += 'IPMI_ADDRESS="%s"\n' % nodenetwork['ip']
-                if nodenetwork['mac']:
-                    file += 'IPMI_MAC="%s"\n' % nodenetwork['mac'].lower()
+        for interface in interfaces:
+            if interface['method'] == 'ipmi':
+                file += 'IPMI_ADDRESS="%s"\n' % interface['ip']
+                if interface['mac']:
+                    file += 'IPMI_MAC="%s"\n' % interface['mac'].lower()
                 break
 
         return file

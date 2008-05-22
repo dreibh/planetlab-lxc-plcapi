@@ -75,7 +75,7 @@ try:
 	
 		# do not delete from primary tables
 		if foreign_key_parts[0] in ['addresses', 'boot_states', 'conf_files', \
-			'keys', 'messages', 'nodegroups', 'nodenetworks', 'nodes', 'pcus', 'peers' \
+			'keys', 'messages', 'nodegroups', 'interfaces', 'nodes', 'pcus', 'peers' \
                         'persons', 'roles', 'sessions', 'sites', 'slices']:
 			#print "skipping table %s" % foreign_key_parts[0] 
 			continue

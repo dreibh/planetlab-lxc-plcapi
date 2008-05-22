@@ -15,7 +15,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.BootStates import BootStates
 
 def valid_hostname(hostname):
@@ -38,7 +38,7 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    # Thierry -- we use delete on nodenetworks so the related NodeNetworkSettings get deleted too
+    # Thierry -- we use delete on interfaces so the related InterfaceSettings get deleted too
     join_tables = ['nodegroup_node', 'conf_file_node', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node','node_slice_whitelist']
     fields = {
         'node_id': Parameter(int, "Node identifier"),
@@ -54,7 +54,7 @@ class Node(Row):
 	'last_contact': Parameter(int, "Date and time when node last contacted plc", ro = True), 
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
-        'nodenetwork_ids': Parameter([int], "List of network interfaces that this node has"),
+        'interface_ids': Parameter([int], "List of network interfaces that this node has"),
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
@@ -64,10 +64,11 @@ class Node(Row):
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
         'peer_node_id': Parameter(int, "Foreign node identifier at peer", nullok = True),
+        'tag_ids' : Parameter ([int], "List of tags attached to this node"),
         }
     related_fields = {
-	'nodenetworks': [Mixed(Parameter(int, "NodeNetwork identifier"),
-                       	       Filter(NodeNetwork.fields))],
+	'interfaces': [Mixed(Parameter(int, "Interface identifier"),
+                       	       Filter(Interface.fields))],
 	'nodegroups': [Mixed(Parameter(int, "NodeGroup identifier"),
                              Parameter(str, "NodeGroup name"))],
 	'conf_files': [Parameter(int, "ConfFile identifier")],
@@ -134,26 +135,26 @@ class Node(Row):
                        " where node_id = %d" % (self['node_id']) )
         self.sync(commit)
 
-    def associate_nodenetworks(self, auth, field, value):
+    def associate_interfaces(self, auth, field, value):
 	"""
-	Delete nodenetworks not found in value list (using DeleteNodeNetwor)k	
-	Add nodenetworks found in value list (using AddNodeNetwork)
-	Updates nodenetworks found w/ nodenetwork_id in value list (using UpdateNodeNetwork) 
+	Delete interfaces not found in value list (using DeleteNodeNetwor)k	
+	Add interfaces found in value list (using AddInterface)
+	Updates interfaces found w/ interface_id in value list (using UpdateInterface) 
 	"""
 
-	assert 'nodenetworkp_ids' in self
+	assert 'interfacep_ids' in self
         assert 'node_id' in self
         assert isinstance(value, list)
 
-        (nodenetwork_ids, blank, nodenetworks) = self.separate_types(value)
+        (interface_ids, blank, interfaces) = self.separate_types(value)
 
-        if self['nodenetwork_ids'] != nodenetwork_ids:
-            from PLC.Methods.DeleteNodeNetwork import DeleteNodeNetwork
+        if self['interface_ids'] != interface_ids:
+            from PLC.Methods.DeleteInterface import DeleteInterface
 
-            stale_nodenetworks = set(self['nodenetwork_ids']).difference(nodenetwork_ids)
+            stale_interfaces = set(self['interface_ids']).difference(interface_ids)
 
-            for stale_nodenetwork in stale_nodenetworks:
-                DeleteNodeNetwork.__call__(DeleteNodeNetwork(self.api), auth, stale_nodenetwork['nodenetwork_id'])
+            for stale_interface in stale_interfaces:
+                DeleteInterface.__call__(DeleteInterface(self.api), auth, stale_interface['interface_id'])
 
     def associate_nodegroups(self, auth, field, value):
 	"""
@@ -276,11 +277,11 @@ class Node(Row):
         """
 
         assert 'node_id' in self
-	assert 'nodenetwork_ids' in self
+	assert 'interface_ids' in self
 
-	# we need to clean up NodeNetworkSettings, so handling nodenetworks as part of join_tables does not work
-	for nodenetwork in NodeNetworks(self.api,self['nodenetwork_ids']):
-	    nodenetwork.delete()
+	# we need to clean up InterfaceSettings, so handling interfaces as part of join_tables does not work
+	for interface in Interfaces(self.api,self['interface_ids']):
+	    interface.delete()
 
         # Clean up miscellaneous join tables
         for table in self.join_tables:

@@ -82,7 +82,9 @@ tags:
 
 ########## make sync PLCHOST=hostname
 ifdef PLCHOST
-PLCSSH:=root@$(PLCHOST)
+ifdef VSERVER
+PLCSSH:=root@$(PLCHOST):/vservers/$(VSERVER)
+endif
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
@@ -92,11 +94,11 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
 sync:
 ifeq (,$(PLCSSH))
-	echo "sync: You must define target host as PLCHOST on the command line"
-	echo " e.g. make sync PLCHOST=private.one-lab.org" ; exit 1
+	echo "sync: You must define PLCHOST and VSERVER on the command line"
+	echo " e.g. make sync PLCHOST=private.one-lab.org VSERVER=myplc01" ; exit 1
 else
-	+$(RSYNC) PLC planetlab4.sql migrations $(PLCSSH):/plc/root/usr/share/plc_api/
-	ssh $(PLCSSH) chroot /plc/root apachectl graceful
+	+$(RSYNC) PLC planetlab5.sql migrations $(PLCSSH)/usr/share/plc_api/
+	ssh root@$(PLCHOST) vserver $(VSERVER) exec apachectl graceful
 endif
 
 ####################

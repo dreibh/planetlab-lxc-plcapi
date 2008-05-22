@@ -12,7 +12,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.NodeNetworks import valid_ip, NodeNetwork, NodeNetworks
+from PLC.Interfaces import valid_ip, Interface, Interfaces
 from PLC.Nodes import Node, Nodes
 
 class PCU(Row):

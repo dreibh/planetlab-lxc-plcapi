@@ -3,7 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth, BootAuth, SessionAuth
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 
 can_update = lambda (field, value): field in \
              ['method', 'mac', 'gateway', 'network',
@@ -19,12 +19,12 @@ class BootUpdateNode(Method):
 
     roles = ['node']
 
-    nodenetwork_fields = dict(filter(can_update, NodeNetwork.fields.items()))
+    interface_fields = dict(filter(can_update, Interface.fields.items()))
 
     accepts = [
         Mixed(BootAuth(), SessionAuth()),
         {'boot_state': Node.fields['boot_state'],
-         'primary_network': nodenetwork_fields,
+         'primary_network': interface_fields,
          'ssh_host_key': Node.fields['ssh_rsa_key']}
         ]
 
@@ -41,22 +41,22 @@ class BootUpdateNode(Method):
         if node_fields.has_key('primary_network'):
             primary_network = node_fields['primary_network'] 
 
-            if 'nodenetwork_id' not in primary_network:
+            if 'interface_id' not in primary_network:
                 raise PLCInvalidArgument, "Node network not specified"
-            if primary_network['nodenetwork_id'] not in self.caller['nodenetwork_ids']:
+            if primary_network['interface_id'] not in self.caller['interface_ids']:
                 raise PLCInvalidArgument, "Node network not associated with calling node"
 
-            nodenetworks = NodeNetworks(self.api, [primary_network['nodenetwork_id']])
-            if not nodenetworks:
+            interfaces = Interfaces(self.api, [primary_network['interface_id']])
+            if not interfaces:
                 raise PLCInvalidArgument, "No such node network"
-            nodenetwork = nodenetworks[0]
+            interface = interfaces[0]
 
-            if not nodenetwork['is_primary']:
+            if not interface['is_primary']:
                 raise PLCInvalidArgument, "Not the primary node network on record"
 
-            nodenetwork_fields = dict(filter(can_update, primary_network.items()))
-            nodenetwork.update(nodenetwork_fields)
-            nodenetwork.sync(commit = False)
+            interface_fields = dict(filter(can_update, primary_network.items()))
+            interface.update(interface_fields)
+            interface.sync(commit = False)
 
         self.caller.sync(commit = True)
 	self.message = "Node updated: %s" % ", ".join(node_fields.keys())

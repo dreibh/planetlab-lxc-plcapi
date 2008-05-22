@@ -2,7 +2,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import BootAuth
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.Sessions import Session, Sessions
 
 class BootGetNodeDetails(Method):
@@ -19,7 +19,7 @@ class BootGetNodeDetails(Method):
         'hostname': Node.fields['hostname'],
         'boot_state': Node.fields['boot_state'],
         'model': Node.fields['model'],
-        'networks': [NodeNetwork.fields],
+        'networks': [Interface.fields],
         'session': Session.fields['session_id'],
         }
 
@@ -38,8 +38,8 @@ class BootGetNodeDetails(Method):
 
         details['session'] = session['session_id']
 
-        if self.caller['nodenetwork_ids']:
-            details['networks'] = NodeNetworks(self.api, self.caller['nodenetwork_ids'])
+        if self.caller['interface_ids']:
+            details['networks'] = Interfaces(self.api, self.caller['interface_ids'])
             # XXX Boot Manager cannot unmarshal None
             for network in details['networks']:
                 for field in network:

@@ -19,7 +19,7 @@ class NetworkType(Row):
 
     table_name = 'network_types'
     primary_key = 'type'
-    join_tables = ['nodenetworks']
+    join_tables = ['interfaces']
     fields = {
         'type': Parameter(str, "Network type", max = 20),
         }

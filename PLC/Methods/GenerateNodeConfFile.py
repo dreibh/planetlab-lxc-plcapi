@@ -5,7 +5,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.Auth import Auth
 
 class GenerateNodeConfFile(Method):
@@ -49,10 +49,10 @@ class GenerateNodeConfFile(Method):
 
 	# Get node networks for this node
         primary = None
-        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
-        for nodenetwork in nodenetworks:
-            if nodenetwork['is_primary']:
-                primary = nodenetwork
+        interfaces = Interfaces(self.api, node['interface_ids'])
+        for interface in interfaces:
+            if interface['is_primary']:
+                primary = interface
                 break
         if primary is None:
             raise PLCInvalidArgument, "No primary network configured"
@@ -97,11 +97,11 @@ class GenerateNodeConfFile(Method):
         file += 'HOST_NAME="%s"\n' % host
         file += 'DOMAIN_NAME="%s"\n' % domain
 
-        for nodenetwork in nodenetworks:
-            if nodenetwork['method'] == 'ipmi':
-                file += 'IPMI_ADDRESS="%s"\n' % nodenetwork['ip']
-                if nodenetwork['mac']:
-                    file += 'IPMI_MAC="%s"\n' % nodenetwork['mac'].lower()
+        for interface in interfaces:
+            if interface['method'] == 'ipmi':
+                file += 'IPMI_ADDRESS="%s"\n' % interface['ip']
+                if interface['mac']:
+                    file += 'IPMI_MAC="%s"\n' % interface['mac'].lower()
                 break
 
         return file

@@ -149,8 +149,8 @@ def random_node(boot_states):
         'version': randstr(64),
         }
 
-def random_nodenetwork(method, type):
-    nodenetwork_fields = {
+def random_interface(method, type):
+    interface_fields = {
         'method': method,
         'type': type,
         'bwlimit': randint(500000, 10000000),
@@ -165,9 +165,9 @@ def random_nodenetwork(method, type):
         dns1 = randint(0, 0xffffffff)
 
         for field in 'ip', 'netmask', 'network', 'broadcast', 'gateway', 'dns1':
-            nodenetwork_fields[field] = socket.inet_ntoa(struct.pack('>L', locals()[field]))
+            interface_fields[field] = socket.inet_ntoa(struct.pack('>L', locals()[field]))
 
-    return nodenetwork_fields
+    return interface_fields
 
 def random_pcu():
     return {
@@ -218,7 +218,7 @@ class Test:
         'keys_per_person': 1,
         'nodegroups': 1,
         'nodes_per_site': 1,
-        'nodenetworks_per_node': 1,
+        'interfaces_per_node': 1,
         'pcus_per_site': 1,
         'conf_files': 1,
         'attribute_types': 1,
@@ -234,7 +234,7 @@ class Test:
         'keys_per_person': 2,
         'nodegroups': 10,
         'nodes_per_site': 2,
-        'nodenetworks_per_node': 1,
+        'interfaces_per_node': 1,
         'pcus_per_site': 1,
         'conf_files': 10,
         'attribute_types': 10,
@@ -254,7 +254,7 @@ class Test:
         self.key_ids = []
         self.nodegroup_ids = []
         self.node_ids = []
-        self.nodenetwork_ids = []
+        self.interface_ids = []
         self.pcu_ids = []
         self.conf_file_ids = []
         self.attribute_type_ids = []
@@ -298,7 +298,7 @@ class Test:
         self.AddKeys(params['keys_per_person'])
         self.AddNodeGroups(params['nodegroups'])
         self.AddNodes(params['nodes_per_site'])
-        self.AddNodeNetworks(params['nodenetworks_per_node'])
+        self.AddInterfaces(params['interfaces_per_node'])
         self.AddPCUs(params['pcus_per_site'])
         self.AddConfFiles(params['conf_files'])
         self.AddSliceAttributeTypes(params['attribute_types'])
@@ -313,7 +313,7 @@ class Test:
         self.UpdateKeys()
         self.UpdateNodeGroups()
         self.UpdateNodes()
-        self.UpdateNodeNetworks()
+        self.UpdateInterfaces()
         self.UpdatePCUs()
         self.UpdateConfFiles()
         self.UpdateSliceAttributeTypes()
@@ -327,7 +327,7 @@ class Test:
         self.DeleteKeys()
         self.DeleteConfFiles()
         self.DeletePCUs()
-        self.DeleteNodeNetworks()
+        self.DeleteInterfaces()
         self.DeleteNodes()
         self.DeletePersons()
         self.DeleteNodeGroups()
@@ -927,7 +927,7 @@ class Test:
 
         self.node_ids = []
 
-    def AddNodeNetworks(self, per_node = 1):
+    def AddInterfaces(self, per_node = 1):
         """
         Add a number of random network interfaces to each node.
         """
@@ -946,23 +946,23 @@ class Test:
                 type = random.sample(network_types, 1)[0]
 
                 # Add node network
-                nodenetwork_fields = random_nodenetwork(method, type)
-                nodenetwork_id = self.api.AddNodeNetwork(node_id, nodenetwork_fields)
+                interface_fields = random_interface(method, type)
+                interface_id = self.api.AddInterface(node_id, interface_fields)
 
-                # Should return a unique nodenetwork_id
-                assert nodenetwork_id not in self.nodenetwork_ids
-                self.nodenetwork_ids.append(nodenetwork_id)
+                # Should return a unique interface_id
+                assert interface_id not in self.interface_ids
+                self.interface_ids.append(interface_id)
 
                 if self.check:
                     # Check node network
-                    nodenetwork = self.api.GetNodeNetworks([nodenetwork_id])[0]
-                    for field in nodenetwork_fields:
-                        assert nodenetwork[field] == nodenetwork_fields[field]
+                    interface = self.api.GetInterfaces([interface_id])[0]
+                    for field in interface_fields:
+                        assert interface[field] == interface_fields[field]
 
                 if self.verbose:
-                    print "Added node network", nodenetwork_id, "to node", node_id
+                    print "Added node network", interface_id, "to node", node_id
 
-    def UpdateNodeNetworks(self):
+    def UpdateInterfaces(self):
         """
         Make random changes to any network interfaces we may have added.
         """
@@ -975,41 +975,41 @@ class Test:
         if not network_types:
             raise Exception, "No network types"
 
-        for nodenetwork_id in self.nodenetwork_ids:
+        for interface_id in self.interface_ids:
             method = random.sample(network_methods, 1)[0]
             type = random.sample(network_types, 1)[0]
 
-            # Update nodenetwork
-            nodenetwork_fields = random_nodenetwork(method, type)
-            self.api.UpdateNodeNetwork(nodenetwork_id, nodenetwork_fields)
+            # Update interface
+            interface_fields = random_interface(method, type)
+            self.api.UpdateInterface(interface_id, interface_fields)
 
             if self.check:
-                # Check nodenetwork
-                nodenetwork = self.api.GetNodeNetworks([nodenetwork_id])[0]
-                for field in nodenetwork_fields:
-                    assert nodenetwork[field] == nodenetwork_fields[field]
+                # Check interface
+                interface = self.api.GetInterfaces([interface_id])[0]
+                for field in interface_fields:
+                    assert interface[field] == interface_fields[field]
 
             if self.verbose:
-                print "Updated node network", nodenetwork_id
+                print "Updated node network", interface_id
 
-    def DeleteNodeNetworks(self):
+    def DeleteInterfaces(self):
         """
         Delete any random network interfaces we may have added.
         """
 
-        for nodenetwork_id in self.nodenetwork_ids:
-            self.api.DeleteNodeNetwork(nodenetwork_id)
+        for interface_id in self.interface_ids:
+            self.api.DeleteInterface(interface_id)
 
             if self.check:
-                assert not self.api.GetNodeNetworks([nodenetwork_id])
+                assert not self.api.GetInterfaces([interface_id])
 
             if self.verbose:
-                print "Deleted node network", nodenetwork_id
+                print "Deleted node network", interface_id
 
         if self.check:
-            assert not self.api.GetNodeNetworks(self.nodenetwork_ids)
+            assert not self.api.GetInterfaces(self.interface_ids)
 
-        self.nodenetwork_ids = []
+        self.interface_ids = []
 
     def AddPCUs(self, per_site = 1):
         """

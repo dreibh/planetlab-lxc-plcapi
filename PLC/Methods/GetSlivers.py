@@ -6,7 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
@@ -110,7 +110,7 @@ class GetSlivers(Method):
     node.
 
     All of the information returned by this call can be gathered from
-    other calls, e.g. GetNodes, GetNodeNetworks, GetSlices, etc. This
+    other calls, e.g. GetNodes, GetInterfaces, GetSlices, etc. This
     function exists almost solely for the benefit of Node Manager.
     """
 
@@ -126,7 +126,7 @@ class GetSlivers(Method):
         'timestamp': Parameter(int, "Timestamp of this call, in seconds since UNIX epoch"),
         'node_id': Node.fields['node_id'],
         'hostname': Node.fields['hostname'],
-        'networks': [NodeNetwork.fields],
+        'networks': [Interface.fields],
         'groups': [NodeGroup.fields['name']],
         'conf_files': [ConfFile.fields],
 	'initscripts': [InitScript.fields],
@@ -164,8 +164,8 @@ class GetSlivers(Method):
             if node['peer_id'] is not None:
                 raise PLCInvalidArgument, "Not a local node"
 
-        # Get nodenetwork information
-        networks = NodeNetworks(self.api, node['nodenetwork_ids'])
+        # Get interface information
+        networks = Interfaces(self.api, node['interface_ids'])
 
         # Get node group information
         nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('name')

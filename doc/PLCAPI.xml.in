@@ -134,7 +134,7 @@ GetNodes({'node_id': [1,2,3]})
 </programlisting>
 
       <para>Would be equivalent queries. Attributes that are
-      themselves arrays (such as <literal>nodenetwork_ids</literal>
+      themselves arrays (such as <literal>interface_ids</literal>
       and <literal>slice_ids</literal> for nodes) cannot be used in
       filters.</para>
 

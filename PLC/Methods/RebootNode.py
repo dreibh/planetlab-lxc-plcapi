@@ -4,7 +4,7 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.Auth import Auth
 from PLC.POD import udp_pod
 
@@ -55,10 +55,10 @@ class RebootNode(Method):
         # Only use the hostname as a backup, try to use the primary ID
         # address instead.
         host = node['hostname']
-        nodenetworks = NodeNetworks(self.api, node['nodenetwork_ids'])
-        for nodenetwork in nodenetworks:
-            if nodenetwork['is_primary'] == 1:
-                host = nodenetwork['ip']
+        interfaces = Interfaces(self.api, node['interface_ids'])
+        for interface in interfaces:
+            if interface['is_primary'] == 1:
+                host = interface['ip']
                 break
 
         try:

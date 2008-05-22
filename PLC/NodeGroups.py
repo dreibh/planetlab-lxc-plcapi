@@ -29,14 +29,13 @@ class NodeGroup(Row):
     fields = {
         'nodegroup_id': Parameter(int, "Node group identifier"),
         'name': Parameter(str, "Node group name", max = 50),
-        'description': Parameter(str, "Node group description", max = 200, nullok = True),
-        'node_ids': Parameter([int], "List of nodes in this node group"),
-        'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
+        'tag_name' : Parameter(str, "Tag name that the nodegroup definition is based upon"),
+        'tag_value' : Parameter(str, "value that the nodegroup definition is based upon"),
+#        'node_ids': Parameter([int], "List of nodes in this node group"),
+#        'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
         }
     related_fields = {
 	'conf_files': [Parameter(int, "ConfFile identifier")],
-	'nodes': [Mixed(Parameter(int, "Node identifier"),
-                        Parameter(str, "Fully qualified hostname"))]
 	}
 
     def validate_name(self, name):
@@ -51,86 +50,6 @@ class NodeGroup(Row):
                raise PLCInvalidArgument, "Node group name already in use"
 
 	return name
-
-    def add_node(self, node, commit = True):
-        """
-        Add node to existing nodegroup.
-        """
-
-        assert 'nodegroup_id' in self
-        assert isinstance(node, Node)
-        assert 'node_id' in node
-
-        node_id = node['node_id']
-        nodegroup_id = self['nodegroup_id']
-
-        if node_id not in self['node_ids']:
-            assert nodegroup_id not in node['nodegroup_ids']
-
-            self.api.db.do("INSERT INTO nodegroup_node (nodegroup_id, node_id)" \
-                           " VALUES(%(nodegroup_id)d, %(node_id)d)",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['node_ids'].append(node_id)
-            node['nodegroup_ids'].append(nodegroup_id)
-
-    def remove_node(self, node, commit = True):
-        """
-        Remove node from existing nodegroup.
-        """
-
-        assert 'nodegroup_id' in self
-        assert isinstance(node, Node)
-        assert 'node_id' in node
-
-        node_id = node['node_id']
-        nodegroup_id = self['nodegroup_id']
-
-        if node_id in self['node_ids']:
-            assert nodegroup_id in node['nodegroup_ids']
-
-            self.api.db.do("DELETE FROM nodegroup_node" \
-                           " WHERE nodegroup_id = %(nodegroup_id)d" \
-                           " AND node_id = %(node_id)d",
-                           locals())
-
-            if commit:
-                self.api.db.commit()
-
-            self['node_ids'].remove(node_id)
-            node['nodegroup_ids'].remove(nodegroup_id)
-
-    def associate_nodes(self, auth, field, value):
-        """
-        Adds nodes found in value list to this nodegroup (using AddNodeToNodeGroup).
-        Deletes nodes not found in value list from this slice (using DeleteNodeFromNodeGroup).
-        """
-
-        assert 'node_ids' in self
-        assert 'nodegroup_id' in self
-        assert isinstance(value, list)
-
-        (node_ids, hostnames) = self.separate_types(value)[0:2]
-
-        # Translate hostnames into node_ids
-        if hostnames:
-            nodes = Nodes(self.api, hostnames, ['node_id']).dict('node_id')
-            node_ids += nodes.keys()
-
-        # Add new ids, remove stale ids
-        if self['node_ids'] != node_ids:
-            from PLC.Methods.AddNodeToNodeGroup import AddNodeToNodeGroup
-            from PLC.Methods.DeleteNodeFromNodeGroup import DeleteNodeFromNodeGroup
-            new_nodes = set(node_ids).difference(self['node_ids'])
-            stale_nodes = set(self['node_ids']).difference(node_ids)
-
-            for new_node in new_nodes:
-                AddNodeToNodeGroup.__call__(AddNodeToNodeGroup(self.api), auth, new_node, self['nodegroup_id'])
-            for stale_node in stale_nodes:
-                DeleteNodeFromNodeGroup.__call__(DeleteNodeFromNodeGroup(self.api), auth, stale_node, self['nodegroup_id'])
 
     def associate_conf_files(self, auth, field, value):
         """

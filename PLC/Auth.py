@@ -16,7 +16,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Persons
 from PLC.Nodes import Node, Nodes
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
+from PLC.Interfaces import Interface, Interfaces
 from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Boot import notify_owners
@@ -224,22 +224,22 @@ class BootAuth(Auth):
                 # on record for the node.
                 key = node['boot_nonce']
 
-                nodenetwork = None
-                if node['nodenetwork_ids']:
-                    nodenetworks = NodeNetworks(method.api, node['nodenetwork_ids'])
-                    for nodenetwork in nodenetworks:
-                        if nodenetwork['is_primary']:
+                interface = None
+                if node['interface_ids']:
+                    interfaces = Interfaces(method.api, node['interface_ids'])
+                    for interface in interfaces:
+                        if interface['is_primary']:
                             break
             
-                if not nodenetwork or not nodenetwork['is_primary']:
+                if not interface or not interface['is_primary']:
                     raise PLCAuthenticationFailure, "No primary network interface on record"
             
                 if method.source is None:
                     raise PLCAuthenticationFailure, "Cannot determine IP address of requestor"
 
-                if nodenetwork['ip'] != method.source[0]:
+                if interface['ip'] != method.source[0]:
                     raise PLCAuthenticationFailure, "Requestor IP %s does not match node IP %s" % \
-                          (method.source[0], nodenetwork['ip'])
+                          (method.source[0], interface['ip'])
             else:
                 raise PLCAuthenticationFailure, "No node key or boot nonce"
 

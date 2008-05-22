@@ -19,7 +19,7 @@ class NetworkMethod(Row):
 
     table_name = 'network_methods'
     primary_key = 'method'
-    join_tables = ['nodenetworks']
+    join_tables = ['interfaces']
     fields = {
         'method': Parameter(str, "Network method", max = 20),
         }

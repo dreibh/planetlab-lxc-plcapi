@@ -134,7 +134,7 @@ def create_item_from_schema(item_name):
 
 def fix_row(row, table_name, table_fields):
 
-	if table_name in ['nodenetworks']:
+	if table_name in ['interfaces']:
 		# convert str bwlimit to bps int
 		bwlimit_index = table_fields.index('bwlimit')
 		if isinstance(row[bwlimit_index], int):
