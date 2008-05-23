@@ -68,22 +68,6 @@ class Person(Row):
 			 Parameter(str, "Slice name"))]
 	}	
 
-	
-
-    # for Cache
-    class_key = 'email'
-    foreign_fields = ['first_name', 'last_name', 'title', 'email', 'phone', 'url',
-		      'bio', 'enabled', 'password', ]
-    # forget about these ones, they are read-only anyway
-    # handling them causes Cache to re-sync all over again 
-    # 'last_updated', 'date_created'
-    foreign_xrefs = [
-        {'field' : 'key_ids',  'class': 'Key',  'table' : 'person_key' } ,
-        {'field' : 'site_ids', 'class': 'Site', 'table' : 'person_site'},
-#       xxx this is not handled by Cache yet
-#        'role_ids': Parameter([int], "List of role identifiers"),
-]
-
     def validate_email(self, email):
         """
         Validate email address. Stolen from Mailman.
@@ -394,8 +378,7 @@ class Persons(Table):
 
     def __init__(self, api, person_filter = None, columns = None):
         Table.__init__(self, api, Person, columns)
-        #sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
-        #      ", ".join(self.columns)
+
 	foreign_fields = {'role_ids': ('role_id', 'person_role'),
 			  'roles': ('name', 'roles'),
                           'site_ids': ('site_id', 'person_site'),

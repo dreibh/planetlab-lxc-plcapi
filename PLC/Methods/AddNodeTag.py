@@ -32,10 +32,11 @@ class AddNodeTag(Method):
     accepts = [
         Auth(),
         # no other way to refer to a node
-        NodeTag.fields['node_id'],
+        Mixed(Node.fields['node_id'],
+              Node.fields['hostname']),
         Mixed(NodeTagType.fields['node_tag_type_id'],
-              NodeTagType.fields['name']),
-        NodeTag.fields['value'],
+              NodeTagType.fields['tagname']),
+        NodeTag.fields['tagvalue'],
         ]
 
     returns = Parameter(int, 'New node_tag_id (> 0) if successful')
@@ -81,7 +82,7 @@ class AddNodeTag(Method):
         node_tag = NodeTag(self.api)
         node_tag['node_id'] = node['node_id']
         node_tag['node_tag_type_id'] = node_tag_type['node_tag_type_id']
-        node_tag['value'] = value
+        node_tag['tagvalue'] = value
 
         node_tag.sync()
 	self.object_ids = [node_tag['node_tag_id']]

@@ -22,7 +22,7 @@ class GetNodeTagTypes(Method):
     accepts = [
         Auth(),
         Mixed([Mixed(NodeTagType.fields['node_tag_type_id'],
-                     NodeTagType.fields['name'])],
+                     NodeTagType.fields['tagname'])],
               Filter(NodeTagType.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]

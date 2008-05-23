@@ -26,11 +26,6 @@ class Key(Row):
         'peer_key_id': Parameter(int, "Foreign key identifier at peer", nullok = True),
         }
 
-    # for Cache
-    class_key= 'key'
-    foreign_fields = ['key_type']
-    foreign_xrefs = []
-
     def validate_key_type(self, key_type):
         key_types = [row['key_type'] for row in KeyTypes(self.api)]
         if key_type not in key_types:

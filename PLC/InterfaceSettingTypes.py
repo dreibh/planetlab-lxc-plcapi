@@ -24,14 +24,9 @@ class InterfaceSettingType (Row):
         'interface_setting_type_id': Parameter(int, "Interface setting type identifier"),
         'name': Parameter(str, "Interface setting type name", max = 100),
         'description': Parameter(str, "Interface setting type description", max = 254),
-        'category' : Parameter (str, "Interface setting category", max=64),
+        'category' : Parameter (str, "Interface setting category", max=64, optional=True),
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }
-
-    # for Cache
-    class_key = 'name'
-    foreign_fields = ['category','description','min_role_id']
-    foreign_xrefs = []
 
     def validate_name(self, name):
         if not len(name):

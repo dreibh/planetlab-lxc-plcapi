@@ -79,16 +79,6 @@ class Node(Row):
 	'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
                                    Parameter(str, "Slice name"))]
 	}
-    # for Cache
-    class_key = 'hostname'
-    foreign_fields = ['boot_state','model','version']
-    # forget about these ones, they are read-only anyway
-    # handling them causes Cache to re-sync all over again 
-    # 'date_created','last_updated'
-    foreign_xrefs = [
-	# in this case, we dont need the 'table' but Cache will look it up, so...
-        {'field' : 'site_id' , 'class' : 'Site' , 'table' : 'unused-on-direct-refs' } ,
-	]
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):

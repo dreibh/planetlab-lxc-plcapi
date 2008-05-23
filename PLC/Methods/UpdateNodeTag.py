@@ -29,7 +29,7 @@ class UpdateNodeTag(Method):
     accepts = [
         Auth(),
         NodeTag.fields['node_tag_id'],
-        NodeTag.fields['value']
+        NodeTag.fields['tagvalue']
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -65,7 +65,7 @@ class UpdateNodeTag(Method):
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d",required_min_role
 
-        node_tag['value'] = value
+        node_tag['tagvalue'] = value
         node_tag.sync()
 
 	self.object_ids = [node_tag['node_tag_id']]

@@ -22,11 +22,6 @@ class SliceAttributeType(Row):
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }
 
-    # for Cache
-    class_key = 'name'
-    foreign_fields = ['description','min_role_id']
-    foreign_xrefs = []
-
     def validate_name(self, name):
         if not len(name):
             raise PLCInvalidArgument, "Slice attribute type name must be set"

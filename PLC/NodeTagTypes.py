@@ -22,16 +22,11 @@ class NodeTagType (Row):
     join_tables = ['node_tag']
     fields = {
         'node_tag_type_id': Parameter(int, "Node tag type identifier"),
-        'name': Parameter(str, "Node tag type name", max = 100),
+        'tagname': Parameter(str, "Node tag type name", max = 100),
         'description': Parameter(str, "Node tag type description", max = 254),
-        'category' : Parameter (str, "Node tag category", max=64),
+        'category' : Parameter (str, "Node tag category", max=64, optional=True),
         'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
         }
-
-    # for Cache
-    class_key = 'name'
-    foreign_fields = ['category','description','min_role_id']
-    foreign_xrefs = []
 
     def validate_name(self, name):
         if not len(name):
@@ -69,13 +64,13 @@ class NodeTagTypes(Table):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), node_tag_type_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), node_tag_type_filter)
-                node_tag_type_filter = Filter(NodeTagType.fields, {'node_tag_type_id': ints, 'name': strs})
+                node_tag_type_filter = Filter(NodeTagType.fields, {'node_tag_type_id': ints, 'tagname': strs})
                 sql += " AND (%s) %s" % node_tag_type_filter.sql(api, "OR")
             elif isinstance(node_tag_type_filter, dict):
                 node_tag_type_filter = Filter(NodeTagType.fields, node_tag_type_filter)
                 sql += " AND (%s) %s" % node_tag_type_filter.sql(api, "AND")
             elif isinstance (node_tag_type_filter, StringTypes):
-                node_tag_type_filter = Filter(NodeTagType.fields, {'name':[node_tag_type_filter]})
+                node_tag_type_filter = Filter(NodeTagType.fields, {'tagname':[node_tag_type_filter]})
                 sql += " AND (%s) %s" % node_tag_type_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong node tag type filter %r"%node_tag_type_filter

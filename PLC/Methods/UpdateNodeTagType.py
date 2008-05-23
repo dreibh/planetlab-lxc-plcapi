@@ -10,7 +10,7 @@ from PLC.NodeTagTypes import NodeTagType, NodeTagTypes
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
-             ['name', 'description', 'category', 'min_role_id']
+             ['tagname', 'description', 'category', 'min_role_id']
 
 class UpdateNodeTagType(Method):
     """
@@ -27,7 +27,7 @@ class UpdateNodeTagType(Method):
     accepts = [
         Auth(),
         Mixed(NodeTagType.fields['node_tag_type_id'],
-              NodeTagType.fields['name']),
+              NodeTagType.fields['tagname']),
         node_tag_type_fields
         ]
 

@@ -21,7 +21,7 @@ class DeleteNodeTagType(Method):
     accepts = [
         Auth(),
         Mixed(NodeTagType.fields['node_tag_type_id'],
-              NodeTagType.fields['name']),
+              NodeTagType.fields['tagname']),
         ]
 
     returns = Parameter(int, '1 if successful')

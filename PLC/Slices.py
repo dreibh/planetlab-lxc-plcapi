@@ -46,18 +46,6 @@ class Slice(Row):
 	'nodes': [Mixed(Parameter(int, "Node identifier"),
 		        Parameter(str, "Fully qualified hostname"))]
    	}
-    # for Cache
-    class_key = 'name'
-    foreign_fields = ['instantiation', 'url', 'description', 'max_nodes', 'expires']
-    foreign_xrefs = [
-        {'field': 'node_ids' ,         'class': 'Node',   'table': 'slice_node' },
-	{'field': 'person_ids',        'class': 'Person', 'table': 'slice_person'},
-	{'field': 'creator_person_id', 'class': 'Person', 'table': 'unused-on-direct-refs'},
-        {'field': 'site_id',           'class': 'Site',   'table': 'unused-on-direct-refs'},
-    ]
-    # forget about this one, it is read-only anyway
-    # handling it causes Cache to re-sync all over again 
-    # 'created'
 
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base

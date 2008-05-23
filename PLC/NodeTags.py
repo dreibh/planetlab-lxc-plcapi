@@ -7,6 +7,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
+from PLC.Nodes import Node, Nodes
 from PLC.NodeTagTypes import NodeTagType, NodeTagTypes
 
 class NodeTag(Row):
@@ -19,15 +20,14 @@ class NodeTag(Row):
     primary_key = 'node_tag_id'
     fields = {
         'node_tag_id': Parameter(int, "Node tag identifier"),
-        'node_id': Parameter(int, "Node identifier"),
+        'node_id': Node.fields['node_id'],
+        'hostname' : Node.fields['hostname'],
         'node_tag_type_id': NodeTagType.fields['node_tag_type_id'],
-        'name': NodeTagType.fields['name'],
+        'tagvalue': Parameter(str, "Node tag value"),
+        'tagname': NodeTagType.fields['tagname'],
         'description': NodeTagType.fields['description'],
         'category': NodeTagType.fields['category'],
         'min_role_id': NodeTagType.fields['min_role_id'],
-        'value': Parameter(str, "Node tag value"),
-	### relations
-	
         }
 
 class NodeTags(Table):
