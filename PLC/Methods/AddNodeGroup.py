@@ -4,8 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
-             ['name', 'description']
+can_update = lambda (field, value): field in NodeGroup.fields.keys() and field != NodeGroup.primary_field
 
 class AddNodeGroup(Method):
     """
@@ -28,7 +27,7 @@ class AddNodeGroup(Method):
 
 
     def call(self, auth, nodegroup_fields):
-        nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
+        nodegroup_fields = dict([f for f in nodegroup_fields.items() if can_update(f)])
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup.sync()
 

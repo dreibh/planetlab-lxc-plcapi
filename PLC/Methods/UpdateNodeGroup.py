@@ -23,7 +23,7 @@ class UpdateNodeGroup(Method):
     accepts = [
         Auth(),
         Mixed(NodeGroup.fields['nodegroup_id'],
-	      NodeGroup.fields['name']),
+	      NodeGroup.fields['groupname']),
         nodegroup_fields
         ]
 

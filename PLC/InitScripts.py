@@ -43,7 +43,7 @@ class InitScript(Row):
 
 class InitScripts(Table):
     """
-    Representation of the initscipts table in the database.
+    Representation of the initscripts table in the database.
     """
 
     def __init__(self, api, initscript_filter = None, columns = None):

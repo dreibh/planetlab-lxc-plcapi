@@ -19,7 +19,7 @@ class GetNodeGroups(Method):
     accepts = [
         Auth(),
         Mixed([Mixed(NodeGroup.fields['nodegroup_id'],
-                     NodeGroup.fields['name'])],
+                     NodeGroup.fields['groupname'])],
               Filter(NodeGroup.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]

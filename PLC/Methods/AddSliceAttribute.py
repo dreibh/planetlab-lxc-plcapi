@@ -38,7 +38,7 @@ class AddSliceAttribute(Method):
               Node.fields['hostname'],
 	      None),
 	Mixed(NodeGroup.fields['nodegroup_id'],
-              NodeGroup.fields['name'])
+              NodeGroup.fields['groupname'])
         ]
 
     returns = Parameter(int, 'New slice_attribute_id (> 0) if successful')

@@ -7,7 +7,6 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
-from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
 from PLC.InterfaceSettings import InterfaceSetting, InterfaceSettings

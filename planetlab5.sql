@@ -333,12 +333,12 @@ INNER JOIN node_tag_types USING (node_tag_type_id);
 -- Node groups
 CREATE TABLE nodegroups (
     nodegroup_id serial PRIMARY KEY,			-- Group identifier
-    name text UNIQUE NOT NULL,				-- Group name
+    groupname text UNIQUE NOT NULL,			-- Group name (name & value will refer to the tag)
     node_tag_type_id integer REFERENCES node_tag_types,	-- node is in nodegroup if it has this tag defined
-    value text						-- with value 'value'
+    value text NOT NULL					-- with value 'value'
 ) WITH OIDS;
 
-
+-- xxx - first rough implem
 CREATE OR REPLACE VIEW nodegroup_node AS
 SELECT nodegroup_id, node_id 
 FROM node_tag_types 
@@ -1053,7 +1053,6 @@ LEFT JOIN node_session USING (node_id);
 CREATE OR REPLACE VIEW view_nodegroups AS
 SELECT
 nodegroups.*,
-COALESCE((SELECT node_ids FROM nodegroup_nodes WHERE nodegroup_nodes.nodegroup_id = nodegroups.nodegroup_id), '{}') AS node_ids,
 COALESCE((SELECT conf_file_ids FROM nodegroup_conf_files WHERE nodegroup_conf_files.nodegroup_id = nodegroups.nodegroup_id), '{}') AS conf_file_ids
 FROM nodegroups;
 

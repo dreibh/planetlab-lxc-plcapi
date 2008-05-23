@@ -25,17 +25,17 @@ class NodeGroup(Row):
 
     table_name = 'nodegroups'
     primary_key = 'nodegroup_id'
-    join_tables = ['nodegroup_node', 'conf_file_nodegroup']
+    join_tables = ['conf_file_nodegroup']
+    primary_field = 'nodegroup_id'
     fields = {
         'nodegroup_id': Parameter(int, "Node group identifier"),
-        'name': Parameter(str, "Node group name", max = 50),
-        'tag_name' : Parameter(str, "Tag name that the nodegroup definition is based upon"),
-        'tag_value' : Parameter(str, "value that the nodegroup definition is based upon"),
-#        'node_ids': Parameter([int], "List of nodes in this node group"),
-#        'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
+        'groupname': Parameter(str, "Node group name", max = 50),
+        'node_tag_type_id': Parameter (int, "Node tag type id"),
+        'value' : Parameter(str, "value that the nodegroup definition is based upon"),
         }
     related_fields = {
-	'conf_files': [Parameter(int, "ConfFile identifier")],
+        'name' : Parameter(str, "Tag name that the nodegroup definition is based upon"),
+        'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
 	}
 
     def validate_name(self, name):
@@ -70,9 +70,11 @@ class NodeGroup(Row):
             stale_conf_files = set(self['conf_file_ids']).difference(conf_file_ids)
 
             for new_conf_file in new_conf_files:
-                AddConfFileToNodeGroup.__call__(AddConfFileToNodeGroup(self.api), auth, new_conf_file, self['nodegroup_id'])
+                AddConfFileToNodeGroup.__call__(AddConfFileToNodeGroup(self.api), 
+                                                auth, new_conf_file, self['nodegroup_id'])
             for stale_conf_file in stale_conf_files:
-                DeleteConfFileFromNodeGroup.__call__(DeleteConfFileFromNodeGroup(self.api), auth, stale_conf_file, self['nodegroup_id'])
+                DeleteConfFileFromNodeGroup.__call__(DeleteConfFileFromNodeGroup(self.api), 
+                                                     auth, stale_conf_file, self['nodegroup_id'])
 
 
 class NodeGroups(Table):
@@ -92,7 +94,7 @@ class NodeGroups(Table):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), nodegroup_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), nodegroup_filter)
-                nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'name': strs})
+                nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'groupname': strs})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "OR")
             elif isinstance(nodegroup_filter, dict):
                 nodegroup_filter = Filter(NodeGroup.fields, nodegroup_filter)

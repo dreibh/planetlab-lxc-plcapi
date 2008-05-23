@@ -127,7 +127,7 @@ class GetSlivers(Method):
         'node_id': Node.fields['node_id'],
         'hostname': Node.fields['hostname'],
         'networks': [Interface.fields],
-        'groups': [NodeGroup.fields['name']],
+        'groups': [NodeGroup.fields['groupname']],
         'conf_files': [ConfFile.fields],
 	'initscripts': [InitScript.fields],
         'slivers': [{

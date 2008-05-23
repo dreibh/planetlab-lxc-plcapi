@@ -137,8 +137,8 @@ def random_key(key_types):
 
 def random_nodegroup():
     return {
-        'name': randstr(50),
-        'description': randstr(200),
+        'groupname': randstr(50),
+#        'description': randstr(200),
         }
 
 def random_node(boot_states):

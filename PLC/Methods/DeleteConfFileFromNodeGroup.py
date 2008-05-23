@@ -19,7 +19,7 @@ class DeleteConfFileFromNodeGroup(Method):
         Auth(),
         ConfFile.fields['conf_file_id'],
         Mixed(NodeGroup.fields['nodegroup_id'],
-              NodeGroup.fields['name'])
+              NodeGroup.fields['groupname'])
         ]
 
     returns = Parameter(int, '1 if successful')

@@ -24,6 +24,8 @@ Method
 NetworkMethods
 NetworkTypes
 NodeGroups
+NodeTagTypes
+NodeTags
 Nodes
 PCUProtocolTypes
 PCUTypes

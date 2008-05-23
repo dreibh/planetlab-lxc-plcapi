@@ -8,21 +8,22 @@ class DeleteInitScript(Method):
     """
     Deletes an existing initscript.  
     
-    Returns 1 if successfuli, faults otherwise. 
+    Returns 1 if successful, faults otherwise. 
     """
 
     roles = ['admin']
 
     accepts = [
         Auth(),
-        InitScript.fields['initscript_id']
+        Mixed(InitScript.fields['initscript_id'],
+              InitScript.fields['name']),
         ]
 
     returns = Parameter(int, '1 if successful')
     
 
-    def call(self, auth, initscript_id):
-        initscripts = InitScripts(self.api, [initscript_id])
+    def call(self, auth, initscript_id_or_name):
+        initscripts = InitScripts(self.api, [initscript_id_or_name])
         if not initscripts:
             raise PLCInvalidArgument, "No such initscript"
 

@@ -39,7 +39,9 @@ class Node(Row):
     table_name = 'nodes'
     primary_key = 'node_id'
     # Thierry -- we use delete on interfaces so the related InterfaceSettings get deleted too
-    join_tables = ['nodegroup_node', 'conf_file_node', 'pcu_node', 'slice_node', 'slice_attribute', 'node_session', 'peer_node','node_slice_whitelist']
+    join_tables = [ 'slice_node', 'peer_node', 'slice_attribute', 
+                    'node_session', 'node_slice_whitelist', 
+                    'node_tag', 'conf_file_node', 'pcu_node', ]
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
