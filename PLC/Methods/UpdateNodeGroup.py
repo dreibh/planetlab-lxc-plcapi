@@ -6,7 +6,7 @@ from PLC.Auth import Auth
 
 related_fields = NodeGroup.related_fields.keys()
 can_update = lambda (field, value): field in \
-             ['name', 'description'] + \
+             ['groupname', 'tagname','tagvalue'] + \
 	     related_fields
 
 class UpdateNodeGroup(Method):
