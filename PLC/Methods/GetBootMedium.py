@@ -228,7 +228,7 @@ class GetBootMedium(Method):
             return (pldistro,arch)
 
         known_archs = [ 'i386', 'x86_64' ]
-        nodegroupnames = [ ng['name'] for ng in NodeGroups (self.api, node['nodegroup_ids'],['name'])]
+        nodegroupnames = [ ng['groupname'] for ng in NodeGroups (self.api, node['nodegroup_ids'],['groupname'])]
         # (1) if groupname == arch, nodefamily becomes pldistro-groupname
         # (2) else if groupname looks like pldistro-arch, it is taken as a nodefamily
         # (3) otherwise groupname is taken as an extension
