@@ -50,7 +50,7 @@ class DeleteInterfaceSetting(Method):
             raise PLCInvalidArgument, "No such interface %r"%interface_setting['interface_id']
         interface = interfaces[0]
 
-        assert interface_setting['interface_setting_id'] in interface['setting_ids']
+        assert interface_setting['interface_setting_id'] in interface['interface_setting_ids']
 
 	# check permission : it not admin, is the user affiliated with the right site
 	if 'admin' not in self.caller['roles']:

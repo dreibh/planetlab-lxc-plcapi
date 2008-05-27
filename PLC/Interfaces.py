@@ -65,7 +65,7 @@ class Interface(Row):
         'hostname': Parameter(str, "(Optional) Hostname", nullok = True),
         'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
-        'setting_ids' : Parameter([int], "List of interface settings"),
+        'interface_setting_ids' : Parameter([int], "List of interface settings"),
         }
 
     def validate_method(self, method):

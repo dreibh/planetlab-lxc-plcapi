@@ -500,7 +500,7 @@ CREATE TABLE interface_setting (
 
 CREATE OR REPLACE VIEW interface_settings AS 
 SELECT interface_id,
-array_accum(interface_setting_id) AS setting_ids
+array_accum(interface_setting_id) AS interface_setting_ids
 FROM interface_setting
 GROUP BY interface_id;
 
@@ -534,7 +534,7 @@ interfaces.dns1,
 interfaces.dns2,
 interfaces.bwlimit,
 interfaces.hostname,
-COALESCE((SELECT setting_ids FROM interface_settings WHERE interface_settings.interface_id = interfaces.interface_id), '{}') AS setting_ids
+COALESCE((SELECT interface_setting_ids FROM interface_settings WHERE interface_settings.interface_id = interfaces.interface_id), '{}') AS interface_setting_ids
 FROM interfaces;
 
 --------------------------------------------------------------------------------

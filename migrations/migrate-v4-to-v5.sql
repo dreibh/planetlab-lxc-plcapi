@@ -26,7 +26,7 @@ ALTER TABLE node_interfaces RENAME COLUMN nodenetwork_ids TO interface_ids;
 
 ALTER TABLE nodenetwork_settings RENAME TO interface_settings;
 ALTER TABLE interface_settings RENAME COLUMN nodenetwork_id TO interface_id;
-ALTER TABLE interface_settings RENAME COLUMN nodenetwork_setting_ids TO setting_ids;
+ALTER TABLE interface_settings RENAME COLUMN nodenetwork_setting_ids TO interface_setting_ids;
 
 ALTER TABLE view_nodenetwork_settings RENAME TO view_interface_settings;
 ALTER TABLE view_interface_settings RENAME COLUMN nodenetwork_setting_id TO interface_setting_id;
@@ -35,7 +35,7 @@ ALTER TABLE view_interface_settings RENAME COLUMN nodenetwork_setting_type_id TO
 
 ALTER TABLE view_nodenetworks RENAME TO view_interfaces;
 ALTER TABLE view_interfaces RENAME COLUMN nodenetwork_id TO interface_id;
-ALTER TABLE view_interfaces RENAME COLUMN nodenetwork_setting_ids TO setting_ids;
+ALTER TABLE view_interfaces RENAME COLUMN nodenetwork_setting_ids TO interface_setting_ids;
 
 ALTER TABLE view_nodes RENAME COLUMN nodenetwork_ids TO interface_ids;
 
