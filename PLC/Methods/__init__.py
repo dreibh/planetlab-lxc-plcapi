@@ -5,6 +5,8 @@ AddBootState
 AddConfFile
 AddConfFileToNode
 AddConfFileToNodeGroup
+AddIlink
+AddIlinkType
 AddInitScript
 AddInterface
 AddInterfaceSetting
@@ -50,6 +52,8 @@ DeleteBootState
 DeleteConfFile
 DeleteConfFileFromNode
 DeleteConfFileFromNodeGroup
+DeleteIlink
+DeleteIlinkType
 DeleteInitScript
 DeleteInterface
 DeleteInterfaceSetting
@@ -89,6 +93,8 @@ GetBootStates
 GetConfFiles
 GetEventObjects
 GetEvents
+GetIlinkTypes
+GetIlinks
 GetInitScripts
 GetInterfaceSettingTypes
 GetInterfaceSettings
@@ -148,6 +154,8 @@ SliceUsersList
 UpdateAddress
 UpdateAddressType
 UpdateConfFile
+UpdateIlink
+UpdateIlinkType
 UpdateInitScript
 UpdateInterface
 UpdateInterfaceSetting

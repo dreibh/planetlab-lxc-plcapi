@@ -328,6 +328,158 @@ INNER JOIN node_tag_types USING (node_tag_type_id)
 INNER JOIN nodes USING (node_id);
 
 --------------------------------------------------------------------------------
+-- (network) interfaces
+--------------------------------------------------------------------------------
+
+-- Valid network addressing schemes
+CREATE TABLE network_types (
+    type text PRIMARY KEY -- Addressing scheme
+) WITH OIDS;
+INSERT INTO network_types (type) VALUES ('ipv4');
+
+-- Valid network configuration methods
+CREATE TABLE network_methods (
+    method text PRIMARY KEY -- Configuration method
+) WITH OIDS;
+INSERT INTO network_methods (method) VALUES
+        ('static'), ('dhcp'), ('proxy'), ('tap'), ('ipmi'), ('unknown');
+
+-- Node network interfaces
+CREATE TABLE interfaces (
+    -- Mandatory
+    interface_id serial PRIMARY KEY,			-- Network interface identifier
+    node_id integer REFERENCES nodes NOT NULL,		-- Which node
+    is_primary boolean NOT NULL DEFAULT false,		-- Is the primary interface for this node
+    type text REFERENCES network_types NOT NULL,	-- Addressing scheme
+    method text REFERENCES network_methods NOT NULL,	-- Configuration method
+
+    -- Optional, depending on type and method
+    ip text,						-- IP address
+    mac text,						-- MAC address
+    gateway text,					-- Default gateway address
+    network text,					-- Network address
+    broadcast text,					-- Network broadcast address
+    netmask text,					-- Network mask
+    dns1 text,						-- Primary DNS server
+    dns2 text,						-- Secondary DNS server
+    bwlimit integer,					-- Bandwidth limit in bps
+    hostname text					-- Hostname of this interface
+) WITH OIDS;
+CREATE INDEX interfaces_node_id_idx ON interfaces (node_id);
+
+-- Ordered by primary interface first
+CREATE OR REPLACE VIEW interfaces_ordered AS
+SELECT node_id, interface_id
+FROM interfaces
+ORDER BY is_primary DESC;
+
+-- Network interfaces on each node
+CREATE OR REPLACE VIEW node_interfaces AS
+SELECT node_id,
+array_accum(interface_id) AS interface_ids
+FROM interfaces_ordered
+GROUP BY node_id;
+
+--------------------------------------------------------------------------------
+-- Interface setting types and interfaces settings
+--------------------------------------------------------------------------------
+
+CREATE TABLE interface_setting_types (
+    interface_setting_type_id serial PRIMARY KEY,	-- Setting Type Identifier
+    name text UNIQUE NOT NULL,				-- Setting Name    
+    description text,					-- Optional Description
+    category text NOT NULL DEFAULT 'general',		-- Free text for grouping, e.g. Wifi, or whatever
+    min_role_id integer REFERENCES roles DEFAULT 10	-- minimal role required
+) WITH OIDS;
+
+CREATE TABLE interface_setting (
+    interface_setting_id serial PRIMARY KEY,		-- Interface Setting Identifier
+    interface_id integer REFERENCES interfaces NOT NULL,-- the interface this applies to
+    interface_setting_type_id integer 
+	REFERENCES interface_setting_types NOT NULL,	-- the setting type
+    value text						-- value attached
+) WITH OIDS;
+
+CREATE OR REPLACE VIEW interface_settings AS 
+SELECT interface_id,
+array_accum(interface_setting_id) AS interface_setting_ids
+FROM interface_setting
+GROUP BY interface_id;
+
+CREATE OR REPLACE VIEW view_interface_settings AS
+SELECT
+interface_setting.interface_setting_id,
+interface_setting.interface_id,
+interface_setting_types.interface_setting_type_id,
+interface_setting_types.name,
+interface_setting_types.description,
+interface_setting_types.category,
+interface_setting_types.min_role_id,
+interface_setting.value
+FROM interface_setting
+INNER JOIN interface_setting_types USING (interface_setting_type_id);
+
+CREATE OR REPLACE VIEW view_interfaces AS
+SELECT
+interfaces.interface_id,
+interfaces.node_id,
+interfaces.is_primary,
+interfaces.type,
+interfaces.method,
+interfaces.ip,
+interfaces.mac,
+interfaces.gateway,
+interfaces.network,
+interfaces.broadcast,
+interfaces.netmask,
+interfaces.dns1,
+interfaces.dns2,
+interfaces.bwlimit,
+interfaces.hostname,
+COALESCE((SELECT interface_setting_ids FROM interface_settings WHERE interface_settings.interface_id = interfaces.interface_id), '{}') AS interface_setting_ids
+FROM interfaces;
+
+--------------------------------------------------------------------------------
+-- ilinks : links between interfaces
+--------------------------------------------------------------------------------
+CREATE TABLE ilink_types (
+       ilink_type_id serial PRIMARY KEY,		-- id
+       name text UNIQUE NOT NULL,			-- link name
+       description text,				-- optional description
+       min_role_id integer REFERENCES roles DEFAULT 10 	-- minimal role required
+) WITH OIDS;
+
+CREATE TABLE ilink (
+       ilink_id serial PRIMARY KEY,				-- id
+       ilink_type_id integer REFERENCES ilink_types,		-- id of the ilink type
+       src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
+       dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
+       value text						-- optional value on the link
+) WITH OIDS;
+
+CREATE OR REPLACE VIEW view_ilinks AS
+SELECT * FROM ilink_types 
+INNER JOIN ilink USING (ilink_type_id);
+
+-- expose node_ids ???
+-- -- cannot mention the same table twice in a join ?
+-- -- CREATE OR REPLACE VIEW ilink_src_node AS 
+-- SELECT 
+-- ilink.ilink_type_id,
+-- ilink.src_interface_id,
+-- interfaces.node_id AS src_node_id,
+-- ilink.dst_interface_id
+-- FROM ilink 
+-- INNER JOIN interfaces ON ilink.src_interface_id = interfaces.interface_id;
+-- 
+-- CREATE OR REPLACE VIEW ilink_nodes AS
+-- SELECT 
+-- ilink_src_node.*,
+-- interfaces.node_id as dst_node_id
+-- FROM ilink_src_node
+-- INNER JOIN interfaces ON ilink_src_node.dst_interface_id = interfaces.interface_id;
+
+--------------------------------------------------------------------------------
 -- Node groups
 --------------------------------------------------------------------------------
 
@@ -339,7 +491,7 @@ CREATE TABLE nodegroups (
     tagvalue text NOT NULL				-- with this value attached
 ) WITH OIDS;
 
--- xxx - first rough implem
+-- xxx - first rough implem. similar to former semantics but might be slow
 CREATE OR REPLACE VIEW nodegroup_node AS
 SELECT nodegroup_id, node_id 
 FROM node_tag_types 
@@ -424,118 +576,6 @@ SELECT nodegroup_id,
 array_accum(conf_file_id) AS conf_file_ids
 FROM conf_file_nodegroup
 GROUP BY nodegroup_id;
-
---------------------------------------------------------------------------------
--- Node network interfaces
---------------------------------------------------------------------------------
-
--- Valid network addressing schemes
-CREATE TABLE network_types (
-    type text PRIMARY KEY -- Addressing scheme
-) WITH OIDS;
-INSERT INTO network_types (type) VALUES ('ipv4');
-
--- Valid network configuration methods
-CREATE TABLE network_methods (
-    method text PRIMARY KEY -- Configuration method
-) WITH OIDS;
-INSERT INTO network_methods (method) VALUES
-        ('static'), ('dhcp'), ('proxy'), ('tap'), ('ipmi'), ('unknown');
-
--- Node network interfaces
-CREATE TABLE interfaces (
-    -- Mandatory
-    interface_id serial PRIMARY KEY,			-- Network interface identifier
-    node_id integer REFERENCES nodes NOT NULL,		-- Which node
-    is_primary boolean NOT NULL DEFAULT false,		-- Is the primary interface for this node
-    type text REFERENCES network_types NOT NULL,	-- Addressing scheme
-    method text REFERENCES network_methods NOT NULL,	-- Configuration method
-
-    -- Optional, depending on type and method
-    ip text,						-- IP address
-    mac text,						-- MAC address
-    gateway text,					-- Default gateway address
-    network text,					-- Network address
-    broadcast text,					-- Network broadcast address
-    netmask text,					-- Network mask
-    dns1 text,						-- Primary DNS server
-    dns2 text,						-- Secondary DNS server
-    bwlimit integer,					-- Bandwidth limit in bps
-    hostname text					-- Hostname of this interface
-) WITH OIDS;
-CREATE INDEX interfaces_node_id_idx ON interfaces (node_id);
-
--- Ordered by primary interface first
-CREATE OR REPLACE VIEW interfaces_ordered AS
-SELECT node_id, interface_id
-FROM interfaces
-ORDER BY is_primary DESC;
-
--- Network interfaces on each node
-CREATE OR REPLACE VIEW node_interfaces AS
-SELECT node_id,
-array_accum(interface_id) AS interface_ids
-FROM interfaces_ordered
-GROUP BY node_id;
-
---------------------------------------------------------------------------------
--- Interface setting types and interfaces settings
---------------------------------------------------------------------------------
-
-CREATE TABLE interface_setting_types (
-    interface_setting_type_id serial PRIMARY KEY,	-- Setting Type Identifier
-    name text UNIQUE NOT NULL,				-- Setting Name    
-    description text,					-- Optional Description
-    category text NOT NULL DEFAULT 'general',		-- Free text for grouping, e.g. Wifi, or whatever
-    min_role_id integer REFERENCES roles DEFAULT 10	-- If set, minimal role required
-) WITH OIDS;
-
-CREATE TABLE interface_setting (
-    interface_setting_id serial PRIMARY KEY,		-- Interface Setting Identifier
-    interface_id integer REFERENCES interfaces NOT NULL,-- the interface this applies to
-    interface_setting_type_id integer 
-	REFERENCES interface_setting_types NOT NULL,	-- the setting type
-    value text						-- value attached
-) WITH OIDS;
-
-CREATE OR REPLACE VIEW interface_settings AS 
-SELECT interface_id,
-array_accum(interface_setting_id) AS interface_setting_ids
-FROM interface_setting
-GROUP BY interface_id;
-
-CREATE OR REPLACE VIEW view_interface_settings AS
-SELECT
-interface_setting.interface_setting_id,
-interface_setting.interface_id,
-interface_setting_types.interface_setting_type_id,
-interface_setting_types.name,
-interface_setting_types.description,
-interface_setting_types.category,
-interface_setting_types.min_role_id,
-interface_setting.value
-FROM interface_setting
-INNER JOIN interface_setting_types USING (interface_setting_type_id);
-
-CREATE OR REPLACE VIEW view_interfaces AS
-SELECT
-interfaces.interface_id,
-interfaces.node_id,
-interfaces.is_primary,
-interfaces.type,
-interfaces.method,
-interfaces.ip,
-interfaces.mac,
-interfaces.gateway,
-interfaces.network,
-interfaces.broadcast,
-interfaces.netmask,
-interfaces.dns1,
-interfaces.dns2,
-interfaces.bwlimit,
-interfaces.hostname,
-COALESCE((SELECT interface_setting_ids FROM interface_settings WHERE interface_settings.interface_id = interfaces.interface_id), '{}') AS interface_setting_ids
-FROM interfaces;
 
 --------------------------------------------------------------------------------
 -- Power control units (PCUs)

@@ -51,7 +51,7 @@ index: $(init)
 index-clean:
 	rm $(init)
 
-####################
+#################### regenerate indexes - not used by the build, as both files are svn added - please update as appropriate
 # All .py files in PLC/
 
 # the current content of __init__.py

@@ -12,7 +12,6 @@ from PLC.NodeTagTypes import NodeTagType, NodeTagTypes
 from PLC.NodeTags import NodeTag, NodeTags
 from PLC.Nodes import Node, Nodes
 
-from PLC.Nodes import Nodes
 from PLC.Sites import Sites
 
 class AddNodeTag(Method):

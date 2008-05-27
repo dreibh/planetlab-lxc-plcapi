@@ -13,6 +13,8 @@ Events
 Faults
 Filter
 GPG
+IlinkTypes
+Ilinks
 InitScripts
 InterfaceSettingTypes
 InterfaceSettings
