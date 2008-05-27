@@ -55,23 +55,15 @@ through Apache mod_python.
 
 %build
 # python-pycurl and python-psycopg2 avail. from fedora 5
-# make sure to check build/<pldistro>/plc.pkgs
-if [ "%{distrorelease}" -le 4 ] ; then
-    modules="psycopg2 pycurl"
-else
-    modules=""
-fi
+# we used to ship our own version of psycopg2 and pycurl, for fedora4
+# starting with 5.0, support for these two modules is taken out
+# 
 # Build __init__.py metafiles and PHP API. 
-%{__make} %{?_smp_mflags} subdirs="php php/xmlrpc" modules="$modules"
+%{__make} %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-if [ "%{distrorelease}" -le 4 ] ; then
-    modules="psycopg2 pycurl"
-else
-    modules=""
-fi
-%{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}" modules="$modules"
+%{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}"
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}

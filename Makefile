@@ -10,37 +10,24 @@
 # Metafiles
 init := PLC/__init__.py PLC/Methods/__init__.py
 
-# Python modules
-# see PLCAPI.spec for the settings of modules
-# default is : no extra module get built
+# python-pycurl and python-psycopg2 avail. from fedora 5
+# we used to ship our own version of psycopg2 and pycurl, for fedora4
+# starting with 5.0, support for these two modules is taken out
 
-## Temporarily until we can kill the Fedora Core 2 build
-#curl_vernum := $(shell printf %d 0x$(shell curl-config --vernum))
-#pycurl_vernum := $(shell printf %d 0x070d01) # 7.13.1
-#pycurl_incompatnum := $(shell printf %d 0x071000) # 7.16.0
-#ifeq ($(shell test $(curl_vernum) -ge $(pycurl_vernum) && echo 1),1)
-#ifeq ($(shell test $(curl_vernum) -ge $(pycurl_incompatnum) && echo 0),1)
-#modules += pycurl
-#endif
-#endif
-
-modules-install := $(foreach module, $(modules), $(module)-install)
-modules-clean := $(foreach module, $(modules), $(module)-clean)
-
-# Other stuff
-subdirs := doc php php/xmlrpc
+# Other stuff - doc not implicit, it's redone by myplc-docs
+subdirs := php php/xmlrpc
 
 # autoconf compatible variables
-DESTDIR := /plc/root
+DESTDIR := /
 datadir := /usr/share
 bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: $(init) $(subdirs) $(modules)
+all: $(init) $(subdirs) 
 	python setup.py build
 
-install: $(modules-install)
+install: 
 	python setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
@@ -48,25 +35,12 @@ install: $(modules-install)
 	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
 	install -D -m 755 refresh-peer.py $(DESTDIR)/$(bindir)/refresh-peer.py
 
-$(subdirs): $(init) $(modules)
+$(subdirs): $(init)
 
 $(subdirs): %:
 	$(MAKE) -C $@
 
-$(modules):
-        # Install in the current directory so that we can import it while developing
-	cd $@ && \
-	    python setup.py build && \
-	    python setup.py install_lib --install-dir=$(PWD)
-
-$(modules-install): %-install:
-	cd $* && \
-	    python setup.py install_lib --install-dir=$(DESTDIR)/$(datadir)/plc_api
-
-$(modules-clean): %-clean:
-	cd $* && python setup.py clean && rm -rf build
-
-clean: $(modules-clean)
+clean: 
 	find . -name '*.pyc' | xargs rm -f
 	rm -f $(INIT)
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
@@ -76,30 +50,6 @@ index: $(init)
 
 index-clean:
 	rm $(init)
-
-tags:
-	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile ')' | xargs etags
-
-########## make sync PLCHOST=hostname
-ifdef PLCHOST
-ifdef VSERVER
-PLCSSH:=root@$(PLCHOST):/vservers/$(VSERVER)
-endif
-endif
-
-LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
-RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
-RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
-RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
-
-sync:
-ifeq (,$(PLCSSH))
-	echo "sync: You must define PLCHOST and VSERVER on the command line"
-	echo " e.g. make sync PLCHOST=private.one-lab.org VSERVER=myplc01" ; exit 1
-else
-	+$(RSYNC) PLC planetlab5.sql migrations $(PLCSSH)/usr/share/plc_api/
-	ssh root@$(PLCHOST) vserver $(VSERVER) exec apachectl graceful
-endif
 
 ####################
 # All .py files in PLC/
@@ -131,7 +81,32 @@ PLC/Methods/__init__.py:
 
 force:
 
-.PHONY: all install force clean index tags $(subdirs) $(modules)
+.PHONY: all install force clean index tags $(subdirs)
+
+#################### devel tools
+tags:
+	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile ')' | xargs etags
+
+########## make sync PLCHOST=hostname
+ifdef PLCHOST
+ifdef VSERVER
+PLCSSH:=root@$(PLCHOST):/vservers/$(VSERVER)
+endif
+endif
+
+LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
+RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
+RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
+RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
+
+sync:
+ifeq (,$(PLCSSH))
+	echo "sync: You must define PLCHOST and VSERVER on the command line"
+	echo " e.g. make sync PLCHOST=private.one-lab.org VSERVER=myplc01" ; exit 1
+else
+	+$(RSYNC) PLC planetlab5.sql migrations $(PLCSSH)/usr/share/plc_api/
+	ssh root@$(PLCHOST) vserver $(VSERVER) exec apachectl graceful
+endif
 
 #################### convenience, for debugging only
 # make +foo : prints the value of $(foo)
