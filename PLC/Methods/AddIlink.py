@@ -8,7 +8,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
-from PLC.IlinkTypes import IlinkType, IlinkTypes
+from PLC.LinkTypes import LinkType, LinkTypes
 from PLC.Ilinks import Ilink, Ilinks
 from PLC.Interfaces import Interface, Interfaces
 
@@ -31,14 +31,14 @@ class AddIlink(Method):
         # refer to either the id or the type name
         Ilink.fields['src_interface_id'],
         Ilink.fields['dst_interface_id'],
-        Mixed(IlinkType.fields['ilink_type_id'],
-              IlinkType.fields['name']),
+        Mixed(LinkType.fields['link_type_id'],
+              LinkType.fields['name']),
         Ilink.fields['value'],
         ]
 
     returns = Parameter(int, 'New ilink_id (> 0) if successful')
 
-    def call(self, auth,  src_if_id, dst_if_id, ilink_type_id_or_name, value):
+    def call(self, auth,  src_if_id, dst_if_id, link_type_id_or_name, value):
 
         src_if = Interfaces (self.api, [src_if_id],[interface_id])
         if not src_if:
@@ -47,21 +47,21 @@ class AddIlink(Method):
         if not dst_if:
             raise PLCInvalidArgument, "No such destination interface %r"%dst_if_id
 
-        ilink_types = IlinkTypes(self.api, [ilink_type_id_or_name])
-        if not ilink_types:
-            raise PLCInvalidArgument, "No such ilink type %r"%ilink_type_id_or_name
-        ilink_type = ilink_types[0]
+        link_types = LinkTypes(self.api, [link_type_id_or_name])
+        if not link_types:
+            raise PLCInvalidArgument, "No such ilink type %r"%link_type_id_or_name
+        link_type = link_types[0]
 
 	# checks for existence - with the same type
         conflicts = Ilinks(self.api,
-                           {'ilink_type_id':ilink_type['ilink_type_id'],
+                           {'link_type_id':link_type['link_type_id'],
                             'src_interface_id':src_if_id,
                             'dst_interface_id':dst_if_id,})
 
         if len(conflicts) :
             ilink=conflicts[0]
             raise PLCInvalidArgument, "Ilink (%s,%d,%d) already exists and has value %r"\
-                %(ilink_type['name'],src_if_id,dst_if_id,ilink['value'])
+                %(link_type['name'],src_if_id,dst_if_id,ilink['value'])
 
 	if 'admin' not in self.caller['roles']:
 #	# check permission : it not admin, is the user affiliated with the right site(s) ????
@@ -73,13 +73,13 @@ class AddIlink(Method):
 #	    if self.caller['person_id'] not in site['person_ids']:
 #		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
 	    
-	    required_min_role = ilink_type ['min_role_id']
+	    required_min_role = link_type ['min_role_id']
 	    if required_min_role is not None and \
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role
 
         ilink = Ilink(self.api)
-        ilink['ilink_type_id'] = ilink_type['ilink_type_id']
+        ilink['link_type_id'] = link_type['link_type_id']
         ilink['src_interface_id'] = src_if_id
         ilink['dst_interface_id'] = dst_if_id
         ilink['value'] = value

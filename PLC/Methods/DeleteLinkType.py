@@ -6,10 +6,10 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.IlinkTypes import IlinkType, IlinkTypes
+from PLC.LinkTypes import LinkType, LinkTypes
 from PLC.Auth import Auth
 
-class DeleteIlinkType(Method):
+class DeleteLinkType(Method):
     """
     Deletes the specified ilink type.
 
@@ -20,20 +20,20 @@ class DeleteIlinkType(Method):
 
     accepts = [
         Auth(),
-        Mixed(IlinkType.fields['ilink_type_id'],
-              IlinkType.fields['name']),
+        Mixed(LinkType.fields['link_type_id'],
+              LinkType.fields['name']),
         ]
 
     returns = Parameter(int, '1 if successful')
 
 
-    def call(self, auth, ilink_type_id_or_name):
-        ilink_types = IlinkTypes(self.api, [ilink_type_id_or_name])
-        if not ilink_types:
+    def call(self, auth, link_type_id_or_name):
+        link_types = LinkTypes(self.api, [link_type_id_or_name])
+        if not link_types:
             raise PLCInvalidArgument, "No such ilink type"
-        ilink_type = ilink_types[0]
+        link_type = link_types[0]
 
-        ilink_type.delete()
-	self.object_ids = [ilink_type['ilink_type_id']]
+        link_type.delete()
+	self.object_ids = [link_type['link_type_id']]
 
         return 1

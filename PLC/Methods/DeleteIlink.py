@@ -62,7 +62,7 @@ class DeleteIlink(Method):
 	    if self.caller['person_id'] not in site['person_ids']:
 		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
 	    
-	    required_min_role = ilink_type ['min_role_id']
+	    required_min_role = link_type ['min_role_id']
 	    if required_min_role is not None and \
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role

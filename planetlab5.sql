@@ -442,8 +442,8 @@ FROM interfaces;
 --------------------------------------------------------------------------------
 -- ilinks : links between interfaces
 --------------------------------------------------------------------------------
-CREATE TABLE ilink_types (
-       ilink_type_id serial PRIMARY KEY,		-- id
+CREATE TABLE link_types (
+       link_type_id serial PRIMARY KEY,		-- id
        name text UNIQUE NOT NULL,			-- link name
        description text,				-- optional description
        min_role_id integer REFERENCES roles DEFAULT 10 	-- minimal role required
@@ -451,21 +451,21 @@ CREATE TABLE ilink_types (
 
 CREATE TABLE ilink (
        ilink_id serial PRIMARY KEY,				-- id
-       ilink_type_id integer REFERENCES ilink_types,		-- id of the ilink type
+       link_type_id integer REFERENCES link_types,		-- id of the ilink type
        src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
        dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
        value text						-- optional value on the link
 ) WITH OIDS;
 
 CREATE OR REPLACE VIEW view_ilinks AS
-SELECT * FROM ilink_types 
-INNER JOIN ilink USING (ilink_type_id);
+SELECT * FROM link_types 
+INNER JOIN ilink USING (link_type_id);
 
 -- expose node_ids ???
 -- -- cannot mention the same table twice in a join ?
 -- -- CREATE OR REPLACE VIEW ilink_src_node AS 
 -- SELECT 
--- ilink.ilink_type_id,
+-- ilink.link_type_id,
 -- ilink.src_interface_id,
 -- interfaces.node_id AS src_node_id,
 -- ilink.dst_interface_id
