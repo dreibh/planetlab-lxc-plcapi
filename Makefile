@@ -33,7 +33,6 @@ install:
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
-	install -D -m 755 refresh-peer.py $(DESTDIR)/$(bindir)/refresh-peer.py
 
 $(subdirs): $(init)
 

@@ -87,7 +87,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/plcsh
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
-%{_bindir}/refresh-peer.py*
 
 %changelog
 * Wed May 14 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-8
