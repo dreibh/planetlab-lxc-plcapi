@@ -1,8 +1,11 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import Auth
+
+from PLC.NodeGroups import NodeGroup, NodeGroups
+from PLC.NodeTagTypes import NodeTagType, NodeTagTypes
+from PLC.NodeTags import NodeTag, NodeTags
 
 can_update = lambda (field, value): field in NodeGroup.fields.keys() and field != NodeGroup.primary_field
 
@@ -20,14 +23,25 @@ class AddNodeGroup(Method):
 
     accepts = [
         Auth(),
-        nodegroup_fields
+        NodeGroup.fields['groupname'],
+        Mixed(NodeTagType.fields['node_tag_type_id'],
+              NodeTagType.fields['tagname']),
+        NodeTag.fields['tagvalue'],
         ]
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
 
 
-    def call(self, auth, nodegroup_fields):
-        nodegroup_fields = dict([f for f in nodegroup_fields.items() if can_update(f)])
+    def call(self, auth, groupname, node_tag_type_id_or_tagname, tagvalue):
+        # locate tag type
+        tag_types = NodeTagTypes (self.api,node_tag_type_id_or_tagname)
+        if not(tag_types):
+            raise PLCInvalidArgument, "No such tag type %r"%node_tag_type_id_or_tagname
+        tag_type=tag_types[0]
+
+        nodegroup_fields = { 'groupname' : groupname,
+                             'node_tag_type_id' : tag_type['node_tag_type_id'],
+                             'tagvalue' : tagvalue }
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup.sync()
 
