@@ -38,7 +38,6 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    # Thierry -- we use delete on interfaces so the related InterfaceSettings get deleted too
     join_tables = [ 'slice_node', 'peer_node', 'slice_attribute', 
                     'node_session', 'node_slice_whitelist', 
                     'node_tag', 'conf_file_node', 'pcu_node', ]
@@ -57,7 +56,6 @@ class Node(Row):
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
         'interface_ids': Parameter([int], "List of network interfaces that this node has"),
-        'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
         'slice_ids': Parameter([int], "List of slices on this node"),
@@ -67,6 +65,7 @@ class Node(Row):
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
         'peer_node_id': Parameter(int, "Foreign node identifier at peer", nullok = True),
         'tag_ids' : Parameter ([int], "List of tags attached to this node"),
+        'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         }
     related_fields = {
 	'interfaces': [Mixed(Parameter(int, "Interface identifier"),
@@ -148,38 +147,6 @@ class Node(Row):
             for stale_interface in stale_interfaces:
                 DeleteInterface.__call__(DeleteInterface(self.api), auth, stale_interface['interface_id'])
 
-    def associate_nodegroups(self, auth, field, value):
-	"""
-	Add node to nodegroups found in value list (AddNodeToNodegroup)
-	Delete node from nodegroup not found in value list (DeleteNodeFromNodegroup)
-	"""
-	
-	from PLC.NodeGroups import NodeGroups
-	
-	assert 'nodegroup_ids' in self
-	assert 'node_id' in self
-	assert isinstance(value, list)
-
-	(nodegroup_ids, nodegroup_names) = self.separate_types(value)[0:2]
-	
-	if nodegroup_names:
-	    nodegroups = NodeGroups(self.api, nodegroup_names, ['nodegroup_id']).dict('nodegroup_id')
-	    nodegroup_ids += nodegroups.keys()
-
-	if self['nodegroup_ids'] != nodegroup_ids:
-	    from PLC.Methods.AddNodeToNodeGroup import AddNodeToNodeGroup
-	    from PLC.Methods.DeleteNodeFromNodeGroup import DeleteNodeFromNodeGroup
-	
-	    new_nodegroups = set(nodegroup_ids).difference(self['nodegroup_ids'])
-	    stale_nodegroups = set(self['nodegroup_ids']).difference(nodegroup_ids)
-	
-	    for new_nodegroup in new_nodegroups:
-		AddNodeToNodeGroup.__call__(AddNodeToNodeGroup(self.api), auth, self['node_id'], new_nodegroup)
-	    for stale_nodegroup in stale_nodegroups:
-		DeleteNodeFromNodeGroup.__call__(DeleteNodeFromNodeGroup(self.api), auth, self['node_id'], stale_nodegroup)
-	  
-
- 
     def associate_conf_files(self, auth, field, value):
 	"""
 	Add conf_files found in value list (AddConfFileToNode)
@@ -203,7 +170,6 @@ class Node(Row):
 	    for stale_conf_file in stale_conf_files:
 		DeleteConfFileFromNode.__call__(DeleteConfFileFromNode(self.api), auth, stale_conf_file, self['node_id'])
 
- 
     def associate_slices(self, auth, field, value):
 	"""
 	Add slices found in value list to (AddSliceToNode)
