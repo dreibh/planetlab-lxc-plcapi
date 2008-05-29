@@ -86,7 +86,9 @@ force:
 tags:
 	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile ')' | xargs etags
 
-########## make sync PLCHOST=hostname
+.PHONY: tags
+
+########## make sync PLCHOST=hostname VSERVER=vservername
 ifdef PLCHOST
 ifdef VSERVER
 PLCSSH:=root@$(PLCHOST):/vservers/$(VSERVER)
