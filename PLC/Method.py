@@ -91,7 +91,7 @@ class Method:
 	
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
-
+	
             if self.api.config.PLC_API_DEBUG or hasattr(self, 'message'):
 		self.log(None, runtime, *args)
 	    	
@@ -108,8 +108,11 @@ class Method:
             # Prepend caller and method name to expected faults
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
 	    runtime = time.time() - start
-	    self.log(fault, runtime, *args)
-            raise fault
+	    
+	    if self.api.config.PLC_API_DEBUG:
+		self.log(fault, runtime, *args)
+            
+	    raise fault
 
     def log(self, fault, runtime, *args):
         """
