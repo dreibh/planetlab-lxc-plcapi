@@ -15,7 +15,7 @@ class UpdateNodeGroup(Method):
 
     roles = ['admin']
 
-    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items())
+    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
 
     accepts = [
         Auth(),
