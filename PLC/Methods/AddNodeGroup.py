@@ -34,7 +34,7 @@ class AddNodeGroup(Method):
 
     def call(self, auth, groupname, node_tag_type_id_or_tagname, tagvalue):
         # locate tag type
-        tag_types = NodeTagTypes (self.api,node_tag_type_id_or_tagname)
+        tag_types = NodeTagTypes (self.api,[node_tag_type_id_or_tagname])
         if not(tag_types):
             raise PLCInvalidArgument, "No such tag type %r"%node_tag_type_id_or_tagname
         tag_type=tag_types[0]
