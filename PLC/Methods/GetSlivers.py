@@ -168,7 +168,7 @@ class GetSlivers(Method):
         networks = Interfaces(self.api, node['interface_ids'])
 
         # Get node group information
-        nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('name')
+        nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('groupname')
         groups = nodegroups.keys()
 
         # Get all (enabled) configuration files
