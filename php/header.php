@@ -117,7 +117,7 @@ class PLCAPI
     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
 
     // Set some miscellaneous options
-    curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 180);
 
     // Get the output of the request
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
