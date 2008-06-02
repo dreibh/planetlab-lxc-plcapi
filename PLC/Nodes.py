@@ -128,12 +128,12 @@ class Node(Row):
 
     def associate_interfaces(self, auth, field, value):
 	"""
-	Delete interfaces not found in value list (using DeleteNodeNetwor)k	
+	Delete interfaces not found in value list (using DeleteInterface)	
 	Add interfaces found in value list (using AddInterface)
 	Updates interfaces found w/ interface_id in value list (using UpdateInterface) 
 	"""
 
-	assert 'interfacep_ids' in self
+	assert 'interface_ids' in self
         assert 'node_id' in self
         assert isinstance(value, list)
 

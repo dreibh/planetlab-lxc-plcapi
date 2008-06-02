@@ -7,7 +7,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
-from PLC.InterfaceSettingTypes import InterfaceSettingType, InterfaceSettingTypes
+from PLC.TagTypes import TagType, TagTypes
 
 class InterfaceSetting(Row):
     """
@@ -20,11 +20,11 @@ class InterfaceSetting(Row):
     fields = {
         'interface_setting_id': Parameter(int, "Interface setting identifier"),
         'interface_id': Parameter(int, "Interface identifier"),
-        'interface_setting_type_id': InterfaceSettingType.fields['interface_setting_type_id'],
-        'name': InterfaceSettingType.fields['name'],
-        'description': InterfaceSettingType.fields['description'],
-        'category': InterfaceSettingType.fields['category'],
-        'min_role_id': InterfaceSettingType.fields['min_role_id'],
+        'tag_type_id': TagType.fields['tag_type_id'],
+        'tagname': TagType.fields['tagname'],
+        'description': TagType.fields['description'],
+        'category': TagType.fields['category'],
+        'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Interface setting value"),
 	### relations
 	

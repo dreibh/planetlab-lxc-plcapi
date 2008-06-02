@@ -186,7 +186,7 @@ class SliceGetTicket(GetSliceTicket):
                 attribute_name = value_name = name
                 type = "string"
 
-            # <resource name="slice_attribute_type">
+            # <resource name="tag_type">
             xml.startElement('resource', {'name': unicode(attribute_name)})
 
             # <value name="element_name" type="element_type">

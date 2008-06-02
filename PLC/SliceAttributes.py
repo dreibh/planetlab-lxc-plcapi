@@ -2,7 +2,7 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
-from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
+from PLC.TagTypes import TagType, TagTypes
 
 class SliceAttribute(Row):
     """
@@ -17,10 +17,11 @@ class SliceAttribute(Row):
         'slice_id': Parameter(int, "Slice identifier"),
         'node_id': Parameter(int, "Node identifier, if a sliver attribute"),
 	'nodegroup_id': Parameter(int, "Nodegroup identifier, if a sliver attribute"),
-        'attribute_type_id': SliceAttributeType.fields['attribute_type_id'],
-        'name': SliceAttributeType.fields['name'],
-        'description': SliceAttributeType.fields['description'],
-        'min_role_id': SliceAttributeType.fields['min_role_id'],
+        'tag_type_id': TagType.fields['tag_type_id'],
+        'tagname': TagType.fields['tagname'],
+        'description': TagType.fields['description'],
+        'category': TagType.fields['category'],
+        'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Slice attribute value"),
         }
 

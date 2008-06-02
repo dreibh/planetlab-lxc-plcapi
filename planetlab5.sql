@@ -290,9 +290,9 @@ GROUP BY site_id;
 --------------------------------------------------------------------------------
 -- node tags
 --------------------------------------------------------------------------------
-CREATE TABLE node_tag_types (
+CREATE TABLE tag_types (
 
-    node_tag_type_id serial PRIMARY KEY,		-- ID
+    tag_type_id serial PRIMARY KEY,			-- ID
     tagname text UNIQUE NOT NULL,			-- Tag Name
     description text,					-- Optional Description
     category text NOT NULL DEFAULT 'general',		-- Free text for grouping tags together
@@ -302,7 +302,7 @@ CREATE TABLE node_tag_types (
 CREATE TABLE node_tag (
     node_tag_id serial PRIMARY KEY,			-- ID
     node_id integer REFERENCES nodes NOT NULL,		-- node id
-    node_tag_type_id integer REFERENCES node_tag_types, -- tag type id
+    tag_type_id integer REFERENCES tag_types,		-- tag type id
     tagvalue text					-- value attached
 ) WITH OIDS;
 
@@ -317,14 +317,14 @@ SELECT
 node_tag.node_tag_id,
 node_tag.node_id,
 nodes.hostname,
-node_tag_types.node_tag_type_id,
-node_tag_types.tagname,
-node_tag_types.description,
-node_tag_types.category,
-node_tag_types.min_role_id,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
 node_tag.tagvalue
 FROM node_tag 
-INNER JOIN node_tag_types USING (node_tag_type_id)
+INNER JOIN tag_types USING (tag_type_id)
 INNER JOIN nodes USING (node_id);
 
 --------------------------------------------------------------------------------
@@ -381,22 +381,13 @@ FROM interfaces_ordered
 GROUP BY node_id;
 
 --------------------------------------------------------------------------------
--- Interface setting types and interfaces settings
+-- Interface settings
 --------------------------------------------------------------------------------
-
-CREATE TABLE interface_setting_types (
-    interface_setting_type_id serial PRIMARY KEY,	-- Setting Type Identifier
-    name text UNIQUE NOT NULL,				-- Setting Name    
-    description text,					-- Optional Description
-    category text NOT NULL DEFAULT 'general',		-- Free text for grouping, e.g. Wifi, or whatever
-    min_role_id integer REFERENCES roles DEFAULT 10	-- minimal role required
-) WITH OIDS;
 
 CREATE TABLE interface_setting (
     interface_setting_id serial PRIMARY KEY,		-- Interface Setting Identifier
     interface_id integer REFERENCES interfaces NOT NULL,-- the interface this applies to
-    interface_setting_type_id integer 
-	REFERENCES interface_setting_types NOT NULL,	-- the setting type
+    tag_type_id integer REFERENCES tag_types NOT NULL,	-- the setting type
     value text						-- value attached
 ) WITH OIDS;
 
@@ -410,14 +401,14 @@ CREATE OR REPLACE VIEW view_interface_settings AS
 SELECT
 interface_setting.interface_setting_id,
 interface_setting.interface_id,
-interface_setting_types.interface_setting_type_id,
-interface_setting_types.name,
-interface_setting_types.description,
-interface_setting_types.category,
-interface_setting_types.min_role_id,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
 interface_setting.value
 FROM interface_setting
-INNER JOIN interface_setting_types USING (interface_setting_type_id);
+INNER JOIN tag_types USING (tag_type_id);
 
 CREATE OR REPLACE VIEW view_interfaces AS
 SELECT
@@ -442,30 +433,23 @@ FROM interfaces;
 --------------------------------------------------------------------------------
 -- ilinks : links between interfaces
 --------------------------------------------------------------------------------
-CREATE TABLE link_types (
-       link_type_id serial PRIMARY KEY,		-- id
-       name text UNIQUE NOT NULL,			-- link name
-       description text,				-- optional description
-       min_role_id integer REFERENCES roles DEFAULT 10 	-- minimal role required
-) WITH OIDS;
-
 CREATE TABLE ilink (
        ilink_id serial PRIMARY KEY,				-- id
-       link_type_id integer REFERENCES link_types,		-- id of the ilink type
+       tag_type_id integer REFERENCES tag_types,		-- id of the tag type
        src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
        dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
        value text						-- optional value on the link
 ) WITH OIDS;
 
 CREATE OR REPLACE VIEW view_ilinks AS
-SELECT * FROM link_types 
-INNER JOIN ilink USING (link_type_id);
+SELECT * FROM tag_types 
+INNER JOIN ilink USING (tag_type_id);
 
 -- expose node_ids ???
 -- -- cannot mention the same table twice in a join ?
 -- -- CREATE OR REPLACE VIEW ilink_src_node AS 
 -- SELECT 
--- ilink.link_type_id,
+-- ilink.tag_type_id,
 -- ilink.src_interface_id,
 -- interfaces.node_id AS src_node_id,
 -- ilink.dst_interface_id
@@ -485,20 +469,20 @@ INNER JOIN ilink USING (link_type_id);
 
 -- Node groups
 CREATE TABLE nodegroups (
-    nodegroup_id serial PRIMARY KEY,			-- Group identifier
-    groupname text UNIQUE NOT NULL,			-- Group name 
-    node_tag_type_id integer REFERENCES node_tag_types,	-- node is in nodegroup if it has this tag defined
-    tagvalue text NOT NULL				-- with this value attached
+    nodegroup_id serial PRIMARY KEY,		-- Group identifier
+    groupname text UNIQUE NOT NULL,		-- Group name 
+    tag_type_id integer REFERENCES tag_types,	-- node is in nodegroup if it has this tag defined
+    tagvalue text NOT NULL			-- with this value attached
 ) WITH OIDS;
 
 -- xxx - first rough implem. similar to former semantics but might be slow
 CREATE OR REPLACE VIEW nodegroup_node AS
 SELECT nodegroup_id, node_id 
-FROM node_tag_types 
+FROM tag_types 
 JOIN node_tag 
-USING (node_tag_type_id) 
+USING (tag_type_id) 
 JOIN nodegroups 
-USING (node_tag_type_id,tagvalue);
+USING (tag_type_id,tagvalue);
 
 CREATE OR REPLACE VIEW nodegroup_nodes AS
 SELECT nodegroup_id,
@@ -746,23 +730,13 @@ GROUP BY node_id;
 -- Slice attributes
 --------------------------------------------------------------------------------
 
--- Slice attribute types
-CREATE TABLE slice_attribute_types (
-    attribute_type_id serial PRIMARY KEY,		-- Attribute type identifier
-    name text UNIQUE NOT NULL,				-- Attribute name
-    description text,					-- Attribute description
-    min_role_id integer REFERENCES roles DEFAULT 10	-- If set, minimum (least powerful) role that can 
-							-- set or change this attribute
-) WITH OIDS;
-
 -- Slice/sliver attributes
 CREATE TABLE slice_attribute (
     slice_attribute_id serial PRIMARY KEY,		-- Slice attribute identifier
     slice_id integer REFERENCES slices NOT NULL,	-- Slice identifier
     node_id integer REFERENCES nodes,			-- Sliver attribute if set
     nodegroup_id integer REFERENCES nodegroups,		-- Node group attribute if set
-    attribute_type_id integer				-- Attribute type identifier
-    	REFERENCES slice_attribute_types NOT NULL, 
+    tag_type_id integer REFERENCES tag_types NOT NULL,	-- Attribute type identifier
     value text
 ) WITH OIDS;
 CREATE INDEX slice_attribute_slice_id_idx ON slice_attribute (slice_id);
@@ -1116,14 +1090,14 @@ LEFT JOIN node_session USING (node_id);
 CREATE OR REPLACE VIEW view_nodegroups AS
 SELECT
 nodegroups.*,
-node_tag_types.tagname,
+tag_types.tagname,
 COALESCE((SELECT conf_file_ids FROM nodegroup_conf_files 
 		 WHERE nodegroup_conf_files.nodegroup_id = nodegroups.nodegroup_id), '{}') 
 AS conf_file_ids,
 COALESCE((SELECT node_ids FROM nodegroup_nodes 
 		 WHERE nodegroup_nodes.nodegroup_id = nodegroups.nodegroup_id), '{}') 
 AS node_ids
-FROM nodegroups INNER JOIN node_tag_types USING (node_tag_type_id);
+FROM nodegroups INNER JOIN tag_types USING (tag_type_id);
 
 CREATE OR REPLACE VIEW view_conf_files AS
 SELECT
@@ -1214,13 +1188,14 @@ slice_attribute.slice_attribute_id,
 slice_attribute.slice_id,
 slice_attribute.node_id,
 slice_attribute.nodegroup_id,
-slice_attribute_types.attribute_type_id,
-slice_attribute_types.name,
-slice_attribute_types.description,
-slice_attribute_types.min_role_id,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
 slice_attribute.value
 FROM slice_attribute
-INNER JOIN slice_attribute_types USING (attribute_type_id);
+INNER JOIN tag_types USING (tag_type_id);
 
 CREATE OR REPLACE VIEW view_sessions AS
 SELECT

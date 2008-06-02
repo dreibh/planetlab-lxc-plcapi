@@ -8,7 +8,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Interfaces import Interface, Interfaces
-from PLC.LinkTypes import LinkType, LinkTypes
+from PLC.TagTypes import TagType, TagTypes
 
 class Ilink(Row):
     """
@@ -20,7 +20,7 @@ class Ilink(Row):
     primary_key = 'ilink_id'
     fields = {
         'ilink_id': Parameter(int, "ilink identifier"),
-        'link_type_id': LinkType.fields['link_type_id'],
+        'tag_type_id': TagType.fields['tag_type_id'],
         'src_interface_id': Parameter(int, "source interface identifier"),
         'dst_interface_id': Parameter(int, "destination interface identifier"),
         'value': Parameter( str, "optional ilink value"),

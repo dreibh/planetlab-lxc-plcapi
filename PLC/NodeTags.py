@@ -8,7 +8,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.Nodes import Node, Nodes
-from PLC.NodeTagTypes import NodeTagType, NodeTagTypes
+from PLC.TagTypes import TagType, TagTypes
 
 class NodeTag(Row):
     """
@@ -22,12 +22,12 @@ class NodeTag(Row):
         'node_tag_id': Parameter(int, "Node tag identifier"),
         'node_id': Node.fields['node_id'],
         'hostname' : Node.fields['hostname'],
-        'node_tag_type_id': NodeTagType.fields['node_tag_type_id'],
+        'tag_type_id': TagType.fields['tag_type_id'],
         'tagvalue': Parameter(str, "Node tag value"),
-        'tagname': NodeTagType.fields['tagname'],
-        'description': NodeTagType.fields['description'],
-        'category': NodeTagType.fields['category'],
-        'min_role_id': NodeTagType.fields['min_role_id'],
+        'tagname': TagType.fields['tagname'],
+        'description': TagType.fields['description'],
+        'category': TagType.fields['category'],
+        'min_role_id': TagType.fields['min_role_id'],
         }
 
 class NodeTags(Table):

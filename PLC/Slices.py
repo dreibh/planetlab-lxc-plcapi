@@ -183,12 +183,12 @@ class Slice(Row):
 	    updated_attributes = filter(lambda x: 'slice_attribute_id' in x, attributes)
 
 	    for added_attribute in added_attributes:
-		if 'attribute_type' in added_attribute:
-		    type = added_attribute['attribute_type']
-		elif 'attribute_type_id' in added_attribute:
-		    type = added_attribute['attribute_type_id']
+		if 'tag_type' in added_attribute:
+		    type = added_attribute['tag_type']
+		elif 'tag_type_id' in added_attribute:
+		    type = added_attribute['tag_type_id']
 		else:
-		    raise PLCInvalidArgument, "Must specify attribute_type or attribute_type_id"
+		    raise PLCInvalidArgument, "Must specify tag_type or tag_type_id"
 
 		if 'value' in added_attribute:
 		    value = added_attribute['value']

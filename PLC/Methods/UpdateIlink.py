@@ -18,7 +18,7 @@ class UpdateIlink(Method):
     """
     Updates the value of an existing ilink
 
-    Access rights depend on the ilink type.
+    Access rights depend on the tag type.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -51,7 +51,7 @@ class UpdateIlink(Method):
 #	    if self.caller['person_id'] not in site['person_ids']:
 #		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
 	    
-	    required_min_role = link_type ['min_role_id']
+	    required_min_role = tag_type ['min_role_id']
 	    if required_min_role is not None and \
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role

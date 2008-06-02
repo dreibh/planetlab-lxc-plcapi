@@ -21,7 +21,7 @@ class Role(Row):
 
     table_name = 'roles'
     primary_key = 'role_id'
-    join_tables = ['person_role', ('slice_attribute_types', 'min_role_id')]
+    join_tables = ['person_role', ('tag_types', 'min_role_id')]
     fields = {
         'role_id': Parameter(int, "Role identifier"),
         'name': Parameter(str, "Role", max = 100),

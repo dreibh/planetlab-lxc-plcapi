@@ -54,7 +54,7 @@ class UpdateSliceAttribute(Method):
                min(self.caller['role_ids']) > slice_attribute['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to update the specified attribute"
 	
-	if slice_attribute['name'] in ['initscript']:
+	if slice_attribute['tagname'] in ['initscript']:
             initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
             if not initscripts:
                 raise PLCInvalidArgument, "No such plc initscript"	

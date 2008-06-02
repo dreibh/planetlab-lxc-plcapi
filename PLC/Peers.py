@@ -16,7 +16,7 @@ from PLC.Sites import Site, Sites
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
-from PLC.SliceAttributeTypes import SliceAttributeType, SliceAttributeTypes
+from PLC.TagTypes import TagType, TagTypes
 from PLC.SliceAttributes import SliceAttribute, SliceAttributes
 from PLC.Slices import Slice, Slices
 
@@ -28,8 +28,7 @@ class Peer(Row):
 
     table_name = 'peers'
     primary_key = 'peer_id'
-    join_tables = ['peer_site', 'peer_person', 'peer_key', 'peer_node',
-                   'peer_slice_attribute_type', 'peer_slice_attribute', 'peer_slice']
+    join_tables = ['peer_site', 'peer_person', 'peer_key', 'peer_node', 'peer_slice']
     fields = {
 	'peer_id': Parameter (int, "Peer identifier"),
 	'peername': Parameter (str, "Peer name"),

@@ -140,7 +140,7 @@ class GetSlivers(Method):
                 'key': Key.fields['key']
             }],
             'attributes': [{
-                'name': SliceAttribute.fields['name'],
+                'tagname': SliceAttribute.fields['tagname'],
                 'value': SliceAttribute.fields['value']
             }]
         }]

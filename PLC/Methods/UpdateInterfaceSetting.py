@@ -19,7 +19,7 @@ class UpdateInterfaceSetting(Method):
     """
     Updates the value of an existing interface setting
 
-    Access rights depend on the interface setting type.
+    Access rights depend on the tag type.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -60,7 +60,7 @@ class UpdateInterfaceSetting(Method):
 	    if self.caller['person_id'] not in site['person_ids']:
 		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
 	    
-	    required_min_role = interface_setting_type ['min_role_id']
+	    required_min_role = tag_type ['min_role_id']
 	    if required_min_role is not None and \
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified interface setting, requires role %d",required_min_role
