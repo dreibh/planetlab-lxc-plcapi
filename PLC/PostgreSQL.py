@@ -134,6 +134,15 @@ class PostgreSQL:
         cursor.close()
         return self.rowcount
 
+    def next_id(self, table_name, primary_key):
+	sequence = "%(table_name)s_%(primary_key)s_seq" % locals()	
+	sql = "SELECT nextval('%(sequence)s')" % locals()
+	rows = self.selectall(sql, hashref = False)
+	if rows: 
+	    return rows[0][0]
+		
+	return None 
+
     def last_insert_id(self, table_name, primary_key):
         if isinstance(self.lastrowid, int):
             sql = "SELECT %s FROM %s WHERE oid = %d" % \
