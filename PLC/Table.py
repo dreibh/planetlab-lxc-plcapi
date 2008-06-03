@@ -1,4 +1,4 @@
-from types import StringTypes
+from types import StringTypes, IntType, LongType
 import time
 import calendar
 
@@ -230,6 +230,14 @@ class Row(dict):
         if not self.has_key(self.primary_key) or \
            keys == [self.primary_key] or \
            insert is True:
+	    
+	    # If primary key id is a serial int, get next id
+	    if self.fields[self.primary_key].type in (IntType, LongType):
+		pk_id = self.api.db.next_id(self.table_name, self.primary_key)
+		self[self.primary_key] = pk_id
+		db_fields[self.primary_key] = pk_id
+		keys = db_fields.keys()
+        	values = [self.api.db.param(key, value) for (key, value) in db_fields.items()]
             # Insert new row
             sql = "INSERT INTO %s (%s) VALUES (%s)" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))
@@ -243,9 +251,6 @@ class Row(dict):
                    self.api.db.param(self.primary_key, self[self.primary_key]))
 
         self.api.db.do(sql, db_fields)
-
-        if not self.has_key(self.primary_key):
-            self[self.primary_key] = self.api.db.last_insert_id(self.table_name, self.primary_key)
 
         if commit:
             self.api.db.commit()
