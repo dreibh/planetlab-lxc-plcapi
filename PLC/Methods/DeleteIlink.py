@@ -10,10 +10,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
 from PLC.Ilinks import Ilink, Ilinks
-from PLC.Nodes import Node, Nodes
-
+from PLC.Interfaces import Interface, Interfaces
 from PLC.Nodes import Node, Nodes
 from PLC.Sites import Site, Sites
+from PLC.TagTypes import TagType, TagTypes
 
 class DeleteIlink(Method):
     """
@@ -35,7 +35,7 @@ class DeleteIlink(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
+    object_type = 'Interface'
 
 
     def call(self, auth, ilink_id):
@@ -44,30 +44,30 @@ class DeleteIlink(Method):
             raise PLCInvalidArgument, "No such ilink %r"%ilink_id
         ilink = ilinks[0]
 
-        ### reproducing a check from UpdateSliceAttribute, looks dumb though
-        nodes = Nodes(self.api, [ilink['node_id']])
-        if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%ilink['node_id']
-        node = nodes[0]
+        tag_type_id = ilink['tag_type_id']
+        tag_type = TagTypes (self.api,[tag_type_id])[0]
+        required_min_role = tag_type ['min_role_id']
 
-        assert ilink['ilink_id'] in node['tag_ids']
-
-	# check permission : it not admin, is the user affiliated with the right site
+	# check permission : it not admin, is the user affiliated with the right site<S>
 	if 'admin' not in self.caller['roles']:
-	    # locate node
-	    node = Nodes (self.api,[node['node_id']])[0]
-	    # locate site
-	    site = Sites (self.api, [node['site_id']])[0]
-	    # check caller is affiliated with this site
-	    if self.caller['person_id'] not in site['person_ids']:
-		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
+            for key in ['src_interface_id','dst_interface_id']:
+                # locate interface
+                interface_id=ilink[key]
+                interface = Interfaces (self.api,interface_id)[0]
+                node_id=interface['node_id']
+                node = Nodes (self.api,node_id) [0]
+	        # locate site
+                site_id = node['site_id']
+                site = Sites (self.api, [site_id]) [0]
+	        # check caller is affiliated with this site
+                if self.caller['person_id'] not in site['person_ids']:
+                    raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
 	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role
+                if required_min_role is not None and \
+                        min(self.caller['role_ids']) > required_min_role:
+                    raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role
 
         ilink.delete()
-	self.object_ids = [ilink['ilink_id']]
+	self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
 
         return 1

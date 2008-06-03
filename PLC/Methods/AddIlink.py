@@ -40,10 +40,10 @@ class AddIlink(Method):
 
     def call(self, auth,  src_if_id, dst_if_id, tag_type_id_or_name, value):
 
-        src_if = Interfaces (self.api, [src_if_id],[interface_id])
+        src_if = Interfaces (self.api, [src_if_id],['interface_id'])
         if not src_if:
             raise PLCInvalidArgument, "No such source interface %r"%src_if_id
-        dst_if = Interfaces (self.api, [dst_if_id],[interface_id])
+        dst_if = Interfaces (self.api, [dst_if_id],['interface_id'])
         if not dst_if:
             raise PLCInvalidArgument, "No such destination interface %r"%dst_if_id
 
