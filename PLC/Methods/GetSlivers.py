@@ -70,8 +70,8 @@ def get_slivers(api, slice_filter, node = None):
 
         if node is not None:
             for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_attributes):
-                sliver_attributes.append(sliver_attribute['name'])
-                attributes.append({'name': sliver_attribute['name'],
+                sliver_attributes.append(sliver_attribute['tagname'])
+                attributes.append({'tagname': sliver_attribute['tagname'],
                                    'value': sliver_attribute['value']})
 
 	    # set nodegroup slice attributes
@@ -79,16 +79,16 @@ def get_slivers(api, slice_filter, node = None):
 	        # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
-	        if slice_attribute['name'] not in slice_attributes:
-		    attributes.append({'name': slice_attribute['name'],
+	        if slice_attribute['tagname'] not in slice_attributes:
+		    attributes.append({'tagname': slice_attribute['tagname'],
 				   'value': slice_attribute['value']})
 
         for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
             # Do not set any global slice attributes for
             # which there is at least one sliver attribute
             # already set.
-            if slice_attribute['name'] not in sliver_attributes:
-                attributes.append({'name': slice_attribute['name'],
+            if slice_attribute['tagname'] not in sliver_attributes:
+                attributes.append({'tagname': slice_attribute['tagname'],
                                    'value': slice_attribute['value']})
 
         slivers.append({
@@ -203,7 +203,7 @@ class GetSlivers(Method):
 	initscripts = InitScripts(self.api, {'enabled': True})	
 
         # Get system slices
-        system_slice_attributes = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+        system_slice_attributes = SliceAttributes(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
         system_slice_ids = system_slice_attributes.keys()
 	
 	# Get nm-controller slices
