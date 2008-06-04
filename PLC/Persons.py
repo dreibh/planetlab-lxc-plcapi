@@ -235,10 +235,10 @@ class Person(Row):
 	assert 'person_id' in self
 	assert isinstance(value, list)
 	
-	(role_ids, roles_names) = self.separate_types(value)[0:2]
+	(role_ids, role_names) = self.separate_types(value)[0:2]
 	
 	# Translate roles into role_ids
-	if roles_names:
+	if role_names:
 	    roles = Roles(self.api, role_names, ['role_id']).dict('role_id')
 	    role_ids += roles.keys()
 	
