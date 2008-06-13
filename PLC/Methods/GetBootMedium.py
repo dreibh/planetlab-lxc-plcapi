@@ -354,9 +354,9 @@ class GetBootMedium(Method):
             if filedir:
                 if not os.path.exists(filedir):
                     try:
-                        os.makedirs (dirname,0777)
+                        os.makedirs (filedir,0777)
                     except:
-                        raise PLCPermissionDenied, "Could not create dir %s"%dirname
+                        raise PLCPermissionDenied, "Could not create dir %s"%filedir
 
         
         ### generic media
