@@ -43,8 +43,8 @@ def php_cast(value):
 # Class functions
 api = PLCAPI(None)
 
-api.methods.sort()
-for method in api.methods:
+api.all_methods.sort()
+for method in api.all_methods:
     # Skip system. methods
     if "system." in method:
         continue
