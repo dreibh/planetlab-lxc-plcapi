@@ -88,11 +88,22 @@ tags:
 
 .PHONY: tags
 
-########## make sync PLCHOST=hostname VSERVER=vservername
-ifdef PLCHOST
+########## sync
+# 2 forms are supported
+# (*) if your plc root context has direct ssh access:
+# make sync PLC=private.one-lab.org
+# (*) otherwise, entering through the root context
+# make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr
+
 ifdef VSERVER
-PLCSSH:=root@$(PLCHOST):/vservers/$(VSERVER)
+ifdef PLCHOST
+SSHURL:=root@$(PLCHOST):/vservers/$(VSERVER)
+SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(VSERVER)
 endif
+endif
+ifdef PLC
+SSHURL:=root@$(PLC):/
+SSHCOMMAND:=ssh root@$(PLC)
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
@@ -101,12 +112,14 @@ RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
 sync:
-ifeq (,$(PLCSSH))
-	echo "sync: You must define PLCHOST and VSERVER on the command line"
-	echo " e.g. make sync PLCHOST=private.one-lab.org VSERVER=myplc01" ; exit 1
+ifeq (,$(SSHURL))
+	@echo "sync: You must define, either PLC, or PLCHOST & GUEST, on the command line"
+	@echo "  e.g. make sync PLC=private.one-lab.org"
+	@echo "  or   make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr"
+	@exit 1
 else
-	+$(RSYNC) PLC planetlab5.sql migrations $(PLCSSH)/usr/share/plc_api/
-	ssh root@$(PLCHOST) vserver $(VSERVER) exec apachectl graceful
+	+$(RSYNC) PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
+	$(SSHCOMMAND) exec apachectl graceful
 endif
 
 #################### convenience, for debugging only
