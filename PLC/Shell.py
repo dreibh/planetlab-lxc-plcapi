@@ -165,7 +165,7 @@ class Shell:
             if role is not None:
                 self.auth['Role'] = role
 
-        for method in PLC.Methods.methods:
+        for method in PLC.Methods.methods + PLC.API.PLCAPI.legacy_map.keys():
             api_function = self.api.callable(method)
 
             if self.server is None:

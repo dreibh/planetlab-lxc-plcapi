@@ -24,7 +24,8 @@ from PLC.Events import Event, Events
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 
-class Method:
+# we inherit object because we use new-style classes for legacy methods
+class Method (object):
     """
     Base class for all PLCAPI functions. At a minimum, all PLCAPI
     functions must define:
@@ -80,14 +81,17 @@ class Method:
 
         try:
 	    start = time.time()
-            (min_args, max_args, defaults) = self.args()
-	        		
-	    # Check that the right number of arguments were passed in
-            if len(args) < len(min_args) or len(args) > len(max_args):
-                raise PLCInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
-            for name, value, expected in zip(max_args, args, self.accepts):
-                self.type_check(name, value, expected, args)
+            # legacy code cannot be type-checked, due to the way Method.args() works
+            if not hasattr(self,"skip_typecheck"):
+                (min_args, max_args, defaults) = self.args()
+	        		
+                # Check that the right number of arguments were passed in
+                if len(args) < len(min_args) or len(args) > len(max_args):
+                    raise PLCInvalidArgumentCount(len(args), len(min_args), len(max_args))
+
+                for name, value, expected in zip(max_args, args, self.accepts):
+                    self.type_check(name, value, expected, args)
 	
 	    result = self.call(*args, **kwds)
 	    runtime = time.time() - start
@@ -253,7 +257,7 @@ class Method:
         That represents the minimum and maximum sets of arguments that
         this function accepts and the defaults for the optional arguments.
         """
-
+        
         # Inspect call. Remove self from the argument list.
         max_args = self.call.func_code.co_varnames[1:self.call.func_code.co_argcount]
         defaults = self.call.func_defaults

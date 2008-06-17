@@ -83,10 +83,28 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
+import PLC.Legacy
+
+def import_deep(name):
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
 
 class PLCAPI:
+
+    # flat list of method names
     methods = PLC.Methods.methods
 
+    # dict {methodname:module}
+    legacy_map={}
+    for module in PLC.Legacy.__all__ :
+        for method in getattr(import_deep("PLC.Legacy."+module),"methods"):
+            legacy_map[method]=module
+
+    all_methods = methods+legacy_map.keys()
+    
     def __init__(self, config = "/etc/planetlab/plc_config", encoding = "utf-8"):
         self.encoding = encoding
 
@@ -111,14 +129,19 @@ class PLCAPI:
         """
 
         # Look up method
-        if method not in self.methods:
+        if method not in self.all_methods:
             raise PLCInvalidAPIMethod, method
-
+        
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__("PLC.Methods." + method, globals(), locals(), [classname])
-            return getattr(module, classname)(self)
+            if method in self.methods:
+                module = __import__("PLC.Methods." + method, globals(), locals(), [classname])
+                return getattr(module, classname)(self)
+            else:
+                modulename=self.legacy_map[method]
+                module = __import__("PLC.Legacy." + modulename, globals(), locals(), [classname])
+                return getattr(module, classname)(self)
         except ImportError, AttributeError:
             raise PLCInvalidAPIMethod, method
 
