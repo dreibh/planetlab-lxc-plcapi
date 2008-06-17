@@ -1,11 +1,5 @@
-# supposed to be managed manually
-# syntax is modulename.methodname
-
-# xxx could we use __all__ and have each module define its 
-# own set of methods ?
-
+# each module to define in "methods" the set of methods that it defines
 __all__ = """
 NodeNetworks
 Types
 """.split()
-
