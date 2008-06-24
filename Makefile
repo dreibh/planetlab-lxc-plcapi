@@ -112,10 +112,10 @@ tags:
 # (*) otherwise, entering through the root context
 # make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr
 
-ifdef VSERVER
+ifdef GUEST
 ifdef PLCHOST
-SSHURL:=root@$(PLCHOST):/vservers/$(VSERVER)
-SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(VSERVER)
+SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)
+SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(GUEST)
 endif
 endif
 ifdef PLC
