@@ -153,25 +153,39 @@ class PostgreSQL:
 
         return None
 
+    # modified for psycopg2-2.0.7 
+    # executemany is undefined for SELECT's
+    # see http://www.python.org/dev/peps/pep-0249/
+    # accepts either None, a single dict, a tuple of single dict - in which case it execute's
+    # or a tuple of several dicts, in which case it executemany's
     def execute(self, query, params = None):
-        return self.execute_array(query, (params,))
 
-    def execute_array(self, query, param_seq):
         cursor = self.cursor()
         try:
-            if self.debug:
-                for params in param_seq:
-                    if params:
-                        print >> log, query % params
-                    else:
-                        print >> log, query
 
             # psycopg2 requires %()s format for all parameters,
             # regardless of type.
             if psycopg2:
                 query = re.sub(r'(%\([^)]*\)|%)[df]', r'\1s', query)
 
-            cursor.executemany(query, param_seq)
+            if not params:
+                if self.debug:
+                    print >> log,'execute0',query
+                cursor.execute(query)
+            elif isinstance(params,dict):
+                if self.debug:
+                    print >> log,'execute-dict: params',params,'query',query%params
+                cursor.execute(query,params)
+            elif isinstance(params,tuple) and len(params)==1:
+                if self.debug:
+                    print >> log,'execute-tuple',query%params[0]
+                cursor.execute(query,params[0])
+            else:
+                param_seq=(params,)
+                if self.debug:
+                    for params in param_seq:
+                        print >> log,'executemany',query%params
+                cursor.executemany(query, param_seq)
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
         except Exception, e:
@@ -185,7 +199,7 @@ class PostgreSQL:
             print >> log, "Query:"
             print >> log, query
             print >> log, "Params:"
-            print >> log, pformat(param_seq[0])
+            print >> log, pformat(params)
             raise PLCDBError("Please contact " + \
                              self.api.config.PLC_NAME + " Support " + \
                              "<" + self.api.config.PLC_MAIL_SUPPORT_ADDRESS + ">" + \
