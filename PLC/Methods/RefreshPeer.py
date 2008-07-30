@@ -23,6 +23,16 @@ from PLC.Slices import Slice, Slices
 
 verbose=False
 
+def message (to_print=None,verbose_only=False):
+    if verbose_only and not verbose:
+        return
+    print >> log, time.strftime("%m-%d-%H-%M-%S:"),
+    if to_print:
+        print >>log, to_print
+
+def message_verbose(to_print=None):
+    message(to_print,verbose_only=True)
+
 class RefreshPeer(Method):
     """
     Fetches site, node, slice, person and key data from the specified peer
@@ -56,12 +66,11 @@ class RefreshPeer(Method):
 
         # Get peer data
         start = time.time()
-	print >>log, 'Issuing GetPeerData'
+	message('Issuing GetPeerData')
         peer_tables = peer.GetPeerData()
         timers['transport'] = time.time() - start - peer_tables['db_time']
         timers['peer_db'] = peer_tables['db_time']
-        if verbose:
-            print >>log, 'GetPeerData returned -> db=%d transport=%d'%(timers['peer_db'],timers['transport'])
+        message_verbose('GetPeerData returned -> db=%d transport=%d'%(timers['peer_db'],timers['transport']))
 
         def sync(objects, peer_objects, classobj):
             """
@@ -73,8 +82,8 @@ class RefreshPeer(Method):
             keyed on their foreign identifiers.
             """
 
-            if verbose:
-                print >>log, 'Entering sync on',classobj(self.api).__class__.__name__
+            classname=classobj(self.api).__class__.__name__
+            message_verbose('Entering sync on %s'%classname)
 
             synced = {}
 
@@ -82,10 +91,18 @@ class RefreshPeer(Method):
             for peer_object_id, object in objects.iteritems():
                 if peer_object_id not in peer_objects:
                     object.delete(commit = False)
-                    print >> log, peer['peername'],classobj(self.api).__class__.__name__, object[object.primary_key],"deleted" 
+                    message("%s %s %s deleted"%(peer['peername'],classname, object[object.primary_key]))
 
+            total = len(peer_objects)
+            count=1
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
+                message_verbose ('DBG %s peer_object_id=%d (%d/%d)'%(classname,peer_object_id,count,total))
+                count += 1
+                if classname == 'Node':
+                    message_verbose ('DBG>> hostname=%s'%peer_object['hostname'])
+                elif classname == "Slice":
+                    message_verbose ('DBG>> slicename=%s'%peer_object['name'])
                 if peer_object_id in objects:
                     # Update existing object
                     object = objects[peer_object_id]
@@ -123,18 +140,16 @@ class RefreshPeer(Method):
                     except PLCInvalidArgument, err:
                         # Skip if validation fails
                         # XXX Log an event instead of printing to logfile
-                        print >> log, "Warning: Skipping invalid", \
-                              peer['peername'], object.__class__.__name__, \
-                              ":", peer_object, ":", err
+                        message("Warning: %s Skipping invalid %s %r : %r"%(\
+                                peer['peername'], classname, peer_object, err))
                         continue
 
                 synced[peer_object_id] = object
 
                 if dbg:
-                    print >> log, peer['peername'], classobj(self.api).__class__.__name__, object[object.primary_key], dbg
+                    message("%s: %s %d %s"%(peer['peername'], classname, object[object.primary_key], dbg))
 
-            if verbose:
-                print >>log, 'Exiting sync on',classobj(self.api).__class__.__name__
+            message_verbose("Exiting sync on %s"%classname)
 
             return synced
 
@@ -144,7 +159,7 @@ class RefreshPeer(Method):
 
         start = time.time()
 
-	print >>log, 'Dealing with Sites'
+        message('Dealing with Sites')
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Sites']:
@@ -172,7 +187,7 @@ class RefreshPeer(Method):
         # XXX Synchronize foreign key types
         #
 
-	print >>log, 'Dealing with Keys'
+        message('Dealing with Keys')
 
         key_types = KeyTypes(self.api).dict()
 
@@ -196,8 +211,7 @@ class RefreshPeer(Method):
         for peer_key_id, key in keys_at_peer.items():
             if key['key_type'] not in key_types:
                 # XXX Log an event instead of printing to logfile
-                print >> log, "Warning: Skipping invalid %s key:" % peer['peername'], \
-                      key, ": invalid key type", key['key_type']
+                message("Warning: Skipping invalid %s key %r" % ( peer['peername'], key))
                 del keys_at_peer[peer_key_id]
                 continue
 
@@ -218,7 +232,7 @@ class RefreshPeer(Method):
 
         start = time.time()
 
-	print >>log, 'Dealing with Persons'
+        message('Dealing with Persons')
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Persons']:
@@ -268,12 +282,12 @@ class RefreshPeer(Method):
             # Remove stale keys from user
 	    for key_id in (set(old_person_key_ids) - set(person_key_ids)):
 		person.remove_key(peer_keys[key_id], commit = False)
-		print >> log, peer['peername'], 'Key', key_id, 'removed from', person['email']
+                message ("%s Key %d removed from person %s"%(peer['peername'], key_id, person['email']))
 
             # Add new keys to user
 	    for key_id in (set(person_key_ids) - set(old_person_key_ids)):
 		person.add_key(peer_keys[key_id], commit = False)
-		print >> log, peer['peername'], 'Key', key_id, 'added into', person['email']
+                message ("%s Key %d added into person %s"%(peer['peername'],key_id, person['email']))
 
         timers['persons'] = time.time() - start
 
@@ -289,7 +303,7 @@ class RefreshPeer(Method):
 
         start = time.time()
 
-	print >>log, 'Dealing with Nodes'
+        message('Dealing with Nodes (1)')
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Nodes']:
@@ -311,8 +325,8 @@ class RefreshPeer(Method):
                 errors.append("invalid boot state %s" % node['boot_state'])
             if errors:
                 # XXX Log an event instead of printing to logfile
-                print >> log, "Warning: Skipping invalid %s node:" % peer['peername'], \
-                      node, ":", ", ".join(errors)
+                message ("Warning: Skipping invalid %s node %r : " % (peer['peername'], node)\
+                             + ", ".join(errors))
                 del nodes_at_peer[peer_node_id]
                 continue
             else:
@@ -335,6 +349,7 @@ class RefreshPeer(Method):
         #
 
         start = time.time()
+        message('Dealing with Nodes (2)')
 
         # Keyed on local node_id
         local_nodes = Nodes(self.api).dict()
@@ -363,7 +378,7 @@ class RefreshPeer(Method):
 
         start = time.time()
 
-	print >>log, 'Dealing with Slices'
+        message('Dealing with Slices (1)')
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Slices']:
@@ -389,8 +404,8 @@ class RefreshPeer(Method):
             else:
                 slice['creator_person_id'] = peer_persons[slice['creator_person_id']]['person_id']
             if errors:
-                print >> log, "Warning: Skipping invalid %s slice:" % peer['peername'], \
-                      slice, ":", ", ".join(errors)
+                message("Warning: Skipping invalid %s slice %r : " % (peer['peername'], slice) \
+                            + ", ".join(errors))
                 del slices_at_peer[peer_slice_id]
                 continue
             else:
@@ -399,6 +414,7 @@ class RefreshPeer(Method):
         # Synchronize new set
         peer_slices = sync(old_peer_slices, slices_at_peer, Slice)
 
+        message('Dealing with Slices (2)')
 	# transcoder : retrieve a local node_id from a peer_node_id
 	node_transcoder = dict ( [ (node['node_id'],peer_node_id) \
 				   for peer_node_id,node in peer_nodes.iteritems()])
@@ -427,12 +443,12 @@ class RefreshPeer(Method):
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
                 slice.remove_node(peer_nodes[node_id], commit = False)
-		print >> log, peer['peername'], 'Node', peer_nodes[node_id]['hostname'], 'removed from', slice['name']
+                message ("%s node %s removed from slice %s"%(peer['peername'], peer_nodes[node_id]['hostname'], slice['name']))
 
             # Add new nodes to slice
             for node_id in (set(slice_node_ids) - set(old_slice_node_ids)):
                 slice.add_node(peer_nodes[node_id], commit = False)
-		print >> log, peer['peername'], 'Node', peer_nodes[node_id]['hostname'], 'added into', slice['name']
+                message ("%s node %s added into slice %s"%(peer['peername'], peer_nodes[node_id]['hostname'], slice['name']))
 
             # N.B.: Local nodes that may have been added to the slice
             # by hand, are removed. In other words, don't do this.
@@ -446,9 +462,9 @@ class RefreshPeer(Method):
 	    old_slice_person_ids = []
 	    for person_id in slice['person_ids']:
 		if not person_transcoder.has_key(person_id):
-		    print >> log, 'WARNING : person_id %d in %s not transcodable (1) - skipped'%(person_id,slice['name'])
+                    message ('WARNING : person_id %d in %s not transcodable (1) - skipped'%(person_id,slice['name']))
 		elif person_transcoder[person_id] not in peer_persons:
-		    print >> log, 'WARNING : person_id %d in %s not transcodable (2) - skipped'%(person_id,slice['name'])
+                    message('WARNING : person_id %d in %s not transcodable (2) - skipped'%(person_id,slice['name']))
 		else:
 		    old_slice_person_ids += [person_transcoder[person_id]]
 
@@ -458,12 +474,12 @@ class RefreshPeer(Method):
             # Remove stale users from slice
             for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
                 slice.remove_person(peer_persons[person_id], commit = False)
-		print >> log, peer['peername'], 'User', peer_persons[person_id]['email'], 'removed from', slice['name']
+                message ("%s user %s removed from slice %s"%(peer['peername'],peer_persons[person_id]['email'], slice['name']))
 
             # Add new users to slice
             for person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
                 slice.add_person(peer_persons[person_id], commit = False)
-		print >> log, peer['peername'], 'User', peer_persons[person_id]['email'], 'added into', slice['name']
+                message ("%s user %s added into slice %s"%(peer['peername'],peer_persons[person_id]['email'], slice['name']))
 
             # N.B.: Local users that may have been added to the slice
             # by hand, are not touched.
