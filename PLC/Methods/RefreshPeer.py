@@ -23,6 +23,11 @@ from PLC.Slices import Slice, Slices
 
 verbose=False
 
+# initial version was doing only one final commit
+# * set commit_mode to False to get that behaviour
+# * set comit_mode to True to get everything synced at once
+commit_mode=True
+
 def message (to_print=None,verbose_only=False):
     if verbose_only and not verbose:
         return
@@ -66,6 +71,7 @@ class RefreshPeer(Method):
 
         # Get peer data
         start = time.time()
+	message('RefreshPeer starting up (commit_mode=%r)'%commit_mode)
 	message('Issuing GetPeerData')
         peer_tables = peer.GetPeerData()
         timers['transport'] = time.time() - start - peer_tables['db_time']
@@ -90,11 +96,18 @@ class RefreshPeer(Method):
             # Delete stale objects
             for peer_object_id, object in objects.iteritems():
                 if peer_object_id not in peer_objects:
-                    object.delete(commit = False)
+                    object.delete(commit = commit_mode)
                     message("%s %s %s deleted"%(peer['peername'],classname, object[object.primary_key]))
 
             total = len(peer_objects)
             count=1
+            # set this to something realistic to trace down a given object(s)
+            trace_type="Node"
+            trace_ids=[]
+            def trace (message):
+                if classname == trace_type and peer_object_id in trace_ids:
+                    message_verbose('TRACE>>'+message)
+                
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
                 message_verbose ('DBG %s peer_object_id=%d (%d/%d)'%(classname,peer_object_id,count,total))
@@ -115,28 +128,36 @@ class RefreshPeer(Method):
                     # Must use __eq__() instead of == since
                     # peer_object may be a raw dict instead of a Peer
                     # object.
+                    trace ("in objects : comparing")
                     if not object.__eq__(peer_object):
                         # Only update intrinsic fields
+                        trace ("updating")
                         object.update(object.db_fields(peer_object))
+                        trace ("updated")
                         sync = True
                         dbg = "changed"
                     else:
+                        trace ("intact")
                         sync = False
                         dbg = None
 
                     # Restore foreign identifier
                     peer_object[object.primary_key] = peer_object_id
                 else:
+                    trace ("not in objects -- creating")
                     # Add new object
                     object = classobj(self.api, peer_object)
+                    trace ("created")
                     # Replace foreign identifier with new local identifier
                     del object[object.primary_key]
+                    trace ("forced clean id")
                     sync = True
                     dbg = "added"
 
                 if sync:
+                    message_verbose("DBG>> syncing %s %d - commit_mode=%r"%(classname,peer_object_id,commit_mode))
                     try:
-                        object.sync(commit = False)
+                        object.sync(commit = commit_mode)
                     except PLCInvalidArgument, err:
                         # Skip if validation fails
                         # XXX Log an event instead of printing to logfile
@@ -177,7 +198,7 @@ class RefreshPeer(Method):
         for peer_site_id, site in peer_sites.iteritems():
             # Bind any newly cached sites to peer
             if peer_site_id not in old_peer_sites:
-                peer.add_site(site, peer_site_id, commit = False)
+                peer.add_site(site, peer_site_id, commit = commit_mode)
                 site['peer_id'] = peer_id
                 site['peer_site_id'] = peer_site_id
 
@@ -220,7 +241,7 @@ class RefreshPeer(Method):
         for peer_key_id, key in peer_keys.iteritems():
             # Bind any newly cached keys to peer
             if peer_key_id not in old_peer_keys:
-                peer.add_key(key, peer_key_id, commit = False)
+                peer.add_key(key, peer_key_id, commit = commit_mode)
                 key['peer_id'] = peer_id
                 key['peer_key_id'] = peer_key_id
 
@@ -262,7 +283,7 @@ class RefreshPeer(Method):
         for peer_person_id, person in peer_persons.iteritems():
             # Bind any newly cached users to peer
             if peer_person_id not in old_peer_persons:
-                peer.add_person(person, peer_person_id, commit = False)
+                peer.add_person(person, peer_person_id, commit = commit_mode)
                 person['peer_id'] = peer_id
                 person['peer_person_id'] = peer_person_id
                 person['key_ids'] = []
@@ -281,12 +302,12 @@ class RefreshPeer(Method):
 
             # Remove stale keys from user
 	    for key_id in (set(old_person_key_ids) - set(person_key_ids)):
-		person.remove_key(peer_keys[key_id], commit = False)
+		person.remove_key(peer_keys[key_id], commit = commit_mode)
                 message ("%s Key %d removed from person %s"%(peer['peername'], key_id, person['email']))
 
             # Add new keys to user
 	    for key_id in (set(person_key_ids) - set(old_person_key_ids)):
-		person.add_key(peer_keys[key_id], commit = False)
+		person.add_key(peer_keys[key_id], commit = commit_mode)
                 message ("%s Key %d added into person %s"%(peer['peername'],key_id, person['email']))
 
         timers['persons'] = time.time() - start
@@ -338,7 +359,7 @@ class RefreshPeer(Method):
         for peer_node_id, node in peer_nodes.iteritems():
             # Bind any newly cached foreign nodes to peer
             if peer_node_id not in old_peer_nodes:
-                peer.add_node(node, peer_node_id, commit = False)
+                peer.add_node(node, peer_node_id, commit = commit_mode)
                 node['peer_id'] = peer_id
                 node['peer_node_id'] = peer_node_id
 
@@ -424,7 +445,7 @@ class RefreshPeer(Method):
         for peer_slice_id, slice in peer_slices.iteritems():
             # Bind any newly cached foreign slices to peer
             if peer_slice_id not in old_peer_slices:
-                peer.add_slice(slice, peer_slice_id, commit = False)
+                peer.add_slice(slice, peer_slice_id, commit = commit_mode)
                 slice['peer_id'] = peer_id
                 slice['peer_slice_id'] = peer_slice_id
                 slice['node_ids'] = []
@@ -442,12 +463,12 @@ class RefreshPeer(Method):
 
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
-                slice.remove_node(peer_nodes[node_id], commit = False)
+                slice.remove_node(peer_nodes[node_id], commit = commit_mode)
                 message ("%s node %s removed from slice %s"%(peer['peername'], peer_nodes[node_id]['hostname'], slice['name']))
 
             # Add new nodes to slice
             for node_id in (set(slice_node_ids) - set(old_slice_node_ids)):
-                slice.add_node(peer_nodes[node_id], commit = False)
+                slice.add_node(peer_nodes[node_id], commit = commit_mode)
                 message ("%s node %s added into slice %s"%(peer['peername'], peer_nodes[node_id]['hostname'], slice['name']))
 
             # N.B.: Local nodes that may have been added to the slice
@@ -473,12 +494,12 @@ class RefreshPeer(Method):
 
             # Remove stale users from slice
             for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
-                slice.remove_person(peer_persons[person_id], commit = False)
+                slice.remove_person(peer_persons[person_id], commit = commit_mode)
                 message ("%s user %s removed from slice %s"%(peer['peername'],peer_persons[person_id]['email'], slice['name']))
 
             # Add new users to slice
             for person_id in (set(slice_person_ids) - set(old_slice_person_ids)):
-                slice.add_person(peer_persons[person_id], commit = False)
+                slice.add_person(peer_persons[person_id], commit = commit_mode)
                 message ("%s user %s added into slice %s"%(peer['peername'],peer_persons[person_id]['email'], slice['name']))
 
             # N.B.: Local users that may have been added to the slice
