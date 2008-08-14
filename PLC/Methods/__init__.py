@@ -1,4 +1,4 @@
-methods = """
+native_methods = """
 AddAddressType
 AddAddressTypeToAddress
 AddBootState

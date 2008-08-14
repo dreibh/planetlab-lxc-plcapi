@@ -83,6 +83,7 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
+import PLC.Shortcuts
 import PLC.Legacy
 
 def import_deep(name):
@@ -95,15 +96,21 @@ def import_deep(name):
 class PLCAPI:
 
     # flat list of method names
-    methods = PLC.Methods.methods
+    native_methods = PLC.Methods.native_methods
 
-    # dict {methodname:module}
-    legacy_map={}
-    for module in PLC.Legacy.__all__ :
-        for method in getattr(import_deep("PLC.Legacy."+module),"methods"):
-            legacy_map[method]=module
+    # other_methods_map : dict {methodname: fullpath}
+    # e.g. 'Shortcuts' -> 'PLC.Shortcuts.Shortcuts'
+    other_methods_map={}
+    for subdir in [ 'Shortcuts', 'Legacy']:
+        path="PLC."+subdir
+        # scan e.g. PLC.Shortcuts.__all__
+        pkg = __import__(path).__dict__[subdir]
+        for modulename in getattr(pkg,"__all__"):
+            fullpath=path+"."+modulename
+            for method in getattr(import_deep(fullpath),"methods"):
+                other_methods_map[method] = fullpath
 
-    all_methods = methods+legacy_map.keys()
+    all_methods = native_methods + other_methods_map.keys()
     
     def __init__(self, config = "/etc/planetlab/plc_config", encoding = "utf-8"):
         self.encoding = encoding
@@ -135,12 +142,12 @@ class PLCAPI:
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            if method in self.methods:
+            if method in self.native_methods:
                 module = __import__("PLC.Methods." + method, globals(), locals(), [classname])
                 return getattr(module, classname)(self)
             else:
-                modulename=self.legacy_map[method]
-                module = __import__("PLC.Legacy." + modulename, globals(), locals(), [classname])
+                fullpath=self.other_methods_map[method]
+                module = __import__(fullpath, globals(), locals(), [classname])
                 return getattr(module, classname)(self)
         except ImportError, AttributeError:
             raise PLCInvalidAPIMethod, method
