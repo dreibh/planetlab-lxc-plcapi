@@ -5,7 +5,7 @@ from DocBook import DocBook
 
 def api_methods():
     api = PLCAPI(None)
-    methods = api.methods
+    methods = api.all_methods
     return [api.callable(method) for method in methods]
 
 DocBook(api_methods ()).Process()
