@@ -21,7 +21,7 @@ class TagType (Row):
 
     table_name = 'tag_types'
     primary_key = 'tag_type_id'
-    join_tables = ['node_tag']
+    join_tables = ['node_tag', 'interface_setting', 'slice_attribute' ]
     fields = {
         'tag_type_id': Parameter(int, "Node tag type identifier"),
         'tagname': Parameter(str, "Node tag type name", max = 100),

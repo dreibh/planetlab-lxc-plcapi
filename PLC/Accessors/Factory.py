@@ -9,18 +9,30 @@ from PLC.Parameter import Parameter, Mixed
 
 from PLC.Faults import *
 
-from PLC.Nodes import Node
-from PLC.Interfaces import Interface
-from PLC.Slices import Slice
-from PLC.Ilinks import Ilink
+from PLC.Nodes import Nodes, Node
+from PLC.NodeTags import NodeTags, NodeTag
+from PLC.Interfaces import Interfaces, Interface
+from PLC.InterfaceSettings import InterfaceSettings, InterfaceSetting
+from PLC.Slices import Slices, Slice
+from PLC.SliceAttributes import SliceAttributes, SliceAttribute
+
+# this is another story..
+#from PLC.Ilinks import Ilink
 
 from PLC.TagTypes import TagTypes, TagType
 
 # known classes : { class -> secondary_key }
-taggable_classes = { Node : 'hostname', 
-                     Interface : None, 
-                     Slice: 'login_base', 
-                     Ilink : None}
+taggable_classes = { Node : {'table_class' : Nodes, 
+                             'joins_class' : NodeTags, 'join_class' : NodeTag,
+                             'value_key': 'tagvalue', 'secondary_key': 'hostname'},
+                     Interface : {'table_class' : Interfaces, 
+                                  'joins_class': InterfaceSettings, 'join_class': InterfaceSetting,
+                                  'value_key' : 'value' }, 
+                     Slice: {'table_class' : Slices, 
+                             'joins_class': SliceAttributes, 'join_class': SliceAttribute,
+                             'value_key' : 'value', 'secondary_key':'login_base'},
+#                     Ilink : xxx
+                     }
 
 # xxx probably defined someplace else
 all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
@@ -59,12 +71,13 @@ def get_set_factory (objclass, methodsuffix,
     # accepts 
     get_accepts = [ Auth () ]
     primary_key=objclass.primary_key
-    secondary_key = taggable_classes[objclass]
-    if not secondary_key:
-        get_accepts += [ objclass.fields[primary_key] ]
-    else:
+    try:
+        secondary_key = taggable_classes[objclass]['secondary_key']
         get_accepts += [ Mixed (objclass.fields[primary_key], objclass.fields[secondary_key]) ]
-    # for set, idem + one additional arg
+    except:
+        secondary_key = None
+        get_accepts += [ objclass.fields[primary_key] ]
+    # for set, idem set of arguments + one additional arg, the new value
     set_accepts = get_accepts + [ Parameter (str,"New tag value") ]
 
     # returns
@@ -81,41 +94,78 @@ def get_set_factory (objclass, methodsuffix,
     setattr(set_class,'accepts',set_accepts)
     setattr(set_class,'returns', set_returns)
     setattr(set_class,'skip_typecheck',True)
+    
+    table_class = taggable_classes[objclass]['table_class']
+    joins_class = taggable_classes[objclass]['joins_class']
+    join_class = taggable_classes[objclass]['join_class']
+    value_key = taggable_classes[objclass]['value_key']
 
     # body of the get method
     def get_call (self, auth, id_or_name):
-        print 'Automagical Accessor get method',classname,get_name,tagname,primary_key,secondary_key
-        print 'Warning: PLC/Accessors/Factory is an ongoing work'
-        tag_type_id = locate_or_create_tag_type_id (self.api, tagname, 
-                                                    category, description, tag_min_role_id)
-        return 'foobar'
+        # search the tagtype - xxx - might need a cache
+        tag_types = TagTypes (self.api, {'tagname': tagname})
+        if not tag_types:
+            return None
+        tag_type_id = tag_types[0]['tag_type_id']
+        filter = {'tag_type_id':tag_type_id}
+        if isinstance (id_or_name,int):
+            filter[primary_key]=id_or_name
+        else:
+            filter[secondary_key]=id_or_name
+        joins = joins_class (self.api,filter,[value_key])
+        if not joins:
+            # xxx - we return None even if id_or_name is not valid 
+            return None
+        else:
+            return joins[0][value_key]
+
+    # attach it
     setattr (get_class,"call",get_call)
 
-    # body of the set method
+    # body of the set method 
     def set_call (self, auth, id_or_name, tagvalue):
-        print 'Automagical Accessor set method',classname,get_name,tagname,primary_key,secondary_key
-        print 'Warning: PLC/Accessors/Factory is an ongoing work'
-        return None
+        # locate the object
+        if isinstance (id_or_name, int):
+            filter={primary_key:id_or_name}
+        else:
+            filter={secondary_key:id_or_name}
+        objs = table_class(self.api, filter,[primary_key])
+        if not objs:
+            raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
+        primary_id = objs[0][primary_key]
+                           
+        # search tag type & create if needed
+        tag_types = TagTypes (self.api, {'tagname':tagname})
+        if tag_types:
+            tag_type = tag_types[0]
+        else:
+            # not found: create it
+            tag_type_fields = {'tagname':tagname, 
+                               'category' :  category,
+                               'description' : description,
+                               'min_role_id': tag_min_role_id}
+            tag_type = TagType (self.api, tag_type_fields)
+            tag_type.sync()
+        # proceed
+        tag_type_id = tag_type['tag_type_id']
+        filter = {'tag_type_id':tag_type_id}
+        if isinstance (id_or_name,int):
+            filter[primary_key]=id_or_name
+        else:
+            filter[secondary_key]=id_or_name
+        joins = joins_class (self.api,filter)
+        if not joins:
+            join = join_class (self.api)
+            join['tag_type_id']=tag_type_id
+            join[primary_key]=primary_id
+            join[value_key]=tagvalue
+            join.sync()
+        else:
+            joins[0][value_key]=tagvalue
+            joins[0].sync()
+
+    # attach it
     setattr (set_class,"call",set_call)
 
     return ( get_class, set_class )
 
-### might need to use a cache
-def locate_or_create_tag_type_id (api, tagname, category, description, min_role_id):
-    # search tag
-    tag_types = TagTypes (api, {'tagname':tagname})
-    # not found: create it
-    if tag_types:
-        print 'FOUND preexisting'
-        tag_type_id = tag_types[0]['tag_type_id']
-    else:
-        print 'not FOUND : creating'
-        tag_type_fields = {'tagname':tagname, 
-                           'category' :  category,
-                           'description' : description,
-                           'min_role_id': min_role_id}
-        tag_type = TagType (api, tag_type_fields)
-        tag_type.sync()
-        tag_type_id = tag_type['tag_type_id']
-
-    return tag_type_id
