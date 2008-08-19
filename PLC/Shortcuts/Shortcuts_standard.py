@@ -6,10 +6,7 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Ilinks import Ilink
 
-from PLC.Shortcuts.Factory import get_set_factory
-
-# xxx probably defined someplace else
-all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
+from PLC.Shortcuts.Factory import all_roles, get_set_factory
 
 methods=[]
 
@@ -21,9 +18,3 @@ methods=[]
                       set_roles=['admin', 'pi', 'tech'] )
 methods += [ 'GetNodeArch', 'SetNodeArch' ]
 
-# example : vlan ids on interfaces
-(GetInterfaceVlan, SetInterfaceVlan) = \
-    get_set_factory ( Interface, "Vlan", "vlan","interface/general", "tag for setting VLAN id",
-                      get_roles=all_roles,
-                      set_roles=['admin', 'pi', 'tech'] )
-methods += [ 'GetInterfaceVlan', 'SetInterfaceVlan' ]

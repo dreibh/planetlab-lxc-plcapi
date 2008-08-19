@@ -14,8 +14,16 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Ilinks import Ilink
 
+from PLC.TagTypes import TagTypes, TagType
+
 # known classes : { class -> secondary_key }
-taggable_classes = { Node : 'hostname', Interface : None, Slice: 'login_base', Ilink : None}
+taggable_classes = { Node : 'hostname', 
+                     Interface : None, 
+                     Slice: 'login_base', 
+                     Ilink : None}
+
+# xxx probably defined someplace else
+all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 
 # generates 2 method classes:
 # Get<classname><methodsuffix> (auth, id_or_name) -> tagvalue or None
@@ -78,6 +86,8 @@ def get_set_factory (objclass, methodsuffix,
     def get_call (self, auth, id_or_name):
         print 'Automagical Shortcut get method',classname,get_name,tagname,primary_key,secondary_key
         print 'Warning: PLC/Shortcuts/Factory is an ongoing work'
+        tag_type_id = locate_or_create_tag_type_id (self.api, tagname, 
+                                                    category, description, tag_min_role_id)
         return 'foobar'
     setattr (get_class,"call",get_call)
 
@@ -90,3 +100,22 @@ def get_set_factory (objclass, methodsuffix,
 
     return ( get_class, set_class )
 
+### might need to use a cache
+def locate_or_create_tag_type_id (api, tagname, category, description, min_role_id):
+    # search tag
+    tag_types = TagTypes (api, {'tagname':tagname})
+    # not found: create it
+    if tag_types:
+        print 'FOUND preexisting'
+        tag_type_id = tag_types[0]['tag_type_id']
+    else:
+        print 'not FOUND : creating'
+        tag_type_fields = {'tagname':tagname, 
+                           'category' :  category,
+                           'description' : description,
+                           'min_role_id': min_role_id}
+        tag_type = TagType (api, tag_type_fields)
+        tag_type.sync()
+        tag_type_id = tag_type['tag_type_id']
+
+    return tag_type_id
