@@ -6,15 +6,14 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Ilinks import Ilink
 
-from PLC.Accessors.Factory import all_roles, get_set_factory
+from PLC.Accessors.Factory import define_accessors, all_roles
 
-methods=[]
+import sys
+current_module = sys.modules[__name__]
 
 # example : node architecture 
-(GetNodeArch, SetNodeArch) = \
-    get_set_factory ( Node, "Arch", 'arch',  'node/config', 'architecture name', 
-                      tag_min_role_id=40, 
-                      get_roles=all_roles,
-                      set_roles=['admin', 'pi', 'tech'] )
-methods += [ 'GetNodeArch', 'SetNodeArch' ]
+define_accessors(current_module, Node, "Arch", 'arch',  'node/config', 'architecture name', 
+                 tag_min_role_id=40,
+                 get_roles=all_roles,
+                 set_roles=['admin', 'pi', 'tech'] )
 

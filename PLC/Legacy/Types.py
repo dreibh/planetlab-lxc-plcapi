@@ -21,8 +21,6 @@ map = {
     "UpdateNodeNetworkSettingType"  : "UpdateTagType",
 }    
 
-methods = map.keys()
-
 # does any required renaming
 def rename (x):
     if x=='name':
@@ -38,7 +36,7 @@ def patch_legacy_arg (arg):
         return dict ( [ (rename(k),v) for (k,v) in arg.iteritems() ] )
     return arg
 
-def factory (legacyname, newname):
+def legacy_method (legacyname, newname):
     # locate new class
     newclass=getattr(import_deep("PLC.Methods."+newname),newname)
     # create class for legacy name
@@ -57,13 +55,11 @@ def factory (legacyname, newname):
 
     return legacyclass
 
-# see NodeNetworks for attempts to avoid this
+import sys
+current_module=sys.modules[__name__]
 
-AddSliceAttributeType=factory("AddSliceAttributeType","AddTagType")
-DeleteSliceAttributeType=factory("DeleteSliceAttributeType","DeleteTagType")
-GetSliceAttributeTypes=factory("GetSliceAttributeTypes","GetTagTypes")
-UpdateSliceAttributeType=factory("UpdateSliceAttributeType","UpdateTagType")
-AddNodeNetworkSettingType=factory("AddNodeNetworkSettingType","AddTagType")
-DeleteNodeNetworkSettingType=factory("DeleteNodeNetworkSettingType","DeleteTagType")
-GetNodeNetworkSettingTypes=factory("GetNodeNetworkSettingTypes","GetTagTypes")
-UpdateNodeNetworkSettingType=factory("UpdateNodeNetworkSettingType","UpdateTagType")
+for (legacyname,newname) in map.iteritems():
+    setattr(current_module,legacyname,legacy_method(legacyname,newname))
+
+methods = map.keys()
+

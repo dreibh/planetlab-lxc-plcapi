@@ -14,11 +14,12 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Ilinks import Ilink
 
-from PLC.Accessors.Factory import all_roles, get_set_factory
+from PLC.Accessors.Factory import define_accessors, all_roles
+
+import sys
+current_module = sys.modules[__name__]
 
 #### example : attach vlan ids on interfaces
-###(GetInterfaceVlan, SetInterfaceVlan) = \
-###    get_set_factory ( Interface, "Vlan", "vlan","interface/general", "tag for setting VLAN id",
-###                      get_roles=all_roles,
-###                      set_roles=['admin', 'pi', 'tech'] )
-###methods += [ 'GetInterfaceVlan', 'SetInterfaceVlan' ]
+###define_accessors(current_module, Interface, "Vlan", "vlan","interface/general", "tag for setting VLAN id",
+###                 get_roles=all_roles,
+###                 set_roles=['admin', 'pi', 'tech'] )

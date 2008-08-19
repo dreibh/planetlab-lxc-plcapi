@@ -38,7 +38,7 @@ def patch_legacy_arg (arg):
         return dict ( [ (rename(k),v) for (k,v) in arg.iteritems() ] )
     return arg
 
-def factory (legacyname):
+def legacy_method (legacyname):
     # new method name
     newname=legacyname.replace("NodeNetwork","Interface")
     # locate new class
@@ -60,19 +60,10 @@ def factory (legacyname):
 
     return legacyclass
 
-# this does not work, as __module__ is not yet supported
-#for legacyname in methods:
-#   setattr(__module__,legacyname,factory(legacyname))
-# this does not work either, as we are importing the module so we cannot locate it yet
-#for legacyname in methods:
-#    this_module = import_deep(__name__)
-#    setattr(__module__,legacyname,factory(legacyname))
+import sys
+current_module=sys.modules[__name__]
 
-AddNodeNetwork=factory("AddNodeNetwork")
-AddNodeNetworkSetting=factory("AddNodeNetworkSetting")
-DeleteNodeNetwork=factory("DeleteNodeNetwork")
-DeleteNodeNetworkSetting=factory("DeleteNodeNetworkSetting")
-GetNodeNetworkSettings=factory("GetNodeNetworkSettings")
-GetNodeNetworks=factory("GetNodeNetworks")
-UpdateNodeNetwork=factory("UpdateNodeNetwork")
-UpdateNodeNetworkSetting=factory("UpdateNodeNetworkSetting")
+# attach
+for legacyname in methods:
+    setattr(current_module,legacyname,legacy_method(legacyname))
+

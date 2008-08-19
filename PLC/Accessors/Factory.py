@@ -48,9 +48,9 @@ all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 # returns a tuple (get_method, set_method)
 # See Accessors* for examples
 
-def get_set_factory (objclass, methodsuffix, 
-                     tagname, category, description, tag_min_role_id=10,
-                     get_roles=['admin'], set_roles=['admin']):
+def define_accessors (module, objclass, methodsuffix, 
+                      tagname, category, description, tag_min_role_id=10,
+                      get_roles=['admin'], set_roles=['admin']):
     
     if objclass not in taggable_classes:
         try:
@@ -146,26 +146,43 @@ def get_set_factory (objclass, methodsuffix,
                                'min_role_id': tag_min_role_id}
             tag_type = TagType (self.api, tag_type_fields)
             tag_type.sync()
-        # proceed
         tag_type_id = tag_type['tag_type_id']
+
+        # locate the join object (e.g. NodeTag, SliceAttribute or InterfaceSetting)
         filter = {'tag_type_id':tag_type_id}
         if isinstance (id_or_name,int):
             filter[primary_key]=id_or_name
         else:
             filter[secondary_key]=id_or_name
         joins = joins_class (self.api,filter)
-        if not joins:
-            join = join_class (self.api)
-            join['tag_type_id']=tag_type_id
-            join[primary_key]=primary_id
-            join[value_key]=tagvalue
-            join.sync()
+        # setting to something non void
+        if tagvalue is not None:
+            if not joins:
+                join = join_class (self.api)
+                join['tag_type_id']=tag_type_id
+                join[primary_key]=primary_id
+                join[value_key]=tagvalue
+                join.sync()
+            else:
+                joins[0][value_key]=tagvalue
+                joins[0].sync()
+        # providing an empty value means clean up
         else:
-            joins[0][value_key]=tagvalue
-            joins[0].sync()
+            if joins:
+                join=joins[0]
+                join.delete()
 
     # attach it
     setattr (set_class,"call",set_call)
 
-    return ( get_class, set_class )
+    # define in module
+    setattr(module,get_name,get_class)
+    setattr(module,set_name,set_class)
+    # add in <module>.methods
+    try:
+        methods=getattr(module,'methods')
+    except:
+        methods=[]
+    methods += [get_name,set_name]
+    setattr(module,'methods',methods)
 
