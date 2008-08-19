@@ -7,7 +7,7 @@
 # $Id$
 #
 
-# Metafiles - manage Legacy/ and Shortcuts by hand
+# Metafiles - manage Legacy/ and Accessors by hand
 init := PLC/__init__.py PLC/Methods/__init__.py 
 
 # python-pycurl and python-psycopg2 avail. from fedora 5

@@ -83,7 +83,7 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
-import PLC.Shortcuts
+import PLC.Accessors
 import PLC.Legacy
 
 def import_deep(name):
@@ -99,11 +99,11 @@ class PLCAPI:
     native_methods = PLC.Methods.native_methods
 
     # other_methods_map : dict {methodname: fullpath}
-    # e.g. 'Shortcuts' -> 'PLC.Shortcuts.Shortcuts'
+    # e.g. 'Accessors' -> 'PLC.Accessors.Accessors'
     other_methods_map={}
-    for subdir in [ 'Shortcuts', 'Legacy']:
+    for subdir in [ 'Accessors', 'Legacy']:
         path="PLC."+subdir
-        # scan e.g. PLC.Shortcuts.__all__
+        # scan e.g. PLC.Accessors.__all__
         pkg = __import__(path).__dict__[subdir]
         for modulename in getattr(pkg,"__all__"):
             fullpath=path+"."+modulename

@@ -34,7 +34,7 @@ all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 # while get_roles and set_roles get attached to the created methods
 # 
 # returns a tuple (get_method, set_method)
-# See Shortcuts.py for examples
+# See Accessors* for examples
 
 def get_set_factory (objclass, methodsuffix, 
                      tagname, category, description, tag_min_role_id=10,
@@ -42,19 +42,19 @@ def get_set_factory (objclass, methodsuffix,
     
     if objclass not in taggable_classes:
         try:
-            raise PLCInvalidArgument,"PLC.Shortcuts.Factory: unknown class %s"%objclass.__name__
+            raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class %s"%objclass.__name__
         except:
-            raise PLCInvalidArgument,"PLC.Shortcuts.Factory: unknown class ??"
+            raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class ??"
     classname=objclass.__name__
     get_name = "Get" + classname + methodsuffix
     set_name = "Set" + classname + methodsuffix
 
     # create method objects under PLC.Method.Method
     get_class = type (get_name, (Method,),
-                      {"__doc__":"Shortcut 'get' method designed for %s objects using tag %s"%\
+                      {"__doc__":"Accessor 'get' method designed for %s objects using tag %s"%\
                            (classname,tagname)})
     set_class = type (set_name, (Method,),
-                      {"__doc__":"Shortcut 'set' method designed for %s objects using tag %s"%\
+                      {"__doc__":"Accessor 'set' method designed for %s objects using tag %s"%\
                            (classname,tagname)})
     # accepts 
     get_accepts = [ Auth () ]
@@ -84,8 +84,8 @@ def get_set_factory (objclass, methodsuffix,
 
     # body of the get method
     def get_call (self, auth, id_or_name):
-        print 'Automagical Shortcut get method',classname,get_name,tagname,primary_key,secondary_key
-        print 'Warning: PLC/Shortcuts/Factory is an ongoing work'
+        print 'Automagical Accessor get method',classname,get_name,tagname,primary_key,secondary_key
+        print 'Warning: PLC/Accessors/Factory is an ongoing work'
         tag_type_id = locate_or_create_tag_type_id (self.api, tagname, 
                                                     category, description, tag_min_role_id)
         return 'foobar'
@@ -93,8 +93,8 @@ def get_set_factory (objclass, methodsuffix,
 
     # body of the set method
     def set_call (self, auth, id_or_name, tagvalue):
-        print 'Automagical Shortcut set method',classname,get_name,tagname,primary_key,secondary_key
-        print 'Warning: PLC/Shortcuts/Factory is an ongoing work'
+        print 'Automagical Accessor set method',classname,get_name,tagname,primary_key,secondary_key
+        print 'Warning: PLC/Accessors/Factory is an ongoing work'
         return None
     setattr (set_class,"call",set_call)
 

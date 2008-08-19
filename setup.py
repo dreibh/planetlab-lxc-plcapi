@@ -12,7 +12,7 @@ from distutils.core import setup
 from glob import glob
 
 setup(py_modules = ['ModPython'],
-      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Shortcuts', 'PLC/Legacy'],
+      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'PLC/Legacy'],
       scripts = ['plcsh', 'Server.py'],
       data_files = [('', ['planetlab5.sql']),
                     ('php', ['php/plc_api.php']),

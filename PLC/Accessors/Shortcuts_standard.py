@@ -6,7 +6,7 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Ilinks import Ilink
 
-from PLC.Shortcuts.Factory import all_roles, get_set_factory
+from PLC.Accessors.Factory import all_roles, get_set_factory
 
 methods=[]
 
