@@ -21,6 +21,8 @@ map = {
     "UpdateNodeNetworkSettingType"  : "UpdateTagType",
 }    
 
+methods = map.keys()
+
 # does any required renaming
 def rename (x):
     if x=='name':
@@ -60,6 +62,4 @@ current_module=sys.modules[__name__]
 
 for (legacyname,newname) in map.iteritems():
     setattr(current_module,legacyname,legacy_method(legacyname,newname))
-
-methods = map.keys()
 
