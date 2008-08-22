@@ -14,9 +14,12 @@ current_module = sys.modules[__name__]
 # node architecture 
 define_accessors(current_module, Node, "Arch", 'arch',  'node/config', 'architecture name', 
                  get_roles=all_roles, set_roles=tech_roles )
-
+# distribution to be deployed
+define_accessors(current_module, Node, "Pldistro", 'pldistro',  'node/config', 'PlanetLab distribution', 
+                 get_roles=all_roles, set_roles=['admin'] )
 # node deployment (alpha, beta, ...)
-define_accessors(current_module, Node, "Deployment", "deployment", "node/config", "deployment flavour",
+define_accessors(current_module, Node, "Deployment", "deployment", "node/operation", 
+                 'deployment flavour, typically "alpha", "beta", or "production"',
                  get_roles=all_roles, set_roles=['admin'])
 
 # interface alias
