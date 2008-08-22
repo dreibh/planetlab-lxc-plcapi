@@ -75,10 +75,6 @@ cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
 extension=xmlrpc.so
 EOF
 
-%post
-# create local shortcuts if not present (mentioned in PLC/Shortcuts/__init__.py)
-[ -f %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py ] || cp %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py.in %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -91,6 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/plcsh
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
+%config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
 * Wed May 14 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-8

@@ -36,6 +36,7 @@ taggable_classes = { Node : {'table_class' : Nodes,
 
 # xxx probably defined someplace else
 all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
+tech_roles = [ 'admin', 'pi', 'tech' ]
 
 # generates 2 method classes:
 # Get<classname><methodsuffix> (auth, id_or_name) -> tagvalue or None

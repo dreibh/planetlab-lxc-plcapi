@@ -1,11 +1,11 @@
 # Thierry Parmentelat - INRIA
 # $Id$
 #
-# 
 # Shortcuts_site.py is the place where you can define your own tag accessors
+# this will not be overwritten through rpm upgrades in a myplc-devel packaging
 #
 # methods denotes the set of methods (names) that get inserted into the API
-#
+# it is updated by define_accessors
 
 methods=[]
 
