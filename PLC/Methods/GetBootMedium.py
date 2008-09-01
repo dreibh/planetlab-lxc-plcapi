@@ -12,7 +12,7 @@ from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceSettings import InterfaceSetting, InterfaceSettings
-from PLC.NodeGroups import NodeGroup, NodeGroups
+from PLC.NodeTags import NodeTags
 
 # could not define this in the class..
 boot_medium_actions = [ 'node-preview',
@@ -219,32 +219,27 @@ class GetBootMedium(Method):
 
     # see also InstallBootstrapFS in bootmanager that does similar things
     def get_nodefamily (self, node):
+        # get defaults from the myplc build
         try:
             (pldistro,arch) = file("/etc/planetlab/nodefamily").read().strip().split("-")
         except:
             (pldistro,arch) = ("planetlab","i386")
             
+        # with no valid argument, return system-wide defaults
         if not node:
             return (pldistro,arch)
 
-        known_archs = [ 'i386', 'x86_64' ]
-        nodegroupnames = [ ng['groupname'] for ng in NodeGroups (self.api, node['nodegroup_ids'],['groupname'])]
-        # (1) if groupname == arch, nodefamily becomes pldistro-groupname
-        # (2) else if groupname looks like pldistro-arch, it is taken as a nodefamily
-        # (3) otherwise groupname is taken as an extension
-        for nodegroupname in nodegroupnames:
-            if nodegroupname in known_archs:
-                arch = nodegroupname
-            else:
-                for known_arch in known_archs:
-                    try:
-                        (api_pldistro,api_arch)=nodegroupname.split("-")
-                        # sanity check
-                        if api_arch != known_arch: raise Exception,"mismatch"
-                        (pldistro,arch) = (api_pldistro, api_arch)
-                        break
-                    except:
-                        pass
+        node_id=node['node_id']
+        # cannot use accessors in the API itself
+        # the 'arch' tag type is assumed to exist, see db-config
+        arch_tags = NodeTags (self.api, {'tagname':'arch','node_id':node_id},['tagvalue'])
+        if arch_tags:
+            arch=arch_tags[0]['tagvalue']
+        # ditto
+        pldistro_tags = NodeTags (self.api, {'tagname':'pldistro','node_id':node_id},['tagvalue'])
+        if pldistro_tags:
+            pldistro=pldistro_tags[0]['tagvalue']
+
         return (pldistro,arch)
 
     def bootcd_version (self):

@@ -11,6 +11,11 @@ from PLC.Accessors.Factory import define_accessors, all_roles, tech_roles
 import sys
 current_module = sys.modules[__name__]
 
+# NOTE.
+# most of these tag types are defined in MyPLC/db-config, so any details here in the 
+# description/category area is unlikely to make it into the database
+#
+
 # node architecture 
 define_accessors(current_module, Node, "Arch", 'arch',  'node/config', 'architecture name', 
                  get_roles=all_roles, set_roles=tech_roles )
