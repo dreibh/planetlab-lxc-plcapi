@@ -1,11 +1,12 @@
 --
 -- PlanetLab Central database schema
--- Version 4, PostgreSQL
+-- Version 5, PostgreSQL
 --
 -- Aaron Klingaman <alk@cs.princeton.edu>
 -- Reid Moran <rmoran@cs.princeton.edu>
 -- Mark Huang <mlhuang@cs.princeton.edu>
 -- Tony Mack <tmack@cs.princeton.edu>
+-- Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr>
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
@@ -295,8 +296,8 @@ CREATE TABLE tag_types (
     tag_type_id serial PRIMARY KEY,			-- ID
     tagname text UNIQUE NOT NULL,			-- Tag Name
     description text,					-- Optional Description
-    category text NOT NULL DEFAULT 'general',		-- Free text for grouping tags together
-    min_role_id integer REFERENCES roles DEFAULT 10	-- set minimal role required
+    min_role_id integer REFERENCES roles DEFAULT 10,	-- set minimal role required
+    category text NOT NULL DEFAULT 'general'		-- Free text for grouping tags together
 ) WITH OIDS;
 
 CREATE TABLE node_tag (
