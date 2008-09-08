@@ -9,7 +9,9 @@ DIRNAME=$(cd ${DIRNAME}; /bin/pwd)
 MIGRATION_SED=$DIRNAME/${BASENAME}.sed
 MIGRATION_SQL=$DIRNAME/${BASENAME}.sql
 # look in ..
-SCHEMA_SQL=$(dirname $DIRNAME)/planetlab5.sql
+UP=$(dirname $DIRNAME)
+UPUP=$(dirname $UP)
+SCHEMA_SQL=$UPUP/planetlab5.sql
 
 DATE=$(date +%Y-%m-%d-%H-%M)
 DATE_=$(date +%Y_%m_%d_%H_%M)
@@ -20,6 +22,9 @@ FAKE=${DIRNAME}/input-pl4.sql
 VIEWS_SQL=$DIRNAME/${DATE}-views5.sql
 NODEGROUPS_DEF=$DIRNAME/site-nodegroups.def
 NODEGROUPS_SQL=$DIRNAME/${DATE}-nodegroups.sql
+
+PGM_VIEWS=$UP/extract-views.py
+PGM_NODEGROUPS=$DIRNAME/parse-site-nodegroups.py
 
 # load config
 . /etc/planetlab/plc_config
@@ -138,10 +143,10 @@ function migrate () {
     run "Creating    planetlab5 database" createdb --user=postgres --encoding=UNICODE --owner=$PLC_DB_USER planetlab5
     run "Loading     language plpgsql" createlang -U postgres plpgsql planetlab5 || true
     run "Populating  planetlab5 from $RESTORE" psql --user=postgres -f $RESTORE planetlab5 
-    run "Parsing     $NODEGROUPS_DEF" $DIRNAME/v4-to-v5-nodegroups.py $NODEGROUPS_DEF $NODEGROUPS_SQL
+    run "Parsing     $NODEGROUPS_DEF" $PGM_NODEGROUPS $NODEGROUPS_DEF $NODEGROUPS_SQL
     run "Loading     $NODEGROUPS_SQL" psql --user=$PLC_DB_USER -f $NODEGROUPS_SQL planetlab5
     run "Fine-tuning it with $MIGRATION_SQL" psql --user=$PLC_DB_USER -f $MIGRATION_SQL planetlab5
-    run "Extracting  views definitions from $SCHEMA_SQL" ./extract-views.py $SCHEMA_SQL $VIEWS_SQL
+    run "Extracting  views definitions from $SCHEMA_SQL" $PGM_VIEWS $SCHEMA_SQL $VIEWS_SQL
     run "Inserting   views definitions in planetlab5" \
 	psql --user=$PLC_DB_USER -f $VIEWS_SQL planetlab5
 }
