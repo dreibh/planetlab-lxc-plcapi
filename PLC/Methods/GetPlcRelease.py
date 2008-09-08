@@ -8,7 +8,8 @@ comment_regexp = '\A\s*#.|\A\s*\Z|\Axxxxx'
 
 regexps = { 'build'   : '\A[bB]uild\s+(?P<key>[^:]+)\s*:\s*(?P<value>.*)\Z',
 	    'tags'    : '\A(?P<key>[^:]+)\s*:=\s*(?P<value>.*)\Z',
-            'rpms'    : '\A(?P<key>[^:]+)\s*::\s*(?P<value>.*)\Z',
+# spaces not part of key : ungreedy
+            'rpms'    : '\A(?P<key>[^:]+?)\s*::\s*(?P<value>.*)\Z',
 }
 
 class GetPlcRelease(Method):
