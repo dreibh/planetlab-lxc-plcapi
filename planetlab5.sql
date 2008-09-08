@@ -473,7 +473,8 @@ CREATE TABLE nodegroups (
     nodegroup_id serial PRIMARY KEY,		-- Group identifier
     groupname text UNIQUE NOT NULL,		-- Group name 
     tag_type_id integer REFERENCES tag_types,	-- node is in nodegroup if it has this tag defined
-    tagvalue text NOT NULL			-- with this value attached
+    -- can be null, make management faster & easier
+    tagvalue text				-- with this value attached
 ) WITH OIDS;
 
 -- xxx - first rough implem. similar to former semantics but might be slow

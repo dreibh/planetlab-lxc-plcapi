@@ -18,6 +18,8 @@ DUMP=${DIRNAME}/${DATE}-pl4.sql
 RESTORE=${DIRNAME}/${DATE}-pl5.sql
 FAKE=${DIRNAME}/input-pl4.sql
 VIEWS_SQL=$DIRNAME/${DATE}-views5.sql
+NODEGROUPS_DEF=$DIRNAME/site-nodegroups.def
+NODEGROUPS_SQL=$DIRNAME/${DATE}-nodegroups.sql
 
 # load config
 . /etc/planetlab/plc_config
@@ -25,7 +27,7 @@ VIEWS_SQL=$DIRNAME/${DATE}-views5.sql
 # return 0 (yes) or 1 (no) whether the database exists
 function check_for_database () {
     dbname=$1; shift
-    psql --user=$PLC_DB_USER --quiet -c "SELECT subversion from plc_db_version LIMIT 1" $dbname > /dev/null 2>&1 
+    psql --user=$PLC_DB_USER --quiet -c "SELECT datname from pg_database where datname= '$dbname' LIMIT 1" $dbname > /dev/null 2>&1 
     return $?
 }
 
@@ -33,11 +35,16 @@ function check_for_database () {
 # so this script will drop the planetlab5 DB and re-create it from scratch 
 # with the contents of the planetlab4 DB that is epxected to exist
 function warning () {
+    echo "========================================"
     echo "$COMMAND"
     echo "This script is designed to ease the migration from myplc 4.2 to 5.0"
     echo "You can run it before of after you install a 5.0 myplc"
+    echo ""
     echo "It will attempt to re-create the planetlab5 database from planetlab4"
     echo "The planetlab5 database is renamed, not dropped, if it is found on the system"
+    echo ""
+    echo "You might wish to edit/review $NODEGROUPS_DEF to finetune your migration"
+    echo "========================================"
     echo -n "Are you sure you want to proceed y/[n] ? "
     read answer
     case $answer in
@@ -50,6 +57,7 @@ function check () {
     [ -f $MIGRATION_SED ] || { echo $MIGRATION_SED not found - exiting ; exit 1; }
     [ -f $MIGRATION_SQL ] || { echo $MIGRATION_SQL not found - exiting ; exit 1; }
     [ -f $SCHEMA_SQL ] || { echo $SCHEMA_SQL not found - exiting ; exit 1; }
+    [ -f $NODEGROUPS_DEF ] || { echo $NODEGROUPS_DEF not found - exiting ; exit 1; }
 }
 
 function run () {
@@ -130,6 +138,8 @@ function migrate () {
     run "Creating    planetlab5 database" createdb --user=postgres --encoding=UNICODE --owner=$PLC_DB_USER planetlab5
     run "Loading     language plpgsql" createlang -U postgres plpgsql planetlab5 || true
     run "Populating  planetlab5 from $RESTORE" psql --user=postgres -f $RESTORE planetlab5 
+    run "Parsing     $NODEGROUPS_DEF" $DIRNAME/v4-to-v5-nodegroups.py $NODEGROUPS_DEF $NODEGROUPS_SQL
+    run "Loading     $NODEGROUPS_SQL" psql --user=$PLC_DB_USER -f $NODEGROUPS_SQL planetlab5
     run "Fine-tuning it with $MIGRATION_SQL" psql --user=$PLC_DB_USER -f $MIGRATION_SQL planetlab5
     run "Extracting  views definitions from $SCHEMA_SQL" ./extract-views.py $SCHEMA_SQL $VIEWS_SQL
     run "Inserting   views definitions in planetlab5" \

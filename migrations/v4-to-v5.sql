@@ -1,4 +1,5 @@
---
+-- Thierry Parmentelat - INRIA
+-- 
 -- $Id$
 --
 -- this is part of the script to migrate from 4.2 to 5.0
@@ -9,21 +10,21 @@
 -- the views will be reinstantiated later upon loading of planetlab5.sql
 
 -- this lists all views
-CREATE OR REPLACE VIEW all_views AS
+CREATE OR REPLACE VIEW mgn_all_views AS
     SELECT c.relname FROM pg_catalog.pg_class c
        LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
           WHERE c.relkind IN ('v','') AND n.nspname in ('public')
 	     AND pg_catalog.pg_table_is_visible(c.oid);
 
 -- shows in logfile
-select * from all_views;
+select * from mgn_all_views;
 
 -- this one version almost works, but somehow does not, could not figure why
-CREATE OR REPLACE FUNCTION drop_all_views () RETURNS INTEGER AS $$
+CREATE OR REPLACE FUNCTION mgn_drop_all_views () RETURNS INTEGER AS $$
     DECLARE 
-        row all_views%ROWTYPE;
+        row mgn_all_views%ROWTYPE;
     BEGIN
-        FOR row IN SELECT * FROM all_views where relname != 'all_views' LOOP
+        FOR row IN SELECT * FROM mgn_all_views where relname != 'mgn_all_views' LOOP
 	   RAISE NOTICE 'Dropping %',row.relname;
            EXECUTE 'DROP VIEW ' || row.relname || ' CASCADE' ;
 	END LOOP;
@@ -31,7 +32,7 @@ CREATE OR REPLACE FUNCTION drop_all_views () RETURNS INTEGER AS $$
     END;
 $$ LANGUAGE 'plpgsql';
 
--- SELECT drop_all_views();
+-- SELECT mgn_drop_all_views();
 
 -- so let's have it the boring way
 DROP VIEW address_address_types CASCADE;
@@ -90,7 +91,7 @@ DROP VIEW view_slice_attributes CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_slices CASCADE;
 
 -- shows in logfile
-select * from all_views;
+select * from mgn_all_views;
 
 
 -------------------- TAG TYPES
@@ -100,16 +101,15 @@ select * from all_views;
 ALTER TABLE tag_types RENAME COLUMN name TO tagname;
 --- former slice_attribute_types had no 'category'
 ALTER TABLE tag_types ADD COLUMN category TEXT NOT NULL DEFAULT 'slice/legacy';
---- change default now that the column is filled
-ALTER TABLE tag_types ALTER COLUMN category SET DEFAULT 'general';
 
 --- append in tag_types the contents of nodenetwork_setting_types
-insert into tag_types (tagname,description,min_role_id,category) select name,description,min_role_id,'interface/legacy' from interface_setting_types;
+INSERT INTO tag_types (tagname,description,min_role_id,category) 
+       SELECT name,description,min_role_id,'interface/legacy' FROM interface_setting_types;
 
 --- former nodenetwork_setting_type_id are now renumbered, need to fix interface_setting accordingly
 
 -- old_index -> new_index relation
-CREATE OR REPLACE VIEW index_renumber AS
+CREATE OR REPLACE VIEW mgn_setting_renumber AS
    SELECT 
       interface_setting_types.interface_setting_type_id AS old_index,	
       tag_types.tag_type_id AS new_index 
@@ -123,7 +123,7 @@ ALTER TABLE interface_setting DROP CONSTRAINT interface_setting_interface_settin
 -- do the transcoding
 UPDATE interface_setting 
    SET interface_setting_type_id = 
-      (select new_index from index_renumber where old_index=interface_setting_type_id);
+      (select new_index from mgn_setting_renumber where old_index=interface_setting_type_id);
 
 -- alter column nam to reflect change
 ALTER TABLE interface_setting RENAME interface_setting_type_id TO tag_type_id;
@@ -132,10 +132,8 @@ ALTER TABLE interface_setting RENAME interface_setting_type_id TO tag_type_id;
 ALTER TABLE interface_setting ADD CONSTRAINT interface_setting_tag_type_id_fkey 
     FOREIGN KEY (tag_type_id) references tag_types(tag_type_id) ;
 
---- cleanup
-drop view index_renumber;
-
 -- drop former interface_setting_types altogether
+drop view mgn_setting_renumber;
 drop table interface_setting_types;
 
 -------------------- NEW STUFF
@@ -159,31 +157,70 @@ CREATE TABLE node_tag (
 ----------------------------------------
 -- nodegroups
 ----------------------------------------
---- xxx - need to capture this first
---- xxx would dump some python script to capture current nodegroups...
 
---- xxx would maybe like to preserve it in nodegroups_v4 or something
-DROP TABLE IF EXISTS nodegroups CASCADE;
-DROP TABLE IF EXISTS nodegroup_node CASCADE;
+---------- nodegroups table - start
+-- nodegroup_id is preserved for conf_files and other references
+-- former nodegroups table was (nodegroup_id,name,description)
+-- new table is	now	       (nodegroup_id, groupname, tag_type_id, tagvalue)
 
-CREATE TABLE nodegroups (
-    nodegroup_id serial PRIMARY KEY,		-- Group identifier
-    groupname text UNIQUE NOT NULL,		-- Group name 
-    tag_type_id integer REFERENCES tag_types,	-- node is in nodegroup if it has this tag defined
-    tagvalue text NOT NULL			-- with this value attached
-) WITH OIDS;
+-- rename column
+ALTER TABLE nodegroups RENAME name TO groupname;
 
+---------- create missing tag types
+-- change default for the entries about to be created
+ALTER TABLE tag_types ALTER COLUMN category SET DEFAULT 'nodegroup/migration';
+
+-- do it
+INSERT INTO tag_types (tagname)
+   SELECT DISTINCT tagname FROM mgn_site_nodegroup 
+      WHERE tagname NOT IN (SELECT tagname from tag_types);
+
+-- xxx drop description in former nodegroups for now, could be attached to newly created tag types..
+ALTER TABLE nodegroups DROP COLUMN description;
+
+---------- set the right tags so as to recover former nodegroups
+INSERT INTO node_tag (node_id, tag_type_id, tagvalue)
+   SELECT node_id, tag_type_id, tagvalue FROM
+      nodegroup_node LEFT JOIN nodegroups USING (nodegroup_id) 
+         INNER JOIN mgn_site_nodegroup USING (groupname)
+	    LEFT JOIN tag_types using (tagname); 
+
+---------- nodegroups table - conclusion
+ALTER TABLE nodegroups ADD COLUMN tag_type_id INTEGER;
+ALTER TABLE nodegroups ADD COLUMN tagvalue TEXT;
+
+CREATE OR REPLACE VIEW mgn_nodegroups AS
+   SELECT groupname, tag_types.tag_type_id, mgn_site_nodegroup.tagvalue 
+      FROM nodegroups INNER JOIN mgn_site_nodegroup USING (groupname) 
+         INNER JOIN tag_types USING (tagname);
+
+UPDATE nodegroups SET tag_type_id = (SELECT tag_type_id FROM mgn_nodegroups WHERE nodegroups.groupname=mgn_nodegroups.groupname);
+UPDATE nodegroups SET tagvalue = (SELECT tagvalue FROM mgn_nodegroups WHERE nodegroups.groupname=mgn_nodegroups.groupname);
+
+-- install corresponding constraints
+ALTER TABLE nodegroups ADD CONSTRAINT nodegroups_tag_type_id_fkey
+   FOREIGN KEY (tag_type_id) REFERENCES tag_types (tag_type_id);  
 -------------
 -- display constraints
 
-CREATE OR REPLACE VIEW all_constraints AS
+CREATE OR REPLACE VIEW mgn_all_constraints AS
     SELECT * FROM pg_catalog.pg_constraint c
        LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.connamespace
        LEFT JOIN pg_catalog.pg_class t ON t.oid = c.conrelid
           WHERE c.contype IN ('c','f','p','u') AND n.nspname in ('public')
 	     AND pg_catalog.pg_table_is_visible(c.oid);
 
--- cleanup
-drop view all_views;
+--- change default now that the column is filled
+ALTER TABLE tag_types ALTER COLUMN category SET DEFAULT 'general';
+
+-- cleanup the nodegroup area
+drop view mgn_nodegroups;
+drop table mgn_site_nodegroup;
+drop table nodegroup_node;
+
+-- cleanup migration utilities
+drop view mgn_all_views;
+drop view mgn_all_constraints;
+drop function mgn_drop_all_views ();
 
 --- versioning (plc_db_version): ignore for now, so we keep both entries (v4 and v5)

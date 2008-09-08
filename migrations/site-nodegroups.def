@@ -1,0 +1,37 @@
+# this file allows you to plan the migration of your nodegroups
+# 
+# groupname tagname tagvalue
+# 
+# single quotes can be used
+# although tagnames can have spaces, it is not recommended 
+# if use of accessors is planned
+#
+# catured on private.one-lab.org
+onelab-i386		arch			i386
+x86_64			arch			x86_64
+umts			extension		umts
+# ### captured on PLE
+# alpha			deployment		alpha
+# onelab-x86_64		arch			x86_64
+# onelab-i386		arch			i386
+# ### captured on PLC
+# Alpha			deployment		alpha
+# Beta			deployment		beta
+# Nightly			Nightly			true
+# Internet2		Internet2		true
+# V2			V2			true
+# v3			v3			true
+# Uppsala			Uppsala			true
+# LogWatch		LogWatch		true
+# DC7800Deployment	DC7800Deployment	true
+# AlphaDeployment		AlphaDeployment		true
+# debug.sh.sgn		debug.sh.sgn		true
+# hdboot-serial.sh.sgn	hdboot-serial.sh.sgn	true
+# 'Shark NFS'		'Shark NFS'		true		
+# cluster			cluster			true
+# IRIS			IRIS			true
+# 'NM prototype'		'NM prototype'		true
+# 'IRIS + NM prototype'	'IRIS + NM prototype'	true
+# 'JHU honeypot'		'JHU honeypot'		true
+# chopstix		chopstix		true
+# PolishTelecom		PolishTelecom		true
