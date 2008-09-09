@@ -5,7 +5,9 @@
 -- this is part of the script to migrate from 4.2 to 5.0
 --
 
--------------------- VIEWS :
+----------------------------------------
+-- views
+----------------------------------------
 -- we want the views to get out of our way, i.e. to drop all views; 
 -- the views will be reinstantiated later upon loading of planetlab5.sql
 
@@ -93,9 +95,16 @@ DROP VIEW view_slice_attributes CASCADE;
 -- shows in logfile
 select * from mgn_all_views;
 
+-- cleanup migration utilities
+drop view mgn_all_views;
+drop function mgn_drop_all_views ();
 
--------------------- TAG TYPES
+----------------------------------------
+-- tag types
+----------------------------------------
 --- merge former slice attribute types and setting attribute types into tagtypes
+
+---------- slice attributes
 
 --- the tag_types table is obtained from the former slice_attribute_types table 
 ALTER TABLE tag_types RENAME COLUMN name TO tagname;
@@ -105,6 +114,8 @@ ALTER TABLE tag_types ADD COLUMN category TEXT NOT NULL DEFAULT 'slice/legacy';
 --- append in tag_types the contents of nodenetwork_setting_types
 INSERT INTO tag_types (tagname,description,min_role_id,category) 
        SELECT name,description,min_role_id,'interface/legacy' FROM interface_setting_types;
+
+---------- interface settings
 
 --- former nodenetwork_setting_type_id are now renumbered, need to fix interface_setting accordingly
 
@@ -125,7 +136,7 @@ UPDATE interface_setting
    SET interface_setting_type_id = 
       (select new_index from mgn_setting_renumber where old_index=interface_setting_type_id);
 
--- alter column nam to reflect change
+-- alter column name to reflect change
 ALTER TABLE interface_setting RENAME interface_setting_type_id TO tag_type_id;
 
 -- add contraint again
@@ -136,22 +147,25 @@ ALTER TABLE interface_setting ADD CONSTRAINT interface_setting_tag_type_id_fkey
 drop view mgn_setting_renumber;
 drop table interface_setting_types;
 
--------------------- NEW STUFF
-
-CREATE TABLE ilink (
-       ilink_id serial PRIMARY KEY,				-- id
-       tag_type_id integer REFERENCES tag_types,		-- id of the tag type
-       src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
-       dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
-       value text						-- optional value on the link
-) WITH OIDS;
-
+---------- node tags
 
 CREATE TABLE node_tag (
     node_tag_id serial PRIMARY KEY,			-- ID
     node_id integer REFERENCES nodes NOT NULL,		-- node id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
     tagvalue text					-- value attached
+) WITH OIDS;
+
+
+----------------------------------------
+-- ilinks
+----------------------------------------
+CREATE TABLE ilink (
+       ilink_id serial PRIMARY KEY,				-- id
+       tag_type_id integer REFERENCES tag_types,		-- id of the tag type
+       src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
+       dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
+       value text						-- optional value on the link
 ) WITH OIDS;
 
 ----------------------------------------
@@ -175,7 +189,8 @@ INSERT INTO tag_types (tagname)
    SELECT DISTINCT tagname FROM mgn_site_nodegroup 
       WHERE tagname NOT IN (SELECT tagname from tag_types);
 
--- xxx drop description in former nodegroups for now, could be attached to newly created tag types..
+-- xxx drop description in former nodegroups for now, 
+-- but could have been attached to newly created tag types first
 ALTER TABLE nodegroups DROP COLUMN description;
 
 ---------- set the right tags so as to recover former nodegroups
@@ -200,15 +215,6 @@ UPDATE nodegroups SET tagvalue = (SELECT tagvalue FROM mgn_nodegroups WHERE node
 -- install corresponding constraints
 ALTER TABLE nodegroups ADD CONSTRAINT nodegroups_tag_type_id_fkey
    FOREIGN KEY (tag_type_id) REFERENCES tag_types (tag_type_id);  
--------------
--- display constraints
-
-CREATE OR REPLACE VIEW mgn_all_constraints AS
-    SELECT * FROM pg_catalog.pg_constraint c
-       LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.connamespace
-       LEFT JOIN pg_catalog.pg_class t ON t.oid = c.conrelid
-          WHERE c.contype IN ('c','f','p','u') AND n.nspname in ('public')
-	     AND pg_catalog.pg_table_is_visible(c.oid);
 
 --- change default now that the column is filled
 ALTER TABLE tag_types ALTER COLUMN category SET DEFAULT 'general';
@@ -218,9 +224,53 @@ drop view mgn_nodegroups;
 drop table mgn_site_nodegroup;
 drop table nodegroup_node;
 
--- cleanup migration utilities
-drop view mgn_all_views;
-drop view mgn_all_constraints;
-drop function mgn_drop_all_views ();
+----------------------------------------
+-- boot states
+----------------------------------------
+INSERT INTO boot_states (boot_state) 
+       VALUES ('safeboot'), ('failboot'), ('disabled'), ('install'), ('reinstall');
+
+-- xxx need checking 
+--
+-- boot          boot
+-- dbg           safeboot ?
+-- diag          failboot ?
+-- disable       disabled
+-- inst          install
+-- rins          reinstall
+-- new           reinstall ?
+-- rcnf	      failboot ?
+
+
+UPDATE nodes SET boot_state='safeboot' WHERE boot_state='dbg';
+UPDATE nodes SET boot_state='failboot' WHERE boot_state='diag';
+UPDATE nodes SET boot_state='disabled' WHERE boot_state='disable';
+UPDATE nodes SET boot_state='install' WHERE boot_state='inst';
+UPDATE nodes SET boot_state='reinstall' WHERE boot_state='rins';
+UPDATE nodes SET boot_state='reinstall' WHERE boot_state='new';
+UPDATE nodes SET boot_state='failboot' WHERE boot_state='rcnf';
+
+-- one-by-one is safer
+DELETE FROM boot_states WHERE boot_state='dbg';
+DELETE FROM boot_states WHERE boot_state='diag';
+DELETE FROM boot_states WHERE boot_state='disable';
+DELETE FROM boot_states WHERE boot_state='inst';
+DELETE FROM boot_states WHERE boot_state='rins';
+DELETE FROM boot_states WHERE boot_state='new';
+DELETE FROM boot_states WHERE boot_state='rcnf';
+
+-- ----------------------------------------
+-- -- debug/information : display current constraints
+-- ----------------------------------------
+-- CREATE OR REPLACE VIEW mgn_all_constraints AS
+--     SELECT * FROM pg_catalog.pg_constraint c
+--        LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.connamespace
+--        LEFT JOIN pg_catalog.pg_class t ON t.oid = c.conrelid
+--           WHERE c.contype IN ('c','f','p','u') AND n.nspname in ('public')
+-- 	     AND pg_catalog.pg_table_is_visible(c.oid);
+-- 
+-- select * from mgn_all_constraints;
+--
+-- drop view mgn_all_constraints;
 
 --- versioning (plc_db_version): ignore for now, so we keep both entries (v4 and v5)
