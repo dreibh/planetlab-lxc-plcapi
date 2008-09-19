@@ -242,8 +242,8 @@ INSERT INTO boot_states (boot_state)
 -- rcnf	      failboot ?
 
 
-UPDATE nodes SET boot_state='safeboot' WHERE boot_state='dbg';
-UPDATE nodes SET boot_state='failboot' WHERE boot_state='diag';
+UPDATE nodes SET boot_state='failboot' WHERE boot_state='dbg';
+UPDATE nodes SET boot_state='safeboot' WHERE boot_state='diag';
 UPDATE nodes SET boot_state='disabled' WHERE boot_state='disable';
 UPDATE nodes SET boot_state='install' WHERE boot_state='inst';
 UPDATE nodes SET boot_state='reinstall' WHERE boot_state='rins';

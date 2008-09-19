@@ -252,7 +252,7 @@ CREATE TABLE boot_states (
     boot_state text PRIMARY KEY
 ) WITH OIDS;
 INSERT INTO boot_states (boot_state) 
-       VALUES ('boot'), ('dbg'), ('diag'), ('disable'), ('inst'), ('rins'), ('new');
+       VALUES ('boot'), ('safeboot'), ('failboot'), ('disabled'), ('install'), ('reinstall');
 
 -- Nodes
 CREATE TABLE nodes (
