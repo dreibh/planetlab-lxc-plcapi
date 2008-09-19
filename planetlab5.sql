@@ -262,7 +262,7 @@ CREATE TABLE nodes (
     site_id integer REFERENCES sites NOT NULL,		-- At which site 
 
     boot_state text REFERENCES boot_states NOT NULL	-- Node boot state
-    	       DEFAULT 'inst', 
+    	       DEFAULT 'install', 
     deleted boolean NOT NULL DEFAULT false,		-- Is deleted
 
     -- Optional
