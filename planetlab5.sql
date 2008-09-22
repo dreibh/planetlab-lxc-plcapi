@@ -139,8 +139,11 @@ CREATE TABLE address_types (
     description text					-- Address type description
 ) WITH OIDS;
 
+-- Multi-rows insertion "insert .. values (row1), (row2)" is not supported by pgsql-8.1
 -- 'Billing' Used to be 'Site'
-INSERT INTO address_types (name) VALUES ('Personal'), ('Shipping'), ('Billing');
+INSERT INTO address_types (name) VALUES ('Personal');
+INSERT INTO address_types (name) VALUES ('Shipping');
+INSERT INTO address_types (name) VALUES ('Billing');
 
 -- Mailing addresses
 CREATE TABLE addresses (
@@ -225,7 +228,10 @@ CREATE TABLE roles (
     role_id integer PRIMARY KEY,			-- Role identifier
     name text UNIQUE NOT NULL				-- Role symbolic name
 ) WITH OIDS;
-INSERT INTO roles (role_id, name) VALUES (10, 'admin'), (20, 'pi'), (30, 'user'), (40, 'tech');
+INSERT INTO roles (role_id, name) VALUES (10, 'admin');
+INSERT INTO roles (role_id, name) VALUES (20, 'pi');
+INSERT INTO roles (role_id, name) VALUES (30, 'user');
+INSERT INTO roles (role_id, name) VALUES (40, 'tech');
 
 CREATE TABLE person_role (
     person_id integer REFERENCES persons NOT NULL,	-- Account identifier
@@ -251,8 +257,12 @@ GROUP BY person_id;
 CREATE TABLE boot_states (
     boot_state text PRIMARY KEY
 ) WITH OIDS;
-INSERT INTO boot_states (boot_state) 
-       VALUES ('boot'), ('safeboot'), ('failboot'), ('disabled'), ('install'), ('reinstall');
+INSERT INTO boot_states (boot_state) VALUES ('boot');
+INSERT INTO boot_states (boot_state) VALUES ('safeboot');
+INSERT INTO boot_states (boot_state) VALUES ('failboot');
+INSERT INTO boot_states (boot_state) VALUES ('disabled');
+INSERT INTO boot_states (boot_state) VALUES ('install');
+INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 
 -- Nodes
 CREATE TABLE nodes (
@@ -342,8 +352,13 @@ INSERT INTO network_types (type) VALUES ('ipv4');
 CREATE TABLE network_methods (
     method text PRIMARY KEY -- Configuration method
 ) WITH OIDS;
-INSERT INTO network_methods (method) VALUES
-        ('static'), ('dhcp'), ('proxy'), ('tap'), ('ipmi'), ('unknown');
+
+INSERT INTO network_methods (method) VALUES ('static');
+INSERT INTO network_methods (method) VALUES ('dhcp');
+INSERT INTO network_methods (method) VALUES ('proxy');
+INSERT INTO network_methods (method) VALUES ('tap');
+INSERT INTO network_methods (method) VALUES ('ipmi');
+INSERT INTO network_methods (method) VALUES ('unknown');
 
 -- Node network interfaces
 CREATE TABLE interfaces (
@@ -621,11 +636,10 @@ GROUP BY pcu_id;
 CREATE TABLE slice_instantiations (
     instantiation text PRIMARY KEY
 ) WITH OIDS;
-INSERT INTO slice_instantiations (instantiation) VALUES 
-       ('not-instantiated'),				-- Placeholder slice
-       ('plc-instantiated'),				-- Instantiated by Node Manager
-       ('delegated'),					-- Manually instantiated
-       ('nm-controller');				-- NM Controller
+INSERT INTO slice_instantiations (instantiation) VALUES ('not-instantiated');	-- Placeholder slice
+INSERT INTO slice_instantiations (instantiation) VALUES ('plc-instantiated');	-- Instantiated by Node Manager
+INSERT INTO slice_instantiations (instantiation) VALUES ('delegated');		-- Manually instantiated
+INSERT INTO slice_instantiations (instantiation) VALUES ('nm-controller');	-- NM Controller
 
 -- Slices
 CREATE TABLE slices (
@@ -1213,15 +1227,13 @@ LEFT JOIN node_session USING (session_id);
 -- Built-in maintenance account and default site
 --------------------------------------------------------------------------------
 
-INSERT INTO persons
-(first_name, last_name, email, password, enabled)
-VALUES
-('Maintenance', 'Account', 'maint@localhost.localdomain', 'nopass', true);
+INSERT INTO persons (first_name, last_name, email, password, enabled)
+VALUES              ('Maintenance', 'Account', 'maint@localhost.localdomain', 'nopass', true);
 
-INSERT INTO person_role (person_id, role_id) 
-       VALUES (1, 10), (1, 20), (1, 30), (1, 40);
+INSERT INTO person_role (person_id, role_id) VALUES (1, 10);
+INSERT INTO person_role (person_id, role_id) VALUES (1, 20);
+INSERT INTO person_role (person_id, role_id) VALUES (1, 30);
+INSERT INTO person_role (person_id, role_id) VALUES (1, 40);
 
-INSERT INTO sites
-(login_base, name, abbreviated_name, max_slices)
-VALUES
-('pl', 'PlanetLab Central', 'PLC', 100);
+INSERT INTO sites (login_base, name, abbreviated_name, max_slices)
+VALUES ('pl', 'PlanetLab Central', 'PLC', 100);
