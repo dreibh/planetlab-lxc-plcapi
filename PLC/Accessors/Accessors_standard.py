@@ -17,7 +17,7 @@ current_module = sys.modules[__name__]
 #
 
 # slice vref
-define_accessors(current_module, Slice, "Vref", 'vref', 'slice/config',
+define_accessors(current_module, Slice, "Vref", 'vref', 'slice/config', 'vserver reference image type',
                  get_roles=all_roles, set_roles=['admin'])
 
 # node architecture 
