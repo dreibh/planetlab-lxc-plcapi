@@ -16,6 +16,10 @@ current_module = sys.modules[__name__]
 # description/category area is unlikely to make it into the database
 #
 
+# slice vref
+define_accessors(current_module, Slice, "Vref", 'vref', 'slice/config',
+                 get_roles=all_roles, set_roles=['admin'])
+
 # node architecture 
 define_accessors(current_module, Node, "Arch", 'arch',  'node/config', 'architecture name', 
                  get_roles=all_roles, set_roles=tech_roles )
