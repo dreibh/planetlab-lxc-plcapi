@@ -3,6 +3,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
+from PLC.sendmail import sendmail
 
 related_fields = Person.related_fields.keys()
 can_update = lambda (field, value): field in \
@@ -62,7 +63,19 @@ class UpdatePerson(Method):
         person.update(person_fields)
 	person.update_last_updated(False)
         person.sync()
-	
+
+	if 'enabled' in person_fields:
+	    To = [("%s %s" % (person['first_name'], person['last_name']), person['email'])]
+	    Cc = []	
+	    if person['enabled']:
+		Subject = "PlanetLab account enabled"
+		Body = "Your PlanetLab account has been enabled. You should now be allowd to access you account"  
+	    else:
+		Subject = "PlanetLab account disabled"
+		Body = "Your PlanetLab account has been disabled. Please contact your PI or PlanetLab support for more information"
+	    sendmail(self.api, To = To, Cc = Cc, Subject = Subject, Body = Body)		
+
+			  	
 	# Logging variables
 	self.event_objects = {'Person': [person['person_id']]}
 
