@@ -68,11 +68,11 @@ class UpdatePerson(Method):
 	    To = [("%s %s" % (person['first_name'], person['last_name']), person['email'])]
 	    Cc = []	
 	    if person['enabled']:
-		Subject = "PlanetLab account enabled"
-		Body = "Your PlanetLab account has been enabled. You should now be allowd to access you account"  
+		Subject = "%s account enabled" % (self.api.config.PLC_NAME)
+		Body = "Your %s account has been enabled. Please visit %s to access your account." % (self.api.config.PLC_NAME, self.api.config.PLC_WWW_HOST) 
 	    else:
-		Subject = "PlanetLab account disabled"
-		Body = "Your PlanetLab account has been disabled. Please contact your PI or PlanetLab support for more information"
+		Subject = "%s account disabled" % (self.api.config.PLC_NAME)
+		Body = "Your %s account has been disabled. Please contact your PI or PlanetLab support for more information" % (self.api.config.PLC_NAME)
 	    sendmail(self.api, To = To, Cc = Cc, Subject = Subject, Body = Body)		
 
 			  	
