@@ -7,7 +7,7 @@ from PLC.Auth import Auth
 related_fields = Node.related_fields.keys()
 can_update = lambda (field, value): field in \
              ['hostname', 'boot_state', 'model', 'version',
-              'key', 'session', 'boot_nonce'] + \
+              'key', 'session', 'boot_nonce', 'site_id'] + \
 	     related_fields
 
 class UpdateNode(Method):
@@ -35,11 +35,12 @@ class UpdateNode(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, node_id_or_hostname, node_fields):
-        node_fields = dict(filter(can_update, node_fields.items()))
+        
+	node_fields = dict(filter(can_update, node_fields.items()))
 
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
-            for key in 'key', 'session', 'boot_nonce':
+            for key in 'key', 'session', 'boot_nonce', 'site_id':
                 if node_fields.has_key(key):
                     del node_fields[key]
 
