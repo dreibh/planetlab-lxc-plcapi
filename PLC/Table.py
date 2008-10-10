@@ -231,8 +231,9 @@ class Row(dict):
            keys == [self.primary_key] or \
            insert is True:
 	    
-	    # If primary key id is a serial int, get next id
-	    if self.fields[self.primary_key].type in (IntType, LongType):
+	    # If primary key id is a serial int and it isnt included, get next id
+	    if self.fields[self.primary_key].type in (IntType, LongType) and \
+	       self.primary_key not in self:
 		pk_id = self.api.db.next_id(self.table_name, self.primary_key)
 		self[self.primary_key] = pk_id
 		db_fields[self.primary_key] = pk_id
