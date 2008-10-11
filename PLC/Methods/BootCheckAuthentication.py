@@ -1,3 +1,4 @@
+# $Id#
 from PLC.Methods.AuthCheck import AuthCheck
 
 class BootCheckAuthentication(AuthCheck):

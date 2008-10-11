@@ -1,3 +1,4 @@
+# $Id#
 from PLC.Methods.SliceGetTicket import SliceGetTicket
 
 class SliceTicketGet(SliceGetTicket):

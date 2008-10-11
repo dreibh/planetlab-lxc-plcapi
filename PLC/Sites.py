@@ -1,3 +1,4 @@
+# $Id#
 from types import StringTypes
 import string
 
