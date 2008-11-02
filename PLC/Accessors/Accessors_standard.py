@@ -20,6 +20,7 @@ current_module = sys.modules[__name__]
 define_accessors(current_module, Slice, "Vref", 'vref', 'slice/config', 'vserver reference image type',
                  get_roles=all_roles, set_roles=['admin'])
 
+
 # node architecture 
 define_accessors(current_module, Node, "Arch", 'arch',  'node/config', 'architecture name', 
                  get_roles=all_roles, set_roles=tech_roles )
@@ -30,8 +31,12 @@ define_accessors(current_module, Node, "Pldistro", 'pldistro',  'node/config', '
 define_accessors(current_module, Node, "Deployment", "deployment", "node/operation", 
                  'deployment flavour, typically "alpha", "beta", or "production"',
                  get_roles=all_roles, set_roles=['admin'])
+# extension
+define_accessors(current_module, Node, "Extensions", "extensions", "node/config", "spce-separated list of extensions to install",
+                 get_roles=all_roles, set_roles=['admin'])
 
-# interface alias
+
+# interface accessors
 define_accessors(current_module, Interface, "Ifname", "ifname", "interface/config", "linux name",
                  get_roles=all_roles, set_roles=tech_roles)
 define_accessors(current_module, Interface, "Driver", "driver", "interface/config", "driver name",
