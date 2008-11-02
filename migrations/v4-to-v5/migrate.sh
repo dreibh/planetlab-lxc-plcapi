@@ -16,7 +16,7 @@ SCHEMA_SQL=$UPUP/planetlab5.sql
 DATE=$(date +%Y-%m-%d-%H-%M)
 DATE_=$(date +%Y_%m_%d_%H_%M)
 LOG=${DIRNAME}/${DATE}.log
-DUMP=${DIRNAME}/${DATE}-pl4.sql
+DUMP=${DIRNAME}/pl4.sql
 RESTORE=${DIRNAME}/${DATE}-pl5.sql
 FAKE=${DIRNAME}/input-pl4.sql
 VIEWS_SQL=$DIRNAME/${DATE}-views5.sql
@@ -28,41 +28,6 @@ PGM_NODEGROUPS=$DIRNAME/parse-site-nodegroups.py
 
 # load config
 . /etc/planetlab/plc_config
-
-# return 0 (yes) or 1 (no) whether the database exists
-function check_for_database () {
-    dbname=$1; shift
-    psql --user=$PLC_DB_USER --quiet -c "SELECT datname from pg_database where datname= '$dbname' LIMIT 1" $dbname > /dev/null 2>&1 
-    return $?
-}
-
-# when 'service plc start' gets run, the planetlab5 DB gets created 
-# so this script will drop the planetlab5 DB and re-create it from scratch 
-# with the contents of the planetlab4 DB that is epxected to exist
-function warning () {
-    echo "========================================"
-    echo "$COMMAND"
-    echo "This script is designed to ease the migration from myplc 4.2 to 5.0"
-    echo "It attempts to (re)create the planetlab5 database from planetlab4"
-    echo ""
-    echo "You might wish to edit/review $NODEGROUPS_DEF to finetune your migration"
-    echo ""
-    echo "Please refer to http://svn.planet-lab.org/wiki/Migration4to5"
-    echo "========================================"
-    echo -n "Are you sure you want to proceed y/[n] ? "
-    read answer
-    case $answer in
-	y|Y) echo See log in $LOG ;;
-	*) echo "Bye" ; exit 1 ;;
-    esac
-}
-
-function check () {
-    [ -f $MIGRATION_SED ] || { echo $MIGRATION_SED not found - exiting ; exit 1; }
-    [ -f $MIGRATION_SQL ] || { echo $MIGRATION_SQL not found - exiting ; exit 1; }
-    [ -f $SCHEMA_SQL ] || { echo $SCHEMA_SQL not found - exiting ; exit 1; }
-    [ -f $NODEGROUPS_DEF ] || { echo $NODEGROUPS_DEF not found - exiting ; exit 1; }
-}
 
 function run () {
     message=$1; shift
@@ -80,17 +45,69 @@ function run () {
     echo Done
 }
 
-function migrate () {
-    set -e
-    cd $DIRNAME
+# return 0 (yes) or 1 (no) whether the database exists
+function check_for_database () {
+    dbname=$1; shift
+    psql --user=$PLC_DB_USER --quiet -c "SELECT datname from pg_database where datname= '$dbname' LIMIT 1" $dbname > /dev/null 2>&1 
+    return $?
+}
 
-    # check that planetlab4 exists
-    if check_for_database planetlab4 ; then
-	echo "OK : FOUND db planetlab4"
+# when 'service plc start' gets run, the planetlab5 DB gets created 
+# so this script will drop the planetlab5 DB and re-create it from scratch 
+# with the contents of the planetlab4 DB that is epxected to exist
+function confirm_nodegroups () {
+    echo "========================================"
+    echo "$COMMAND"
+    echo "This script is designed to ease the migration from myplc 4.2 to 5.0"
+    echo "It attempts to (re)create the planetlab5 database from planetlab4"
+    echo ""
+    echo "You might wish to edit/review"
+    echo "    $NODEGROUPS_DEF"
+    echo "    to finetune your migration"
+    echo ""
+    echo "Please refer to http://svn.planet-lab.org/wiki/Migration4to5"
+    echo "========================================"
+    echo -n "Are you sure you want to proceed y/[n] ? "
+    read answer
+    case $answer in
+	y|Y) echo See log in $LOG ;;
+	*) echo "Bye" ; exit 1 ;;
+    esac
+}
+
+function check_env () {
+    [ -f $MIGRATION_SED ] || { echo $MIGRATION_SED not found - exiting ; exit 1; }
+    [ -f $MIGRATION_SQL ] || { echo $MIGRATION_SQL not found - exiting ; exit 1; }
+    [ -f $SCHEMA_SQL ] || { echo $SCHEMA_SQL not found - exiting ; exit 1; }
+    [ -f $NODEGROUPS_DEF ] || { echo $NODEGROUPS_DEF not found - exiting ; exit 1; }
+}
+
+# connect to the former myplc, performs a local dump of planetlab4 and creates is locally
+function get_planetlab4 () {
+
+    # for faster tests ..
+    if [ -f $FAKE ] ; then
+	echo ''
+	echo 'xxxx     WARNING     WARNING     WARNING     WARNING     WARNING     xxx'
+	echo ''
+	echo Using fake input for tests $FAKE
+	echo ''
+	echo 'xxxx     WARNING     WARNING     WARNING     WARNING     WARNING     xxx'
+	echo ''
+	DUMP=$FAKE
+    elif [ -f $DUMP ] ; then
+	echo "Using planetlab4 from $DUMP"
     else
-	echo "ERROR : planetlab4 NOT FOUND - bye"
-	exit 1
+
+	echo -n "Enter the hostname for the former DB service : "
+	read hostname
+	echo "Running pg_dump on $hostname.."
+	pg_dump --ignore-version --host=$hostname --user=$PLC_DB_USER planetlab4 -f ${DUMP}
+	DUMP=$DUMP
     fi
+}
+
+function prepare_planetlab5 () {
 
     # check if planetlab5 exists
     if check_for_database planetlab5 ; then
@@ -117,25 +134,17 @@ function migrate () {
     if check_for_database planetlab5 ; then
 	echo "ERROR : FOUND planetlab5 - should not happen - exiting"
 	exit 1
-    else
-	echo "OK, we're clear, let's go"
     fi
+}
+
+
+
+function migrate () {
+    set -e
+    cd $DIRNAME
 
     # dump planetlab4
     
-    if [ ! -f $FAKE ] ; then
-	run "Dumping     planetlab4 in $DUMP" pg_dump --user=$PLC_DB_USER -f $DUMP planetlab4 
-    else 
-	echo ''
-	echo 'xxxx     WARNING     WARNING     WARNING     WARNING     WARNING     xxx'
-	echo ''
-	echo Using fake input for tests $FAKE
-	echo ''
-	echo 'xxxx     WARNING     WARNING     WARNING     WARNING     WARNING     xxx'
-	echo ''
-	DUMP=$FAKE
-    fi
-
     run "Copying     into $RESTORE" cp $DUMP $RESTORE
     run "Renaming    identifiers in $RESTORE" sed -f $MIGRATION_SED -i $RESTORE
 
@@ -174,11 +183,17 @@ function links () {
 
 function main () {
     
-    check
-    warning
+    check_env
+    confirm_nodegroups
+    echo "OK, we're clear, let's go"
     set -e
+    get_planetlab4
+    prepare_planetlab5
     migrate
     links
+    echo "See logfile $LOG for detailed log"
+    echo "Checking for 'error' in the logfile"
+    grep -i error $LOG
 
 }
 

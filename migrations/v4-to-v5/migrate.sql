@@ -227,8 +227,11 @@ drop table nodegroup_node;
 ----------------------------------------
 -- boot states
 ----------------------------------------
-INSERT INTO boot_states (boot_state) 
-       VALUES ('safeboot'), ('failboot'), ('disabled'), ('install'), ('reinstall');
+INSERT INTO boot_states (boot_state) VALUES ('safeboot');
+INSERT INTO boot_states (boot_state) VALUES ('failboot');
+INSERT INTO boot_states (boot_state) VALUES ('disabled');
+INSERT INTO boot_states (boot_state) VALUES ('install');
+INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 
 -- xxx need checking 
 --
