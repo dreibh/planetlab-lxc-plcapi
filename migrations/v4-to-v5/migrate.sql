@@ -236,13 +236,13 @@ INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 -- xxx need checking 
 --
 -- boot          boot
--- dbg           safeboot ?
--- diag          failboot ?
+-- dbg           failboot
+-- diag          safeboot 
 -- disable       disabled
 -- inst          install
 -- rins          reinstall
--- new           reinstall ?
--- rcnf	      failboot ?
+-- new           reinstall
+-- rcnf	      	 failboot
 
 
 UPDATE nodes SET boot_state='failboot' WHERE boot_state='dbg';
