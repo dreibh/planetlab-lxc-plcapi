@@ -432,7 +432,7 @@ class GetBootMedium(Method):
                 if "serial" in build_sh_spec: 
                     build_sh_options += " -s %s"%build_sh_spec['serial']
                 
-                for k_option in build_sh_options['-k']:
+                for k_option in build_sh_spec['-k']:
                     build_sh_options += " -k %s"%k_option
 
                 log_file="%s.log"%node_image
