@@ -360,6 +360,13 @@ class GetBootMedium(Method):
                         raise PLCPermissionDenied, "Could not create dir %s"%filedir
 
         
+        # log call
+        if node:
+            self.message='GetBootMedium on node %s - action=%s'%(nodename,action)
+            self.event_objects={'Node': [ node ]}
+        else:
+            self.message='GetBootMedium - generic - action=%s'%action
+
         ### generic media
         if action == 'generic-iso' or action == 'generic-usb':
             if options:
