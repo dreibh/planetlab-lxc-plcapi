@@ -35,7 +35,7 @@ define_accessors(current_module, Node, "Deployment", "deployment", "node/operati
 define_accessors(current_module, Node, "Extensions", "extensions", "node/config", "space-separated list of extensions to install",
                  get_roles=all_roles, set_roles=['admin'])
 # test nodes perform their installation from an uncompressed bootstrapfs
-define_accessors(current_module, Node, "PlainBoostrapfs", "plain-bootstrapfs", "node/config", "use uncompressed bootstrapfs when set",
+define_accessors(current_module, Node, "PlainBootstrapfs", "plain-bootstrapfs", "node/config", "use uncompressed bootstrapfs when set",
                  get_roles=all_roles, set_roles=['admin','pi','tech'])
 
 # interface accessors
