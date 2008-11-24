@@ -93,6 +93,7 @@ class GetBootMedium(Method):
         - 'partition' - for USB actions only
         - 'cramfs'
         - 'serial' or 'serial:<console_spec>'
+        - 'no-hangcheck'
         console_spec (or 'default') is passed as-is to bootcd/build.sh
         it is expected to be a colon separated string denoting
         tty - baudrate - parity - bits
@@ -282,19 +283,21 @@ class GetBootMedium(Method):
                 raise PLCInvalidArgument, "Options are not supported for node configs"
         else:
             # create a dict for build.sh 
-            optdict={}
+            build_sh_spec={'-k':[]}
             for option in options:
                 if option == "cramfs":
-                    optdict['cramfs']=True
+                    build_sh_spec['cramfs']=True
                 elif option == 'partition':
                     if type != "usb":
                         raise PLCInvalidArgument, "option 'partition' is for USB images only"
                     else:
                         type="usb_partition"
                 elif option == "serial":
-                    optdict['serial']='default'
+                    build_sh_spec['serial']='default'
                 elif option.find("serial:") == 0:
-                    optdict['serial']=option.replace("serial:","")
+                    build_sh_spec['serial']=option.replace("serial:","")
+                elif option == "no-hangcheck":
+                    build_sh_spec['-k'].append('hangcheck_reboot=0')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
@@ -423,9 +426,15 @@ class GetBootMedium(Method):
                 node_image = "%s/%s%s"%(self.WORKDIR,nodename,suffix)
 
                 # make build's arguments
-                serial_arg=""
-                if "cramfs" in optdict: type += "_cramfs"
-                if "serial" in optdict: serial_arg = "-s %s"%optdict['serial']
+                build_sh_options=""
+                if "cramfs" in build_sh_spec: 
+                    type += "_cramfs"
+                if "serial" in build_sh_spec: 
+                    build_sh_options += " -s %s"%build_sh_spec['serial']
+                
+                for k_option in build_sh_options['-k']:
+                    build_sh_options += " -k %s"%k_option
+
                 log_file="%s.log"%node_image
                 # invoke build.sh
                 build_command = '%s -f "%s" -o "%s" -t "%s" %s &> %s' % (self.BOOTCDBUILD,
