@@ -32,9 +32,11 @@ define_accessors(current_module, Node, "Deployment", "deployment", "node/operati
                  'deployment flavour, typically "alpha", "beta", or "production"',
                  get_roles=all_roles, set_roles=['admin'])
 # extension
-define_accessors(current_module, Node, "Extensions", "extensions", "node/config", "spce-separated list of extensions to install",
+define_accessors(current_module, Node, "Extensions", "extensions", "node/config", "space-separated list of extensions to install",
                  get_roles=all_roles, set_roles=['admin'])
-
+# test nodes perform their installation from an uncompressed bootstrapfs
+define_accessors(current_module, Node, "PlainBoostrapfs", "plain-bootstrapfs", "node/config", "use uncompressed bootstrapfs when set",
+                 get_roles=all_roles, set_roles=['admin','pi','tech']
 
 # interface accessors
 define_accessors(current_module, Interface, "Ifname", "ifname", "interface/config", "linux name",
