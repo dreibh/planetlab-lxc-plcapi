@@ -441,7 +441,7 @@ class GetBootMedium(Method):
                                                                          floppy_file,
                                                                          node_image,
                                                                          type,
-                                                                         serial_arg,
+                                                                         build_sh_options,
                                                                          log_file)
                 if self.DEBUG:
                     print 'build command:',build_command
