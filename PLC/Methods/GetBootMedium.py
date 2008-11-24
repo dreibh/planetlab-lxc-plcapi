@@ -175,6 +175,7 @@ class GetBootMedium(Method):
         if renew_key:
             file += 'NODE_ID="%d"\n' % node['node_id']
             file += 'NODE_KEY="%s"\n' % node['key']
+            # not used anywhere, just a note for operations people
             file += 'KEY_RENEWAL_DATE="%s"\n' % time.strftime('%Y-%m-%d at %H:%M:%S +0000',time.gmtime())
 
         if primary['mac']:
