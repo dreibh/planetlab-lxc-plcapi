@@ -177,7 +177,7 @@ class GetBootMedium(Method):
             file += 'NODE_ID="%d"\n' % node['node_id']
             file += 'NODE_KEY="%s"\n' % node['key']
             # not used anywhere, just a note for operations people
-            file += 'KEY_RENEWAL_DATE="%s"\n' % time.strftime('%Y-%m-%d at %H:%M:%S +0000',time.gmtime())
+            file += 'KEY_RENEWAL_DATE="%s"\n' % time.strftime('%Y/%m/%d at %H:%M +0000',time.gmtime())
 
         if primary['mac']:
             file += 'NET_DEVICE="%s"\n' % primary['mac'].lower()
@@ -363,7 +363,7 @@ class GetBootMedium(Method):
         # log call
         if node:
             self.message='GetBootMedium on node %s - action=%s'%(nodename,action)
-            self.event_objects={'Node': [ node ]}
+            self.event_objects={'Node': [ node ['node_id'] ]}
         else:
             self.message='GetBootMedium - generic - action=%s'%action
 
