@@ -297,8 +297,7 @@ class GetBootMedium(Method):
                 elif option.find("serial:") == 0:
                     build_sh_spec['serial']=option.replace("serial:","")
                 elif option == "no-hangcheck":
-                    build_sh_spec['kargs'].append('hcheck_reboot=0')
-                    build_sh_spec['kargs'].append('debug')
+                    build_sh_spec['kargs'].append('hcheck_reboot0')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
