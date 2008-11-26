@@ -283,7 +283,7 @@ class GetBootMedium(Method):
                 raise PLCInvalidArgument, "Options are not supported for node configs"
         else:
             # create a dict for build.sh 
-            build_sh_spec={'-k':[]}
+            build_sh_spec={'kargs':[]}
             for option in options:
                 if option == "cramfs":
                     build_sh_spec['cramfs']=True
@@ -297,7 +297,8 @@ class GetBootMedium(Method):
                 elif option.find("serial:") == 0:
                     build_sh_spec['serial']=option.replace("serial:","")
                 elif option == "no-hangcheck":
-                    build_sh_spec['-k'].append('hcheck_reboot=0')
+                    build_sh_spec['kargs'].append('hcheck_reboot=0')
+                    build_sh_spec['kargs'].append('debug')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
@@ -439,8 +440,8 @@ class GetBootMedium(Method):
                 if "serial" in build_sh_spec: 
                     build_sh_options += " -s %s"%build_sh_spec['serial']
                 
-                for k_option in build_sh_spec['-k']:
-                    build_sh_options += " -k %s"%k_option
+                for karg in build_sh_spec['kargs']:
+                    build_sh_options += ' -k "%s"'%karg
 
                 log_file="%s.log"%node_image
                 # invoke build.sh
