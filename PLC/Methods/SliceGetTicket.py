@@ -9,7 +9,7 @@ from PLC.Faults import *
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 
 from PLC.Methods.GetSliceTicket import GetSliceTicket
 
@@ -97,7 +97,7 @@ class SliceGetTicket(GetSliceTicket):
 
         nodes = Nodes(self.api, slice['node_ids']).dict()
         persons = Persons(self.api, slice['person_ids']).dict()
-        slice_attributes = SliceAttributes(self.api, slice['slice_attribute_ids']).dict()
+        slice_tags = SliceTags(self.api, slice['slice_tag_ids']).dict()
 
         ticket = NamedTemporaryFile()
 
@@ -141,13 +141,13 @@ class SliceGetTicket(GetSliceTicket):
 
         # <rspec>
         xml.startElement('rspec', {})
-        for slice_attribute_id in slice['slice_attribute_ids']:
-            if not slice_attributes.has_key(slice_attribute_id):
+        for slice_tag_id in slice['slice_tag_ids']:
+            if not slice_tags.has_key(slice_tag_id):
                 continue
-            slice_attribute = slice_attributes[slice_attribute_id]
+            slice_tag = slice_tags[slice_tag_id]
 
-            name = slice_attribute['name']
-            value = slice_attribute['value']
+            name = slice_tag['name']
+            value = slice_tag['value']
 
             def kbps_to_bps(kbps):
                 bps = int(kbps) * 1000
@@ -179,7 +179,7 @@ class SliceGetTicket(GetSliceTicket):
 
             if name == 'initscript':
                 (attribute_name, value_name, type) = ('initscript', 'initscript_id', 'integer')
-                value = slice_attribute['slice_attribute_id']
+                value = slice_tag['slice_tag_id']
             elif name in name_type_cast:
                 (attribute_name, value_name, type, cast) = name_type_cast[name]
                 value = cast(value)

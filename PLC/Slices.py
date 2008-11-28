@@ -11,7 +11,7 @@ from PLC.Table import Row, Table
 from PLC.SliceInstantiations import SliceInstantiation, SliceInstantiations
 from PLC.Nodes import Node
 from PLC.Persons import Person, Persons
-from PLC.SliceAttributes import SliceAttribute
+from PLC.SliceTags import SliceTag
 
 class Slice(Row):
     """
@@ -23,7 +23,7 @@ class Slice(Row):
 
     table_name = 'slices'
     primary_key = 'slice_id'
-    join_tables = ['slice_node', 'slice_person', 'slice_attribute', 'peer_slice', 'node_slice_whitelist']
+    join_tables = ['slice_node', 'slice_person', 'slice_tag', 'peer_slice', 'node_slice_whitelist']
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
@@ -37,7 +37,7 @@ class Slice(Row):
         'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
         'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
         'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
-        'slice_attribute_ids': Parameter([int], "List of slice attributes", ro = True),
+        'slice_tag_ids': Parameter([int], "List of slice attributes", ro = True),
         'peer_id': Parameter(int, "Peer to which this slice belongs", nullok = True),
         'peer_slice_id': Parameter(int, "Foreign slice identifier at peer", nullok = True),
         }
@@ -152,14 +152,14 @@ class Slice(Row):
 		AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, self['slice_id'], list(new_nodes))
 	    if stale_nodes:
 		DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, self['slice_id'], list(stale_nodes))			
-    def associate_slice_attributes(self, auth, fields, value):
+    def associate_slice_tags(self, auth, fields, value):
 	"""
-	Deletes slice_attribute_ids not found in value list (using DeleteSliceAttribute). 
-	Adds slice_attributes if slice_fields w/o slice_id is found (using AddSliceAttribute).
-	Updates slice_attribute if slice_fields w/ slice_id is found (using UpdateSlceiAttribute).  
+	Deletes slice_tag_ids not found in value list (using DeleteSliceTag). 
+	Adds slice_tags if slice_fields w/o slice_id is found (using AddSliceTag).
+	Updates slice_tag if slice_fields w/ slice_id is found (using UpdateSlceiAttribute).  
 	"""
 	
-	assert 'slice_attribute_ids' in self
+	assert 'slice_tag_ids' in self
 	assert isinstance(value, list)
 
 	(attribute_ids, blank, attributes) = self.separate_types(value)
@@ -167,21 +167,21 @@ class Slice(Row):
 	# There is no way to add attributes by id. They are
 	# associated with a slice when they are created.
 	# So we are only looking to delete here 
-	if self['slice_attribute_ids'] != attribute_ids:
-	    from PLC.Methods.DeleteSliceAttribute import DeleteSliceAttribute
-	    stale_attributes = set(self['slice_attribute_ids']).difference(attribute_ids)
+	if self['slice_tag_ids'] != attribute_ids:
+	    from PLC.Methods.DeleteSliceTag import DeleteSliceTag
+	    stale_attributes = set(self['slice_tag_ids']).difference(attribute_ids)
 	
 	    for stale_attribute in stale_attributes:
-		DeleteSliceAttribute.__call__(DeleteSliceAttribute(self.api), auth, stale_attribute['slice_attribute_id'])	 	
+		DeleteSliceTag.__call__(DeleteSliceTag(self.api), auth, stale_attribute['slice_tag_id'])	 	
 	
 	# If dictionary exists, we are either adding new
         # attributes or updating existing ones.
         if attributes:
-            from PLC.Methods.AddSliceAttribute import AddSliceAttribute
-            from PLC.Methods.UpdateSliceAttribute import UpdateSliceAttribute
+            from PLC.Methods.AddSliceTag import AddSliceTag
+            from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 	
-	    added_attributes = filter(lambda x: 'slice_attribute_id' not in x, attributes)
-	    updated_attributes = filter(lambda x: 'slice_attribute_id' in x, attributes)
+	    added_attributes = filter(lambda x: 'slice_tag_id' not in x, attributes)
+	    updated_attributes = filter(lambda x: 'slice_tag_id' in x, attributes)
 
 	    for added_attribute in added_attributes:
 		if 'tag_type' in added_attribute:
@@ -206,13 +206,13 @@ class Slice(Row):
 		else:
 		    nodegroup_id = None 
  
-		AddSliceAttribute.__call__(AddSliceAttribute(self.api), auth, self['slice_id'], type, value, node_id, nodegroup_id)
+		AddSliceTag.__call__(AddSliceTag(self.api), auth, self['slice_id'], type, value, node_id, nodegroup_id)
 	    for updated_attribute in updated_attributes:
-		attribute_id = updated_attribute.pop('slice_attribute_id')
-		if attribute_id not in self['slice_attribute_ids']:
+		attribute_id = updated_attribute.pop('slice_tag_id')
+		if attribute_id not in self['slice_tag_ids']:
 		    raise PLCInvalidArgument, "Attribute doesnt belong to this slice" 
 		else:
-		    UpdateSliceAttribute.__call__(UpdateSliceAttribute(self.api), auth, attribute_id, updated_attribute)	 	 
+		    UpdateSliceTag.__call__(UpdateSliceTag(self.api), auth, attribute_id, updated_attribute)	 	 
 	
     def sync(self, commit = True):
         """

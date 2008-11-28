@@ -12,9 +12,9 @@ from PLC.Faults import *
 from PLC.Nodes import Nodes, Node
 from PLC.NodeTags import NodeTags, NodeTag
 from PLC.Interfaces import Interfaces, Interface
-from PLC.InterfaceSettings import InterfaceSettings, InterfaceSetting
+from PLC.InterfaceTags import InterfaceTags, InterfaceTag
 from PLC.Slices import Slices, Slice
-from PLC.SliceAttributes import SliceAttributes, SliceAttribute
+from PLC.SliceTags import SliceTags, SliceTag
 
 # this is another story..
 #from PLC.Ilinks import Ilink
@@ -26,10 +26,10 @@ taggable_classes = { Node : {'table_class' : Nodes,
                              'joins_class' : NodeTags, 'join_class' : NodeTag,
                              'value_key': 'tagvalue', 'secondary_key': 'hostname'},
                      Interface : {'table_class' : Interfaces, 
-                                  'joins_class': InterfaceSettings, 'join_class': InterfaceSetting,
+                                  'joins_class': InterfaceTags, 'join_class': InterfaceTag,
                                   'value_key' : 'value' }, 
                      Slice: {'table_class' : Slices, 
-                             'joins_class': SliceAttributes, 'join_class': SliceAttribute,
+                             'joins_class': SliceTags, 'join_class': SliceTag,
                              'value_key' : 'value', 'secondary_key':'login_base'},
 #                     Ilink : xxx
                      }
@@ -149,7 +149,7 @@ def define_accessors (module, objclass, methodsuffix,
             tag_type.sync()
         tag_type_id = tag_type['tag_type_id']
 
-        # locate the join object (e.g. NodeTag, SliceAttribute or InterfaceSetting)
+        # locate the join object (e.g. NodeTag, SliceTag or InterfaceTag)
         filter = {'tag_type_id':tag_type_id}
         if isinstance (id_or_name,int):
             filter[primary_key]=id_or_name

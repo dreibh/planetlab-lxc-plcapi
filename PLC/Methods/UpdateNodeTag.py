@@ -43,7 +43,7 @@ class UpdateNodeTag(Method):
             raise PLCInvalidArgument, "No such node tag %r"%node_tag_id
         node_tag = node_tags[0]
 
-        ### reproducing a check from UpdateSliceAttribute, looks dumb though
+        ### reproducing a check from UpdateSliceTag, looks dumb though
         nodes = Nodes(self.api, [node_tag['node_id']])
         if not nodes:
             raise PLCInvalidArgument, "No such node %r"%node_tag['node_id']

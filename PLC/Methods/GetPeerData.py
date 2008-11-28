@@ -17,7 +17,7 @@ from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.Slices import Slice, Slices
-from PLC.SliceAttributes import SliceAttributes
+from PLC.SliceTags import SliceTags
 
 class GetPeerData(Method):
     """
@@ -67,7 +67,7 @@ class GetPeerData(Method):
 				     'peer_id': None}, person_fields)
 
 	# filter out system slices
-        system_slice_ids = SliceAttributes(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+        system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
 	slices = Slices(self.api, {'peer_id': None,
 				   '~slice_id':system_slice_ids.keys()})
 	

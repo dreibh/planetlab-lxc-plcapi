@@ -40,7 +40,7 @@ def patch_legacy_arg (arg):
 
 def legacy_method (legacyname):
     # new method name
-    newname=legacyname.replace("NodeNetwork","Interface")
+    newname=legacyname.replace("NodeNetwork","Interface").replace("Setting","Tag")
     # locate new class
     newclass=getattr(import_deep("PLC.Methods."+newname),newname)
     # create class for legacy name

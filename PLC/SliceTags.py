@@ -1,0 +1,48 @@
+# $Id#
+from PLC.Faults import *
+from PLC.Parameter import Parameter
+from PLC.Filter import Filter
+from PLC.Table import Row, Table
+from PLC.TagTypes import TagType, TagTypes
+
+class SliceTag(Row):
+    """
+    Representation of a row in the slice_tag table. To use,
+    instantiate with a dict of values.
+    """
+
+    table_name = 'slice_tag'
+    primary_key = 'slice_tag_id'
+    fields = {
+        'slice_tag_id': Parameter(int, "Slice attribute identifier"),
+        'slice_id': Parameter(int, "Slice identifier"),
+        'node_id': Parameter(int, "Node identifier, if a sliver attribute"),
+	'nodegroup_id': Parameter(int, "Nodegroup identifier, if a sliver attribute"),
+        'tag_type_id': TagType.fields['tag_type_id'],
+        'tagname': TagType.fields['tagname'],
+        'description': TagType.fields['description'],
+        'category': TagType.fields['category'],
+        'min_role_id': TagType.fields['min_role_id'],
+        'value': Parameter(str, "Slice attribute value"),
+        }
+
+class SliceTags(Table):
+    """
+    Representation of row(s) from the slice_tag table in the
+    database.
+    """
+
+    def __init__(self, api, slice_tag_filter = None, columns = None):
+        Table.__init__(self, api, SliceTag, columns)
+
+        sql = "SELECT %s FROM view_slice_tags WHERE True" % \
+              ", ".join(self.columns)
+
+        if slice_tag_filter is not None:
+            if isinstance(slice_tag_filter, (list, tuple, set)):
+                slice_tag_filter = Filter(SliceTag.fields, {'slice_tag_id': slice_tag_filter})
+            elif isinstance(slice_tag_filter, dict):
+                slice_tag_filter = Filter(SliceTag.fields, slice_tag_filter)
+            sql += " AND (%s) %s" % slice_tag_filter.sql(api)
+
+        self.selectall(sql)

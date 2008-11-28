@@ -48,7 +48,7 @@ class Interface(Row):
 
     table_name = 'interfaces'
     primary_key = 'interface_id'
-    join_tables = ['interface_setting']
+    join_tables = ['interface_tag']
     fields = {
         'interface_id': Parameter(int, "Node interface identifier"),
         'method': Parameter(str, "Addressing method (e.g., 'static' or 'dhcp')"),
@@ -65,7 +65,7 @@ class Interface(Row):
         'hostname': Parameter(str, "(Optional) Hostname", nullok = True),
         'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
-        'interface_setting_ids' : Parameter([int], "List of interface settings"),
+        'interface_tag_ids' : Parameter([int], "List of interface settings"),
         }
 
     def validate_method(self, method):

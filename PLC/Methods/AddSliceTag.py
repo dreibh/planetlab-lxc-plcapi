@@ -5,12 +5,12 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.TagTypes import TagType, TagTypes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
 
-class AddSliceAttribute(Method):
+class AddSliceTag(Method):
     """
     Sets the specified attribute of the slice (or sliver, if
     node_id_or_hostname is specified) to the specified value.
@@ -21,7 +21,7 @@ class AddSliceAttribute(Method):
     attributes of slices or slivers at their sites, or of which they
     are members. Admins may set attributes of any slice or sliver.
 
-    Returns the new slice_attribute_id (> 0) if successful, faults
+    Returns the new slice_tag_id (> 0) if successful, faults
     otherwise.
     """
 
@@ -31,9 +31,9 @@ class AddSliceAttribute(Method):
         Auth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-        Mixed(SliceAttribute.fields['tag_type_id'],
-              SliceAttribute.fields['tagname']),
-        Mixed(SliceAttribute.fields['value'],
+        Mixed(SliceTag.fields['tag_type_id'],
+              SliceTag.fields['tagname']),
+        Mixed(SliceTag.fields['value'],
 	      InitScript.fields['name']),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'],
@@ -42,7 +42,7 @@ class AddSliceAttribute(Method):
               NodeGroup.fields['groupname'])
         ]
 
-    returns = Parameter(int, 'New slice_attribute_id (> 0) if successful')
+    returns = Parameter(int, 'New slice_tag_id (> 0) if successful')
 
     def call(self, auth, slice_id_or_name, tag_type_id_or_name, value, node_id_or_hostname = None, nodegroup_id_or_name = None):
         slices = Slices(self.api, [slice_id_or_name])
@@ -73,10 +73,10 @@ class AddSliceAttribute(Method):
 	    if not initscripts:	
 		raise PLCInvalidArgument, "No such plc initscript %r"%value
 
-        slice_attribute = SliceAttribute(self.api)
-        slice_attribute['slice_id'] = slice['slice_id']
-        slice_attribute['tag_type_id'] = tag_type['tag_type_id']
-        slice_attribute['value'] = unicode(value)
+        slice_tag = SliceTag(self.api)
+        slice_tag['slice_id'] = slice['slice_id']
+        slice_tag['tag_type_id'] = tag_type['tag_type_id']
+        slice_tag['value'] = unicode(value)
 
         # Sliver attribute if node is specified
         if node_id_or_hostname is not None:
@@ -87,7 +87,7 @@ class AddSliceAttribute(Method):
             
             if node['node_id'] not in slice['node_ids']:
                 raise PLCInvalidArgument, "Node not in the specified slice"
-            slice_attribute['node_id'] = node['node_id']
+            slice_tag['node_id'] = node['node_id']
 
 	# Sliver attribute shared accross nodes if nodegroup is sepcified
 	if nodegroup_id_or_name is not None:
@@ -96,21 +96,21 @@ class AddSliceAttribute(Method):
 		raise PLCInvalidArgument, "No such nodegroup %r"%nodegroup_id_or_name
 	    nodegroup = nodegroups[0]
 	
-	    slice_attribute['nodegroup_id'] = nodegroup['nodegroup_id']
+	    slice_tag['nodegroup_id'] = nodegroup['nodegroup_id']
 
 	# Check if slice attribute alreay exists
-        slice_attributes_check = SliceAttributes(self.api, {'slice_id': slice['slice_id'], 
+        slice_tags_check = SliceTags(self.api, {'slice_id': slice['slice_id'], 
                                                             'tagname': tag_type['tagname'], 
                                                             'value': value})
-        for slice_attribute_check in slice_attributes_check:
-            if 'node_id' in slice_attribute and slice_attribute['node_id'] == slice_attribute_check['node_id']:
+        for slice_tag_check in slice_tags_check:
+            if 'node_id' in slice_tag and slice_tag['node_id'] == slice_tag_check['node_id']:
 		raise PLCInvalidArgument, "Sliver attribute already exists"
-	    if 'nodegroup_id' in slice_attribute and slice_attribute['nodegroup_id'] == slice_attribute_check['nodegroup_id']:
+	    if 'nodegroup_id' in slice_tag and slice_tag['nodegroup_id'] == slice_tag_check['nodegroup_id']:
 		raise PLCInvalidArgument, "Slice attribute already exists for this nodegroup"
             if node_id_or_hostname is None and nodegroup_id_or_name is None:
                 raise PLCInvalidArgument, "Slice attribute already exists"
 
-        slice_attribute.sync()
-	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
+        slice_tag.sync()
+	self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
 
-        return slice_attribute['slice_attribute_id']
+        return slice_tag['slice_tag_id']

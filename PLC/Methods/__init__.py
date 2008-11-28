@@ -8,7 +8,7 @@ AddConfFileToNodeGroup
 AddIlink
 AddInitScript
 AddInterface
-AddInterfaceSetting
+AddInterfaceTag
 AddKeyType
 AddMessage
 AddNetworkMethod
@@ -31,8 +31,8 @@ AddSession
 AddSite
 AddSiteAddress
 AddSlice
-AddSliceAttribute
 AddSliceInstantiation
+AddSliceTag
 AddSliceToNodes
 AddSliceToNodesWhitelist
 AddTagType
@@ -52,7 +52,7 @@ DeleteConfFileFromNodeGroup
 DeleteIlink
 DeleteInitScript
 DeleteInterface
-DeleteInterfaceSetting
+DeleteInterfaceTag
 DeleteKey
 DeleteKeyType
 DeleteMessage
@@ -74,10 +74,10 @@ DeleteRoleFromPerson
 DeleteSession
 DeleteSite
 DeleteSlice
-DeleteSliceAttribute
 DeleteSliceFromNodes
 DeleteSliceFromNodesWhitelist
 DeleteSliceInstantiation
+DeleteSliceTag
 DeleteTagType
 GenerateNodeConfFile
 GetAddressTypes
@@ -89,7 +89,7 @@ GetEventObjects
 GetEvents
 GetIlinks
 GetInitScripts
-GetInterfaceSettings
+GetInterfaceTags
 GetInterfaces
 GetKeyTypes
 GetKeys
@@ -111,9 +111,9 @@ GetRoles
 GetSession
 GetSessions
 GetSites
-GetSliceAttributes
 GetSliceInstantiations
 GetSliceKeys
+GetSliceTags
 GetSliceTicket
 GetSlices
 GetSlicesMD5
@@ -148,7 +148,7 @@ UpdateConfFile
 UpdateIlink
 UpdateInitScript
 UpdateInterface
-UpdateInterfaceSetting
+UpdateInterfaceTag
 UpdateKey
 UpdateMessage
 UpdateNode
@@ -161,7 +161,7 @@ UpdatePeer
 UpdatePerson
 UpdateSite
 UpdateSlice
-UpdateSliceAttribute
+UpdateSliceTag
 UpdateTagType
 VerifyPerson
 system.listMethods

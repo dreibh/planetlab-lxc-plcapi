@@ -3,6 +3,8 @@
 -- $Id$
 --
 -- this is part of the script to migrate from 4.2 to 5.0
+-- 
+-- most of the renamings have taken place already when this script is invoked
 --
 
 ----------------------------------------
@@ -51,7 +53,7 @@ DROP VIEW node_slices CASCADE;
 DROP VIEW node_slices_whitelist CASCADE;
 DROP VIEW nodegroup_conf_files CASCADE;
 DROP VIEW nodegroup_nodes CASCADE;
-DROP VIEW interface_settings CASCADE;
+DROP VIEW interface_tags CASCADE;
 DROP VIEW pcu_nodes CASCADE;
 DROP VIEW pcu_protocol_types CASCADE;
 DROP VIEW peer_keys CASCADE;
@@ -69,7 +71,7 @@ DROP VIEW site_nodes CASCADE;
 DROP VIEW site_pcus CASCADE;
 DROP VIEW site_persons CASCADE;
 DROP VIEW site_slices CASCADE;
-DROP VIEW slice_attributes CASCADE;
+DROP VIEW slice_tags CASCADE;
 DROP VIEW slice_nodes CASCADE;
 DROP VIEW slice_persons CASCADE;
 DROP VIEW slivers CASCADE;
@@ -80,7 +82,7 @@ DROP VIEW view_event_objects CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_events CASCADE;
 DROP VIEW view_keys CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_nodegroups CASCADE;
-DROP VIEW view_interface_settings CASCADE;
+DROP VIEW view_interface_tags CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_interfaces CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_nodes CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_pcu_types CASCADE;
@@ -89,7 +91,7 @@ DROP VIEW view_interface_settings CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_persons CASCADE;
 DROP VIEW view_sessions CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_sites CASCADE;
-DROP VIEW view_slice_attributes CASCADE;
+DROP VIEW view_slice_tags CASCADE;
 -- caught by some previous cascade -- DROP VIEW view_slices CASCADE;
 
 -- shows in logfile
@@ -113,39 +115,39 @@ ALTER TABLE tag_types ADD COLUMN category TEXT NOT NULL DEFAULT 'slice/legacy';
 
 --- append in tag_types the contents of nodenetwork_setting_types
 INSERT INTO tag_types (tagname,description,min_role_id,category) 
-       SELECT name,description,min_role_id,'interface/legacy' FROM interface_setting_types;
+       SELECT name,description,min_role_id,'interface/legacy' FROM interface_tag_types;
 
 ---------- interface settings
 
---- former nodenetwork_setting_type_id are now renumbered, need to fix interface_setting accordingly
+--- former nodenetwork_setting_type_id are now renumbered, need to fix interface_tag accordingly
 
 -- old_index -> new_index relation
 CREATE OR REPLACE VIEW mgn_setting_renumber AS
    SELECT 
-      interface_setting_types.interface_setting_type_id AS old_index,	
+      interface_tag_types.interface_tag_type_id AS old_index,	
       tag_types.tag_type_id AS new_index 
    FROM 
-      interface_setting_types INNER JOIN tag_types  
-      ON interface_setting_types.name = tag_types.tagname;
+      interface_tag_types INNER JOIN tag_types  
+      ON interface_tag_types.name = tag_types.tagname;
 
--- need to temporarily drop constraint on interface_setting_type_id
-ALTER TABLE interface_setting DROP CONSTRAINT interface_setting_interface_setting_type_id_fkey;
+-- need to temporarily drop constraint on interface_tag_type_id
+ALTER TABLE interface_tag DROP CONSTRAINT interface_tag_interface_tag_type_id_fkey;
 
 -- do the transcoding
-UPDATE interface_setting 
-   SET interface_setting_type_id = 
-      (select new_index from mgn_setting_renumber where old_index=interface_setting_type_id);
+UPDATE interface_tag 
+   SET interface_tag_type_id = 
+      (select new_index from mgn_setting_renumber where old_index=interface_tag_type_id);
 
 -- alter column name to reflect change
-ALTER TABLE interface_setting RENAME interface_setting_type_id TO tag_type_id;
+ALTER TABLE interface_tag RENAME interface_tag_type_id TO tag_type_id;
 
 -- add contraint again
-ALTER TABLE interface_setting ADD CONSTRAINT interface_setting_tag_type_id_fkey 
+ALTER TABLE interface_tag ADD CONSTRAINT interface_tag_tag_type_id_fkey 
     FOREIGN KEY (tag_type_id) references tag_types(tag_type_id) ;
 
--- drop former interface_setting_types altogether
+-- drop former interface_tag_types altogether
 drop view mgn_setting_renumber;
-drop table interface_setting_types;
+drop table interface_tag_types;
 
 ---------- node tags
 

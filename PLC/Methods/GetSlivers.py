@@ -13,19 +13,19 @@ from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
 
 def get_slivers(api, slice_filter, node = None):
     # Get slice information
-    slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_attribute_ids'])
+    slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
 
     # Build up list of users and slice attributes
     person_ids = set()
-    slice_attribute_ids = set()
+    slice_tag_ids = set()
     for slice in slices:
         person_ids.update(slice['person_ids'])
-        slice_attribute_ids.update(slice['slice_attribute_ids'])
+        slice_tag_ids.update(slice['slice_tag_ids'])
 
     # Get user information
     all_persons = Persons(api, {'person_id':person_ids,'enabled':True}, ['person_id', 'enabled', 'key_ids']).dict()
@@ -39,7 +39,7 @@ def get_slivers(api, slice_filter, node = None):
     all_keys = Keys(api, key_ids, ['key_id', 'key', 'key_type']).dict()
 
     # Get slice attributes
-    all_slice_attributes = SliceAttributes(api, slice_attribute_ids).dict()
+    all_slice_tags = SliceTags(api, slice_tag_ids).dict()
 
     slivers = []
     for slice in slices:
@@ -58,10 +58,10 @@ def get_slivers(api, slice_filter, node = None):
         attributes = []
 
         # All (per-node and global) attributes for this slice
-        slice_attributes = []
-        for slice_attribute_id in slice['slice_attribute_ids']:
-            if slice_attribute_id in all_slice_attributes:
-                slice_attributes.append(all_slice_attributes[slice_attribute_id])
+        slice_tags = []
+        for slice_tag_id in slice['slice_tag_ids']:
+            if slice_tag_id in all_slice_tags:
+                slice_tags.append(all_slice_tags[slice_tag_id])
 
         # Per-node sliver attributes take precedence over global
         # slice attributes, so set them first.
@@ -70,27 +70,27 @@ def get_slivers(api, slice_filter, node = None):
         sliver_attributes = []
 
         if node is not None:
-            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_attributes):
+            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_tags):
                 sliver_attributes.append(sliver_attribute['tagname'])
                 attributes.append({'tagname': sliver_attribute['tagname'],
                                    'value': sliver_attribute['value']})
 
 	    # set nodegroup slice attributes
-	    for slice_attribute in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_attributes):
+	    for slice_tag in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_tags):
 	        # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
-	        if slice_attribute['tagname'] not in slice_attributes:
-		    attributes.append({'tagname': slice_attribute['tagname'],
-				   'value': slice_attribute['value']})
+	        if slice_tag['tagname'] not in slice_tags:
+		    attributes.append({'tagname': slice_tag['tagname'],
+				   'value': slice_tag['value']})
 
-        for slice_attribute in filter(lambda a: a['node_id'] is None, slice_attributes):
+        for slice_tag in filter(lambda a: a['node_id'] is None, slice_tags):
             # Do not set any global slice attributes for
             # which there is at least one sliver attribute
             # already set.
-            if slice_attribute['tagname'] not in sliver_attributes:
-                attributes.append({'tagname': slice_attribute['tagname'],
-                                   'value': slice_attribute['value']})
+            if slice_tag['tagname'] not in sliver_attributes:
+                attributes.append({'tagname': slice_tag['tagname'],
+                                   'value': slice_tag['value']})
 
         slivers.append({
             'name': slice['name'],
@@ -141,8 +141,8 @@ class GetSlivers(Method):
                 'key': Key.fields['key']
             }],
             'attributes': [{
-                'tagname': SliceAttribute.fields['tagname'],
-                'value': SliceAttribute.fields['value']
+                'tagname': SliceTag.fields['tagname'],
+                'value': SliceTag.fields['value']
             }]
         }]
     }
@@ -204,8 +204,8 @@ class GetSlivers(Method):
 	initscripts = InitScripts(self.api, {'enabled': True})	
 
         # Get system slices
-        system_slice_attributes = SliceAttributes(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
-        system_slice_ids = system_slice_attributes.keys()
+        system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
+        system_slice_ids = system_slice_tags.keys()
 	
 	# Get nm-controller slices
 	controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')

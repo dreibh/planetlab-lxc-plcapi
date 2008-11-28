@@ -15,7 +15,7 @@ Filter
 GPG
 Ilinks
 InitScripts
-InterfaceSettings
+InterfaceTags
 Interfaces
 KeyTypes
 Keys
@@ -39,8 +39,8 @@ Roles
 Sessions
 Shell
 Sites
-SliceAttributes
 SliceInstantiations
+SliceTags
 Slices
 Table
 TagTypes

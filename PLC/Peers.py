@@ -18,7 +18,7 @@ from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 
 class Peer(Row):

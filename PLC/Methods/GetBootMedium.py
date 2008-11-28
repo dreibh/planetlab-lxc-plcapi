@@ -12,7 +12,7 @@ from PLC.Auth import Auth
 
 from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
-from PLC.InterfaceSettings import InterfaceSetting, InterfaceSettings
+from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTags
 
 # could not define this in the class..
@@ -197,7 +197,7 @@ class GetBootMedium(Method):
         file += 'DOMAIN_NAME="%s"\n' % domain
 
         # define various interface settings attached to the primary interface
-        settings = InterfaceSettings (self.api, {'interface_id':interface['interface_id']})
+        settings = InterfaceTags (self.api, {'interface_id':interface['interface_id']})
 
         categories = set()
         for setting in settings:
@@ -205,7 +205,7 @@ class GetBootMedium(Method):
                 categories.add(setting['category'])
         
         for category in categories:
-            category_settings = InterfaceSettings(self.api,{'interface_id':interface['interface_id'],
+            category_settings = InterfaceTags(self.api,{'interface_id':interface['interface_id'],
                                                               'category':category})
             if category_settings:
                 file += '### Category : %s\n'%category

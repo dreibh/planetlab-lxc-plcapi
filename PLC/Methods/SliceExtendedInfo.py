@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
@@ -62,7 +62,7 @@ class SliceExtendedInfo(Method):
 	    index = slices.index(slice)
             node_ids = slices[index].pop('node_ids')
             person_ids = slices[index].pop('person_ids')
-	    attribute_ids = slices[index].pop('slice_attribute_ids')
+	    attribute_ids = slices[index].pop('slice_tag_ids')
             if return_users or return_users is None:
                 persons = Persons(self.api, person_ids)
                 person_info = [{'email': person['email'], 
@@ -76,7 +76,7 @@ class SliceExtendedInfo(Method):
 			     for node in nodes]
                 slices[index]['nodes'] = node_info
 	    if return_attributes or return_attributes is None:
-		attributes = SliceAttributes(self.api, attribute_ids)
+		attributes = SliceTags(self.api, attribute_ids)
 		attribute_info = [{'name': attribute['name'],
 				   'value': attribute['value']} \
 				  for attribute in attributes]

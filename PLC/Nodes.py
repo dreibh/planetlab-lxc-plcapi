@@ -38,7 +38,7 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    join_tables = [ 'slice_node', 'peer_node', 'slice_attribute', 
+    join_tables = [ 'slice_node', 'peer_node', 'slice_tag', 
                     'node_session', 'node_slice_whitelist', 
                     'node_tag', 'conf_file_node', 'pcu_node', ]
     fields = {
@@ -237,7 +237,7 @@ class Node(Row):
         assert 'node_id' in self
 	assert 'interface_ids' in self
 
-	# we need to clean up InterfaceSettings, so handling interfaces as part of join_tables does not work
+	# we need to clean up InterfaceTags, so handling interfaces as part of join_tables does not work
 	for interface in Interfaces(self.api,self['interface_ids']):
 	    interface.delete()
 

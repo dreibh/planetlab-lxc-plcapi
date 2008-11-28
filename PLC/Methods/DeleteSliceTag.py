@@ -1,13 +1,13 @@
-# $Id#
+g# $Id#
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.SliceAttributes import SliceAttribute, SliceAttributes
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
 
-class DeleteSliceAttribute(Method):
+class DeleteSliceTag(Method):
     """
     Deletes the specified slice or sliver attribute.
 
@@ -24,23 +24,23 @@ class DeleteSliceAttribute(Method):
 
     accepts = [
         Auth(),
-        SliceAttribute.fields['slice_attribute_id']
+        SliceTag.fields['slice_tag_id']
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, slice_attribute_id):
-        slice_attributes = SliceAttributes(self.api, [slice_attribute_id])
-        if not slice_attributes:
+    def call(self, auth, slice_tag_id):
+        slice_tags = SliceTags(self.api, [slice_tag_id])
+        if not slice_tags:
             raise PLCInvalidArgument, "No such slice attribute"
-        slice_attribute = slice_attributes[0]
+        slice_tag = slice_tags[0]
 
-        slices = Slices(self.api, [slice_attribute['slice_id']])
+        slices = Slices(self.api, [slice_tag['slice_id']])
         if not slices:
             raise PLCInvalidArgument, "No such slice"
         slice = slices[0]
 
-        assert slice_attribute['slice_attribute_id'] in slice['slice_attribute_ids']
+        assert slice_tag['slice_tag_id'] in slice['slice_tag_ids']
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
@@ -50,11 +50,11 @@ class DeleteSliceAttribute(Method):
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
-            if slice_attribute['min_role_id'] is not None and \
-               min(self.caller['role_ids']) > slice_attribute['min_role_id']:
+            if slice_tag['min_role_id'] is not None and \
+               min(self.caller['role_ids']) > slice_tag['min_role_id']:
                 raise PLCPermissioinDenied, "Not allowed to delete the specified attribute"
 
-        slice_attribute.delete()
-	self.event_objects = {'SliceAttribute': [slice_attribute['slice_attribute_id']]}
+        slice_tag.delete()
+	self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
 
         return 1
