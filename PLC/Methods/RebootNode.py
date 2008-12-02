@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 import socket
 
 from PLC.Faults import *

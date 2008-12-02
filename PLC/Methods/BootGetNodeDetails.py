@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import BootAuth

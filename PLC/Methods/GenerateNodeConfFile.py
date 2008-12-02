@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 import random
 import base64
 

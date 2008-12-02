@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 #
 # Thierry Parmentelat - INRIA
 #

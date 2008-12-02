@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 import time
 
 from PLC.Method import Method
