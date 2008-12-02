@@ -141,7 +141,7 @@ UPDATE interface_tag
 -- alter column name to reflect change
 ALTER TABLE interface_tag RENAME interface_tag_type_id TO tag_type_id;
 
--- add contraint again
+-- add constraint again
 ALTER TABLE interface_tag ADD CONSTRAINT interface_tag_tag_type_id_fkey 
     FOREIGN KEY (tag_type_id) references tag_types(tag_type_id) ;
 
@@ -229,24 +229,14 @@ drop table nodegroup_node;
 ----------------------------------------
 -- boot states
 ----------------------------------------
+-- create new ones
 INSERT INTO boot_states (boot_state) VALUES ('safeboot');
 INSERT INTO boot_states (boot_state) VALUES ('failboot');
 INSERT INTO boot_states (boot_state) VALUES ('disabled');
 INSERT INTO boot_states (boot_state) VALUES ('install');
 INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 
--- xxx need checking 
---
--- boot          boot
--- dbg           failboot
--- diag          safeboot 
--- disable       disabled
--- inst          install
--- rins          reinstall
--- new           reinstall
--- rcnf	      	 failboot
-
-
+-- map old ones
 UPDATE nodes SET boot_state='failboot' WHERE boot_state='dbg';
 UPDATE nodes SET boot_state='safeboot' WHERE boot_state='diag';
 UPDATE nodes SET boot_state='disabled' WHERE boot_state='disable';
@@ -255,7 +245,7 @@ UPDATE nodes SET boot_state='reinstall' WHERE boot_state='rins';
 UPDATE nodes SET boot_state='reinstall' WHERE boot_state='new';
 UPDATE nodes SET boot_state='failboot' WHERE boot_state='rcnf';
 
--- one-by-one is safer
+-- delete old ones
 DELETE FROM boot_states WHERE boot_state='dbg';
 DELETE FROM boot_states WHERE boot_state='diag';
 DELETE FROM boot_states WHERE boot_state='disable';
