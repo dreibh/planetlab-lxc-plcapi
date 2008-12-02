@@ -50,7 +50,7 @@ class BootGetNodeDetails(Method):
                         else:
                             network[field] = ""
 
-	self.messge = "Node request boot_state (%s) and networks" % \
+	self.message = "Node request boot_state (%s) and networks" % \
 		(details['boot_state'])
         return details
 
