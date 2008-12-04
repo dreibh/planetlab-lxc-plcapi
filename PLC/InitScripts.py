@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 #
 # Functions for interacting with the initscripts table in the database
 #
