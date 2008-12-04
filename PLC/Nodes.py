@@ -43,6 +43,7 @@ class Node(Row):
                     'node_tag', 'conf_file_node', 'pcu_node', ]
     fields = {
         'node_id': Parameter(int, "Node identifier"),
+        'node_type': Parameter(str,"Node type",max=20),
         'hostname': Parameter(str, "Fully qualified hostname", max = 255),
         'site_id': Parameter(int, "Site at which this node is located"),
         'boot_state': Parameter(str, "Boot state", max = 20),
@@ -69,7 +70,7 @@ class Node(Row):
         }
     related_fields = {
 	'interfaces': [Mixed(Parameter(int, "Interface identifier"),
-                       	       Filter(Interface.fields))],
+                             Filter(Interface.fields))],
 	'nodegroups': [Mixed(Parameter(int, "NodeGroup identifier"),
                              Parameter(str, "NodeGroup name"))],
 	'conf_files': [Parameter(int, "ConfFile identifier")],
@@ -78,6 +79,14 @@ class Node(Row):
 	'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
                                    Parameter(str, "Slice name"))]
 	}
+    view_name = "view_nodes"
+    view_tags_name = "view_node_tags"
+    tags = {
+        # regular
+        'arch': Parameter(str, "node/config", ro=True),
+        'deployment': Parameter(str, "node/operation"),
+        # dummynet
+        }
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):
@@ -260,8 +269,14 @@ class Nodes(Table):
     def __init__(self, api, node_filter = None, columns = None):
         Table.__init__(self, api, Node, columns)
 
-        sql = "SELECT %s FROM view_nodes WHERE deleted IS False" % \
-              ", ".join(self.columns)
+        # the view that we're selecting upon: start with view_nodes
+        view = "view_nodes"
+        # as many left joins as requested tags
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Node.tagvalue_view_name(tagname),Node.primary_key)
+            
+        sql = "SELECT %s FROM %s WHERE deleted IS False" % \
+              (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 
         if node_filter is not None:
             if isinstance(node_filter, (list, tuple, set)):

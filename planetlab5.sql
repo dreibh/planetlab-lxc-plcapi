@@ -264,13 +264,22 @@ INSERT INTO boot_states (boot_state) VALUES ('disabled');
 INSERT INTO boot_states (boot_state) VALUES ('install');
 INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 
+-- Known node types (Nodes.py expect max length to be 20)
+CREATE TABLE node_types (
+    node_type text PRIMARY KEY
+) WITH OIDS;
+INSERT INTO node_types (node_type) VALUES ('regular');
+INSERT INTO node_types (node_type) VALUES ('dummynet');
+
 -- Nodes
 CREATE TABLE nodes (
     -- Mandatory
     node_id serial PRIMARY KEY,				-- Node identifier
+    node_type text REFERENCES node_types		-- node type
+    	       DEFAULT 'regular',
+
     hostname text NOT NULL,				-- Node hostname
     site_id integer REFERENCES sites NOT NULL,		-- At which site 
-
     boot_state text REFERENCES boot_states NOT NULL	-- Node boot state
     	       DEFAULT 'install', 
     deleted boolean NOT NULL DEFAULT false,		-- Is deleted
@@ -1058,6 +1067,7 @@ INNER JOIN nodes USING (node_id);
 CREATE OR REPLACE VIEW view_nodes AS
 SELECT
 nodes.node_id,
+nodes.node_type,
 nodes.hostname,
 nodes.site_id,
 nodes.boot_state,

@@ -14,11 +14,13 @@ class Row(dict):
     """
 
     # Set this to the name of the table that stores the row.
+    # e.g. table_name = "nodes"
     table_name = None
 
     # Set this to the name of the primary key of the table. It is
     # assumed that the this key is a sequence if it is not set when
     # sync() is called.
+    # e.g. primary_key="node_id"
     primary_key = None
 
     # Set this to the names of tables that reference this table's
@@ -29,6 +31,17 @@ class Row(dict):
     # types. Not all fields (e.g., joined fields) may be updated via
     # sync().
     fields = {}
+
+    # Set this to the name of the view that gathers the row and its relations
+    # e.g. view_name = "view_nodes"
+    view_name = None
+
+    # The name of the view that extends objects with tags
+    # e.g. view_tags_name = "view_node_tags"
+    view_tags_name = None
+
+    # Set this to the set of tags that can be returned by the Get function
+    tags = {}
 
     def __init__(self, api, fields = {}):
         dict.__init__(self, fields)
@@ -69,8 +82,8 @@ class Row(dict):
 
     def associate(self, *args):
     	"""
-	Provides a means for high lvl api calls to associate objects
-        using low lvl calls.
+	Provides a means for high level api calls to associate objects
+        using low level calls.
 	"""
 
 	if len(args) < 3:
@@ -180,6 +193,17 @@ class Row(dict):
 
     remove_object = classmethod(remove_object)
 
+    # convenience: check in dict (self.fields or self.tags) that a key is writable
+    @staticmethod
+    def is_writable (key,value,dict):
+        # if not mentioned, assume it's writable (e.g. deleted ...)
+        if key not in dict: return True
+        # if mentioned but not linked to a Parameter object, idem
+        if not isinstance(dict[key], Parameter): return True
+        # if not marked ro, it's writable
+        if not dict[key].ro: return True
+        return False
+
     def db_fields(self, obj = None):
         """
         Return only those fields that can be set or updated directly
@@ -187,16 +211,65 @@ class Row(dict):
         for this object, and are not marked as a read-only Parameter.
         """
 
-        if obj is None:
-            obj = self
+        if obj is None: obj = self
 
         db_fields = self.api.db.fields(self.table_name)
-        return dict(filter(lambda (key, value): \
-                           key in db_fields and \
-                           (key not in self.fields or \
-                            not isinstance(self.fields[key], Parameter) or \
-                            not self.fields[key].ro),
-                           obj.items()))
+        return dict ( [ (key,value) for (key,value) in obj.items()
+                        if key in db_fields and
+                        Row.is_writable(key,value,self.fields) ] )
+
+    def tag_fields (self, obj=None):
+        """
+        Return the fields of obj that are mentioned in tags
+        """
+        if obj is None: obj=self
+        
+        return dict ( [ (key,value) for (key,value) in obj.iteritems() 
+                        if key in self.tags and Row.is_writable(key,value,self.tags) ] )
+    
+    # takes in input a list of columns, returns three lists
+    # fields, tags, rejected
+    @classmethod
+    def parse_columns (cls, columns):
+        (fields,tags,rejected)=({},{},{})
+        for column in columns:
+            if column in cls.fields: fields[column]=cls.fields[column]
+            elif column in cls.tags: tags[column]=cls.tags[column]
+            else: rejected.append(column)
+        return (fields,tags,rejected)
+
+    @classmethod
+    def tagvalue_view_name (cls, tagname):
+        return "tagvalue_view_%s_%s"%(cls.primary_key,tagname)
+
+    @classmethod
+    def tagvalue_view_create (cls,tagname):
+        """
+        returns an SQL sentence that creates a view named after the primary_key and tagname, 
+        with 2 columns
+        (*) column 1: name=self.primary_key 
+        (*) column 2: name=tagname value=tagvalue
+        """
+
+        if not cls.view_tags_name: return ""
+
+        table_name=cls.table_name
+        primary_key=cls.primary_key
+        view_tags_name=cls.view_tags_name
+        tagvalue_view_name=cls.tagvalue_view_name(tagname)
+        return 'CREATE OR REPLACE VIEW %(tagvalue_view_name)s ' \
+            'as SELECT %(table_name)s.%(primary_key)s,%(view_tags_name)s.tagvalue as "%(tagname)s" ' \
+            'from %(table_name)s right join %(view_tags_name)s using (%(primary_key)s) ' \
+            'WHERE tagname = \'%(tagname)s\';'%locals()
+
+    @classmethod
+    def tagvalue_views_create (cls):
+        if not cls.tags: return
+        sql = []
+        for (type,type_dict) in cls.tags.iteritems():
+            for (tagname,details) in type_dict.iteritems():
+                sql.append(cls.tagvalue_view_create (tagname))
+        return sql
 
     def __eq__(self, y):
         """
@@ -293,12 +366,16 @@ class Table(list):
 
         if columns is None:
             columns = classobj.fields
+            tag_columns={}
         else:
-            columns = filter(lambda x: x in classobj.fields, columns)
+            (columns,tag_columns,rejected) = classobj.parse_columns(columns)
             if not columns:
-                raise PLCInvalidArgument, "No valid return fields specified"
+                raise PLCInvalidArgument, "No valid return fields specified for class %s"%classobj.__name__
+            if rejected:
+                raise PLCInvalidArgument, "unknown column(s) specified %r in %s"%(rejected,classobj.__name__)
 
         self.columns = columns
+        self.tag_columns = tag_columns
 
     def sync(self, commit = True):
         """

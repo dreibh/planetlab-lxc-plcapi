@@ -102,6 +102,11 @@ drop view mgn_all_views;
 drop function mgn_drop_all_views ();
 
 ----------------------------------------
+-- nodes
+----------------------------------------
+ALTER TABLE nodes ADD COLUMN node_type TEXT NOT NULL DEFAULT 'regular';
+
+----------------------------------------
 -- tag types
 ----------------------------------------
 --- merge former slice attribute types and setting attribute types into tagtypes

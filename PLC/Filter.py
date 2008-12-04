@@ -1,4 +1,4 @@
-# $Id#
+# $Id$
 from types import StringTypes
 try:
     set
@@ -74,27 +74,12 @@ class Filter(Parameter, dict):
         # Declare ourselves as a type of parameter that can take
         # either a value or a list of values for each of the specified
         # fields.
-        self.fields = {}
-
-        for field, expected in fields.iteritems():
-            # Cannot filter on sequences
-            if python_type(expected) in (list, tuple, set):
-                continue
-            
-            # Accept either a value or a list of values of the specified type
-            self.fields[field] = Mixed(expected, [expected])
+        self.fields = dict ( [ ( field, Mixed (expected, [expected])) 
+                                 for (field,expected) in fields.iteritems()
+                                 if python_type(expected) not in (list, tuple, set) ] )
 
         # Null filter means no filter
         Parameter.__init__(self, self.fields, doc = doc, nullok = True)
-
-    # this code is not used anymore
-    # at some point the select in the DB for event objects was done on
-    # the events table directly, that is stored as a timestamp, thus comparisons
-    # needed to be done based on SQL timestamps as well
-    def unix2timestamp (self,unix):
-	s = time.gmtime(unix)
-	return "TIMESTAMP'%04d-%02d-%02d %02d:%02d:%02d'" % (s.tm_year,s.tm_mon,s.tm_mday,
-							     s.tm_hour,s.tm_min,s.tm_sec)
 
     def sql(self, api, join_with = "AND"):
         """
