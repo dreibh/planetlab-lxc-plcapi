@@ -253,7 +253,7 @@ GROUP BY person_id;
 -- Nodes
 --------------------------------------------------------------------------------
 
--- Valid node boot states
+-- Valid node boot states (Nodes.py expect max length to be 20)
 CREATE TABLE boot_states (
     boot_state text PRIMARY KEY
 ) WITH OIDS;
@@ -317,27 +317,6 @@ CREATE TABLE node_tag (
     tagvalue text					-- value attached
 ) WITH OIDS;
 
-CREATE OR REPLACE VIEW node_tags AS
-SELECT node_id,
-array_accum(node_tag_id) AS tag_ids
-FROM node_tag
-GROUP BY node_id;
-
-CREATE OR REPLACE VIEW view_node_tags AS
-SELECT
-node_tag.node_tag_id,
-node_tag.node_id,
-nodes.hostname,
-tag_types.tag_type_id,
-tag_types.tagname,
-tag_types.description,
-tag_types.category,
-tag_types.min_role_id,
-node_tag.tagvalue
-FROM node_tag 
-INNER JOIN tag_types USING (tag_type_id)
-INNER JOIN nodes USING (node_id);
-
 --------------------------------------------------------------------------------
 -- (network) interfaces
 --------------------------------------------------------------------------------
@@ -397,7 +376,7 @@ FROM interfaces_ordered
 GROUP BY node_id;
 
 --------------------------------------------------------------------------------
--- Interface settings
+-- Interface tags (formerly known as interface settings)
 --------------------------------------------------------------------------------
 
 CREATE TABLE interface_tag (
@@ -743,7 +722,7 @@ FROM node_slice_whitelist
 GROUP BY node_id;
 
 --------------------------------------------------------------------------------
--- Slice attributes
+-- Slice tags (formerly known as slice attributes)
 --------------------------------------------------------------------------------
 
 -- Slice/sliver attributes
@@ -758,12 +737,6 @@ CREATE TABLE slice_tag (
 CREATE INDEX slice_tag_slice_id_idx ON slice_tag (slice_id);
 CREATE INDEX slice_tag_node_id_idx ON slice_tag (node_id);
 CREATE INDEX slice_tag_nodegroup_id_idx ON slice_tag (nodegroup_id);
-
-CREATE OR REPLACE VIEW slice_tags AS
-SELECT slice_id,
-array_accum(slice_tag_id) AS slice_tag_ids
-FROM slice_tag
-GROUP BY slice_id;
 
 --------------------------------------------------------------------------------
 -- Initscripts
@@ -984,6 +957,7 @@ COALESCE((SELECT pcu_protocol_type_ids FROM pcu_protocol_types
 AS pcu_protocol_type_ids
 FROM pcu_types;
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_events AS
 SELECT
 events.event_id,
@@ -1015,6 +989,7 @@ event_object.object_id,
 event_object.object_type
 FROM events LEFT JOIN event_object USING (event_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_persons AS
 SELECT
 persons.person_id,
@@ -1042,6 +1017,7 @@ COALESCE((SELECT slice_ids FROM person_slices WHERE person_slices.person_id = pe
 FROM persons
 LEFT JOIN peer_person USING (person_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_peers AS
 SELECT 
 peers.*, 
@@ -1056,6 +1032,28 @@ COALESCE((SELECT peer_node_ids FROM peer_nodes WHERE peer_nodes.peer_id = peers.
 COALESCE((SELECT slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.peer_id), '{}') AS slice_ids,
 COALESCE((SELECT peer_slice_ids FROM peer_slices WHERE peer_slices.peer_id = peers.peer_id), '{}') AS peer_slice_ids
 FROM peers;
+
+--------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW node_tags AS
+SELECT node_id,
+array_accum(node_tag_id) AS tag_ids
+FROM node_tag
+GROUP BY node_id;
+
+CREATE OR REPLACE VIEW view_node_tags AS
+SELECT
+node_tag.node_tag_id,
+node_tag.node_id,
+nodes.hostname,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
+node_tag.tagvalue
+FROM node_tag 
+INNER JOIN tag_types USING (tag_type_id)
+INNER JOIN nodes USING (node_id);
 
 CREATE OR REPLACE VIEW view_nodes AS
 SELECT
@@ -1103,6 +1101,7 @@ FROM nodes
 LEFT JOIN peer_node USING (node_id)
 LEFT JOIN node_session USING (node_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_nodegroups AS
 SELECT
 nodegroups.*,
@@ -1115,6 +1114,7 @@ COALESCE((SELECT node_ids FROM nodegroup_nodes
 AS node_ids
 FROM nodegroups INNER JOIN tag_types USING (tag_type_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_conf_files AS
 SELECT
 conf_files.*,
@@ -1126,6 +1126,7 @@ COALESCE((SELECT nodegroup_ids FROM conf_file_nodegroups
 AS nodegroup_ids
 FROM conf_files;
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_pcus AS
 SELECT
 pcus.*,
@@ -1133,6 +1134,7 @@ COALESCE((SELECT node_ids FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), 
 COALESCE((SELECT ports FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS ports
 FROM pcus;
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_sites AS
 SELECT
 sites.site_id,
@@ -1160,6 +1162,7 @@ COALESCE((SELECT pcu_ids FROM site_pcus WHERE site_pcus.site_id = sites.site_id)
 FROM sites
 LEFT JOIN peer_site USING (site_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_addresses AS
 SELECT
 addresses.*,
@@ -1167,6 +1170,7 @@ COALESCE((SELECT address_type_ids FROM address_address_types WHERE address_addre
 COALESCE((SELECT address_types FROM address_address_types WHERE address_address_types.address_id = addresses.address_id), '{}') AS address_types
 FROM addresses;
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_keys AS
 SELECT
 keys.*,
@@ -1176,6 +1180,13 @@ peer_key.peer_key_id
 FROM keys
 LEFT JOIN person_key USING (key_id)
 LEFT JOIN peer_key USING (key_id);
+
+--------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW slice_tags AS
+SELECT slice_id,
+array_accum(slice_tag_id) AS slice_tag_ids
+FROM slice_tag
+GROUP BY slice_id;
 
 CREATE OR REPLACE VIEW view_slices AS
 SELECT
@@ -1213,6 +1224,7 @@ slice_tag.value
 FROM slice_tag
 INNER JOIN tag_types USING (tag_type_id);
 
+--------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_sessions AS
 SELECT
 sessions.session_id,
