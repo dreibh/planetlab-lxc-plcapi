@@ -119,7 +119,7 @@ ifeq (,$(SSHURL))
 	@echo "  or   make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr"
 	@exit 1
 else
-	+$(RSYNC) PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
+	+$(RSYNC) plcsh PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
 	$(SSHCOMMAND) exec apachectl graceful
 endif
 
