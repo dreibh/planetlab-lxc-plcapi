@@ -32,10 +32,6 @@ class Row(dict):
     # sync().
     fields = {}
 
-    # Set this to the name of the view that gathers the row and its relations
-    # e.g. view_name = "view_nodes"
-    view_name = None
-
     # The name of the view that extends objects with tags
     # e.g. view_tags_name = "view_node_tags"
     view_tags_name = None

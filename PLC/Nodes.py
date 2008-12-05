@@ -80,7 +80,7 @@ class Node(Row):
 	'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
                                    Parameter(str, "Slice name"))]
 	}
-    view_name = "view_nodes"
+
     view_tags_name = "view_node_tags"
     tags = {
         # regular
