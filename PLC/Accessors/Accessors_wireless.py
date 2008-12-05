@@ -13,7 +13,7 @@ current_module = sys.modules[__name__]
 
 #### Wireless
 
-define_accessors(current_module, Interface, "WifiMode", "wifi_mode", "interface/wifi", "Wifi operation mode - see iwconfig",
+define_accessors(current_module, Interface, "WifiMode", "mode", "interface/wifi", "Wifi operation mode - see iwconfig",
                  get_roles=all_roles, set_roles=tech_roles)
 define_accessors(current_module, Interface, "Essid", "essid", "interface/wifi", "Wireless essid - see iwconfig",
                  get_roles=all_roles, set_roles=tech_roles)

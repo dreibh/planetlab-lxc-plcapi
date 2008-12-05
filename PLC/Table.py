@@ -223,16 +223,47 @@ class Row(dict):
         return dict ( [ (key,value) for (key,value) in obj.iteritems() 
                         if key in self.tags and Row.is_writable(key,value,self.tags) ] )
     
-    # takes in input a list of columns, returns three lists
+    # takes in input a list of columns, returns 2 dicts and one list
     # fields, tags, rejected
     @classmethod
     def parse_columns (cls, columns):
-        (fields,tags,rejected)=({},{},{})
+        (fields,tags,rejected)=({},{},[])
         for column in columns:
             if column in cls.fields: fields[column]=cls.fields[column]
             elif column in cls.tags: tags[column]=cls.tags[column]
             else: rejected.append(column)
         return (fields,tags,rejected)
+
+    # given a dict (typically passed to an Update method), we check and sort
+    # them against a list of dicts, e.g. [Node.fields, Node.related_fields]
+    # return is a list that contains n+1 dicts, last one has the rejected fields
+    @staticmethod
+    def split_fields (fields, dicts):
+        result=[]
+        for x in dicts: result.append({})
+        rejected={}
+        for (field,value) in fields.iteritems():
+            found=False
+            for i in range(len(dicts)):
+                candidate_dict=dicts[i]
+                if field in candidate_dict.keys():
+                    result[i][field]=value
+                    found=True
+                    break 
+            if not found: rejected[field]=value
+        result.append(rejected)
+        return result
+
+    # compute the accepts part of an update method from a list of column names, and a (list of) field dict
+    @staticmethod
+    def accepted_fields (can_update_columns, fields):
+        result={}
+        if not isinstance(fields,list): fields = [fields]
+        for dict in fields:
+            for (k,v) in dict.iteritems():
+                if k in can_update_columns:
+                    result[k]=v
+        return result
 
     @classmethod
     def tagvalue_view_name (cls, tagname):

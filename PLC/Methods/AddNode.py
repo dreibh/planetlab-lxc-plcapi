@@ -2,13 +2,13 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Table import Row
 from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
-             ['hostname', 'node_type', 'boot_state', 'model', 'version']
+can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version']
 
 class AddNode(Method):
     """
@@ -23,19 +23,23 @@ class AddNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    node_fields = dict(filter(can_update, Node.fields.items()))
+    accepted_fields = Row.accepted_fields(can_update, [Node.fields,Node.tags])
 
     accepts = [
         Auth(),
         Mixed(Site.fields['site_id'],
               Site.fields['login_base']),
-        node_fields
+        accepted_fields
         ]
 
     returns = Parameter(int, 'New node_id (> 0) if successful')
 
     def call(self, auth, site_id_or_login_base, node_fields):
-        node_fields = dict(filter(can_update, node_fields.items()))
+
+        [native,tags,rejected]=Row.split_fields(node_fields,[Node.fields,Node.tags])
+
+        if rejected:
+            raise PLCInvalidArgument, "Cannot add Node with column(s) %r"%rejected
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
@@ -56,9 +60,14 @@ class AddNode(Method):
             else:
                 assert self.caller['person_id'] in site['person_ids']
 
-        node = Node(self.api, node_fields)
+        node = Node(self.api, native)
         node['site_id'] = site['site_id']
         node.sync()
+
+        if tags:
+            print 'AddNode: warning, tags not handled yet'
+            for (k,v) in tags.iteritems():
+                print 'tag',k,v
 
 	self.event_objects = {'Site': [site['site_id']],
 			     'Node': [node['node_id']]}	

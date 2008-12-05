@@ -72,8 +72,6 @@ class Node(Row):
     related_fields = {
 	'interfaces': [Mixed(Parameter(int, "Interface identifier"),
                              Filter(Interface.fields))],
-	'nodegroups': [Mixed(Parameter(int, "NodeGroup identifier"),
-                             Parameter(str, "NodeGroup name"))],
 	'conf_files': [Parameter(int, "ConfFile identifier")],
 	'slices': [Mixed(Parameter(int, "Slice identifier"),
                          Parameter(str, "Slice name"))],
@@ -82,6 +80,7 @@ class Node(Row):
 	}
 
     view_tags_name = "view_node_tags"
+    # tags declared here should also be defined as Accessors to ensure that the TagType is created
     tags = {
         # regular
         'arch': Parameter(str, "node/config", ro=True),

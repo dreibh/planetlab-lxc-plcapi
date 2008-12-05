@@ -2,14 +2,12 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Table import Row
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
 
-related_fields = Node.related_fields.keys()
-can_update = lambda (field, value): field in \
-             ['hostname', 'boot_state', 'model', 'version',
-              'key', 'session', 'boot_nonce', 'site_id'] + \
-	     related_fields
+can_update = ['hostname', 'boot_state', 'model', 'version','key', 'session', 'boot_nonce', 'site_id'] + \
+              Node.related_fields.keys()
 
 class UpdateNode(Method):
     """
@@ -24,7 +22,7 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    node_fields = dict(filter(can_update, Node.fields.items() + Node.related_fields.items()))
+    node_fields = Row.accepted_fields(can_update,[Node.fields,Node.related_fields,Node.tags])
 
     accepts = [
         Auth(),
@@ -37,22 +35,26 @@ class UpdateNode(Method):
 
     def call(self, auth, node_id_or_hostname, node_fields):
         
-	node_fields = dict(filter(can_update, node_fields.items()))
+        # split provided fields 
+        [native,related,tags,rejected] = Row.split_fields(node_fields,[Node.fields,Node.related_fields,Node.tags])
+
+        if rejected:
+            raise PLCInvalidArgument, "Cannot update column(s) %r"%rejected
 
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
             for key in 'key', 'session', 'boot_nonce', 'site_id':
-                if node_fields.has_key(key):
-                    del node_fields[key]
+                if native.has_key(key):
+                    del native[key]
 
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument, "Not a local node %r"%node_id_or_hostname
 
         # Authenticated function
         assert self.caller is not None
@@ -64,14 +66,17 @@ class UpdateNode(Method):
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
         # Make requested associations
-        for field in related_fields:
-            if field in node_fields:
-                node.associate(auth, field, node_fields[field])
-                node_fields.pop(field)
+        for (k,v) in related.iteritems():
+            node.associate(auth, k,v)
 
-	node.update(node_fields)
-	node.update_last_updated(False)
-        node.sync()
+        if tags:
+            print 'UpdateNode: warning, tags not handled yet'
+            for (k,v) in tags.iteritems():
+                print 'tag',k,v
+
+	node.update(native)
+	node.update_last_updated(commit=False)
+        node.sync(commit=True)
 	
 	# Logging variables
 	self.event_objects = {'Node': [node['node_id']]}
