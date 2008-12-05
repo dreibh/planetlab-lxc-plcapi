@@ -15,8 +15,9 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Debug import profile
 from PLC.Table import Row, Table
-from PLC.Interfaces import Interface, Interfaces
+from PLC.NodeTypes import NodeTypes
 from PLC.BootStates import BootStates
+from PLC.Interfaces import Interface, Interfaces
 
 def valid_hostname(hostname):
     # 1. Each part begins and ends with a letter or number.
@@ -99,11 +100,16 @@ class Node(Row):
 
         return hostname
 
+    def validate_node_type(self, node_type):
+        node_types = [row['node_type'] for row in NodeTypes(self.api)]
+        if node_type not in node_types:
+            raise PLCInvalidArgument, "Invalid node type %r"%node_type
+        return node_type
+
     def validate_boot_state(self, boot_state):
         boot_states = [row['boot_state'] for row in BootStates(self.api)]
         if boot_state not in boot_states:
-            raise PLCInvalidArgument, "Invalid boot state"
-
+            raise PLCInvalidArgument, "Invalid boot state %r"%boot_state
         return boot_state
 
     validate_date_created = Row.validate_timestamp

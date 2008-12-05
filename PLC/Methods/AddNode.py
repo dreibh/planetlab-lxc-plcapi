@@ -8,7 +8,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
-             ['hostname', 'boot_state', 'model', 'version']
+             ['hostname', 'node_type', 'boot_state', 'model', 'version']
 
 class AddNode(Method):
     """
