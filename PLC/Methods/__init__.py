@@ -17,6 +17,7 @@ AddNode
 AddNodeGroup
 AddNodeTag
 AddNodeToPCU
+AddNodeType
 AddPCU
 AddPCUProtocolType
 AddPCUType
@@ -62,6 +63,7 @@ DeleteNode
 DeleteNodeFromPCU
 DeleteNodeGroup
 DeleteNodeTag
+DeleteNodeType
 DeletePCU
 DeletePCUProtocolType
 DeletePCUType
@@ -98,6 +100,7 @@ GetNetworkMethods
 GetNetworkTypes
 GetNodeGroups
 GetNodeTags
+GetNodeTypes
 GetNodes
 GetPCUProtocolTypes
 GetPCUTypes
