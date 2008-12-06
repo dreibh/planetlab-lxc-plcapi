@@ -7,6 +7,10 @@ from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
+from PLC.TagTypes import TagTypes
+from PLC.NodeTags import NodeTags
+from PLC.Methods.AddNodeTag import AddNodeTag
+from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
 can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version']
 
@@ -64,12 +68,18 @@ class AddNode(Method):
         node['site_id'] = site['site_id']
         node.sync()
 
-        if tags:
-            print 'AddNode: warning, tags not handled yet',
-            for (k,v) in tags.iteritems(): print k
-
 	self.event_objects = {'Site': [site['site_id']],
 			     'Node': [node['node_id']]}	
 	self.message = "Node %s created" % node['node_id']
+
+        for (tagname,tagvalue) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
+            if not node_tags:
+                AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,tagvalue)
+            else:
+                UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],tagvalue)
 
         return node['node_id']

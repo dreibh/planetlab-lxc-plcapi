@@ -5,6 +5,10 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Table import Row
 from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
+from PLC.TagTypes import TagTypes
+from PLC.NodeTags import NodeTags
+from PLC.Methods.AddNodeTag import AddNodeTag
+from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
 can_update = ['hostname', 'boot_state', 'model', 'version','key', 'session', 'boot_nonce', 'site_id'] + \
               Node.related_fields.keys()
@@ -69,10 +73,6 @@ class UpdateNode(Method):
         for (k,v) in related.iteritems():
             node.associate(auth, k,v)
 
-        if tags:
-            print 'UpdateNode: warning, tags not handled yet',
-            for (k,v) in tags.iteritems(): print k
-
 	node.update(native)
 	node.update_last_updated(commit=False)
         node.sync(commit=True)
@@ -83,5 +83,15 @@ class UpdateNode(Method):
 		(node['node_id'], ", ".join(node_fields.keys()))
 	if 'boot_state' in node_fields.keys():
 		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
+
+        for (tagname,tagvalue) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
+            if not node_tags:
+                AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,tagvalue)
+            else:
+                UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],tagvalue)
 
         return 1
