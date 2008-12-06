@@ -65,9 +65,8 @@ class AddNode(Method):
         node.sync()
 
         if tags:
-            print 'AddNode: warning, tags not handled yet'
-            for (k,v) in tags.iteritems():
-                print 'tag',k,v
+            print 'AddNode: warning, tags not handled yet',
+            for (k,v) in tags.iteritems(): print k
 
 	self.event_objects = {'Site': [site['site_id']],
 			     'Node': [node['node_id']]}	

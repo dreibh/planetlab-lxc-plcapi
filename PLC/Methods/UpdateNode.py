@@ -70,9 +70,8 @@ class UpdateNode(Method):
             node.associate(auth, k,v)
 
         if tags:
-            print 'UpdateNode: warning, tags not handled yet'
-            for (k,v) in tags.iteritems():
-                print 'tag',k,v
+            print 'UpdateNode: warning, tags not handled yet',
+            for (k,v) in tags.iteritems(): print k
 
 	node.update(native)
 	node.update_last_updated(commit=False)
