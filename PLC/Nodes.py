@@ -291,7 +291,8 @@ class Nodes(Table):
                 node_filter = Filter(Node.fields, {'node_id': ints, 'hostname': strs})
                 sql += " AND (%s) %s" % node_filter.sql(api, "OR")
             elif isinstance(node_filter, dict):
-                node_filter = Filter(Node.fields, node_filter)
+                allowed_fields=dict(Node.fields.items()+Node.tags.items())
+                node_filter = Filter(allowed_fields, node_filter)
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             elif isinstance (node_filter, StringTypes):
                 node_filter = Filter(Node.fields, {'hostname':[node_filter]})

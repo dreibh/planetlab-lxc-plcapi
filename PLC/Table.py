@@ -259,7 +259,7 @@ class Row(dict):
         result.append(rejected)
         return result
 
-    # compute the accepts part of an update method from a list of column names, and a (list of) field dict
+    # compute the accepts part of an update method from a list of column names, and a (list of) fields dict
     @staticmethod
     def accepted_fields (can_update_columns, fields):
         result={}
