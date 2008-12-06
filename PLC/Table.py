@@ -42,6 +42,11 @@ class Row(dict):
     def __init__(self, api, fields = {}):
         dict.__init__(self, fields)
         self.api = api
+        # run the class_init initializer once
+        cls=self.__class__
+        if not hasattr(cls,'class_inited'):
+            cls.class_init (api)
+            cls.class_inited=True # actual value does not matter
 
     def validate(self):
         """
@@ -265,14 +270,15 @@ class Row(dict):
                     result[k]=v
         return result
 
+    ### class initialization : create tag-dependent cross view if needed
     @classmethod
     def tagvalue_view_name (cls, tagname):
         return "tagvalue_view_%s_%s"%(cls.primary_key,tagname)
 
     @classmethod
-    def tagvalue_view_create (cls,tagname):
+    def tagvalue_view_create_sql (cls,tagname):
         """
-        returns an SQL sentence that creates a view named after the primary_key and tagname, 
+        returns a SQL sentence that creates a view named after the primary_key and tagname, 
         with 2 columns
         (*) column 1: name=self.primary_key 
         (*) column 2: name=tagname value=tagvalue
@@ -290,13 +296,15 @@ class Row(dict):
             'WHERE tagname = \'%(tagname)s\';'%locals()
 
     @classmethod
-    def tagvalue_views_create (cls):
+    def class_init (cls,api):
+        cls.tagvalue_views_create (api)
+
+    @classmethod
+    def tagvalue_views_create (cls,api):
         if not cls.tags: return
-        sql = []
-        for (type,type_dict) in cls.tags.iteritems():
-            for (tagname,details) in type_dict.iteritems():
-                sql.append(cls.tagvalue_view_create (tagname))
-        return sql
+        for tagname in cls.tags.keys():
+            api.db.do(cls.tagvalue_view_create_sql (tagname))
+        api.db.commit()
 
     def __eq__(self, y):
         """
