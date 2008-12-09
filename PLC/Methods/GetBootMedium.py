@@ -234,9 +234,9 @@ class GetBootMedium(Method):
 
         node_id=node['node_id']
 
-        tag=Nodes([node_id],['arch'])[0]['arch']
+        tag=Nodes(self.api,[node_id],['arch'])[0]['arch']
         if tag: arch=tag
-        tag=Nodes([node_id],['arch'])[0]['pldistro']
+        tag=Nodes(self.api,[node_id],['arch'])[0]['pldistro']
         if tag: pldistro=tag
 
         return (pldistro,arch)
