@@ -13,7 +13,6 @@ from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
-from PLC.NodeTags import NodeTags
 
 # could not define this in the class..
 boot_medium_actions = [ 'node-preview',
@@ -234,15 +233,11 @@ class GetBootMedium(Method):
             return (pldistro,arch)
 
         node_id=node['node_id']
-        # cannot use accessors in the API itself
-        # the 'arch' tag type is assumed to exist, see db-config
-        arch_tags = NodeTags (self.api, {'tagname':'arch','node_id':node_id},['tagvalue'])
-        if arch_tags:
-            arch=arch_tags[0]['tagvalue']
-        # ditto
-        pldistro_tags = NodeTags (self.api, {'tagname':'pldistro','node_id':node_id},['tagvalue'])
-        if pldistro_tags:
-            pldistro=pldistro_tags[0]['tagvalue']
+
+        tag=Nodes([node_id],['arch'])[0]['arch']
+        if tag: arch=tag
+        tag=Nodes([node_id],['arch'])[0]['pldistro']
+        if tag: pldistro=tag
 
         return (pldistro,arch)
 

@@ -5,7 +5,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in ['groupname','tagvalue'] 
+can_update = lambda (field, value): field in ['groupname','value'] 
 
 class UpdateNodeGroup(Method):
     """

@@ -27,13 +27,13 @@ class AddNodeGroup(Method):
         NodeGroup.fields['groupname'],
         Mixed(TagType.fields['tag_type_id'],
               TagType.fields['tagname']),
-        NodeTag.fields['tagvalue'],
+        NodeTag.fields['value'],
         ]
 
     returns = Parameter(int, 'New nodegroup_id (> 0) if successful')
 
 
-    def call(self, auth, groupname, tag_type_id_or_tagname, tagvalue):
+    def call(self, auth, groupname, tag_type_id_or_tagname, value):
         # locate tag type
         tag_types = TagTypes (self.api,[tag_type_id_or_tagname])
         if not(tag_types):
@@ -42,7 +42,7 @@ class AddNodeGroup(Method):
 
         nodegroup_fields = { 'groupname' : groupname,
                              'tag_type_id' : tag_type['tag_type_id'],
-                             'tagvalue' : tagvalue }
+                             'value' : value }
         nodegroup = NodeGroup(self.api, nodegroup_fields)
         nodegroup.sync()
 

@@ -160,7 +160,7 @@ CREATE TABLE node_tag (
     node_tag_id serial PRIMARY KEY,			-- ID
     node_id integer REFERENCES nodes NOT NULL,		-- node id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
-    tagvalue text					-- value attached
+    value text						-- value attached
 ) WITH OIDS;
 
 
@@ -182,7 +182,7 @@ CREATE TABLE ilink (
 ---------- nodegroups table - start
 -- nodegroup_id is preserved for conf_files and other references
 -- former nodegroups table was (nodegroup_id,name,description)
--- new table is	now	       (nodegroup_id, groupname, tag_type_id, tagvalue)
+-- new table is	now	       (nodegroup_id, groupname, tag_type_id, value)
 
 -- rename column
 ALTER TABLE nodegroups RENAME name TO groupname;
@@ -201,23 +201,23 @@ INSERT INTO tag_types (tagname)
 ALTER TABLE nodegroups DROP COLUMN description;
 
 ---------- set the right tags so as to recover former nodegroups
-INSERT INTO node_tag (node_id, tag_type_id, tagvalue)
-   SELECT node_id, tag_type_id, tagvalue FROM
+INSERT INTO node_tag (node_id, tag_type_id, value)
+   SELECT node_id, tag_type_id, value FROM
       nodegroup_node LEFT JOIN nodegroups USING (nodegroup_id) 
          INNER JOIN mgn_site_nodegroup USING (groupname)
 	    LEFT JOIN tag_types using (tagname); 
 
 ---------- nodegroups table - conclusion
 ALTER TABLE nodegroups ADD COLUMN tag_type_id INTEGER;
-ALTER TABLE nodegroups ADD COLUMN tagvalue TEXT;
+ALTER TABLE nodegroups ADD COLUMN value TEXT;
 
 CREATE OR REPLACE VIEW mgn_nodegroups AS
-   SELECT groupname, tag_types.tag_type_id, mgn_site_nodegroup.tagvalue 
+   SELECT groupname, tag_types.tag_type_id, mgn_site_nodegroup.value 
       FROM nodegroups INNER JOIN mgn_site_nodegroup USING (groupname) 
          INNER JOIN tag_types USING (tagname);
 
 UPDATE nodegroups SET tag_type_id = (SELECT tag_type_id FROM mgn_nodegroups WHERE nodegroups.groupname=mgn_nodegroups.groupname);
-UPDATE nodegroups SET tagvalue = (SELECT tagvalue FROM mgn_nodegroups WHERE nodegroups.groupname=mgn_nodegroups.groupname);
+UPDATE nodegroups SET value = (SELECT value FROM mgn_nodegroups WHERE nodegroups.groupname=mgn_nodegroups.groupname);
 
 -- install corresponding constraints
 ALTER TABLE nodegroups ADD CONSTRAINT nodegroups_tag_type_id_fkey

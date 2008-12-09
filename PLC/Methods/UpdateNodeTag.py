@@ -10,11 +10,9 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
-from PLC.NodeTags import NodeTag, NodeTags
-from PLC.Nodes import Node, Nodes
-
-from PLC.Nodes import Nodes
 from PLC.Sites import Sites
+from PLC.Nodes import Node, Nodes
+from PLC.NodeTags import NodeTag, NodeTags
 
 class UpdateNodeTag(Method):
     """
@@ -30,7 +28,7 @@ class UpdateNodeTag(Method):
     accepts = [
         Auth(),
         NodeTag.fields['node_tag_id'],
-        NodeTag.fields['tagvalue']
+        NodeTag.fields['value']
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -66,7 +64,7 @@ class UpdateNodeTag(Method):
 		    min(self.caller['role_ids']) > required_min_role:
 		raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d",required_min_role
 
-        node_tag['tagvalue'] = value
+        node_tag['value'] = value
         node_tag.sync()
 
 	self.object_ids = [node_tag['node_tag_id']]

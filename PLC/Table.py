@@ -280,8 +280,8 @@ class Row(dict):
         """
         returns a SQL sentence that creates a view named after the primary_key and tagname, 
         with 2 columns
-        (*) column 1: name=self.primary_key 
-        (*) column 2: name=tagname value=tagvalue
+        (*) column 1: primary_key 
+        (*) column 2: actual tag value, renamed into tagname
         """
 
         if not cls.view_tags_name: return ""
@@ -291,7 +291,7 @@ class Row(dict):
         view_tags_name=cls.view_tags_name
         tagvalue_view_name=cls.tagvalue_view_name(tagname)
         return 'CREATE OR REPLACE VIEW %(tagvalue_view_name)s ' \
-            'as SELECT %(table_name)s.%(primary_key)s,%(view_tags_name)s.tagvalue as "%(tagname)s" ' \
+            'as SELECT %(table_name)s.%(primary_key)s,%(view_tags_name)s.value as "%(tagname)s" ' \
             'from %(table_name)s right join %(view_tags_name)s using (%(primary_key)s) ' \
             'WHERE tagname = \'%(tagname)s\';'%locals()
 

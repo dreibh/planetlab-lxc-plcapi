@@ -323,7 +323,7 @@ CREATE TABLE node_tag (
     node_tag_id serial PRIMARY KEY,			-- ID
     node_id integer REFERENCES nodes NOT NULL,		-- node id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
-    tagvalue text					-- value attached
+    value text						-- value attached
 ) WITH OIDS;
 
 --------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ CREATE TABLE nodegroups (
     groupname text UNIQUE NOT NULL,		-- Group name 
     tag_type_id integer REFERENCES tag_types,	-- node is in nodegroup if it has this tag defined
     -- can be null, make management faster & easier
-    tagvalue text				-- with this value attached
+    value text					-- with this value attached
 ) WITH OIDS;
 
 -- xxx - first rough implem. similar to former semantics but might be slow
@@ -487,7 +487,7 @@ FROM tag_types
 JOIN node_tag 
 USING (tag_type_id) 
 JOIN nodegroups 
-USING (tag_type_id,tagvalue);
+USING (tag_type_id,value);
 
 CREATE OR REPLACE VIEW nodegroup_nodes AS
 SELECT nodegroup_id,
@@ -1059,7 +1059,7 @@ tag_types.tagname,
 tag_types.description,
 tag_types.category,
 tag_types.min_role_id,
-node_tag.tagvalue
+node_tag.value
 FROM node_tag 
 INNER JOIN tag_types USING (tag_type_id)
 INNER JOIN nodes USING (node_id);

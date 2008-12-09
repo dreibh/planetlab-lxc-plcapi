@@ -24,7 +24,7 @@ class NodeTag(Row):
         'node_id': Node.fields['node_id'],
         'hostname' : Node.fields['hostname'],
         'tag_type_id': TagType.fields['tag_type_id'],
-        'tagvalue': Parameter(str, "Node tag value"),
+        'value': Parameter(str, "Node tag value"),
         'tagname': TagType.fields['tagname'],
         'description': TagType.fields['description'],
         'category': TagType.fields['category'],

@@ -81,11 +81,13 @@ class Node(Row):
 
     view_tags_name = "view_node_tags"
     # tags declared here should also be defined as Accessors to ensure that the TagType is created
+    # type info not used yet
     tags = {
-        # regular
-        'arch': Parameter(str, "node/config", ro=True),
-        'deployment': Parameter(str, "node/operation"),
-        # dummynet
+        # regular nodes
+        'arch': str,
+        'pldistro' : str,
+        'deployment': str,
+        # dummynet nodes
         }
 
     def validate_hostname(self, hostname):

@@ -63,8 +63,8 @@ class Filter(Parameter, dict):
     example : filter = { '-OFFSET' : 100, '-LIMIT':25}
 
     A realistic example would read
-    GetNodes ( { 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
-    and that would return nodes matching '*.edu' in alphabetical order from 31th to 55th
+    GetNodes ( { 'node_type' : 'regular' , 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
+    and that would return regular (usual) nodes matching '*.edu' in alphabetical order from 31th to 55th
     """
 
     def __init__(self, fields = {}, filter = {}, doc = "Attribute filter"):

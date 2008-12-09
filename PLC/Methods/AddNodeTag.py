@@ -9,11 +9,11 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
+from PLC.Sites import Sites
+from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
-from PLC.Nodes import Node, Nodes
 
-from PLC.Sites import Sites
 
 class AddNodeTag(Method):
     """
@@ -36,7 +36,7 @@ class AddNodeTag(Method):
               Node.fields['hostname']),
         Mixed(TagType.fields['tag_type_id'],
               TagType.fields['tagname']),
-        NodeTag.fields['tagvalue'],
+        NodeTag.fields['value'],
         ]
 
     returns = Parameter(int, 'New node_tag_id (> 0) if successful')
@@ -82,7 +82,7 @@ class AddNodeTag(Method):
         node_tag = NodeTag(self.api)
         node_tag['node_id'] = node['node_id']
         node_tag['tag_type_id'] = tag_type['tag_type_id']
-        node_tag['tagvalue'] = value
+        node_tag['value'] = value
 
         node_tag.sync()
 	self.object_ids = [node_tag['node_tag_id']]

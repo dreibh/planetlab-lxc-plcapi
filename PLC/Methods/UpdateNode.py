@@ -84,14 +84,14 @@ class UpdateNode(Method):
 	if 'boot_state' in node_fields.keys():
 		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
 
-        for (tagname,tagvalue) in tags.iteritems():
+        for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
                 raise PLCInvalidArgument,"No such TagType %s"%tagname
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:
-                AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,tagvalue)
+                AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,value)
             else:
-                UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],tagvalue)
+                UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
 
         return 1

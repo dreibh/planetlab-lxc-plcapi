@@ -12,7 +12,7 @@ class Nodegroups:
     # strip off comments
     comment=re.compile("\s*#.*")
     id="[\w\.-]+|\'[^\']+\'"
-    id3="\s*(?P<groupname>%s)\s+(?P<tagname>%s)\s+(?P<tagvalue>%s\s*)"%(id,id,id)
+    id3="\s*(?P<groupname>%s)\s+(?P<tagname>%s)\s+(?P<value>%s\s*)"%(id,id,id)
     line=re.compile(id3)
 
     def parse (self):
@@ -22,7 +22,7 @@ class Nodegroups:
             outfile = sys.stdout
         lineno=0
         print >> outfile, """
-CREATE TABLE mgn_site_nodegroup (groupname text, tagname text, tagvalue text);
+CREATE TABLE mgn_site_nodegroup (groupname text, tagname text, value text);
 """
         for line in file(self.input).readlines():
             lineno += 1
@@ -37,11 +37,11 @@ CREATE TABLE mgn_site_nodegroup (groupname text, tagname text, tagvalue text);
                 if id.find("'")==0:
                     return id
                 return "'%s'"%id
-            [groupname,tagname,tagvalue]=[normalize(x) for x in match.groups()]
+            [groupname,tagname,value]=[normalize(x) for x in match.groups()]
 
             print >> outfile, \
-"INSERT INTO mgn_site_nodegroup (groupname,tagname,tagvalue) VALUES (%s,%s,%s);"%\
-(groupname,tagname,tagvalue)
+"INSERT INTO mgn_site_nodegroup (groupname,tagname,value) VALUES (%s,%s,%s);"%\
+(groupname,tagname,value)
         if outfile != sys.stdout:
             outfile.close()
 

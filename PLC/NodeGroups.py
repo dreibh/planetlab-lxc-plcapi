@@ -31,7 +31,7 @@ class NodeGroup(Row):
         'nodegroup_id': Parameter(int, "Node group identifier"),
         'groupname': Parameter(str, "Node group name", max = 50),
         'tag_type_id': Parameter (int, "Node tag type id"),
-        'tagvalue' : Parameter(str, "value that the nodegroup definition is based upon"),
+        'value' : Parameter(str, "value that the nodegroup definition is based upon"),
         'tagname' : Parameter(str, "Tag name that the nodegroup definition is based upon"),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
         'node_ids' : Parameter([int], "List of node_ids that belong to this nodegroup"),

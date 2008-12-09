@@ -24,13 +24,13 @@ from PLC.TagTypes import TagTypes, TagType
 # known classes : { class -> secondary_key }
 taggable_classes = { Node : {'table_class' : Nodes, 
                              'joins_class' : NodeTags, 'join_class' : NodeTag,
-                             'value_key': 'tagvalue', 'secondary_key': 'hostname'},
+                             'secondary_key': 'hostname'},
                      Interface : {'table_class' : Interfaces, 
                                   'joins_class': InterfaceTags, 'join_class': InterfaceTag,
-                                  'value_key' : 'value' }, 
+                                  },
                      Slice: {'table_class' : Slices, 
                              'joins_class': SliceTags, 'join_class': SliceTag,
-                             'value_key' : 'value', 'secondary_key':'login_base'},
+                             'secondary_key':'login_base'},
 #                     Ilink : xxx
                      }
 
@@ -39,9 +39,9 @@ all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 tech_roles = [ 'admin', 'pi', 'tech' ]
 
 # generates 2 method classes:
-# Get<classname><methodsuffix> (auth, id_or_name) -> tagvalue or None
-# Set<classname><methodsuffix> (auth, id_or_name, tagvalue) -> None
-# tagvalue is always a string, no cast nor typecheck for now
+# Get<classname><methodsuffix> (auth, id_or_name) -> value or None
+# Set<classname><methodsuffix> (auth, id_or_name, value) -> None
+# value is always a string, no cast nor typecheck for now
 #
 # note: tag_min_role_id gets attached to the tagtype instance, 
 # while get_roles and set_roles get attached to the created methods
@@ -99,7 +99,6 @@ def define_accessors (module, objclass, methodsuffix,
     table_class = taggable_classes[objclass]['table_class']
     joins_class = taggable_classes[objclass]['joins_class']
     join_class = taggable_classes[objclass]['join_class']
-    value_key = taggable_classes[objclass]['value_key']
 
     # body of the get method
     def get_call (self, auth, id_or_name):
@@ -113,18 +112,18 @@ def define_accessors (module, objclass, methodsuffix,
             filter[primary_key]=id_or_name
         else:
             filter[secondary_key]=id_or_name
-        joins = joins_class (self.api,filter,[value_key])
+        joins = joins_class (self.api,filter,['value'])
         if not joins:
             # xxx - we return None even if id_or_name is not valid 
             return None
         else:
-            return joins[0][value_key]
+            return joins[0]['value']
 
     # attach it
     setattr (get_class,"call",get_call)
 
     # body of the set method 
-    def set_call (self, auth, id_or_name, tagvalue):
+    def set_call (self, auth, id_or_name, value):
         # locate the object
         if isinstance (id_or_name, int):
             filter={primary_key:id_or_name}
@@ -157,15 +156,15 @@ def define_accessors (module, objclass, methodsuffix,
             filter[secondary_key]=id_or_name
         joins = joins_class (self.api,filter)
         # setting to something non void
-        if tagvalue is not None:
+        if value is not None:
             if not joins:
                 join = join_class (self.api)
                 join['tag_type_id']=tag_type_id
                 join[primary_key]=primary_id
-                join[value_key]=tagvalue
+                join['value']=value
                 join.sync()
             else:
-                joins[0][value_key]=tagvalue
+                joins[0]['value']=value
                 joins[0].sync()
         # providing an empty value means clean up
         else:

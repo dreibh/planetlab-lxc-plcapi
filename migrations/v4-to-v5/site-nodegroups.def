@@ -1,6 +1,6 @@
 # this file allows you to plan the migration of your nodegroups
 # 
-# groupname tagname tagvalue
+# groupname tagname value
 # 
 # single quotes can be used
 # although tagnames can have spaces, it is not recommended 
