@@ -404,7 +404,7 @@ class Table(list):
             tag_columns={}
         else:
             (columns,tag_columns,rejected) = classobj.parse_columns(columns)
-            if not columns:
+            if not columns and not tag_columns:
                 raise PLCInvalidArgument, "No valid return fields specified for class %s"%classobj.__name__
             if rejected:
                 raise PLCInvalidArgument, "unknown column(s) specified %r in %s"%(rejected,classobj.__name__)
