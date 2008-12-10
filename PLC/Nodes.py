@@ -80,15 +80,9 @@ class Node(Row):
 	}
 
     view_tags_name = "view_node_tags"
-    # tags declared here should also be defined as Accessors to ensure that the TagType is created
-    # type info not used yet
-    tags = {
-        # regular nodes
-        'arch': str,
-        'pldistro' : str,
-        'deployment': str,
-        # dummynet nodes
-        }
+    # tags are used by the Add/Get/Update methods to expose tags
+    # this is initialized here and updated by the accessors factory
+    tags = { }
 
     def validate_hostname(self, hostname):
         if not valid_hostname(hostname):

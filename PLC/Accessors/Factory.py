@@ -38,26 +38,35 @@ taggable_classes = { Node : {'table_class' : Nodes,
 all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 tech_roles = [ 'admin', 'pi', 'tech' ]
 
+#
 # generates 2 method classes:
 # Get<classname><methodsuffix> (auth, id_or_name) -> value or None
 # Set<classname><methodsuffix> (auth, id_or_name, value) -> None
 # value is always a string, no cast nor typecheck for now
 #
+# The expose_in_api flag tells whether this tag may be handled 
+#   through the Add/Get/Update methods as a native field
+#
 # note: tag_min_role_id gets attached to the tagtype instance, 
 # while get_roles and set_roles get attached to the created methods
+# this might need a cleanup
 # 
-# returns a tuple (get_method, set_method)
-# See Accessors* for examples
 
-def define_accessors (module, objclass, methodsuffix, 
-                      tagname, category, description, tag_min_role_id=10,
-                      get_roles=['admin'], set_roles=['admin']):
+def define_accessors (module, objclass, methodsuffix, tagname, 
+                      category, description, 
+                      get_roles=['admin'], set_roles=['admin'], 
+                      tag_min_role_id=10, expose_in_api = False):
     
     if objclass not in taggable_classes:
         try:
             raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class %s"%objclass.__name__
         except:
             raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class ??"
+
+    # side-effect on, say, Node.tags, if required
+    if expose_in_api:
+        getattr(objclass,'tags')[tagname]=Parameter(str,"accessor")
+
     classname=objclass.__name__
     get_name = "Get" + classname + methodsuffix
     set_name = "Set" + classname + methodsuffix
