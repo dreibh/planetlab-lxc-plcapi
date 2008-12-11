@@ -2,14 +2,19 @@
 import re
 
 from PLC.Faults import *
+from PLC.Auth import Auth
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Slices import Slice, Slices
-from PLC.Auth import Auth
-from PLC.Sites import Site, Sites
+from PLC.Table import Row
 
-can_update = lambda (field, value): field in \
-             ['name', 'instantiation', 'url', 'description', 'max_nodes']
+from PLC.Slices import Slice, Slices
+from PLC.Sites import Site, Sites
+from PLC.TagTypes import TagTypes
+from PLC.SliceTags import SliceTags
+from PLC.Methods.AddSliceTag import AddSliceTag
+from PLC.Methods.UpdateSliceTag import UpdateSliceTag
+
+can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
 class AddSlice(Method):
     """
@@ -30,17 +35,24 @@ class AddSlice(Method):
 
     roles = ['admin', 'pi']
 
-    slice_fields = dict(filter(can_update, Slice.fields.items()))
+    accepted_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.tags])
 
     accepts = [
         Auth(),
-        slice_fields
+        accepted_fields
         ]
 
     returns = Parameter(int, 'New slice_id (> 0) if successful')
 
     def call(self, auth, slice_fields):
-        slice_fields = dict(filter(can_update, slice_fields.items()))
+
+        [native,tags,rejected]=Row.split_fields(slice_fields,[Slice.fields,Slice.tags])
+
+        if rejected:
+            raise PLCInvalidArgument, "Cannot add Slice with column(s) %r"%rejected
+
+        # Authenticated function
+        assert self.caller is not None
 
         # 1. Lowercase.
         # 2. Begins with login_base (letters or numbers).
@@ -61,21 +73,32 @@ class AddSlice(Method):
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Slice prefix %s must be the same as the login_base of one of your sites"%login_base
+                raise PLCPermissionDenied, "Slice prefix %s must match one of your sites' login_base"%login_base
 
         if len(site['slice_ids']) >= site['max_slices']:
-            raise PLCInvalidArgument, "Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
-                                                                                                         len(site['slice_ids']),
-                                                                                                         site['max_slices'])
-
+            raise PLCInvalidArgument, \
+                "Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
+                                                                                   len(site['slice_ids']),
+                                                                                   site['max_slices'])
 	if not site['enabled']:
-	    raise PLCInvalidArgument, "Site %s is disabled can cannot create slices" % (site['name'])
+	    raise PLCInvalidArgument, "Site %s is disabled and can cannot create slices" % (site['name'])
 	 
-        slice = Slice(self.api, slice_fields)
+        slice = Slice(self.api, native)
         slice['creator_person_id'] = self.caller['person_id']
         slice['site_id'] = site['site_id']
         slice.sync()
 
+        for (tagname,value) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            slice_tags=SliceTags(self.api,{'tagname':tagname,'slice_id':slice['slice_id']})
+            if not slice_tags:
+                AddSliceTag(self.api).__call__(auth,slice['slice_id'],tagname,value)
+            else:
+                UpdateSliceTag(self.api).__call__(auth,slice_tags[0]['slice_tag_id'],value)
+
 	self.event_objects = {'Slice': [slice['slice_id']]}
+        self.message = "Slice %d created" % slice['slice_id']
 
         return slice['slice_id']

@@ -68,10 +68,6 @@ class AddNode(Method):
         node['site_id'] = site['site_id']
         node.sync()
 
-	self.event_objects = {'Site': [site['site_id']],
-			     'Node': [node['node_id']]}	
-	self.message = "Node %s created" % node['node_id']
-
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
@@ -81,5 +77,9 @@ class AddNode(Method):
                 AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,value)
             else:
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
+
+	self.event_objects = {'Site': [site['site_id']],
+			     'Node': [node['node_id']]}	
+	self.message = "Node %s created" % node['node_id']
 
         return node['node_id']

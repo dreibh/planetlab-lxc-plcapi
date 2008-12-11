@@ -30,7 +30,7 @@ taggable_classes = { Node : {'table_class' : Nodes,
                                   'secondary_key' : 'ip'},
                      Slice: {'table_class' : Slices, 
                              'joins_class': SliceTags, 'join_class': SliceTag,
-                             'secondary_key':'login_base'},
+                             'secondary_key':'name'},
 #                     Ilink : xxx
                      }
 
@@ -81,12 +81,8 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     # accepts 
     get_accepts = [ Auth () ]
     primary_key=objclass.primary_key
-    try:
-        secondary_key = taggable_classes[objclass]['secondary_key']
-        get_accepts += [ Mixed (objclass.fields[primary_key], objclass.fields[secondary_key]) ]
-    except:
-        secondary_key = None
-        get_accepts += [ objclass.fields[primary_key] ]
+    secondary_key = taggable_classes[objclass]['secondary_key']
+    get_accepts += [ Mixed (objclass.fields[primary_key], objclass.fields[secondary_key]) ]
     # for set, idem set of arguments + one additional arg, the new value
     set_accepts = get_accepts + [ Parameter (str,"New tag value") ]
 
@@ -138,7 +134,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
             filter={primary_key:id_or_name}
         else:
             filter={secondary_key:id_or_name}
-        objs = table_class(self.api, filter,[primary_key])
+        objs = table_class(self.api, filter,[primary_key,secondary_key])
         if not objs:
             raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
         primary_id = objs[0][primary_key]
@@ -180,6 +176,14 @@ def define_accessors (module, objclass, methodsuffix, tagname,
             if joins:
                 join=joins[0]
                 join.delete()
+        # log it
+        self.event_objects= { objclass.__name__ : [primary_id] }
+        self.message=objclass.__name__
+        if secondary_key in objs[0]:
+            self.message += " %s "%objs[0][secondary_key]
+        else:
+            self.message += " %d "%objs[0][primary_key]
+        self.message += "updated"
 
     # attach it
     setattr (set_class,"call",set_call)

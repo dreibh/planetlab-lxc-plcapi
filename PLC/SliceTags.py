@@ -3,6 +3,10 @@ from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
+# seems to cause import loops
+#from PLC.Slices import Slice, Slices
+from PLC.Nodes import Node, Nodes
+from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.TagTypes import TagType, TagTypes
 
 class SliceTag(Row):
@@ -14,10 +18,11 @@ class SliceTag(Row):
     table_name = 'slice_tag'
     primary_key = 'slice_tag_id'
     fields = {
-        'slice_tag_id': Parameter(int, "Slice attribute identifier"),
+        'slice_tag_id': Parameter(int, "Slice tag identifier"),
         'slice_id': Parameter(int, "Slice identifier"),
-        'node_id': Parameter(int, "Node identifier, if a sliver attribute"),
-	'nodegroup_id': Parameter(int, "Nodegroup identifier, if a sliver attribute"),
+        'name': Parameter(str, "Slice name"),
+        'node_id': Node.fields['node_id'],
+	'nodegroup_id': NodeGroup.fields['nodegroup_id'],
         'tag_type_id': TagType.fields['tag_type_id'],
         'tagname': TagType.fields['tagname'],
         'description': TagType.fields['description'],

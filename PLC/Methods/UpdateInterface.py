@@ -82,7 +82,10 @@ class UpdateInterface(Method):
                 UpdateInterfaceTag(self.api).__call__(auth,interface_tags[0]['interface_tag_id'],value)
 
 	self.event_objects = {'Interface': [interface['interface_id']]}
-	self.message = "Interface %d updated: %s " % \
-	    (interface['interface_id'], ", ".join(interface_fields.keys()))
+        if 'ip' in interface:
+            self.message = "Interface %s updated"%interface['ip']
+        else:
+            self.message = "Interface %d updated"%interface['interface_id']
+        self.message += "[%s]." % ", ".join(interface_fields.keys())
 
         return 1

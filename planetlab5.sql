@@ -1232,9 +1232,11 @@ tag_types.tagname,
 tag_types.description,
 tag_types.category,
 tag_types.min_role_id,
-slice_tag.value
+slice_tag.value,
+slices.name
 FROM slice_tag
-INNER JOIN tag_types USING (tag_type_id);
+INNER JOIN tag_types USING (tag_type_id)
+INNER JOIN slices USING (slice_id);
 
 --------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_sessions AS

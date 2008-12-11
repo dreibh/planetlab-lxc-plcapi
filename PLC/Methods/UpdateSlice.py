@@ -4,15 +4,18 @@ import time
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Slices import Slice, Slices
+from PLC.Table import Row
 from PLC.Auth import Auth
+
+from PLC.Slices import Slice, Slices
 from PLC.Sites import Site, Sites
+from PLC.TagTypes import TagTypes
+from PLC.SliceTags import SliceTags
+from PLC.Methods.AddSliceTag import AddSliceTag
+from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-related_fields = Slice.related_fields.keys() 
-can_update = lambda (field, value): field in \
-             ['instantiation', 'url', 'description', 'max_nodes', 'expires'] + \
-	     related_fields
-
+can_update = ['instantiation', 'url', 'description', 'max_nodes', 'expires'] + \
+    Slice.related_fields.keys()
 
 class UpdateSlice(Method):
     """
@@ -32,7 +35,7 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    slice_fields = dict(filter(can_update, Slice.fields.items() + Slice.related_fields.items()))
+    slice_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.related_fields,Slice.tags])
 
     accepts = [
         Auth(),
@@ -44,15 +47,23 @@ class UpdateSlice(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, slice_id_or_name, slice_fields):
-        slice_fields = dict(filter(can_update, slice_fields.items()))
-        
+
+        # split provided fields 
+        [native,related,tags,rejected] = Row.split_fields(slice_fields,[Slice.fields,Slice.related_fields,Slice.tags])
+
+        if rejected:
+            raise PLCInvalidArgument, "Cannot update Node column(s) %r"%rejected
+
 	slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
         slice = slices[0]
 
         if slice['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local slice"
+
+        # Authenticated function
+        assert self.caller is not None
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
@@ -63,12 +74,13 @@ class UpdateSlice(Method):
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
         # Renewing
+        renewing=False
         if 'expires' in slice_fields and slice_fields['expires'] > slice['expires']:
             sites = Sites(self.api, [slice['site_id']])
             assert sites
             site = sites[0]
 
-            if site['max_slices'] < 0:
+            if site['max_slices'] <= 0:
                 raise PLCInvalidArgument, "Slice creation and renewal have been disabled for the site"
 
             # Maximum expiration date is 8 weeks from now
@@ -88,6 +100,7 @@ class UpdateSlice(Method):
 		if 'url' not in slice_fields or slice_fields['url'] is None or \
 		   not slice_fields['url'].strip():
                     raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
+            renewing=True
 	    
         if 'max_nodes' in slice_fields and slice_fields['max_nodes'] != slice['max_nodes']:
             if 'admin' not in self.caller['roles'] and \
@@ -95,14 +108,28 @@ class UpdateSlice(Method):
                 raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
 
 	# Make requested associations
-	for field in related_fields:
-	    if field in slice_fields:
-		slice.associate(auth, field, slice_fields[field])
-		slice_fields.pop(field)
+        for (k,v) in related.iteritems():
+            slice.associate(auth,k,v)
 
 	slice.update(slice_fields)
-        slice.sync()
+        slice.sync(commit=True)
+
+        for (tagname,value) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            slice_tags=SliceTags(self.api,{'tagname':tagname,'slice_id':slice['slice_id']})
+            if not slice_tags:
+                AddSliceTag(self.api).__call__(auth,slice['slice_id'],tagname,value)
+            else:
+                UpdateSliceTag(self.api).__call__(auth,slice_tags[0]['slice_tag_id'],value)
 
 	self.event_objects = {'Slice': [slice['slice_id']]}
+        if 'name' in slice:
+            self.message='Slice %s updated'%slice['name']
+        else:
+            self.message='Slice %d updated'%slice['slice_id']
+        if renewing:
+            self.message += ' renewed until %s'%time.strftime('%Y-%m-%d:%H:%M',localtime(slice['expires']))
 
         return 1

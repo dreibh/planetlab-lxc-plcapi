@@ -90,9 +90,12 @@ class UpdateNode(Method):
 
 	# Logging variables
 	self.event_objects = {'Node': [node['node_id']]}
-	self.message = 'Node %d updated: %s.' % \
-		(node['node_id'], ", ".join(node_fields.keys()))
+        if 'hostname' in node:
+            self.message = 'Node %s updated'%node['hostname']
+        else:
+            self.message = 'Node %d updated'%node['node_id']
+        self.message += " [%s]." % (", ".join(node_fields.keys()),)
 	if 'boot_state' in node_fields.keys():
-		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
+		self.message += ' boot_state updated to %s' % node_fields['boot_state']
 
         return 1

@@ -20,7 +20,7 @@ current_module = sys.modules[__name__]
 # xxx - don't expose yet in api interface and slices dont know how to use that yet
 define_accessors(current_module, Slice, "Vref", "vref", 
                  "slice/config", "vserver reference image type",
-                 get_roles=all_roles, set_roles=["admin"], expose_in_api=False)
+                 get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
 
 
 # node architecture 

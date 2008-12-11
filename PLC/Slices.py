@@ -256,8 +256,15 @@ class Slices(Table):
     def __init__(self, api, slice_filter = None, columns = None, expires = int(time.time())):
         Table.__init__(self, api, Slice, columns)
 
-        sql = "SELECT %s FROM view_slices WHERE is_deleted IS False" % \
-              ", ".join(self.columns)
+        # the view that we're selecting upon: start with view_slices
+        view = "view_slices"
+        # as many left joins as requested tags
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Slice.tagvalue_view_name(tagname),
+                                                Slice.primary_key)
+            
+        sql = "SELECT %s FROM %s WHERE is_deleted IS False" % \
+              (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 
         if expires is not None:
             if expires >= 0:
