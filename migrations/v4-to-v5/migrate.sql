@@ -118,7 +118,7 @@ ALTER TABLE tag_types RENAME COLUMN name TO tagname;
 --- former slice_attribute_types had no 'category'
 ALTER TABLE tag_types ADD COLUMN category TEXT NOT NULL DEFAULT 'slice/legacy';
 
---- append in tag_types the contents of nodenetwork_setting_types
+--- append in tag_types the contents of former nodenetwork_setting_types
 INSERT INTO tag_types (tagname,description,min_role_id,category) 
        SELECT name,description,min_role_id,'interface/legacy' FROM interface_tag_types;
 
