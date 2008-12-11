@@ -68,6 +68,9 @@ class Interface(Row):
         'interface_tag_ids' : Parameter([int], "List of interface settings"),
         }
 
+    view_tags_name = "view_interface_tags"
+    tags = {}
+
     def validate_method(self, method):
         network_methods = [row['method'] for row in NetworkMethods(self.api)]
         if method not in network_methods:
@@ -214,18 +217,34 @@ class Interfaces(Table):
     def __init__(self, api, interface_filter = None, columns = None):
         Table.__init__(self, api, Interface, columns)
 
-        sql = "SELECT %s FROM view_interfaces WHERE True" % \
-              ", ".join(self.columns)
+        # the view that we're selecting upon: start with view_nodes
+        view = "view_interfaces"
+        # as many left joins as requested tags
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Interface.tagvalue_view_name(tagname),
+                                                Interface.primary_key)
+            
+        sql = "SELECT %s FROM %s WHERE True" % \
+            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 
         if interface_filter is not None:
             if isinstance(interface_filter, (list, tuple, set)):
-                interface_filter = Filter(Interface.fields, {'interface_id': interface_filter})
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), interface_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), interface_filter)
+                interface_filter = Filter(Interface.fields, {'interface_id': ints, 'ip': strs})
+                sql += " AND (%s) %s" % interface_filter.sql(api, "OR")
             elif isinstance(interface_filter, dict):
-                interface_filter = Filter(Interface.fields, interface_filter)
+                allowed_fields=dict(Interface.fields.items()+Interface.tags.items())
+                interface_filter = Filter(allowed_fields, interface_filter)
+                sql += " AND (%s) %s" % interface_filter.sql(api)
             elif isinstance(interface_filter, int):
                 interface_filter = Filter(Interface.fields, {'interface_id': [interface_filter]})
+                sql += " AND (%s) %s" % interface_filter.sql(api)
+            elif isinstance (interface_filter, StringTypes):
+                interface_filter = Filter(Interface.fields, {'ip':[interface_filter]})
+                sql += " AND (%s) %s" % interface_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong node network filter %r"%interface_filter
-            sql += " AND (%s) %s" % interface_filter.sql(api)
+                raise PLCInvalidArgument, "Wrong interface filter %r"%interface_filter
 
         self.selectall(sql)

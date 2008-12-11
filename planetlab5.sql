@@ -348,7 +348,7 @@ INSERT INTO network_methods (method) VALUES ('tap');
 INSERT INTO network_methods (method) VALUES ('ipmi');
 INSERT INTO network_methods (method) VALUES ('unknown');
 
--- Node network interfaces
+-- Network interfaces
 CREATE TABLE interfaces (
     -- Mandatory
     interface_id serial PRIMARY KEY,			-- Network interface identifier
@@ -405,6 +405,7 @@ CREATE OR REPLACE VIEW view_interface_tags AS
 SELECT
 interface_tag.interface_tag_id,
 interface_tag.interface_id,
+interfaces.ip,
 tag_types.tag_type_id,
 tag_types.tagname,
 tag_types.description,
@@ -412,7 +413,8 @@ tag_types.category,
 tag_types.min_role_id,
 interface_tag.value
 FROM interface_tag
-INNER JOIN tag_types USING (tag_type_id);
+INNER JOIN tag_types USING (tag_type_id)
+INNER JOIN interfaces USING (interface_id);
 
 CREATE OR REPLACE VIEW view_interfaces AS
 SELECT

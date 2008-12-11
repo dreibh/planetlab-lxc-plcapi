@@ -48,6 +48,9 @@ class Slice(Row):
 		        Parameter(str, "Fully qualified hostname"))]
    	}
 
+    view_tags_name="view_slice_tags"
+    tags = {}
+
     def validate_name(self, name):
         # N.B.: Responsibility of the caller to ensure that login_base
         # portion of the slice name corresponds to a valid site, if

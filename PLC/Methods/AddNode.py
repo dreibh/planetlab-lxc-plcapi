@@ -1,12 +1,12 @@
 # $Id$
 from PLC.Faults import *
+from PLC.Auth import Auth
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Table import Row
-from PLC.Nodes import Node, Nodes
-from PLC.NodeGroups import NodeGroup, NodeGroups
+
 from PLC.Sites import Site, Sites
-from PLC.Auth import Auth
+from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags
 from PLC.Methods.AddNodeTag import AddNodeTag

@@ -284,7 +284,8 @@ class Row(dict):
         (*) column 2: actual tag value, renamed into tagname
         """
 
-        if not cls.view_tags_name: return ""
+        if not cls.view_tags_name: 
+            raise Exception, 'WARNING: class %s needs to set view_tags_name'%cls.__name__
 
         table_name=cls.table_name
         primary_key=cls.primary_key

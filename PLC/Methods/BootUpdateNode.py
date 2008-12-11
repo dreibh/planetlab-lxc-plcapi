@@ -38,22 +38,22 @@ class BootUpdateNode(Method):
         if node_fields.has_key('ssh_host_key'):
             self.caller['ssh_rsa_key'] = node_fields['ssh_host_key']
 
-        # Update primary node network state
+        # Update primary interface state
         if node_fields.has_key('primary_network'):
             primary_network = node_fields['primary_network'] 
 
             if 'interface_id' not in primary_network:
-                raise PLCInvalidArgument, "Node network not specified"
+                raise PLCInvalidArgument, "Interface not specified"
             if primary_network['interface_id'] not in self.caller['interface_ids']:
-                raise PLCInvalidArgument, "Node network not associated with calling node"
+                raise PLCInvalidArgument, "Interface not associated with calling node"
 
             interfaces = Interfaces(self.api, [primary_network['interface_id']])
             if not interfaces:
-                raise PLCInvalidArgument, "No such node network"
+                raise PLCInvalidArgument, "No such interface %r"%interface_id
             interface = interfaces[0]
 
             if not interface['is_primary']:
-                raise PLCInvalidArgument, "Not the primary node network on record"
+                raise PLCInvalidArgument, "Not the primary interface on record"
 
             interface_fields = dict(filter(can_update, primary_network.items()))
             interface.update(interface_fields)

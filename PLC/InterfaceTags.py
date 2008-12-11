@@ -9,6 +9,7 @@ from PLC.Parameter import Parameter
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 from PLC.TagTypes import TagType, TagTypes
+from PLC.Interfaces import Interface
 
 class InterfaceTag(Row):
     """
@@ -20,7 +21,8 @@ class InterfaceTag(Row):
     primary_key = 'interface_tag_id'
     fields = {
         'interface_tag_id': Parameter(int, "Interface setting identifier"),
-        'interface_id': Parameter(int, "Interface identifier"),
+        'interface_id': Interface.fields['interface_id'],
+        'ip': Interface.fields['ip'],
         'tag_type_id': TagType.fields['tag_type_id'],
         'tagname': TagType.fields['tagname'],
         'description': TagType.fields['description'],

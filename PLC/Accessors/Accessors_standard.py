@@ -48,7 +48,7 @@ define_accessors(current_module, Node, "PlainBootstrapfs", "plain-bootstrapfs",
 # xxx - don't expose yet in api interface and slices dont know how to use that yet
 define_accessors(current_module, Interface, "Ifname", "ifname", 
                  "interface/config", "linux name",
-                 get_roles=all_roles, set_roles=tech_roles, expose_in_api=False)
+                 get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
 define_accessors(current_module, Interface, "Driver", "driver", 
                  "interface/config", "driver name",
                  get_roles=all_roles, set_roles=tech_roles)

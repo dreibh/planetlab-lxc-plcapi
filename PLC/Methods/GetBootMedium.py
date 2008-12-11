@@ -152,7 +152,7 @@ class GetBootMedium(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to generate a configuration file for %s"%node['hostname']
 
-        # Get node networks for this node
+        # Get interface for this node
         primary = None
         interfaces = Interfaces(self.api, node['interface_ids'])
         for interface in interfaces:

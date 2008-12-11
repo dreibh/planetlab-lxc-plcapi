@@ -3,8 +3,9 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Table import Row
-from PLC.Nodes import Node, Nodes
 from PLC.Auth import Auth
+
+from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags
 from PLC.Methods.AddNodeTag import AddNodeTag
@@ -43,7 +44,7 @@ class UpdateNode(Method):
         [native,related,tags,rejected] = Row.split_fields(node_fields,[Node.fields,Node.related_fields,Node.tags])
 
         if rejected:
-            raise PLCInvalidArgument, "Cannot update column(s) %r"%rejected
+            raise PLCInvalidArgument, "Cannot update Node column(s) %r"%rejected
 
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
@@ -77,13 +78,6 @@ class UpdateNode(Method):
 	node.update_last_updated(commit=False)
         node.sync(commit=True)
 	
-	# Logging variables
-	self.event_objects = {'Node': [node['node_id']]}
-	self.message = 'Node %d updated: %s.' % \
-		(node['node_id'], ", ".join(node_fields.keys()))
-	if 'boot_state' in node_fields.keys():
-		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
-
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
@@ -93,5 +87,12 @@ class UpdateNode(Method):
                 AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,value)
             else:
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
+
+	# Logging variables
+	self.event_objects = {'Node': [node['node_id']]}
+	self.message = 'Node %d updated: %s.' % \
+		(node['node_id'], ", ".join(node_fields.keys()))
+	if 'boot_state' in node_fields.keys():
+		self.message += ' boot_state updated to %s' %  node_fields['boot_state']
 
         return 1

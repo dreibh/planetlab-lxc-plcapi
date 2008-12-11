@@ -274,7 +274,8 @@ class Nodes(Table):
         view = "view_nodes"
         # as many left joins as requested tags
         for tagname in self.tag_columns:
-            view= "%s left join %s using (%s)"%(view,Node.tagvalue_view_name(tagname),Node.primary_key)
+            view= "%s left join %s using (%s)"%(view,Node.tagvalue_view_name(tagname),
+                                                Node.primary_key)
             
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
               (", ".join(self.columns.keys()+self.tag_columns.keys()),view)

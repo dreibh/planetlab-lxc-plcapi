@@ -52,6 +52,7 @@ class PostgreSQL:
     def __init__(self, api):
         self.api = api
         self.debug = False
+#        self.debug = True
         self.connection = None
 
     def cursor(self):

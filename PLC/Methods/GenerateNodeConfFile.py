@@ -48,7 +48,7 @@ class GenerateNodeConfFile(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to generate a configuration file for that node"
 
-	# Get node networks for this node
+	# Get interfaces for this node
         primary = None
         interfaces = Interfaces(self.api, node['interface_ids'])
         for interface in interfaces:

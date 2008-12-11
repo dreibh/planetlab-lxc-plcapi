@@ -2,47 +2,56 @@
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
-from PLC.Nodes import Node, Nodes
-from PLC.Interfaces import Interface, Interfaces
+from PLC.Table import Row
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field not in \
-             ['interface_id','node_id']
+from PLC.Nodes import Node, Nodes
+from PLC.TagTypes import TagTypes
+from PLC.InterfaceTags import InterfaceTags
+from PLC.Interfaces import Interface, Interfaces
+from PLC.Methods.AddInterfaceTag import AddInterfaceTag
+from PLC.Methods.UpdateInterfaceTag import UpdateInterfaceTag
+
+can_update = ['interface_id','node_id']
 
 class UpdateInterface(Method):
     """
-    Updates an existing node network. Any values specified in
+    Updates an existing interface network. Any values specified in
     interface_fields are used, otherwise defaults are
     used. Acceptable values for method are dhcp and static. If type is
     static, then ip, gateway, network, broadcast, netmask, and dns1
     must all be specified in interface_fields. If type is dhcp,
     these parameters, even if specified, are ignored.
     
-    PIs and techs may only update networks associated with their own
-    nodes. Admins may update any node network.
+    PIs and techs may only update interfaces associated with their own
+    nodes. Admins may update any interface network.
  
     Returns 1 if successful, faults otherwise.
     """
 
     roles = ['admin', 'pi', 'tech']
 
-    interface_fields = dict(filter(can_update, Interface.fields.items()))
+    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags])
 
     accepts = [
         Auth(),
 	Interface.fields['interface_id'],
-     	interface_fields
+     	accepted_fields
         ]
 
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, interface_id, interface_fields):
-        interface_fields = dict(filter(can_update, interface_fields.items()))
 
-	# Get node network information
+        [native,tags,rejected] = Row.split_fields(interface_fields,[Interface.fields,Interface.tags])
+
+        if rejected:
+            raise PLCInvalidArgument, "Cannot update Interface column(s) %r"%rejected
+
+	# Get interface information
 	interfaces = Interfaces(self.api, [interface_id])
 	if not interfaces:
-            raise PLCInvalidArgument, "No such node network"
+            raise PLCInvalidArgument, "No such interface"
 
 	interface = interfaces[0]
 		
@@ -54,17 +63,26 @@ class UpdateInterface(Method):
         if 'admin' not in self.caller['roles']:
             nodes = Nodes(self.api, [interface['node_id']])
             if not nodes:
-                raise PLCPermissionDenied, "Node network is not associated with a node"
+                raise PLCPermissionDenied, "Interface is not associated with a node"
             node = nodes[0]
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to update node network"
+                raise PLCPermissionDenied, "Not allowed to update interface"
 
-	# Update node network
-	interface.update(interface_fields)
+	interface.update(native)
         interface.sync()
 	
+        for (tagname,value) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            interface_tags=InterfaceTags(self.api,{'tagname':tagname,'interface_id':interface['interface_id']})
+            if not interface_tags:
+                AddInterfaceTag(self.api).__call__(auth,interface['interface_id'],tagname,value)
+            else:
+                UpdateInterfaceTag(self.api).__call__(auth,interface_tags[0]['interface_tag_id'],value)
+
 	self.event_objects = {'Interface': [interface['interface_id']]}
-	self.message = "Node network %d updated: %s " % \
+	self.message = "Interface %d updated: %s " % \
 	    (interface['interface_id'], ", ".join(interface_fields.keys()))
 
         return 1

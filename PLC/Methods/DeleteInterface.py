@@ -8,10 +8,10 @@ from PLC.Interfaces import Interface, Interfaces
 
 class DeleteInterface(Method):
     """
-    Deletes an existing node network interface.
+    Deletes an existing interface.
 
-    Admins may delete any node network. PIs and techs may only delete
-    node network interfaces associated with nodes at their sites.
+    Admins may delete any interface. PIs and techs may only delete
+    interface interfaces associated with nodes at their sites.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -28,16 +28,16 @@ class DeleteInterface(Method):
 
     def call(self, auth, interface_id):
 
-        # Get node network information
+        # Get interface information
         interfaces = Interfaces(self.api, [interface_id])
         if not interfaces:
-            raise PLCInvalidArgument, "No such node network"
+            raise PLCInvalidArgument, "No such interface %r"%interface_id
 	interface = interfaces[0]
 	
 	# Get node information
 	nodes = Nodes(self.api, [interface['node_id']])
 	if not nodes:
-		raise PLCInvalidArgument, "No such node"
+		raise PLCInvalidArgument, "No such node %r"%node_id
 	node = nodes[0]
 
         # Authenticated functino
@@ -47,12 +47,12 @@ class DeleteInterface(Method):
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete this node network"
+                raise PLCPermissionDenied, "Not allowed to delete this interface"
 
         interface.delete()
 
 	# Logging variables
 	self.event_objects = {'Interface': [interface['interface_id']]}
-	self.message = "Node network %d deleted" % interface['interface_id']
+	self.message = "Interface %d deleted" % interface['interface_id']
 
         return 1
