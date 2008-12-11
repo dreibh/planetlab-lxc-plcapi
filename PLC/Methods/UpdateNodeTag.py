@@ -47,7 +47,7 @@ class UpdateNodeTag(Method):
             raise PLCInvalidArgument, "No such node %r"%node_tag['node_id']
         node = nodes[0]
 
-        assert node_tag['node_tag_id'] in node['tag_ids']
+        assert node_tag['node_tag_id'] in node['node_tag_ids']
 
 	# check permission : it not admin, is the user affiliated with the right site
 	if 'admin' not in self.caller['roles']:

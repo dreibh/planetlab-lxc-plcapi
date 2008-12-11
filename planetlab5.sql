@@ -1045,7 +1045,7 @@ FROM peers;
 --------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW node_tags AS
 SELECT node_id,
-array_accum(node_tag_id) AS tag_ids
+array_accum(node_tag_id) AS node_tag_ids
 FROM node_tag
 GROUP BY node_id;
 
@@ -1103,9 +1103,9 @@ AS ports,
 COALESCE((SELECT conf_file_ids FROM node_conf_files
 		 WHERE node_conf_files.node_id = nodes.node_id), '{}') 
 AS conf_file_ids,
-COALESCE((SELECT tag_ids FROM node_tags 
+COALESCE((SELECT node_tag_ids FROM node_tags 
 		 WHERE node_tags.node_id = nodes.node_id), '{}') 
-AS tag_ids,
+AS node_tag_ids,
 node_session.session_id AS session
 FROM nodes
 LEFT JOIN peer_node USING (node_id)

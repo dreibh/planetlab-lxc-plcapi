@@ -66,7 +66,7 @@ class Node(Row):
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
         'peer_node_id': Parameter(int, "Foreign node identifier at peer", nullok = True),
-        'tag_ids' : Parameter ([int], "List of tags attached to this node"),
+        'node_tag_ids' : Parameter ([int], "List of tags attached to this node"),
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         }
     related_fields = {
