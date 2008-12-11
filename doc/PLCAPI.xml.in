@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- -*-xml-*- -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
 "@DOCBOOK-43@" [
 <!ENTITY Methods SYSTEM "Methods.xml">
@@ -122,16 +123,16 @@
     <section id="Filters">
       <title>Filters</title>
 
-      <para>Most of the <function>Get</function> functions take a
+      <para>Most of the <function>Get</function> methods take a
       filter argument. Filters may be arrays of integer (and sometimes
       string) identifiers, or a struct representing a filter on the
-      attributes of the entities being queried. For example,</para>
+      attributes of the entities being queried. For example,
 
 <programlisting>
-# plcsh code fragment (see below)
-GetNodes([1,2,3])
-GetNodes({'node_id': [1,2,3]})
+>>> GetNodes([1,2,3])
+>>> GetNodes({'node_id': [1,2,3]})
 </programlisting>
+</para>
 
       <para>Would be equivalent queries. Attributes that are
       themselves arrays (such as <literal>interface_ids</literal>
@@ -139,28 +140,206 @@ GetNodes({'node_id': [1,2,3]})
       filters.</para>
 
       <para> Filters support a few extra features illustrated in the following examples.</para>
-      <itemizedlist>
-	<listitem>
-	  <para> <emphasis> Pattern Matching </emphasis> </para>
+      
+      <section id="pattern-matching">
+	<title> Pattern Matching</title>
+	<para> <literal>*</literal> can be used in a text value and have the usual meaning, so all nodes in the <emphasis>fr</emphasis> can be obtained with:
 	  <programlisting>GetNodes ( { 'hostname' : '*.fr' } ) </programlisting>
-	</listitem>
-	<listitem>
-	  <para> <emphasis> Negation </emphasis> </para>
-	  <programlisting>GetNodes( { '~peer_id' : None } ) </programlisting>
-	</listitem>
-	<listitem>
-	  <para> <emphasis> Numeric comparisons </emphasis> </para>
-	  <programlisting>GetEvents( { '>time' : 1178531418 } ) </programlisting>
-	  <programlisting>GetEvents( { ']event_id' : 2305 } ) </programlisting>
-	</listitem>
-	<listitem>
-	  <para> <emphasis> Sorting and Clipping </emphasis> </para>
+	</para>
+      </section>
+
+      <section id="negation">
+	<title> Negation </title>
+	<para> Fields starting with a <literal>~</literal> are negated, so non-local nodes can be fetched with:
+	<programlisting>GetNodes( { '~peer_id' : None } ) </programlisting>
+	</para>
+      </section>
+
+      <section id="numeric">
+	<title> Nueric comparisons </title>
+	<para> Strictly greater/smaller operations are achieved by prepending the field name like in:
+	<programlisting>GetEvents( { '>time' : 1178531418 } ) </programlisting>
+	</para>
+	<para> Greater/smaller or equal: 
+	<programlisting>GetEvents( { ']event_id' : 2305 } ) </programlisting>
+	</para>
+      </section>
+
+      <section id="sort-clip">
+	<title> Sorting and Clipping </title> 
+	<para> The following 3 special fields can be used to extract only a subset of the results for pagination:
 	  <programlisting> GetNodes( { '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 }</programlisting>
-	</listitem>
-      </itemizedlist>
+	</para>
+      </section>
     </section>
 
-    <section>
+    <section id="tags">
+      <title>Tags</title>
+
+      <para> The PLC API comes with a feature called
+      <emphasis>tags</emphasis>, that basically aims at supporting an
+      extensible data model. A few classes (as of this writing, Nodes,
+      Interfaces and Slices) are eligible for being dynamically
+      extended beyond the basic set of fields that are built into the
+      database schema.</para>
+
+      <para> Historically, this is a generalization of the concept of
+      <emphasis> SliceAttribute </emphasis>, and the more recent
+      concept of <emphasis> InterfaceSetting </emphasis>, that with
+      release 5.0 have been renamed into <emphasis> SliceTag
+      </emphasis> and <emphasis> InterfaceTag </emphasis>,
+      respectively. </para>
+
+      <section id="tags-low-level">
+	<title> Low level </title>
+	<para> The low level interface to tags relies on the following items:
+      <itemizedlist>
+	<listitem>
+	  <para> 
+	    A <emphasis> TagType </emphasis> object basically models a
+	    new column that needs to be added to other objects. In
+	    much the same way as nodes are named through a <emphasis>
+	    hostname </emphasis>, tagtypes are named with a
+	    <emphasis>tagname</emphasis>, plus additional information
+	    (category, description) that is mostly informative. The
+	    convention is to use a category that depicts the type of
+	    objects that the tag type, like e.g. <emphasis>
+	    node/config </emphasis> 
+	  </para>
+	</listitem>
+	<listitem>
+	  <para> You would then be allowed to attach a value to, say,
+	  a Node, by calling <emphasis> AddNodeTag </emphasis>, and
+	  then as usual change this value with <emphasis>
+	  UpdateNodeTag </emphasis>, or delete it with <emphasis>
+	  DeleteNodeTag </emphasis>. </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+      </section>
+
+      <section id="accessors">
+	<title> Accessors </title>
+      <para> A rather more convenient way to use tags is through
+      Accessors. This convenience is located in <emphasis>
+      PLC/Accessors </emphasis>, and allows you to easily define Get
+      or Set methods dedicated to a given tag. This is for instance
+      how the <emphasis> GetNodeArch </emphasis> and <emphasis>
+      SetNodeArch </emphasis> methods are implemented. These methods
+      greatly simplify tags manipulation as they take care of
+      <itemizedlist>
+	<listitem>
+	  <para> Lazily create <emphasis> TagTypes </emphasis> when
+	  needed,</para>
+	</listitem>
+	<listitem>
+	  <para> Create or update the, say, <emphasis> NodeTag
+	  </emphasis> object, as needed.</para>
+	</listitem>
+      </itemizedlist>
+      </para>
+      <para> <emphasis> Site-specific </emphasis> accessors can be
+      defined in <emphasis>
+      /usr/share/plc_api/PLC/Accessors/Accessors_site.py </emphasis>
+      that will be preserved across updates of the PLCAPI rpm. 
+      </para>
+      <para> 
+	This mechanism does not currently support setting slice
+	tags that apply only on a given node or nodegroup. 
+      </para>
+      </section>
+
+      <section id="expose-in-api">
+	<title> Through regular Add/Get/Update methods </title>
+      <para> 
+	Finally, tags may also get manipulated through the
+	<emphasis>AddNode</emphasis>, <emphasis>GetNodes</emphasis>,
+	and <emphasis>UpdateNode</emphasis> methods:
+
+      <itemizedlist>
+	<listitem> <para> 
+	  The <literal>define_accessors</literal> function in the
+	  Accessors factory has an optional argument named <literal>
+	  expose_in_api </literal>. When this is set, the
+	  corresponding tag becomes visible from the Add/Get/Update
+	  methods almost as if it was a native tag.
+	</para> </listitem>
+
+	<listitem><para>
+	  So for instance the following code would be legal and do as expected:
+<programlisting>
+# create a x86_64 node
+>>> AddNode({'hostname':'pl1.foo.com','arch':'x86_64'})
+# get details for pl1.foo.com including tag 'arch' tag
+>>> GetNodes(['pl1.foo.com'],['boot_state','node_type','arch'])
+# set the 'deployment' tag
+>>> UpdateNode('pl1.foo.com',{'deployment':'beta'})
+# get all alpha and beta nodes
+>>> GetNodes({'deployment':'*a'},['hostname','deployment'])
+</programlisting>
+	</para></listitem>
+
+	<listitem><para> 
+	  The current limitation about tags as opposed to native
+	  fields is that, for performance, tags won't get returned
+	  when using the implicit set of columns. So for instance:
+<programlisting>
+# get all details for 'pl1.foo.com' 
+>>> node=GetNodes(['pl1.foo.com'])[0]
+# this did not return the 'arch' tag
+>>> 'arch' in node
+False
+</programlisting>
+	</para></listitem>
+
+      </itemizedlist>
+    </para>
+      </section>
+    </section>
+
+    <section id="nodegroups">
+    <title>Nodegroups</title>
+
+    <para> In earlier versions up to v4.2, <emphasis> NodeGroups
+    </emphasis> used to be defined extensively. So you would,
+    basically, create an empty nodegroup instance, and then use
+    <emphasis> AddNodeToNodeGroup </emphasis> or <emphasis>
+    DeleteNodeFromNodeGroup </emphasis> to manage the nodegroup's
+    contents. </para>
+
+    <para> The new model has been redefined as follows. You now define
+    a nodegroup as the set of nodes for which a given <emphasis> Tag
+    </emphasis> has a given value, which are defined once and for good
+    when creating the <emphasis> NodeGroup </emphasis> object. </para>
+
+    <para> So for instance for managing the set of nodes that are
+    running various levels of software code, PLC has defined two
+    <emphasis> NodeGroups </emphasis> named <literal> alpha </literal>
+    and <literal> beta </literal>. With the new model, we would now do
+    something like the following, using the built-in <literal>
+    deployment </literal> tag that is created for that purpose:
+<programlisting>
+>>> AddNodeGroup('alphanodes','deployment','alpha')
+21
+>>> AddNodeGroup('betanodes','deployment','beta')
+21
+>>> for ng in GetNodeGroups(['alphanodes','betanodes'],['groupname','node_ids']): print ng
+{'groupname': u'alphanodes', 'node_ids': []}
+{'groupname': u'betanodes', 'node_ids': []}
+>>> SetNodeDeployment('vnode01.inria.fr','alpha')
+>>> for ng in GetNodeGroups(['alphanodes','betanodes'],['groupname','node_ids']): print ng
+{'groupname': u'alphanodes', 'node_ids': [1]}
+{'groupname': u'betanodes', 'node_ids': []}
+>>> SetNodeDeployment('vnode01.inria.fr','beta')
+>>> for ng in GetNodeGroups(['alphanodes','betanodes'],['groupname','node_ids']): print ng
+{'groupname': u'alphanodes', 'node_ids': []}
+{'groupname': u'betanodes', 'node_ids': [1]}
+</programlisting>
+</para>  
+
+    </section>
+
+    <section id="plcsh">
       <title>PlanetLab shell</title>
 
       <para>A command-line program called <command>plcsh</command>
