@@ -148,6 +148,7 @@ SliceUsersList
 UpdateAddress
 UpdateAddressType
 UpdateConfFile
+UpdateEmulationLink
 UpdateIlink
 UpdateInitScript
 UpdateInterface

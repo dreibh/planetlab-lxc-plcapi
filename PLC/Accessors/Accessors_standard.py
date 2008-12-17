@@ -27,6 +27,9 @@ define_accessors(current_module, Slice, "Vref", "vref",
 define_accessors(current_module, Node, "Arch", "arch",  
                  "node/config", "architecture name", 
                  get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
+# define the dummynet connection to a node
+define_accessors(current_module, Node, "Dummynet", "dummynet", "node/config",
+                 "dummynet box connected to the node", get_roles=all_roles, set_roles="pi")
 # distribution to be deployed
 define_accessors(current_module, Node, "Pldistro", "pldistro",
                  "node/config", "PlanetLab distribution", 
