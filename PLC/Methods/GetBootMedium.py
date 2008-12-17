@@ -17,7 +17,7 @@ from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
 allowed_actions = {
-                 'regular' : [ 'node-preview',
+                'regular' : [ 'node-preview',
                               'node-floppy',
                               'node-iso',
                               'node-usb',
@@ -28,10 +28,9 @@ allowed_actions = {
                                'dummynet-iso',
                                'dummynet-usb',
                              ],
-		}
+                }
 
 # compute a new key
-# xxx used by GetDummyBoxMedium
 def compute_key():
     # Generate 32 random bytes
     bytes = random.sample(xrange(0, 256), 32)
@@ -58,13 +57,21 @@ class GetBootMedium(Method):
     (*) or just provide the generic ISO or USB boot images 
         in which case of course the node_id_or_hostname parameter is not used
 
-    action is expected among the following string constants
+    action is expected among the following string constants according the
+    node type value:
+
+    for a 'regular' node:
     (*) node-preview
     (*) node-floppy
     (*) node-iso
     (*) node-usb
     (*) generic-iso
     (*) generic-usb
+
+    for a 'dummynet' node:
+    (*) node-preview
+    (*) dummynet-iso
+    (*) dummynet-usb
 
     Apart for the preview mode, this method generates a new node key for the
     specified node, effectively invalidating any old boot medium.
@@ -95,6 +102,7 @@ class GetBootMedium(Method):
 
     Options: an optional array of keywords. 
         options are not supported for generic images
+        options are not supported for dummynet boxes
     Currently supported are
         - 'partition' - for USB actions only
         - 'cramfs'
@@ -129,6 +137,7 @@ class GetBootMedium(Method):
 
     returns = Parameter(str, "Node boot medium, either inlined, or filename, depending on the filename parameter")
 
+    # define globals for regular nodes, override later for other types
     BOOTCDDIR = "/usr/share/bootcd-@NODEFAMILY@/"
     BOOTCDBUILD = "/usr/share/bootcd-@NODEFAMILY@/build.sh"
     GENERICDIR = "/var/www/html/download-@NODEFAMILY@/"
@@ -152,7 +161,7 @@ class GetBootMedium(Method):
     # This function will create the configuration file a node
     # composed by:
     #  - a common part, regardless of the 'node_type' tag
-    #  - XXX a special part, depending on the 'snode_type' tag value.
+    #  - XXX a special part, depending on the 'node_type' tag value.
     def floppy_contents (self, node, renew_key):
 
         # Do basic checks
@@ -177,7 +186,7 @@ class GetBootMedium(Method):
 
         ( host, domain ) = self.split_hostname (node)
 
-	# renew the key and save it on the database
+        # renew the key and save it on the database
         if renew_key:
             node['key'] = compute_key()
             node.sync()
@@ -309,6 +318,53 @@ class GetBootMedium(Method):
 
         return filename
 
+    # Build the command line to be executed
+    # according the node type
+    def build_command(self, node_type, build_sh_spec, node_image, type, floppy_file, log_file):
+
+        command = ""
+
+        # regular node, make build's arguments
+        # and build the full command line to be called
+        if node_type == 'regular':
+
+            build_sh_options=""
+            if "cramfs" in build_sh_spec: 
+                type += "_cramfs"
+            if "serial" in build_sh_spec: 
+                build_sh_options += " -s %s"%build_sh_spec['serial']
+            
+            for karg in build_sh_spec['kargs']:
+                build_sh_options += ' -k "%s"'%karg
+
+            log_file="%s.log"%node_image
+
+            command = '%s -f "%s" -o "%s" -t "%s" %s &> %s' % (self.BOOTCDBUILD,
+                                                                 floppy_file,
+                                                                 node_image,
+                                                                 type,
+                                                                 build_sh_options,
+                                                                 log_file)
+        # dummynet node
+        elif node_type == 'dummynet':
+            # the build script expect the following parameters:
+            # the package base directory
+            # the working directory
+            # the full path of the configuration file
+            # the name of the resulting image file
+            # the type of the generated image
+            # the name of the log file
+            command = "%s -b %s -w %s -f %s -o %s -t %s -l %s" \
+                        % (self.BOOTCDBUILD, self.BOOTCDDIR, self.WORKDIR,
+                           floppy_file, node_image, type, log_file)
+            command = "touch %s %s; echo 'dummynet build script not yet supported'" \
+                        % (log_file, node_image)
+
+        if self.DEBUG:
+            print "The build command line is %s" % command
+
+        return command 
+
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
         self.trash=[]
@@ -324,7 +380,22 @@ class GetBootMedium(Method):
             suffix=".txt"
             type = "txt"
 
-        # handle / caconicalize options
+        # check for node existence and get node_type
+        nodes = Nodes(self.api, [node_id_or_hostname])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+        node = nodes[0]
+
+        if self.DEBUG: print "%s required on node %s. Node type is: %s" \
+                % (action, node['node_id'], node['node_type'])
+
+        # check the required action against the node type
+        node_type = node['node_type']
+        if action not in allowed_actions[node_type]:
+            raise PLCInvalidArgument, "Action %s not valid for %s nodes, valid actions are %s" \
+                                   % (action, node_type, "|".join(allowed_actions[node_type]))
+
+        # handle / canonicalize options
         if type == "txt":
             if options:
                 raise PLCInvalidArgument, "Options are not supported for node configs"
@@ -348,30 +419,21 @@ class GetBootMedium(Method):
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
-        ### check for node existence and get node_type
-        nodes = Nodes(self.api, [node_id_or_hostname])
-        if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
-        node = nodes[0]
-
-	if self.DEBUG: print "%s required on node %s. Node type is: %s" \
-                % (action, node['node_id'], node['node_type'])
-
-	# checks required action against the node type
-	node_type = node['node_type']
-	if action not in allowed_actions[node_type]:
-		raise PLCInvalidArgument, "Action %s not valid for %s nodes, valid actions are %s" \
-			 % (action, node_type, "|".join(allowed_actions[node_type]))
-
-        # compute nodename
+        # compute nodename according the action
         if action.find("node-") == 0 or action.find("dummynet-") == 0:
             nodename = node['hostname']
         else:
-            node = None	# XXX
+            node = None
             # compute a 8 bytes random number
             tempbytes = random.sample (xrange(0,256), 8);
             def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
             nodename = "".join(map(hexa2,tempbytes))
+
+        # override some global definition, according node_type
+        if node_type == 'dummynet':
+            self.BOOTCDDIR = "/usr/share/dummynet"		# the base installation dir
+            self.BOOTCDBUILD = "/usr/share/dummynet/build.sh"	# dummynet build script
+            self.WORKDIR = "/var/tmp/DummynetBoxMedium"		# temporary working dir
 
         # get nodefamily
         (pldistro,arch) = self.get_nodefamily(node)
@@ -381,7 +443,7 @@ class GetBootMedium(Method):
         for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
             setattr(self,attr,getattr(self,attr).replace("@NODEFAMILY@",self.nodefamily))
             
-	filename = self.handle_filename(filename, nodename, suffix, arch)
+        filename = self.handle_filename(filename, nodename, suffix, arch)
         
         # log call
         if node:
@@ -411,21 +473,28 @@ class GetBootMedium(Method):
                 ### return the generic medium content as-is, just base64 encoded
                 return base64.b64encode(file(generic_path).read())
 
-	### config file preview or regenerated
-	if action == 'node-preview' or action == 'node-floppy':
+        ### config file preview or regenerated
+        if action == 'node-preview' or action == 'node-floppy':
             renew_key = (action == 'node-floppy')
             floppy = self.floppy_contents (node,renew_key)
-	    if filename:
-		try:
-		    file(filename,'w').write(floppy)
-		except:
-		    raise PLCPermissionDenied, "Could not write into %s"%filename
-		return filename
-	    else:
-		return floppy
+            if filename:
+                try:
+                    file(filename,'w').write(floppy)
+                except:
+                    raise PLCPermissionDenied, "Could not write into %s"%filename
+                return filename
+            else:
+                return floppy
 
         ### we're left with node-iso and node-usb
-        if action == 'node-iso' or action == 'node-usb':
+        # the steps involved in the image creation are:
+        # - create and test the working environment
+        # - generate the configuration file
+        # - build and invoke the build command
+        # - delivery the resulting image file
+
+        if action == 'node-iso' or action == 'node-usb' \
+                 or action == 'dummynet-iso' or action == 'dummynet-usb':
 
             ### check we've got required material
             version = self.bootcd_version()
@@ -454,33 +523,20 @@ class GetBootMedium(Method):
                 self.trash.append(floppy_file)
 
                 node_image = "%s/%s%s"%(self.WORKDIR,nodename,suffix)
-
-                # make build's arguments
-                build_sh_options=""
-                if "cramfs" in build_sh_spec: 
-                    type += "_cramfs"
-                if "serial" in build_sh_spec: 
-                    build_sh_options += " -s %s"%build_sh_spec['serial']
-                
-                for karg in build_sh_spec['kargs']:
-                    build_sh_options += ' -k "%s"'%karg
-
                 log_file="%s.log"%node_image
-                # invoke build.sh
-                build_command = '%s -f "%s" -o "%s" -t "%s" %s &> %s' % (self.BOOTCDBUILD,
-                                                                         floppy_file,
-                                                                         node_image,
-                                                                         type,
-                                                                         build_sh_options,
-                                                                         log_file)
-                if self.DEBUG:
-                    print 'build command:',build_command
-                ret=os.system(build_command)
+
+                command = self.build_command(node_type, build_sh_spec, node_image, type, floppy_file, log_file)
+
+                # invoke the image build script
+                if command != "":
+                    ret=os.system(command)
+
                 if ret != 0:
-                    raise PLCAPIError,"bootcd/build.sh failed\n%s\n%s"%(
-                        build_command,file(log_file).read())
+                    raise PLCAPIError, "%s failed Command line was: %s Error logs: %s" % \
+                              (self.BOOTCDBUILD,  command, file(log_file).read())
 
                 self.trash.append(log_file)
+
                 if not os.path.isfile (node_image):
                     raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
             
@@ -504,3 +560,4 @@ class GetBootMedium(Method):
                 
         # we're done here, or we missed something
         raise PLCAPIError,'Unhandled action %s'%action
+
