@@ -15,13 +15,20 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 
 # could not define this in the class..
-boot_medium_actions = [ 'node-preview',
-                        'node-floppy',
-                        'node-iso',
-                        'node-usb',
-                        'generic-iso',
-                        'generic-usb',
-                        ]
+# create a dict with the allowed actions for each type of node
+allowed_actions = {
+                 'regular' : [ 'node-preview',
+                              'node-floppy',
+                              'node-iso',
+                              'node-usb',
+                              'generic-iso',
+                              'generic-usb',
+                               ],
+                'dummynet' : [ 'node-preview',
+                               'dummynet-iso',
+                               'dummynet-usb',
+                             ],
+		}
 
 # compute a new key
 # xxx used by GetDummyBoxMedium
@@ -115,7 +122,7 @@ class GetBootMedium(Method):
         Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
-        Parameter (str, "Action mode, expected in " + "|".join(boot_medium_actions)),
+        Parameter (str, "Action mode, expected value depends of the type of node"),
         Parameter (str, "Empty string for verbatim result, resulting file full path otherwise"),
         Parameter ([str], "Options"),
         ]
@@ -140,9 +147,15 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument, "Node hostname %s is invalid"%node['hostname']
         return parts
         
-    # plnode.txt content
+    # Generate the node (plnode.txt) configuration content.
+    #
+    # This function will create the configuration file a node
+    # composed by:
+    #  - a common part, regardless of the 'node_type' tag
+    #  - XXX a special part, depending on the 'snode_type' tag value.
     def floppy_contents (self, node, renew_key):
 
+        # Do basic checks
         if node['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local node"
 
@@ -164,9 +177,9 @@ class GetBootMedium(Method):
 
         ( host, domain ) = self.split_hostname (node)
 
+	# renew the key and save it on the database
         if renew_key:
             node['key'] = compute_key()
-            # Save it
             node.sync()
 
         # Generate node configuration file suitable for BootCD
@@ -254,12 +267,51 @@ class GetBootMedium(Method):
             else:
                 os.unlink(file)
 
+    ### handle filename
+    # build the filename string 
+    # check for permissions and concurrency
+    # returns the filename
+    def handle_filename (self, filename, nodename, suffix, arch):
+        # allow to set filename to None or any other empty value
+        if not filename: filename=''
+        filename = filename.replace ("%d",self.WORKDIR)
+        filename = filename.replace ("%n",nodename)
+        filename = filename.replace ("%s",suffix)
+        filename = filename.replace ("%p",self.api.config.PLC_NAME)
+        # let's be cautious
+        try: filename = filename.replace ("%f", self.nodefamily)
+        except: pass
+        try: filename = filename.replace ("%a", arch)
+        except: pass
+        try: filename = filename.replace ("%v",self.bootcd_version())
+        except: pass
+
+        ### Check filename location
+        if filename != '':
+            if 'admin' not in self.caller['roles']:
+                if ( filename.index(self.WORKDIR) != 0):
+                    raise PLCInvalidArgument, "File %s not under %s"%(filename,self.WORKDIR)
+
+            ### output should not exist (concurrent runs ..)
+            if os.path.exists(filename):
+                raise PLCInvalidArgument, "Resulting file %s already exists"%filename
+
+            ### we can now safely create the file, 
+            ### either we are admin or under a controlled location
+            filedir=os.path.dirname(filename)
+            # dirname does not return "." for a local filename like its shell counterpart
+            if filedir:
+                if not os.path.exists(filedir):
+                    try:
+                        os.makedirs (filedir,0777)
+                    except:
+                        raise PLCPermissionDenied, "Could not create dir %s"%filedir
+
+        return filename
+
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
         self.trash=[]
-        ### check action
-        if action not in boot_medium_actions:
-            raise PLCInvalidArgument, "Unknown action %s"%action
 
         ### compute file suffix and type
         if action.find("-iso") >= 0 :
@@ -296,16 +348,26 @@ class GetBootMedium(Method):
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
-        ### check node if needed
-        if action.find("node-") == 0:
-            nodes = Nodes(self.api, [node_id_or_hostname])
-            if not nodes:
-                raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
-            node = nodes[0]
-            nodename = node['hostname']
+        ### check for node existence and get node_type
+        nodes = Nodes(self.api, [node_id_or_hostname])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+        node = nodes[0]
 
+	if self.DEBUG: print "%s required on node %s. Node type is: %s" \
+                % (action, node['node_id'], node['node_type'])
+
+	# checks required action against the node type
+	node_type = node['node_type']
+	if action not in allowed_actions[node_type]:
+		raise PLCInvalidArgument, "Action %s not valid for %s nodes, valid actions are %s" \
+			 % (action, node_type, "|".join(allowed_actions[node_type]))
+
+        # compute nodename
+        if action.find("node-") == 0 or action.find("dummynet-") == 0:
+            nodename = node['hostname']
         else:
-            node = None
+            node = None	# XXX
             # compute a 8 bytes random number
             tempbytes = random.sample (xrange(0,256), 8);
             def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
@@ -314,46 +376,12 @@ class GetBootMedium(Method):
         # get nodefamily
         (pldistro,arch) = self.get_nodefamily(node)
         self.nodefamily="%s-%s"%(pldistro,arch)
+
         # apply on globals
         for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
             setattr(self,attr,getattr(self,attr).replace("@NODEFAMILY@",self.nodefamily))
             
-        ### handle filename
-        # allow to set filename to None or any other empty value
-        if not filename: filename=''
-        filename = filename.replace ("%d",self.WORKDIR)
-        filename = filename.replace ("%n",nodename)
-        filename = filename.replace ("%s",suffix)
-        filename = filename.replace ("%p",self.api.config.PLC_NAME)
-        # let's be cautious
-        try: filename = filename.replace ("%f", self.nodefamily)
-        except: pass
-        try: filename = filename.replace ("%a", arch)
-        except: pass
-        try: filename = filename.replace ("%v",self.bootcd_version())
-        except: pass
-
-        ### Check filename location
-        if filename != '':
-            if 'admin' not in self.caller['roles']:
-                if ( filename.index(self.WORKDIR) != 0):
-                    raise PLCInvalidArgument, "File %s not under %s"%(filename,self.WORKDIR)
-
-            ### output should not exist (concurrent runs ..)
-            if os.path.exists(filename):
-                raise PLCInvalidArgument, "Resulting file %s already exists"%filename
-
-            ### we can now safely create the file, 
-            ### either we are admin or under a controlled location
-            filedir=os.path.dirname(filename)
-            # dirname does not return "." for a local filename like its shell counterpart
-            if filedir:
-                if not os.path.exists(filedir):
-                    try:
-                        os.makedirs (filedir,0777)
-                    except:
-                        raise PLCPermissionDenied, "Could not create dir %s"%filedir
-
+	filename = self.handle_filename(filename, nodename, suffix, arch)
         
         # log call
         if node:
@@ -476,4 +504,3 @@ class GetBootMedium(Method):
                 
         # we're done here, or we missed something
         raise PLCAPIError,'Unhandled action %s'%action
-
