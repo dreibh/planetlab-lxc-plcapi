@@ -424,9 +424,10 @@ nodes = plc.GetNodes([121], ['node_id', 'hostname'])
     <title>Using regular python</title>
 
     <para>It is also possible to write simple regular-python scripts,
-    as illustrated in the example below. The only difference is that
-    all API calls need to be passed a first argument for
-    athenticating:</para>
+    as illustrated in the example below. The only difference with the
+    examples above is that all API calls need to be passed a first
+    argument for authentication. This example would write in a file
+    the name of all the hosts attached to a given slice.</para>
 
 <programlisting>
 #!/usr/bin/env python
