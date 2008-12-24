@@ -59,7 +59,12 @@ class BootUpdateNode(Method):
             interface.update(interface_fields)
             interface.sync(commit = False)
 
+        # indicate that node has booted & contacted PLC.
+        if isinstance(self.caller, Node):
+            node = self.caller
+            node.update_last_contact()
+
         self.caller.sync(commit = True)
-	self.message = "Node updated: %s" % ", ".join(node_fields.keys())
+        self.message = "Node updated: %s" % ", ".join(node_fields.keys())
 
         return 1
