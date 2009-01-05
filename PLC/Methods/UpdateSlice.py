@@ -52,7 +52,7 @@ class UpdateSlice(Method):
         [native,related,tags,rejected] = Row.split_fields(slice_fields,[Slice.fields,Slice.related_fields,Slice.tags])
 
         if rejected:
-            raise PLCInvalidArgument, "Cannot update Node column(s) %r"%rejected
+            raise PLCInvalidArgument, "Cannot update Slice column(s) %r"%rejected
 
 	slices = Slices(self.api, [slice_id_or_name])
         if not slices:
@@ -130,6 +130,11 @@ class UpdateSlice(Method):
         else:
             self.message='Slice %d updated'%slice['slice_id']
         if renewing:
-            self.message += ' renewed until %s'%time.strftime('%Y-%m-%d:%H:%M',time.localtime(float(slice['expires'])))
+            # it appears that slice['expires'] may be either an int, or a formatted string
+            try:
+                expire_date=time.strftime('%Y-%m-%d:%H:%M',time.localtime(float(slice['expires'])))
+            except:
+                expire_date=slice['expires']
+            self.message += ' renewed until %s'%expire_date
 
         return 1
