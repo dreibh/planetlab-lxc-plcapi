@@ -130,6 +130,6 @@ class UpdateSlice(Method):
         else:
             self.message='Slice %d updated'%slice['slice_id']
         if renewing:
-            self.message += ' renewed until %s'%time.strftime('%Y-%m-%d:%H:%M',localtime(slice['expires']))
+            self.message += ' renewed until %s'%time.strftime('%Y-%m-%d:%H:%M',time.localtime(slice['expires']))
 
         return 1
