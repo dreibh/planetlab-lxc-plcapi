@@ -126,6 +126,7 @@ GetWhitelist
 NotifyPersons
 NotifySupport
 RebootNode
+RebootNodeWithPCU
 RefreshPeer
 ResetPassword
 SetPersonPrimarySite
