@@ -1,13 +1,13 @@
+# $Id$
 import socket
 
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Auth import Auth
+
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
-from PLC.NodeNetworks import NodeNetwork, NodeNetworks
-from PLC.Auth import Auth
-from PLC.POD import udp_pod
 
 try:
 	from pcucontrol import reboot
