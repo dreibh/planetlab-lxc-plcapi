@@ -55,20 +55,20 @@ class RebootNodeWithPCU(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to reboot nodes from specified site"
 
-		# Verify that the node has pcus associated with it.
-		pcus = PCUs(self.api, {'pcu_id' : node['pcu_ids']} )
+	# Verify that the node has pcus associated with it.
+	pcus = PCUs(self.api, {'pcu_id' : node['pcu_ids']} )
         if not pcus:
             raise PLCInvalidArgument, "No PCUs associated with Node"
 
-		pcu = pcus[0]
+	pcu = pcus[0]
 
-		if not external_dependency:
+	if not external_dependency:
             raise PLCNotImplemented, "Could not load external module to attempt reboot"
 
-		# model, hostname, port, 
-		# i = pcu['node_ids'].index(node['node_id'])
-		# p = pcu['ports'][i]
-		ret = reboot.reboot_api(node, pcu)
+	# model, hostname, port, 
+	# i = pcu['node_ids'].index(node['node_id'])
+	# p = pcu['ports'][i]
+	ret = reboot.reboot_api(node, pcu)
 
         self.event_objects = {'Node': [node['node_id']]}
         self.message = "RebootNodeWithPCU called"
