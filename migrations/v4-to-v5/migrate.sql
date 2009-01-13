@@ -102,6 +102,11 @@ drop view mgn_all_views;
 drop function mgn_drop_all_views ();
 
 ----------------------------------------
+-- peers
+----------------------------------------
+ALTER TABLE peers ADD COLUMN shortname TEXT;
+
+----------------------------------------
 -- nodes
 ----------------------------------------
 ALTER TABLE nodes ADD COLUMN node_type TEXT NOT NULL DEFAULT 'regular';

@@ -771,13 +771,15 @@ CREATE INDEX initscripts_name_idx ON initscripts (name);
 -- Peers
 CREATE TABLE peers (
     peer_id serial PRIMARY KEY,				-- Peer identifier
-    peername text NOT NULL,				-- Peer name
+    peername text UNIQUE NOT NULL,			-- Peer name
     peer_url text NOT NULL,				-- (HTTPS) URL of the peer PLCAPI interface
     cacert text,					-- (SSL) Public certificate of peer API server
     key text,						-- (GPG) Public key used for authentication
+    shortname text,					-- abbreviated name for displaying foreign objects
     deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
 CREATE INDEX peers_peername_idx ON peers (peername) WHERE deleted IS false;
+CREATE INDEX peers_shortname_idx ON peers (shortname) WHERE deleted IS false;
 
 -- Objects at each peer
 CREATE TABLE peer_site (
