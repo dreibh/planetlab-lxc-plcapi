@@ -44,10 +44,13 @@ class DeleteNode(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
 
+        node_id=node['node_id']
+        site_id=node['site_id']
         node.delete()
 
 	# Logging variables
-	self.event_objects = {'Node': [node['node_id']]}
+        # it's not much use to attach to the node as it's going to vanish...
+	self.event_objects = {'Node': [node_id], 'Site': [site_id] }
 	self.message = "Node %d deleted" % node['node_id']
 
         return 1

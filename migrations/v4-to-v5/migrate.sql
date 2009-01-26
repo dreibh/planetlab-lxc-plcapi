@@ -105,6 +105,7 @@ drop function mgn_drop_all_views ();
 -- peers
 ----------------------------------------
 ALTER TABLE peers ADD COLUMN shortname TEXT;
+ALTER TABLE peers ADD COLUMN hrn_root TEXT;
 
 ----------------------------------------
 -- nodes

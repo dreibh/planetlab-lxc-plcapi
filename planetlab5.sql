@@ -776,6 +776,7 @@ CREATE TABLE peers (
     cacert text,					-- (SSL) Public certificate of peer API server
     key text,						-- (GPG) Public key used for authentication
     shortname text,					-- abbreviated name for displaying foreign objects
+    hrn_root text,						-- root for this peer domain
     deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
 CREATE INDEX peers_peername_idx ON peers (peername) WHERE deleted IS false;

@@ -9,7 +9,7 @@ from PLC.Auth import Auth
 from PLC.Peers import Peer, Peers
 
 can_update = lambda (field, value): field in \
-             ['peername', 'peer_url', 'key', 'cacert', 'shortname']
+             ['peername', 'peer_url', 'key', 'cacert', 'shortname', 'hrn_root']
 
 class AddPeer(Method):
     """

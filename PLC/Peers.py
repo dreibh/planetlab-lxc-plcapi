@@ -37,6 +37,7 @@ class Peer(Row):
 	'key': Parameter(str, "Peer GPG public key"),
 	'cacert': Parameter(str, "Peer SSL public certificate"),
         'shortname' : Parameter(str, "Peer short name"),
+        'hrn_root' : Parameter(str, "Root of this peer in a hierarchical naming space"),
         ### cross refs
         'site_ids': Parameter([int], "List of sites for which this peer is authoritative"),
         'person_ids': Parameter([int], "List of users for which this peer is authoritative"),
