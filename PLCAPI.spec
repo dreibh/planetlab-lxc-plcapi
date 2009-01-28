@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -90,6 +90,12 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Wed Jan 28 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-3
+- unified all tags
+- renamed interface settings into interface tags and slice attributes into slice tags
+- nodes have a node_type
+- various changes on the way to 5.0
+
 * Thu Nov 27 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
 - Checkpointing : this version still has interface settings and slice attributes
 
