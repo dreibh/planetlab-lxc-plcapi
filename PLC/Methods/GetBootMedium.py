@@ -464,11 +464,11 @@ class GetBootMedium(Method):
             generic_path = "%s/%s" % (self.GENERICDIR,generic_name)
 
             if filename:
-                ret=os.system ("cp %s %s"%(generic_path,filename))
+                ret=os.system ('cp "%s" "%s"'%(generic_path,filename))
                 if ret==0:
                     return filename
                 else:
-                    raise PLCPermissionDenied, "Could not copy %s into"%(generic_path,filename)
+                    raise PLCPermissionDenied, "Could not copy %s into %s"%(generic_path,filename)
             else:
                 ### return the generic medium content as-is, just base64 encoded
                 return base64.b64encode(file(generic_path).read())
@@ -542,7 +542,7 @@ class GetBootMedium(Method):
             
                 # handle result
                 if filename:
-                    ret=os.system("mv %s %s"%(node_image,filename))
+                    ret=os.system('mv "%s" "%s"'%(node_image,filename))
                     if ret != 0:
                         self.trash.append(node_image)
                         self.cleantrash()
