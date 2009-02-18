@@ -128,6 +128,7 @@ NotifySupport
 RebootNode
 RebootNodeWithPCU
 RefreshPeer
+ReportRunlevel
 ResetPassword
 SetPersonPrimarySite
 SliceCreate

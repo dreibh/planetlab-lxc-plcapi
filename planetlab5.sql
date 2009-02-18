@@ -259,10 +259,16 @@ CREATE TABLE boot_states (
 ) WITH OIDS;
 INSERT INTO boot_states (boot_state) VALUES ('boot');
 INSERT INTO boot_states (boot_state) VALUES ('safeboot');
-INSERT INTO boot_states (boot_state) VALUES ('failboot');
-INSERT INTO boot_states (boot_state) VALUES ('disabled');
-INSERT INTO boot_states (boot_state) VALUES ('install');
 INSERT INTO boot_states (boot_state) VALUES ('reinstall');
+INSERT INTO boot_states (boot_state) VALUES ('disabled');
+
+CREATE TABLE run_levels  (
+    run_level text PRIMARY KEY
+) WITH OIDS;
+INSERT INTO run_levels  (run_level) VALUES ('boot');
+INSERT INTO run_levels  (run_level) VALUES ('safeboot');
+INSERT INTO run_levels  (run_level) VALUES ('failboot');
+INSERT INTO run_levels  (run_level) VALUES ('reinstall');
 
 -- Known node types (Nodes.py expect max length to be 20)
 CREATE TABLE node_types (
@@ -281,7 +287,8 @@ CREATE TABLE nodes (
     hostname text NOT NULL,				-- Node hostname
     site_id integer REFERENCES sites NOT NULL,		-- At which site 
     boot_state text REFERENCES boot_states NOT NULL	-- Node boot state
-    	       DEFAULT 'install', 
+    	       DEFAULT 'reinstall', 
+    run_level  text REFERENCES run_levels DEFAULT NULL, -- Node Run Level
     deleted boolean NOT NULL DEFAULT false,		-- Is deleted
 
     -- Optional
@@ -290,6 +297,8 @@ CREATE TABLE nodes (
     version text,					-- Boot CD version string updated by Boot Manager
     ssh_rsa_key text,					-- SSH host key updated by Boot Manager
     key text,						-- Node key generated when boot file is downloaded
+	verified boolean NOT NULL DEFAULT false,		-- whether or not the node & pcu are verified
+	extrainfo text,
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1076,10 +1085,13 @@ nodes.node_type,
 nodes.hostname,
 nodes.site_id,
 nodes.boot_state,
+nodes.run_level,
 nodes.deleted,
 nodes.model,
 nodes.boot_nonce,
 nodes.version,
+nodes.verified,
+nodes.extrainfo,
 nodes.ssh_rsa_key,
 nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,

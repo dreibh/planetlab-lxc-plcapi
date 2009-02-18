@@ -111,6 +111,9 @@ ALTER TABLE peers ADD COLUMN hrn_root TEXT;
 -- nodes
 ----------------------------------------
 ALTER TABLE nodes ADD COLUMN node_type TEXT NOT NULL DEFAULT 'regular';
+ALTER TABLE nodes ADD COLUMN verified boolean NOT NULL DEFAULT false;	-- whether or not the node & pcu are verified
+ALTER TABLE nodes ADD COLUMN extrainfo TEXT;
+ALTER TABLE nodes ADD COLUMN run_level TEXT REFERENCES run_levels DEFAULT NULL; -- Node Run Level
 
 ----------------------------------------
 -- tag types
@@ -238,28 +241,40 @@ drop table mgn_site_nodegroup;
 drop table nodegroup_node;
 
 ----------------------------------------
+-- run levels
+----------------------------------------
+CREATE TABLE run_levels  (
+    run_level text PRIMARY KEY
+) WITH OIDS;
+INSERT INTO run_levels  (run_level) VALUES ('boot');
+INSERT INTO run_levels  (run_level) VALUES ('safeboot');
+INSERT INTO run_levels  (run_level) VALUES ('failboot');
+INSERT INTO run_levels  (run_level) VALUES ('reinstall');
+
+----------------------------------------
 -- boot states
 ----------------------------------------
 -- create new ones
 INSERT INTO boot_states (boot_state) VALUES ('safeboot');
 INSERT INTO boot_states (boot_state) VALUES ('failboot');
 INSERT INTO boot_states (boot_state) VALUES ('disabled');
-INSERT INTO boot_states (boot_state) VALUES ('install');
 INSERT INTO boot_states (boot_state) VALUES ('reinstall');
 
 -- map old ones
-UPDATE nodes SET boot_state='failboot' WHERE boot_state='dbg';
+-- b/c boot_states are declared by users not reported by node.
+UPDATE nodes SET boot_state='safeboot' WHERE boot_state='dbg';  
 UPDATE nodes SET boot_state='safeboot' WHERE boot_state='diag';
 UPDATE nodes SET boot_state='disabled' WHERE boot_state='disable';
-UPDATE nodes SET boot_state='install' WHERE boot_state='inst';
+UPDATE nodes SET boot_state='reinstall' WHERE boot_state='inst';
 UPDATE nodes SET boot_state='reinstall' WHERE boot_state='rins';
 UPDATE nodes SET boot_state='reinstall' WHERE boot_state='new';
-UPDATE nodes SET boot_state='failboot' WHERE boot_state='rcnf';
+UPDATE nodes SET boot_state='reinstall' WHERE boot_state='rcnf';
 
 -- delete old ones
 DELETE FROM boot_states WHERE boot_state='dbg';
 DELETE FROM boot_states WHERE boot_state='diag';
 DELETE FROM boot_states WHERE boot_state='disable';
+DELETE FROM boot_states WHERE boot_state='install';
 DELETE FROM boot_states WHERE boot_state='inst';
 DELETE FROM boot_states WHERE boot_state='rins';
 DELETE FROM boot_states WHERE boot_state='new';
