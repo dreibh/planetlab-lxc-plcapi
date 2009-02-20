@@ -1,3 +1,4 @@
+## Please use make index to update this file
 all = """
 API
 AddressTypes
