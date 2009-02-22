@@ -28,6 +28,13 @@ Obsoletes: plcapilib
 
 # We use set everywhere
 Requires: python >= 2.4
+Requires: postgresql postgresql-server postgresql-python
+Requires: python-psycopg2
+Requires: python-pycurl
+Requires: httpd
+Requires: mod_python
+Requires: mod_ssl
+Requires: SOAPpy
 
 # We use psycopg2
 BuildRequires: postgresql-devel
