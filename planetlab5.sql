@@ -460,23 +460,10 @@ CREATE OR REPLACE VIEW view_ilinks AS
 SELECT * FROM tag_types 
 INNER JOIN ilink USING (tag_type_id);
 
--- expose node_ids ???
--- -- cannot mention the same table twice in a join ?
--- -- CREATE OR REPLACE VIEW ilink_src_node AS 
--- SELECT 
--- ilink.tag_type_id,
--- ilink.src_interface_id,
--- interfaces.node_id AS src_node_id,
--- ilink.dst_interface_id
--- FROM ilink 
--- INNER JOIN interfaces ON ilink.src_interface_id = interfaces.interface_id;
--- 
--- CREATE OR REPLACE VIEW ilink_nodes AS
--- SELECT 
--- ilink_src_node.*,
--- interfaces.node_id as dst_node_id
--- FROM ilink_src_node
--- INNER JOIN interfaces ON ilink_src_node.dst_interface_id = interfaces.interface_id;
+-- xxx TODO : expose to view_interfaces the set of ilinks a given interface is part of
+-- this is needed for properly deleting these ilinks when an interface gets deleted
+-- as this is not done yet, it prevents DeleteInterface, thus DeleteNode, thus DeleteSite
+-- from working correctly when an iLink is set
 
 --------------------------------------------------------------------------------
 -- Node groups
