@@ -63,7 +63,7 @@ through Apache mod_python.
 %build
 # python-pycurl and python-psycopg2 avail. from fedora 5
 # we used to ship our own version of psycopg2 and pycurl, for fedora4
-# starting with 5.0, support for these two modules is taken out
+# starting with 4.3, support for these two modules is taken out
 # 
 # Build __init__.py metafiles and PHP API. 
 %{__make} %{?_smp_mflags}
@@ -97,16 +97,16 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
-* Wed Jan 28 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-3
+* Wed Jan 28 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-3
 - unified all tags
 - renamed interface settings into interface tags and slice attributes into slice tags
 - nodes have a node_type
-- various changes on the way to 5.0
+- various changes on the way to 4.3
 
-* Thu Nov 27 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
+* Thu Nov 27 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-2
 - Checkpointing : this version still has interface settings and slice attributes
 
-* Wed Sep 10 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-1
+* Wed Sep 10 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-1
 - first iteration with taggable nodes/interfaces/slices
 - embryo for ilinks
 - cleaned up boot states
