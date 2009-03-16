@@ -5,7 +5,7 @@
 %define url $URL$
 
 %define name PLCAPI
-%define version 5.0
+%define version 4.3
 %define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}

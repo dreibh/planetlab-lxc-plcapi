@@ -10,6 +10,8 @@
 --
 -- Copyright (C) 2006 The Trustees of Princeton University
 --
+-- NOTE: this file was first created for version 4.3, the filename might be confusing
+--
 -- $Id$
 --
 
