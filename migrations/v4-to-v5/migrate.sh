@@ -58,7 +58,7 @@ function check_for_database () {
 function confirm_nodegroups () {
     echo "========================================"
     echo "$COMMAND"
-    echo "This script is designed to ease the migration from myplc 4.2 to 5.0"
+    echo "This script is designed to ease the migration from myplc 4.2 to 4.3"
     echo "It attempts to (re)create the planetlab5 database from planetlab4"
     echo ""
     echo "You might wish to edit/review"
