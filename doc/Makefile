@@ -23,7 +23,7 @@ PLCAPI.xml: PLCAPI.xml.in
 	$(if $(local-docbook-43), \
 	echo Using locally installed DTD $(local-docbook-43), \
 	echo WARNING - could not locate local DTD - using remote $(remote-docbook-43))
-	sed -e s:@DOCBOOK-43@:$(docbook-43): $< > $@
+	sed -e "s:@DOCBOOK-43@:$(docbook-43):" $< > $@
 
 .PLCAPI.xml.valid: Methods.xml
 
