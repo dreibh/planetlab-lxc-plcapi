@@ -21,11 +21,11 @@ setup(py_modules = ['ModPython'],
          ['migrations/README.txt',
           'migrations/extract-views.py'] 
          + glob('migrations/[0-9][0-9][0-9]*')),
-        ('migrations/v4.2-to-4.3', 
-         ['migrations/v4.2-to-4.3/migrate.sh',
-          'migrations/v4.2-to-4.3/migrate.sed',
-          'migrations/v4.2-to-4.3/migrate.sql',
-          'migrations/v4.2-to-4.3/parse-site-nodegroups.py',
-          'migrations/v4.2-to-4.3/site-nodegroups.def'
+        ('migrations/v42-to-43', 
+         ['migrations/v42-to-43/migrate.sh',
+          'migrations/v42-to-43/migrate.sed',
+          'migrations/v42-to-43/migrate.sql',
+          'migrations/v42-to-43/parse-site-nodegroups.py',
+          'migrations/v42-to-43/site-nodegroups.def'
           ]),
         ])
