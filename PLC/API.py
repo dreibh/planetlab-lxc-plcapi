@@ -143,14 +143,13 @@ class PLCAPI:
         try:
             classname = method.split(".")[-1]
             if method in self.native_methods:
-                module = __import__("PLC.Methods." + method, globals(), locals(), [classname])
-                return getattr(module, classname)(self)
+                fullpath="PLC.Methods." + method
             else:
                 fullpath=self.other_methods_map[method]
-                module = __import__(fullpath, globals(), locals(), [classname])
-                return getattr(module, classname)(self)
+            module = __import__(fullpath, globals(), locals(), [classname])
+            return getattr(module, classname)(self)
         except ImportError, AttributeError:
-            raise PLCInvalidAPIMethod, method
+            raise PLCInvalidAPIMethod, "import error %s for %s" % (AttributeError,fullpath)
 
     def call(self, source, method, *args):
         """
