@@ -300,7 +300,6 @@ CREATE TABLE nodes (
     ssh_rsa_key text,					-- SSH host key updated by Boot Manager
     key text,						-- Node key generated when boot file is downloaded
 	verified boolean NOT NULL DEFAULT false,		-- whether or not the node & pcu are verified
-	extrainfo text,
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1080,7 +1079,6 @@ nodes.model,
 nodes.boot_nonce,
 nodes.version,
 nodes.verified,
-nodes.extrainfo,
 nodes.ssh_rsa_key,
 nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,

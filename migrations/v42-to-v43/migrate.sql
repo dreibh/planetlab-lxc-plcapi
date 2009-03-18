@@ -124,7 +124,6 @@ INSERT INTO run_levels  (run_level) VALUES ('reinstall');
 ----------------------------------------
 ALTER TABLE nodes ADD COLUMN node_type TEXT NOT NULL DEFAULT 'regular';
 ALTER TABLE nodes ADD COLUMN verified boolean NOT NULL DEFAULT false;	-- whether or not the node & pcu are verified
-ALTER TABLE nodes ADD COLUMN extrainfo TEXT;
 ALTER TABLE nodes ADD COLUMN run_level TEXT REFERENCES run_levels DEFAULT NULL; -- Node Run Level
 
 ----------------------------------------
