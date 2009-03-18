@@ -5,7 +5,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth, BootAuth, SessionAuth
 from PLC.Nodes import Node, Nodes
 
-can_update = ['run_level', 'extrainfo']
+can_update = ['run_level']
 
 class ReportRunlevel(Method):
     """
@@ -16,7 +16,6 @@ class ReportRunlevel(Method):
     accepts = [
         Mixed(BootAuth(), SessionAuth(), Auth()),
         {'run_level': Node.fields['run_level'],
-         'extrainfo': Node.fields['extrainfo'],
          },
         Mixed(Node.fields['node_id'],
               Node.fields['hostname'])
