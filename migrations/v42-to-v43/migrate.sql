@@ -107,6 +107,18 @@ drop function mgn_drop_all_views ();
 ALTER TABLE peers ADD COLUMN shortname TEXT;
 ALTER TABLE peers ADD COLUMN hrn_root TEXT;
 
+
+----------------------------------------
+-- run levels
+----------------------------------------
+CREATE TABLE run_levels  (
+    run_level text PRIMARY KEY
+) WITH OIDS;
+INSERT INTO run_levels  (run_level) VALUES ('boot');
+INSERT INTO run_levels  (run_level) VALUES ('safeboot');
+INSERT INTO run_levels  (run_level) VALUES ('failboot');
+INSERT INTO run_levels  (run_level) VALUES ('reinstall');
+
 ----------------------------------------
 -- nodes
 ----------------------------------------
@@ -240,16 +252,6 @@ drop view mgn_nodegroups;
 drop table mgn_site_nodegroup;
 drop table nodegroup_node;
 
-----------------------------------------
--- run levels
-----------------------------------------
-CREATE TABLE run_levels  (
-    run_level text PRIMARY KEY
-) WITH OIDS;
-INSERT INTO run_levels  (run_level) VALUES ('boot');
-INSERT INTO run_levels  (run_level) VALUES ('safeboot');
-INSERT INTO run_levels  (run_level) VALUES ('failboot');
-INSERT INTO run_levels  (run_level) VALUES ('reinstall');
 
 ----------------------------------------
 -- boot states
