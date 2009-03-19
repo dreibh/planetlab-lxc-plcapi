@@ -133,6 +133,7 @@ INSERT INTO node_types (node_type) VALUES ('dummynet');
 -- nodes
 ----------------------------------------
 ALTER TABLE nodes ADD COLUMN node_type TEXT REFERENCES node_types  DEFAULT 'regular'; -- node types
+ALTER TABLE nodes ALTER COLUMN boot_state SET DEFAULT 'reinstall'; -- boot_states changed in planetlab5.sql
 ALTER TABLE nodes ADD COLUMN verified boolean NOT NULL DEFAULT false;	-- whether or not the node & pcu are verified
 ALTER TABLE nodes ADD COLUMN run_level TEXT REFERENCES run_levels DEFAULT NULL; -- Node Run Level
 
