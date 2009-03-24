@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,14 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Tue Mar 24 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-4
+- renumbered as 4.3
+- nodes have new fields run_level (in addition to boot_state) and verified
+- tweaked migration from 4.2
+- tuned rpm dependencies
+- doc generation more explicit about errors like missing python modules
+- removed obsolete method GetSlicesMD5
+
 * Wed Jan 28 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-3
 - unified all tags
 - renamed interface settings into interface tags and slice attributes into slice tags
