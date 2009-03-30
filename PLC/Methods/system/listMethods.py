@@ -17,4 +17,4 @@ class listMethods(Method):
         self.name = "system.listMethods"
 
     def call(self):
-        return self.api.methods
+        return self.api.all_methods
