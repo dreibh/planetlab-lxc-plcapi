@@ -65,7 +65,9 @@ class Peer(Row):
         (scheme, netloc, path, params, query, fragment) = urlparse(url)
         if scheme != "https":
             raise PLCInvalidArgument, "Peer URL scheme must be https"
-
+        if path[-1] != '/':
+            raise PLCInvalidArgument, "Peer URL should end with /"
+        
 	return url
 
     def delete(self, commit = True):
