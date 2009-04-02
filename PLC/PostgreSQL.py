@@ -222,7 +222,7 @@ class PostgreSQL:
         cursor = self.execute(query, params)
         rows = cursor.fetchall()
         cursor.close()
-
+        self.commit()
         if hashref or key_field is not None:
             # Return each row as a dictionary keyed on field name
             # (like DBI selectrow_hashref()).
