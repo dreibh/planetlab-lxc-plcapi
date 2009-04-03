@@ -107,11 +107,15 @@ class GetBootMedium(Method):
         - 'partition' - for USB actions only
         - 'cramfs'
         - 'serial' or 'serial:<console_spec>'
-        - 'no-hangcheck'
         console_spec (or 'default') is passed as-is to bootcd/build.sh
         it is expected to be a colon separated string denoting
         tty - baudrate - parity - bits
         e.g. ttyS0:115200:n:8
+        - 'variant:<variantname>'
+        passed to build.sh as -V <variant> 
+        variants are used to run a different kernel on the bootCD
+        see kvariant.sh for how to create a variant
+        - 'no-hangcheck'
 
     Security:
         - Non-admins can only generate files for nodes at their sites.
@@ -333,6 +337,8 @@ class GetBootMedium(Method):
                 type += "_cramfs"
             if "serial" in build_sh_spec: 
                 build_sh_options += " -s %s"%build_sh_spec['serial']
+            if "variant" in build_sh_spec:
+                build_sh_options += " -V %s"%build_sh_spec['variant']
             
             for karg in build_sh_spec['kargs']:
                 build_sh_options += ' -k "%s"'%karg
@@ -414,6 +420,8 @@ class GetBootMedium(Method):
                     build_sh_spec['serial']='default'
                 elif option.find("serial:") == 0:
                     build_sh_spec['serial']=option.replace("serial:","")
+                elif option.find("variant:") == 0:
+                    build_sh_spec['variant']=option.replace("variant:","")
                 elif option == "no-hangcheck":
                     build_sh_spec['kargs'].append('hcheck_reboot0')
                 else:
