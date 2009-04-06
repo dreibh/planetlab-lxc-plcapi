@@ -120,13 +120,18 @@ class Filter(Parameter, dict):
                     raise PLCInvalidArgument, "Invalid filter field '%s'" % field
 
                 if isinstance(value, (list, tuple, set)):
-                    # Turn empty list into (NULL) instead of invalid ()
+                    # handling filters like '~slice_id':[]
+                    # this should return true, as it's the opposite of 'slice_id':[] which is false
+                    # prior to this fix, 'slice_id':[] would have returned ``slice_id IN (NULL) '' which is unknown 
+                    # so it worked by coincidence, but the negation '~slice_ids':[] would return false too
                     if not value:
-                        value = [None]
-
-                    operator = "IN"
-                    value = map(str, map(api.db.quote, value))
-                    value = "(%s)" % ", ".join(value)
+                        field=""
+                        operator=""
+                        value = "FALSE"
+                    else:
+                        operator = "IN"
+                        value = map(str, map(api.db.quote, value))
+                        value = "(%s)" % ", ".join(value)
                 else:
                     if value is None:
                         operator = "IS"
