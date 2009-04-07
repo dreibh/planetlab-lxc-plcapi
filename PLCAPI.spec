@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,12 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Tue Apr 07 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-5
+- support for BootCD variants (GetBootMedium ['variant:centos5'])
+- fix corner case with filters like {'~slice_id':[]}
+- fix transaction leak that caused the db connections pool to exhaust
+- properly expose all methods, including Legacy/, and not only Methods/
+
 * Tue Mar 24 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-4
 - renumbered as 4.3
 - nodes have new fields run_level (in addition to boot_state) and verified
