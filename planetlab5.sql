@@ -768,7 +768,7 @@ CREATE INDEX initscripts_name_idx ON initscripts (name);
 -- Peers
 CREATE TABLE peers (
     peer_id serial PRIMARY KEY,				-- Peer identifier
-    peername text UNIQUE NOT NULL,			-- Peer name
+    peername text NOT NULL,				-- Peer name
     peer_url text NOT NULL,				-- (HTTPS) URL of the peer PLCAPI interface
     cacert text,					-- (SSL) Public certificate of peer API server
     key text,						-- (GPG) Public key used for authentication
