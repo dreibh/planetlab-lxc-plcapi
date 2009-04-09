@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,10 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Thu Apr 09 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-6
+- fixes for smooth federation between 4.2 and 4.3
+- peername is not UNIQUE in schema anymore, was preventing delete/recreate
+
 * Tue Apr 07 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-5
 - support for BootCD variants (GetBootMedium ['variant:centos5'])
 - fix corner case with filters like {'~slice_id':[]}
