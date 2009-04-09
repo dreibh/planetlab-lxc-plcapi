@@ -74,6 +74,18 @@ class RefreshPeer(Method):
 	message('RefreshPeer starting up (commit_mode=%r)'%commit_mode)
 	message('Issuing GetPeerData')
         peer_tables = peer.GetPeerData()
+        # for smooth federation with 4.2 - ignore fields that are useless anyway, and rewrite boot_state
+        boot_state_rewrite={'dbg':'safeboot','diag':'safeboot','disable':'disabled',
+                            'inst':'reinstall','rins':'reinstall','new':'reinstall','rcnf':'reinstall'}
+        for node in peer_tables['Nodes']:
+            for key in ['nodenetwork_ids','dummybox_id']:
+                if key in node:
+                    del node[key]
+            if node['boot_state'] in boot_state_rewrite: node['boot_state']=boot_state_rewrite[node['boot_state']]
+        for slice in peer_tables['Slices']:
+            for key in ['slice_attribute_ids']:
+                if key in slice:
+                    del slice[key]
         timers['transport'] = time.time() - start - peer_tables['db_time']
         timers['peer_db'] = peer_tables['db_time']
         message_verbose('GetPeerData returned -> db=%d transport=%d'%(timers['peer_db'],timers['transport']))
@@ -330,7 +342,10 @@ class RefreshPeer(Method):
         if peer_tables['Nodes']:
             columns = peer_tables['Nodes'][0].keys()
         else:
-            columns = None
+            # smooth federation with a 4.2 peer - ignore these fields that are useless anyway
+            columns = Node.fields
+            if 'interface_ids' in columns: columns.remove('interface_ids')
+            if 'dummybox_id' in columns: columns.remove('dummybox_id')
 
         # Keyed on foreign node_id
         old_peer_nodes = Nodes(self.api, {'peer_id': peer_id}, columns).dict('peer_node_id')

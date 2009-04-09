@@ -247,11 +247,15 @@ class Node(Row):
         """
 
         assert 'node_id' in self
-	assert 'interface_ids' in self
 
 	# we need to clean up InterfaceTags, so handling interfaces as part of join_tables does not work
-	for interface in Interfaces(self.api,self['interface_ids']):
-	    interface.delete()
+        # federated nodes don't have interfaces though so for smooth transition from 4.2 to 4.3
+        if 'peer_id' in self and self['peer_id']:
+            pass
+        else:
+            assert 'interface_ids' in self
+            for interface in Interfaces(self.api,self['interface_ids']):
+                interface.delete()
 
         # Clean up miscellaneous join tables
         for table in self.join_tables:
