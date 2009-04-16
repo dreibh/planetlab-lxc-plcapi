@@ -10,7 +10,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
-from PLC.Accessors.Accessors_standard import *			# import dummynet accessors
+from PLC.Accessors.Accessors_dummynetbox import *			# import dummynet accessors
 
 class UpdateEmulationLink(Method):
     """
@@ -80,7 +80,7 @@ class UpdateEmulationLink(Method):
                 raise PLCPermissionDenied, "Not allowed to manage on this link"
 
         # Add the dummynetbox
-        emulation_link = SetNodeDummynet(self.api)
+	emulation_link = SetNodeDummynetBox(self.api)
         emulation_link.call(auth, node_id, dummynet_id)
 
         return 1
