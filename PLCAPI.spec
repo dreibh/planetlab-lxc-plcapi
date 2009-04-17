@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 7
+%define taglevel 8
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Fri Apr 17 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-8
+- remove duplicate in Methods/__init__ that was breaking build of myplc-docs
+
 * Fri Apr 17 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-7
 - support for external dummynet boxes back in 4.3 - first draft
 
