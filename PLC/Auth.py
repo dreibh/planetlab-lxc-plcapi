@@ -45,12 +45,13 @@ class Auth(Parameter):
             expected = PasswordAuth()
         elif auth['AuthMethod'] == "gpg":
             expected = GPGAuth()
-        elif auth['AuthMethod'] == "hmac":
+        elif auth['AuthMethod'] == "hmac" or \
+             auth['AuthMethod'] == "hmac_dummybox":
             expected = BootAuth()
         elif auth['AuthMethod'] == "anonymous":
             expected = AnonymousAuth()
         else:
-            raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', or 'anonymous'", "AuthMethod")
+            raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', 'hmac_dummybox', or 'anonymous'", "AuthMethod")
 
         # Re-check using the specified authentication method
         method.type_check("auth", auth, expected, (auth,) + args)

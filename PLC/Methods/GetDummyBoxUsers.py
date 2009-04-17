@@ -37,7 +37,7 @@ class GetDummyBoxUsers(Method):
 	Return keys, 0 if there are no users.
 	"""
 
-	roles = ['admin', 'pi']
+	roles = ['admin', 'pi', 'node']
 
 	accepts = [
 		Auth(),

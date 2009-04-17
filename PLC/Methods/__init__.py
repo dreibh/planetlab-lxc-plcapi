@@ -126,6 +126,7 @@ GetSliceTicket
 GetSlices
 GetSlivers
 GetTagTypes
+GetDummyBoxUsers
 GetWhitelist
 NotifyPersons
 NotifySupport
