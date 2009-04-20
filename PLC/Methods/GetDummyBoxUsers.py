@@ -83,8 +83,7 @@ class GetDummyBoxUsers(Method):
 
 		node_list = []
 		for i in connected_nodes:
-			node_list.append(i['node_id'])
-
+			node_list.append(['node_id'])
 
 		nodes = Nodes(self.api, node_list, ['node_id', 'hostname', 'slice_ids'])
 		if not nodes: return 0

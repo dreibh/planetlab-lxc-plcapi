@@ -91,6 +91,7 @@ GetAddresses
 GetBootMedium
 GetBootStates
 GetConfFiles
+GetDummyBoxMedium
 GetDummyBoxUsers
 GetEventObjects
 GetEvents
