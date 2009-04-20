@@ -471,7 +471,7 @@ class RefreshPeer(Method):
 
             # Nodes that are currently part of the slice
 	    old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids'] \
-				   if node_transcoder[node_id] in peer_nodes]
+				   if node_id in node_transcoder and node_transcoder[node_id] in peer_nodes]
 
             # Nodes that should be part of the slice
 	    slice_node_ids = [ node_id for node_id in peer_slice['node_ids'] if node_id in peer_nodes]
