@@ -1,6 +1,6 @@
 #
 # Marta Carbone - UniPi 
-# $Id: GetDummyBoxUsers.py 10410 2008-09-04 16:29:48Z marta $
+# $Id$
 #
 # This Method returns a list of tuples formatted as follow:
 # 
