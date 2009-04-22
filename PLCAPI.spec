@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Wed Apr 22 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-10
+- restore missing ResolveSlices
+
 * Mon Apr 20 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-9
 - new method GetDummyBoxMedium
 
