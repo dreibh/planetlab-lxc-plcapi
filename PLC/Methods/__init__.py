@@ -135,6 +135,7 @@ RebootNodeWithPCU
 RefreshPeer
 ReportRunlevel
 ResetPassword
+ResolveSlices
 SetPersonPrimarySite
 SliceCreate
 SliceDelete
