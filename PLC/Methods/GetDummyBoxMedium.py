@@ -24,16 +24,14 @@ BASE_IMAGE = "/usr/share/dummynet/picobsd"
 
 class GetDummyBoxMedium(Method):
     """
-    This method is used to get a boot image for the DummyNetBox
+    This method is used to fetch a boot image for the DummyNetBox
     with its configuration file embedded.
 
-    We need to provide the dummybox_id of the DummyNetBox
-    we want to generate.
-    Since every time a new configuration file will be generated,
-    THIS OPERATION WILL INVALIDATE ANY PREVIOUSLY DUMMYNETBOX BOOT MEDIUM.
+    Every time this method is called, a new key is generated in the configuration file,
+    SO THIS OPERATION WILL INVALIDATE ANY PREVIOUSLY DUMMYNETBOX BOOT MEDIUM.
 
-    Returns the iso image customized for the DummyNetBox with the new
-    key integrated in the image, and update the key fields in the database.
+    This method updates the key fields in the database.
+    It returns a base64-encoded boot image.
     """
     # I added the session role, because this method should be called from the web
     roles = ['admin', 'pi', 'tech', 'session']
@@ -161,6 +159,7 @@ class GetDummyBoxMedium(Method):
         dummybox['key'] = new_key
         dummybox.sync()
 
-        # return the file
-        #return IMAGE_NAME
-        return base64.b64encode(file(IMAGE_NAME).read())
+        # return the file's content base64-encoded
+        result = file(IMAGE_NAME).read()
+        os.unlink(IMAGE_NAME)
+        return base64.b64encode(result)
