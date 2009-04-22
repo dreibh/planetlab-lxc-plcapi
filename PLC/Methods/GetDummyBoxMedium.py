@@ -109,6 +109,7 @@ class GetDummyBoxMedium(Method):
             raise PLCInvalidArgument, "No primary network configured on %s" % dummybox_hostname
 
 	dummybox = interface_info
+        dummybox['hostname']=dummybox_hostname
 
 	# Select the base image, default to bin image
         if type != 'iso':
@@ -120,10 +121,6 @@ class GetDummyBoxMedium(Method):
 
         # Permission checks
         assert self.caller is not None
-        if 'admin' not in self.caller['roles']:
-            if dummybox['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to generate an iso image for %s %s" % \
-                               (dummybox['hostname'], dummybox_id)
 
         # Start the generation of the image
         # Generate a new key
@@ -164,5 +161,5 @@ class GetDummyBoxMedium(Method):
         dummybox.sync()
 
         # return the file
-        return IMAGE_NAME
+        #return IMAGE_NAME
         return base64.b64encode(file(IMAGE_NAME).read())
