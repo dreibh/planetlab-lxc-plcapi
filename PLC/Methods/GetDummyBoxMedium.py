@@ -17,21 +17,20 @@ from PLC.Parameter import Parameter               # use the Parameter wrapper
 from PLC.Auth import Auth                         # import the Auth parameter
 from PLC.Nodes import *                           # nodes functions
 from PLC.Methods.GetBootMedium import compute_key # key generation function
-from PLC.Accessors.Accessors_dummynetbox import *                       # import dummynet accessors
+from PLC.Accessors.Accessors_dummynetbox import * # import dummynet accessors
 
 WORK_DIR = "/var/tmp/DummynetBoxMedium"
 BASE_IMAGE = "/usr/share/dummynet/picobsd"
 
 class GetDummyBoxMedium(Method):
     """
-    This method is used to get a boot image of the DummyNetBox
-    equipped with the configuration file.
+    This method is used to get a boot image for the DummyNetBox
+    with its configuration file embedded.
 
     We need to provide the dummybox_id of the DummyNetBox
     we want to generate.
-    Since every time a new configuration file will be generater,
+    Since every time a new configuration file will be generated,
     THIS OPERATION WILL INVALIDATE ANY PREVIOUSLY DUMMYNETBOX BOOT MEDIUM.
-    # XXX add checks for picobsd.bin existence
 
     Returns the iso image customized for the DummyNetBox with the new
     key integrated in the image, and update the key fields in the database.
@@ -47,6 +46,8 @@ class GetDummyBoxMedium(Method):
 
     returns = Parameter(str, "DummynetBox boot medium")
 
+    # XXX add checks for picobsd.bin existence
+
     # Generate a new configuration file in the working directory
     # input parameters follows:
     # self is used to access instance data,
@@ -59,7 +60,7 @@ class GetDummyBoxMedium(Method):
         today = datetime.date.today()
         file = ""
         file += "# This is the dummynetbox configuration file\n"
-        file += "# and was generated the %s\n" % str(today)
+        file += "# and was generated on %s\n" % str(today)
         
         host_domain = dummybox['hostname']
         host_domain = host_domain.split('.', 1)
@@ -149,7 +150,7 @@ class GetDummyBoxMedium(Method):
 	shell_script += " chmod u+w %s; chmod u+w %s; " % (IMAGE_NAME, configfile)
 
         # cat the configuration file in the raw image
-        shell_script += "cat %s | dd of=%s seek=$MATCH conv=notrunc bs=1)" \
+        shell_script += " cat %s | dd of=%s seek=$MATCH conv=notrunc bs=1)" \
                            % (configfile, IMAGE_NAME)
 
         # check returned values, 0 means OK, remove the lock file
