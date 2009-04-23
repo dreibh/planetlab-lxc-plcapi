@@ -156,8 +156,8 @@ class GetDummyBoxMedium(Method):
         os.system("rm %s" % (lockfile))
 
         # if all goes fine store the key in the database
-        dummybox['key'] = new_key
-        dummybox.sync()
+        dummybox_info['key'] = new_key
+        dummybox_info.sync()
 
         # return the file's content base64-encoded
         result = file(IMAGE_NAME).read()
