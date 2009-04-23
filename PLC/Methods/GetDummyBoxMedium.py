@@ -156,8 +156,11 @@ class GetDummyBoxMedium(Method):
         os.system("rm %s" % (lockfile))
 
         # if all goes fine store the key in the database
-        dummybox_info['key'] = new_key
-        dummybox_info.sync()
+        nodes = Nodes(self.api, dummybox_id)
+        if not nodes:
+            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+        nodes[0]['key'] = new_key
+        nodes.sync()
 
         # return the file's content base64-encoded
         result = file(IMAGE_NAME).read()
