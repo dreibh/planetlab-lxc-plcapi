@@ -124,6 +124,10 @@ class RefreshPeer(Method):
             for peer_object_id, peer_object in peer_objects.iteritems():
                 message_verbose ('DBG %s peer_object_id=%d (%d/%d)'%(classname,peer_object_id,count,total))
                 count += 1
+                if peer_object_id in synced:
+                    message("Warning: %s Skipping already added %s: %r"%(
+                            peer['peername'], classname, peer_object))
+                    continue
                 if classname == 'Node':
                     message_verbose ('DBG>> hostname=%s'%peer_object['hostname'])
                 elif classname == "Slice":
