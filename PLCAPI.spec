@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 12
+%define taglevel 13
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 
 %changelog
+* Wed May 06 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-13
+- skips already added entries
+
 * Tue Apr 28 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-12
 - yet another set of fixes for external dummynet boxes
 
