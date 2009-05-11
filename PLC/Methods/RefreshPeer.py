@@ -3,6 +3,9 @@
 # 
 # $Id$
 
+import os
+import sys
+import fcntl
 import time
 
 from PLC.Debug import log
@@ -38,6 +41,40 @@ def message (to_print=None,verbose_only=False):
 def message_verbose(to_print=None):
     message(to_print,verbose_only=True)
 
+
+class FileLock:
+    """
+    Lock/Unlock file
+    """
+    def __init__(self, file_path, expire = 60 * 60 * 2):
+        self.expire = expire
+        self.fpath = file_path
+        self.fd = None
+
+    def lock(self):
+        if os.path.exists(self.fpath):
+            if (time.time() - os.stat(self.fpath).st_ctime) > self.expire:
+                try:
+                    os.unlink(self.fpath)
+                except Exception, e:
+                    message('FileLock.lock(%s) : %s' % (self.fpath, e))
+                    return False
+        try:
+            self.fd = open(self.fpath, 'w')
+            fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError, e:
+            message('FileLock.lock(%s) : %s' % (self.fpath, e))
+            return False
+        return True
+
+    def unlock(self):
+        try:
+            fcntl.flock(self.fd, fcntl.LOCK_UN | fcntl.LOCK_NB)
+            self.fd.close()
+        except IOError, e:
+            message('FileLock.unlock(%s) : %s' % (self.fpath, e))
+
+
 class RefreshPeer(Method):
     """
     Fetches site, node, slice, person and key data from the specified peer
@@ -57,6 +94,20 @@ class RefreshPeer(Method):
     returns = Parameter(int, "1 if successful")
 
     def call(self, auth, peer_id_or_peername):
+        
+        peername = Peers(self.api, [peer_id_or_peername], ['peername'])[0]['peername']
+        file_lock = FileLock("/tmp/refresh-peer-%s.lock" % peername)
+        if not file_lock.lock():
+            raise Exception, "Another instance of RefreshPeer is running."
+        try:
+            self.real_call(auth, peer_id_or_peername)
+        except Exception, e:
+            file_lock.unlock()
+            raise Exception, e
+        file_lock.unlock()
+
+        
+    def real_call(self, auth, peer_id_or_peername):
         # Get peer
 	peers = Peers(self.api, [peer_id_or_peername])
         if not peers:
@@ -528,5 +579,5 @@ class RefreshPeer(Method):
 
         # Update peer itself and commit
         peer.sync(commit = True)
-
+        
         return timers
