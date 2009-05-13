@@ -94,17 +94,18 @@ class RefreshPeer(Method):
     returns = Parameter(int, "1 if successful")
 
     def call(self, auth, peer_id_or_peername):
-        
+        ret_val = None
         peername = Peers(self.api, [peer_id_or_peername], ['peername'])[0]['peername']
         file_lock = FileLock("/tmp/refresh-peer-%s.lock" % peername)
         if not file_lock.lock():
             raise Exception, "Another instance of RefreshPeer is running."
         try:
-            self.real_call(auth, peer_id_or_peername)
+            ret_val = self.real_call(auth, peer_id_or_peername)
         except Exception, e:
             file_lock.unlock()
             raise Exception, e
         file_lock.unlock()
+        return ret_val
 
         
     def real_call(self, auth, peer_id_or_peername):
