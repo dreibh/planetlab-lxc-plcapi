@@ -26,6 +26,8 @@ NODEGROUPS_SQL=$DIRNAME/${DATE}-nodegroups.sql
 PGM_VIEWS=$UP/extract-views.py
 PGM_NODEGROUPS=$DIRNAME/parse-site-nodegroups.py
 
+INTERACTIVE_MODE="true"
+
 # load config
 . /etc/planetlab/plc_config
 
@@ -68,11 +70,13 @@ function confirm_nodegroups () {
     echo "Please refer to http://svn.planet-lab.org/wiki/Migration4to5"
     echo "========================================"
     echo -n "Are you sure you want to proceed y/[n] ? "
-    read answer
-    case $answer in
-	y|Y) echo See log in $LOG ;;
-	*) echo "Bye" ; exit 1 ;;
-    esac
+    if [ "$INTERACTIVE_MODE" = "true" ] ; then
+    	read answer
+	case $answer in
+	    y|Y) echo See log in $LOG ;;
+	    *) echo "Bye" ; exit 1 ;;
+	esac
+    fi
 }
 
 function check_env () {
@@ -100,9 +104,13 @@ function get_planetlab4 () {
     else
 
 	echo -n "Enter the hostname for the former DB service : "
-	read hostname
-	echo "Running pg_dump on $hostname.."
-	pg_dump --ignore-version --host=$hostname --user=$PLC_DB_USER planetlab4 -f ${DUMP}
+	if [ "$INTERACTIVE_MODE" = "true" ] ; then 
+		read hostname
+		echo "Running pg_dump on $hostname.."
+		pg_dump --ignore-version --host=$hostname --user=$PLC_DB_USER planetlab4 -f ${DUMP}
+	else
+		pg_dump --ignore-version --user=$PLC_DB_USER planetlab4 -f ${DUMP}
+	fi
 	DUMP=$DUMP
     fi
 }
@@ -113,7 +121,11 @@ function prepare_planetlab5 () {
     if check_for_database planetlab5 ; then
 	rename=planetlab5_${DATE_}
 	echo -n "There is an existing DB named planetlab5, drop or rename into $rename d/[r] ? "
-	read _answer_
+	if [ "$INTERACTIVE_MODE" = "true" ] ; then
+		read _answer_
+	else
+		_answer_='r'
+	fi
 	case $_answer_ in
 	    d|D)
 		run "Dropping    planetlab5" psql --user=postgres template1 -c "DROP DATABASE planetlab5" || true
@@ -182,6 +194,17 @@ function links () {
 }
 
 function main () {
+
+    while getopts "b" opt ; do
+	case $opt in
+	    b) INTERACTIVE_MODE='false' ;;
+	    *) 
+	    	echo "migrate.sh [-b]"
+	    	echo " -b -- execute in batch mode without asking for user feedback"
+		exit
+	    ;;
+	esac
+    done
     
     check_env
     confirm_nodegroups
