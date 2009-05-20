@@ -37,9 +37,9 @@ for legacyname in methods:
 # GetNodes update
 # first replace the call method so we can translate fields
 c = getattr(v42legacy.import_deep("PLC.Methods.GetNodes"),"GetNodes")
-# rename call to newcall so we can still invoke
+# rename call to __origcall so we can still invoke
 original = getattr(c,"call")
-setattr(c,"newcall",original)
+setattr(c,"__origcall",original)
 
 # 4.2 legacy support; update node_fields to include nodenetwork_ids
 from PLC.Parameter import Parameter, Mixed, python_type
@@ -71,14 +71,13 @@ newreturns = [node_fields]
 setattr(c,"returns",newreturns)
 
 def GetNodesCall(self, auth, node_filter = None, return_fields = None):
-    global original
     # convert nodenetwork_ids -> interface_ids
     if node_filter <> None and \
            node_filter.has_key('nodenetwork_ids') and \
            not node_filter.has_key('interface_ids'):
         node_filter['interface_ids']=node_filter['nodenetwork_ids']
         
-    nodes = original(self,auth,node_filter,return_fields)
+    nodes = self.__origcall(auth,node_filter,return_fields)
 
     # add in a interface_ids -> nodenetwork_ids
     for node in nodes:

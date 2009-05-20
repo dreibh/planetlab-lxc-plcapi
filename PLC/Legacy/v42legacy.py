@@ -21,6 +21,7 @@ def patch (arg,rename):
 def make_class (legacyname,newname,path,v42rename,v43rename):
     # locate new class
     newclass=getattr(import_deep(path+newname),newname)
+    setattr(newclass,"__origcall",getattr(newclass,"call"))
     # create class for legacy name
     legacyclass = type(legacyname,(newclass,), 
                        {"__doc__":"Legacy method - please use %s instead"%newname})
@@ -33,7 +34,7 @@ def make_class (legacyname,newname,path,v42rename,v43rename):
 	# print "%s: self.caller = %s, self=%s" % (legacyname,self.caller,self)
         newargs=[patch(x,v42rename) for x in args]
         newkwds=dict ( [ (k,patch(v,v42rename)) for (k,v) in kwds.iteritems() ] )
-        results = getattr(newclass,"call")(self,auth,*newargs,**newkwds)
+        results = self.__origcall(auth,*newargs,**newkwds)
         return patch(results,v43rename)
     setattr(legacyclass,"call",wrapped_call)
 
