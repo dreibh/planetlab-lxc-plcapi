@@ -22,21 +22,40 @@ methods = [
 ]
 
 # does any required renaming
-def rename (x):
-    if x=='nodenetwork_id':
-        return 'interface_id'
-    if x=='nodenetwork_ids':
-        return 'interface_ids'
-    else:
-        return x
+v42_to_v43_renaming = {
+    "nodenetwork_id":"interface_id",
+    "nodenetwork_ids":"interface_ids",
+    "nodenetworksetting_ids":"interface_tag_ids",
+    }
+
+v43_to_v42_renaming = dict([ (v,k) for k,v in v42_to_v43_renaming.iteritems()])
+
+for k,v in v42_to_v43_renaming.iteritems():
+    v43_to_v42_renaming[v]=k
+
+def v42rename (x):
+    return v42_to_v43_renaming.get(x,x)
+
+def v43rename (x):
+    return v43_to_v42_renaming.get(x,x)
+
 
 # apply rename on list (columns) or dict (filter) args
-def patch_legacy_arg (arg):
+def patch_legacy_arg (arg,rename):
     if isinstance(arg,list):
         return [rename(x) for x in arg]
     if isinstance(arg,dict):
         return dict ( [ (rename(k),v) for (k,v) in arg.iteritems() ] )
-    return arg
+    return rename(arg)
+
+def patch_legacy_return (retval,rename):
+    if isinstance(retval,list):
+        for i in range(0,len(retval)):
+            retval[i] = patch_legacy_return(retval[i],rename)
+        return retval
+    if isinstance(retval,dict):
+        return dict ( [ (rename(k),v) for (k,v) in retval.iteritems() ] )
+    return rename(retval)
 
 def legacy_method (legacyname):
     # new method name
@@ -53,9 +72,11 @@ def legacy_method (legacyname):
     setattr(legacyclass,"skip_typecheck",True)
     # rewrite call
     def wrapped_call (self,auth,*args, **kwds):
-        newargs=[patch_legacy_arg(x) for x in args]
-        newkwds=dict ( [ (k,patch_legacy_arg(v)) for (k,v) in kwds.iteritems() ] )
-        return getattr(newclass,"call")(self,auth,*newargs,**newkwds)
+	print "%s: self.caller = %s, self=%s" % (legacyname,self.caller,self)
+        newargs=[patch_legacy_arg(x,v42rename) for x in args]
+        newkwds=dict ( [ (k,patch_legacy_arg(v,v42rename)) for (k,v) in kwds.iteritems() ] )
+        results = getattr(newclass,"call")(self,auth,*newargs,**newkwds)
+        return patch_legacy_return(results,v43rename)
     setattr(legacyclass,"call",wrapped_call)
 
     return legacyclass
