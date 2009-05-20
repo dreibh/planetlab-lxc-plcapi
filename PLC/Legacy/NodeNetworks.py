@@ -41,21 +41,14 @@ def v43rename (x):
 
 
 # apply rename on list (columns) or dict (filter) args
-def patch_legacy_arg (arg,rename):
+def patch_legacy (arg,rename):
     if isinstance(arg,list):
-        return [rename(x) for x in arg]
+        for i in range(0,len(arg)):
+            arg[i] = patch_legacy(arg[i],rename)
+        return arg
     if isinstance(arg,dict):
         return dict ( [ (rename(k),v) for (k,v) in arg.iteritems() ] )
     return rename(arg)
-
-def patch_legacy_return (retval,rename):
-    if isinstance(retval,list):
-        for i in range(0,len(retval)):
-            retval[i] = patch_legacy_return(retval[i],rename)
-        return retval
-    if isinstance(retval,dict):
-        return dict ( [ (rename(k),v) for (k,v) in retval.iteritems() ] )
-    return rename(retval)
 
 def legacy_method (legacyname):
     # new method name
@@ -73,10 +66,10 @@ def legacy_method (legacyname):
     # rewrite call
     def wrapped_call (self,auth,*args, **kwds):
 	print "%s: self.caller = %s, self=%s" % (legacyname,self.caller,self)
-        newargs=[patch_legacy_arg(x,v42rename) for x in args]
-        newkwds=dict ( [ (k,patch_legacy_arg(v,v42rename)) for (k,v) in kwds.iteritems() ] )
+        newargs=[patch_legacy(x,v42rename) for x in args]
+        newkwds=dict ( [ (k,patch_legacy(v,v42rename)) for (k,v) in kwds.iteritems() ] )
         results = getattr(newclass,"call")(self,auth,*newargs,**newkwds)
-        return patch_legacy_return(results,v43rename)
+        return patch_legacy(results,v43rename)
     setattr(legacyclass,"call",wrapped_call)
 
     return legacyclass
