@@ -30,11 +30,13 @@ def make_class (legacyname,newname,path,import_deep,v42rename,v43rename):
 	#print "%s: self.caller = %s, auth=%s, self.api=%s, self=%s" % (legacyname,self.caller,auth,self.api,self)
         if not hasattr(self,"auth"):
             self.auth = None
+
         if self.auth == None and auth <> None:
             self.auth = auth
 
-        if self.auth <> None:
+        if self.auth <> None and self.caller == None:
             a = PLC.Auth.map_auth(auth)
+            print "a = %s" % a
             a.check(self,auth,*args)
 
         newargs=[patch(x,v42rename) for x in args]

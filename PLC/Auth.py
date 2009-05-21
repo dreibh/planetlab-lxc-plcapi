@@ -36,6 +36,7 @@ def map_auth(auth):
         expected = AnonymousAuth()
     else:
         raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', 'hmac_dummybox', or 'anonymous'", "AuthMethod")
+    return expected
 
 class Auth(Parameter):
     """
