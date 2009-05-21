@@ -84,7 +84,6 @@ from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
 import PLC.Accessors
-import PLC.Legacy
 
 def import_deep(name):
     mod = __import__(name)
@@ -101,7 +100,7 @@ class PLCAPI:
     # other_methods_map : dict {methodname: fullpath}
     # e.g. 'Accessors' -> 'PLC.Accessors.Accessors'
     other_methods_map={}
-    for subdir in [ 'Accessors', 'Legacy']:
+    for subdir in [ 'Accessors' ]:
         path="PLC."+subdir
         # scan e.g. PLC.Accessors.__all__
         pkg = __import__(path).__dict__[subdir]
