@@ -1,11 +1,8 @@
 # $Id: $
 
-def import_deep(name):
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+from PLC.Method import Method
+from PLC.Auth import Auth
+import PLC.Auth
 
 # apply rename on list (columns) or dict (filter) args
 def patch (arg,rename):
@@ -17,8 +14,7 @@ def patch (arg,rename):
         return dict ( [ (rename(k),v) for (k,v) in arg.iteritems() ] )
     return rename(arg)
 
-
-def make_class (legacyname,newname,path,v42rename,v43rename):
+def make_class (legacyname,newname,path,import_deep,v42rename,v43rename):
     # locate new class
     newclass=getattr(import_deep(path+newname),newname)
     setattr(newclass,"__origcall",getattr(newclass,"call"))
@@ -31,7 +27,16 @@ def make_class (legacyname,newname,path,v42rename,v43rename):
     setattr(legacyclass,"skip_typecheck",True)
     # rewrite call
     def wrapped_call (self,auth,*args, **kwds):
-	# print "%s: self.caller = %s, self=%s" % (legacyname,self.caller,self)
+	#print "%s: self.caller = %s, auth=%s, self.api=%s, self=%s" % (legacyname,self.caller,auth,self.api,self)
+        if not hasattr(self,"auth"):
+            self.auth = None
+        if self.auth == None and auth <> None:
+            self.auth = auth
+
+        if self.auth <> None:
+            a = PLC.Auth.map_auth(auth)
+            a.check(self,auth,*args)
+
         newargs=[patch(x,v42rename) for x in args]
         newkwds=dict ( [ (k,patch(v,v42rename)) for (k,v) in kwds.iteritems() ] )
         results = self.__origcall(auth,*newargs,**newkwds)

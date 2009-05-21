@@ -6,6 +6,13 @@ import v42legacy
 import sys
 current_module=sys.modules[__name__]
 
+def import_deep(name):
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
 v42_to_v43_methodmap = {
     "AddSliceAttributeType"         : "AddTagType",
     "DeleteSliceAttributeType"      : "DeleteTagType",
@@ -30,4 +37,4 @@ for legacyname in methods:
     # new method name
     newname=v42_to_v43_methodmap[legacyname]
     path = "PLC.Methods."
-    setattr(current_module,legacyname,v42legacy.make_class(legacyname,newname,path,v42rename,v43rename))
+    setattr(current_module,legacyname,v42legacy.make_class(legacyname,newname,path,import_deep,v42rename,v43rename))

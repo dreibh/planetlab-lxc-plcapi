@@ -6,6 +6,13 @@ import v42legacy
 import sys
 current_module=sys.modules[__name__]
 
+def import_deep(name):
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
 methods = [
     "AddNodeNetwork",
     "AddNodeNetworkSetting",
@@ -32,11 +39,11 @@ for legacyname in methods:
     # new method name
     newname=legacyname.replace("NodeNetwork","Interface").replace("Setting","Tag")
     path = "PLC.Methods."
-    setattr(current_module,legacyname,v42legacy.make_class(legacyname,newname,path,v42rename,v43rename))
+    setattr(current_module,legacyname,v42legacy.make_class(legacyname,newname,path,import_deep,v42rename,v43rename))
 
 # GetNodes update
 # first replace the call method so we can translate fields
-c = getattr(v42legacy.import_deep("PLC.Methods.GetNodes"),"GetNodes")
+c = getattr(import_deep("PLC.Methods.GetNodes"),"GetNodes")
 # rename call to __origcall so we can still invoke
 original = getattr(c,"call")
 setattr(c,"__origcall",original)
