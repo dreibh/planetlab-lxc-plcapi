@@ -17,14 +17,14 @@ class Parameter:
     sub-parameters (i.e., dict fields).
     """
 
-    def __init__(self, type, doc = "",
+    def __init__(self, typeval, doc = "",
                  min = None, max = None,
                  optional = None,
                  ro = False,
                  nullok = False):
         # Basic type of the parameter. Must be a builtin type
         # that can be marshalled by XML-RPC.
-        self.type = type
+        self.type = typeval
 
         # Documentation string for the parameter
         self.doc = doc
