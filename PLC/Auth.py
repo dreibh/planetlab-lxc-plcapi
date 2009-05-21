@@ -21,6 +21,22 @@ from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Boot import notify_owners
 
+def map_auth(auth):
+    if auth['AuthMethod'] == "session":
+        expected = SessionAuth()
+    elif auth['AuthMethod'] == "password" or \
+         auth['AuthMethod'] == "capability":
+        expected = PasswordAuth()
+    elif auth['AuthMethod'] == "gpg":
+        expected = GPGAuth()
+    elif auth['AuthMethod'] == "hmac" or \
+         auth['AuthMethod'] == "hmac_dummybox":
+        expected = BootAuth()
+    elif auth['AuthMethod'] == "anonymous":
+        expected = AnonymousAuth()
+    else:
+        raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', 'hmac_dummybox', or 'anonymous'", "AuthMethod")
+
 class Auth(Parameter):
     """
     Base class for all API authentication methods, as well as a class
@@ -38,20 +54,7 @@ class Auth(Parameter):
         # mandatory fields were present.
         assert 'AuthMethod' in auth
 
-        if auth['AuthMethod'] == "session":
-            expected = SessionAuth()
-        elif auth['AuthMethod'] == "password" or \
-             auth['AuthMethod'] == "capability":
-            expected = PasswordAuth()
-        elif auth['AuthMethod'] == "gpg":
-            expected = GPGAuth()
-        elif auth['AuthMethod'] == "hmac" or \
-             auth['AuthMethod'] == "hmac_dummybox":
-            expected = BootAuth()
-        elif auth['AuthMethod'] == "anonymous":
-            expected = AnonymousAuth()
-        else:
-            raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', 'hmac_dummybox', or 'anonymous'", "AuthMethod")
+        expected = map_auth(auth)
 
         # Re-check using the specified authentication method
         method.type_check("auth", auth, expected, (auth,) + args)
