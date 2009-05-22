@@ -7,7 +7,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
-class GetNodes(Method):
+class v43GetNodes(Method):
     """
     Returns an array of structs containing details about nodes. If
     node_filter is specified and is an array of node identifiers or
@@ -82,3 +82,34 @@ class GetNodes(Method):
 		    del node[field]	
 
         return nodes
+
+node_fields = Node.fields.copy()
+node_fields['nodenetwork_ids']=Parameter([int], "Legacy version of interface_ids")
+
+class v42GetNodes(v43GetNodes):
+    accepts = [
+        Auth(),
+        Mixed([Mixed(Node.fields['node_id'],
+                     Node.fields['hostname'])],
+	      Parameter(str,"hostname"),
+              Parameter(int,"node_id"),
+              Filter(node_fields)),
+        Parameter([str], "List of fields to return", nullok = True),
+        ]
+    returns = [node_fields]
+
+    def call(self, auth, node_filter = None, return_fields = None):
+        # convert nodenetwork_ids -> interface_ids
+        if node_filter <> None and \
+               node_filter.has_key('nodenetwork_ids') and \
+               not node_filter.has_key('interface_ids'):
+            node_filter['interface_ids']=node_filter['nodenetwork_ids']
+        nodes = v43GetNodes.call(self,auth,node_filter,return_fields)
+        # add in a interface_ids -> nodenetwork_ids
+        for node in nodes:
+            if node.has_key('interface_ids'):
+                node['nodenetwork_ids']=node['interface_ids']
+        return nodes
+
+GetNodes = v42GetNodes
+

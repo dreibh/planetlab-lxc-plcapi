@@ -49,7 +49,6 @@ Table
 TagTypes
 v42LegacyNodeNetworkSettings
 v42LegacyNodeNetworks
-v42LegacyNodes
 v42Legacy
 v42LegacyTypes
 """.split()
