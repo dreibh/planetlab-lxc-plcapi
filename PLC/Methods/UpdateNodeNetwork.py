@@ -5,6 +5,7 @@ from PLC.Methods.UpdateInterface import UpdateInterface
 class UpdateNodeNetwork(UpdateInterface):
     """ Legacy version of UpdateInterface. """
     skip_typecheck = True
+    status = "deprecated"
     def call(self, auth, *args, **kwds):
         newargs=[patch(x,v42rename) for x in args]
         newkwds=dict ( [ (k,patch(v,v42rename)) for (k,v) in kwds.iteritems() ] )
