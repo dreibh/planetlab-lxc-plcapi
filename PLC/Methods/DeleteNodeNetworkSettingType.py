@@ -1,6 +1,6 @@
 
 from PLC.v42Legacy import patch
-from PLC.v42LegacyTypes import v42rename, v43rename
+from PLC.v42LegacyNodeNetworkSettingTypes import v42rename, v43rename
 from PLC.Methods.DeleteTagType import DeleteTagType
 class DeleteNodeNetworkSettingType(DeleteTagType):
     """ Legacy version of DeleteTagType. """

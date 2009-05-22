@@ -36,6 +36,7 @@ AddRoleToPerson
 AddSession
 AddSiteAddress
 AddSite
+AddSliceAttribute
 AddSliceAttributeType
 AddSliceInstantiation
 AddSlice
@@ -86,6 +87,7 @@ DeleteRoleFromPerson
 DeleteRole
 DeleteSession
 DeleteSite
+DeleteSliceAttribute
 DeleteSliceAttributeType
 DeleteSliceFromNodes
 DeleteSliceFromNodesWhitelist
@@ -131,6 +133,7 @@ GetRoles
 GetSession
 GetSessions
 GetSites
+GetSliceAttributes
 GetSliceAttributeTypes
 GetSliceInstantiations
 GetSliceKeys
@@ -191,6 +194,7 @@ UpdatePCUType
 UpdatePeer
 UpdatePerson
 UpdateSite
+UpdateSliceAttribute
 UpdateSliceAttributeType
 UpdateSlice
 UpdateSliceTag

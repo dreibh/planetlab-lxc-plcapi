@@ -48,7 +48,9 @@ SliceTags
 Table
 TagTypes
 v42LegacyNodeNetworkSettings
+v42LegacyNodeNetworkSettingTypes
 v42LegacyNodeNetworks
 v42Legacy
-v42LegacyTypes
+v42LegacySliceAttributes
+v42LegacySliceAttributeTypes
 """.split()

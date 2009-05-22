@@ -1,6 +1,6 @@
 
 from PLC.v42Legacy import patch
-from PLC.v42LegacyTypes import v42rename, v43rename
+from PLC.v42LegacyAttributeTypes import v42rename, v43rename
 from PLC.Methods.UpdateTagType import UpdateTagType
 class UpdateSliceAttributeType(UpdateTagType):
     """ Legacy version of UpdateTagType. """
