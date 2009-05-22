@@ -7,7 +7,7 @@ from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 
-class GetSlices(Method):
+class v43GetSlices(Method):
     """
     Returns an array of structs containing details about slices. If
     slice_filter is specified and is an array of slice identifiers or
@@ -74,3 +74,20 @@ class GetSlices(Method):
 		    del slice['slice_id']
 
         return slices
+
+class v42GetSlices(v43GetSlices):
+
+    def call(self, auth, slice_filter = None, return_fields = None):
+        # convert nodenetwork_ids -> interface_ids
+        if slice_filter <> None and \
+               slice_filter.has_key('slice_attribute_ids') and \
+               not slice_filter.has_key('slice_tag_ids'):
+            slice_filter['slice_tag_ids']=slice_filter['slice_attribute_ids']
+        slices = v43GetSlices.call(self,auth,slice_filter,return_fields)
+        # add in a slice_tag_ids -> slice_attribute_ids
+        for slice in slices:
+            if slice.has_key('slice_tag_ids'):
+                slice['slice_attribute_ids']=slice['slice_tag_ids']
+        return slices
+
+GetSlices=v42GetSlices

@@ -103,7 +103,7 @@ def get_slivers(api, slice_filter, node = None):
 
     return slivers
 
-class GetSlivers(Method):
+class v43GetSlivers(Method):
     """
     Returns a struct containing information about the specified node
     (or calling node, if called by a node and node_id_or_hostname is
@@ -226,3 +226,32 @@ class GetSlivers(Method):
 	    'initscripts': initscripts,
             'slivers': slivers
             }
+
+class v42GetSlivers(v43GetSlivers):
+    """
+    Returns a struct containing information about the specified node
+    (or calling node, if called by a node and node_id_or_hostname is
+    not specified), including the current set of slivers bound to the
+    node.
+
+    All of the information returned by this call can be gathered from
+    other calls, e.g. GetNodes, GetInterfaces, GetSlices, etc. This
+    function exists almost solely for the benefit of Node Manager.
+    """
+
+    def call(self, auth, node_id_or_hostname = None):
+        result = v43GetSlivers.call(self,auth,node_id_or_hostname)
+        networks = result['networks']
+
+        for i in range(0,len(networks)):
+            network = networks[i]
+            if network.has_key("interface_id"):
+                network['nodenetwork_id']=network['interface_id']
+            if network.has_key("interface_tag_ids"):
+                network['nodenetwork_setting_ids']=network['interface_tag_ids']
+            networks[i]=network
+
+        result['networks']=networks
+        return result
+
+GetSlivers = v42GetSlivers
