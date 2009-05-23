@@ -79,7 +79,7 @@ class v42GetSlices(v43GetSlices):
 
     def call(self, auth, slice_filter = None, return_fields = None):
         # convert nodenetwork_ids -> interface_ids
-        if slice_filter <> None and \
+        if slice_filter <> None and isinstance(slice_filter, dict) and \
                slice_filter.has_key('slice_attribute_ids') and \
                not slice_filter.has_key('slice_tag_ids'):
             slice_filter['slice_tag_ids']=slice_filter['slice_attribute_ids']

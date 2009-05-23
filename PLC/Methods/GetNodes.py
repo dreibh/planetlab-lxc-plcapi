@@ -111,7 +111,7 @@ class v42GetNodes(v43GetNodes):
 
     def call(self, auth, node_filter = None, return_fields = None):
         # convert nodenetwork_ids -> interface_ids
-        if node_filter <> None and \
+        if node_filter <> None and isinstance(node_filter, dict)t, dict) and \
                node_filter.has_key('nodenetwork_ids') and \
                not node_filter.has_key('interface_ids'):
             node_filter['interface_ids']=node_filter['nodenetwork_ids']
