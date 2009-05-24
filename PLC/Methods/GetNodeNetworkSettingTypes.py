@@ -7,7 +7,7 @@ class GetNodeNetworkSettingTypes(GetTagTypes):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, tag_type_filter = None, return_fields = None):
-	tag_type_filter=patch(tag_type_filter,v2rename)
-	return_fields=patch(return_fields,v2rename)
+	tag_type_filter=patch(tag_type_filter,v42rename)
+	return_fields=patch(return_fields,v42rename)
 	result=GetTagTypes.call(self,auth,tag_type_filter,return_fields)
 	return patch(result,v43rename)

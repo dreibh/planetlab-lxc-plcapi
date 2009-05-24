@@ -7,6 +7,6 @@ class DeleteNodeNetworkSetting(DeleteInterfaceTag):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_tag_id):
-	interface_tag_id=patch(interface_tag_id,v2rename)
+	interface_tag_id=patch(interface_tag_id,v42rename)
 	result=DeleteInterfaceTag.call(self,auth,interface_tag_id)
 	return patch(result,v43rename)

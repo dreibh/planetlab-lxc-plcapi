@@ -7,8 +7,8 @@ class AddNodeNetworkSetting(AddInterfaceTag):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_id, tag_type_id_or_name, value):
-	interface_id=patch(interface_id,v2rename)
-	tag_type_id_or_name=patch(tag_type_id_or_name,v2rename)
-	value=patch(value,v2rename)
+	interface_id=patch(interface_id,v42rename)
+	tag_type_id_or_name=patch(tag_type_id_or_name,v42rename)
+	value=patch(value,v42rename)
 	result=AddInterfaceTag.call(self,auth,interface_id,tag_type_id_or_name,value)
 	return patch(result,v43rename)

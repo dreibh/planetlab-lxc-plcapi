@@ -7,7 +7,7 @@ class GetSliceAttributes(GetSliceTags):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, slice_tag_filter = None, return_fields = None):
-	slice_tag_filter=patch(slice_tag_filter,v2rename)
-	return_fields=patch(return_fields,v2rename)
+	slice_tag_filter=patch(slice_tag_filter,v42rename)
+	return_fields=patch(return_fields,v42rename)
 	result=GetSliceTags.call(self,auth,slice_tag_filter,return_fields)
 	return patch(result,v43rename)

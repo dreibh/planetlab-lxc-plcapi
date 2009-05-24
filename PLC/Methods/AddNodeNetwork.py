@@ -7,7 +7,7 @@ class AddNodeNetwork(AddInterface):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, node_id_or_hostname, interface_fields):
-	node_id_or_hostname=patch(node_id_or_hostname,v2rename)
-	interface_fields=patch(interface_fields,v2rename)
+	node_id_or_hostname=patch(node_id_or_hostname,v42rename)
+	interface_fields=patch(interface_fields,v42rename)
 	result=AddInterface.call(self,auth,node_id_or_hostname,interface_fields)
 	return patch(result,v43rename)

@@ -7,7 +7,7 @@ class GetNodeNetworks(GetInterfaces):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_filter = None, return_fields = None):
-	interface_filter=patch(interface_filter,v2rename)
-	return_fields=patch(return_fields,v2rename)
+	interface_filter=patch(interface_filter,v42rename)
+	return_fields=patch(return_fields,v42rename)
 	result=GetInterfaces.call(self,auth,interface_filter,return_fields)
 	return patch(result,v43rename)

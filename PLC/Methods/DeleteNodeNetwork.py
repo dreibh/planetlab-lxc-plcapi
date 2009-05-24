@@ -7,6 +7,6 @@ class DeleteNodeNetwork(DeleteInterface):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_id):
-	interface_id=patch(interface_id,v2rename)
+	interface_id=patch(interface_id,v42rename)
 	result=DeleteInterface.call(self,auth,interface_id)
 	return patch(result,v43rename)

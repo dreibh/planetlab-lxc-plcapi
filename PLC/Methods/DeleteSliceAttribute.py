@@ -7,6 +7,6 @@ class DeleteSliceAttribute(DeleteSliceTag):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, slice_tag_id):
-	slice_tag_id=patch(slice_tag_id,v2rename)
+	slice_tag_id=patch(slice_tag_id,v42rename)
 	result=DeleteSliceTag.call(self,auth,slice_tag_id)
 	return patch(result,v43rename)

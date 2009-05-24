@@ -7,7 +7,7 @@ class UpdateNodeNetworkSettingType(UpdateTagType):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, tag_type_id_or_name, tag_type_fields):
-	tag_type_id_or_name=patch(tag_type_id_or_name,v2rename)
-	tag_type_fields=patch(tag_type_fields,v2rename)
+	tag_type_id_or_name=patch(tag_type_id_or_name,v42rename)
+	tag_type_fields=patch(tag_type_fields,v42rename)
 	result=UpdateTagType.call(self,auth,tag_type_id_or_name,tag_type_fields)
 	return patch(result,v43rename)

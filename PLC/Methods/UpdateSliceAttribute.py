@@ -7,7 +7,7 @@ class UpdateSliceAttribute(UpdateSliceTag):
     skip_typecheck = True
     status = "deprecated"
     def call(self, auth, slice_tag_id, value):
-	slice_tag_id=patch(slice_tag_id,v2rename)
-	value=patch(value,v2rename)
+	slice_tag_id=patch(slice_tag_id,v42rename)
+	value=patch(value,v42rename)
 	result=UpdateSliceTag.call(self,auth,slice_tag_id,value)
 	return patch(result,v43rename)
