@@ -1,4 +1,4 @@
-
+# $Id: $
 from PLC.v42Legacy import patch
 from PLC.v42LegacyNodeNetworkSettings import v42rename, v43rename
 from PLC.Methods.DeleteInterfaceTag import DeleteInterfaceTag
@@ -6,8 +6,7 @@ class DeleteNodeNetworkSetting(DeleteInterfaceTag):
     """ Legacy version of DeleteInterfaceTag. """
     skip_typecheck = True
     status = "deprecated"
-    def call(self, auth, *args, **kwds):
-        newargs=[patch(x,v42rename) for x in args]
-        newkwds=dict ( [ (k,patch(v,v42rename)) for (k,v) in kwds.iteritems() ] )
-        results = DeleteInterfaceTag.call(self,auth,*newargs,**newkwds)
-        return patch(results,v43rename)
+    def call(self, auth, interface_tag_id):
+	interface_tag_id=patch(interface_tag_id,v2rename)
+	result=DeleteInterfaceTag.call(self,auth,interface_tag_id)
+	return patch(result,v43rename)

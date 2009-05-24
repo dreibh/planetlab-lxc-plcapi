@@ -1,4 +1,4 @@
-
+# $Id: $
 from PLC.v42Legacy import patch
 from PLC.v42LegacyAttributeTypes import v42rename, v43rename
 from PLC.Methods.DeleteTagType import DeleteTagType
@@ -6,8 +6,7 @@ class DeleteSliceAttributeType(DeleteTagType):
     """ Legacy version of DeleteTagType. """
     skip_typecheck = True
     status = "deprecated"
-    def call(self, auth, *args, **kwds):
-        newargs=[patch(x,v42rename) for x in args]
-        newkwds=dict ( [ (k,patch(v,v42rename)) for (k,v) in kwds.iteritems() ] )
-        results = DeleteTagType.call(self,auth,*newargs,**newkwds)
-        return patch(results,v43rename)
+    def call(self, auth, tag_type_id_or_name):
+	tag_type_id_or_name=patch(tag_type_id_or_name,v2rename)
+	result=DeleteTagType.call(self,auth,tag_type_id_or_name)
+	return patch(result,v43rename)
