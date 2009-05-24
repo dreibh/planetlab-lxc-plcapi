@@ -4,7 +4,6 @@ from PLC.v42LegacyNodeNetworkSettings import v42rename, v43rename
 from PLC.Methods.DeleteInterfaceTag import DeleteInterfaceTag
 class DeleteNodeNetworkSetting(DeleteInterfaceTag):
     """ Legacy version of DeleteInterfaceTag. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_tag_id):
 	interface_tag_id=patch(interface_tag_id,v42rename)

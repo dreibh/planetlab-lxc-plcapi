@@ -4,7 +4,6 @@ from PLC.v42LegacyNodeNetworkSettingTypes import v42rename, v43rename
 from PLC.Methods.DeleteTagType import DeleteTagType
 class DeleteNodeNetworkSettingType(DeleteTagType):
     """ Legacy version of DeleteTagType. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, tag_type_id_or_name):
 	tag_type_id_or_name=patch(tag_type_id_or_name,v42rename)

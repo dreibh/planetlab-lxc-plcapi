@@ -4,7 +4,6 @@ from PLC.v42LegacySliceAttributes import v42rename, v43rename
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 class UpdateSliceAttribute(UpdateSliceTag):
     """ Legacy version of UpdateSliceTag. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, slice_tag_id, value):
 	slice_tag_id=patch(slice_tag_id,v42rename)

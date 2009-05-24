@@ -4,7 +4,6 @@ from PLC.v42LegacyNodeNetworks import v42rename, v43rename
 from PLC.Methods.UpdateInterface import UpdateInterface
 class UpdateNodeNetwork(UpdateInterface):
     """ Legacy version of UpdateInterface. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, interface_id, interface_fields):
 	interface_id=patch(interface_id,v42rename)

@@ -4,7 +4,6 @@ from PLC.v42LegacySliceAttributeTypes import v42rename, v43rename
 from PLC.Methods.AddTagType import AddTagType
 class AddSliceAttributeType(AddTagType):
     """ Legacy version of AddTagType. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, tag_type_fields):
 	tag_type_fields=patch(tag_type_fields,v42rename)

@@ -4,7 +4,6 @@ from PLC.v42LegacyNodeNetworkSettingTypes import v42rename, v43rename
 from PLC.Methods.GetTagTypes import GetTagTypes
 class GetNodeNetworkSettingTypes(GetTagTypes):
     """ Legacy version of GetTagTypes. """
-    skip_typecheck = True
     status = "deprecated"
     def call(self, auth, tag_type_filter = None, return_fields = None):
 	tag_type_filter=patch(tag_type_filter,v42rename)
