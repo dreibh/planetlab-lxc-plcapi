@@ -229,14 +229,7 @@ class v43GetSlivers(Method):
 
 class v42GetSlivers(v43GetSlivers):
     """
-    Returns a struct containing information about the specified node
-    (or calling node, if called by a node and node_id_or_hostname is
-    not specified), including the current set of slivers bound to the
-    node.
-
-    All of the information returned by this call can be gathered from
-    other calls, e.g. GetNodes, GetInterfaces, GetSlices, etc. This
-    function exists almost solely for the benefit of Node Manager.
+    Legacy wrapper for v43GetSlivers.
     """
 
     def call(self, auth, node_id_or_hostname = None):
@@ -254,4 +247,16 @@ class v42GetSlivers(v43GetSlivers):
         result['networks']=networks
         return result
 
-GetSlivers = v42GetSlivers
+class GetSlivers(v42GetSlivers):
+    """
+    Returns a struct containing information about the specified node
+    (or calling node, if called by a node and node_id_or_hostname is
+    not specified), including the current set of slivers bound to the
+    node.
+
+    All of the information returned by this call can be gathered from
+    other calls, e.g. GetNodes, GetInterfaces, GetSlices, etc. This
+    function exists almost solely for the benefit of Node Manager.
+    """
+
+    pass

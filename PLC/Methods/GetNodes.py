@@ -88,15 +88,8 @@ node_fields['nodenetwork_ids']=Parameter([int], "Legacy version of interface_ids
 
 class v42GetNodes(v43GetNodes):
     """
-    Returns an array of structs containing details about nodes. If
-    node_filter is specified and is an array of node identifiers or
-    hostnames, or a struct of node attributes, only nodes matching the
-    filter will be returned. If return_fields is specified, only the
-    specified details will be returned.
-
-    Some fields may only be viewed by admins.
+    Legacy wrapper for v43GetNodes.
     """
-
     accepts = [
         Auth(),
         Mixed([Mixed(Node.fields['node_id'],
@@ -121,5 +114,15 @@ class v42GetNodes(v43GetNodes):
                 node['nodenetwork_ids']=node['interface_ids']
         return nodes
 
-GetNodes = v42GetNodes
+class GetNodes(v42GetNodes):
+    """
+    Returns an array of structs containing details about nodes. If
+    node_filter is specified and is an array of node identifiers or
+    hostnames, or a struct of node attributes, only nodes matching the
+    filter will be returned. If return_fields is specified, only the
+    specified details will be returned.
 
+    Some fields may only be viewed by admins.
+    """
+
+    pass
