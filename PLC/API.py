@@ -83,6 +83,7 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
+import PLC.Legacy
 import PLC.Accessors
 
 def import_deep(name):
@@ -96,6 +97,7 @@ class PLCAPI:
 
     # flat list of method names
     native_methods = PLC.Methods.native_methods
+    legacy_methods = PLC.Legacy.native_methods
 
     # other_methods_map : dict {methodname: fullpath}
     # e.g. 'Accessors' -> 'PLC.Accessors.Accessors'
@@ -109,7 +111,7 @@ class PLCAPI:
             for method in getattr(import_deep(fullpath),"methods"):
                 other_methods_map[method] = fullpath
 
-    all_methods = native_methods + other_methods_map.keys()
+    all_methods = native_methods + legacy_methods + other_methods_map.keys()
     
     def __init__(self, config = "/etc/planetlab/plc_config", encoding = "utf-8"):
         self.encoding = encoding
@@ -143,6 +145,8 @@ class PLCAPI:
             classname = method.split(".")[-1]
             if method in self.native_methods:
                 fullpath="PLC.Methods." + method
+            elif method in self.legacy_methods:
+                fullpath="PLC.Legacy." + method
             else:
                 fullpath=self.other_methods_map[method]
             module = __import__(fullpath, globals(), locals(), [classname])

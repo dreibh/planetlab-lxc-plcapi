@@ -8,7 +8,7 @@
 #
 
 # Metafiles - manage Legacy/ and Accessors by hand
-init := PLC/__init__.py PLC/Methods/__init__.py 
+init := PLC/__init__.py PLC/Methods/__init__.py PLC/Legacy/__init__.py
 
 # python-pycurl and python-psycopg2 avail. from fedora 5
 # we used to ship our own version of psycopg2 and pycurl, for fedora4
@@ -78,7 +78,23 @@ endif
 PLC/Methods/__init__.py: 
 	(echo '## Please use make index to update this file' ; echo 'native_methods = """' ; cd PLC/Methods; ls -1 *.py system/*.py | grep -v __init__ | sed -e 's,.py$$,,' -e 's,system/,system.,' ; echo '""".split()') > $@
 
+########## Legacy/
+# the current content of __init__.py
+LEGACY_now := $(sort $(shell fgrep -v '"' PLC/Legacy/__init__.py 2>/dev/null))
+# what should be declared
+LEGACY_paths := $(filter-out %/__init__.py, $(wildcard PLC/Legacy/*.py))
+LEGACY_files := $(sort $(notdir $(LEGACY_paths:.py=)))
+
+ifneq ($(LEGACY_now),$(LEGACY_files))
+PLC/Legacy/__init__.py: force
+endif
+PLC/Legacy/__init__.py: 
+	(echo '## Please use make index to update this file' ; echo 'native_methods = """' ; cd PLC/Legacy; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' -e 's,system/,system.,' ; echo '""".split()') > $@
+
 ##########
+
+
+
 force:
 
 .PHONY: all install force clean index tags $(subdirs)

@@ -1,0 +1,23 @@
+## Please use make index to update this file
+native_methods = """
+AddNodeNetwork
+AddNodeNetworkSetting
+AddNodeNetworkSettingType
+AddSliceAttribute
+AddSliceAttributeType
+DeleteNodeNetwork
+DeleteNodeNetworkSetting
+DeleteNodeNetworkSettingType
+DeleteSliceAttribute
+DeleteSliceAttributeType
+GetNodeNetworkSettings
+GetNodeNetworkSettingTypes
+GetNodeNetworks
+GetSliceAttributes
+GetSliceAttributeTypes
+UpdateNodeNetwork
+UpdateNodeNetworkSetting
+UpdateNodeNetworkSettingType
+UpdateSliceAttribute
+UpdateSliceAttributeType
+""".split()

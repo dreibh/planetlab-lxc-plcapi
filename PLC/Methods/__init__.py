@@ -16,9 +16,6 @@ AddMessage
 AddNetworkMethod
 AddNetworkType
 AddNodeGroup
-AddNodeNetwork
-AddNodeNetworkSetting
-AddNodeNetworkSettingType
 AddNode
 AddNodeTag
 AddNodeToPCU
@@ -36,8 +33,6 @@ AddRoleToPerson
 AddSession
 AddSiteAddress
 AddSite
-AddSliceAttribute
-AddSliceAttributeType
 AddSliceInstantiation
 AddSlice
 AddSliceTag
@@ -70,9 +65,6 @@ DeleteNetworkMethod
 DeleteNetworkType
 DeleteNodeFromPCU
 DeleteNodeGroup
-DeleteNodeNetwork
-DeleteNodeNetworkSetting
-DeleteNodeNetworkSettingType
 DeleteNode
 DeleteNodeTag
 DeleteNodeType
@@ -87,8 +79,6 @@ DeleteRoleFromPerson
 DeleteRole
 DeleteSession
 DeleteSite
-DeleteSliceAttribute
-DeleteSliceAttributeType
 DeleteSliceFromNodes
 DeleteSliceFromNodesWhitelist
 DeleteSliceInstantiation
@@ -115,9 +105,6 @@ GetMessages
 GetNetworkMethods
 GetNetworkTypes
 GetNodeGroups
-GetNodeNetworkSettings
-GetNodeNetworkSettingTypes
-GetNodeNetworks
 GetNodes
 GetNodeTags
 GetNodeTypes
@@ -133,8 +120,6 @@ GetRoles
 GetSession
 GetSessions
 GetSites
-GetSliceAttributes
-GetSliceAttributeTypes
 GetSliceInstantiations
 GetSliceKeys
 GetSlices
@@ -183,9 +168,6 @@ UpdateInterfaceTag
 UpdateKey
 UpdateMessage
 UpdateNodeGroup
-UpdateNodeNetwork
-UpdateNodeNetworkSetting
-UpdateNodeNetworkSettingType
 UpdateNode
 UpdateNodeTag
 UpdatePCUProtocolType
@@ -194,8 +176,6 @@ UpdatePCUType
 UpdatePeer
 UpdatePerson
 UpdateSite
-UpdateSliceAttribute
-UpdateSliceAttributeType
 UpdateSlice
 UpdateSliceTag
 UpdateTagType
