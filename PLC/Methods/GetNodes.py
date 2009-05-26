@@ -87,7 +87,6 @@ node_fields = Node.fields.copy()
 node_fields['nodenetwork_ids']=Parameter([int], "Legacy version of interface_ids")
 
 class v42GetNodes(v43GetNodes):
-    # XXX is there a way to inherit the doc from v43GetNodes?
     """
     Returns an array of structs containing details about nodes. If
     node_filter is specified and is an array of node identifiers or

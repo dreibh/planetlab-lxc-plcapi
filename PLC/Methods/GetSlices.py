@@ -76,6 +76,18 @@ class v43GetSlices(Method):
         return slices
 
 class v42GetSlices(v43GetSlices):
+    """
+    Returns an array of structs containing details about slices. If
+    slice_filter is specified and is an array of slice identifiers or
+    slice names, or a struct of slice attributes, only slices matching
+    the filter will be returned. If return_fields is specified, only the
+    specified details will be returned.
+
+    Users may only query slices of which they are members. PIs may
+    query any of the slices at their sites. Admins and nodes may query
+    any slice. If a slice that cannot be queried is specified in
+    slice_filter, details about that slice will not be returned.
+    """
 
     def call(self, auth, slice_filter = None, return_fields = None):
         # convert nodenetwork_ids -> interface_ids
