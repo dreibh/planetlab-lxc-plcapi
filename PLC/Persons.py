@@ -152,8 +152,8 @@ class Person(Row):
 
         if 'pi' in self['roles']:
             if set(self['site_ids']).intersection(person['site_ids']):
-                # Can update people with higher role IDs
-                return min(self['role_ids']) < min(person['role_ids'])
+                # Can update person is neither a PI or ADMIN
+                return (not (('pi' in person['roles']) or ('admin' in person['roles'])))
 
         return False
 
@@ -175,7 +175,7 @@ class Person(Row):
         if 'pi' in self['roles']:
             if set(self['site_ids']).intersection(person['site_ids']):
                 # Can view people with equal or higher role IDs
-                return min(self['role_ids']) <= min(person['role_ids'])
+                return 'admin' not in person['roles']
 
         return False
 
