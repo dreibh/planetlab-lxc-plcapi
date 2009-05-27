@@ -239,7 +239,7 @@ class Person(Row):
 	
 	# Translate roles into role_ids
 	if role_names:
-	    roles = Roles(self.api, role_names, ['role_id']).dict('role_id')
+	    roles = Roles(self.api, role_names).dict('role_id')
 	    role_ids += roles.keys()
 	
 	# Add new ids, remove stale ids
