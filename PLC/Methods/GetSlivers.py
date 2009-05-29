@@ -80,7 +80,7 @@ def get_slivers(api, slice_filter, node = None):
 	        # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
-	        if slice_tag['tagname'] not in slice_tags:
+	        if slice_tag not in slice_tags:
 		    attributes.append({'tagname': slice_tag['tagname'],
 				   'value': slice_tag['value']})
 
