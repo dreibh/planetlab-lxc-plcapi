@@ -75,17 +75,38 @@ class v43GetSlices(Method):
 
         return slices
 
+slice_fields = Slice.fields.copy()
+slice_fields['slice_attribute_ids']=Parameter([int], "Legacy version of slice_tag_ids")
+
 class v42GetSlices(v43GetSlices):
     """
     Legacy wrapper for v43GetSlices.
     """
 
+    accepts = [
+        Auth(),
+        Mixed([Mixed(Slice.fields['slice_id'],
+                     Slice.fields['name'])],
+              Parameter(str,"name"),
+              Parameter(int,"slice_id"),
+              Filter(slice_fields)),
+        Parameter([str], "List of fields to return", nullok = True)
+        ]
+
+    returns = [slice_fields]
+
     def call(self, auth, slice_filter = None, return_fields = None):
         # convert nodenetwork_ids -> interface_ids
-        if slice_filter <> None and isinstance(slice_filter, dict) and \
-               slice_filter.has_key('slice_attribute_ids') and \
-               not slice_filter.has_key('slice_tag_ids'):
-            slice_filter['slice_tag_ids']=slice_filter['slice_attribute_ids']
+        if isinstance(slice_filter, dict):
+            if slice_filter.has_key('slice_attribute_ids'):
+                slice_tag_ids = slice_filter.pop('slice_attribute_ids') 
+                if not slice_filter.has_key('slice_tag_ids'):
+                    slice_filter['slice_tag_ids']=slice_tag_ids
+        if isinstance(return_fields, list):
+            if 'slice_attribute_ids' in return_fields:
+                return_fields.remove('slice_attribute_ids')
+                if 'slice_tag_ids' not in return_fields:
+                    return_fields.append('slice_tag_ids')
         slices = v43GetSlices.call(self,auth,slice_filter,return_fields)
         # add in a slice_tag_ids -> slice_attribute_ids
         for slice in slices:

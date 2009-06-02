@@ -90,6 +90,7 @@ class v42GetNodes(v43GetNodes):
     """
     Legacy wrapper for v43GetNodes.
     """
+
     accepts = [
         Auth(),
         Mixed([Mixed(Node.fields['node_id'],
@@ -103,12 +104,19 @@ class v42GetNodes(v43GetNodes):
 
     def call(self, auth, node_filter = None, return_fields = None):
         # convert nodenetwork_ids -> interface_ids
-        if node_filter <> None and isinstance(node_filter, dict) and \
-               node_filter.has_key('nodenetwork_ids') and \
-               not node_filter.has_key('interface_ids'):
-            node_filter['interface_ids']=node_filter['nodenetwork_ids']
+        if isinstance(node_filter, dict):
+            if node_filter.has_key('nodenetwork_ids'):
+                interface_ids = node_filter.pop('nodenetwork_ids')
+                if not node_filter.has_key('interface_ids'):
+                    node_filter['interface_ids']=interface_ids
+
+        if isinstance(return_fields, list):
+            if 'nodenetwork_ids' in return_fields:
+                return_fields.remove('nodenetwork_ids')
+                if 'interface_ids' not in return_fields:
+                    return_fields.append('interface_ids')
         nodes = v43GetNodes.call(self,auth,node_filter,return_fields)
-        # add in a interface_ids -> nodenetwork_ids
+        # if interface_ids are present, then create a nodenetwork_ids mapping
         for node in nodes:
             if node.has_key('interface_ids'):
                 node['nodenetwork_ids']=node['interface_ids']
