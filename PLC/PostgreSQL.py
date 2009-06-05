@@ -166,8 +166,13 @@ class PostgreSQL:
 
             # psycopg2 requires %()s format for all parameters,
             # regardless of type.
+            # this needs to be done carefully though as with pattern-based filters
+            # we might have percents embedded in the query
+            # so e.g. GetPersons({'email':'*fake*'}) was resulting in .. LIKE '%sake%'
             if psycopg2:
                 query = re.sub(r'(%\([^)]*\)|%)[df]', r'\1s', query)
+            # rewrite wildcards set by Filter.py as '***' into '%'
+            query = query.replace ('***','%')
 
             if not params:
                 if self.debug:

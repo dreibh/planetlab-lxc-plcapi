@@ -139,7 +139,12 @@ class Filter(Parameter, dict):
                     elif isinstance(value, StringTypes) and \
                             (value.find("*") > -1 or value.find("%") > -1):
                         operator = "LIKE"
-                        value = str(api.db.quote(value.replace("*", "%")))
+                        # insert *** in pattern instead of either * or %
+                        # we dont use % as requests are likely to %-expansion later on
+                        # actual replacement to % done in PostgreSQL.py
+                        value = value.replace ('*','***')
+                        value = value.replace ('%','***')
+                        value = str(api.db.quote(value))
                     else:
                         operator = "="
                         if modifiers['<']:
