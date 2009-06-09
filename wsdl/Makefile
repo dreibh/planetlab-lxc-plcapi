@@ -1,11 +1,11 @@
 # Build a WSDL spec of the API
 
-all: plc_api.wsdl
+all: plcapi.wsdl
 
-plc_api.wsdl:
-	./api2wsdl.py -o plc_api.wsdl
+plcapi.wsdl:
+	PYTHONPATH=../ python api2wsdl.py > $@
 
 clean:
-	rm -f plc_api.wsdl
+	rm -f plcapi.wsdl
 
 .PHONY: all clean
