@@ -67,10 +67,12 @@ through Apache mod_python.
 # 
 # Build __init__.py metafiles and PHP API. 
 %{__make} %{?_smp_mflags}
+%{__make} -C wsdl
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__make} %{?_smp_mflags} install DESTDIR="$RPM_BUILD_ROOT" datadir="%{_datadir}" bindir="%{_bindir}"
+install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
 # Install shell symlink
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
@@ -95,6 +97,7 @@ rm -rf $RPM_BUILD_ROOT
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
+/var/www/html/wsdl/plcapi.wsdl
 
 %changelog
 * Sun Jun 07 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-19
