@@ -6,7 +6,7 @@
 # Current limitations:
 # - Invalid for the following reasons 
 # - The types are python types, not WSDL types
-# - I'm not sure of what to do with the auth structure - Need to figure out PLCAPI more closely
+# - I'm not sure of what to do with the auth structure 
 
 import os, sys
 import time
