@@ -235,7 +235,7 @@ class GetBootMedium(Method):
             if category_settings:
                 file += '### Category : %s\n'%category
                 for setting in category_settings:
-                    file += '%s_%s="%s"\n'%(category.upper(),setting['name'].upper(),setting['value'])
+                    file += '%s_%s="%s"\n'%(category.upper(),setting['tagname'].upper(),setting['value'])
 
         for interface in interfaces:
             if interface['method'] == 'ipmi':
