@@ -15,7 +15,8 @@ from tempfile import NamedTemporaryFile
 
 class PyCurlTransport(xmlrpclib.Transport):
     def __init__(self, uri, cert = None, timeout = 300):
-        xmlrpclib.Transport.__init__(self)
+        if hasattr(xmlrpclib.Transport,'__init__'):
+            xmlrpclib.Transport.__init__(self)
         self.curl = pycurl.Curl()
 
         # Suppress signals
