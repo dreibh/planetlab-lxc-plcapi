@@ -13,6 +13,7 @@ from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
+from PLC.NodeTags import NodeTag, NodeTags
 
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
@@ -426,6 +427,23 @@ class GetBootMedium(Method):
                     build_sh_spec['kargs'].append('hcheck_reboot0')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
+            # check for node tag equivalents
+            tags = NodeTags(self.api, {'node_id': node['node_id'], 'tagname': [
+                                       'serial', 'cramfs', 'kvariant',
+                                       'kargs', 'no-hangcheck']},
+                            ['tagname', 'value'])
+            if tags:
+                for tag in tags:
+                    if tag['tagname'] == 'serial':
+                        build_sh_spec['serial'] = tag['value']
+                    if tag['tagname'] == 'cramfs':
+                        build_sh_spec['cramfs'] = True
+                    if tag['tagname'] == 'kvariant':
+                        build_sh_spec['variant'] = tag['value']
+                    if tag['tagname'] == 'kargs':
+                        build_sh_spec['kargs'].append(tag['value'].split())
+                    if tag['tagname'] == 'no-hangcheck':
+                        build_sh_spec['kargs'].append('hcheck_reboot0')
 
         # compute nodename according the action
         if action.find("node-") == 0 or action.find("dummynet-") == 0:
