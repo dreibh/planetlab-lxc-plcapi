@@ -37,6 +37,10 @@ class ReportRunlevel(Method):
             nodes  = [self.caller]
 
         node = nodes[0]
+        # avoid logging this even too often
+        # avoid logging occurrences where run_level does not change
+        former_level=None
+        if 'run_level' in node: former_level=node['run_level']
 
         node.update_last_contact()
         for field in can_update:
@@ -44,7 +48,15 @@ class ReportRunlevel(Method):
                 node.update({field : report_fields[field]})
 
         node.sync(commit=True)
-
-        self.message = "Node Runlevel Report : %s" % ", ".join(report_fields.keys())
+        
+        # skip logging in this case
+        if former_level and 'run_level' in node and node['run_level'] == former_level:
+            pass
+        else:
+            # handle the 'run_level' key
+            message="run level " + node['hostname'] + ":"
+            if 'run_level' in report_fields:
+                message += former_level + "->" + report_fields['run_level']
+            message += ", ".join(  [ k + "->" + v for (k,v) in report_fields.items() if k not in ['run_level'] ] )
 
         return 1
