@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 20
+%define taglevel 21
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Wed Jul 01 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-21
+- getbootmedium supports options as tags (serial, cramfs, kvariant, kargs, no-hangcheck )
+- reportrunlevel logs its calls only when run_level changes
+- pycurl more robust wrt to xmlrpclib.Transport
+
 * Tue Jun 16 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-20
 - produce a wsdl interface
 - bugfix in getbootmedium for nodes with interface tags
