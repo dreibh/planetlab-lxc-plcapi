@@ -19,7 +19,7 @@ class UpdateSliceTag(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin', 'pi', 'user']
+    roles = ['admin', 'pi', 'user', 'node']
 
     accepts = [
         Auth(),

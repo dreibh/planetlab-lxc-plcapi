@@ -25,7 +25,7 @@ class AddSliceTag(Method):
     otherwise.
     """
 
-    roles = ['admin', 'pi', 'user']
+    roles = ['admin', 'pi', 'user', 'node']
 
     accepts = [
         Auth(),
