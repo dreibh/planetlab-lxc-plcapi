@@ -24,8 +24,7 @@ class UpdateSliceTag(Method):
     accepts = [
         Auth(),
         SliceTag.fields['slice_tag_id'],
-	Mixed(SliceTag.fields['value'],
-              InitScript.fields['name'])
+	SliceTag.fields['value'],
         ]
 
     returns = Parameter(int, '1 if successful')
