@@ -55,18 +55,24 @@ class AddSliceTag(Method):
             raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
         tag_type = tag_types[0]
 
-        if 'admin' not in self.caller['roles']:
-            if self.caller['person_id'] in slice['person_ids']:
-                pass
-            elif 'pi' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not a member of the specified slice"
-            elif slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
+        if not isinstance(self.caller, Node):
+            if ('admin' not in self.caller['roles']):
+                if self.caller['person_id'] in slice['person_ids']:
+                    pass
+                elif 'pi' not in self.caller['roles']:
+                    raise PLCPermissionDenied, "Not a member of the specified slice"
+                elif slice['site_id'] not in self.caller['site_ids']:
+                    raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
 
-            if tag_type['min_role_id'] is not None and \
-               min(self.caller['role_ids']) > tag_type['min_role_id']:
+                if tag_type['min_role_id'] is not None and \
+                       min(self.caller['role_ids']) > tag_type['min_role_id']:
+                    raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
+        else:
+            ### make node's min_role_id == PI min_role_id
+            node_role_id = 20
+            if tag_type['min_role_id'] is not None and node_role_id > tag_type['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
-
+            
 	# if initscript is specified, validate value
 	if tag_type['tagname'] in ['initscript']:
 	    initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
@@ -79,18 +85,31 @@ class AddSliceTag(Method):
         slice_tag['value'] = unicode(value)
 
         # Sliver attribute if node is specified
-        if node_id_or_hostname is not None:
-            nodes = Nodes(self.api, [node_id_or_hostname])
-            if not nodes:
-                raise PLCInvalidArgument, "No such node"
-            node = nodes[0]
+        if node_id_or_hostname is not None or isinstance(self.caller, Node):
+            node_id = None
+            if isinstance(self.caller, Node):
+                node = self.caller
+                node_id = node['node_id']
+
+            if node_id_or_hostname is not None:
+                nodes = Nodes(self.api, [node_id_or_hostname])
+                if not nodes:
+                    raise PLCInvalidArgument, "No such node"
+                node = nodes[0]
+                if node_id <> None and node_id <> node['node_id']:
+                    raise PLCPermissionDenied, "Not allowed to set another node's sliver attribute"
+                else:                    
+                    node_id = node['node_id']
             
-            if node['node_id'] not in slice['node_ids']:
+            if node_id not in slice['node_ids']:
                 raise PLCInvalidArgument, "Node not in the specified slice"
             slice_tag['node_id'] = node['node_id']
 
 	# Sliver attribute shared accross nodes if nodegroup is sepcified
 	if nodegroup_id_or_name is not None:
+            if isinstance(self.caller, Node):
+                    raise PLCPermissionDenied, "Not allowed to set nodegroup slice attributes"
+                
 	    nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
 	    if not nodegroups:
 		raise PLCInvalidArgument, "No such nodegroup %r"%nodegroup_id_or_name
