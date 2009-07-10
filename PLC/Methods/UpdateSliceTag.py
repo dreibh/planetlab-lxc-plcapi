@@ -6,6 +6,7 @@ from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
+from PLC.Nodes import Node
 
 class UpdateSliceTag(Method):
     """
