@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 21
+%define taglevel 22
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Jul 10 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-22
+- new BindObjectToPeer method for sfa
+- AddSliceTag and UpdateSliceTag open to the 'node' auth method with restrictions
+
 * Wed Jul 01 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-21
 - getbootmedium supports options as tags (serial, cramfs, kvariant, kargs, no-hangcheck )
 - reportrunlevel logs its calls only when run_level changes
