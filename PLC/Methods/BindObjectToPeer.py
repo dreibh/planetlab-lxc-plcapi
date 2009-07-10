@@ -10,7 +10,7 @@ from PLC.Nodes import Nodes
 from PLC.Slices import Slices
 from PLC.Peers import Peers
 
-class BindRemoteObjectToPeer(Method):
+class BindObjectToPeer(Method):
     """
     This method is a hopefully temporary hack to let the sfa correctly
     attach the objects it creates to a remote peer object. This is
@@ -62,7 +62,6 @@ class BindRemoteObjectToPeer(Method):
         object = self.locate_object (object_type, object_id)
         adder_name = 'add_'+object_type
         add_function = getattr(type(peer),adder_name)
-        print 'object',object
         add_function(peer,object,remote_object_id)
 
         return 1

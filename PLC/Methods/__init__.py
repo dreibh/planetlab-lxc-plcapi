@@ -40,7 +40,7 @@ AddSliceToNodes
 AddSliceToNodesWhitelist
 AddTagType
 AuthCheck
-BindRemoteObjectToPeer
+BindObjectToPeer
 BlacklistKey
 BootCheckAuthentication
 BootGetNodeDetails
