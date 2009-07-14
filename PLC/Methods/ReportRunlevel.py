@@ -56,7 +56,7 @@ class ReportRunlevel(Method):
             # handle the 'run_level' key
             message="run level " + node['hostname'] + ":"
             if 'run_level' in report_fields:
-                message += former_level + "->" + report_fields['run_level']
+                message += str(former_level) + "->" + report_fields['run_level']
             message += ", ".join(  [ k + "->" + v for (k,v) in report_fields.items() if k not in ['run_level'] ] )
 
         return 1
