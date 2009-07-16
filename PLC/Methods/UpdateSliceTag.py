@@ -3,10 +3,10 @@ from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.SliceTags import SliceTag, SliceTags
+from PLC.Nodes import Node
 from PLC.Slices import Slice, Slices
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
-from PLC.Nodes import Node
 
 class UpdateSliceTag(Method):
     """
@@ -25,7 +25,8 @@ class UpdateSliceTag(Method):
     accepts = [
         Auth(),
         SliceTag.fields['slice_tag_id'],
-	SliceTag.fields['value'],
+	Mixed(SliceTag.fields['value'],
+              InitScript.fields['name'])
         ]
 
     returns = Parameter(int, '1 if successful')
