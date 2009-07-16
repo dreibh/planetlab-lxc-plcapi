@@ -250,20 +250,8 @@ class v43GetSlivers(Method):
             sites = Sites(self.api, site_filter, site_return_filter)
             site = sites[0]
             person_filter =  {'person_id':site['person_ids'],'enabled':True}
-            person_return_filter = ['person_id', 'enabled', 'key_ids','role_ids'] 
+            person_return_filter = ['person_id', 'enabled', 'key_ids','role_ids','roles'] 
             site_persons = Persons(self.api, person_filter, person_return_filter)
-
-            # XXX This snippet below maps role names to role_ids,
-            # which is really DUMB.  Why can't one just pass 'roles'
-            # as a return_filter to Persons() above.
-            __roles = {}
-            dbroles = Roles(self.api)
-            for dbrole in dbroles:
-                __roles[dbrole['name']]=dbrole['role_id']
-            __theroles = []
-            for role in theroles:
-                __theroles.append(__roles[role])
-            theroles=__theroles
 
             # collect the keys into a table to weed out duplicates
             site_keys = {}
