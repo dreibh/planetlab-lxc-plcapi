@@ -12,9 +12,18 @@ from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
+from PLC.Sites import Sites
+from PLC.Roles import Roles
 from PLC.Keys import Key, Keys
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
+from PLC.Config import Config
+
+# XXX we don't really know whether this PLC is loaded from /etc/planetlab/plc_config or elsewhere
+plc_config = Config()
+
+# XXX used to check if slice expiration time is sane
+MAXINT =  2L**31-1
 
 def get_slivers(api, slice_filter, node = None):
     # Get slice information
@@ -92,6 +101,10 @@ def get_slivers(api, slice_filter, node = None):
                 attributes.append({'tagname': slice_tag['tagname'],
                                    'value': slice_tag['value']})
 
+        # XXX Sanity check; though technically this should be a system invariant
+        # checked with an assertion
+        if slice['expires'] > MAXINT:  slice['expires']= MAXINT
+
         slivers.append({
             'name': slice['name'],
             'slice_id': slice['slice_id'],
@@ -131,6 +144,13 @@ class v43GetSlivers(Method):
         'groups': [NodeGroup.fields['groupname']],
         'conf_files': [ConfFile.fields],
 	'initscripts': [InitScript.fields],
+        'accounts': [{
+            'name': Parameter(str, "unix style account name", max = 254),
+            'keys': [{
+                'key_type': Key.fields['key_type'],
+                'key': Key.fields['key']
+            }],
+            }],
         'slivers': [{
             'name': Slice.fields['name'],
             'slice_id': Slice.fields['slice_id'],
@@ -148,6 +168,8 @@ class v43GetSlivers(Method):
     }
 
     def call(self, auth, node_id_or_hostname = None):
+        global plc_config
+
         timestamp = int(time.time())
 
         # Get node
@@ -214,6 +236,59 @@ class v43GetSlivers(Method):
 
 	slivers = get_slivers(self.api, slice_ids, node)
 
+        # get the special accounts and keys needed for the node
+        # root
+        # site_admin
+        accounts = []
+        if False and 'site_id' not in node:
+            nodes = Nodes(self.api, node['node_id'])
+            node = nodes[0]
+
+        def getpersonsitekeys(site_id_or_name,theroles):
+            site_filter = site_id_or_name
+            site_return_filter = ['person_ids']
+            sites = Sites(self.api, site_filter, site_return_filter)
+            site = sites[0]
+            person_filter =  {'person_id':site['person_ids'],'enabled':True}
+            person_return_filter = ['person_id', 'enabled', 'key_ids','role_ids'] 
+            site_persons = Persons(self.api, person_filter, person_return_filter)
+
+            # XXX This snippet below maps role names to role_ids,
+            # which is really DUMB.  Why can't one just pass 'roles'
+            # as a return_filter to Persons() above.
+            __roles = {}
+            dbroles = Roles(self.api)
+            for dbrole in dbroles:
+                __roles[dbrole['name']]=dbrole['role_id']
+            __theroles = []
+            for role in theroles:
+                __theroles.append(__roles[role])
+            theroles=__theroles
+
+            # collect the keys into a table to weed out duplicates
+            site_keys = {}
+            for site_person in site_persons:
+                if site_person['enabled'] is False: continue
+                more = True
+                for role in theroles:
+                    if role in site_person['role_ids']:
+                        keys_filter = site_person['key_ids']
+                        keys_return_filter = ['key_id', 'key', 'key_type']
+                        keys = Keys(self.api, keys_filter, keys_return_filter)
+                        for key in keys:
+                            if key['key_type'] == 'ssh':
+                                site_keys[key['key']]=None
+            return site_keys.keys()
+
+        # 'site_admin' account setup
+        personsitekeys=getpersonsitekeys(node['site_id'],['pi','tech'])
+        accounts.append({'name':'site_admin','keys':personsitekeys})
+
+        # 'root' account setup on nodes from all 'admin' users
+        # registered with the PLC main site
+        personsitekeys=getpersonsitekeys(plc_config.PLC_SLICE_PREFIX,['admin'])
+        accounts.append({'name':'root','keys':personsitekeys})
+
 	node.update_last_contact()
 
         return {
@@ -224,7 +299,8 @@ class v43GetSlivers(Method):
             'groups': groups,
             'conf_files': conf_files.values(),
 	    'initscripts': initscripts,
-            'slivers': slivers
+            'slivers': slivers,
+            'accounts': accounts
             }
 
 class v42GetSlivers(v43GetSlivers):
