@@ -9,7 +9,8 @@ from PLC.Sites import Sites
 from PLC.Nodes import Nodes
 from PLC.Slices import Slices
 from PLC.Peers import Peers
-
+from PLC.Faults import *
+ 
 class BindObjectToPeer(Method):
     """
     This method is a hopefully temporary hack to let the sfa correctly
