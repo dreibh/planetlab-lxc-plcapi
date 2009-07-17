@@ -17,10 +17,6 @@ from PLC.Roles import Roles
 from PLC.Keys import Key, Keys
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
-from PLC.Config import Config
-
-# XXX we don't really know whether this PLC is loaded from /etc/planetlab/plc_config or elsewhere
-plc_config = Config()
 
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
@@ -168,8 +164,6 @@ class v43GetSlivers(Method):
     }
 
     def call(self, auth, node_id_or_hostname = None):
-        global plc_config
-
         timestamp = int(time.time())
 
         # Get node
@@ -274,7 +268,7 @@ class v43GetSlivers(Method):
 
         # 'root' account setup on nodes from all 'admin' users
         # registered with the PLC main site
-        personsitekeys=getpersonsitekeys(plc_config.PLC_SLICE_PREFIX,['admin'])
+        personsitekeys=getpersonsitekeys(self.api.config.PLC_SLICE_PREFIX,['admin'])
         accounts.append({'name':'root','keys':personsitekeys})
 
 	node.update_last_contact()
