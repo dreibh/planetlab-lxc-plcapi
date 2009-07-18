@@ -27,13 +27,13 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    node_fields = Row.accepted_fields(can_update,[Node.fields,Node.related_fields,Node.tags])
+    accepted_fields = Row.accepted_fields(can_update,[Node.fields,Node.related_fields,Node.tags])
 
     accepts = [
         Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
-        node_fields
+        accepted_fields
         ]
 
     returns = Parameter(int, '1 if successful')

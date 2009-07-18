@@ -35,13 +35,13 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    slice_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.related_fields,Slice.tags])
+    accepted_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.related_fields,Slice.tags])
 
     accepts = [
         Auth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-        slice_fields
+        accepted_fields
         ]
 
     returns = Parameter(int, '1 if successful')
