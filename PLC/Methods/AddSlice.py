@@ -46,6 +46,8 @@ class AddSlice(Method):
 
     def call(self, auth, slice_fields):
 
+        slice_fields = Row.check_fields (slice_fields, self.accepted_fields)
+
         [native,tags,rejected]=Row.split_fields(slice_fields,[Slice.fields,Slice.tags])
 
         if rejected:

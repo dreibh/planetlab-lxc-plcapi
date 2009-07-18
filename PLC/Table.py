@@ -239,6 +239,30 @@ class Row(dict):
             else: rejected.append(column)
         return (fields,tags,rejected)
 
+    # compute the accepts part of an update method from a list of column names, and a (list of) fields dict
+    # use exclude=True to exclude the column names instead
+    @staticmethod
+    def accepted_fields (update_columns, fields, exclude=False):
+        if not isinstance(fields,list): fields = [fields]
+        result={}
+        for fields_dict in fields:
+            for (k,v) in fields_dict.iteritems():
+                if (not exclude and k in update_columns) or (exclude and k not in update_columns):
+                    result[k]=v
+        return result
+
+    # filter out user-provided fields that are not part of the declared acceptance list
+    # this could maybe have been integrated in split_fields, but for simplicity we keep it aside
+    @staticmethod
+    def check_fields (user_dict, accepted_fields):
+# avoid the simple, but silent, version
+#        return dict ([ (k,v) for (k,v) in user_dict.items() if k in accepted_fields ])
+        result={}
+        for (k,v) in user_dict.items():
+            if k in accepted_fields: result[k]=v
+            else: raise PLCInvalidArgument ('Trying to set/change unaccepted key %s'%k)
+        return result
+
     # given a dict (typically passed to an Update method), we check and sort
     # them against a list of dicts, e.g. [Node.fields, Node.related_fields]
     # return is a list that contains n+1 dicts, last one has the rejected fields
@@ -257,17 +281,6 @@ class Row(dict):
                     break 
             if not found: rejected[field]=value
         result.append(rejected)
-        return result
-
-    # compute the accepts part of an update method from a list of column names, and a (list of) fields dict
-    @staticmethod
-    def accepted_fields (can_update_columns, fields):
-        result={}
-        if not isinstance(fields,list): fields = [fields]
-        for dict in fields:
-            for (k,v) in dict.iteritems():
-                if k in can_update_columns:
-                    result[k]=v
         return result
 
     ### class initialization : create tag-dependent cross view if needed

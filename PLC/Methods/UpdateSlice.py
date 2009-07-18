@@ -48,6 +48,8 @@ class UpdateSlice(Method):
 
     def call(self, auth, slice_id_or_name, slice_fields):
 
+        slice_fields = Row.check_fields (slice_fields, self.accepted_fields)
+
         # split provided fields 
         [native,related,tags,rejected] = Row.split_fields(slice_fields,[Slice.fields,Slice.related_fields,Slice.tags])
 

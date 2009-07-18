@@ -40,6 +40,8 @@ class AddNode(Method):
 
     def call(self, auth, site_id_or_login_base, node_fields):
 
+        node_fields = Row.check_fields (node_fields, self.accepted_fields)
+
         [native,tags,rejected]=Row.split_fields(node_fields,[Node.fields,Node.tags])
 
         if rejected:

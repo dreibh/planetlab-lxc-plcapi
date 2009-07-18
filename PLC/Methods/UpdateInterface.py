@@ -31,7 +31,7 @@ class UpdateInterface(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags])
+    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags],exclude=True)
 
     accepts = [
         Auth(),
@@ -42,6 +42,8 @@ class UpdateInterface(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, interface_id, interface_fields):
+
+        interface_fields = Row.check_fields (interface_fields, self.accepted_fields)
 
         [native,tags,rejected] = Row.split_fields(interface_fields,[Interface.fields,Interface.tags])
 

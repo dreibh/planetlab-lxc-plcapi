@@ -19,23 +19,21 @@ class AddInterface(Method):
 
     Adds a new network for a node. Any values specified in
     interface_fields are used, otherwise defaults are
-    used. Acceptable values for method may be retrieved via
-    GetNetworkMethods. Acceptable values for type may be retrieved via
-    GetNetworkTypes.
+    used. 
 
-    If type is static, ip, gateway, network, broadcast, netmask, and
-    dns1 must all be specified in interface_fields. If type is dhcp,
-    these parameters, even if specified, are ignored.
+    If type is static, then ip, gateway, network, broadcast, netmask,
+    and dns1 must all be specified in interface_fields. If type is
+    dhcp, these parameters, even if specified, are ignored.
 
-    PIs and techs may only add networks to their own nodes. Admins may
-    add networks to any node.
+    PIs and techs may only add interfaces to their own nodes. Admins may
+    add interfaces to any node.
 
     Returns the new interface_id (> 0) if successful, faults otherwise.
     """
 
     roles = ['admin', 'pi', 'tech']
 
-    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags])
+    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags], exclude=True)
 
     accepts = [
         Auth(),
@@ -48,6 +46,8 @@ class AddInterface(Method):
 
     
     def call(self, auth, node_id_or_hostname, interface_fields):
+
+        interface_fields = Row.check_fields (interface_fields, self.accepted_fields)
 
         [native,tags,rejected]=Row.split_fields(interface_fields,[Interface.fields,Interface.tags])
         if rejected:

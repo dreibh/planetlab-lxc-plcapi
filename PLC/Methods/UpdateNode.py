@@ -40,6 +40,8 @@ class UpdateNode(Method):
 
     def call(self, auth, node_id_or_hostname, node_fields):
         
+        node_fields = Row.check_fields (node_fields, self.accepted_fields)
+
         # split provided fields 
         [native,related,tags,rejected] = Row.split_fields(node_fields,[Node.fields,Node.related_fields,Node.tags])
 
