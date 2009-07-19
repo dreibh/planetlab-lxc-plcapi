@@ -12,7 +12,7 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.Methods.AddInterfaceTag import AddInterfaceTag
 from PLC.Methods.UpdateInterfaceTag import UpdateInterfaceTag
 
-can_update = ['interface_id','node_id']
+cannot_update = ['interface_id','node_id']
 
 class UpdateInterface(Method):
     """
@@ -31,7 +31,8 @@ class UpdateInterface(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    accepted_fields = Row.accepted_fields(can_update, [Interface.fields,Interface.tags],exclude=True)
+    accepted_fields = Row.accepted_fields(cannot_update, Interface.fields,exclude=True)
+    accepted_fields.update(Interface.tags)
 
     accepts = [
         Auth(),
@@ -43,10 +44,10 @@ class UpdateInterface(Method):
 
     def call(self, auth, interface_id, interface_fields):
 
-        interface_fields = Row.check_fields (interface_fields, self.accepted_fields)
-
         [native,tags,rejected] = Row.split_fields(interface_fields,[Interface.fields,Interface.tags])
 
+        # type checking
+        native= Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot update Interface column(s) %r"%rejected
 

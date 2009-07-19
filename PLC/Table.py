@@ -228,8 +228,8 @@ class Row(dict):
         return dict ( [ (key,value) for (key,value) in obj.iteritems() 
                         if key in self.tags and Row.is_writable(key,value,self.tags) ] )
     
-    # takes in input a list of columns, returns 2 dicts and one list
-    # fields, tags, rejected
+    # takes as input a list of columns, sort native fields from tags
+    # returns 2 dicts and one list : fields, tags, rejected
     @classmethod
     def parse_columns (cls, columns):
         (fields,tags,rejected)=({},{},[])
@@ -239,20 +239,20 @@ class Row(dict):
             else: rejected.append(column)
         return (fields,tags,rejected)
 
-    # compute the accepts part of an update method from a list of column names, and a (list of) fields dict
+    # compute the 'accepts' part of a method, from a list of column names, and a fields dict
     # use exclude=True to exclude the column names instead
+    # typically accepted_fields (Node.fields,['hostname','model',...])
     @staticmethod
-    def accepted_fields (update_columns, fields, exclude=False):
-        if not isinstance(fields,list): fields = [fields]
+    def accepted_fields (update_columns, fields_dict, exclude=False):
         result={}
-        for fields_dict in fields:
-            for (k,v) in fields_dict.iteritems():
-                if (not exclude and k in update_columns) or (exclude and k not in update_columns):
-                    result[k]=v
+        for (k,v) in fields_dict.iteritems():
+            if (not exclude and k in update_columns) or (exclude and k not in update_columns):
+                result[k]=v
         return result
 
     # filter out user-provided fields that are not part of the declared acceptance list
-    # this could maybe have been integrated in split_fields, but for simplicity we keep it aside
+    # keep it separate from split_fields for simplicity
+    # typically check_fields (<user_provided_dict>,{'hostname':Parameter(str,...),'model':Parameter(..)...})
     @staticmethod
     def check_fields (user_dict, accepted_fields):
 # avoid the simple, but silent, version

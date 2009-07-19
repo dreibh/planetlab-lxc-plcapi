@@ -7,13 +7,19 @@ from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
+admin_only = ['key', 'session', 'boot_nonce' ]
+
 class v43GetNodes(Method):
     """
     Returns an array of structs containing details about nodes. If
     node_filter is specified and is an array of node identifiers or
     hostnames, or a struct of node attributes, only nodes matching the
-    filter will be returned. If return_fields is specified, only the
-    specified details will be returned.
+    filter will be returned. 
+
+    If return_fields is specified, only the specified details will be
+    returned. NOTE that if return_fields is unspecified, the complete
+    set of native fields are returned, which DOES NOT include tags at
+    this time.
 
     Some fields may only be viewed by admins.
     """
@@ -71,7 +77,7 @@ class v43GetNodes(Method):
 
 	    # remove remaining admin only fields
             for node in nodes:    
-		for field in ['boot_nonce', 'key', 'session', 'root_person_ids']:
+		for field in admin_only:
                     if field in node:
                         del node[field]
 	

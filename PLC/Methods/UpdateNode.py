@@ -11,8 +11,8 @@ from PLC.NodeTags import NodeTags
 from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
-can_update = ['hostname', 'boot_state', 'model', 'version','key', 'session', 'boot_nonce', 'site_id'] + \
-              Node.related_fields.keys()
+admin_only = [ 'key', 'session', 'boot_nonce', 'site_id']
+can_update = ['hostname', 'boot_state', 'model', 'version'] + admin_only 
 
 class UpdateNode(Method):
     """
@@ -27,7 +27,10 @@ class UpdateNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    accepted_fields = Row.accepted_fields(can_update,[Node.fields,Node.related_fields,Node.tags])
+    accepted_fields = Row.accepted_fields(can_update,Node.fields)
+    # xxx check the related_fields feature
+    accepted_fields.update(Node.related_fields)
+    accepted_fields.update(Node.tags)
 
     accepts = [
         Auth(),
@@ -40,17 +43,20 @@ class UpdateNode(Method):
 
     def call(self, auth, node_id_or_hostname, node_fields):
         
-        node_fields = Row.check_fields (node_fields, self.accepted_fields)
-
         # split provided fields 
         [native,related,tags,rejected] = Row.split_fields(node_fields,[Node.fields,Node.related_fields,Node.tags])
 
+        # type checking
+        native = Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot update Node column(s) %r"%rejected
 
+        # Authenticated function
+        assert self.caller is not None
+
 	# Remove admin only fields
 	if 'admin' not in self.caller['roles']:
-            for key in 'key', 'session', 'boot_nonce', 'site_id':
+            for key in admin_only:
                 if native.has_key(key):
                     del native[key]
 
@@ -62,9 +68,6 @@ class UpdateNode(Method):
 
         if node['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local node %r"%node_id_or_hostname
-
-        # Authenticated function
-        assert self.caller is not None
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.

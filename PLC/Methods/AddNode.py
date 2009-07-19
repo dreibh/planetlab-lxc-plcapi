@@ -27,7 +27,8 @@ class AddNode(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    accepted_fields = Row.accepted_fields(can_update, [Node.fields,Node.tags])
+    accepted_fields = Row.accepted_fields(can_update,Node.fields)
+    accepted_fields.update(Node.tags)
 
     accepts = [
         Auth(),
@@ -40,10 +41,10 @@ class AddNode(Method):
 
     def call(self, auth, site_id_or_login_base, node_fields):
 
-        node_fields = Row.check_fields (node_fields, self.accepted_fields)
-
         [native,tags,rejected]=Row.split_fields(node_fields,[Node.fields,Node.tags])
 
+        # type checking
+        native = Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot add Node with column(s) %r"%rejected
 

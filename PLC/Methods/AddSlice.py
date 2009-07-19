@@ -35,7 +35,8 @@ class AddSlice(Method):
 
     roles = ['admin', 'pi']
 
-    accepted_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.tags])
+    accepted_fields = Row.accepted_fields(can_update, Slice.fields)
+    accepted_fields.update(Slice.tags)
 
     accepts = [
         Auth(),
@@ -46,10 +47,10 @@ class AddSlice(Method):
 
     def call(self, auth, slice_fields):
 
-        slice_fields = Row.check_fields (slice_fields, self.accepted_fields)
-
         [native,tags,rejected]=Row.split_fields(slice_fields,[Slice.fields,Slice.tags])
 
+        # type checking
+        native = Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot add Slice with column(s) %r"%rejected
 

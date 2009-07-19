@@ -14,8 +14,7 @@ from PLC.SliceTags import SliceTags
 from PLC.Methods.AddSliceTag import AddSliceTag
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-can_update = ['instantiation', 'url', 'description', 'max_nodes', 'expires'] + \
-    Slice.related_fields.keys()
+can_update = ['instantiation', 'url', 'description', 'max_nodes', 'expires'] 
 
 class UpdateSlice(Method):
     """
@@ -35,7 +34,10 @@ class UpdateSlice(Method):
 
     roles = ['admin', 'pi', 'user']
 
-    accepted_fields = Row.accepted_fields(can_update, [Slice.fields,Slice.related_fields,Slice.tags])
+    accepted_fields = Row.accepted_fields(can_update, Slice.fields)
+    # xxx check the related_fields feature
+    accepted_fields.update(Slice.related_fields)
+    accepted_fields.update(Slice.tags)
 
     accepts = [
         Auth(),
@@ -48,11 +50,11 @@ class UpdateSlice(Method):
 
     def call(self, auth, slice_id_or_name, slice_fields):
 
-        slice_fields = Row.check_fields (slice_fields, self.accepted_fields)
-
         # split provided fields 
         [native,related,tags,rejected] = Row.split_fields(slice_fields,[Slice.fields,Slice.related_fields,Slice.tags])
-
+        
+        # type checking
+        native = Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot update Slice column(s) %r"%rejected
 
