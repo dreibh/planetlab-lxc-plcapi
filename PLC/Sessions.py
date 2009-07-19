@@ -1,4 +1,5 @@
 # $Id$
+# $URL$
 from types import StringTypes
 import random
 import base64

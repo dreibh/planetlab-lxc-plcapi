@@ -5,6 +5,7 @@
 # Copyright (C) 2005 The Trustees of Princeton University
 #
 # $Id$
+# $URL$
 #
 
 # Metafiles - manage Legacy/ and Accessors by hand

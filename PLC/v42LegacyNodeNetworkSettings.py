@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 
 # mapping of argument/return names for *NodeNetworkSettings* and *InterfaceTags* calls
 v42_to_v43_argmap = {

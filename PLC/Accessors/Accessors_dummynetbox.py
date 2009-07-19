@@ -1,5 +1,6 @@
 # Marta Carbone - unipi
-# $Id: $
+# $Id$
+# $URL$
 
 from PLC.Nodes import Node
 from PLC.Accessors.Factory import define_accessors, all_roles

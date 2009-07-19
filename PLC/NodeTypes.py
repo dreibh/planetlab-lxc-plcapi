@@ -2,6 +2,7 @@
 # Functions for interacting with the node_types table in the database
 #
 # $Id$
+# $URL$
 #
 
 from PLC.Faults import *

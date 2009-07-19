@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 from PLC.v42Legacy import patch
 from PLC.v42LegacyNodeNetworks import v42rename, v43rename
 from PLC.Methods.AddInterface import AddInterface

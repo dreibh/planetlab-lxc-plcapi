@@ -2,6 +2,7 @@
 # Thierry Parmentelat - INRIA
 # 
 # $Id$
+# $URL$
 
 import os
 import sys

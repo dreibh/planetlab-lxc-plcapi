@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 
 # apply rename on list (columns) or dict (filter) args
 def patch (arg,rename):

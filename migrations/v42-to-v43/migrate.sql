@@ -1,8 +1,9 @@
 -- Thierry Parmentelat - INRIA
 -- 
 -- $Id$
+-- $URL$
 --
--- this is part of the script to migrate from 4.2 to 5.0
+-- this is part of the script to migrate from 4.2 to 4.3
 -- 
 -- most of the renamings have taken place already when this script is invoked
 --

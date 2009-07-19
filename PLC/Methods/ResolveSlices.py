@@ -1,4 +1,5 @@
-# $Id: ResolveSlices.py 12217 2009-02-24 17:28:54Z thierry $
+# $Id$
+# $URL$
 
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed

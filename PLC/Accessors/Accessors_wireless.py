@@ -1,5 +1,6 @@
 # Thierry Parmentelat - INRIA
-# $Id: Accessors_standard.py 10295 2008-08-19 21:49:06Z thierry $
+# $Id$
+# $URL$
 
 from PLC.Nodes import Node
 from PLC.Interfaces import Interface

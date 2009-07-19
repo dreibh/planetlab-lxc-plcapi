@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 
 # mapping of argument/return names for *SliceAttributeType* calls
 

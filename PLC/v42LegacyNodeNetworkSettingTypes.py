@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 
 # mapping of argument/return names for *NodeNetworkSettingType*
 v42_to_v43_argmap = { "name":"tagname",

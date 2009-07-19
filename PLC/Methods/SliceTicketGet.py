@@ -1,4 +1,5 @@
 # $Id$
+# $URL$
 from PLC.Methods.SliceGetTicket import SliceGetTicket
 
 class SliceTicketGet(SliceGetTicket):

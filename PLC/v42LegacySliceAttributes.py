@@ -1,4 +1,5 @@
-# $Id: $
+# $Id$
+# $URL$
 
 # mapping of argument/return names for *{SliceAttribute,NetworkSetting}Type* and *TagType* calls
 

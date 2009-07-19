@@ -1,6 +1,7 @@
 #
 # Marta Carbone - UniPi
 # $Id$
+# $URL$
 #
 # This class requires the rpm package containing
 # the picobsd image to be installed

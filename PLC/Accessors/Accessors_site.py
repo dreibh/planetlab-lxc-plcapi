@@ -1,5 +1,6 @@
 # Thierry Parmentelat - INRIA
 # $Id$
+# $URL$
 #
 # Shortcuts_site.py is the place where you can define your own tag accessors
 # this will not be overwritten through rpm upgrades in a myplc-devel packaging
