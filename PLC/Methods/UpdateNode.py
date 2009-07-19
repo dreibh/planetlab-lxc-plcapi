@@ -12,7 +12,7 @@ from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
 admin_only = [ 'key', 'session', 'boot_nonce', 'site_id']
-can_update = ['hostname', 'boot_state', 'model', 'version'] + admin_only 
+can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version'] + admin_only 
 
 class UpdateNode(Method):
     """
