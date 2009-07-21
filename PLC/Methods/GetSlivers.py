@@ -252,9 +252,8 @@ class v43GetSlivers(Method):
             site_keys = {}
             for site_person in site_persons:
                 if site_person['enabled'] is False: continue
-                more = True
                 for role in theroles:
-                    if role in site_person['role_ids']:
+                    if role in site_person['roles']:
                         keys_filter = site_person['key_ids']
                         keys_return_filter = ['key_id', 'key', 'key_type']
                         keys = Keys(self.api, keys_filter, keys_return_filter)
