@@ -15,7 +15,7 @@ from PLC.SliceTags import SliceTags
 from PLC.Methods.AddSliceTag import AddSliceTag
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes', 'expires']
+can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
 class AddSlice(Method):
     """
