@@ -6,7 +6,6 @@ AddBootState
 AddConfFile
 AddConfFileToNodeGroup
 AddConfFileToNode
-AddDummynetBox
 AddIlink
 AddInitScript
 AddInterface
@@ -53,7 +52,6 @@ DeleteBootState
 DeleteConfFileFromNodeGroup
 DeleteConfFileFromNode
 DeleteConfFile
-DeleteDummynetBox
 DeleteEmulationLink
 DeleteIlink
 DeleteInitScript
@@ -92,8 +90,6 @@ GetAddressTypes
 GetBootMedium
 GetBootStates
 GetConfFiles
-GetDummyBoxMedium
-GetDummyBoxUsers
 GetEventObjects
 GetEvents
 GetIlinks
