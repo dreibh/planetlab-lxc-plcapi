@@ -32,11 +32,11 @@ class Peer(Row):
     primary_key = 'peer_id'
     join_tables = ['peer_site', 'peer_person', 'peer_key', 'peer_node', 'peer_slice']
     fields = {
-	'peer_id': Parameter (int, "Peer identifier"),
-	'peername': Parameter (str, "Peer name"),
-	'peer_url': Parameter (str, "Peer API URL"),
-	'key': Parameter(str, "Peer GPG public key"),
-	'cacert': Parameter(str, "Peer SSL public certificate"),
+        'peer_id': Parameter (int, "Peer identifier"),
+        'peername': Parameter (str, "Peer name"),
+        'peer_url': Parameter (str, "Peer API URL"),
+        'key': Parameter(str, "Peer GPG public key"),
+        'cacert': Parameter(str, "Peer SSL public certificate"),
         'shortname' : Parameter(str, "Peer short name"),
         'hrn_root' : Parameter(str, "Root of this peer in a hierarchical naming space"),
         ### cross refs
@@ -59,9 +59,9 @@ class Peer(Row):
         return peername
 
     def validate_peer_url(self, url):
-	"""
-	Validate URL. Must be HTTPS.
-	"""
+        """
+        Validate URL. Must be HTTPS.
+        """
 
         (scheme, netloc, path, params, query, fragment) = urlparse(url)
         if scheme != "https":
@@ -72,11 +72,11 @@ class Peer(Row):
 	return url
 
     def delete(self, commit = True):
-	"""
-	Deletes this peer and all related entities.
-	"""
+        """
+        Deletes this peer and all related entities.
+        """
 
-	assert 'peer_id' in self
+        assert 'peer_id' in self
 
         # Remove all related entities
         for obj in \
@@ -89,8 +89,8 @@ class Peer(Row):
             obj.delete(commit = False)
 
         # Mark as deleted
-	self['deleted'] = True
-	self.sync(commit)
+        self['deleted'] = True
+        self.sync(commit)
 
     def add_site(self, site, peer_site_id, commit = True):
         """
@@ -104,6 +104,14 @@ class Peer(Row):
              'peer_site_id': peer_site_id},
             commit = commit)
 
+    def remove_site(self, site, commit = True):
+        """
+        Unassociate a site with this peer.
+        """
+        
+        remove = Row.remove_object(Site, 'peer_site')
+        remove(self, site, commit)
+
     def add_person(self, person, peer_person_id, commit = True):
         """
         Associate a local user entry with this peer.
@@ -115,6 +123,14 @@ class Peer(Row):
              'person_id': person['person_id'],
              'peer_person_id': peer_person_id},
             commit = commit)
+    
+    def remove_person(self, person, commit = True):
+        """
+        Unassociate a site with this peer.
+        """
+    
+        remove = Row.remove_object(Person, 'peer_person')
+        remove(self, person, commit)
 
     def add_key(self, key, peer_key_id, commit = True):
         """
@@ -128,6 +144,14 @@ class Peer(Row):
              'peer_key_id': peer_key_id},
             commit = commit)
 
+    def remove_key(self, key, commit = True):
+        """
+        Unassociate a key with this peer.
+        """
+    
+        remove = Row.remove_object(Key, 'peer_key')
+        remove(self, key, commit)
+
     def add_node(self, node, peer_node_id, commit = True):
         """
         Associate a local node entry with this peer.
@@ -140,6 +164,14 @@ class Peer(Row):
              'peer_node_id': peer_node_id},
             commit = commit)
 
+    def remove_node(self, node, commit = True):
+        """
+        Unassociate a node with this peer.
+        """
+    
+        remove = Row.remove_object(Node, 'peer_node')
+        remove(self, node, commit)
+
     def add_slice(self, slice, peer_slice_id, commit = True):
         """
         Associate a local slice entry with this peer.
@@ -151,6 +183,14 @@ class Peer(Row):
              'slice_id': slice['slice_id'],
              'peer_slice_id': peer_slice_id},
             commit = commit)
+
+    def remove_slice(self, slice, commit = True):
+        """
+        Unassociate a slice with this peer.
+        """
+
+        remove = Row.remove_object(Slice, 'peer_slice')
+        remove(self, slice, commit)
 
     def connect(self, **kwds):
         """

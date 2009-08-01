@@ -1,5 +1,6 @@
 ## Please use make index to update this file
 native_methods = """
+BinaryTest
 AddAddressType
 AddAddressTypeToAddress
 AddBootState
@@ -154,6 +155,7 @@ system.listMethods
 system.methodHelp
 system.methodSignature
 system.multicall
+UnBindObjectFromPeer
 UpdateAddress
 UpdateAddressType
 UpdateConfFile
