@@ -1,6 +1,5 @@
 ## Please use make index to update this file
 native_methods = """
-BinaryTest
 AddAddressType
 AddAddressTypeToAddress
 AddBootState
