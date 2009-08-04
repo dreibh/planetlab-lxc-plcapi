@@ -40,13 +40,15 @@ class DeleteSite(Method):
         if site['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local site"
 
+        # sync with sfa db
+        sfa = SFA()
+        sfa.delete_record(site, 'site')
+        
         site.delete()
 	
         # Logging variables
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d deleted' % site['site_id']	
 
-        sfa = SFA()
-        sfa.delete_record(site, 'site')
         
         return 1
