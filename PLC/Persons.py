@@ -388,7 +388,7 @@ class Persons(Table):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), person_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), person_filter)
-                node_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
+                person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
                 sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
                 person_filter = Filter(Person.fields, person_filter)
