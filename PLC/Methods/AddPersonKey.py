@@ -6,6 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
+from PLC.SFA import SFA
 
 can_update = lambda (field, value): field in ['key_type','key']
 
@@ -53,9 +54,13 @@ class AddPersonKey(Method):
         person.add_key(key, commit = True)
 
         # Logging variables
-	self.event_objects = {'Person': [person['person_id']],
-			      'Key': [key['key_id']]}
-	self.message = 'Key %d added to person %d' % \
-		(key['key_id'], person['person_id'])
+        self.event_objects = {'Person': [person['person_id']],
+                              'Key': [key['key_id']]}
+        self.message = 'Key %d added to person %d' % \
+                        (key['key_id'], person['person_id'])
 
+        # sync with the geni db
+        sfa = SFA()
+        sfa.update_record(person, 'person') 
+        
         return key['key_id']

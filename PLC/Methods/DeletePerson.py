@@ -5,6 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
+from PLC.SFA import SFA
 
 class DeletePerson(Method):
     """
@@ -46,8 +47,11 @@ class DeletePerson(Method):
 
         person.delete()
 	
-	# Logging variables
-	self.event_objects = {'Person': [person['person_id']]}
-	self.message = 'Person %d deleted' % person['person_id']
+        # Logging variables
+        self.event_objects = {'Person': [person['person_id']]}
+        self.message = 'Person %d deleted' % person['person_id']
+
+        sfa = SFA()
+        sfa.delete_record(person, 'person')
 
         return 1

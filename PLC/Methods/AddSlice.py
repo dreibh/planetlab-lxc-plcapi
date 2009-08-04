@@ -14,6 +14,7 @@ from PLC.TagTypes import TagTypes
 from PLC.SliceTags import SliceTags
 from PLC.Methods.AddSliceTag import AddSliceTag
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
+from PLC.SFA import SFA
 
 can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
@@ -102,7 +103,9 @@ class AddSlice(Method):
             else:
                 UpdateSliceTag(self.api).__call__(auth,slice_tags[0]['slice_tag_id'],value)
 
-	self.event_objects = {'Slice': [slice['slice_id']]}
+        self.event_objects = {'Slice': [slice['slice_id']]}
         self.message = "Slice %d created" % slice['slice_id']
-
+    
+        sfa = SFA()
+        sfa.update_record(slice, 'slice', site['login_base']) 
         return slice['slice_id']

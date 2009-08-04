@@ -8,6 +8,7 @@ from PLC.Persons import Person, Persons
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
 from PLC.Auth import Auth
+from PLC.SFA import SFA
 
 class DeleteSite(Method):
     """
@@ -41,8 +42,11 @@ class DeleteSite(Method):
 
         site.delete()
 	
-	# Logging variables
-	self.event_objects = {'Site': [site['site_id']]}
-	self.message = 'Site %d deleted' % site['site_id']	
+        # Logging variables
+        self.event_objects = {'Site': [site['site_id']]}
+        self.message = 'Site %d deleted' % site['site_id']	
 
+        sfa = SFA()
+        sfa.delete_record(site, 'site')
+        
         return 1
