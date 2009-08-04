@@ -19,7 +19,7 @@ class BootNotifyOwners(Method):
     roles = ['node']
 
     accepts = [
-        Mixed(BootAuth(), SessionAuth()),
+        Auth(),
         Message.fields['message_id'],
         Parameter(int, "Notify PIs"),
         Parameter(int, "Notify technical contacts"),

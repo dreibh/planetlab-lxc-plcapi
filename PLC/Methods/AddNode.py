@@ -12,6 +12,7 @@ from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags
 from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
+from PLC.SFA import SFA
 
 can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version']
 
@@ -45,7 +46,7 @@ class AddNode(Method):
         [native,tags,rejected]=Row.split_fields(node_fields,[Node.fields,Node.tags])
 
         # type checking
-        native = Row.check_fields (native, self.accepted_fields)
+        native = Row.check_fields(native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot add Node with column(s) %r"%rejected
 
@@ -82,8 +83,12 @@ class AddNode(Method):
             else:
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
 
-	self.event_objects = {'Site': [site['site_id']],
+        self.event_objects = {'Site': [site['site_id']],
 			     'Node': [node['node_id']]}	
-	self.message = "Node %s created" % node['node_id']
-
+        self.message = "Node %s created" % node['node_id']
+        
+        # sync with geni db
+        sfa = SFA()
+        sfa.update_record(node, 'node', site['login_base']) 
+        
         return node['node_id']

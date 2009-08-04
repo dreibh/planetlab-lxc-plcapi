@@ -40,6 +40,7 @@ PyCurl
 Roles
 sendmail
 Sessions
+SFA
 Shell
 Sites
 SliceInstantiations

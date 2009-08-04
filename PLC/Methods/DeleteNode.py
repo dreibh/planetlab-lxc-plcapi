@@ -5,6 +5,7 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
+from PLC.SFA import SFA
 
 class DeleteNode(Method):
     """
@@ -49,9 +50,12 @@ class DeleteNode(Method):
         site_id=node['site_id']
         node.delete()
 
-	# Logging variables
+        # Logging variables
         # it's not much use to attach to the node as it's going to vanish...
-	self.event_objects = {'Node': [node_id], 'Site': [site_id] }
-	self.message = "Node %d deleted" % node['node_id']
+        self.event_objects = {'Node': [node_id], 'Site': [site_id] }
+        self.message = "Node %d deleted" % node['node_id']
+
+        sfa = SFA()
+        sfa.delete_record(node, 'node')       
 
         return 1
