@@ -62,6 +62,11 @@ class BindObjectToPeer(Method):
 
         peer=peers[0]
         object = self.locate_object (object_type, object_id)
+        
+        # There is no need to continue if the object is already bound to this peer  
+        if object['peer_id'] in [peer['peer_id']]:
+            return 1
+        
         adder_name = 'add_'+object_type
         add_function = getattr(type(peer),adder_name)
         add_function(peer,object,remote_object_id)
