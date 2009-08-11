@@ -1,7 +1,5 @@
 from types import StringTypes
 import traceback
-    packages_imported = False
-    traceback.print_exc()
 
 def wrap_exception(method):
     def wrap(*args, **kwds):
