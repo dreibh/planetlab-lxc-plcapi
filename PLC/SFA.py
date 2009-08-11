@@ -1,11 +1,5 @@
 from types import StringTypes
 import traceback
-try:
-    from sfa.plc.sfaImport import sfaImport, cleanup_string
-    from sfa.plc.api import GeniAPI
-    from sfa.util.debug import log
-    packages_imported = True  
-except:
     packages_imported = False
     traceback.print_exc()
 
@@ -21,6 +15,16 @@ class SFA:
     
     @wrap_exception
     def __init__(self):
+        try:
+            from sfa.plc.sfaImport import sfaImport, cleanup_string
+            from sfa.plc.api import GeniAPI
+            from sfa.util.debug import log
+            packages_imported = True
+        except:
+            packages_imported = False
+            traceback.print_exc()        
+        
+        self.cleanup_string = cleanup_string
         self.log = log
         self.sfa = sfaImport()
         geniapi = GeniAPI()
@@ -68,7 +72,7 @@ class SFA:
                 login_bases = [login_bases]
 
             for login_base in login_bases:
-                login_base = cleanup_string(login_base)
+                login_base = self.cleanup_string(login_base)
                 parent_hrn = self.authority + "." + login_base
                 if type in ['person']:
                     self.sfa.import_person(parent_hrn, object)
@@ -97,7 +101,7 @@ class SFA:
             login_bases = [login_base]
 
         for login_base in login_bases:
-            login_base = cleanup_string(login_base)
+            login_base = self.cleanup_string(login_base)
             parent_hrn = self.authority + "." + login_base
             self.sfa.delete_record(parent_hrn, object, type)
 
