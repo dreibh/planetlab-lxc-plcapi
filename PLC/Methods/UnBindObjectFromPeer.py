@@ -9,6 +9,7 @@ from PLC.Persons import Persons
 from PLC.Sites import Sites
 from PLC.Nodes import Nodes
 from PLC.Slices import Slices
+from PLC.Keys import Keys
 from PLC.Peers import Peers
 from PLC.Faults import *
  
