@@ -60,7 +60,7 @@ class AddPersonKey(Method):
                         (key['key_id'], person['person_id'])
 
         # sync with the geni db
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.update_record(person, 'person') 
         
         return key['key_id']

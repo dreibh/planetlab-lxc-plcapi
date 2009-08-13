@@ -88,7 +88,7 @@ class AddNode(Method):
         self.message = "Node %s created" % node['node_id']
         
         # sync with geni db
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.update_record(node, 'node', site['login_base']) 
         
         return node['node_id']

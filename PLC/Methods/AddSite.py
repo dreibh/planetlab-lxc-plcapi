@@ -41,7 +41,7 @@ class AddSite(Method):
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d created' % site['site_id']
  	
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.update_record(site, 'site', site['login_base'])
 
         return site['site_id']

@@ -41,8 +41,8 @@ class DeleteKey(Method):
 
         key.delete()
 	
-	# Logging variables
-	self.event_objects = {'Key': [key['key_id']]}
-	self.message = 'Key %d deleted' % key['key_id']
+        # Logging variables
+        self.event_objects = {'Key': [key['key_id']]}
+        self.message = 'Key %d deleted' % key['key_id']
 
         return 1

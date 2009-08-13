@@ -48,7 +48,7 @@ class DeleteSlice(Method):
         slice.delete()
         self.event_objects = {'Slice': [slice['slice_id']]}
 
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.delete_record(slice, 'slice')
 
         return 1

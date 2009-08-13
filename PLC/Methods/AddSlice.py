@@ -106,6 +106,6 @@ class AddSlice(Method):
         self.event_objects = {'Slice': [slice['slice_id']]}
         self.message = "Slice %d created" % slice['slice_id']
     
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.update_record(slice, 'slice', site['login_base']) 
         return slice['slice_id']

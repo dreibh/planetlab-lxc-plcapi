@@ -41,7 +41,7 @@ class DeleteSite(Method):
             raise PLCInvalidArgument, "Not a local site"
 
         # sync with sfa db
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.delete_record(site, 'site')
         
         site.delete()

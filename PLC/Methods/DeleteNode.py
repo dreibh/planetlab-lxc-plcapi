@@ -55,7 +55,7 @@ class DeleteNode(Method):
         self.event_objects = {'Node': [node_id], 'Site': [site_id] }
         self.message = "Node %d deleted" % node['node_id']
 
-        sfa = SFA()
+        sfa = SFA(self.api)
         sfa.delete_record(node, 'node')       
 
         return 1
