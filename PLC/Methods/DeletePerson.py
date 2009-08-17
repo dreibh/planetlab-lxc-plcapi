@@ -52,6 +52,6 @@ class DeletePerson(Method):
         self.message = 'Person %d deleted' % person['person_id']
 
         sfa = SFA(self.api)
-        sfa.delete_record(person, 'person')
+        sfa.delete_record(person, 'user')
 
         return 1
