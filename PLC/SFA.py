@@ -14,7 +14,8 @@ def wrap_exception(method):
         try:
             return method(*args, **kwds)
         except:
-            traceback.print_exc()
+            pass
+            #traceback.print_exc()
     return wrap
 
 def required_packages_imported(method):
