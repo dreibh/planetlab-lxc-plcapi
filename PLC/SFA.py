@@ -46,7 +46,7 @@ class SFA:
         # get a connection to our local sfa registry
         # and a valid credential
         self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
-        self.sfa_api.interface = "other"
+        self.sfa_api.interface = "plcapi"
         registries = Registries(self.sfa_api)
         self.registry = registries[self.sfa_api.hrn]
         self.credential = self.sfa_api.getCredential()
@@ -98,6 +98,21 @@ class SFA:
 
         return hrn
 
+    def sfa_record_exists(self, hrn, type):
+        """
+        check if the record (hrn and type) already exist in our sfa db
+        """
+        exists = False
+        
+        # list is quicker than resolve
+        parent_hrn = get_authority(hrn)
+        if not parent_hrn: parent_hrn = hrn
+        records = self.registry.list(self.credential, parent_hrn)
+        for record in records: 
+            if record['type'] == type and record['hrn'] == hrn:
+                exists = True
+        return exists 
+
     @wrap_exception
     @required_packages_imported
     def update_record(self, object, type, login_bases = None):
@@ -111,31 +126,34 @@ class SFA:
         for login_base in login_bases:
             login_base = cleanup_string(login_base)
             parent_hrn = self.authority + "." + login_base
-                
+                        
+            if type in ['person']:
+                type = 'user'
+            elif type in ['site']:
+                type = 'authority'
+        
             # set the object hrn, tpye and create the sfa record 
             # object 
             object['hrn'] = self.get_object_hrn(type, object, self.authority, login_base)   
-            if type in ['person', 'user']:
-                object['type'] = 'user'
+            object['type'] = type
+            if type in ['user']:
                 record = UserRecord(dict=object)
 
             elif type in ['slice']:
-                object['type'] = 'slice'
                 record = SliceRecord(dict=object)
 
             elif type in ['node']:
-                object['type'] = 'node'
                 record = NodeRecord(dict=object)
     
-            elif type in ['site']:
-                object['type'] = 'authority'
+            elif type in ['authority']:
                 record = AuthorityRecord(dict=object)
 
             else:
                 raise Exception, "Invalid record type %(type)s" % locals()
 
             # add the record to sfa
-            self.registry.register(self.credential, record)
+            if not self.sfa_record_exists(object['hrn'], type):
+                self.registry.register(self.credential, record)
 
     @wrap_exception
     @required_packages_imported
@@ -156,5 +174,6 @@ class SFA:
         for login_base in login_bases:
             login_base = cleanup_string(login_base)
             hrn = self.get_object_hrn(type, object, self.authority, login_base)
-            self.registry.remove(self.credential, type, hrn) 
+            if self.sfa_record_exists(hrn, type):
+                self.registry.remove(self.credential, type, hrn) 
 
