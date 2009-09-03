@@ -6,7 +6,6 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
-from PLC.SFA import SFA
 
 class DeletePersonFromSite(Method):
     """
@@ -56,8 +55,5 @@ class DeletePersonFromSite(Method):
                               'Person': [person['person_id']]}	
         self.message = 'Person %d deleted from site %d	' % \
                         (person['person_id'], site['site_id'])
-
-        sfa = SFA(self.api)
-        sfa.delete_record(person, 'user')
 
         return 1
