@@ -6,6 +6,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
+from PLC.SFA import SFA
 
 class AddPersonToSite(Method):
     """
@@ -50,9 +51,13 @@ class AddPersonToSite(Method):
         if site['site_id'] not in person['site_ids']:
             site.add_person(person)
 
-	# Logging variables
-	self.event_objects = {'Site': [site['site_id']],
-			      'Person': [person['person_id']]}
-	self.message = 'Person %d added to site %d' % \
-		(person['person_id'], site['site_id'])
+        # Logging variables
+        self.event_objects = {'Site': [site['site_id']],
+                              'Person': [person['person_id']]}
+        self.message = 'Person %d added to site %d' % \
+                       (person['person_id'], site['site_id'])
+
+        sfa = SFA(self.api)
+        self.update_record(person, 'user')
+
         return 1
