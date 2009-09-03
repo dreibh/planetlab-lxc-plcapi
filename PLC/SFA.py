@@ -81,11 +81,11 @@ class SFA:
         parent_hrn = authority + "." + login_base 
         if type in ['person', 'user']:
             name_parts = object['email'].split("@")
-            hrn = parent_hrn + "." + name_parts[:1]
+            hrn = parent_hrn + "." + name_parts[:1][0]
         
         elif type in ['slice']:
             name_parts = object['name'].split("_")
-            hrn = parent_hrn + "." + name_parts[-1:]
+            hrn = parent_hrn + "." + name_parts[-1:][0]
         
         elif type in ['node']:
             hrn = hostname_to_hrn(self.authority, login_base, object['hostname'])
