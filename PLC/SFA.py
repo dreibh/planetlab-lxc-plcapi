@@ -69,7 +69,7 @@ class SFA:
         elif object.has_key('site_ids') and object['site_ids']:
             site_ids.extend(object['site_ids'])
         else:
-            raise Exception
+            return login_bases
 
         # get the login bases
         for site_id in site_ids:
