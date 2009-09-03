@@ -136,7 +136,7 @@ class SFA:
             # object 
             object['hrn'] = self.get_object_hrn(type, object, self.authority, login_base)   
             object['type'] = type
-            if type in ['user', 'person']:
+            if type in ['user']:
                 record = UserRecord(dict=object)
 
             elif type in ['slice']:
