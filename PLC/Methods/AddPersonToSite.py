@@ -57,7 +57,9 @@ class AddPersonToSite(Method):
         self.message = 'Person %d added to site %d' % \
                        (person['person_id'], site['site_id'])
 
+        
         sfa = SFA(self.api)
+        person['site_ids'] = [site['site_id']]
         sfa.update_record(person, 'user')
 
         return 1
