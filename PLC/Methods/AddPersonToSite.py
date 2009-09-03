@@ -58,6 +58,6 @@ class AddPersonToSite(Method):
                        (person['person_id'], site['site_id'])
 
         sfa = SFA(self.api)
-        self.update_record(person, 'user')
+        sfa.update_record(person, 'user')
 
         return 1
