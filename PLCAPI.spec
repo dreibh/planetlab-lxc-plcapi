@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 22
+%define taglevel 23
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Mon Sep 07 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-23
+- Ongoing work to add upcalls, using new SFA class
+- new methods BindObjectToPeer, UnBindObjectFromPeer, still for SFA
+- reviewed type-checking for the 3 taggable classes node-interface-slice
+- cleanup ald dummynet stuff
+- expose the 'extensions' accessors to the API
+- tweaked checks in AddSliceTag
+- GetPersons exposes roles by default
+- bugfix in ReportRunLevel for non-string levels
+- tweaks in GetSlivers ( seems that it now exposes the keys for the root context )
+
 * Fri Jul 10 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-22
 - new BindObjectToPeer method for sfa
 - AddSliceTag and UpdateSliceTag open to the 'node' auth method with restrictions
