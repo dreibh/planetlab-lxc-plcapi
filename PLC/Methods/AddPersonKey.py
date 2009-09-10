@@ -44,7 +44,7 @@ class AddPersonKey(Method):
         if person['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local account"
 
-	# If we are not admin, make sure caller is adding a key to their account
+        # If we are not admin, make sure caller is adding a key to their account
         if 'admin' not in self.caller['roles']:
             if person['person_id'] != self.caller['person_id']:
                 raise PLCPermissionDenied, "You may only modify your own keys"
@@ -60,6 +60,7 @@ class AddPersonKey(Method):
                         (key['key_id'], person['person_id'])
 
         # sync with the geni db
+        person['key'] = key_fields['key']
         sfa = SFA(self.api)
         sfa.update_record(person, 'user') 
         
