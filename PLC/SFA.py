@@ -3,6 +3,9 @@ from types import StringTypes
 from PLC.Sites import Sites
 try:
     from sfa.plc.api import GeniAPI
+    from sfa.util.geniclient import *
+    from sfa.util.config import *
+    from sfa.trust.credential import *         
     from sfa.plc.sfaImport import cleanup_string
     from sfa.server.registry import Registries
     from sfa.util.record import *
@@ -45,13 +48,14 @@ class SFA:
     
         # get a connection to our local sfa registry
         # and a valid credential
+        config = Config()
+        self.authority = config.SFA_INTERFACE_HRN
+        url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT) 
+        self.registry = GeniCleint(url, key_file, cert_file)
         self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
-        self.sfa_api.interface = "plcapi"
-        registries = Registries(self.sfa_api)
-        self.registry = registries[self.sfa_api.hrn]
         self.credential = self.sfa_api.getCredential()
-        self.authority = self.sfa_api.hrn
-        
+        #cred_file = '/etc/sfa/slicemgr.plc.authority.cred'
+        #self.credential = Credential(filename = cred_file)   
 
     def get_login_base(self, site_id):
         sites = Sites(self.api, [site_id], ['login_base'])
@@ -103,11 +107,12 @@ class SFA:
         check if the record (hrn and type) already exist in our sfa db
         """
         exists = False
-        
         # list is quicker than resolve
         parent_hrn = get_authority(hrn)
         if not parent_hrn: parent_hrn = hrn
-        records = self.registry.list(self.credential, parent_hrn)
+        #records = self.registry.list(self.credential, parent_hrn)
+        records = self.registry.resolve(self.credential, hrn)
+        records = []
         for record in records: 
             if record['type'] == type and record['hrn'] == hrn:
                 exists = True
