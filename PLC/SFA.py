@@ -2,12 +2,10 @@ import traceback
 from types import StringTypes
 from PLC.Sites import Sites
 try:
-    from sfa.plc.api import GeniAPI
     from sfa.util.geniclient import *
     from sfa.util.config import *
     from sfa.trust.credential import *         
     from sfa.plc.sfaImport import cleanup_string
-    from sfa.server.registry import Registries
     from sfa.util.record import *
     from sfa.trust.hierarchy import *
     from sfa.util.misc import *
@@ -52,10 +50,10 @@ class SFA:
         self.authority = config.SFA_INTERFACE_HRN
         url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT) 
         self.registry = GeniCleint(url, key_file, cert_file)
-        self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
-        self.credential = self.sfa_api.getCredential()
-        #cred_file = '/etc/sfa/slicemgr.plc.authority.cred'
-        #self.credential = Credential(filename = cred_file)   
+        #self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
+        #self.credential = self.sfa_api.getCredential()
+        cred_file = '/etc/sfa/slicemgr.plc.authority.cred'
+        self.credential = Credential(filename = cred_file)   
 
     def get_login_base(self, site_id):
         sites = Sites(self.api, [site_id], ['login_base'])
