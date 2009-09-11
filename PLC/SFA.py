@@ -112,7 +112,6 @@ class SFA:
         if not parent_hrn: parent_hrn = hrn
         #records = self.registry.list(self.credential, parent_hrn)
         records = self.registry.resolve(self.credential, hrn)
-        records = []
         for record in records: 
             if record['type'] == type and record['hrn'] == hrn:
                 exists = True
