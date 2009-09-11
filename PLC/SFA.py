@@ -154,6 +154,8 @@ class SFA:
             # add the record to sfa
             if not self.sfa_record_exists(object['hrn'], type):
                 self.registry.register(self.credential, record)
+            else:
+                self.registry.update(self.credential, record)
 
     @wrap_exception
     @required_packages_imported
