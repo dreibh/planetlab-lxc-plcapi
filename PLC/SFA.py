@@ -49,7 +49,7 @@ class SFA:
         config = Config()
         self.authority = config.SFA_INTERFACE_HRN
         url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT) 
-        self.registry = GeniCleint(url, key_file, cert_file)
+        self.registry = GeniClient(url, key_file, cert_file)
         #self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
         #self.credential = self.sfa_api.getCredential()
         cred_file = '/etc/sfa/slicemgr.plc.authority.cred'
