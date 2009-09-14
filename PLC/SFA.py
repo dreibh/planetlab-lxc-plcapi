@@ -51,8 +51,8 @@ class SFA:
         url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT) 
         self.registry = GeniClient(url, key_file, cert_file)
         #self.sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file)
-        #self.credential = self.sfa_api.getCredential()
-        cred_file = '/etc/sfa/slicemgr.plc.authority.cred'
+        #self.credential = self.sfa_api.getCredential() 
+        cred_file = '/etc/sfa/slicemgr.' + self.authority + '.authority.cred'
         self.credential = Credential(filename = cred_file)   
 
     def get_login_base(self, site_id):
