@@ -12,7 +12,6 @@ from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags
 from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
-from PLC.SFA import SFA
 
 can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version']
 
@@ -86,9 +85,5 @@ class AddNode(Method):
         self.event_objects = {'Site': [site['site_id']],
 			     'Node': [node['node_id']]}	
         self.message = "Node %s created" % node['node_id']
-        
-        # sync with geni db
-        sfa = SFA(self.api)
-        sfa.update_record(node, 'node', site['login_base']) 
         
         return node['node_id']

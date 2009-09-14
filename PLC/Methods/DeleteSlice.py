@@ -5,7 +5,6 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
-from PLC.SFA import SFA
 
 class DeleteSlice(Method):
     """
@@ -47,8 +46,5 @@ class DeleteSlice(Method):
 
         slice.delete()
         self.event_objects = {'Slice': [slice['slice_id']]}
-
-        sfa = SFA(self.api)
-        sfa.delete_record(slice, 'slice')
 
         return 1

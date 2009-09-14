@@ -8,7 +8,6 @@ from PLC.Persons import Person, Persons
 from PLC.Nodes import Node, Nodes
 from PLC.PCUs import PCU, PCUs
 from PLC.Auth import Auth
-from PLC.SFA import SFA
 
 class DeleteSite(Method):
     """
@@ -40,10 +39,6 @@ class DeleteSite(Method):
         if site['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local site"
 
-        # sync with sfa db
-        sfa = SFA(self.api)
-        sfa.delete_record(site, 'site')
-        
         site.delete()
 	
         # Logging variables

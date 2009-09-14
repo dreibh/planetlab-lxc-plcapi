@@ -5,7 +5,6 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
-from PLC.SFA import SFA
 
 can_update = lambda (field, value): field in \
              ['name', 'abbreviated_name', 'login_base',
@@ -41,7 +40,4 @@ class AddSite(Method):
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d created' % site['site_id']
  	
-        sfa = SFA(self.api)
-        sfa.update_record(site, 'site', site['login_base'])
-
         return site['site_id']
