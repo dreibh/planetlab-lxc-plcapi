@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 23
+%define taglevel 24
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Sep 18 2009 anil vengalil <avengali@sophia.inria.fr> - PLCAPI-4.3-24
+
 * Mon Sep 07 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-23
 - Ongoing work to add upcalls, using new SFA class
 - new methods BindObjectToPeer, UnBindObjectFromPeer, still for SFA
