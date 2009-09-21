@@ -156,7 +156,7 @@
       </section>
 
       <section id="numeric">
-	<title> Nueric comparisons </title>
+	<title> Numeric comparisons </title>
 	<para> Strictly greater/smaller operations are achieved by prepending the field name like in:
 	<programlisting>GetEvents( { '>time' : 1178531418 } ) </programlisting>
 	</para>
