@@ -48,7 +48,7 @@ class GetBootMedium(Method):
     This method is a redesign based on former, supposedly dedicated, 
     AdmGenerateNodeConfFile
 
-    As compared with its ancestor, this method provides a much more detailed
+    As compared with its ancestor, this method provides a much more 
     detailed interface, that allows to
     (*) either just preview the node config file -- in which case 
         the node key is NOT recomputed, and NOT provided in the output
