@@ -60,7 +60,7 @@ class UpdateSliceTag(Method):
         else:
             ### make node's min_role_id == PI min_role_id
             node_role_id = 20
-            if slice_tag['min_role_id'] is not None and node_role_id > slice_tag['min_role_id']:
+            if slice_tag['min_role_id'] is not None and node_role_id >= slice_tag['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to update the specified slice attribute"
 	
 	if slice_tag['tagname'] in ['initscript']:
