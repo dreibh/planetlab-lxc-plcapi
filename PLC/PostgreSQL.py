@@ -89,6 +89,12 @@ class PostgreSQL:
             self.connection.close()
             self.connection = None
 
+    # join insists on getting strings
+    @classmethod
+    def quote_string(self, value):
+        return str(PostgreSQL.quote(value))
+
+    @classmethod
     def quote(self, value):
         """
         Returns quoted version of the specified value.
@@ -97,12 +103,11 @@ class PostgreSQL:
         # The pgdb._quote function is good enough for general SQL
         # quoting, except for array types.
         if isinstance(value, (list, tuple, set)):
-            return "ARRAY[%s]" % ", ".join(map, self.quote, value)
+            return "ARRAY[%s]" % ", ".join(map (PostgreSQL.quote_string, value))
         else:
             return pgdb._quote(value)
 
-    quote = classmethod(quote)
-
+    @classmethod
     def param(self, name, value):
         # None is converted to the unquoted string NULL
         if isinstance(value, NoneType):
@@ -118,8 +123,6 @@ class PostgreSQL:
             conversion = "s"
 
         return '%(' + name + ')' + conversion
-
-    param = classmethod(param)
 
     def begin_work(self):
         # Implicit in pgdb.connect()
