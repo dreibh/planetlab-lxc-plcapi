@@ -239,36 +239,38 @@ class v43GetSlivers(Method):
             nodes = Nodes(self.api, node['node_id'])
             node = nodes[0]
 
-        def getpersonsitekeys(site_id_or_name,theroles):
-            site_filter = site_id_or_name
-            site_return_filter = ['person_ids']
-            sites = Sites(self.api, site_filter, site_return_filter)
-            site = sites[0]
-            person_filter =  {'person_id':site['person_ids'],'enabled':True}
-            person_return_filter = ['person_id', 'enabled', 'key_ids','role_ids','roles'] 
-            site_persons = Persons(self.api, person_filter, person_return_filter)
+        # used in conjunction with reduce to flatten lists, like in
+        # reduce ( reduce_flatten_list, [ [1] , [2,3] ], []) => [ 1,2,3 ]
+        def reduce_flatten_list (x,y): return x+y
 
-            # collect the keys into a table to weed out duplicates
-            site_keys = {}
-            for site_person in site_persons:
-                if site_person['enabled'] is False: continue
-                for role in theroles:
-                    if role in site_person['roles']:
-                        keys_filter = site_person['key_ids']
-                        keys_return_filter = ['key_id', 'key', 'key_type']
-                        keys = Keys(self.api, keys_filter, keys_return_filter)
-                        for key in keys:
-                            if key['key_type'] == 'ssh':
-                                site_keys[key['key']]=None
-            return site_keys.keys()
+        def get_site_roles_keys(site_id_or_name,roles):
+            site = Sites (self.api,site_id_or_name,['person_ids'])[0]
+            persons = Persons(self.api,{'person_id':site['person_ids'], 'enabled':True},
+                              ['roles','key_ids','enabled'] )
+            key_ids = []
+            for role in roles:
+                key_ids.extend(reduce (reduce_flatten_list, [ p['key_ids'] for p in persons if role in p['roles'] ], []))
+            return [ key['key'] for key in Keys (self.api, key_ids) if key['key_type']=='ssh']
+
+        def get_all_admin_keys():
+            # get all admins key_ids and flatten them into a list of key_ids
+            key_ids = reduce (reduce_flatten_list, 
+                              [ p['key_ids'] for p in \
+                                    Persons(self.api,{'peer_id':None,'enabled':True}, \
+                                            ['roles','key_ids','enabled']) \
+                                    if 'admin' in p['roles'] ],
+                              # starting point for reduce in case there's no admin - I know..
+                              [])
+            # fetch the corresponding keys, and extract the 'key' part into a list
+            # this does not return duplicates
+            return [ key['key'] for key in Keys (self.api, key_ids) if key['key_type']=='ssh']
 
         # 'site_admin' account setup
-        personsitekeys=getpersonsitekeys(node['site_id'],['pi','tech'])
+        personsitekeys=get_site_roles_keys(node['site_id'],['pi','tech'])
         accounts.append({'name':'site_admin','keys':personsitekeys})
 
         # 'root' account setup on nodes from all 'admin' users
-        # registered with the PLC main site
-        personsitekeys=getpersonsitekeys(self.api.config.PLC_SLICE_PREFIX,['admin'])
+        personsitekeys=get_all_admin_keys()
         accounts.append({'name':'root','keys':personsitekeys})
 
 	node.update_last_contact()
