@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 25
+%define taglevel 26
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Thu Oct 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-26
+- Filter now supports the | and & features to match in sequence values
+- bugfix in the postgresql wrapper for sequence filter values
+- reviewed GetSlivers to export admin keys more efficiently
+- fix checking roles in UpdateSliceTag
+
 * Sat Sep 26 2009 Marc Fiuczynski <mef@cs.princeton.edu> - PLCAPI-4.3-25
 - - Some typos in the documentation were fixed.
 - - UpdateSliceTag check if a node's min_role_id is >= (rather than >)
