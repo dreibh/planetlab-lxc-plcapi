@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 26
+%define taglevel 27
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -100,6 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Oct 09 2009 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-4.3-27
+- Require postgresql 8.2 (for array operators && and @>)
+
 * Thu Oct 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-26
 - Filter now supports the | and & features to match in sequence values
 - bugfix in the postgresql wrapper for sequence filter values
