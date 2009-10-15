@@ -29,7 +29,11 @@ Obsoletes: plcapilib
 # We use set everywhere
 Requires: python >= 2.4
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
+%if "%{?distro}" == "CentOS"
 Requires: postgresql-python
+%else
+Requires: postgresql-python >= 8.2
+%endif
 Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
