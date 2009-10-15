@@ -28,7 +28,8 @@ Obsoletes: plcapilib
 
 # We use set everywhere
 Requires: python >= 2.4
-Requires: postgresql >= 8.2, postgresql-server >= 8.2, postgresql-python >= 8.2
+Requires: postgresql >= 8.2, postgresql-server >= 8.2
+Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
