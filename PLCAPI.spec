@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 27
+%define taglevel 28
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -105,6 +105,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Thu Oct 15 2009 Daniel Hokka Zakrisson <daniel@hozac.com> - PLCAPI-4.3-28
+- Fix requires for CentOS.
+
 * Fri Oct 09 2009 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-4.3-27
 - Require postgresql 8.2 (for array operators && and @>)
 
