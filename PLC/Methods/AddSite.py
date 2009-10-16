@@ -9,7 +9,7 @@ from PLC.Auth import Auth
 can_update = lambda (field, value): field in \
              ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
-              'max_slices', 'max_slivers', 'enabled']
+              'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id']
 
 class AddSite(Method):
     """
