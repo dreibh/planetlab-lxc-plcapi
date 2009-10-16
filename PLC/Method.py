@@ -128,6 +128,8 @@ class Method (object):
         #if self.name.startswith('system') or self.name.startswith('Get'):
         #    return False
         # Do not log ReportRunlevel 
+        if self.name.startswith('system'):
+            return False
         if self.name.startswith('ReportRunlevel'):
             return False
 
