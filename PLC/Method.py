@@ -125,8 +125,11 @@ class Method (object):
         """	
 
 	# Do not log system or Get calls
-        #if self.name.startswith('system') or self.name.startswith('Get') or self.name.startswith('ReportRunlevel') :
+        #if self.name.startswith('system') or self.name.startswith('Get'):
         #    return False
+        # Do not log ReportRunlevel 
+        if self.name.startswith('ReportRunlevel'):
+            return False
 
         # Create a new event
         event = Event(self.api)
