@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 28
+%define taglevel 29
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -101,6 +101,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Mon Oct 19 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-29
+- let AddSite set ext_consortium_id - required for the poorman registration pages
+- drop version constraint on Requires: postgresql-python
+- don't log system calls nor ReportRunLevel
+
 * Thu Oct 15 2009 Daniel Hokka Zakrisson <daniel@hozac.com> - PLCAPI-4.3-28
 - Fix requires for CentOS.
 
