@@ -141,22 +141,28 @@ class Method (object):
         event['runtime'] = runtime
 
         # Redact passwords and sessions
-        if args and isinstance(args[0], dict):
-	    # what type of auth this is
-	    if args[0].has_key('AuthMethod'):
-	        auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
-	    	auth_method = args[0]['AuthMethod']
-		if auth_method in auth_methods:
-		    event['auth_type'] = auth_method
-            for password in 'AuthString', 'session':
-                if args[0].has_key(password):
-                    auth = args[0].copy()
-                    auth[password] = "Removed by API"
-                    args = (auth,) + args[1:]
+        newargs = args
+        if args:
+            newargs = []
+            for arg in args:
+                if not isinstance(arg, dict):
+                    newargs.append(arg)
+                    continue
+                # what type of auth this is
+                if arg.has_key('AuthMethod'):
+                    auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
+                    auth_method = arg['AuthMethod']
+                    if auth_method in auth_methods:
+                        event['auth_type'] = auth_method
+                for password in 'AuthString', 'session', 'password':
+                    if arg.has_key(password):
+                        arg = arg.copy()
+                        arg[password] = "Removed by API"
+                newargs.append(arg)
 
         # Log call representation
         # XXX Truncate to avoid DoS
-        event['call'] = self.name + pprint.saferepr(args)
+        event['call'] = self.name + pprint.saferepr(newargs)
 	event['call_name'] = self.name
 
         # Both users and nodes can call some methods
