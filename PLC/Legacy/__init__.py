@@ -10,11 +10,11 @@ DeleteNodeNetworkSetting
 DeleteNodeNetworkSettingType
 DeleteSliceAttribute
 DeleteSliceAttributeType
-GetNodeNetworkSettings
 GetNodeNetworkSettingTypes
+GetNodeNetworkSettings
 GetNodeNetworks
-GetSliceAttributes
 GetSliceAttributeTypes
+GetSliceAttributes
 UpdateNodeNetwork
 UpdateNodeNetworkSetting
 UpdateNodeNetworkSettingType

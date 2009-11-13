@@ -45,6 +45,7 @@ class Site(Row):
         'node_ids': Parameter([int], "List of site node identifiers"),
         'peer_id': Parameter(int, "Peer to which this site belongs", nullok = True),
         'peer_site_id': Parameter(int, "Foreign site identifier at peer", nullok = True),
+        'site_tag_ids' : Parameter ([int], "List of tags attached to this site"),
 	'ext_consortium_id': Parameter(int, "external consortium id", nullok = True)
         }
     related_fields = {
@@ -53,6 +54,10 @@ class Site(Row):
 	'addresses': [Mixed(Parameter(int, "Address identifer"),
                             Filter(Address.fields))]
 	}
+    view_tags_name = "view_site_tags"
+    # tags are used by the Add/Get/Update methods to expose tags
+    # this is initialized here and updated by the accessors factory
+    tags = { }
 
     def validate_name(self, name):
         if not len(name):
@@ -238,9 +243,14 @@ class Sites(Table):
 
     def __init__(self, api, site_filter = None, columns = None):
         Table.__init__(self, api, Site, columns)
-
-        sql = "SELECT %s FROM view_sites WHERE deleted IS False" % \
-              ", ".join(self.columns)
+	
+        view = "view_sites"
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Site.tagvalue_view_name(tagname),
+                                                Site.primary_key)
+            
+        sql = "SELECT %s FROM %s WHERE deleted IS False" % \
+            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 
         if site_filter is not None:
             if isinstance(site_filter, (list, tuple, set)):
