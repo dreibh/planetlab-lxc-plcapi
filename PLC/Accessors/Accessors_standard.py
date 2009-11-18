@@ -45,6 +45,18 @@ define_accessors(current_module, Node, "PlainBootstrapfs", "plain-bootstrapfs",
                  "node/config", "use uncompressed bootstrapfs when set",
                  get_roles=all_roles, set_roles=tech_roles)
 
+# the tags considered when creating a boot CD
+define_accessor(current_module, Node, "Serial", "serial",
+                "node/bootcd", "serial to use when creating the boot CD -- see GetBootMedium")
+define_accessor(current_module, Node, "Cramfs", "cramfs",
+                "node/bootcd", "boot CD to use cramfs if set -- see GetBootMedium")
+define_accessor(current_module, Node, "Kvariant", "kvariant",
+                "node/bootcd", "the variant to use for creating the boot CD -- see GetBootMedium")
+define_accessor(current_module, Node, "Kargs", "kargs",
+                "node/bootcd", "extra args to pass the kernel on the Boot CD -- see GetBootMedium")
+define_accessor(current_module, Node, "NoHangcheck", "no-hangcheck",
+                "node/bootcd", "disable hangcheck on the boot CD if set -- see GetBootMedium")
+
 # interface 
 # xxx - don't expose yet in api interface and slices dont know how to use that yet
 define_accessors(current_module, Interface, "Ifname", "ifname", 
