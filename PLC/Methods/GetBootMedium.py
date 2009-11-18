@@ -105,7 +105,7 @@ class GetBootMedium(Method):
     Options: an optional array of keywords. 
         options are not supported for generic images
         options are not supported for dummynet boxes
-    Currently supported are
+      Currently supported are
         - 'partition' - for USB actions only
         - 'cramfs'
         - 'serial' or 'serial:<console_spec>'
@@ -117,8 +117,11 @@ class GetBootMedium(Method):
         passed to build.sh as -V <variant> 
         variants are used to run a different kernel on the bootCD
         see kvariant.sh for how to create a variant
-        - 'no-hangcheck'
+        - 'no-hangcheck' - disable hangcheck
 
+    Tags: the following tags are taken into account when attached to the node:
+        'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck'
+        
     Security:
         - Non-admins can only generate files for nodes at their sites.
         - Non-admins, when they provide a filename, *must* specify it in the %d area
@@ -410,6 +413,25 @@ class GetBootMedium(Method):
         else:
             # create a dict for build.sh 
             build_sh_spec={'kargs':[]}
+            # use node tags as defaults
+            # check for node tag equivalents
+            tags = NodeTags(self.api, 
+                            {'node_id': node['node_id'], 
+                             'tagname': ['serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck']},
+                            ['tagname', 'value'])
+            if tags:
+                for tag in tags:
+                    if tag['tagname'] == 'serial':
+                        build_sh_spec['serial'] = tag['value']
+                    if tag['tagname'] == 'cramfs':
+                        build_sh_spec['cramfs'] = True
+                    if tag['tagname'] == 'kvariant':
+                        build_sh_spec['variant'] = tag['value']
+                    if tag['tagname'] == 'kargs':
+                        build_sh_spec['kargs'].append(tag['value'].split())
+                    if tag['tagname'] == 'no-hangcheck':
+                        build_sh_spec['kargs'].append('hcheck_reboot0')
+            # then options can override tags
             for option in options:
                 if option == "cramfs":
                     build_sh_spec['cramfs']=True
@@ -428,23 +450,6 @@ class GetBootMedium(Method):
                     build_sh_spec['kargs'].append('hcheck_reboot0')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
-            # check for node tag equivalents
-            tags = NodeTags(self.api, {'node_id': node['node_id'], 'tagname': [
-                                       'serial', 'cramfs', 'kvariant',
-                                       'kargs', 'no-hangcheck']},
-                            ['tagname', 'value'])
-            if tags:
-                for tag in tags:
-                    if tag['tagname'] == 'serial':
-                        build_sh_spec['serial'] = tag['value']
-                    if tag['tagname'] == 'cramfs':
-                        build_sh_spec['cramfs'] = True
-                    if tag['tagname'] == 'kvariant':
-                        build_sh_spec['variant'] = tag['value']
-                    if tag['tagname'] == 'kargs':
-                        build_sh_spec['kargs'].append(tag['value'].split())
-                    if tag['tagname'] == 'no-hangcheck':
-                        build_sh_spec['kargs'].append('hcheck_reboot0')
 
         # compute nodename according the action
         if action.find("node-") == 0 or action.find("dummynet-") == 0:
