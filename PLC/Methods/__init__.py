@@ -25,6 +25,7 @@ AddPCUType
 AddPeer
 AddPerson
 AddPersonKey
+AddPersonTag
 AddPersonToSite
 AddPersonToSlice
 AddRole
@@ -75,6 +76,7 @@ DeletePeer
 DeletePerson
 DeletePersonFromSite
 DeletePersonFromSlice
+DeletePersonTag
 DeleteRole
 DeleteRoleFromPerson
 DeleteSession
@@ -113,6 +115,7 @@ GetPCUs
 GetPeerData
 GetPeerName
 GetPeers
+GetPersonTags
 GetPersons
 GetPlcRelease
 GetRoles
@@ -172,6 +175,7 @@ UpdatePCUProtocolType
 UpdatePCUType
 UpdatePeer
 UpdatePerson
+UpdatePersonTag
 UpdateSite
 UpdateSiteTag
 UpdateSlice

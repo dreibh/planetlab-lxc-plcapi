@@ -34,6 +34,7 @@ PCUs
 POD
 Parameter
 Peers
+PersonTags
 Persons
 PostgreSQL
 PyCurl

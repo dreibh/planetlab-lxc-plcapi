@@ -57,6 +57,7 @@ class Person(Row):
         'slice_ids': Parameter([int], "List of slice identifiers"),
         'peer_id': Parameter(int, "Peer to which this user belongs", nullok = True),
         'peer_person_id': Parameter(int, "Foreign user identifier at peer", nullok = True),
+        'person_tag_ids' : Parameter ([int], "List of tags attached to this person"),
         }
     related_fields = {
 	'roles': [Mixed(Parameter(int, "Role identifier"),
@@ -68,6 +69,10 @@ class Person(Row):
 	'slices': [Mixed(Parameter(int, "Slice identifier"),
 			 Parameter(str, "Slice name"))]
 	}	
+    view_tags_name = "view_person_tags"
+    # tags are used by the Add/Get/Update methods to expose tags
+    # this is initialized here and updated by the accessors factory
+    tags = { }
 
     def validate_email(self, email):
         """
@@ -380,8 +385,13 @@ class Persons(Table):
     def __init__(self, api, person_filter = None, columns = None):
         Table.__init__(self, api, Person, columns)
 
-	sql = "SELECT %s FROM view_persons WHERE deleted IS False" % \
-              ", ".join(self.columns)
+        view = "view_persons"
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Person.tagvalue_view_name(tagname),
+                                                Person.primary_key)
+            
+        sql = "SELECT %s FROM %s WHERE deleted IS False" % \
+            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):
