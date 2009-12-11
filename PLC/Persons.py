@@ -80,26 +80,12 @@ class Person(Row):
         """
 
         invalid_email = PLCInvalidArgument("Invalid e-mail address")
-        email_badchars = r'[][()<>|;^,\200-\377]'
 
-        # Pretty minimal, cheesy check.  We could do better...
-        if not email or email.count(' ') > 0:
-            raise invalid_email
-        if re.search(email_badchars, email) or email[0] == '-':
+        if not email:
             raise invalid_email
 
-        email = email.lower()
-        at_sign = email.find('@')
-        if at_sign < 1:
-            raise invalid_email
-        user = email[:at_sign]
-        rest = email[at_sign+1:]
-        domain = rest.split('.')
-
-        # This means local, unqualified addresses, are not allowed
-        if not domain:
-            raise invalid_email
-        if len(domain) < 2:
+        email_re = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-_]+\.[a-zA-Z]+')
+        if not email_re.match(email):
             raise invalid_email
 
        	# check only against users on the same peer  
