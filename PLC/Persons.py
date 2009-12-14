@@ -84,7 +84,7 @@ class Person(Row):
         if not email:
             raise invalid_email
 
-        email_re = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-_]+\.[a-zA-Z]+')
+	email_re = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+')
         if not email_re.match(email):
             raise invalid_email
 
