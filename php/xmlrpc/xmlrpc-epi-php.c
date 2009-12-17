@@ -73,6 +73,39 @@
 
 #define PHP_EXT_VERSION "0.51"
 
+/* ====================
+ * Thierry - Dec. 17 2009 
+ * patch for php - bug first triggered on f12 with php-5.3
+ * http://pecl.php.net/bugs/bug.php?id=14369
+ * http://remi.fedorapeople.org/ncurses-1.0.0-php53.patch
+ * I'm taking out the 'static' stuff as after pre-processing it appears to be part of the macro expansion already
+ */
+#if ZEND_MODULE_API_NO >= 20071006
+// No more defined with PHP 5.3.0
+	ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+	ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+#endif
+/* ==================== end patch */
+
+/* ========== additional notes
+ * in the process, I've also come across the following resources that might help 
+ * if/when zend_get_parameters_ex gets deprecated (only generates warnings for now)
+ *
+ * http://developers.evrsoft.com/docs/php/zend.arguments.deprecated-retrieval.shtml
+ * explains how the old (our) stuff works
+ *
+ * http://www.hospedajeydominios.com/mambo/documentacion-manual_php-pagina-zend_arguments_retrieval.html
+ * gives info on the new scheme
+ *
+ * I'm taking tha risk as the changes seem to mean major surgery ...
+ */
+
 /* You should tweak config.m4 so this symbol (or some else suitable)
 	gets defined.  */
 
