@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 30
+%define taglevel 31
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -101,6 +101,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Dec 18 2009 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-4.3-31
+- * patch for php-5.3 (the one in f12)
+- * validate email addresses with regex
+- * add PersonTags and SiteTags
+- * add additional accessors for node tags (kvariant, serial, ..)
+
 * Tue Nov 03 2009 Marc Fiuczynski <mef@cs.princeton.edu> - PLCAPI-4.3-30
 - Redacting password, session, and authstring values from the event log.
 
