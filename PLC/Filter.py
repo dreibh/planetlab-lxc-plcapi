@@ -193,8 +193,8 @@ class Filter(Parameter, dict):
                             operator='<='
                         if modifiers[']']:
                             operator='>='
-                        else:
-                            value = str(api.db.quote(value))
+
+                        value = str(api.db.quote(value))
  
                 clause = "%s %s %s" % (field, operator, value)
 
