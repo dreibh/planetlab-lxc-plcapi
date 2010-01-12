@@ -105,7 +105,7 @@ class AddSliceTag(Method):
             system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
             system_slice_ids = system_slice_tags.keys()
 	    if slice['slice_id'] not in system_slice_ids and node_id not in slice['node_ids']:
-                raise PLCInvalidArgument, "Node not in the specified slice %s not in %s"%(slice['slice_id'],system_slice_ids)
+                raise PLCInvalidArgument, "AddSliceTag: slice %s not on specified node %s nor is it a system slice (%r)"%(slice['name'],node['hostname'],system_slice_ids)
             slice_tag['node_id'] = node['node_id']
 
 	# Sliver attribute shared accross nodes if nodegroup is sepcified
