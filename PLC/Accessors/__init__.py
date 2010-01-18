@@ -3,6 +3,5 @@
 __all__ = """
 Accessors_standard
 Accessors_wireless
-Accessors_dummynetbox
 Accessors_site
 """.split()

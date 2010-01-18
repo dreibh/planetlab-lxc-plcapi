@@ -26,10 +26,6 @@ allowed_actions = {
                               'generic-iso',
                               'generic-usb',
                                ],
-                'dummynet' : [ 'node-preview',
-                               'dummynet-iso',
-                               'dummynet-usb',
-                             ],
                 }
 
 # compute a new key
@@ -70,11 +66,6 @@ class GetBootMedium(Method):
     (*) generic-iso
     (*) generic-usb
 
-    for a 'dummynet' node:
-    (*) node-preview
-    (*) dummynet-iso
-    (*) dummynet-usb
-
     Apart for the preview mode, this method generates a new node key for the
     specified node, effectively invalidating any old boot medium.
 
@@ -104,7 +95,6 @@ class GetBootMedium(Method):
 
     Options: an optional array of keywords. 
         options are not supported for generic images
-        options are not supported for dummynet boxes
       Currently supported are
         - 'partition' - for USB actions only
         - 'cramfs'
@@ -356,20 +346,6 @@ class GetBootMedium(Method):
                                                                  type,
                                                                  build_sh_options,
                                                                  log_file)
-        # dummynet node
-        elif node_type == 'dummynet':
-            # the build script expect the following parameters:
-            # the package base directory
-            # the working directory
-            # the full path of the configuration file
-            # the name of the resulting image file
-            # the type of the generated image
-            # the name of the log file
-            command = "%s -b %s -w %s -f %s -o %s -t %s -l %s" \
-                        % (self.BOOTCDBUILD, self.BOOTCDDIR, self.WORKDIR,
-                           floppy_file, node_image, type, log_file)
-            command = "touch %s %s; echo 'dummynet build script not yet supported'" \
-                        % (log_file, node_image)
 
         if self.DEBUG:
             print "The build command line is %s" % command
@@ -452,7 +428,7 @@ class GetBootMedium(Method):
                     raise PLCInvalidArgument, "unknown option %s"%option
 
         # compute nodename according the action
-        if action.find("node-") == 0 or action.find("dummynet-") == 0:
+        if action.find("node-") == 0:
             nodename = node['hostname']
         else:
             node = None
@@ -460,12 +436,6 @@ class GetBootMedium(Method):
             tempbytes = random.sample (xrange(0,256), 8);
             def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
             nodename = "".join(map(hexa2,tempbytes))
-
-        # override some global definition, according node_type
-        if node_type == 'dummynet':
-            self.BOOTCDDIR = "/usr/share/dummynet"		# the base installation dir
-            self.BOOTCDBUILD = "/usr/share/dummynet/build.sh"	# dummynet build script
-            self.WORKDIR = "/var/tmp/DummynetBoxMedium"		# temporary working dir
 
         # get nodefamily
         (pldistro,arch) = self.get_nodefamily(node)
@@ -525,8 +495,7 @@ class GetBootMedium(Method):
         # - build and invoke the build command
         # - delivery the resulting image file
 
-        if action == 'node-iso' or action == 'node-usb' \
-                 or action == 'dummynet-iso' or action == 'dummynet-usb':
+        if action == 'node-iso' or action == 'node-usb':
 
             ### check we've got required material
             version = self.bootcd_version()

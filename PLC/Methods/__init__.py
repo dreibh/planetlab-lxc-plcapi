@@ -54,7 +54,6 @@ DeleteBootState
 DeleteConfFile
 DeleteConfFileFromNode
 DeleteConfFileFromNodeGroup
-DeleteEmulationLink
 DeleteIlink
 DeleteInitScript
 DeleteInterface
@@ -160,7 +159,6 @@ UnBindObjectFromPeer
 UpdateAddress
 UpdateAddressType
 UpdateConfFile
-UpdateEmulationLink
 UpdateIlink
 UpdateInitScript
 UpdateInterface
