@@ -278,6 +278,7 @@ CREATE TABLE node_types (
     node_type text PRIMARY KEY
 ) WITH OIDS;
 INSERT INTO node_types (node_type) VALUES ('regular');
+-- old dummynet stuff, to be removed
 INSERT INTO node_types (node_type) VALUES ('dummynet');
 
 -- Nodes
