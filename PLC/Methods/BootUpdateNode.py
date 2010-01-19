@@ -32,6 +32,10 @@ class BootUpdateNode(Method):
 
     returns = Parameter(int, '1 if successful')
 
+    # xxx this method is a bit spamming the events log
+    #    todo : log only when a change occurs
+    # also this seems to expect the user-provided node_fields to optionally 
+    #    contain the 'primary_network' key that should be renamed into 'primary_interface'
     def call(self, auth, node_fields):
         # Update node state
         if node_fields.has_key('boot_state'):

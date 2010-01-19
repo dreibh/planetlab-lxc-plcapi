@@ -18,11 +18,12 @@ from PLC.Roles import Roles
 from PLC.Keys import Key, Keys
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
+from PLC.Methods.GetSliceFamily import GetSliceFamily
 
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
 
-def get_slivers(api, slice_filter, node = None):
+def get_slivers(api, auth, slice_filter, node = None):
     # Get slice information
     slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
 
@@ -76,13 +77,13 @@ def get_slivers(api, slice_filter, node = None):
         sliver_attributes = []
 
         if node is not None:
-            for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_tags):
+            for sliver_attribute in [ a for a in slice_tags if a['node_id'] == node['node_id'] ]:
                 sliver_attributes.append(sliver_attribute['tagname'])
                 attributes.append({'tagname': sliver_attribute['tagname'],
                                    'value': sliver_attribute['value']})
 
 	    # set nodegroup slice attributes
-	    for slice_tag in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_tags):
+	    for slice_tag in [ a for a in slice_tags if a['nodegroup_id'] in node['nodegroup_ids'] ]:
 	        # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
@@ -90,7 +91,7 @@ def get_slivers(api, slice_filter, node = None):
 		    attributes.append({'tagname': slice_tag['tagname'],
 				   'value': slice_tag['value']})
 
-        for slice_tag in filter(lambda a: a['node_id'] is None, slice_tags):
+        for slice_tag in [ a for a in slice_tags if a['node_id'] is None ]:
             # Do not set any global slice attributes for
             # which there is at least one sliver attribute
             # already set.
@@ -102,13 +103,17 @@ def get_slivers(api, slice_filter, node = None):
         # checked with an assertion
         if slice['expires'] > MAXINT:  slice['expires']= MAXINT
 
+        # expose the slice vref as computed by GetSliceFamily
+        family = GetSliceFamily (api).call(auth, slice['slice_id'])
+
         slivers.append({
             'name': slice['name'],
             'slice_id': slice['slice_id'],
             'instantiation': slice['instantiation'],
             'expires': slice['expires'],
             'keys': keys,
-            'attributes': attributes
+            'attributes': attributes,
+            'GetSliceFamily': family,
             })
 
     return slivers
@@ -225,11 +230,12 @@ class v43GetSlivers(Method):
         system_slice_ids = system_slice_tags.keys()
 	
 	# Get nm-controller slices
+        # xxx Thierry: should these really be exposed regardless of their mapping to nodes ?
 	controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')
 	controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
 	slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
 
-	slivers = get_slivers(self.api, slice_ids, node)
+	slivers = get_slivers(self.api, auth, slice_ids, node)
 
         # get the special accounts and keys needed for the node
         # root

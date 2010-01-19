@@ -63,7 +63,7 @@ class GetSliceTicket(Method):
         data = {
             'timestamp': int(time.time()),
 	    'initscripts': initscripts,
-            'slivers': get_slivers(self.api, [slice['slice_id']]),
+            'slivers': get_slivers(self.api, auth, [slice['slice_id']]),
             }
 
         # Sign ticket

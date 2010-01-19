@@ -122,6 +122,7 @@ GetSession
 GetSessions
 GetSiteTags
 GetSites
+GetSliceFamily
 GetSliceInstantiations
 GetSliceKeys
 GetSliceTags

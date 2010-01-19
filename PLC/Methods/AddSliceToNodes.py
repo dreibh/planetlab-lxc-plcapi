@@ -35,7 +35,7 @@ class AddSliceToNodes(Method):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
         slice = slices[0]
 
         if slice['peer_id'] is not None:

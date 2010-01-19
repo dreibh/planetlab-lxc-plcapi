@@ -17,20 +17,40 @@ current_module = sys.modules[__name__]
 # description/category area is unlikely to make it into the database
 #
 
-# slice vref
-# xxx - don't expose yet in api interface and slices dont know how to use that yet
+# 
+### system slices - at least planetflow - still rely on 'vref'
+# 
+
+# These following accessors are mostly of interest for implementing the 
+# GetSliceFamily method, that takes into account the vref attribute, 
+# as well as the 3 attributes below, and the PLC_FLAVOUR config category
+
+### slice vref 
 define_accessors(current_module, Slice, "Vref", "vref", 
-                 "slice/config", "vserver reference image type",
+                 "slice/config", "vserver reference image name",
                  get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
 
+# xxx the accessor factory should enforce the category and descriptions provided here.
+# and BTW the tag should be created right away as far as possible, or at least when a Get is issued
+# also note that the two 'arch' instances use here will end in the same unique TagType object,
+# so you should make sure to use the same category/description for both 
+define_accessors(current_module, Slice, "Arch", "arch", 
+                 "node/slice/config", "node arch or slivers arch",
+                 get_roles=all_roles, set_roles=["user"], expose_in_api=True)
+define_accessors(current_module, Slice, "Pldistro", "pldistro",
+                 "node/slice/config", "PlanetLab distribution to use for node or slivers", 
+                 get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
+define_accessors(current_module, Slice, "Fcdistro", "fcdistro",
+                 "node/slice/config", "Fedora or CentOS distribution to use for node or slivers", 
+                 get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
 
 # node architecture 
 define_accessors(current_module, Node, "Arch", "arch",  
-                 "node/config", "architecture name", 
+                 "node/slice/config", "node arch or slivers arch",
                  get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
 # distribution to be deployed
 define_accessors(current_module, Node, "Pldistro", "pldistro",
-                 "node/config", "PlanetLab distribution", 
+                 "node/slice/config", "PlanetLab distribution to use for node or slivers", 
                  get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
 # node deployment (alpha, beta, ...)
 define_accessors(current_module, Node, "Deployment", "deployment",
