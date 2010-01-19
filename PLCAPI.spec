@@ -36,6 +36,8 @@ Requires: httpd
 Requires: mod_python
 Requires: mod_ssl
 Requires: SOAPpy
+# for the RebootNodeWithPCU method
+Requires: pcucontrol
 
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
