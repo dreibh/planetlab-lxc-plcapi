@@ -1,0 +1,196 @@
+#!/bin/bash
+# $Id$
+# $URL$
+#
+# priority: 700
+#
+# Manage the PostgreSQL database server
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+local_config=/etc/planetlab/configs/site.xml
+
+# Be verbose
+set -x
+
+# Default locations
+PGDATA=/var/lib/pgsql/data
+postgresql_conf=$PGDATA/postgresql.conf
+pghba_conf=$PGDATA/pg_hba.conf
+
+# Export so that we do not have to specify -p to psql invocations
+export PGPORT=$PLC_DB_PORT
+
+# /etc/init.d/postgresql always returns 0, even on failure
+postgresql_start ()
+{
+    # start() always returns 0
+    (exec 3>&- 4>&- ; service postgresql start)
+
+    # status() will still return 0 even while still initializing
+    if status postmaster && [ -f /var/lock/subsys/postgresql ] ; then
+	# The only way we can be sure is if we can access it
+	for i in $(seq 1 10) ; do
+	    # Must do this as the postgres user initially (before we
+	    # fix pg_hba.conf to passwordless localhost access).
+	    su -c 'psql -U postgres -c "" template1' postgres && return 0
+	    sleep 1
+	done
+    fi
+
+    return 1
+}
+
+postgresql_init ()
+{
+    service postgresql initdb &> /dev/null || :
+    postgresql_start
+}
+
+case "$1" in
+    start)
+	if [ "$PLC_DB_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	MESSAGE=$"Starting PostgreSQL server"
+	dialog "$MESSAGE"
+
+	# Set data directory and redirect startup output to /var/log/pgsql
+	mkdir -p /etc/sysconfig/pgsql
+	(
+	    echo "PGDATA=$PGDATA"
+	    echo "PGLOG=/var/log/pgsql"
+	    echo "PGPORT=$PLC_DB_PORT"
+	) >>/etc/sysconfig/pgsql/postgresql
+
+	# Fix ownership (rpm installation may have changed it)
+	chown -R -H postgres:postgres $(dirname $PGDATA)
+
+	# PostgreSQL must be started at least once to bootstrap
+	# /var/lib/pgsql/data
+	if [ ! -f $postgresql_conf ] ; then
+	    postgresql_init
+	    check
+	    service postgresql stop
+	    check
+	fi
+
+	# Enable DB server. PostgreSQL >=8.0 defines listen_addresses,
+	# PostgreSQL 7.x uses tcpip_socket.
+	if grep -q listen_addresses $postgresql_conf ; then
+	    sed -i -e '/^listen_addresses/d' $postgresql_conf
+	    echo "listen_addresses = '*'" >>$postgresql_conf
+	elif grep -q tcpip_socket $postgresql_conf ; then
+	    sed -i -e '/^tcpip_socket/d' $postgresql_conf
+	    echo "tcpip_socket = true" >>$postgresql_conf
+	fi
+
+	# Disable access to all DBs from all hosts
+	sed -i -e '/^\(host\|local\)/d' $pghba_conf
+
+	# Enable passwordless localhost access
+	echo "local all all trust" >>$pghba_conf
+
+	# Enable access from the API, boot, and web servers
+	PLC_API_IP=$(gethostbyname $PLC_API_HOST)
+	PLC_BOOT_IP=$(gethostbyname $PLC_BOOT_HOST)
+	PLC_WWW_IP=$(gethostbyname $PLC_WWW_HOST)
+	ip_failure=0
+	if [ -z "$PLC_API_IP" ] ; then
+	    MESSAGE=$"PLC_API_IP is not set"
+	    dialog "$MESSAGE"
+	    ip_failure=1
+	fi
+	if [ -z "$PLC_BOOT_IP" ] ; then
+	    MESSAGE=$"PLC_BOOT_IP is not set"
+	    dialog "$MESSAGE"
+	    ip_failure=1
+	fi
+	if [ -z "$PLC_WWW_IP" ] ; then
+	    MESSAGE=$"PLC_WWW_IP is not set"
+	    dialog "$MESSAGE"
+	    ip_failure=1
+	fi
+	if [ $ip_failure -eq 1 ] ; then
+	    /bin/false
+	    check
+	fi
+
+	(
+	    echo "host $PLC_DB_NAME $PLC_DB_USER 127.0.0.1/32 password"
+	    echo "host $PLC_DB_NAME $PLC_DB_USER $PLC_API_IP/32 password"
+	    echo "host $PLC_DB_NAME $PLC_DB_USER $PLC_BOOT_IP/32 password"
+	    echo "host $PLC_DB_NAME $PLC_DB_USER $PLC_WWW_IP/32 password"
+	    # Drupal also uses PostgreSQL
+	    echo "host drupal $PLC_DB_USER 127.0.0.1/32 password"
+	    echo "host drupal $PLC_DB_USER $PLC_WWW_IP/32 password"
+	) >>$pghba_conf
+
+	# Append site-specific access rules
+	for file in $pghba_conf.d/*.conf ; do
+	    cat "$file" >>$pghba_conf
+	done
+
+	# Fix ownership (sed -i changes it)
+	chown postgres:postgres $postgresql_conf $pghba_conf
+
+	# Start up the server
+	postgresql_start
+	check
+
+	# Create/update the unprivileged database user and password
+	if [ -z "$PLC_DB_PASSWORD" ] ; then
+	    PLC_DB_PASSWORD=$(uuidgen)
+	    plc-config --category=plc_db --variable=password --value="$PLC_DB_PASSWORD" --save=$local_config $local_config
+	    service plc reload
+	fi
+	if ! psql -U $PLC_DB_USER -c "" template1 >/dev/null 2>&1 ; then
+	    psql -U postgres -c "CREATE USER $PLC_DB_USER PASSWORD '$PLC_DB_PASSWORD'" template1
+	else
+	    psql -U postgres -c "ALTER USER $PLC_DB_USER WITH PASSWORD '$PLC_DB_PASSWORD'" template1
+	fi
+	check
+
+	# Create the databases if necessary
+	if ! psql -U $PLC_DB_USER -c "" $PLC_DB_NAME >/dev/null 2>&1 ; then
+	    createdb -U postgres --template=template0 --encoding=UNICODE --owner=$PLC_DB_USER $PLC_DB_NAME
+	    psql -U $PLC_DB_USER -f /usr/share/plc_api/$PLC_DB_NAME.sql $PLC_DB_NAME
+	fi
+	check
+	if ! psql -U $PLC_DB_USER -c "" drupal >/dev/null 2>&1 ; then
+	    createdb -U postgres --template=template0 --encoding=UNICODE --owner=$PLC_DB_USER drupal
+            psql -U $PLC_DB_USER -f /var/www/html/database/database.pgsql drupal 
+	fi
+	check
+
+	result "$MESSAGE"
+	;;
+
+    stop)
+	MESSAGE=$"Stopping PostgreSQL server"
+	dialog "$MESSAGE"
+
+	# Drop the current user in case the username changes
+	psql -U postgres -c "DROP USER $PLC_DB_USER" template1
+
+	# WARNING: If the DB name changes, the old DB will be left
+	# intact and a new one will be created. If it changes
+	# back, the old DB will not be re-created.
+
+	# Shut down the server
+	service postgresql stop
+
+	# /etc/init.d/postgresql fails if it is not running
+	[ "$PLC_DB_ENABLED" = 1 ] && check
+
+	result "$MESSAGE"
+	;;
+esac
+
+exit $ERRORS

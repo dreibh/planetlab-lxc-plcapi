@@ -1,0 +1,144 @@
+# -*-python-*-
+# $Id$
+# $URL$
+#################### 
+import sys, os
+import resource
+
+g_url = ""
+def GetMyPLCURL(): return g_url
+def SetMyPLCURL(url):
+    global g_url
+    g_url = url
+
+# Get all currently registered roles
+g_role_names = [ role['name'] for role in GetRoles()]
+g_role_names.sort()
+
+def SetRole(level, role):
+    global g_role_names
+    if role not in g_role_names:
+        AddRole(level, role)
+        g_role_names.append(role)
+        g_role_names.sort()
+
+# Get list of existing tag types
+g_known_tag_types = [tag_type['tagname'] for tag_type in GetTagTypes()]
+g_known_tag_types.sort()
+
+def SetTagType(tag_type):
+    global g_known_tag_types
+    # Create/update default slice tag types
+    if tag_type['tagname'] not in g_known_tag_types:
+        AddTagType(tag_type)
+        g_known_tag_types.append(tag_type['tagname'])
+        g_known_tag_types.sort()
+    else:
+        UpdateTagType(tag_type['tagname'], tag_type)
+
+# Get list of existing (enabled, global) files
+g_conf_files = GetConfFiles()
+g_conf_files = filter(lambda conf_file: conf_file['enabled'] and \
+                    not conf_file['node_ids'] and \
+                    not conf_file['nodegroup_ids'],
+                    g_conf_files)
+g_dests = [conf_file['dest'] for conf_file in g_conf_files]
+g_conf_files = dict(zip(g_dests, g_conf_files))
+
+# Get list of existing initscripts
+g_oldinitscripts = GetInitScripts()
+g_oldinitscript_names = [script['name'] for script in g_oldinitscripts]
+g_oldinitscripts = dict(zip(g_oldinitscript_names, g_oldinitscripts))
+
+def SetInitScript(initscript):
+    global g_oldinitscripts, g_oldinitscript_names
+    if initscript['name'] not in g_oldinitscript_names:
+        initscript_id = AddInitScript(initscript)
+        g_oldinitscript_names.append(initscript['name'])
+        initscript['initscript_id']=initscript_id
+        g_oldinitscripts[initscript['name']]=initscript
+    else:
+        orig_initscript = g_oldinitscripts[initscript['name']]
+        initscript_id = orig_initscript['initscript_id']
+        UpdateInitScript(initscript_id, initscript)
+        
+def SetConfFile(conf_file):
+    global g_conf_files, g_dests
+    if conf_file['dest'] not in g_dests:
+        AddConfFile(conf_file)
+    else:
+        orig_conf_file = g_conf_files[conf_file['dest']]
+        conf_file_id = orig_conf_file['conf_file_id']
+        UpdateConfFile(conf_file_id, conf_file)
+
+def SetSlice(slice, tags):
+    # Create or Update slice
+    slice_name = slice['name']
+    slices = GetSlices([slice_name])
+    if len(slices)==1:
+        slice_id = slices[0]['slice_id']
+        if slice.has_key('name'):
+            del slice['name']
+        UpdateSlice(slice_id, slice)
+        slice['name']=slice_name
+    else:
+        expires = None
+        if slice.has_key('expires'):
+            expires = slice['expires']
+            del slice['expires']
+        slice_id = AddSlice(slice)
+        if expires <> None:
+            UpdateSlice(slice_id, {'expires':expires})
+
+    # Get slice structure with all fields
+    slice = GetSlices([slice_name])[0]
+
+    # Create/delete all tags
+    # NOTE: update is not needed, since unspecified tags are deleted, 
+    #       and new tags are added
+    slice_tags = []
+    if slice['slice_tag_ids']:
+        # Delete unknown attributes
+        for slice_tag in GetSliceTags(slice['slice_tag_ids']):
+            # ignore sliver tags, as those are custom/run-time values
+            if slice_tag['node_id'] <> None: continue
+            if (slice_tag['tagname'], slice_tag['value']) not in tags:
+                DeleteSliceTag(slice_tag['slice_tag_id'])
+            else:
+                slice_tags.append((slice_tag['tagname'],slice_tag['value']))
+
+    # only add slice tags that are new
+    for (name, value) in tags:
+        if (name,value) not in slice_tags:
+            AddSliceTag(slice_name, name, value)            
+        else:
+            # NOTE: this confirms that the user-specified tag is 
+            #       returned by GetSliceTags
+            pass
+
+def SetMessage(message):
+    messages = GetMessages([message['message_id']])
+    if len(messages)==0:
+        AddMessage(message)
+    else:
+        UpdateMessage(message['message_id'],message)
+
+# Get all model names
+g_pcu_models = [type['model'] for type in GetPCUTypes()]
+
+def SetPCUType(pcu_type):
+    global g_pcu_models
+    if 'pcu_protocol_types' in pcu_type:
+        protocol_types = pcu_type['pcu_protocol_types']
+        # Take this value out of the struct.
+        del pcu_type['pcu_protocol_types']
+    else:
+        protocol_types = []
+
+    if pcu_type['model'] not in g_pcu_models:
+        # Add the name/model info into DB
+        id = AddPCUType(pcu_type)
+        # for each protocol, also add this.
+        for ptype in protocol_types:
+            AddPCUProtocolType(id, ptype)
+

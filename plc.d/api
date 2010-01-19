@@ -1,0 +1,58 @@
+#!/bin/bash
+# $Id$
+# $URL$
+#
+# priority: 800
+#
+# Configure the API. Must be done after SSL certificates are generated
+# and before the API web server is brought up.
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+local_config=/etc/planetlab/configs/site.xml
+
+# Be verbose
+set -x
+
+case "$1" in
+    start)
+	if [ "$PLC_API_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	MESSAGE=$"Configuring the API"
+	dialog "$MESSAGE"
+
+	# Make sure that the API maintenance account is protected by a
+	# password.
+	if [ -z "$PLC_API_MAINTENANCE_PASSWORD" ] ; then
+	    PLC_API_MAINTENANCE_PASSWORD=$(uuidgen)
+	    plc-config --category=plc_api --variable=maintenance_password --value="$PLC_API_MAINTENANCE_PASSWORD" --save=$local_config $local_config
+	    service plc reload
+	fi
+
+	# Make sure that all PLC servers are allowed to access the API
+	# through the maintenance account.
+	PLC_API_MAINTENANCE_SOURCES=($((
+	    for ip in $PLC_API_MAINTENANCE_SOURCES ; do
+		echo $ip
+	    done
+	    for server in API BOOT WWW ; do
+		hostname=PLC_${server}_HOST
+		gethostbyname ${!hostname}
+	    done
+        ) | sort -u))
+	PLC_API_MAINTENANCE_SOURCES=${PLC_API_MAINTENANCE_SOURCES[*]}
+	plc-config --category=plc_api --variable=maintenance_sources --value="$PLC_API_MAINTENANCE_SOURCES" --save=$local_config $local_config
+	service plc reload
+
+	result "$MESSAGE"
+	;;
+esac
+
+exit $ERRORS

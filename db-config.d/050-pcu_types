@@ -1,0 +1,61 @@
+#################### PCUs
+### Setup Initial PCU information
+	
+pcu_types = [
+    {'model': 'HPiLO',
+     'name': 'HP iLO v1 or v2 (Integrated Lights-Out)', },
+    
+    {'model': 'IntelAMT',
+     'name': 'Intel AMT v2.5 or v3.0 (Active Management Technology)', },
+    
+    {'model': 'DRAC',
+     'name': 'DRAC - Dell Remote Access Control (all versions)', },
+    
+    {'model': 'OpenIPMI',
+     'name': 'OpenIPMI - Intelligent Platform Management Interface', },
+    
+    {'model': 'APCControl12p3',
+     'name': 'APC AP79xx or Masterswitch (sequence 1-2-port-3)', },
+    {'model': 'APCControl1p4',
+     'name': 'APC AP79xx or Masterswitch (sequence 1-port-4)', },
+    {'model': 'APCControl121p3',
+     'name': 'APC AP79xx or Masterswitch (sequence 1-2-1-port-3)', },
+    {'model': 'APCControl121p1',
+     'name': 'APC AP79xx or Masterswitch (sequence 1-2-1-port-1)', },
+    {'model': 'APCControl13p13',
+     'name': 'APC AP79xx or Masterswitch (sequence 1-3-port-1-3)', },
+    
+    {'model': 'BayTechRPC3NC', 
+     'name': 'BayTech with prompt RPC3-NC>', },
+    {'model': 'BayTechRPC16', 
+     'name': 'BayTech with prompt RPC-16>', },
+    {'model': 'BayTech',
+     'name': 'BayTech with prompt DS-RPC>', },
+    {'model': 'BayTechCtrlC', 
+     'name': 'BayTech Ctrl-C, 5, then with prompt DS-RPC>', },
+    {'model': 'BayTechCtrlCUnibe', 
+     'name': 'BayTech Ctrl-C, 3, then with prompt DS-RPC>', },
+    
+    {'model': 'BlackBoxPSMaverick',
+     'name': 'BlackBoxPSMaverick Web based controller'},
+    
+    {'model': 'IPAL', 
+     'name': 'IPAL - Dataprobe IP-41x & IP-81x', },
+    {'model': 'ePowerSwitchNew',
+     'name': 'ePowerSwitch Newer Models 1/4/8x', },
+    {'model': 'ePowerSwitchOld',
+     'name': 'ePowerSwitch Older Models 1/4/8x', },
+    
+    {'model': 'PM211MIP',
+     'name': 'Infratec PM221-MIP', },
+    
+    {'model': 'WTIIPS4',
+     'name': 'Western Telematic (WTI IPS-4)', },
+    
+    {'model': 'ManualPCU',
+     'name': 'Manual Administrator Operation (choose if model unknown)', },
+    ]
+
+for pcu_type in pcu_types:
+    SetPCUType(pcu_type)
+

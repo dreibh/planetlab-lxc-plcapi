@@ -1,0 +1,26 @@
+# -*-python-*-
+# $Id$
+# $URL$
+#################### interface settings
+# xxx this should move to PLC/Accessors
+
+default_interface_types = \
+[
+    {'category' : "interface/general",
+     'tagname' : "ifname",
+     'description': "Set interface name, instead of eth0 or the like",
+     'min_role_id' : 40},
+
+    {'category' : "interface/multihome",
+     'tagname' : "alias",
+     'description': "Specifies that the network is used for multihoming",
+     'min_role_id' : 40},
+    
+    {'category' : "interface/hidden",
+     'tagname' : "backdoor",
+     'description': "For testing new settings",
+     'min_role_id' : 10},
+]
+
+for setting_type in default_interface_types:
+    SetTagType(setting_type)

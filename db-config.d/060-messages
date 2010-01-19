@@ -1,0 +1,293 @@
+# -*-python-*-
+# $Id$
+# $URL$
+#################### body for messages
+
+installfailed = """Once the node meets these requirements, please reinitiate the install
+by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+Update the BootState to 'Reinstall', then reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we may investigate the problem.
+"""
+
+# Load default message templates
+message_templates = [
+    {'message_id': 'Verify account',
+     'subject': "Verify account registration",
+     'template': """
+Please verify that you registered for a %(PLC_NAME)s account with the
+username %(email)s by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/persons/register.php?id=%(person_id)d&key=%(verification_key)s
+
+You must wait for this account to be approved before you can begin using it, please be patient.
+
+If you did not register for a %(PLC_NAME)s account, please ignore this
+message, or contact %(PLC_NAME)s Support <%(PLC_MAIL_SUPPORT_ADDRESS)s>.
+"""
+     },
+
+    {'message_id': 'New PI account',
+     'subject': "New PI account registration from %(first_name)s %(last_name)s <%(email)s> at %(site_name)s",
+     'template': """
+%(first_name)s %(last_name)s <%(email)s> has signed up for a new
+%(PLC_NAME)s account at %(site_name)s and has requested a PI role. PIs
+are responsible for enabling user accounts, creating slices, and
+ensuring that all users abide by the %(PLC_NAME)s Acceptable Use
+Policy.
+
+Only %(PLC_NAME)s administrators may enable new PI accounts. If you
+are a PI at %(site_name)s, please respond and indicate whether this
+registration is acceptable.
+
+To view the request, visit:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/persons/index.php?id=%(person_id)d
+"""
+     },
+
+    {'message_id': 'New account',
+     'subject': "New account registration from %(first_name)s %(last_name)s <%(email)s> at %(site_name)s",
+     'template': """
+%(first_name)s %(last_name)s <%(email)s> has signed up for a new
+%(PLC_NAME)s account at %(site_name)s and has requested the following
+roles: %(roles)s.
+
+To deny the request or enable the account, visit:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/persons/index.php?id=%(person_id)d
+"""
+     },
+
+    {'message_id': 'Password reset requested',
+     'subject': "Password reset requested",
+     'template': """
+Someone has requested that the password of your %(PLC_NAME)s account
+%(email)s be reset. If this person was you, you may continue with the
+reset by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/persons/reset_password.php?id=%(person_id)d&key=%(verification_key)s
+
+If you did not request that your password be reset, please contact
+%(PLC_NAME)s Support <%(PLC_MAIL_SUPPORT_ADDRESS)s>. Do not quote or
+otherwise include any of this text in any correspondence.
+"""
+     },
+
+    {'message_id': 'Password reset',
+     'subject': "Password reset",
+     'template': """
+The password of your %(PLC_NAME)s account %(email)s has been
+temporarily reset to:
+
+%(password)s
+
+Please change it at as soon as possible by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/persons/index.php?id=%(person_id)d
+
+If you did not request that your password be reset, please contact
+%(PLC_NAME)s Support <%(PLC_MAIL_SUPPORT_ADDRESS)s>. Do not quote or
+otherwise include any of this text in any correspondence.
+"""
+     },
+
+    # Boot Manager messages
+    {'message_id': "installfinished",
+     'subject': "%(hostname)s completed installation",
+     'template': """
+%(hostname)s just completed installation.
+
+The node should be usable in a couple of minutes if installation was
+successful.
+"""
+     },
+
+    {'message_id': "insufficientdisk",
+     'subject': "%(hostname)s does not have sufficient disk space",
+     'template': """
+%(hostname)s failed to boot because it does not have sufficent disk
+space, or because its disk controller was not recognized.
+
+Please replace the current disk or disk controller or install
+additional disks to meet the current hardware requirements.
+""" + installfailed
+     },
+
+    {'message_id': "insufficientmemory",
+     'subject': "%(hostname)s does not have sufficient memory",
+     'template': """
+%(hostname)s failed to boot because it does not have sufficent
+memory.
+
+Please install additional memory to meet the current hardware
+requirements.
+""" + installfailed
+     },
+
+    {'message_id': "authfail",
+     'subject': "%(hostname)s failed to authenticate",
+     'template':
+"""
+%(hostname)s failed to authenticate for the following reason:
+
+%(fault)s
+
+The most common reason for authentication failure is that the
+authentication key stored in the node configuration file, does not
+match the key on record. 
+
+There are two possible steps to resolve the problem.
+
+1. If you have used an All-in-one BootCD that includes the plnode.txt file,
+    then please check your machine for any old boot media, either in the
+    floppy drive, or on a USB stick.  It is likely that an old configuration
+    is being used instead of the new configuration stored on the BootCD.
+Or, 
+2. If you are using Generic BootCD image, then regenerate the node 
+    configuration file by visiting:
+
+    https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+    Under 'Download', follow the 'Download plnode.txt file for %(hostname)s'
+    option, and save the downloaded file as plnode.txt on either a floppy 
+    disk or a USB flash drive.  Be sure the 'Boot State' is set to 'Boot', 
+    and, then reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we can help investigate the problem.
+"""
+     },
+
+    {'message_id': "notinstalled",
+     'subject': "%(hostname)s is not installed",
+     'template':
+"""
+%(hostname)s failed to boot because it has either never been
+installed, or the installation is corrupt.
+
+Please check if the hard drive has failed, and replace it if so. After
+doing so, visit:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+Change the 'Boot State' to 'Reinstall', and then reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we may investigate the problem.
+"""
+     },
+
+    {'message_id': "missingkernel",
+     'subject': "%(hostname)s is missing its production kernel",
+     'template':
+"""
+%(hostname)s failed to boot because the filesystem is missing its production
+kernel.
+
+No action is needed from you at this time; this message is merely
+informational.
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+We will investigate the problem shortly.
+"""
+     },
+
+    {'message_id': "filesystemcorrupted",
+     'subject': "%(hostname)s may have corrupt filesystem",
+     'template':
+"""
+%(hostname)s failed to boot because the filesystem appears to be corrupted. 
+
+No action is needed from you at this time; this message is merely
+informational.
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+We will investigate the problem shortly.
+"""
+     },
+
+    {'message_id': "mountfailed",
+     'subject': "%(hostname)s could not mount filesystem",
+     'template':
+"""
+%(hostname)s failed to boot because the boot scripts could not mount the 
+filesystem.
+
+This could be for a number of reasons.  No action is needed from you at this
+time; this message is merely informational.  
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+We will investigate the problem shortly.
+"""
+     },
+
+    {'message_id': "hostnamenotresolve",
+     'subject': "%(hostname)s does not resolve",
+     'template':
+"""
+%(hostname)s failed to boot because its hostname does not resolve, or
+does resolve but does not match its configured IP address.
+
+Please check the network settings for the node, especially its
+hostname, IP address, and DNS servers, by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+Correct any errors, and change the 'Boot State' to 'Reinstall', and then
+reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we may investigate the problem.
+"""
+     },
+
+    # XXX N.B. I don't think these are necessary, since there's no
+    # way that the Boot Manager would even be able to contact the
+    # API to send these messages.
+
+    {'message_id': "noconfig",
+     'subject': "%(hostname)s does not have a configuration file",
+     'template': """
+%(hostname)s failed to boot because it could not find a PlanetLab
+configuration file. To create this file, visit:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+Click the Configuration File link, and save the downloaded file as
+plnode.txt on either a floppy disk or a USB flash drive.  Change the 
+'Boot State' to 'Reinstall', and then reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we may investigate the problem.
+"""
+     },
+
+    {'message_id': "nodetectednetwork",
+     'subject': "%(hostname)s has unsupported network hardware",
+     'template':
+"""
+
+%(hostname)s failed to boot because it has network hardware that is
+unsupported by the current production kernel. If it has booted
+successfully in the past, please try re-installing it by visiting:
+
+https://%(PLC_WWW_HOST)s:%(PLC_WWW_SSL_PORT)d/db/nodes/?id=%(node_id)d
+
+Change the 'Boot State' to 'Reinstall', and then reboot the node.
+
+If you have already performed this step and are still receiving this
+message, please reply so that we may investigate the problem.
+"""
+     },
+]
+
+for message in message_templates:
+    SetMessage(message)

@@ -1,0 +1,193 @@
+#!/bin/bash
+# $Id$
+# $URL$
+#
+# priority: 900
+#
+# Bootstrap the database
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+
+# Be verbose
+set -x
+
+# Export so that we do not have to specify -p to psql invocations
+export PGPORT=$PLC_DB_PORT
+
+# Updates the database by applying all migration scripts in
+# /usr/share/plc_api/migrations/N-up-*, where N is greater than the
+# current subversion. At least one of the migration scripts with the
+# same N must update plc_db_version.subversion.
+function migrate_db()
+{
+    subversion=$(psql -U $PLC_DB_USER --quiet --tuples-only --no-align -c \
+	         "SELECT subversion FROM plc_db_version LIMIT 1" \
+	         $PLC_DB_NAME 2>/dev/null || echo 0)
+    shopt -s nullglob
+    for file in /usr/share/plc_api/migrations/[0-9]*-up-* ; do
+	script=$(basename $file)
+	index=${script%-up*}
+	extension=${script##*.}
+	if [ $index -gt $subversion ] ; then
+	    if [ "$extension" = "sql" ] ; then
+	        dialog " - $script (dbdumped)"
+	        dump_planetlab_db "before-$script"
+		psql -U $PLC_DB_USER -f $file $PLC_DB_NAME
+	    elif [ -x $file ] ; then
+	        dialog " - $script (dbdumped)"
+	        dump_planetlab_db "before-$script"
+		$file
+	    else
+	        dialog "\nWarning: migration $file not executable"
+	    fi
+	    check
+	fi
+    done
+}
+
+function checkpoint_planetlab_db()
+{
+    dumpfile=$1
+    pg_dump -U $PLC_DB_USER $PLC_DB_NAME > $dumpfile
+    check
+}
+
+function restore_planetlab_db()
+{
+    dumpfile=$1
+    if [ -n "$dumpfile" ] ; then 
+	[ -f "$dumpfile" ] && psql -a -U $PLC_DB_USER $PLC_DB_NAME < $dumpfile
+	check
+    fi
+}
+
+# use a single date of this script invocation for the dump_*_db functions.
+DATE=$(date +"%Y-%m-%d-%H-%M-%S")
+
+# Dumps the database - optional argument to specify filename suffix
+function dump_planetlab_db()
+{
+    if [ -n "$1" ] ; then suffix="-$1" ; else suffix="" ; fi
+    dumpfile=/var/lib/pgsql/backups/$(date +"${PLC_DB_NAME}.${DATE}${suffix}.sql")
+    checkpoint_planetlab_db $dumpfile
+}
+
+function restore_drupal_db()
+{
+    dumpfile=$1
+    if [ -n "$dumpfile" ] ; then 
+	[ -f "$dumpfile" ] && psql -a -U $PLC_DB_USER drupal < $1
+	check
+    fi
+}
+
+function checkpoint_drupal_db()
+{
+    dumpfile=$1
+    pg_dump -U $PLC_DB_USER drupal > $dumpfile
+    check
+}
+
+function dump_drupal_db()
+{
+    dumpfile=/var/lib/pgsql/backups/$(date +"drupal.${DATE}.sql")
+    checkpoint_drupal_db $dumpfile
+    check
+}
+
+# Clean up old backups
+function clean_dumps()
+{
+    find /var/lib/pgsql/backups '(' -name "$PLC_DB_NAME.*.sql" -o -name "drupal.*.sql" ')' -a -atime +15 | xargs rm -f
+    check
+}
+
+[ $PLC_DB_ENABLED -ne 1 ] && exit 0
+case "$1" in
+    start)
+	MESSAGE=$"Bootstrapping the database"
+	dialog "$MESSAGE"
+
+	# Apply schema updates
+	migrate_db
+
+	# Update the maintenance account username. This can't be
+	# done through the api-config script since it uses the
+	# maintenance account to access the API. The maintenance
+	# account should be person_id 1 since it is created by the
+	# DB schema itself.
+	psql -U $PLC_DB_USER -c "UPDATE persons SET email='$PLC_API_MAINTENANCE_USER' WHERE person_id=1" $PLC_DB_NAME
+
+	# Update the Drupal site_name variable
+	# also turn off drupal native user registration
+	psql -U $PLC_DB_USER drupal <<EOF
+DELETE FROM variable WHERE name = 'site_name';
+INSERT INTO variable (name, value) VALUES ('site_name', 's:${#PLC_NAME}:"$PLC_NAME";');
+DELETE FROM variable WHERE name = 'user_register';
+INSERT INTO variable (name, value) VALUES ('user_register', 's:1:"0";');
+DELETE FROM cache;
+EOF
+
+	# Bootstrap the DB
+	db-config
+	check
+
+	result "$MESSAGE"
+	;;
+
+    migrate)
+	MESSAGE=$"Migrating the database"
+	dialog "$MESSAGE"
+
+	migrate_db
+	result "$MESSAGE"
+	;;
+
+    dump)
+      	MESSAGE=$"Dumping the databases in /var/lib/pgsql/backups"
+	dialog "$MESSAGE"
+
+	dump_planetlab_db
+	dump_drupal_db
+	result "$MESSAGE"
+	;;
+
+    checkpoint)
+	MESSAGE=$"Checkpointing the databases"
+	checkpoint_planetlab_db $2
+	checkpoint_drupal_db $3
+	;;
+
+    restore)
+	MESSAGE=$"Restoring the databases from checkpoint files"
+	restore_planetlab_db $2
+	restore_drupal_db $3
+	;;
+
+    clean-dump)
+      	MESSAGE=$"Cleaning old database dumps"
+	dialog "$MESSAGE"
+
+	clean_dumps
+	result "$MESSAGE"
+	;;
+
+    stop)
+	MESSAGE="Ignoring request to stop myplc databases"
+	dialog "$MESSAGE"
+	result ""
+	;;
+
+    *)
+        echo "Usage: $0 [start|migrate|dump|checkpoint|restore|clean-dump|stop]"
+	exit 1
+	;;
+esac
+
+exit $ERRORS

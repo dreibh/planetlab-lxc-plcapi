@@ -1,0 +1,23 @@
+# -*-python-*-
+# $Id: 012-slice_tags -1   $
+# $URL: svn+ssh://thierry@svn.planet-lab.org/svn/MyPLC/trunk/db-config.d/012-slice_tags $
+#################### slice tag types
+default_boot_states = [
+    'boot',
+    'failboot',
+    'safeboot',
+    'install',
+    'reinstall',
+    'disabled',
+]
+current_boot_states = GetBootStates()
+for state in default_boot_states:
+    if state not in current_boot_states:
+        AddBootState(state)
+
+# TODO: Delete old boot states. 
+if False:# NOTE: Only set to true if all federating peers have the new default boot states above.
+    for state in current_boot_states:
+        if state not in default_boot_states:
+            DeleteBootState(state)
+    

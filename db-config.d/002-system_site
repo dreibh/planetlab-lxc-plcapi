@@ -1,0 +1,69 @@
+# -*-python-*-
+# $Id$
+# $URL$
+#################### 
+# Create/update and populate the default site (should be site_id 1)
+
+### plc_www holds the contents of the PLC_WWW configuration category
+if plc_www['port'] == '80':
+    url = "http://" + plc_www['host'] + "/"
+elif plc_www['port'] == '443':
+    url = "https://" + plc_www['host'] + "/"
+else:
+    url = "http://" + plc_www['host'] + ":" + plc_www['port'] + "/"
+
+SetMyPLCURL(url)
+
+site = { 'site_id': 1,
+         'name': plc['name'] + " Central",
+         'abbreviated_name': plc['name'],
+         'login_base': plc['slice_prefix'],
+         'is_public': False,
+         'url': url,
+         'max_slices': 100 }
+
+sites = GetSites([site['site_id']])
+if not sites:
+    site_id = AddSite(site['name'], site['abbreviated_name'], site['login_base'], site)
+    if site_id != site['site_id']:
+        DeleteSite(site_id)
+        raise Exception, "Someone deleted the \"%s\" site from the database!" % \
+              site['name']
+    sites = [site]
+
+# Must call UpdateSite() even after AddSite() to update max_slices
+site_id = sites[0]['site_id']
+UpdateSite(site_id, site)
+
+# The default administrator account must be associated with a site
+# in order to login.
+AddPersonToSite(admin['person_id'], site['site_id'])
+SetPersonPrimarySite(admin['person_id'], site['site_id'])
+
+# Grant admin and PI roles to the default administrator account
+AddRoleToPerson(10, admin['person_id'])
+AddRoleToPerson(20, admin['person_id'])
+
+# Associate root ssh key with the default administrator
+keyfile=plc['root_ssh_key_pub']
+person = GetPersons(admin['person_id'])[0]
+keys = GetKeys(person['key_ids'])
+if os.path.exists(keyfile):
+    sshkeyfp = file(keyfile,"r")
+    sshkey = sshkeyfp.read()
+    sshkeyfp.close()
+
+    found=False
+    for key in keys:
+        if key['key_type']=='ssh':
+            if key['key'] == sshkey:
+                found=True
+            else:
+                # should we delete other keys?
+                pass
+    if not found:
+        key_id = AddPersonKey(admin['person_id'],{'key_type':'ssh','key':sshkey})
+else:
+    if len(keys)==0:
+        print "WARNING: default administrator does not have an ssh key"
+        print "and the default ssh root pub key (%s) file does not exist." % keyfile

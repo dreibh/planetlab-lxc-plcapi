@@ -37,6 +37,10 @@ Requires: mod_python
 Requires: mod_ssl
 Requires: SOAPpy
 
+### avoid having yum complain about updates, as stuff is moving around
+# plc.d/api
+Conflicts: MyPLC <= 4.3-37
+
 # We use psycopg2
 BuildRequires: postgresql-devel
 
@@ -85,6 +89,17 @@ cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
 extension=xmlrpc.so
 EOF
 
+# Install initscripts
+echo "* Installing initscripts"
+find plc.d | cpio -p -d -u ${RPM_BUILD_ROOT}/etc/
+chmod 755 ${RPM_BUILD_ROOT}/etc/plc.d/*
+
+# Install db-config.d files
+echo "* Installing db-config.d files"
+mkdir -p ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
+cp db-config.d/* ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
+chmod 444 ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d/*
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -103,7 +118,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Sat Jan 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-32
 - support for fedora 12
-- fix subtle bug in filering with ] and quotes
+- fix subtle bug in filtering with ] and quotes
 
 * Fri Dec 18 2009 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-4.3-31
 - * patch for php-5.3 (the one in f12)
