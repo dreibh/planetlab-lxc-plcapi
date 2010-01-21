@@ -126,4 +126,4 @@ FROM persons
 LEFT JOIN peer_person USING (person_id);
 
 
-UPDATE plc_db_version SET subversion = 1;
+UPDATE plc_db_version SET subversion = 11;
