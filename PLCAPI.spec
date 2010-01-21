@@ -5,8 +5,8 @@
 %define url $URL$
 
 %define name PLCAPI
-%define version 4.3
-%define taglevel 32
+%define version 5.0
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -296,4 +296,4 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> - 
 - Initial build.
 
-%define module_current_branch 4.2
+%define module_current_branch 4.3
