@@ -132,7 +132,7 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 sync:
 ifeq (,$(SSHURL))
 	@echo "sync: You must define, either PLC, or PLCHOST & GUEST, on the command line"
-	@echo "  e.g. make sync PLC=private.one-lab.org"
+	@echo "  e.g. make sync PLC=boot.planetlab.eu"
 	@echo "  or   make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr"
 	@exit 1
 else
