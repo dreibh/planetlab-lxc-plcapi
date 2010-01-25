@@ -41,7 +41,7 @@ Requires: pcucontrol
 
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
-Conflicts: MyPLC <= 4.3-37
+Conflicts: MyPLC <= 4.3
 
 # We use psycopg2
 BuildRequires: postgresql-devel
