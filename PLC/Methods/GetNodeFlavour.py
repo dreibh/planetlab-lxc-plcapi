@@ -25,7 +25,7 @@ class GetNodeFlavour(Method):
     accepts = [
         Auth(),
         Mixed(Node.fields['node_id'],
-              Node.fields['name']),
+              Node.fields['hostname']),
         ]
 
     returns = { 'nodefamily' : Parameter (str, "the node-family this node should be based upon"),
@@ -35,7 +35,7 @@ class GetNodeFlavour(Method):
 
     
     ########## nodefamily
-    def nodefamily (self, auth, nodeid):
+    def nodefamily (self, auth, node_id):
 
         # the deployment tag, if set, wins
         deployment = GetNodeDeployment (self.api).call(auth,node_id)
@@ -55,10 +55,13 @@ class GetNodeFlavour(Method):
         return "%s-%s"%(pldistro,arch)
 
     def extensions (self, auth, node_id):
-        return GetNodeExtensions(self.api).call(auth,node_id).split()
+        try:
+            return GetNodeExtensions(self.api).call(auth,node_id).split()
+        except:
+            return []
 
     def compressed (self, auth, node_id):
-        return not PlainBootstrapfs(self.api).call(auth,node_id)
+        return not not not GetNodePlainBootstrapfs(self.api).call(auth,node_id)
 
     def call(self, auth, node_id_or_name):
         # Get node information
@@ -68,6 +71,7 @@ class GetNodeFlavour(Method):
         node = nodes[0]
         node_id = node['node_id']
 
+        # xxx could use some sanity checking, and could provide fallbacks
         return { 'nodefamily' : self.nodefamily(auth,node_id),
                  'extensions' : self.extensions(auth,node_id),
                  'compressed' : self.compressed(auth,node_id),
