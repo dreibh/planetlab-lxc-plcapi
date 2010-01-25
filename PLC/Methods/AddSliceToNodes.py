@@ -65,7 +65,9 @@ class AddSliceToNodes(Method):
 
         slice.sync()
 
-	self.event_objects = {'Node': [node['node_id'] for node in nodes],
+        nodeids = [node['node_id'] for node in nodes]
+	self.event_objects = {'Node': nodeids,
 			      'Slice': [slice['slice_id']]}
+        self.message = 'Slice %d added to nodes %s' % (slice['slice_id'], nodeids)
 
         return 1
