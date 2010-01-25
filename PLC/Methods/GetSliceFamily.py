@@ -25,7 +25,7 @@ class GetSliceFamily(Method):
               Slice.fields['name']),
         ]
 
-    returns = Parameter (str, "the slice-family this slice should be based upon")
+    returns = Parameter (str, "the slicefamily this slice should be based upon")
 
     # 
     ### system slices - at least planetflow - still rely on 'vref'

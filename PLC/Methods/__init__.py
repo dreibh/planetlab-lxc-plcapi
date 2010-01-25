@@ -104,6 +104,7 @@ GetKeys
 GetMessages
 GetNetworkMethods
 GetNetworkTypes
+GetNodeFlavour
 GetNodeGroups
 GetNodeTags
 GetNodeTypes
