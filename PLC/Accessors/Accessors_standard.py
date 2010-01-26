@@ -10,14 +10,15 @@ from PLC.Sites import Site
 from PLC.Persons import Person
 #from PLC.Ilinks import Ilink
 
-from PLC.Accessors.Factory import define_accessors, all_roles, tech_roles
+from PLC.Accessors.Factory import define_accessors, admin_roles, all_roles, tech_roles
 
 import sys
 current_module = sys.modules[__name__]
 
 # NOTE.
-# most of these tag types are defined in MyPLC/db-config, so any details here in the 
-# description/category area is unlikely to make it into the database
+# The 'Get' and 'Set' accessors defined here automagically create the corresponding TagType in the database
+# for safety, some crucial tags are forced to be created at plc startup time, through the db-config.d mechanism
+# You might wish to keep this roughly in sync with db-config.d/011-standard_tags
 #
 
 # 
@@ -93,8 +94,7 @@ define_accessors(current_module, Interface, "Driver", "driver",
 define_accessors(current_module, Interface, "Alias", "alias", 
                  "interface/config", "interface alias",
                  get_roles=all_roles, set_roles=tech_roles)
+define_accessors(current_module, Interface, "Backdoor", "backdoor",
+                 "interface/hidden", "For testing new settings",
+                 get_roles=all_roles, set_roles=admin_roles)
 
-# site
-define_accessors(current_module, Site, "Foo", "foo",
-                 "site/test", "some name",
-                 get_roles=all_roles, set_roles=all_roles, expose_in_api=True)

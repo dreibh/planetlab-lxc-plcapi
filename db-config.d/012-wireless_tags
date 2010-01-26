@@ -1,0 +1,21 @@
+# -*-python-*-
+# $Id: 012-interface_tags -1   $
+# $URL: svn+ssh://thierry@svn.planet-lab.org/svn/MyPLC/trunk/db-config.d/012-interface_tags $
+#################### interface settings
+
+# force creation of tags defined as accessors
+GetInterfaceMode(0)
+GetInterfaceEssid(0)
+GetInterfaceNw(0)
+GetInterfaceFreq(0)
+GetInterfaceChannel(0)
+GetInterfaceSens(0)
+GetInterfaceRate(0)
+GetInterfaceKey(0)
+GetInterfaceKey1(0)
+GetInterfaceKey2(0)
+GetInterfaceKey3(0)
+GetInterfaceKey4(0)
+GetInterfaceSecurityMode(0)
+GetInterfaceIwconfig(0)
+GetInterfaceIwpriv(0)
