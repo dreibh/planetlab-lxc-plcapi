@@ -3,8 +3,6 @@
 #
 # Thierry Parmentelat - INRIA
 #
-# $Revision: 9423 $
-#
 from types import StringTypes
 
 from PLC.Faults import *
