@@ -36,7 +36,7 @@ class GetNodeFlavour(Method):
 
     
     ########## nodefamily
-    def nodefamily (self, auth, node_id, arch):
+    def nodefamily (self, auth, node_id, fcdistro, arch):
 
         # the deployment tag, if set, wins
         deployment = GetNodeDeployment (self.api).call(auth,node_id)
@@ -45,15 +45,12 @@ class GetNodeFlavour(Method):
         pldistro = GetNodePldistro (self.api).call(auth, node_id)
         if not pldistro: pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
 
-        fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
-        if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
-
         # xxx would make sense to check the corresponding bootstrapfs is available
         return "%s-%s-%s"%(pldistro,fcdistro,arch)
 
-    def extensions (self, auth, node_id, arch):
+    def extensions (self, auth, node_id, fcdistro, arch):
         try:
-            return [ "%s-%s"%(e,arch) for e in GetNodeExtensions(self.api).call(auth,node_id).split() ]
+            return [ "%s-%s-%s"%(e,fcdistro,arch) for e in GetNodeExtensions(self.api).call(auth,node_id).split() ]
         except:
             return []
 
@@ -71,8 +68,11 @@ class GetNodeFlavour(Method):
         arch = GetNodeArch (self.api).call(auth,node_id)
         if not arch: arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
 
+        fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
+        if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
+
         # xxx could use some sanity checking, and could provide fallbacks
-        return { 'nodefamily' : self.nodefamily(auth,node_id, arch),
-                 'extensions' : self.extensions(auth,node_id, arch),
+        return { 'nodefamily' : self.nodefamily(auth,node_id, fcdistro, arch),
+                 'extensions' : self.extensions(auth,node_id, fcdistro, arch),
                  'plain' : self.plain(auth,node_id),
                  }
