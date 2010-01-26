@@ -244,7 +244,7 @@ class GetBootMedium(Method):
         return file
 
     # see also GetNodeFlavour that does similar things
-    def get_nodefamily (self, node):
+    def get_nodefamily (self, node, auth):
         pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
         fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
         arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
@@ -441,7 +441,7 @@ class GetBootMedium(Method):
             nodename = "".join(map(hexa2,tempbytes))
 
         # get nodefamily
-        (pldistro,fcdistro,arch) = self.get_nodefamily(node)
+        (pldistro,fcdistro,arch) = self.get_nodefamily(node,auth)
         self.nodefamily="%s-%s-%s"%(pldistro,fcdistro,arch)
 
         # apply on globals
