@@ -16,6 +16,8 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTag, NodeTags
 
+from PLC.Accessors.Accessors_standard import *			# import node accessors
+
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
 allowed_actions = {
@@ -241,26 +243,27 @@ class GetBootMedium(Method):
 
         return file
 
-    # see also InstallBootstrapFS in bootmanager that does similar things
+    # see also GetNodeFlavour that does similar things
     def get_nodefamily (self, node):
-        # get defaults from the myplc build
-        try:
-            (pldistro,arch) = file("/etc/planetlab/nodefamily").read().strip().split("-")
-        except:
-            (pldistro,arch) = ("planetlab","i386")
-            
-        # with no valid argument, return system-wide defaults
+        pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
+        fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
+        arch: arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
         if not node:
-            return (pldistro,arch)
-
+            return (pldistro,fcdistro,arch)
+        
         node_id=node['node_id']
+        
+        # no support for deployment-based BootCD's, use kvariants instead
+        node_pldistro = GetNodePldistro (self.api).call(auth, node_id)
+        if node_pldistro: pldistro = node_pldistro
 
-        tag=Nodes(self.api,[node_id],['arch'])[0]['arch']
-        if tag: arch=tag
-        tag=Nodes(self.api,[node_id],['pldistro'])[0]['pldistro']
-        if tag: pldistro=tag
+        node_fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
+        if node_fcdistro: fcdistro = node_fcdistro
 
-        return (pldistro,arch)
+        node_arch = GetNodeArch (self.api).call(auth,node_id)
+        if node_arch: arch = node_arch
+        
+        return (pldistro,fcdistro,arch)
 
     def bootcd_version (self):
         try:
@@ -438,8 +441,8 @@ class GetBootMedium(Method):
             nodename = "".join(map(hexa2,tempbytes))
 
         # get nodefamily
-        (pldistro,arch) = self.get_nodefamily(node)
-        self.nodefamily="%s-%s"%(pldistro,arch)
+        (pldistro,fcdistro,arch) = self.get_nodefamily(node)
+        self.nodefamily="%s-%s-%s"%(pldistro,fcdistro,arch)
 
         # apply on globals
         for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:

@@ -29,7 +29,7 @@ class GetNodeFlavour(Method):
         ]
 
     returns = { 
-        'nodefamily' : Parameter (str, "the node-family this node should be based upon"),
+        'nodefamily' : Parameter (str, "the nodefamily this node should be based upon"),
         'extensions' : [ Parameter (str, "extensions to add to the base install") ],
         'plain' : Parameter (bool, "use plain bootstrapfs image if set (for tests)" ) ,
         }
@@ -45,12 +45,11 @@ class GetNodeFlavour(Method):
         pldistro = GetNodePldistro (self.api).call(auth, node_id)
         if not pldistro: pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
 
-        ###fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
-        ###if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
+        fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
+        if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
 
         # xxx would make sense to check the corresponding bootstrapfs is available
-        ###return "%s-%s-%s"%(pldistro,fcdistro,arch)
-        return "%s-%s"%(pldistro,arch)
+        return "%s-%s-%s"%(pldistro,fcdistro,arch)
 
     def extensions (self, auth, node_id, arch):
         try:
