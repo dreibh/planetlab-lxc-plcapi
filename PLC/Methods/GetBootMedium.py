@@ -247,7 +247,7 @@ class GetBootMedium(Method):
     def get_nodefamily (self, node):
         pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
         fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
-        arch: arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
+        arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
         if not node:
             return (pldistro,fcdistro,arch)
         
