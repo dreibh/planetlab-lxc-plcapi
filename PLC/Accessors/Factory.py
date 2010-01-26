@@ -4,11 +4,12 @@
 
 from types import NoneType
 
-from PLC.Method import Method
+from PLC.Faults import *
+
 from PLC.Auth import Auth
 from PLC.Parameter import Parameter, Mixed
-
-from PLC.Faults import *
+from PLC.Method import Method
+from PLC.Accessor import Accessor, AccessorSingleton
 
 from PLC.Nodes import Nodes, Node
 from PLC.NodeTags import NodeTags, NodeTag
@@ -16,6 +17,10 @@ from PLC.Interfaces import Interfaces, Interface
 from PLC.InterfaceTags import InterfaceTags, InterfaceTag
 from PLC.Slices import Slices, Slice
 from PLC.SliceTags import SliceTags, SliceTag
+from PLC.Sites import Sites, Site
+from PLC.SiteTags import SiteTags, SiteTag
+from PLC.Persons import Persons, Person
+from PLC.PersonTags import PersonTags, PersonTag
 
 # this is another story..
 #from PLC.Ilinks import Ilink
@@ -32,6 +37,12 @@ taggable_classes = { Node : {'table_class' : Nodes,
                      Slice: {'table_class' : Slices, 
                              'joins_class': SliceTags, 'join_class': SliceTag,
                              'secondary_key':'name'},
+                     Site: {'table_class' : Sites, 
+                             'joins_class': SiteTags, 'join_class': SiteTag,
+                             'secondary_key':'login_base'},
+                     Person: {'table_class' : Persons, 
+                             'joins_class': PersonTags, 'join_class': PersonTag,
+                             'secondary_key':'email'},
 #                     Ilink : xxx
                      }
 
@@ -52,6 +63,8 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # while get_roles and set_roles get attached to the created methods
 # this might need a cleanup
 # 
+# in addition a convenience method like e.g. LocateNodeArch is defined 
+# in the Accessor class; its purpose is to retrieve the tag, or to create it if needed
 
 def define_accessors (module, objclass, methodsuffix, tagname, 
                       category, description, 
@@ -71,14 +84,16 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     classname=objclass.__name__
     get_name = "Get" + classname + methodsuffix
     set_name = "Set" + classname + methodsuffix
+    locator_name = "Locate" + classname + methodsuffix
 
-    # create method objects under PLC.Method.Method
+    # accessor method objects under PLC.Method.Method
     get_class = type (get_name, (Method,),
                       {"__doc__":"Accessor 'get' method designed for %s objects using tag %s"%\
                            (classname,tagname)})
     set_class = type (set_name, (Method,),
                       {"__doc__":"Accessor 'set' method designed for %s objects using tag %s"%\
                            (classname,tagname)})
+
     # accepts 
     get_accepts = [ Auth () ]
     primary_key=objclass.primary_key
@@ -106,13 +121,23 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     joins_class = taggable_classes[objclass]['joins_class']
     join_class = taggable_classes[objclass]['join_class']
 
+    # locate the tag and create it if needed
+    # this method is attached to the Accessor class
+    def locate_or_create_tag (self):
+        return self.locate_or_create_tag (tagname=tagname,
+                                          category=category,
+                                          description=description,
+                                          min_role_id=tag_min_role_id)
+
+    # attach it to the Accessor class
+    setattr(Accessor,locator_name,locate_or_create_tag)
+
     # body of the get method
     def get_call (self, auth, id_or_name):
-        # search the tagtype - xxx - might need a cache
-        tag_types = TagTypes (self.api, {'tagname': tagname})
-        if not tag_types:
-            return None
-        tag_type_id = tag_types[0]['tag_type_id']
+        # locate the tag, see above
+        locator = getattr(Accessor,locator_name)
+        tag_type_id = locator(AccessorSingleton(self.api))
+
         filter = {'tag_type_id':tag_type_id}
         if isinstance (id_or_name,int):
             filter[primary_key]=id_or_name
@@ -140,19 +165,9 @@ def define_accessors (module, objclass, methodsuffix, tagname,
             raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
         primary_id = objs[0][primary_key]
                            
-        # search tag type & create if needed
-        tag_types = TagTypes (self.api, {'tagname':tagname})
-        if tag_types:
-            tag_type = tag_types[0]
-        else:
-            # not found: create it
-            tag_type_fields = {'tagname':tagname, 
-                               'category' :  category,
-                               'description' : description,
-                               'min_role_id': tag_min_role_id}
-            tag_type = TagType (self.api, tag_type_fields)
-            tag_type.sync()
-        tag_type_id = tag_type['tag_type_id']
+        # locate the tag, see above
+        locator = getattr(Accessor,locator_name)
+        tag_type_id = locator(AccessorSingleton(self.api))
 
         # locate the join object (e.g. NodeTag, SliceTag or InterfaceTag)
         filter = {'tag_type_id':tag_type_id}

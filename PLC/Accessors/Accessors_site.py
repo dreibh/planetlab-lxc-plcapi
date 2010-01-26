@@ -2,8 +2,11 @@
 # $Id$
 # $URL$
 #
-# Shortcuts_site.py is the place where you can define your own tag accessors
-# this will not be overwritten through rpm upgrades in a myplc-devel packaging
+# Accessors_site.py is the place where you can define your own local tag accessors
+# this will not be overwritten through rpm upgrades
+#
+# Now that Sites are taggable too, the name may be confusing, think of is as
+# Accessors_local.py
 #
 # methods denotes the set of methods (names) that get inserted into the API
 # it is updated by define_accessors
@@ -13,6 +16,8 @@ methods=[]
 from PLC.Nodes import Node
 from PLC.Interfaces import Interface
 from PLC.Slices import Slice
+from PLC.Sites import Site
+from PLC.Persons import Person
 #from PLC.Ilinks import Ilink
 
 from PLC.Accessors.Factory import define_accessors, all_roles, tech_roles
