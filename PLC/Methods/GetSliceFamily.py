@@ -38,10 +38,6 @@ class GetSliceFamily(Method):
         slice = slices[0]
         slice_id = slice['slice_id']
 
-        # the vref tag, if set, wins
-        vref = GetSliceVref (self.api).call(auth,slice_id)
-        if vref: return vref
-
         arch = GetSliceArch (self.api).call(auth,slice_id)
         if not arch: arch = self.api.config.PLC_FLAVOUR_SLICE_ARCH
 
@@ -51,6 +47,12 @@ class GetSliceFamily(Method):
         fcdistro = GetSliceFcdistro (self.api).call(auth, slice_id)
         if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_SLICE_FCDISTRO
 
+        # the vref tag, if set, wins over pldistro
+        vref = GetSliceVref (self.api).call(auth,slice_id)
+
         # xxx would make sense to check the corresponding vserver rpms are available
         # in all node-families yum repos (and yumgroups, btw)
-        return "%s-%s-%s"%(pldistro,fcdistro,arch)
+        if vref: 
+            return "%s-%s-%s"%(vref,fcdistro,arch)
+        else:
+            return "%s-%s-%s"%(pldistro,fcdistro,arch)
