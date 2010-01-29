@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -123,6 +123,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Jan 29 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-1
+- first working version of 5.0:
+- pld.c/, db-config.d/ and nodeconfig/ scripts should now sit in the module they belong to
+- nodefamily is 3-fold with pldistro-fcdistro-arch
+- site and person tags
+- new methods GetSliceFamily and GetNodeFlavour
+- deprecated the dummynet stuff that were for the external dummyboxes
+- tags definition : more consistency between db-config scripts and accessors
+- (get accessor to create the tag type too if absent)
+- logging an event for AddSliceToNodes
+
 * Sat Jan 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-32
 - support for fedora 12
 - fix subtle bug in filtering with ] and quotes
