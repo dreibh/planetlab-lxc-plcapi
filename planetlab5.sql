@@ -28,7 +28,14 @@ CREATE TABLE plc_db_version (
     subversion integer NOT NULL DEFAULT 0
 ) WITH OIDS;
 
-INSERT INTO plc_db_version (version, subversion) VALUES (5, 0);
+-- the migration scripts do not use the major 'version' number
+-- so 5.0 sets subversion at 100
+-- in case your database misses the site and persons tags feature, 
+-- you might wish to first upgrade to 4.3-rc16 before moving to some 5.0
+-- or run the up script here
+-- http://svn.planet-lab.org/svn/PLCAPI/branches/4.3/migrations/
+
+INSERT INTO plc_db_version (version, subversion) VALUES (5, 100);
 
 --------------------------------------------------------------------------------
 -- Aggregates and store procedures
@@ -42,6 +49,18 @@ CREATE AGGREGATE array_accum (
     stype = anyarray,
     initcond = '{}'
 );
+
+--------------------------------------------------------------------------------
+-- The building block for attaching tags
+--------------------------------------------------------------------------------
+CREATE TABLE tag_types (
+
+    tag_type_id serial PRIMARY KEY,			-- ID
+    tagname text UNIQUE NOT NULL,			-- Tag Name
+    description text,					-- Optional Description
+    min_role_id integer REFERENCES roles DEFAULT 10,	-- set minimal role required
+    category text NOT NULL DEFAULT 'general'		-- Free text for grouping tags together
+) WITH OIDS;
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -72,6 +91,37 @@ CREATE TABLE persons (
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) WITH OIDS;
 CREATE INDEX persons_email_idx ON persons (email);
+
+--------------------------------------------------------------------------------
+-- person tags
+--------------------------------------------------------------------------------
+CREATE TABLE person_tag (
+    person_tag_id serial PRIMARY KEY,			-- ID
+    person_id integer REFERENCES persons NOT NULL,		-- person id
+    tag_type_id integer REFERENCES tag_types,		-- tag type id
+    value text						-- value attached
+) WITH OIDS;
+
+CREATE OR REPLACE VIEW person_tags AS
+SELECT person_id,
+array_accum(person_tag_id) AS person_tag_ids
+FROM person_tag
+GROUP BY person_id;
+
+CREATE OR REPLACE VIEW view_person_tags AS
+SELECT
+person_tag.person_tag_id,
+person_tag.person_id,
+persons.email,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
+person_tag.value
+FROM person_tag 
+INNER JOIN tag_types USING (tag_type_id)
+INNER JOIN persons USING (person_id);
 
 --------------------------------------------------------------------------------
 -- Sites
@@ -131,6 +181,38 @@ SELECT site_id,
 array_accum(person_id) AS person_ids
 FROM person_site
 GROUP BY site_id;
+
+--------------------------------------------------------------------------------
+-- site tags
+--------------------------------------------------------------------------------
+
+CREATE TABLE site_tag (
+    site_tag_id serial PRIMARY KEY,			-- ID
+    site_id integer REFERENCES sites NOT NULL,		-- site id
+    tag_type_id integer REFERENCES tag_types,		-- tag type id
+    value text						-- value attached
+) WITH OIDS;
+
+CREATE OR REPLACE VIEW site_tags AS
+SELECT site_id,
+array_accum(site_tag_id) AS site_tag_ids
+FROM site_tag
+GROUP BY site_id;
+
+CREATE OR REPLACE VIEW view_site_tags AS
+SELECT
+site_tag.site_tag_id,
+site_tag.site_id,
+sites.login_base,
+tag_types.tag_type_id,
+tag_types.tagname,
+tag_types.description,
+tag_types.category,
+tag_types.min_role_id,
+site_tag.value
+FROM site_tag 
+INNER JOIN tag_types USING (tag_type_id)
+INNER JOIN sites USING (site_id);
 
 --------------------------------------------------------------------------------
 -- Mailing Addresses
@@ -322,14 +404,6 @@ GROUP BY site_id;
 --------------------------------------------------------------------------------
 -- node tags
 --------------------------------------------------------------------------------
-CREATE TABLE tag_types (
-
-    tag_type_id serial PRIMARY KEY,			-- ID
-    tagname text UNIQUE NOT NULL,			-- Tag Name
-    description text,					-- Optional Description
-    min_role_id integer REFERENCES roles DEFAULT 10,	-- set minimal role required
-    category text NOT NULL DEFAULT 'general'		-- Free text for grouping tags together
-) WITH OIDS;
 
 CREATE TABLE node_tag (
     node_tag_id serial PRIMARY KEY,			-- ID
@@ -1026,7 +1100,8 @@ COALESCE((SELECT role_ids FROM person_roles WHERE person_roles.person_id = perso
 COALESCE((SELECT roles FROM person_roles WHERE person_roles.person_id = persons.person_id), '{}') AS roles,
 COALESCE((SELECT site_ids FROM person_sites WHERE person_sites.person_id = persons.person_id), '{}') AS site_ids,
 COALESCE((SELECT key_ids FROM person_keys WHERE person_keys.person_id = persons.person_id), '{}') AS key_ids,
-COALESCE((SELECT slice_ids FROM person_slices WHERE person_slices.person_id = persons.person_id), '{}') AS slice_ids
+COALESCE((SELECT slice_ids FROM person_slices WHERE person_slices.person_id = persons.person_id), '{}') AS slice_ids,
+COALESCE((SELECT person_tag_ids FROM person_tags WHERE person_tags.person_id = persons.person_id), '{}') AS person_tag_ids
 FROM persons
 LEFT JOIN peer_person USING (person_id);
 
@@ -1174,7 +1249,8 @@ COALESCE((SELECT person_ids FROM site_persons WHERE site_persons.site_id = sites
 COALESCE((SELECT node_ids FROM site_nodes WHERE site_nodes.site_id = sites.site_id), '{}') AS node_ids,
 COALESCE((SELECT address_ids FROM site_addresses WHERE site_addresses.site_id = sites.site_id), '{}') AS address_ids,
 COALESCE((SELECT slice_ids FROM site_slices WHERE site_slices.site_id = sites.site_id), '{}') AS slice_ids,
-COALESCE((SELECT pcu_ids FROM site_pcus WHERE site_pcus.site_id = sites.site_id), '{}') AS pcu_ids
+COALESCE((SELECT pcu_ids FROM site_pcus WHERE site_pcus.site_id = sites.site_id), '{}') AS pcu_ids,
+COALESCE((SELECT site_tag_ids FROM site_tags WHERE site_tags.site_id = sites.site_id), '{}') AS site_tag_ids
 FROM sites
 LEFT JOIN peer_site USING (site_id);
 
