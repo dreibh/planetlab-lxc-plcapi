@@ -84,7 +84,6 @@ except ImportError:
 from PLC.Config import Config
 from PLC.Faults import *
 import PLC.Methods
-import PLC.Legacy
 import PLC.Accessors
 
 def import_deep(name):

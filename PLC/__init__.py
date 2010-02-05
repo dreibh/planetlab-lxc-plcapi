@@ -49,10 +49,4 @@ Slices
 Table
 TagTypes
 sendmail
-v42Legacy
-v42LegacyNodeNetworkSettingTypes
-v42LegacyNodeNetworkSettings
-v42LegacyNodeNetworks
-v42LegacySliceAttributeTypes
-v42LegacySliceAttributes
 """.split()

@@ -10,7 +10,7 @@ from PLC.Auth import Auth
 
 admin_only = ['key', 'session', 'boot_nonce' ]
 
-class v43GetNodes(Method):
+class GetNodes(Method):
     """
     Returns an array of structs containing details about nodes. If
     node_filter is specified and is an array of node identifiers or
@@ -89,55 +89,3 @@ class v43GetNodes(Method):
 		    del node[field]	
 
         return nodes
-
-node_fields = Node.fields.copy()
-node_fields['nodenetwork_ids']=Parameter([int], "Legacy version of interface_ids")
-
-class v42GetNodes(v43GetNodes):
-    """
-    Legacy wrapper for v43GetNodes.
-    """
-
-    accepts = [
-        Auth(),
-        Mixed([Mixed(Node.fields['node_id'],
-                     Node.fields['hostname'])],
-	      Parameter(str,"hostname"),
-              Parameter(int,"node_id"),
-              Filter(node_fields)),
-        Parameter([str], "List of fields to return", nullok = True),
-        ]
-    returns = [node_fields]
-
-    def call(self, auth, node_filter = None, return_fields = None):
-        # convert nodenetwork_ids -> interface_ids
-        if isinstance(node_filter, dict):
-            if node_filter.has_key('nodenetwork_ids'):
-                interface_ids = node_filter.pop('nodenetwork_ids')
-                if not node_filter.has_key('interface_ids'):
-                    node_filter['interface_ids']=interface_ids
-
-        if isinstance(return_fields, list):
-            if 'nodenetwork_ids' in return_fields:
-                return_fields.remove('nodenetwork_ids')
-                if 'interface_ids' not in return_fields:
-                    return_fields.append('interface_ids')
-        nodes = v43GetNodes.call(self,auth,node_filter,return_fields)
-        # if interface_ids are present, then create a nodenetwork_ids mapping
-        for node in nodes:
-            if node.has_key('interface_ids'):
-                node['nodenetwork_ids']=node['interface_ids']
-        return nodes
-
-class GetNodes(v42GetNodes):
-    """
-    Returns an array of structs containing details about nodes. If
-    node_filter is specified and is an array of node identifiers or
-    hostnames, or a struct of node attributes, only nodes matching the
-    filter will be returned. If return_fields is specified, only the
-    specified details will be returned.
-
-    Some fields may only be viewed by admins.
-    """
-
-    pass

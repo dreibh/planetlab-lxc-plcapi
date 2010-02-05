@@ -8,7 +8,7 @@ from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 
-class v43GetSlices(Method):
+class GetSlices(Method):
     """
     Returns an array of structs containing details about slices. If
     slice_filter is specified and is an array of slice identifiers or
@@ -76,57 +76,3 @@ class v43GetSlices(Method):
 
         return slices
 
-slice_fields = Slice.fields.copy()
-slice_fields['slice_attribute_ids']=Parameter([int], "Legacy version of slice_tag_ids")
-
-class v42GetSlices(v43GetSlices):
-    """
-    Legacy wrapper for v43GetSlices.
-    """
-
-    accepts = [
-        Auth(),
-        Mixed([Mixed(Slice.fields['slice_id'],
-                     Slice.fields['name'])],
-              Parameter(str,"name"),
-              Parameter(int,"slice_id"),
-              Filter(slice_fields)),
-        Parameter([str], "List of fields to return", nullok = True)
-        ]
-
-    returns = [slice_fields]
-
-    def call(self, auth, slice_filter = None, return_fields = None):
-        # convert nodenetwork_ids -> interface_ids
-        if isinstance(slice_filter, dict):
-            if slice_filter.has_key('slice_attribute_ids'):
-                slice_tag_ids = slice_filter.pop('slice_attribute_ids') 
-                if not slice_filter.has_key('slice_tag_ids'):
-                    slice_filter['slice_tag_ids']=slice_tag_ids
-        if isinstance(return_fields, list):
-            if 'slice_attribute_ids' in return_fields:
-                return_fields.remove('slice_attribute_ids')
-                if 'slice_tag_ids' not in return_fields:
-                    return_fields.append('slice_tag_ids')
-        slices = v43GetSlices.call(self,auth,slice_filter,return_fields)
-        # add in a slice_tag_ids -> slice_attribute_ids
-        for slice in slices:
-            if slice.has_key('slice_tag_ids'):
-                slice['slice_attribute_ids']=slice['slice_tag_ids']
-        return slices
-
-class GetSlices(v42GetSlices):
-    """
-    Returns an array of structs containing details about slices. If
-    slice_filter is specified and is an array of slice identifiers or
-    slice names, or a struct of slice attributes, only slices matching
-    the filter will be returned. If return_fields is specified, only the
-    specified details will be returned.
-
-    Users may only query slices of which they are members. PIs may
-    query any of the slices at their sites. Admins and nodes may query
-    any slice. If a slice that cannot be queried is specified in
-    slice_filter, details about that slice will not be returned.
-    """
-
-    pass

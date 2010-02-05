@@ -118,7 +118,7 @@ def get_slivers(api, auth, slice_filter, node = None):
 
     return slivers
 
-class v43GetSlivers(Method):
+class GetSlivers(Method):
     """
     Returns a struct containing information about the specified node
     (or calling node, if called by a node and node_id_or_hostname is
@@ -142,7 +142,7 @@ class v43GetSlivers(Method):
         'timestamp': Parameter(int, "Timestamp of this call, in seconds since UNIX epoch"),
         'node_id': Node.fields['node_id'],
         'hostname': Node.fields['hostname'],
-        'networks': [Interface.fields],
+        'interfaces': [Interface.fields],
         'groups': [NodeGroup.fields['groupname']],
         'conf_files': [ConfFile.fields],
 	'initscripts': [InitScript.fields],
@@ -188,7 +188,7 @@ class v43GetSlivers(Method):
                 raise PLCInvalidArgument, "Not a local node"
 
         # Get interface information
-        networks = Interfaces(self.api, node['interface_ids'])
+        interfaces = Interfaces(self.api, node['interface_ids'])
 
         # Get node group information
         nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('groupname')
@@ -283,44 +283,10 @@ class v43GetSlivers(Method):
             'timestamp': timestamp,
             'node_id': node['node_id'],
             'hostname': node['hostname'],
-            'networks': networks,
+            'interfaces': interfaces,
             'groups': groups,
             'conf_files': conf_files.values(),
 	    'initscripts': initscripts,
             'slivers': slivers,
             'accounts': accounts
             }
-
-class v42GetSlivers(v43GetSlivers):
-    """
-    Legacy wrapper for v43GetSlivers.
-    """
-
-    def call(self, auth, node_id_or_hostname = None):
-        result = v43GetSlivers.call(self,auth,node_id_or_hostname)
-        networks = result['networks']
-
-        for i in range(0,len(networks)):
-            network = networks[i]
-            if network.has_key("interface_id"):
-                network['nodenetwork_id']=network['interface_id']
-            if network.has_key("interface_tag_ids"):
-                network['nodenetwork_setting_ids']=network['interface_tag_ids']
-            networks[i]=network
-
-        result['networks']=networks
-        return result
-
-class GetSlivers(v42GetSlivers):
-    """
-    Returns a struct containing information about the specified node
-    (or calling node, if called by a node and node_id_or_hostname is
-    not specified), including the current set of slivers bound to the
-    node.
-
-    All of the information returned by this call can be gathered from
-    other calls, e.g. GetNodes, GetInterfaces, GetSlices, etc. This
-    function exists almost solely for the benefit of Node Manager.
-    """
-
-    pass
