@@ -1,4 +1,4 @@
-n#!/usr/bin/python
+#!/usr/bin/python
 #
 # Setup script for PLCAPI
 #
