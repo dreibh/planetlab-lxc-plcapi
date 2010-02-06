@@ -51,6 +51,20 @@ CREATE AGGREGATE array_accum (
 );
 
 --------------------------------------------------------------------------------
+-- Roles
+--------------------------------------------------------------------------------
+
+-- Valid account roles
+CREATE TABLE roles (
+    role_id integer PRIMARY KEY,			-- Role identifier
+    name text UNIQUE NOT NULL				-- Role symbolic name
+) WITH OIDS;
+INSERT INTO roles (role_id, name) VALUES (10, 'admin');
+INSERT INTO roles (role_id, name) VALUES (20, 'pi');
+INSERT INTO roles (role_id, name) VALUES (30, 'user');
+INSERT INTO roles (role_id, name) VALUES (40, 'tech');
+
+--------------------------------------------------------------------------------
 -- The building block for attaching tags
 --------------------------------------------------------------------------------
 CREATE TABLE tag_types (
@@ -307,16 +321,6 @@ GROUP BY person_id;
 --------------------------------------------------------------------------------
 -- Account roles
 --------------------------------------------------------------------------------
-
--- Valid account roles
-CREATE TABLE roles (
-    role_id integer PRIMARY KEY,			-- Role identifier
-    name text UNIQUE NOT NULL				-- Role symbolic name
-) WITH OIDS;
-INSERT INTO roles (role_id, name) VALUES (10, 'admin');
-INSERT INTO roles (role_id, name) VALUES (20, 'pi');
-INSERT INTO roles (role_id, name) VALUES (30, 'user');
-INSERT INTO roles (role_id, name) VALUES (40, 'tech');
 
 CREATE TABLE person_role (
     person_id integer REFERENCES persons NOT NULL,	-- Account identifier
