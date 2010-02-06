@@ -1,4 +1,4 @@
-#!/usr/bin/python
+n#!/usr/bin/python
 #
 # Setup script for PLCAPI
 #
@@ -13,7 +13,7 @@ from distutils.core import setup
 from glob import glob
 
 setup(py_modules = ['ModPython'],
-      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'PLC/Legacy'],
+      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', ],
       scripts = ['plcsh', 'Server.py'],
       data_files = [
         ('', ['planetlab5.sql']),
