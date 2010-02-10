@@ -10,7 +10,7 @@
 
 from types import StringTypes
 from datetime import datetime
-import md5
+import hashlib
 import time
 from random import Random
 import re
@@ -116,7 +116,7 @@ class Person(Row):
         else:
             # Generate a somewhat unique 8 character salt string
             salt = str(time.time()) + str(Random().random())
-            salt = md5.md5(salt).hexdigest()[:8] 
+            salt = hashlib.md5(salt).hexdigest()[:8] 
             return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
 
     validate_date_created = Row.validate_timestamp

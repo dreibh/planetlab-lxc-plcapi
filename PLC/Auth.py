@@ -9,7 +9,7 @@
 #
 
 import crypt
-import sha
+import hashlib
 import hmac
 import time
 
@@ -257,7 +257,7 @@ class BootAuth(Auth):
             # We encode in UTF-8 before calculating the HMAC, which is
             # an 8-bit algorithm.
             # python 2.6 insists on receiving a 'str' as opposed to a 'unicode'
-            digest = hmac.new(str(key), msg.encode('utf-8'), sha).hexdigest()
+            digest = hmac.new(str(key), msg.encode('utf-8'), hashlib.sha1).hexdigest()
 
             if digest != auth['value']:
                 raise PLCAuthenticationFailure, "Call could not be authenticated"
