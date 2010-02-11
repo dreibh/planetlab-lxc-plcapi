@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -123,6 +123,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
+- major cleanup
+- get rid of all 4.2-related legacy code
+- reset the migrations code, planetlab5.sql somes with (5,100)
+- uses hashlib module when available
+
 * Fri Jan 29 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-1
 - first working version of 5.0:
 - pld.c/, db-config.d/ and nodeconfig/ scripts should now sit in the module they belong to
