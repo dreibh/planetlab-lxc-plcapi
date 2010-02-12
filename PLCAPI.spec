@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 33
+%define taglevel 34
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Fri Feb 12 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.3-34
+- log calls to AddSliceToNodes
+
 * Thu Jan 21 2010 Talip Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-4.3-33
 - rename migration scripts
 
