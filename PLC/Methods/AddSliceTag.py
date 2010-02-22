@@ -125,6 +125,12 @@ class AddSliceTag(Method):
                                                             'tagname': tag_type['tagname'], 
                                                             'value': value})
         for slice_tag_check in slice_tags_check:
+            # do not compare between slice tag and sliver tag
+            if 'node_id' not in slice_tag and slice_tag_check['node_id'] is not None:
+                continue
+            # do not compare between sliver tag and slice tag
+            if 'node_id' in slice_tag and slice_tag['node_id'] is not None and slice_tag_check['node_id'] is None:
+                continue
             if 'node_id' in slice_tag and slice_tag['node_id'] == slice_tag_check['node_id']:
 		raise PLCInvalidArgument, "Sliver attribute already exists"
 	    if 'nodegroup_id' in slice_tag and slice_tag['nodegroup_id'] == slice_tag_check['nodegroup_id']:
