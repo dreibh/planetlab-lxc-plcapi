@@ -146,31 +146,7 @@ class Filter(Parameter, dict):
                     if not isinstance(value, (list, tuple, set)):
                         value = [value,]
 
-                if isinstance(value, (list, tuple, set)):
-                    # handling filters like '~slice_id':[]
-                    # this should return true, as it's the opposite of 'slice_id':[] which is false
-                    # prior to this fix, 'slice_id':[] would have returned ``slice_id IN (NULL) '' which is unknown 
-                    # so it worked by coincidence, but the negation '~slice_ids':[] would return false too
-                    if not value:
-                        if modifiers['&'] or modifiers['|']:
-                            operator = "="
-                            value = "'{}'"
-                        else:
-                            field=""
-                            operator=""
-                            value = "FALSE"
-                    else:
-                        value = map(str, map(api.db.quote, value))
-                        if modifiers['&']:
-                            operator = "@>"
-                            value = "ARRAY[%s]" % ", ".join(value)
-                        elif modifiers['|']:
-                            operator = "&&"
-                            value = "ARRAY[%s]" % ", ".join(value)
-                        else:
-                            operator = "IN"
-                            value = "(%s)" % ", ".join(value)
-                else:
+                def get_op_and_val(value):
                     if value is None:
                         operator = "IS"
                         value = "NULL"
@@ -195,8 +171,59 @@ class Filter(Parameter, dict):
                             operator='>='
 
                         value = str(api.db.quote(value))
- 
-                clause = "%s %s %s" % (field, operator, value)
+                    return (operator, value)
+
+                if isinstance(value, (list, tuple, set)):
+                    # handling filters like '~slice_id':[]
+                    # this should return true, as it's the opposite of 'slice_id':[] which is false
+                    # prior to this fix, 'slice_id':[] would have returned ``slice_id IN (NULL) '' which is unknown 
+                    # so it worked by coincidence, but the negation '~slice_ids':[] would return false too
+                    if not value:
+                        if modifiers['&'] or modifiers['|']:
+                            operator = "="
+                            value = "'{}'"
+                        else:
+                            field=""
+                            operator=""
+                            value = "FALSE"
+                    else:
+                        do_join = True
+                        vals = {}
+                        for val in value:
+                            base_op, val = get_op_and_val(val)
+                            if base_op != '=':
+                                do_join = False
+                            if base_op in vals:
+                                vals[base_op].append(val)
+                            else:
+                                vals[base_op] = [val]
+                        if do_join:
+                            if modifiers['&']:
+                                operator = "@>"
+                                value = "ARRAY[%s]" % ", ".join(value)
+                            elif modifiers['|']:
+                                operator = "&&"
+                                value = "ARRAY[%s]" % ", ".join(value)
+                            else:
+                                operator = "IN"
+                                value = "(%s)" % ", ".join(value)
+                            clause = "%s %s %s" % (field, operator, value)
+                        else:
+                            # We need something more complex
+                            subclauses = []
+                            for operator in vals.keys():
+                                if operator == '=':
+                                    subclauses.append("(%s IN (%s))" % (field, ",".join(vals[operator])))
+                                elif operator == 'IS':
+                                    subclauses.append("(%s IS NULL)" % field)
+                                else:
+                                    for value in vals[operator]:
+                                        subclauses.append("(%s %s %s)" % (field, operator, value))
+                            clause = "(" + " OR ".join(subclauses) + ")"
+                else:
+                    operator, value = get_op_and_val(value)
+
+                    clause = "%s %s %s" % (field, operator, value)
 
                 if modifiers['~']:
                     clause = " ( NOT %s ) " % (clause)
