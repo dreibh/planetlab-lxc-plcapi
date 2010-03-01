@@ -147,6 +147,12 @@ slicetag_types = \
       'description' : 'Exclude this slice from MyOps until given date (YYYYMMDD)',
       'category' : 'slice/myops', 
       'min_role_id' : 10} ,
+
+    # DistributedRateLimiting slice
+    {'tagname': "drl",
+     'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
+     'category' : 'slice/general',
+     'min_role_id': 10},
 ]
 
 # add in the platform supported rlimits to the default_attribute_types
