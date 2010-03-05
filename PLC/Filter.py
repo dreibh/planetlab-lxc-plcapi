@@ -169,7 +169,6 @@ class Filter(Parameter, dict):
                             operator='<='
                         if modifiers[']']:
                             operator='>='
-
                         value = str(api.db.quote(value))
                     return (operator, value)
 
@@ -186,7 +185,9 @@ class Filter(Parameter, dict):
                             field=""
                             operator=""
                             value = "FALSE"
+                        clause = "%s %s %s" % (field, operator, value)
                     else:
+                        value = map(str, map(api.db.quote, value))
                         do_join = True
                         vals = {}
                         for val in value:
@@ -222,7 +223,6 @@ class Filter(Parameter, dict):
                             clause = "(" + " OR ".join(subclauses) + ")"
                 else:
                     operator, value = get_op_and_val(value)
-
                     clause = "%s %s %s" % (field, operator, value)
 
                 if modifiers['~']:
