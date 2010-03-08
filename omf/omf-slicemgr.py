@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Baris Metin <tmetin@sophia.inria.fr>
 
 import os
@@ -253,9 +254,9 @@ if __name__ == "__main__":
 
     config = Config("/etc/planetlab/plc_config")
 
-    xmppserver = self.config.PLC_OMF_XMPP_SERVER
-    xmppuser = "@".join([self.config.PLC_OMF_XMPP_USER, xmppserver])
-    xmpppass = self.config.PLC_OMF_XMPP_PASSWORD
+    xmppserver = config.PLC_OMF_XMPP_SERVER
+    xmppuser = "@".join([config.PLC_OMF_XMPP_USER, xmppserver])
+    xmpppass = config.PLC_OMF_XMPP_PASSWORD
     slicemgr = Slicemgr(xmppuser, xmpppass,
                         log=open("/var/log/omf/pubsub_client.log", "a"),
                         verbose=True)
