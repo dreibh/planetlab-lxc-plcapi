@@ -1,0 +1,32 @@
+#!/bin/bash
+# $Id$
+# $URL$
+#
+# priority: 800
+#
+
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+local_config=/etc/planetlab/configs/site.xml
+
+# Be verbose
+set -x
+
+case "$1" in
+    start)
+	if [ "$PLC_OMF_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	MESSAGE=$"Starting the OMF Slice Manager"
+	dialog "$MESSAGE"
+
+        daemon /usr/bin/omf-slicemgr.py
+
+	result "$MESSAGE"
+	;;
+esac
+
+exit $ERRORS

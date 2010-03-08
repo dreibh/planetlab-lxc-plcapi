@@ -126,9 +126,15 @@ class PLCAPI:
         if self.config.PLC_DB_TYPE == "postgresql":
             from PLC.PostgreSQL import PostgreSQL
             self.db = PostgreSQL(self)
-
         else:
             raise PLCAPIError, "Unsupported database type " + self.config.PLC_DB_TYPE
+
+        # Aspects modify the API injecting code before/after method
+        # calls. As of now we only have aspects for OMF integration,
+        # that's why we enable aspects only if PLC_OMF is set to true.
+        if self.config.PLC_OMF:
+            from aspects import apply_aspects; apply_aspects()
+
 
     def callable(self, method):
         """

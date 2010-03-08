@@ -38,6 +38,10 @@ Requires: mod_ssl
 Requires: SOAPpy
 # for the RebootNodeWithPCU method
 Requires: pcucontrol
+# for OMF integration
+Requires: pyaspects
+Requires: python-twisted-words
+Requires: python-twisted-web
 
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api

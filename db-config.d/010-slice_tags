@@ -153,6 +153,12 @@ slicetag_types = \
      'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
      'category' : 'slice/general',
      'min_role_id': 10},
+
+    # OMF controlled slice
+    {'tagname': "omf",
+     'description': "Enable OMF (cOntrol and Management Framework) for the slice",
+     'category' : 'slice/general',
+     'min_role_id': 10},
 ]
 
 # add in the platform supported rlimits to the default_attribute_types
