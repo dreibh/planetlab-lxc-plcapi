@@ -110,7 +110,7 @@ echo "* Installing wsdl"
 install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
 # Install omf-slicemgr.py
-install -D -m 744 omf/omf-slicemgr.py $RPM_BUILD_ROOT/usr/bin/
+install -D -m 755 omf/omf-slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf-slicemgr.py
 
 %clean
 rm -rf $RPM_BUILD_ROOT
