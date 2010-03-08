@@ -118,37 +118,6 @@ class BaseOMF(object):
         self.logit(wobj.name, args, kwargs, data, slice)
 
 
-class OMFAspect_xmpp(BaseOMF):
-    __metaclass__ = MetaAspect
-    name = "omfaspect_xmpp"
-
-    def __init__(self):
-        BaseOMF.__init__(self)
-        xmppserver = self.config.PLC_OMF_XMPP_SERVER
-        xmppuser = "@".join([self.config.PLC_OMF_XMPP_USER, xmppserver])
-        xmpppass = self.config.PLC_OMF_XMPP_PASSWORD
-        self.slicemgr = Slicemgr(xmppuser, xmpppass,
-                                 log=open("/var/log/omf/pubsub_client.log", "a"),
-                                 verbose=True)
-
-    def create_slice(self, slice):
-        self.slicemgr.create_slice(slice)
-
-    def add_resource(self, slice, resource):
-        self.slicemgr.add_resource(slice, resource)
-
-    def delete_slice(self, slice):
-        self.slicemgr.delete_slice(slice)
-
-    def delete_resource(self, slice, resource):
-        self.slicemgr.delete_resource(slice, resource)
-
-    def before(self, wobj, data, *args, **kwargs):
-        BaseOMF.before(self, wobj, data, *args, **kwargs)
-
-    def after(self, wobj, data, *args, **kwargs):
-        BaseOMF.after(self, wobj, data, *args, **kwargs)
-
 
 class OMFAspect_xmlrpc(BaseOMF):
     __metaclass__ = MetaAspect
