@@ -130,16 +130,16 @@ class OMFAspect_xmlrpc(BaseOMF):
         self.server = xmlrpclib.ServerProxy(slicemgr_url)
 
     def create_slice(self, slice):
-        self.server.slicemgr.createSlice(slice)
+        self.server.createSlice(slice)
 
     def add_resource(self, slice, resource):
-        self.server.slicemgr.addResource(slice, resource)
+        self.server.addResource(slice, resource)
 
     def delete_slice(self, slice):
-        self.server.slicemgr.deleteSlice(slice)
+        self.server.deleteSlice(slice)
         
     def delete_resource(self, slice, resource):
-        self.server.slicemgr.removeResource(slice, resource)
+        self.server.removeResource(slice, resource)
 
     def before(self, wobj, data, *args, **kwargs):
         BaseOMF.before(self, wobj, data, *args, **kwargs)

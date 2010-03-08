@@ -192,17 +192,17 @@ class PubSubClient(BaseClient):
 
 
 
-class Slicemgr(PubSubClient, xmlrpc.XMLRPC):
+class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
     
     DOMAIN = "/OMF"
     RESOURCES = 'resources'
 
     def __init__(self, id, secret, verbose = False, log = None):
+        xmlrpc.XMLRPC.__init__(self, allowNone=True)
         PubSubClient.__init__(self, id, secret, verbose = verbose, log = log)
         self.command_queue = Queue.Queue()
 
-        # for xmlrpc interface
-        self.allowNone = True
+        xmlrpc.addIntrospection(self)
 
     def xmlrpc_createSlice(self, slice):
         self.create_slice(slice)
