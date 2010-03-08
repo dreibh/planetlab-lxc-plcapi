@@ -125,10 +125,10 @@ rm -rf $RPM_BUILD_ROOT
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
-/usr/bin/omf-slicemgr.py
 /etc/plc.d
 /etc/planetlab/db-config.d
 /var/www/html/wsdl/plcapi.wsdl
+/usr/bin/omf-slicemgr.py*
 
 %changelog
 * Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
