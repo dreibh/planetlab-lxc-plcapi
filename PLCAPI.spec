@@ -109,6 +109,9 @@ chmod 444 ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d/*
 echo "* Installing wsdl"
 install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
+# Install omf-slicemgr.py
+install -D -m 744 omf/omf-slicemgr.py $RPM_BUILD_ROOT/usr/bin/
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -122,6 +125,7 @@ rm -rf $RPM_BUILD_ROOT
 %{php_extension_dir}/xmlrpc.so
 %{_sysconfdir}/php.d/xmlrpc.ini
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
+/usr/bin/omf-slicemgr.py
 /etc/plc.d
 /etc/planetlab/db-config.d
 /var/www/html/wsdl/plcapi.wsdl

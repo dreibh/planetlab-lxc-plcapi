@@ -13,7 +13,7 @@ from distutils.core import setup
 from glob import glob
 
 setup(py_modules = ['ModPython'],
-      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', ],
+      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'aspects'],
       scripts = ['plcsh', 'Server.py'],
       data_files = [
         ('', ['planetlab5.sql']),
