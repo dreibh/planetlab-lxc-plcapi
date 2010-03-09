@@ -166,7 +166,11 @@ class GetSlivers(Method):
                 'tagname': SliceTag.fields['tagname'],
                 'value': SliceTag.fields['value']
             }]
-        }]
+        }],
+        'xmpp': {'server':Parameter(str,"hostname for the XMPP server"),
+                 'user':Parameter(str,"username for the XMPP server"),
+                 'password':Parameter(str,"username for the XMPP server"),
+                 },
     }
 
     def call(self, auth, node_id_or_hostname = None):
@@ -279,6 +283,16 @@ class GetSlivers(Method):
 
 	node.update_last_contact()
 
+        # XMPP config
+        try:
+            if not self.api.config.PLC_OMF_ENABLED:
+                raise Exception,"OMF disabled"
+            xmpp={'server':self.api.config.PLC_OMF_XMPP_SERVER,
+                  'user':self.api.config.PLC_OMF_XMPP_USER,
+                  'password':self.api.config.PLC_OMF_XMPP_PASSWORD,
+                  }
+        except:
+            xmpp={'server':None,'user':None,'password':None}
         return {
             'timestamp': timestamp,
             'node_id': node['node_id'],
@@ -288,5 +302,6 @@ class GetSlivers(Method):
             'conf_files': conf_files.values(),
 	    'initscripts': initscripts,
             'slivers': slivers,
-            'accounts': accounts
+            'accounts': accounts,
+            'xmpp':xmpp,
             }
