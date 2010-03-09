@@ -132,7 +132,7 @@ class PLCAPI:
         # Aspects modify the API injecting code before/after method
         # calls. As of now we only have aspects for OMF integration,
         # that's why we enable aspects only if PLC_OMF is set to true.
-        if self.config.PLC_OMF:
+        if self.config.PLC_OMF_ENABLED:
             from aspects import apply_aspects; apply_aspects()
 
 
