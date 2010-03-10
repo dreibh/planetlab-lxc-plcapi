@@ -283,7 +283,7 @@ class GetSlivers(Method):
 
 	node.update_last_contact()
 
-        # XMPP config
+        # XMPP config for omf federation
         try:
             if not self.api.config.PLC_OMF_ENABLED:
                 raise Exception,"OMF disabled"
@@ -293,6 +293,7 @@ class GetSlivers(Method):
                   }
         except:
             xmpp={'server':None,'user':None,'password':None}
+
         return {
             'timestamp': timestamp,
             'node_id': node['node_id'],
