@@ -264,7 +264,7 @@ if __name__ == "__main__":
     t = task.LoopingCall(slicemgr.flush_commands)
     t.start(5.0) # check every 5 seconds
     reactor.connectTCP(slicemgr.id.host, 5222, slicemgr.factory)
-    reactor.listenTCP(5053, server.Site(slicemgr))
+    reactor.listenTCP(5053, server.Site(slicemgr), interface="localhost")
     reactor.run(installSignalHandlers=True)
 
 
