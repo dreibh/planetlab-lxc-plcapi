@@ -25,10 +25,11 @@ class BaseOMF(object):
            
     def get_slice(self, api, id_or_name):
         slice_filter = {}
-        if isinstance(id_or_name, str):
+        try: # if integer
+            slice_filter['slice_id'] = int(str(id_or_name))
+        except ValueError:
+            # we have a string
             slice_filter['name'] = id_or_name
-        else:
-            slice_filter['slice_id']= id_or_name
         slice = Slices(api, slice_filter = slice_filter)[0]
 # don't bother to check for slice tags for the moment. we'll only
 # create XMPP pubsub groups for all slices
