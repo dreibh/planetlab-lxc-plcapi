@@ -42,8 +42,14 @@ class BaseOMF(object):
 #         return None
         return slice
 
-    def get_node_hostname(self, api, node_id):
-        node_filter = {'node_id': node_id }
+    def get_node_hostname(self, api, node_id_or_hostname):
+        node_filter = {}
+        try:
+            node_filter['node_id'] = int(str(node_id_or_hostname))
+        except ValueError:
+            # we have a hostname
+            node_filter['hostname'] = node_id_or_hostname
+
         try:
             node = Nodes(api, node_filter = node_filter)[0]
             return node['hostname']
