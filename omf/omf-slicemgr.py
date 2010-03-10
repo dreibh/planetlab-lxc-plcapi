@@ -96,7 +96,8 @@ class BaseClient(object):
 
     def message_chat(self, m):
         n = domish.Element((None, "message"))
-        n['to'], n['from'] = m['from'], m['to']
+        n['to'] = m['from']
+        n['from'] = self.id.full()
         n.addElement("body", content = "don't have time to chat. working!")
         self.xmlstream.send(n)
 
@@ -143,9 +144,14 @@ class PubSubClient(BaseClient):
         if self.verbose: self.info("Items for node: %s" % self.requests[iq['id']])
         
         hook = self.hooks.get('discover', None)
-        for i in iq.query.elements():
-            if self.verbose: self.msg(i.toXml())
-            if hook: hook(i)
+        if hook:
+            hook(iq)
+            self.delete_result_hook('discover')
+
+        if self.verbose:
+            for i in iq.query.elements():
+                self.msg(i.toXml())
+
         self.requests.pop(iq['id'])
 
     def create_node(self, node = None):
@@ -189,7 +195,29 @@ class PubSubClient(BaseClient):
     def result_delete_node(self, iq):
         self.requests.pop(iq['id'])
 
+    def message_chat(self, m):
+        command = ""
+        for e in m.elements():
+            if e.name == "body":
+                command = "%s" % e
+                break
 
+        if command == "list groups":
+            def list_groups(iq):
+                reply = ""
+                for i in iq.query.elements():
+                    reply += "%s\n" % i['node']
+                n = domish.Element((None, "message"))
+                n['to'] = m['from']
+                n['from'] = self.id.full()
+                n.addElement("body", content = reply)
+                self.xmlstream.send(n)
+
+            self.add_result_hook("discover", list_groups)
+            self.discover()
+
+        else:
+            BaseClient.message_chat(self, m)
 
 
 class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
@@ -234,13 +262,13 @@ class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
         slice_prefix = "/".join([self.DOMAIN,slice])
         resource_prefix = "/".join([self.DOMAIN,slice,self.RESOURCES])
         def delete_slice_resources(iq):
-            node = iq['node']
-            if node.startswith(resource_prefix):
-                self.command_que.put(self.delete_node, node)
+            for i in iq.query.elements():
+                node = i['node']
+                if node.startswith(resource_prefix):
+                    self.command_que.put(self.delete_node, node)
 
         self.add_result_hook("discover", delete_slice_resources)
         self.discover()
-        self.delete_result_hook("discover")
 
         self.command_queue.put(( self.delete_node, resource_prefix) )
         self.command_queue.put(( self.delete_node, slice_prefix) )
