@@ -27,6 +27,20 @@ case "$1" in
 
 	result "$MESSAGE"
 	;;
+
+    stop)
+	if [ "$PLC_OMF_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	MESSAGE=$"Stopping the OMF Slice Manager"
+	dialog "$MESSAGE"
+
+        killproc omf-slicemgr.py 
+
+	result "$MESSAGE"
+	;;
+        
 esac
 
 exit $ERRORS

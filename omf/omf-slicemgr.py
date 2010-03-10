@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # Baris Metin <tmetin@sophia.inria.fr>
 
 import os
