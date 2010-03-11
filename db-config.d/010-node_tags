@@ -1,0 +1,17 @@
+# -*-python-*-
+# $Id: 010-node_tags 
+# $URL: 
+#################### node tag types
+
+# Setup default node tag types
+nodetag_types = \
+[
+    # Node HRN (SFA specific human readable name)
+    {'tagname': 'hrn',
+     'description': 'SFA specific human readable name',
+     'category' : 'sfa/general',
+     'min_role_id': 10},
+]
+
+for nodetag_type in nodetag_types:
+    SetTagType(nodetag_type)
