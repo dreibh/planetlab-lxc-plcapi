@@ -178,6 +178,11 @@ class Peer(Row):
     
         remove = Row.remove_object(Node, 'peer_node')
         remove(self, node, commit)
+
+        # calling UpdateNode with the node's hostname
+        # will force the 'hrn' tag to be updated with the
+        # correct root auth
+        shell = Shell() 
         UpdateNode = self.api.callable('UpdateNode')
         UpdateNode(shell.auth, node['node_id'], {'hostname': node['hostname']})
 
