@@ -5,7 +5,9 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Table import Row
 from PLC.Auth import Auth
-
+from PLC.Namespace import hostname_to_hrn
+from PLC.Peers import Peers
+from PLC.Sites import Sites
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags
@@ -55,8 +57,8 @@ class UpdateNode(Method):
         # Authenticated function
         assert self.caller is not None
 
-	# Remove admin only fields
-	if 'admin' not in self.caller['roles']:
+        # Remove admin only fields
+        if 'admin' not in self.caller['roles']:
             for key in admin_only:
                 if native.has_key(key):
                     del native[key]
@@ -80,10 +82,27 @@ class UpdateNode(Method):
         for (k,v) in related.iteritems():
             node.associate(auth, k,v)
 
-	node.update(native)
-	node.update_last_updated(commit=False)
+        node.update(native)
+        node.update_last_updated(commit=False)
         node.sync(commit=True)
-	
+        
+        # if hostname was modifed make sure to update the hrn
+        # tag
+        if 'hostname' in native:
+            # root authority should be PLC_HRN_ROOT for local
+            # objects or peer['hrn_root'] for peer objects 
+            root_auth = self.api.config.PLC_HRN_ROOT
+            if node['peer_id']:
+                peers = Peers(self.api, node['peer_id'], ['hrn_root'])
+                if peers:
+                    root_auth = peers[0]['hrn_root'] 
+                     
+            # sub auth is the login base of this node's site
+            sites = Sites(self.api, node['site_id'], ['login_base'])
+            site = sites[0]
+            login_base = site['login_base']
+            tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname']) 
+            
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
@@ -94,14 +113,14 @@ class UpdateNode(Method):
             else:
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
 
-	# Logging variables
-	self.event_objects = {'Node': [node['node_id']]}
+        # Logging variables
+        self.event_objects = {'Node': [node['node_id']]}
         if 'hostname' in node:
             self.message = 'Node %s updated'%node['hostname']
         else:
             self.message = 'Node %d updated'%node['node_id']
         self.message += " [%s]." % (", ".join(node_fields.keys()),)
-	if 'boot_state' in node_fields.keys():
-		self.message += ' boot_state updated to %s' % node_fields['boot_state']
+        if 'boot_state' in node_fields.keys():
+            self.message += ' boot_state updated to %s' % node_fields['boot_state']
 
         return 1

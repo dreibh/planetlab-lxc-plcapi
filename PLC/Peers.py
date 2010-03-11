@@ -13,7 +13,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
 import PLC.Auth
-
+from PLC.Shell import *
 from PLC.Sites import Site, Sites
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
@@ -164,6 +164,13 @@ class Peer(Row):
              'peer_node_id': peer_node_id},
             commit = commit)
 
+        # calling UpdateNode with the node's hostname 
+        # will force the 'hrn' tag to be updated with the 
+        # correct root auth
+        shell = Shell() 
+        UpdateNode = self.api.callable('UpdateNode')
+        UpdateNode(shell.auth, node['node_id'], {'hostname': node['hostname']})  
+
     def remove_node(self, node, commit = True):
         """
         Unassociate a node with this peer.
@@ -171,6 +178,8 @@ class Peer(Row):
     
         remove = Row.remove_object(Node, 'peer_node')
         remove(self, node, commit)
+        UpdateNode = self.api.callable('UpdateNode')
+        UpdateNode(shell.auth, node['node_id'], {'hostname': node['hostname']})
 
     def add_slice(self, slice, peer_slice_id, commit = True):
         """

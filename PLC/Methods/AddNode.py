@@ -5,7 +5,8 @@ from PLC.Auth import Auth
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Table import Row
-
+from PLC.Namespace import hostname_to_hrn
+from PLC.Peers import Peers
 from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
@@ -71,6 +72,14 @@ class AddNode(Method):
         node = Node(self.api, native)
         node['site_id'] = site['site_id']
         node.sync()
+
+        # since hostname was specified lets add the 'hrn' node tag
+        root_auth = self.api.config.PLC_HRN_ROOT
+        # sub auth is the login base of this node's site
+        sites = Sites(self.api, node['site_id'], ['login_base'])
+        site = sites[0]
+        login_base = site['login_base']
+        tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])        
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
