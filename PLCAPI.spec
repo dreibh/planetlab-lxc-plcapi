@@ -111,6 +111,7 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
 # Install omf_slicemgr.py
 install -D -m 755 omf/omf_slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf_slicemgr.py
+install -D -m 755 omf/reset_xmpp_pubsub_nodes.py $RPM_BUILD_ROOT/usr/bin/reset_xmpp_pubsub_nodes.py
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -129,6 +130,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/planetlab/db-config.d
 /var/www/html/wsdl/plcapi.wsdl
 /usr/bin/omf_slicemgr.py*
+/usr/bin/reset_xmpp_pubsub_nodes.py*
 
 %changelog
 * Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
