@@ -108,6 +108,7 @@ class PubSubClient(BaseClient):
     def __init__(self, id, secret, verbose = False, log = None):
         BaseClient.__init__(self, id, secret, verbose = verbose, log = log)
         self.hooks = {}
+        self.requests = {}
     
     def add_result_hook(self, hook_to, hook):
         self.hooks[hook_to] = hook
@@ -118,12 +119,12 @@ class PubSubClient(BaseClient):
 
     def event_authenticated(self, xs):
         BaseClient.event_authenticated(self, xs)
-        self.requests = {}
         xs.addObserver("/iq/pubsub/create", self.result_create_node)
         xs.addObserver("/iq/pubsub/delete", self.result_delete_node)
         xs.addObserver("/iq/query[@xmlns='http://jabber.org/protocol/disco#items']", self.result_discover)
         xs.addObserver("/iq/pubsub/subscription[@subscription='subscribed']", self.result_subscribe_to_node)
-        xs.addObserver("/iq/pubsub/configure", self.result_configure_node)
+        xs.addObserver("/iq/pubsub/configure/x", self.result_configure_node)
+        xs.addObserver("/iq/pubsub/configure/error", self.result_configure_node)
 
     def __iq(self, t="get"):
         iq = domish.Element((None, "iq"))
@@ -200,6 +201,7 @@ class PubSubClient(BaseClient):
         if hook:
             hook(iq)
             self.delete_result_hook('configure')
+
         self.requests.pop(iq['id'])
 
 
