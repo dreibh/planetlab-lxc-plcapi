@@ -123,6 +123,7 @@ class PubSubClient(BaseClient):
         xs.addObserver("/iq/pubsub/delete", self.result_delete_node)
         xs.addObserver("/iq/query[@xmlns='http://jabber.org/protocol/disco#items']", self.result_discover)
         xs.addObserver("/iq/pubsub/subscription[@subscription='subscribed']", self.result_subscribe_to_node)
+        xs.addObserver("/iq/pubsub/configure", self.result_configure_node)
 
     def __iq(self, t="get"):
         iq = domish.Element((None, "iq"))
@@ -137,6 +138,7 @@ class PubSubClient(BaseClient):
         pubsub['xmlns'] = "http://jabber.org/protocol/pubsub"
         return pubsub
 
+
     def discover(self, node = None):
         iq = self.__iq("get")
         query = iq.addElement("query")
@@ -147,18 +149,13 @@ class PubSubClient(BaseClient):
         self.xmlstream.send(iq)
 
     def result_discover(self, iq):
-        if self.verbose: self.info("Items for node: %s" % self.requests[iq['id']])
-        
         hook = self.hooks.get('discover', None)
         if hook:
             hook(iq)
             self.delete_result_hook('discover')
 
-        if self.verbose:
-            for i in iq.query.elements():
-                self.msg(i.toXml())
-
         self.requests.pop(iq['id'])
+
 
     def subscribe_to_node(self, node):
         iq = self.__iq("set")
@@ -172,6 +169,7 @@ class PubSubClient(BaseClient):
     def result_subscribe_to_node(self, iq):
         self.requests.pop(iq['id'])
 
+
     def publish_to_node(self, node, payload):
         iq = self.__iq("set")
         pubsub = self.__add_pubsub(iq)
@@ -182,7 +180,28 @@ class PubSubClient(BaseClient):
         self.xmlstream.send(iq)
 
     def result_publish_to_node(self, iq):
-        pass
+        self.requests.pop(iq['id'])
+
+
+    # TODO: ejabberd doesn't have the node configuration feature implmented yet!
+    def configure_node(self, node, fields=None):
+        iq = self.__iq("set")
+        pubsub = self.__add_pubsub(iq)
+        configure = pubsub.addElement("configure")
+        configure['node'] = node
+        
+        # TODO: add fields
+
+        self.requests[iq['id']] = node
+        self.xmlstream.send(iq)
+        
+    def result_configure_node(self, iq):
+        hook = self.hooks.get('configure', None)
+        if hook:
+            hook(iq)
+            self.delete_result_hook('configure')
+        self.requests.pop(iq['id'])
+
 
     def create_node(self, node = None):
         iq = self.__iq("set")
@@ -255,6 +274,25 @@ class PubSubClient(BaseClient):
 
             self.add_result_hook("discover", list_groups)
             self.discover()
+
+        elif body.startswith("configuration"):
+            # "configuration NODE"
+            node = ""
+            try:
+                node = body.split()[1].strip()
+            except IndexError:
+                pass
+
+            def get_configuration(iq):
+                reply = iq.toXml()
+                n = domish.Element((None, "message"))
+                n['to'] = m['from']
+                n['from'] = self.id.full()
+                n.addElement("body", content = reply)
+                self.xmlstream.send(n)
+
+            self.add_result_hook("configure", get_configuration)
+            self.configure_node(node)
 
         else:
             BaseClient.message_chat(self, m)
