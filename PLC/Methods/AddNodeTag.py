@@ -78,7 +78,7 @@ class AddNodeTag(Method):
 	    required_min_role = tag_type ['min_role_id']
 	    if required_min_role is not None and \
 		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d",required_min_role
+		raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d"%required_min_role
 
         node_tag = NodeTag(self.api)
         node_tag['node_id'] = node['node_id']

@@ -75,9 +75,6 @@ class AddNode(Method):
 
         # since hostname was specified lets add the 'hrn' node tag
         root_auth = self.api.config.PLC_HRN_ROOT
-        # sub auth is the login base of this node's site
-        sites = Sites(self.api, node['site_id'], ['login_base'])
-        site = sites[0]
         login_base = site['login_base']
         tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])        
 

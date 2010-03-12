@@ -66,10 +66,10 @@ define_accessors(current_module, Node, "Deployment", "deployment",
 define_accessors(current_module, Node, "Extensions", "extensions", 
                  "node/config", "space-separated list of extensions to install",
                  get_roles=all_roles, set_roles=["admin"],expose_in_api=True)
-# access HRN
+# access HRN - this is the ideal definition of roles, even if AddNodeTag cannot handle this 
 define_accessors(current_module, Node, "Hrn","hrn",
                  "node/sfa", "SFA human readable name",
-                 get_roles=all_roles, set_roles=["admin"], expose_in_api=True)
+                 get_roles=all_roles, set_roles=["admin","pi","tech"], expose_in_api=True)
 
 # test nodes perform their installation from an uncompressed bootstrapfs
 define_accessors(current_module, Node, "PlainBootstrapfs", "plain-bootstrapfs", 

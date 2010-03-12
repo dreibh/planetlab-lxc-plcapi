@@ -122,6 +122,7 @@ ifeq (,$(SSHURL))
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
+	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	$(SSHCOMMAND) exec apachectl graceful
 endif
 

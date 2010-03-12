@@ -10,7 +10,7 @@ nodetag_types = \
     {'tagname': 'hrn',
      'description': 'SFA human readable name',
      'category' : 'node/sfa',
-     'min_role_id': 10},
+     'min_role_id': 40},
 ]
 
 for nodetag_type in nodetag_types:
