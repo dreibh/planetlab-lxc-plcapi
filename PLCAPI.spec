@@ -109,8 +109,8 @@ chmod 444 ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d/*
 echo "* Installing wsdl"
 install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
-# Install omf-slicemgr.py
-install -D -m 755 omf/omf-slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf-slicemgr.py
+# Install omf_slicemgr.py
+install -D -m 755 omf/omf_slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf_slicemgr.py
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -128,7 +128,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/plc.d
 /etc/planetlab/db-config.d
 /var/www/html/wsdl/plcapi.wsdl
-/usr/bin/omf-slicemgr.py*
+/usr/bin/omf_slicemgr.py*
 
 %changelog
 * Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2

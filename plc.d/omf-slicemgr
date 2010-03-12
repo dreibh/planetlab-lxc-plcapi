@@ -23,7 +23,7 @@ case "$1" in
 	MESSAGE=$"Starting the OMF Slice Manager"
 	dialog "$MESSAGE"
 
-        daemon /usr/bin/omf-slicemgr.py &
+        daemon /usr/bin/omf_slicemgr.py &
 
 	result "$MESSAGE"
 	;;
@@ -36,7 +36,7 @@ case "$1" in
 	MESSAGE=$"Stopping the OMF Slice Manager"
 	dialog "$MESSAGE"
 
-        killproc omf-slicemgr.py 
+        killproc omf_slicemgr.py 
 
 	result "$MESSAGE"
 	;;
