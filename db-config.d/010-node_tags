@@ -8,8 +8,8 @@ nodetag_types = \
 [
     # Node HRN (SFA specific human readable name)
     {'tagname': 'hrn',
-     'description': 'SFA specific human readable name',
-     'category' : 'sfa/general',
+     'description': 'SFA human readable name',
+     'category' : 'node/sfa',
      'min_role_id': 10},
 ]
 

@@ -20,6 +20,8 @@ from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Methods.GetSliceFamily import GetSliceFamily
 
+from PLC.Accessors.Accessors_standard import *
+
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
 
@@ -281,7 +283,7 @@ class GetSlivers(Method):
         personsitekeys=get_all_admin_keys(self.api)
         accounts.append({'name':'root','keys':personsitekeys})
 
-	node.update_last_contact()
+        hrn = GetNodeHrn(self.api).call(auth,node['node_id'])
 
         # XMPP config for omf federation
         try:
@@ -294,6 +296,8 @@ class GetSlivers(Method):
         except:
             xmpp={'server':None,'user':None,'password':None}
 
+	node.update_last_contact()
+
         return {
             'timestamp': timestamp,
             'node_id': node['node_id'],
@@ -305,4 +309,5 @@ class GetSlivers(Method):
             'slivers': slivers,
             'accounts': accounts,
             'xmpp':xmpp,
+            'hrn':hrn,
             }
