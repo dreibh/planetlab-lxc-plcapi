@@ -172,6 +172,18 @@ class PubSubClient(BaseClient):
     def result_subscribe_to_node(self, iq):
         self.requests.pop(iq['id'])
 
+    def publish_to_node(self, node, payload):
+        iq = self.__iq("set")
+        pubsub = self.__add_pubsub(iq)
+        publish = pubsub.addElement("publish")
+        publish['node'] = node
+        items = publish.addElement("item", content=payload)
+        self.requests[iq['id']] = node
+        self.xmlstream.send(iq)
+
+    def result_publish_to_node(self, iq):
+        pass
+
     def create_node(self, node = None):
         iq = self.__iq("set")
         pubsub = self.__add_pubsub(iq)
@@ -184,20 +196,16 @@ class PubSubClient(BaseClient):
 
     def result_create_node(self, iq):
         node = self.requests[iq['id']]
-        try:
-            if hasattr(iq.error, "conflict"):
+        if iq.error:
+            if iq.error.conflict:
                 # node is already there, nothing important.
                 self.warn("NodeID exists: %s" % node)
             else:
                 err_type = ""
-                err_name = ""
-                if iq.error:
-                    if iq.error.has_key('type'):
-                        err_type = iq.error['type']
-                    if iq.error.firstChildElement and hasattr(iq.error.firstChildElement, "name"):
-                        err_name = iq.error.firstChildElement.name
-                self.error("Can not create node: %s (error type: %s, %s)" %  (node, err_type, err_name))
-        except AttributeError:
+                if iq.error['type']:
+                    err_type = iq.error['type']
+                self.error("Can not create node: %s (error type: %s)" %  (node, err_type))
+        else:
             # no errors
             # try subscribing to the node for debugging purposes
             self.subscribe_to_node(node)
@@ -217,13 +225,24 @@ class PubSubClient(BaseClient):
         self.requests.pop(iq['id'])
 
     def message_chat(self, m):
-        command = ""
+        body = ""
         for e in m.elements():
             if e.name == "body":
-                command = "%s" % e
+                body = "%s" % e
                 break
 
-        if command == "list groups":
+#         try:
+#             node = m.event.items['node']
+#             n = domish.Element((None, "message"))
+#             n.addElement("body", content = "published to: %s\n%s" % (node, m.event.items.toXml()))
+#             # for each listener in promiscuous mode send the published event
+#             self.xmlstream.send(n)
+#             return
+#         except:
+#             # not a pubsub message continue on
+#             pass
+
+        if body == "list groups":
             def list_groups(iq):
                 reply = ""
                 for i in iq.query.elements():
