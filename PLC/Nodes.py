@@ -139,14 +139,30 @@ class Node(Row):
                        " where node_id = %d" % (self['node_id']) )
         self.sync(commit)
 
+    def update_tags(self, tags):
+        from PLC.Shell import Shell
+        from PLC.NodeTags import NodeTags
+        from PLC.Methods.AddNodeTag import AddNodeTag
+        from PLC.Methods.UpdateNodeTag import UpdateNodeTag
+        shell = Shell()
+        for (tagname,value) in tags.iteritems():
+            # the tagtype instance is assumed to exist, just check that
+            if not TagTypes(self.api,{'tagname':tagname}):
+                raise PLCInvalidArgument,"No such TagType %s"%tagname
+            node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
+            if not node_tags:
+                AddNodeTag(self.api).__call__(shell.auth,node['node_id'],tagname,value)
+            else:
+                UpdateNodeTag(self.api).__call__(shell.auth,node_tags[0]['node_tag_id'],value) 
+    
     def associate_interfaces(self, auth, field, value):
-	"""
-	Delete interfaces not found in value list (using DeleteInterface)	
-	Add interfaces found in value list (using AddInterface)
-	Updates interfaces found w/ interface_id in value list (using UpdateInterface) 
-	"""
+        """
+        Delete interfaces not found in value list (using DeleteInterface)	
+        Add interfaces found in value list (using AddInterface)
+        Updates interfaces found w/ interface_id in value list (using UpdateInterface) 
+        """
 
-	assert 'interface_ids' in self
+        assert 'interface_ids' in self
         assert 'node_id' in self
         assert isinstance(value, list)
 

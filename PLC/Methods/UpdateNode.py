@@ -89,14 +89,7 @@ class UpdateNode(Method):
         # if hostname was modifed make sure to update the hrn
         # tag
         if 'hostname' in native:
-            # root authority should be PLC_HRN_ROOT for local
-            # objects or peer['hrn_root'] for peer objects 
             root_auth = self.api.config.PLC_HRN_ROOT
-            if node['peer_id']:
-                peers = Peers(self.api, node['peer_id'], ['hrn_root'])
-                if peers:
-                    root_auth = peers[0]['hrn_root'] 
-                     
             # sub auth is the login base of this node's site
             sites = Sites(self.api, node['site_id'], ['login_base'])
             site = sites[0]

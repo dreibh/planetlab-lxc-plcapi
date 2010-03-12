@@ -8,17 +8,18 @@ import re
 from types import StringTypes
 from urlparse import urlparse
 
+import PLC.Auth
 from PLC.Faults import *
+from PLC.Namespace import hostname_to_hrn
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Table import Row, Table
-import PLC.Auth
-
 from PLC.Sites import Site, Sites
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
+from PLC.NodeTags import NodeTag, NodeTags
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 
@@ -164,11 +165,14 @@ class Peer(Row):
              'peer_node_id': peer_node_id},
             commit = commit)
 
-        # calling UpdateNode with the node's hostname
-        # will force the 'hrn' tag to be updated with the
-        # correct root auth
-        from PLC.Methods.UpdateNode import UpdateNode
-        UpdateNode.__call__(UpdateNode(self.api), auth, node['node_id'], {'hostname': node['hostname']})  
+        # attempt to manually update the 'hrn' tag
+        root_auth = self['hrn_root']
+        sites = Sites(self.api, node['site_id'], ['login_base'])
+        site = sites[0]
+        login_base = site['login_base']
+        hrn = hostname_to_hrn(root_auth, login_base, node['hostname'])
+        tags = {'hrn': hrn}
+        Node(self.api, node).update_tags(tags)
 
     def remove_node(self, node, commit = True):
         """
@@ -177,12 +181,14 @@ class Peer(Row):
     
         remove = Row.remove_object(Node, 'peer_node')
         remove(self, node, commit)
-
-        # calling UpdateNode with the node's hostname
-        # will force the 'hrn' tag to be updated with the
-        # correct root auth
-        from PLC.Methods.UpdateNode import UpdateNode
-        UpdateNode.__call__(UpdateNode(self.api), auth, node['node_id'], {'hostname': node['hostname']})  
+        # attempt to manually update the 'hrn' tag
+        root_auth = self.api.config.PLC_HRN_ROOT
+        sites = Sites(self.api, node['site_id'], ['login_base'])
+        site = sites[0]
+        login_base = site['login_base']
+        hrn = hostname_to_hrn(root_auth, login_base, node['hostname'])
+        tags = {'hrn': hrn}
+        Node(self.api, node).update_tags(tags)
 
     def add_slice(self, slice, peer_slice_id, commit = True):
         """
