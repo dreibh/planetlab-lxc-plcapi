@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -133,6 +133,16 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/reset_xmpp_pubsub_nodes.py*
 
 %changelog
+* Fri Mar 12 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-3
+- slice tag 'omf_control' supported for getting OMF's resource controller shipped to slivers
+- pyaspect hooks allow to  maintain the namespace xmpp groups
+- new omf_slicemgr is a proxy to xmpp, used by these hooks
+- nodes have their hrn exposed in the 'hrn' tag
+- node hrn exposed in GetSlivers, as well as the overall xmpp config
+- system slice 'drl' gets created by db-config
+- daniel's changes to Filter for supporting wildcards in lists
+- AddSliceTag consistency check tweaked
+
 * Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-2
 - major cleanup
 - get rid of all 4.2-related legacy code
