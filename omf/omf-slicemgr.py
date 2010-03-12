@@ -122,6 +122,7 @@ class PubSubClient(BaseClient):
         xs.addObserver("/iq/pubsub/create", self.result_create_node)
         xs.addObserver("/iq/pubsub/delete", self.result_delete_node)
         xs.addObserver("/iq/query[@xmlns='http://jabber.org/protocol/disco#items']", self.result_discover)
+        xs.addObserver("/iq/pubsub/subscription[@subscription='subscribed']", self.result_subscribe_to_node)
 
     def __iq(self, t="get"):
         iq = domish.Element((None, "iq"))
@@ -130,6 +131,11 @@ class PubSubClient(BaseClient):
         iq['type'] = t
         iq.addUniqueId()
         return iq
+
+    def __add_pubsub(self, iq):
+        pubsub = iq.addElement("pubsub")
+        pubsub['xmlns'] = "http://jabber.org/protocol/pubsub"
+        return pubsub
 
     def discover(self, node = None):
         iq = self.__iq("get")
@@ -154,10 +160,21 @@ class PubSubClient(BaseClient):
 
         self.requests.pop(iq['id'])
 
+    def subscribe_to_node(self, node):
+        iq = self.__iq("set")
+        pubsub = self.__add_pubsub(iq)
+        subscribe = pubsub.addElement("subscribe")
+        subscribe['node'] = node
+        subscribe['jid'] = self.id.full()
+        self.requests[iq['id']] = node
+        self.xmlstream.send(iq)
+
+    def result_subscribe_to_node(self, iq):
+        self.requests.pop(iq['id'])
+
     def create_node(self, node = None):
         iq = self.__iq("set")
-        pubsub = iq.addElement("pubsub")
-        pubsub['xmlns'] = "http://jabber.org/protocol/pubsub"
+        pubsub = self.__add_pubsub(iq)
         create = pubsub.addElement("create")
         if node:
             create['node'] = node
@@ -166,27 +183,31 @@ class PubSubClient(BaseClient):
         self.xmlstream.send(iq)
 
     def result_create_node(self, iq):
-#         if hasattr(iq, "error"):
-#             node = self.requests[iq['id']]
-#             if hasattr(iq.error, "conflict"):
-#                 # node is already there, nothing important.
-#                 self.warn("NodeID exists: %s" % node)
-#             else:
-#                 err_type = ""
-#                 err_name = ""
-#                 if iq.error:
-#                     if iq.error.has_key('type'):
-#                         err_type = iq.error['type']
-#                     if iq.error.firstChildElement and hasattr(iq.error.firstChildElement, "name"):
-#                         err_name = iq.error.firstChildElement.name
-#                 self.error("Can not create node: %s (error type: %s, %s)" %  (node, err_type, err_name))
+        node = self.requests[iq['id']]
+        try:
+            if hasattr(iq.error, "conflict"):
+                # node is already there, nothing important.
+                self.warn("NodeID exists: %s" % node)
+            else:
+                err_type = ""
+                err_name = ""
+                if iq.error:
+                    if iq.error.has_key('type'):
+                        err_type = iq.error['type']
+                    if iq.error.firstChildElement and hasattr(iq.error.firstChildElement, "name"):
+                        err_name = iq.error.firstChildElement.name
+                self.error("Can not create node: %s (error type: %s, %s)" %  (node, err_type, err_name))
+        except AttributeError:
+            # no errors
+            # try subscribing to the node for debugging purposes
+            self.subscribe_to_node(node)
+
         self.requests.pop(iq['id'])
 
 
     def delete_node(self, node):
         iq = self.__iq("set")
-        pubsub = iq.addElement("pubsub")
-        pubsub['xmlns'] = "http://jabber.org/protocol/pubsub#owner"
+        pubsub = self.__add_pubsub(iq)
         delete = pubsub.addElement("delete")
         delete['node'] = node
         self.requests[iq['id']] = node
