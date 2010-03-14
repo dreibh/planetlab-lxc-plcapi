@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -133,6 +133,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/reset_xmpp_pubsub_nodes.py*
 
 %changelog
+* Sun Mar 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-4
+- do not use UpdateNode for handling the 'hrn' tag - should fix refresh peer & foreign nodes more generally
+
 * Fri Mar 12 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-3
 - slice tag 'omf_control' supported for getting OMF's resource controller shipped to slivers
 - pyaspect hooks allow to  maintain the namespace xmpp groups
