@@ -14,9 +14,14 @@ class BaseOMF(object):
 
     def __init__(self):
         self.config = Config("/etc/planetlab/plc_config")
-        self.log = open("/var/log/omf/plc_slice_calls.log", "a")
+        # this was only for debugging, no need to log all method calls here -baris
+        # self.log = open("/var/log/omf/plc_slice_calls.log", "a")
+        self.log = None
+        
 
     def logit(self, call, args, kwargs, data, slice):
+        if not self.log: return
+
         self.log.write("%s : args: %s  kwargs: %s\n" % (call, args, kwargs))
         self.log.write("data: %s\n" % data)
         self.log.write("%s\n\n" % slice)

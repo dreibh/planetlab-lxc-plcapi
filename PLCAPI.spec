@@ -121,6 +121,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %dir %{_datadir}/plc_api
+%dir /var/log/omf/
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
 %{php_extension_dir}/xmlrpc.so
@@ -131,6 +132,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 /usr/bin/omf_slicemgr.py*
 /usr/bin/reset_xmpp_pubsub_nodes.py*
+
 
 %changelog
 * Sun Mar 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-4
