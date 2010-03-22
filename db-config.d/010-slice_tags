@@ -34,7 +34,7 @@ slicetag_types = \
     # Slice initialization script
     {'tagname': "initscript",
      'description': "Slice initialization script",
-     'category' : 'slice/config',
+     'category' : 'slice/usertools',
      'min_role_id': 30},
     
     # IP Addresses for a Slice
@@ -155,9 +155,9 @@ slicetag_types = \
      'min_role_id': 10},
 
     # OMF controlled slice
-    {'tagname': "omf",
-     'description': "Enable OMF (cOntrol and Management Framework) for the slice",
-     'category' : 'slice/general',
+    {'tagname': "omf_control",
+     'description': "Pre-install and configure OMF Resource Controller in slice if set",
+     'category' : 'slice/usertools',
      'min_role_id': 10},
 ]
 

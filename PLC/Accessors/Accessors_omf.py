@@ -15,6 +15,6 @@ import sys
 current_module = sys.modules[__name__]
 
 define_accessors(current_module, Slice, "OmfControl","omf_control",
-                 "slice/config","Pre-install and configure OMF Resource Controller in slice if set",
+                 "slice/usertools","Pre-install and configure OMF Resource Controller in slice if set",
                  get_roles=all_roles, set_roles=all_roles, expose_in_api=True)
 
