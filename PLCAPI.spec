@@ -48,7 +48,9 @@ Requires: python-twisted-web
 Conflicts: MyPLC <= 4.3
 
 # We use psycopg2
-BuildRequires: postgresql-devel
+#
+# but we don't need to rebuild it as we depend on distro's packages - baris
+# BuildRequires: postgresql-devel
 
 # Standard xmlrpc.so that ships with PHP does not marshal NULL
 BuildRequires: php-devel
