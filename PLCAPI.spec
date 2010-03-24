@@ -114,6 +114,7 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 # Install omf_slicemgr.py
 install -D -m 755 omf/omf_slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf_slicemgr.py
 install -D -m 755 omf/reset_xmpp_pubsub_nodes.py $RPM_BUILD_ROOT/usr/bin/reset_xmpp_pubsub_nodes.py
+mkdir -p $RPM_BUILD_ROOT/var/log/omf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
