@@ -81,25 +81,25 @@ class Person(Row):
         """
         Validate email address. Stolen from Mailman.
         """
-
+        email = email.lower()
         invalid_email = PLCInvalidArgument("Invalid e-mail address")
 
         if not email:
             raise invalid_email
 
-	email_re = re.compile('\A[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9._\-]+\.[a-zA-Z]+\Z')
+        email_re = re.compile('\A[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9._\-]+\.[a-zA-Z]+\Z')
         if not email_re.match(email):
             raise invalid_email
 
        	# check only against users on the same peer  
-	if 'peer_id' in self:
+        if 'peer_id' in self:
             namespace_peer_id = self['peer_id']
         else:
             namespace_peer_id = None
          
-	conflicts = Persons(self.api, {'email':email,'peer_id':namespace_peer_id}) 
+        conflicts = Persons(self.api, {'email':email,'peer_id':namespace_peer_id}) 
 	
-	for person in conflicts:
+        for person in conflicts:
             if 'person_id' not in self or self['person_id'] != person['person_id']:
                 raise PLCInvalidArgument, "E-mail address already in use"
 
