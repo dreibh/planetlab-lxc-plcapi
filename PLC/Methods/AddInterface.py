@@ -80,8 +80,8 @@ class AddInterface(Method):
         interface.sync()
 	
 	# Logging variables
-	self.object_objects = { 'Node': [node['node_id']], 
-                                'Interface' : [interface['interface_id']] }
+	self.event_objects = { 'Node': [node['node_id']], 
+                               'Interface' : [interface['interface_id']] }
 	self.message = "Interface %d added" % interface['interface_id']
 
         for (tagname,value) in tags.iteritems():

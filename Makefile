@@ -96,7 +96,7 @@ tags:
 # (*) if your plc root context has direct ssh access:
 # make sync PLC=private.one-lab.org
 # (*) otherwise, entering through the root context
-# make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr
+# make sync PLCHOST=testplc.onelab.eu GUEST=vplc03.inria.fr
 
 PLCHOST ?= testplc.onelab.eu
 
@@ -118,7 +118,7 @@ sync:
 ifeq (,$(SSHURL))
 	@echo "sync: You must define, either PLC, or PLCHOST & GUEST, on the command line"
 	@echo "  e.g. make sync PLC=boot.planetlab.eu"
-	@echo "  or   make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr"
+	@echo "  or   make sync PLCHOST=testplc.onelab.eu GUEST=vplc03.inria.fr"
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
