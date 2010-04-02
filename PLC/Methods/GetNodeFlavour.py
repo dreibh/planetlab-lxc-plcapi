@@ -73,6 +73,7 @@ class GetNodeFlavour(Method):
 
         # xxx could use some sanity checking, and could provide fallbacks
         return { 'nodefamily' : self.nodefamily(auth,node_id, fcdistro, arch),
+                 'fcdistro' : fcdistro,
                  'extensions' : self.extensions(auth,node_id, fcdistro, arch),
                  'plain' : self.plain(auth,node_id),
                  }
