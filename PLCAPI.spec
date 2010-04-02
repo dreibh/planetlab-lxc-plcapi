@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -138,6 +138,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Apr 02 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-5
+- tweaks for the omf support (xmpp groups and RC-controlled slices)
+- BootNodeUpdate supports also ssh_rsa_key (and logs only changes)
+- GetNodeFlavour exposes fcdistro
+
 * Sun Mar 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-4
 - do not use UpdateNode for handling the 'hrn' tag - should fix refresh peer & foreign nodes more generally
 
