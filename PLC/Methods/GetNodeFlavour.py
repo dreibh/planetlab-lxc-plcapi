@@ -16,7 +16,7 @@ class GetNodeFlavour(Method):
     This depends on the global PLC settings in the PLC_FLAVOUR area,
     optionnally overridden by any of the following tags if set on that node:
 
-    'arch', 'pldistro', 'fcdistro', (xxx fcdistro not yet supported)
+    'arch', 'pldistro', 'fcdistro', 
     'deployment', 'extensions',
     """
 
@@ -30,6 +30,7 @@ class GetNodeFlavour(Method):
 
     returns = { 
         'nodefamily' : Parameter (str, "the nodefamily this node should be based upon"),
+        'fcdistro': Parameter (str, "the fcdistro this node should be based upon"),
         'extensions' : [ Parameter (str, "extensions to add to the base install") ],
         'plain' : Parameter (bool, "use plain bootstrapfs image if set (for tests)" ) ,
         }
@@ -39,11 +40,15 @@ class GetNodeFlavour(Method):
     def nodefamily (self, auth, node_id, fcdistro, arch):
 
         # the deployment tag, if set, wins
+        # xxx Thierry: this probably is wrong; we need fcdistro to be set anyway 
+        # for generating the proper yum config....
         deployment = GetNodeDeployment (self.api).call(auth,node_id)
         if deployment: return deployment
 
         pldistro = GetNodePldistro (self.api).call(auth, node_id)
-        if not pldistro: pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
+        if not pldistro: 
+            pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
+            SetNodePldistro(self.api).call(auth,node_id,pldistro)
 
         # xxx would make sense to check the corresponding bootstrapfs is available
         return "%s-%s-%s"%(pldistro,fcdistro,arch)
@@ -66,10 +71,15 @@ class GetNodeFlavour(Method):
         node_id = node['node_id']
 
         arch = GetNodeArch (self.api).call(auth,node_id)
-        if not arch: arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
+        # if not set, use the global default and tag the node, in case the global default changes later on
+        if not arch: 
+            arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
+            SetNodeArch (self.api).call(auth,node_id,arch)
 
         fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
-        if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
+        if not fcdistro: 
+            fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
+            SetNodeFcdistro (self.api).call (auth, node_id, fcdistro)
 
         # xxx could use some sanity checking, and could provide fallbacks
         return { 'nodefamily' : self.nodefamily(auth,node_id, fcdistro, arch),
