@@ -129,7 +129,7 @@ class PubSubClient(BaseClient):
     def __iq(self, t="get"):
         iq = domish.Element((None, "iq"))
         iq['from'] = self.id.full()
-        iq['to'] = "pubsub.vplc27.inria.fr"
+        iq['to'] = "pubsub.%s" % self.id.host
         iq['type'] = t
         iq.addUniqueId()
         return iq
