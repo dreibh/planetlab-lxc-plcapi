@@ -1,5 +1,5 @@
-# $Id: SiteTags.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: http://svn.planet-lab.org/svn/PLCAPI/tags/PLCAPI-4.3-27/PLC/SiteTags.py $
+# $Id$
+# $URL$
 #
 # Thierry Parmentelat - INRIA
 #
