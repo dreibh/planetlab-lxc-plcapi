@@ -111,7 +111,7 @@ CREATE INDEX persons_email_idx ON persons (email);
 --------------------------------------------------------------------------------
 CREATE TABLE person_tag (
     person_tag_id serial PRIMARY KEY,			-- ID
-    person_id integer REFERENCES persons NOT NULL,		-- person id
+    person_id integer REFERENCES persons NOT NULL,	-- person id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
     value text						-- value attached
 ) WITH OIDS;
@@ -387,7 +387,7 @@ CREATE TABLE nodes (
     version text,					-- Boot CD version string updated by Boot Manager
     ssh_rsa_key text,					-- SSH host key updated by Boot Manager
     key text,						-- Node key generated when boot file is downloaded
-	verified boolean NOT NULL DEFAULT false,		-- whether or not the node & pcu are verified
+	verified boolean NOT NULL DEFAULT false,	-- whether or not the node & pcu are verified
 
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -815,7 +815,7 @@ GROUP BY node_id;
 
 -- Slice/sliver attributes
 CREATE TABLE slice_tag (
-    slice_tag_id serial PRIMARY KEY,		-- Slice attribute identifier
+    slice_tag_id serial PRIMARY KEY,			-- Slice attribute identifier
     slice_id integer REFERENCES slices NOT NULL,	-- Slice identifier
     node_id integer REFERENCES nodes,			-- Sliver attribute if set
     nodegroup_id integer REFERENCES nodegroups,		-- Node group attribute if set
@@ -853,7 +853,7 @@ CREATE TABLE peers (
     cacert text,					-- (SSL) Public certificate of peer API server
     key text,						-- (GPG) Public key used for authentication
     shortname text,					-- abbreviated name for displaying foreign objects
-    hrn_root text,						-- root for this peer domain
+    hrn_root text,					-- root for this peer domain
     deleted boolean NOT NULL DEFAULT false
 ) WITH OIDS;
 CREATE INDEX peers_peername_idx ON peers (peername) WHERE deleted IS false;
