@@ -75,6 +75,4 @@ class Events(Table):
             elif isinstance(event_filter, dict):
                 event_filter = Filter(Event.fields, event_filter)
             sql += " AND (%s) %s" % event_filter.sql(api)
-# with new filtering, caller needs to set this explicitly
-#	sql += " ORDER BY %s" % Event.primary_key
         self.selectall(sql)

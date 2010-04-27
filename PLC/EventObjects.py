@@ -58,7 +58,5 @@ class EventObjects(Table):
                 sql += " AND (%s) %s" % event_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong event object filter %r"%event_filter
-# with new filtering, caller needs to set this explicitly
-#	sql += " ORDER BY %s" % EventObject.primary_key
         
 	self.selectall(sql)
