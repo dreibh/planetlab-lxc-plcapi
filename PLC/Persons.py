@@ -9,7 +9,6 @@
 #
 
 from types import StringTypes
-from datetime import datetime
 try:
     from hashlib import md5
 except ImportError:

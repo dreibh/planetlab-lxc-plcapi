@@ -1,6 +1,7 @@
 ## Please use make index to update this file
 all = """
 API
+Accessor
 AddressTypes
 Addresses
 Auth
@@ -20,8 +21,11 @@ InterfaceTags
 Interfaces
 KeyTypes
 Keys
+LeaseFilter
+Leases
 Messages
 Method
+Namespace
 NetworkMethods
 NetworkTypes
 NodeGroups
@@ -48,5 +52,6 @@ SliceTags
 Slices
 Table
 TagTypes
+Timestamp
 sendmail
 """.split()

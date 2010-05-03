@@ -13,6 +13,7 @@ from PLC.SliceInstantiations import SliceInstantiation, SliceInstantiations
 from PLC.Nodes import Node
 from PLC.Persons import Person, Persons
 from PLC.SliceTags import SliceTag
+from PLC.Timestamp import Timestamp
 
 class Slice(Row):
     """
@@ -24,7 +25,7 @@ class Slice(Row):
 
     table_name = 'slices'
     primary_key = 'slice_id'
-    join_tables = ['slice_node', 'slice_person', 'slice_tag', 'peer_slice', 'node_slice_whitelist']
+    join_tables = ['slice_node', 'slice_person', 'slice_tag', 'peer_slice', 'node_slice_whitelist', 'leases', ]
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
@@ -86,7 +87,7 @@ class Slice(Row):
         # N.B.: Responsibility of the caller to ensure that expires is
         # not too far into the future.
         check_future = not ('is_deleted' in self and self['is_deleted'])
-        return Row.validate_timestamp(self, expires, check_future = check_future)
+        return Timestamp.sql_validate( expires, check_future = check_future)
 
     add_person = Row.add_object(Person, 'slice_person')
     remove_person = Row.remove_object(Person, 'slice_person')

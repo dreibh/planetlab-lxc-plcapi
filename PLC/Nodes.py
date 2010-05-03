@@ -42,7 +42,7 @@ class Node(Row):
     primary_key = 'node_id'
     join_tables = [ 'slice_node', 'peer_node', 'slice_tag', 
                     'node_session', 'node_slice_whitelist', 
-                    'node_tag', 'conf_file_node', 'pcu_node', ]
+                    'node_tag', 'conf_file_node', 'pcu_node', 'leases', ]
     fields = {
         'node_id': Parameter(int, "Node identifier"),
         'node_type': Parameter(str,"Node type",max=20),

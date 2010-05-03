@@ -25,30 +25,6 @@ from pprint import pformat
 from PLC.Debug import profile, log
 from PLC.Faults import *
 
-if not psycopg2:
-    is8bit = re.compile("[\x80-\xff]").search
-
-    def unicast(typecast):
-        """
-        pgdb returns raw UTF-8 strings. This function casts strings that
-        appear to contain non-ASCII characters to unicode objects.
-        """
-    
-        def wrapper(*args, **kwds):
-            value = typecast(*args, **kwds)
-
-            # pgdb always encodes unicode objects as UTF-8 regardless of
-            # the DB encoding (and gives you no option for overriding
-            # the encoding), so always decode 8-bit objects as UTF-8.
-            if isinstance(value, str) and is8bit(value):
-                value = unicode(value, "utf-8")
-
-            return value
-
-        return wrapper
-
-    pgdb.pgdbTypeCache.typecast = unicast(pgdb.pgdbTypeCache.typecast)
-
 class PostgreSQL:
     def __init__(self, api):
         self.api = api
@@ -59,25 +35,19 @@ class PostgreSQL:
     def cursor(self):
         if self.connection is None:
             # (Re)initialize database connection
-            if psycopg2:
-                try:
-                    # Try UNIX socket first
-                    self.connection = psycopg2.connect(user = self.api.config.PLC_DB_USER,
-                                                       password = self.api.config.PLC_DB_PASSWORD,
-                                                       database = self.api.config.PLC_DB_NAME)
-                except psycopg2.OperationalError:
-                    # Fall back on TCP
-                    self.connection = psycopg2.connect(user = self.api.config.PLC_DB_USER,
-                                                       password = self.api.config.PLC_DB_PASSWORD,
-                                                       database = self.api.config.PLC_DB_NAME,
-                                                       host = self.api.config.PLC_DB_HOST,
-                                                       port = self.api.config.PLC_DB_PORT)
-                self.connection.set_client_encoding("UNICODE")
-            else:
-                self.connection = pgdb.connect(user = self.api.config.PLC_DB_USER,
-                                               password = self.api.config.PLC_DB_PASSWORD,
-                                               host = "%s:%d" % (api.config.PLC_DB_HOST, api.config.PLC_DB_PORT),
-                                               database = self.api.config.PLC_DB_NAME)
+            try:
+                # Try UNIX socket first
+                self.connection = psycopg2.connect(user = self.api.config.PLC_DB_USER,
+                                                   password = self.api.config.PLC_DB_PASSWORD,
+                                                   database = self.api.config.PLC_DB_NAME)
+            except psycopg2.OperationalError:
+                # Fall back on TCP
+                self.connection = psycopg2.connect(user = self.api.config.PLC_DB_USER,
+                                                   password = self.api.config.PLC_DB_PASSWORD,
+                                                   database = self.api.config.PLC_DB_NAME,
+                                                   host = self.api.config.PLC_DB_HOST,
+                                                   port = self.api.config.PLC_DB_PORT)
+            self.connection.set_client_encoding("UNICODE")
 
         (self.rowcount, self.description, self.lastrowid) = \
                         (None, None, None)

@@ -85,10 +85,14 @@ case "$1" in
 	# PostgreSQL 7.x uses tcpip_socket.
 	if grep -q listen_addresses $postgresql_conf ; then
 	    sed -i -e '/^listen_addresses/d' $postgresql_conf
-	    echo "listen_addresses = '*'" >>$postgresql_conf
-	elif grep -q tcpip_socket $postgresql_conf ; then
-	    sed -i -e '/^tcpip_socket/d' $postgresql_conf
-	    echo "tcpip_socket = true" >>$postgresql_conf
+	    echo "listen_addresses = '*'" >> $postgresql_conf
+	    # tweak timezone to be 'UTC'
+	    sed -i -e '/^timezone=/d' $postgresql_conf
+	    echo "timezone='UTC'" >> $postgresql_conf
+	else
+	    dialog "PostgreSQL <= 7.x - not supported"
+	    /bin/false
+	    check
 	fi
 
 	# Disable access to all DBs from all hosts

@@ -89,7 +89,7 @@ class AddNode(Method):
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
 
         self.event_objects = {'Site': [site['site_id']],
-			     'Node': [node['node_id']]}	
-        self.message = "Node %s created" % node['node_id']
+                              'Node': [node['node_id']]}	
+        self.message = "Node %d=%s created" % (node['node_id'],node['hostname'])
         
         return node['node_id']

@@ -61,7 +61,6 @@ class Mixed(tuple):
     def __new__(cls, *types):
         return tuple.__new__(cls, types)
 
-
 def python_type(arg):
     """
     Returns the Python type of the specified argument, which may be a

@@ -11,6 +11,7 @@ AddInitScript
 AddInterface
 AddInterfaceTag
 AddKeyType
+AddLeases
 AddMessage
 AddNetworkMethod
 AddNetworkType
@@ -60,6 +61,7 @@ DeleteInterface
 DeleteInterfaceTag
 DeleteKey
 DeleteKeyType
+DeleteLeases
 DeleteMessage
 DeleteNetworkMethod
 DeleteNetworkType
@@ -101,6 +103,7 @@ GetInterfaceTags
 GetInterfaces
 GetKeyTypes
 GetKeys
+GetLeases
 GetMessages
 GetNetworkMethods
 GetNetworkTypes
@@ -166,6 +169,7 @@ UpdateInitScript
 UpdateInterface
 UpdateInterfaceTag
 UpdateKey
+UpdateLeases
 UpdateMessage
 UpdateNode
 UpdateNodeGroup

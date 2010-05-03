@@ -4,8 +4,10 @@ from types import StringTypes, IntType, LongType
 import time
 import calendar
 
+from PLC.Timestamp import Timestamp
 from PLC.Faults import *
 from PLC.Parameter import Parameter
+
 
 class Row(dict):
     """
@@ -96,28 +98,8 @@ class Row(dict):
 	else:
 	    raise PLCInvalidArguemnt, "No such associate function associate_%s" % args[1]
 
-    def validate_timestamp(self, timestamp, check_future = False):
-        """
-        Validates the specified GMT timestamp string (must be in
-        %Y-%m-%d %H:%M:%S format) or number (seconds since UNIX epoch,
-        i.e., 1970-01-01 00:00:00 GMT). If check_future is True,
-        raises an exception if timestamp is not in the future. Returns
-        a GMT timestamp string.
-        """
-
-        time_format = "%Y-%m-%d %H:%M:%S"
-
-	if isinstance(timestamp, StringTypes):
-	    # calendar.timegm() is the inverse of time.gmtime()
-	    timestamp = calendar.timegm(time.strptime(timestamp, time_format))
-
-        # Human readable timestamp string
-	human = time.strftime(time_format, time.gmtime(timestamp))
-
-	if check_future and timestamp < time.time():
-            raise PLCInvalidArgument, "'%s' not in the future" % human
-
-	return human
+    def validate_timestamp (self, timestamp):
+        return Timestamp.sql_validate(timestamp)
 
     def add_object(self, classobj, join_table, columns = None):
         """

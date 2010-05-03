@@ -31,9 +31,16 @@ class Filter(Parameter, dict):
     filter should be a dictionary of field names and values
     representing  the criteria for filtering. 
     example : filter = { 'hostname' : '*.edu' , site_id : [34,54] }
+
+
     Whether the filter represents an intersection (AND) or a union (OR) 
-    of these criteria is determined by the join_with argument 
-    provided to the sql method below
+    of these criteria is determined as follows:
+    * if the dictionnary has the '-AND' or the '-OR' key, this is chosen
+    * otherwise, the join_with argument, as provided to the sql method below, 
+      is expected to hold the 'AND' or 'OR' string 
+      this argument defaults to 'AND' and in most of the code, this default applies 
+      as the join_with argument is left unspecified
+
 
     Special features:
 
@@ -73,10 +80,15 @@ class Filter(Parameter, dict):
     * '-LIMIT' : the amount of rows to be returned 
     example : filter = { '-OFFSET' : 100, '-LIMIT':25}
 
+
     Here are a few realistic examples
 
-    GetNodes ( { 'node_type' : 'regular' , 'hostname' : '*.edu' , '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
+    GetNodes ( { 'node_type' : 'regular' , 'hostname' : '*.edu' , 
+                 '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
       would return regular (usual) nodes matching '*.edu' in alphabetical order from 31th to 55th
+
+    GetNodes ( { '~peer_id' : None } ) 
+      returns the foreign nodes - that have an integer peer_id 
 
     GetPersons ( { '|role_ids' : [ 20 , 40] } )
       would return all persons that have either pi (20) or tech (40) roles
@@ -87,6 +99,9 @@ class Filter(Parameter, dict):
     GetPersons ( { '|role_ids' : [ 10 ] } )
       all 4 forms are equivalent and would return all admin users in the system
     """
+
+    debug=False
+#    debug=True
 
     def __init__(self, fields = {}, filter = {}, doc = "Attribute filter"):
         # Store the filter in our dict instance
@@ -105,6 +120,15 @@ class Filter(Parameter, dict):
         """
         Returns a SQL conditional that represents this filter.
         """
+
+        if self.has_key('-AND'): 
+            del self['-AND']
+            join_with='AND'
+        if self.has_key('-OR'): 
+            del self['-OR']
+            join_with='OR'
+
+        self.join_with=join_with
 
         # So that we always return something
         if join_with == "AND":
@@ -260,5 +284,5 @@ class Filter(Parameter, dict):
             clip_part += " ORDER BY " + ",".join(sorts)
         if clips:
             clip_part += " " + " ".join(clips)
-#	print 'where_part=',where_part,'clip_part',clip_part
+        if Filter.debug: print 'Filter.sql: where_part=',where_part,'clip_part',clip_part
         return (where_part,clip_part)
