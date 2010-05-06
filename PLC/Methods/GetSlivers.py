@@ -18,6 +18,8 @@ from PLC.Roles import Roles
 from PLC.Keys import Key, Keys
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
+from PLC.Leases import Lease, Leases
+from PLC.Timestamp import Duration
 from PLC.Methods.GetSliceFamily import GetSliceFamily
 
 from PLC.Accessors.Accessors_standard import *
@@ -173,6 +175,10 @@ class GetSlivers(Method):
                  'user':Parameter(str,"username for the XMPP server"),
                  'password':Parameter(str,"username for the XMPP server"),
                  },
+        'leases': [  { 'slice_id' : Lease.fields['slice_id'],
+                       't_from' : Lease.fields['t_from'],
+                       't_until' : Lease.fields['t_until'],
+                       }],
     }
 
     def call(self, auth, node_id_or_hostname = None):
@@ -298,6 +304,15 @@ class GetSlivers(Method):
 
 	node.update_last_contact()
 
+        # expose leases
+        lease_exposed_fields = [ 'slice_id', 't_from', 't_until', ]
+        leases=None
+        if node['node_type'] == 'reservable':
+            # expose the leases for the next 12 hours
+            leases = [ dict ( [ (k,l[k]) for k in lease_exposed_fields ] ) 
+                       for l in Leases (self.api, {'node_id':node['node_id'],
+                                                   'clip': (timestamp, timestamp+12*Duration.HOUR)}) ]
+
         return {
             'timestamp': timestamp,
             'node_id': node['node_id'],
@@ -310,4 +325,5 @@ class GetSlivers(Method):
             'accounts': accounts,
             'xmpp':xmpp,
             'hrn':hrn,
+            'leases':leases,
             }
