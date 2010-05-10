@@ -139,7 +139,7 @@ class OMFAspect_xmlrpc(BaseOMF):
         BaseOMF.__init__(self)
 
         slicemgr_url = self.config.PLC_OMF_SLICEMGR_URL
-        self.server = xmlrpclib.ServerProxy(slicemgr_url)
+        self.server = xmlrpclib.ServerProxy(slicemgr_url, allow_none = 1)
 
     def create_slice(self, slice):
         self.server.createSlice(slice)
