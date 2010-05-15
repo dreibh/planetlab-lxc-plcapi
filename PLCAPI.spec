@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -138,6 +138,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri May 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-9
+- the leases system
+
 * Wed Apr 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-8
 - previous tag had gone wrong
 
