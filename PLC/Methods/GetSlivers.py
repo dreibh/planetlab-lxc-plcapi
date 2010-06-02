@@ -171,10 +171,16 @@ class GetSlivers(Method):
                 'value': SliceTag.fields['value']
             }]
         }],
+        # how to reach the xmpp server
         'xmpp': {'server':Parameter(str,"hostname for the XMPP server"),
                  'user':Parameter(str,"username for the XMPP server"),
                  'password':Parameter(str,"username for the XMPP server"),
                  },
+        # we consider three policies (reservation-policy)
+        # none : the traditional way to use a node
+        # lease_or_idle : 0 or 1 slice runs at a given time
+        # lease_or_shared : 1 slice is running during a lease, otherwise all the slices come back
+        'reservation_policy': Parameter(str,"one among none, lease_or_idle, lease_or_shared"),
         'leases': [  { 'slice_id' : Lease.fields['slice_id'],
                        't_from' : Lease.fields['t_from'],
                        't_until' : Lease.fields['t_until'],
@@ -304,14 +310,20 @@ class GetSlivers(Method):
 
 	node.update_last_contact()
 
-        # expose leases
+        # expose leases & reservation policy
+        # in a first implementation we only support none and lease_or_idle
         lease_exposed_fields = [ 'slice_id', 't_from', 't_until', ]
         leases=None
-        if node['node_type'] == 'reservable':
-            # expose the leases for the next 12 hours
+        if node['node_type'] != 'reservable':
+            reservation_policy='none'
+        else:
+            reservation_policy='lease_or_idle'
+            # expose the leases for the next 24 hours
             leases = [ dict ( [ (k,l[k]) for k in lease_exposed_fields ] ) 
                        for l in Leases (self.api, {'node_id':node['node_id'],
-                                                   'clip': (timestamp, timestamp+12*Duration.HOUR)}) ]
+                                                   'clip': (timestamp, timestamp+24*Duration.HOUR),
+                                                   '-SORT': 't_from',
+                                                   }) ]
 
         return {
             'timestamp': timestamp,
@@ -325,5 +337,6 @@ class GetSlivers(Method):
             'accounts': accounts,
             'xmpp':xmpp,
             'hrn':hrn,
+            'reservation_policy': reservation_policy,
             'leases':leases,
             }
