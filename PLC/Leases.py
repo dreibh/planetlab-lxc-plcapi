@@ -48,8 +48,8 @@ class Lease(Row):
 
     # leases do not have arbitrary boundaries
     # f_from and t_until are rounded to this period of time
-    # initial model is one hour
-    granularity = 60*60
+    # initial model is 15 minutes
+#    granularity = 15*60    granularity = 5*60
 
     def validate_time (self, timestamp, round_up):
         # convert to long

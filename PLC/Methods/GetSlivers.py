@@ -324,6 +324,7 @@ class GetSlivers(Method):
                                                    'clip': (timestamp, timestamp+24*Duration.HOUR),
                                                    '-SORT': 't_from',
                                                    }) ]
+        granularity=Lease.granularity
 
         return {
             'timestamp': timestamp,
@@ -339,4 +340,5 @@ class GetSlivers(Method):
             'hrn':hrn,
             'reservation_policy': reservation_policy,
             'leases':leases,
+            'lease_granularity': granularity,
             }

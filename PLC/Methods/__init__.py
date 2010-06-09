@@ -103,6 +103,7 @@ GetInterfaceTags
 GetInterfaces
 GetKeyTypes
 GetKeys
+GetLeaseGranularity
 GetLeases
 GetMessages
 GetNetworkMethods
