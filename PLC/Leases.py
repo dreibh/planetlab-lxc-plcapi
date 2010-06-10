@@ -46,18 +46,15 @@ class Lease(Row):
 
     related_fields = { }
 
-    # leases do not have arbitrary boundaries
-    # f_from and t_until are rounded to this period of time
-    # initial model is 15 minutes
-#    granularity = 15*60    granularity = 5*60
-
     def validate_time (self, timestamp, round_up):
         # convert to long
         timestamp = Timestamp.cast_long(timestamp)
+        # retrieve configured granularity
+        granularity = self.api.config.PLC_RESERVATION_GRANULARITY
         # the trick for rounding up rather than down
-        if round_up: timestamp += (Lease.granularity-1)
+        if round_up: timestamp += (granularity-1)
         # round down
-        timestamp = (timestamp/Lease.granularity) * Lease.granularity
+        timestamp = (timestamp/granularity) * granularity
         # return a SQL string
         return Timestamp.sql_validate_utc(timestamp)
 

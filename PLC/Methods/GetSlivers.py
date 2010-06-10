@@ -324,7 +324,7 @@ class GetSlivers(Method):
                                                    'clip': (timestamp, timestamp+24*Duration.HOUR),
                                                    '-SORT': 't_from',
                                                    }) ]
-        granularity=Lease.granularity
+        granularity=self.api.config.PLC_RESERVATION_GRANULARITY
 
         return {
             'timestamp': timestamp,
