@@ -312,7 +312,7 @@ class GetSlivers(Method):
 
         # expose leases & reservation policy
         # in a first implementation we only support none and lease_or_idle
-        lease_exposed_fields = [ 'slice_id', 't_from', 't_until', ]
+        lease_exposed_fields = [ 'slice_id', 't_from', 't_until', 'name', ]
         leases=None
         if node['node_type'] != 'reservable':
             reservation_policy='none'
