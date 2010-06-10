@@ -338,9 +338,8 @@ class GetBootMedium(Method):
             if "variant" in build_sh_spec:
                 build_sh_options += " -V %s"%build_sh_spec['variant']
             
-            if len(build_sh_spec['kargs']) > 0:
-                for karg in build_sh_spec['kargs']:
-                    build_sh_options += ' -k "%s"'%karg
+            for karg in build_sh_spec['kargs']:
+                build_sh_options += ' -k "%s"'%karg
 
             log_file="%s.log"%node_image
 
@@ -408,7 +407,7 @@ class GetBootMedium(Method):
                     if tag['tagname'] == 'kvariant':
                         build_sh_spec['variant'] = tag['value']
                     if tag['tagname'] == 'kargs':
-                        build_sh_spec['kargs'].append(tag['value'].split())
+                        build_sh_spec['kargs'] += tag['value'].split()
                     if tag['tagname'] == 'no-hangcheck':
                         build_sh_spec['kargs'].append('hcheck_reboot0')
             # then options can override tags
