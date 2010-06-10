@@ -339,7 +339,7 @@ class GetBootMedium(Method):
                 build_sh_options += " -V %s"%build_sh_spec['variant']
             
             if len(build_sh_spec['kargs']) > 0:
-                for karg in build_sh_spec['kargs'][0]:
+                for karg in build_sh_spec['kargs']:
                     build_sh_options += ' -k "%s"'%karg
 
             log_file="%s.log"%node_image
