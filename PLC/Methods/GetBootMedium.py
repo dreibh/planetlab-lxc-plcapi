@@ -20,15 +20,22 @@ from PLC.Accessors.Accessors_standard import *			# import node accessors
 
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
+# reservable nodes being more recent, we do not support the floppy stuff anymore
 allowed_actions = {
-                'regular' : [ 'node-preview',
-                              'node-floppy',
-                              'node-iso',
-                              'node-usb',
-                              'generic-iso',
-                              'generic-usb',
-                               ],
-                }
+    'regular' : 
+    [ 'node-preview',
+      'node-floppy',
+      'node-iso',
+      'node-usb',
+      'generic-iso',
+      'generic-usb',
+      ],
+    'reservable': 
+    [ 'node-preview',
+      'node-iso',
+      'node-usb',
+      ],
+    }
 
 # compute a new key
 def compute_key():
@@ -70,6 +77,8 @@ class GetBootMedium(Method):
 
     Apart for the preview mode, this method generates a new node key for the
     specified node, effectively invalidating any old boot medium.
+    Note that 'reservable' nodes do not support 'node-floppy', 
+    'generic-iso' nor 'generic-usb'.
 
     In addition, two return mechanisms are supported.
     (*) The default behaviour is that the file's content is returned as a 
@@ -328,7 +337,7 @@ class GetBootMedium(Method):
 
         # regular node, make build's arguments
         # and build the full command line to be called
-        if node_type == 'regular':
+        if node_type in [ 'regular', 'reservable' ]:
 
             build_sh_options=""
             if "cramfs" in build_sh_spec: 
