@@ -34,16 +34,20 @@ class RebootNodeWithPCU(Method):
     accepts = [
         Auth(),
         Mixed(Node.fields['node_id'],
-              Node.fields['hostname'])
+              Node.fields['hostname']),
+        Parameter(bool, "Run as a test, or as a real reboot", nullok = True)
         ]
 
     returns = Parameter(int, '1 if successful')
 
-    def call(self, auth, node_id_or_hostname):
+    def call(self, auth, node_id_or_hostname, testrun=None):
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
+
+        if testrun is None:
+            testrun = False
 
         node = nodes[0]
 
@@ -69,7 +73,7 @@ class RebootNodeWithPCU(Method):
 	# model, hostname, port, 
 	# i = pcu['node_ids'].index(node['node_id'])
 	# p = pcu['ports'][i]
-	ret = reboot.reboot_api(node, pcu)
+	ret = reboot.reboot_api(node, pcu, testrun)
 
         self.event_objects = {'Node': [node['node_id']]}
         self.message = "RebootNodeWithPCU called"
