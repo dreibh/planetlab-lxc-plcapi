@@ -29,7 +29,7 @@ This is implemented as a singleton, so we can cache results over time"""
 
     def locate_or_create_tag (self,tagname,category, description, min_role_id):
         "search tag type from tagname & create if needed"
-        
+
         # cached ?
         if self.has_cache (tagname):
             return self.get_cache(tagname)
@@ -39,7 +39,7 @@ This is implemented as a singleton, so we can cache results over time"""
             tag_type = tag_types[0]
         else:
             # not found: create it
-            tag_type_fields = {'tagname':tagname, 
+            tag_type_fields = {'tagname':tagname,
                                'category' :  category,
                                'description' : description,
                                'min_role_id': min_role_id}

@@ -28,7 +28,7 @@ class GenerateNodeConfFile(Method):
         Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
-	Parameter(bool, "True if you want to regenerate node key")
+        Parameter(bool, "True if you want to regenerate node key")
         ]
 
     returns = Parameter(str, "Node configuration file")
@@ -49,7 +49,7 @@ class GenerateNodeConfFile(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to generate a configuration file for that node"
 
-	# Get interfaces for this node
+        # Get interfaces for this node
         primary = None
         interfaces = Interfaces(self.api, node['interface_ids'])
         for interface in interfaces:
@@ -66,7 +66,7 @@ class GenerateNodeConfFile(Method):
         host = parts[0]
         domain = parts[1]
 
-	if regenerate_node_key:
+        if regenerate_node_key:
             # Generate 32 random bytes
             bytes = random.sample(xrange(0, 256), 32)
             # Base64 encode their string representation

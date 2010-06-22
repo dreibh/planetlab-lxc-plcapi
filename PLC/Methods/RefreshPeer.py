@@ -1,6 +1,6 @@
 #
 # Thierry Parmentelat - INRIA
-# 
+#
 # $Id$
 # $URL$
 
@@ -108,24 +108,24 @@ class RefreshPeer(Method):
         file_lock.unlock()
         return ret_val
 
-        
+
     def real_call(self, auth, peer_id_or_peername):
         # Get peer
-	peers = Peers(self.api, [peer_id_or_peername])
+        peers = Peers(self.api, [peer_id_or_peername])
         if not peers:
             raise PLCInvalidArgument, "No such peer '%s'" % unicode(peer_id_or_peername)
         peer = peers[0]
         peer_id = peer['peer_id']
 
-	# Connect to peer API
+        # Connect to peer API
         peer.connect()
 
         timers = {}
 
         # Get peer data
         start = time.time()
-	message('RefreshPeer starting up (commit_mode=%r)'%commit_mode)
-	message('Issuing GetPeerData')
+        message('RefreshPeer starting up (commit_mode=%r)'%commit_mode)
+        message('Issuing GetPeerData')
         peer_tables = peer.GetPeerData()
         # for smooth federation with 4.2 - ignore fields that are useless anyway, and rewrite boot_state
         boot_state_rewrite={'dbg':'safeboot','diag':'safeboot','disable':'disabled',
@@ -172,7 +172,7 @@ class RefreshPeer(Method):
             def trace (message):
                 if classname == trace_type and peer_object_id in trace_ids:
                     message_verbose('TRACE>>'+message)
-                
+
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
                 message_verbose ('DBG %s peer_object_id=%d (%d/%d)'%(classname,peer_object_id,count,total))
@@ -333,10 +333,10 @@ class RefreshPeer(Method):
         # Keyed on foreign person_id
         old_peer_persons = Persons(self.api, {'peer_id': peer_id}, columns).dict('peer_person_id')
 
-	# artificially attach the persons returned by GetPeerData to the new peer 
-	# this is because validate_email needs peer_id to be correct when checking for duplicates 
-	for person in peer_tables['Persons']: 
-	    person['peer_id']=peer_id
+        # artificially attach the persons returned by GetPeerData to the new peer
+        # this is because validate_email needs peer_id to be correct when checking for duplicates
+        for person in peer_tables['Persons']:
+            person['peer_id']=peer_id
         persons_at_peer = dict([(peer_person['person_id'], peer_person) \
                                 for peer_person in peer_tables['Persons']])
 
@@ -345,9 +345,9 @@ class RefreshPeer(Method):
         # Synchronize new set (still keyed on foreign person_id)
         peer_persons = sync(old_peer_persons, persons_at_peer, Person)
 
-	# transcoder : retrieve a local key_id from a peer_key_id
-	key_transcoder = dict ( [ (key['key_id'],peer_key_id) \
-				  for peer_key_id,key in peer_keys.iteritems()])
+        # transcoder : retrieve a local key_id from a peer_key_id
+        key_transcoder = dict ( [ (key['key_id'],peer_key_id) \
+                                  for peer_key_id,key in peer_keys.iteritems()])
 
         for peer_person_id, person in peer_persons.iteritems():
             # Bind any newly cached users to peer
@@ -359,24 +359,24 @@ class RefreshPeer(Method):
 
             # User as viewed by peer
             peer_person = persons_at_peer[peer_person_id]
-            
+
             # Foreign keys currently belonging to the user
-	    old_person_key_ids = [key_transcoder[key_id] for key_id in person['key_ids'] \
-				  if key_transcoder[key_id] in peer_keys]
+            old_person_key_ids = [key_transcoder[key_id] for key_id in person['key_ids'] \
+                                  if key_transcoder[key_id] in peer_keys]
 
             # Foreign keys that should belong to the user
-	    # this is basically peer_person['key_ids'], we just check it makes sense 
-	    # (e.g. we might have failed importing it)
-	    person_key_ids = [ key_id for key_id in peer_person['key_ids'] if key_id in peer_keys]
+            # this is basically peer_person['key_ids'], we just check it makes sense
+            # (e.g. we might have failed importing it)
+            person_key_ids = [ key_id for key_id in peer_person['key_ids'] if key_id in peer_keys]
 
             # Remove stale keys from user
-	    for key_id in (set(old_person_key_ids) - set(person_key_ids)):
-		person.remove_key(peer_keys[key_id], commit = commit_mode)
+            for key_id in (set(old_person_key_ids) - set(person_key_ids)):
+                person.remove_key(peer_keys[key_id], commit = commit_mode)
                 message ("%s Key %d removed from person %s"%(peer['peername'], key_id, person['email']))
 
             # Add new keys to user
-	    for key_id in (set(person_key_ids) - set(old_person_key_ids)):
-		person.add_key(peer_keys[key_id], commit = commit_mode)
+            for key_id in (set(person_key_ids) - set(old_person_key_ids)):
+                person.add_key(peer_keys[key_id], commit = commit_mode)
                 message ("%s Key %d added into person %s"%(peer['peername'],key_id, person['email']))
 
         timers['persons'] = time.time() - start
@@ -508,11 +508,11 @@ class RefreshPeer(Method):
         peer_slices = sync(old_peer_slices, slices_at_peer, Slice)
 
         message('Dealing with Slices (2)')
-	# transcoder : retrieve a local node_id from a peer_node_id
-	node_transcoder = dict ( [ (node['node_id'],peer_node_id) \
-				   for peer_node_id,node in peer_nodes.iteritems()])
-	person_transcoder = dict ( [ (person['person_id'],peer_person_id) \
-				     for peer_person_id,person in peer_persons.iteritems()])
+        # transcoder : retrieve a local node_id from a peer_node_id
+        node_transcoder = dict ( [ (node['node_id'],peer_node_id) \
+                                   for peer_node_id,node in peer_nodes.iteritems()])
+        person_transcoder = dict ( [ (person['person_id'],peer_person_id) \
+                                     for peer_person_id,person in peer_persons.iteritems()])
 
         for peer_slice_id, slice in peer_slices.iteritems():
             # Bind any newly cached foreign slices to peer
@@ -527,11 +527,11 @@ class RefreshPeer(Method):
             peer_slice = slices_at_peer[peer_slice_id]
 
             # Nodes that are currently part of the slice
-	    old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids'] \
-				   if node_id in node_transcoder and node_transcoder[node_id] in peer_nodes]
+            old_slice_node_ids = [ node_transcoder[node_id] for node_id in slice['node_ids'] \
+                                   if node_id in node_transcoder and node_transcoder[node_id] in peer_nodes]
 
             # Nodes that should be part of the slice
-	    slice_node_ids = [ node_id for node_id in peer_slice['node_ids'] if node_id in peer_nodes]
+            slice_node_ids = [ node_id for node_id in peer_slice['node_ids'] if node_id in peer_nodes]
 
             # Remove stale nodes from slice
             for node_id in (set(old_slice_node_ids) - set(slice_node_ids)):
@@ -547,22 +547,22 @@ class RefreshPeer(Method):
             # by hand, are removed. In other words, don't do this.
 
             # Foreign users that are currently part of the slice
-	    #old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids'] \
-	    #		     if person_transcoder[person_id] in peer_persons]
-	    # An issue occurred with a user who registered on both sites (same email)
-	    # So the remote person could not get cached locally
-	    # The one-line map/filter style is nicer but ineffective here
-	    old_slice_person_ids = []
-	    for person_id in slice['person_ids']:
-		if not person_transcoder.has_key(person_id):
+            #old_slice_person_ids = [ person_transcoder[person_id] for person_id in slice['person_ids'] \
+            #                if person_transcoder[person_id] in peer_persons]
+            # An issue occurred with a user who registered on both sites (same email)
+            # So the remote person could not get cached locally
+            # The one-line map/filter style is nicer but ineffective here
+            old_slice_person_ids = []
+            for person_id in slice['person_ids']:
+                if not person_transcoder.has_key(person_id):
                     message ('WARNING : person_id %d in %s not transcodable (1) - skipped'%(person_id,slice['name']))
-		elif person_transcoder[person_id] not in peer_persons:
+                elif person_transcoder[person_id] not in peer_persons:
                     message('WARNING : person_id %d in %s not transcodable (2) - skipped'%(person_id,slice['name']))
-		else:
-		    old_slice_person_ids += [person_transcoder[person_id]]
+                else:
+                    old_slice_person_ids += [person_transcoder[person_id]]
 
             # Foreign users that should be part of the slice
-	    slice_person_ids = [ person_id for person_id in peer_slice['person_ids'] if person_id in peer_persons ]
+            slice_person_ids = [ person_id for person_id in peer_slice['person_ids'] if person_id in peer_persons ]
 
             # Remove stale users from slice
             for person_id in (set(old_slice_person_ids) - set(slice_person_ids)):
@@ -581,5 +581,5 @@ class RefreshPeer(Method):
 
         # Update peer itself and commit
         peer.sync(commit = True)
-        
+
         return timers

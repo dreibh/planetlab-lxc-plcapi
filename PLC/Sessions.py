@@ -67,21 +67,21 @@ class Sessions(Table):
     """
 
     def __init__(self, api, session_filter = None, expires = int(time.time())):
-	Table.__init__(self, api, Session)
+        Table.__init__(self, api, Session)
 
         sql = "SELECT %s FROM view_sessions WHERE True" % \
               ", ".join(Session.fields)
 
-	if session_filter is not None:
-	    if isinstance(session_filter, (list, tuple, set)):
-		# Separate the list into integers and strings
+        if session_filter is not None:
+            if isinstance(session_filter, (list, tuple, set)):
+                # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), session_filter)
                 strs = filter(lambda x: isinstance(x, StringTypes), session_filter)
                 session_filter = Filter(Session.fields, {'person_id': ints, 'session_id': strs})
                 sql += " AND (%s) %s" % session_filter.sql(api, "OR")
-	    elif isinstance(session_filter, dict):
-		session_filter = Filter(Session.fields, session_filter)
-		sql += " AND (%s) %s" % session_filter.sql(api, "AND")
+            elif isinstance(session_filter, dict):
+                session_filter = Filter(Session.fields, session_filter)
+                sql += " AND (%s) %s" % session_filter.sql(api, "AND")
 
         if expires is not None:
             if expires >= 0:

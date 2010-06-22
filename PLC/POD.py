@@ -71,7 +71,7 @@ def icmp_pod(host,key):
     if uid <> 0:
         print "must be root to send icmp pod"
         return
-    
+
     s = socket(AF_INET, SOCK_RAW, getprotobyname("icmp"))
     packet = _construct(0, key) # make a ping packet
     addr = (host,1)

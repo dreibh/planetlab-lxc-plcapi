@@ -76,13 +76,13 @@ class Interface(Row):
         network_methods = [row['method'] for row in NetworkMethods(self.api)]
         if method not in network_methods:
             raise PLCInvalidArgument, "Invalid addressing method %s"%method
-	return method
+        return method
 
     def validate_type(self, type):
         network_types = [row['type'] for row in NetworkTypes(self.api)]
         if type not in network_types:
             raise PLCInvalidArgument, "Invalid address type %s"%type
-	return type
+        return type
 
     def validate_ip(self, ip):
         if ip and not valid_ip(ip):
@@ -116,13 +116,13 @@ class Interface(Row):
     validate_dns2 = validate_ip
 
     def validate_bwlimit(self, bwlimit):
-	if not bwlimit:
-	    return bwlimit
+        if not bwlimit:
+            return bwlimit
 
-	if bwlimit < 500000:
-	    raise PLCInvalidArgument, 'Minimum bw is 500 kbs'
+        if bwlimit < 500000:
+            raise PLCInvalidArgument, 'Minimum bw is 500 kbs'
 
-	return bwlimit	
+        return bwlimit
 
     def validate_hostname(self, hostname):
         # Optional
@@ -224,7 +224,7 @@ class Interfaces(Table):
         for tagname in self.tag_columns:
             view= "%s left join %s using (%s)"%(view,Interface.tagvalue_view_name(tagname),
                                                 Interface.primary_key)
-            
+
         sql = "SELECT %s FROM %s WHERE True" % \
             (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 

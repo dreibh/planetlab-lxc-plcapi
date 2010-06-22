@@ -22,7 +22,7 @@ class AddNodeToPCU(Method):
 
     accepts = [
         Auth(),
-	Mixed(Node.fields['node_id'],
+        Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
         PCU.fields['pcu_id'],
         Parameter(int, 'PCU port number')
@@ -31,7 +31,7 @@ class AddNodeToPCU(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, node_id_or_hostname, pcu_id, port):
-	 # Get node
+         # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
@@ -55,8 +55,8 @@ class AddNodeToPCU(Method):
                     break
             if not ok:
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
-	
-	# Add node to PCU
+
+        # Add node to PCU
         if node['node_id'] in pcu['node_ids']:
             raise PLCInvalidArgument, "Node already controlled by PCU"
 
@@ -68,9 +68,9 @@ class AddNodeToPCU(Method):
 
         pcu.add_node(node, port)
 
-	# Logging variables
-	self.event_objects = {'Node': [node['node_id']],
-			      'PCU': [pcu['pcu_id']]}
-	self.message = 'Node %d added to pcu %d on port %d' % \
-		(node['node_id'], pcu['pcu_id'], port)
+        # Logging variables
+        self.event_objects = {'Node': [node['node_id']],
+                              'PCU': [pcu['pcu_id']]}
+        self.message = 'Node %d added to pcu %d on port %d' % \
+                (node['node_id'], pcu['pcu_id'], port)
         return 1

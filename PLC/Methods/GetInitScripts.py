@@ -9,10 +9,10 @@ from PLC.Auth import Auth
 
 class GetInitScripts(Method):
     """
-    Returns an array of structs containing details about initscripts. 
-    If initscript_filter is specified and is an array of initscript 
-    identifiers, or a struct of initscript attributes, only initscripts 
-    matching the filter will be returned. If return_fields is specified, 
+    Returns an array of structs containing details about initscripts.
+    If initscript_filter is specified and is an array of initscript
+    identifiers, or a struct of initscript attributes, only initscripts
+    matching the filter will be returned. If return_fields is specified,
     only the specified details will be returned.
     """
 
@@ -21,7 +21,7 @@ class GetInitScripts(Method):
     accepts = [
         Auth(),
         Mixed([Mixed(InitScript.fields['initscript_id'],
-		     InitScript.fields['name'])],
+                     InitScript.fields['name'])],
               Filter(InitScript.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]

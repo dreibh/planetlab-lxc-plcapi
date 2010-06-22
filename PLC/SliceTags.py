@@ -23,7 +23,7 @@ class SliceTag(Row):
         'slice_id': Parameter(int, "Slice identifier"),
         'name': Parameter(str, "Slice name"),
         'node_id': Node.fields['node_id'],
-	'nodegroup_id': NodeGroup.fields['nodegroup_id'],
+        'nodegroup_id': NodeGroup.fields['nodegroup_id'],
         'tag_type_id': TagType.fields['tag_type_id'],
         'tagname': TagType.fields['tagname'],
         'description': TagType.fields['description'],

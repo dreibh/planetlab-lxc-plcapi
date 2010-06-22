@@ -50,19 +50,19 @@ class UpdateSiteTag(Method):
 
         assert site_tag['site_tag_id'] in site['site_tag_ids']
 
-	# check permission : it not admin, is the user affiliated with the right site
-	if 'admin' not in self.caller['roles']:
-	    # check caller is affiliated with this site
-	    if self.caller['person_id'] not in site['person_ids']:
-		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified site setting, requires role %d",required_min_role
+        # check permission : it not admin, is the user affiliated with the right site
+        if 'admin' not in self.caller['roles']:
+            # check caller is affiliated with this site
+            if self.caller['person_id'] not in site['person_ids']:
+                raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
+
+            required_min_role = tag_type ['min_role_id']
+            if required_min_role is not None and \
+                    min(self.caller['role_ids']) > required_min_role:
+                raise PLCPermissionDenied, "Not allowed to modify the specified site setting, requires role %d",required_min_role
 
         site_tag['value'] = value
         site_tag.sync()
 
-	self.object_ids = [site_tag['site_tag_id']]
+        self.object_ids = [site_tag['site_tag_id']]
         return 1

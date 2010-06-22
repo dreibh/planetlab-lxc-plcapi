@@ -2,7 +2,7 @@
 # $URL$
 #
 # Thierry Parmentelat - INRIA
-# 
+#
 
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -31,8 +31,8 @@ class AddPeer(Method):
     returns = Parameter(int, "New peer_id (> 0) if successful")
 
     def call(self, auth, peer_fields):
-	peer = Peer(self.api, peer_fields);
-	peer.sync()
-	self.event_objects = {'Peer': [peer['peer_id']]}
+        peer = Peer(self.api, peer_fields);
+        peer.sync()
+        self.event_objects = {'Peer': [peer['peer_id']]}
 
-	return peer['peer_id']
+        return peer['peer_id']

@@ -26,17 +26,17 @@ class SliceInstantiation(Row):
         }
 
     def validate_instantiation(self, instantiation):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(instantiation):
             raise PLCInvalidArgument, "Slice instantiation state name must be specified"
-	
-	# Make sure slice instantiation does not alredy exist
-	conflicts = SliceInstantiations(self.api, [instantiation])
+
+        # Make sure slice instantiation does not alredy exist
+        conflicts = SliceInstantiations(self.api, [instantiation])
         if conflicts:
             raise PLCInvalidArgument, "Slice instantiation state name already in use"
 
-	return instantiation
-        
+        return instantiation
+
 class SliceInstantiations(Table):
     """
     Representation of the slice_instantiations table in the database.
@@ -47,7 +47,7 @@ class SliceInstantiations(Table):
 
         sql = "SELECT %s FROM slice_instantiations" % \
               ", ".join(SliceInstantiation.fields)
-        
+
         if instantiations:
             sql += " WHERE instantiation IN (%s)" % ", ".join(map(api.db.quote, instantiations))
 

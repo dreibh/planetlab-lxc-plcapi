@@ -40,10 +40,10 @@ class DeleteSite(Method):
             raise PLCInvalidArgument, "Not a local site"
 
         site.delete()
-	
+
         # Logging variables
         self.event_objects = {'Site': [site['site_id']]}
-        self.message = 'Site %d deleted' % site['site_id']	
+        self.message = 'Site %d deleted' % site['site_id']
 
-        
+
         return 1

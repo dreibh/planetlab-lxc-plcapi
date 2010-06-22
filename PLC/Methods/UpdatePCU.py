@@ -46,9 +46,9 @@ class UpdatePCU(Method):
 
         pcu.update(pcu_fields)
         pcu.sync()
-	
-	# Logging variables
-	self.event_objects = {'PCU': [pcu['pcu_id']]}
-	self.message = 'PCU %d updated: %s' % \
-		(pcu['pcu_id'], ", ".join(pcu_fields.keys()))
+
+        # Logging variables
+        self.event_objects = {'PCU': [pcu['pcu_id']]}
+        self.message = 'PCU %d updated: %s' % \
+                (pcu['pcu_id'], ", ".join(pcu_fields.keys()))
         return 1

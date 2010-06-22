@@ -12,14 +12,14 @@ from PLC.Slices import Slices
 from PLC.Keys import Keys
 from PLC.Peers import Peers
 from PLC.Faults import *
- 
+
 class BindObjectToPeer(Method):
     """
     This method is a hopefully temporary hack to let the sfa correctly
     attach the objects it creates to a remote peer object. This is
     needed so that the sfa federation link can work in parallel with
     RefreshPeer, as RefreshPeer depends on remote objects being
-    correctly marked. 
+    correctly marked.
 
     BindRemoteObjectToPeer is allowed to admins only.
     """
@@ -63,11 +63,11 @@ class BindObjectToPeer(Method):
 
         peer=peers[0]
         object = self.locate_object (object_type, object_id)
-        
-        # There is no need to continue if the object is already bound to this peer  
+
+        # There is no need to continue if the object is already bound to this peer
         if object['peer_id'] in [peer['peer_id']]:
             return 1
-        
+
         adder_name = 'add_'+object_type
         add_function = getattr(type(peer),adder_name)
         add_function(peer,object,remote_object_id)

@@ -19,7 +19,7 @@ from PLC.Parameter import Parameter, Mixed
 
 # a dummy class mostly used as a namespace
 class Timestamp:
-    
+
     debug=False
 #    debug=True
 
@@ -36,8 +36,8 @@ class Timestamp:
                       "%Y-%m-%d %H:%M UTC",
                       ]
 
-    # for timestamps we usually accept either an int, or an ISO string, 
-    # the datetime.datetime stuff can in general be used locally, 
+    # for timestamps we usually accept either an int, or an ISO string,
+    # the datetime.datetime stuff can in general be used locally,
     # but not sure it can be marshalled over xmlrpc though
 
     @staticmethod
@@ -49,17 +49,17 @@ class Timestamp:
     @staticmethod
     def sql_validate (input, timezone=False, check_future = False):
         """
-        Validates the specified GMT timestamp, returns a 
+        Validates the specified GMT timestamp, returns a
         standardized string suitable for SQL input.
 
         Input may be a number (seconds since UNIX epoch back in 1970,
-        or a string (in one of the supported input formats).  
+        or a string (in one of the supported input formats).
 
-        If timezone is True, the resulting string contains 
+        If timezone is True, the resulting string contains
         timezone information, which is hard-wired as 'UTC'
-        
+
         If check_future is True, raises an exception if timestamp is in
-        the past. 
+        the past.
 
         Returns a GMT timestamp string suitable to feed SQL.
         """
@@ -108,7 +108,7 @@ class Timestamp:
         Translates input timestamp as a unix timestamp.
 
         Input may be a number (seconds since UNIX epoch, i.e., 1970-01-01
-        00:00:00 GMT), a string (in one of the supported input formats above).  
+        00:00:00 GMT), a string (in one of the supported input formats above).
 
         """
         if Timestamp.debug: print 'cast_long, in:',input,

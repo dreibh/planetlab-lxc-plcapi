@@ -38,14 +38,14 @@ class VerifyPerson(Method):
         Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-	Person.fields['verification_key'],
+        Person.fields['verification_key'],
         Person.fields['verification_expires']
         ]
 
     returns = Parameter(int, '1 if verification_key is valid')
 
     def call(self, auth, person_id_or_email, verification_key = None, verification_expires = None):
-	# Get account information
+        # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
             raise PLCInvalidArgument, "No such account %r"%person_id_or_email
@@ -70,9 +70,9 @@ class VerifyPerson(Method):
         random_key = base64.b64encode("".join(map(chr, bytes)))
 
         if verification_key is None or \
-	(verification_key is not None and person['verification_expires'] and \
-	person['verification_expires'] < time.time()):
-	    # Only allow one verification at a time
+        (verification_key is not None and person['verification_expires'] and \
+        person['verification_expires'] < time.time()):
+            # Only allow one verification at a time
             if person['verification_expires'] is not None and \
                person['verification_expires'] > time.time():
                 raise PLCPermissionDenied, "Verification request already pending"
@@ -91,12 +91,12 @@ class VerifyPerson(Method):
             message_id = 'Verify account'
 
 
-	elif verification_key is not None:
+        elif verification_key is not None:
             if person['verification_key'] is None or \
                person['verification_expires'] is None:
                 raise PLCPermissionDenied, "Invalid Verification key"
             elif person['verification_key'] != verification_key:
-		raise PLCPermissionDenied, "Verification key incorrect"
+                raise PLCPermissionDenied, "Verification key incorrect"
             else:
                 person['verification_key'] = None
                 person['verification_expires'] = None
@@ -147,12 +147,12 @@ class VerifyPerson(Method):
         else:
             print >> log, "Warning: No message template '%s'" % message_id
 
-	# Logging variables
+        # Logging variables
         self.event_objects = {'Person': [person['person_id']]}
         self.message = message_id
-	
-	if verification_key is not None and person['verification_expires'] and \
+
+        if verification_key is not None and person['verification_expires'] and \
         person['verification_expires'] < time.time():
-	    raise PLCPermissionDenied, "Verification key has expired. Another email has been sent."
+            raise PLCPermissionDenied, "Verification key has expired. Another email has been sent."
 
         return 1

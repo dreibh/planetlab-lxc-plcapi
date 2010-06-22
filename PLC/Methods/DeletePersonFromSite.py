@@ -52,8 +52,8 @@ class DeletePersonFromSite(Method):
 
         # Logging variables
         self.event_objects = {'Site': [site['site_id']],
-                              'Person': [person['person_id']]}	
-        self.message = 'Person %d deleted from site %d	' % \
+                              'Person': [person['person_id']]}
+        self.message = 'Person %d deleted from site %d  ' % \
                         (person['person_id'], site['site_id'])
 
         return 1

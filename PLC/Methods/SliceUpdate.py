@@ -12,7 +12,7 @@ from PLC.Methods.UpdateSlice import UpdateSlice
 class SliceUpdate(UpdateSlice):
     """
     Deprecated. See UpdateSlice.
-   
+
     """
 
     status = 'deprecated'
@@ -30,10 +30,10 @@ class SliceUpdate(UpdateSlice):
 
     def call(self, auth, slice_name, url, description):
 
-	slice_fields = {}
-	slice_fields['url'] = url
-	slice_fields['description'] = description
-	
-	return UpdateSlice.call(self, auth, slice_name, slice_fields)
+        slice_fields = {}
+        slice_fields['url'] = url
+        slice_fields['description'] = description
+
+        return UpdateSlice.call(self, auth, slice_name, slice_fields)
 
         return 1

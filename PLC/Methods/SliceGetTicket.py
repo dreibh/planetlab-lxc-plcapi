@@ -113,7 +113,7 @@ class SliceGetTicket(GetSliceTicket):
                          {'id': str(slice['slice_id']),
                           'name': unicode(slice['name']),
                           'expiry': unicode(int(slice['expires']))})
-        
+
         # <nodes>
         xml.startElement('nodes', {})
         for node_id in slice['node_ids']:

@@ -30,8 +30,8 @@ class InterfaceTag(Row):
         'category': TagType.fields['category'],
         'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Interface setting value"),
-	### relations
-	
+        ### relations
+
         }
 
 class InterfaceTags(Table):

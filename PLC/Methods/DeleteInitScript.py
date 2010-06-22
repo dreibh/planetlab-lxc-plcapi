@@ -8,9 +8,9 @@ from PLC.Auth import Auth
 
 class DeleteInitScript(Method):
     """
-    Deletes an existing initscript.  
-    
-    Returns 1 if successful, faults otherwise. 
+    Deletes an existing initscript.
+
+    Returns 1 if successful, faults otherwise.
     """
 
     roles = ['admin']
@@ -22,7 +22,7 @@ class DeleteInitScript(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, initscript_id_or_name):
         initscripts = InitScripts(self.api, [initscript_id_or_name])
@@ -31,6 +31,6 @@ class DeleteInitScript(Method):
 
         initscript = initscripts[0]
         initscript.delete()
-	self.event_objects = {'InitScript':  [initscript['initscript_id']]}
+        self.event_objects = {'InitScript':  [initscript['initscript_id']]}
 
         return 1

@@ -11,14 +11,14 @@ can_update = lambda (field, value): field in \
              ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
               'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id'] + \
-	      related_fields	
+              related_fields
 
 class UpdateSite(Method):
     """
     Updates a site. Only the fields specified in update_fields are
     updated, all other fields are left untouched.
 
-    PIs can only update sites they are a member of. Only admins can 
+    PIs can only update sites they are a member of. Only admins can
     update max_slices, max_slivers, and login_base.
 
     Returns 1 if successful, faults otherwise.
@@ -63,19 +63,19 @@ class UpdateSite(Method):
                 if key in site_fields:
                     del site_fields[key]
 
-	# Make requested associations
-	for field in related_fields:
-	    if field in site_fields:
-		site.associate(auth, field, site_fields[field])
-		site_fields.pop(field)	
-	
+        # Make requested associations
+        for field in related_fields:
+            if field in site_fields:
+                site.associate(auth, field, site_fields[field])
+                site_fields.pop(field)
+
         site.update(site_fields)
-	site.update_last_updated(False)
-	site.sync()
-	
-	# Logging variables
-	self.event_objects = {'Site': [site['site_id']]}
-	self.message = 'Site %d updated: %s' % \
-		(site['site_id'], ", ".join(site_fields.keys()))  	
-	
-	return 1
+        site.update_last_updated(False)
+        site.sync()
+
+        # Logging variables
+        self.event_objects = {'Site': [site['site_id']]}
+        self.message = 'Site %d updated: %s' % \
+                (site['site_id'], ", ".join(site_fields.keys()))
+
+        return 1

@@ -10,7 +10,7 @@ from PLC.Auth import Auth
 class AddPersonToSlice(Method):
     """
     Adds the specified person to the specified slice. If the person is
-    already a member of the slice, no errors are returned. 
+    already a member of the slice, no errors are returned.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -48,16 +48,16 @@ class AddPersonToSlice(Method):
 
         # If we are not admin, make sure the caller is a PI
         # of the site associated with the slice
-	if 'admin' not in self.caller['roles']:
+        if 'admin' not in self.caller['roles']:
             if slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to add users to this slice"
 
-	if slice['slice_id'] not in person['slice_ids']:
+        if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)
 
         # Logging variables
-	self.event_objects = {'Person': [person['person_id']],
-			      'Slice': [slice['slice_id']]}	
-	self.object_ids = [slice['slice_id']]
+        self.event_objects = {'Person': [person['person_id']],
+                              'Slice': [slice['slice_id']]}
+        self.object_ids = [slice['slice_id']]
 
         return 1

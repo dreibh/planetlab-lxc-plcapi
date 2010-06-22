@@ -19,7 +19,7 @@ class UpdateLeases(Method):
     As a convenience you may, in addition to the t_from and t_until fields,
     you can also set the 'duration' field.
 
-    Users may only update leases attached to their slices. 
+    Users may only update leases attached to their slices.
     PIs may update any of the leases for slices at their sites, or any
     slices of which they are members. Admins may update any lease.
 
@@ -87,7 +87,7 @@ class UpdateLeases(Method):
                     # all arithmetics on longs..
                     duration=Duration.validate(input_fields['duration'])
                     # specify 'duration':0 to keep duration unchanged
-                    if not duration: 
+                    if not duration:
                         duration = Timestamp.cast_long(lease['t_until'])-Timestamp.cast_long(lease['t_from'])
                     if 't_from' in input_fields:
                         lease_fields={'t_from':input_fields['t_from'],
@@ -97,20 +97,20 @@ class UpdateLeases(Method):
                                       't_until':input_fields['t_until']}
                     else:
                         lease_fields={'t_until':Timestamp.cast_long(lease['t_from'])+duration}
-                if UpdateLeases.debug: 
+                if UpdateLeases.debug:
                     print 'lease_fields',lease_fields
                     for k in [ 't_from', 't_until'] :
                         if k in lease_fields: print k,'aka',Timestamp.sql_validate_utc(lease_fields[k])
-                
+
                 lease.update(lease_fields)
                 lease.sync()
                 updated_ids.append(lease['lease_id'])
             except Exception,e:
                 errors.append("Could not update lease %d - check new time limits ? -- %r"%(lease['lease_id'],e))
-	
-	# Logging variables
-	self.event_objects = {'Lease': updated_ids}
-	self.message = 'lease %r updated: %s' %  (lease_ids, ", ".join(input_fields.keys()))
+
+        # Logging variables
+        self.event_objects = {'Lease': updated_ids}
+        self.message = 'lease %r updated: %s' %  (lease_ids, ", ".join(input_fields.keys()))
 
         return {'updated_ids' : updated_ids,
                 'errors' : errors }

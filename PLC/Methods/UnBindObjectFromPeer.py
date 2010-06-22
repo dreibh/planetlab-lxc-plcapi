@@ -12,14 +12,14 @@ from PLC.Slices import Slices
 from PLC.Keys import Keys
 from PLC.Peers import Peers
 from PLC.Faults import *
- 
+
 class UnBindObjectFromPeer(Method):
     """
     This method is a hopefully temporary hack to let the sfa correctly
     detach the objects it creates from a remote peer object. This is
     needed so that the sfa federation link can work in parallel with
     RefreshPeer, as RefreshPeer depends on remote objects being
-    correctly marked. 
+    correctly marked.
 
     UnBindObjectFromPeer is allowed to admins only.
     """

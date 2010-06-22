@@ -19,7 +19,7 @@ class ResolveSlices(Method):
 
     roles = ['admin', 'pi', 'user', 'tech', 'anonymous' ]
 
-    applicable_fields = { 
+    applicable_fields = {
         'slice_id' : Slice.fields['slice_id'],
         'name' : Slice.fields['name'],
         }

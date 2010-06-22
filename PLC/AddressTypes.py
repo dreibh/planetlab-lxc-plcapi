@@ -30,17 +30,17 @@ class AddressType(Row):
         }
 
     def validate_name(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Address type must be specified"
-	
-	# Make sure address type does not already exist
-	conflicts = AddressTypes(self.api, [name])
-	for address_type_id in conflicts:
-            if 'address_type_id' not in self or self['address_type_id'] != address_type_id:
-               raise PLCInvalidArgument, "Address type name already in use"
 
-	return name
+        # Make sure address type does not already exist
+        conflicts = AddressTypes(self.api, [name])
+        for address_type_id in conflicts:
+            if 'address_type_id' not in self or self['address_type_id'] != address_type_id:
+                raise PLCInvalidArgument, "Address type name already in use"
+
+        return name
 
 class AddressTypes(Table):
     """
@@ -48,7 +48,7 @@ class AddressTypes(Table):
     """
 
     def __init__(self, api, address_type_filter = None, columns = None):
-	Table.__init__(self, api, AddressType, columns)
+        Table.__init__(self, api, AddressType, columns)
 
         sql = "SELECT %s FROM address_types WHERE True" % \
               ", ".join(self.columns)

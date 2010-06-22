@@ -36,6 +36,6 @@ class DeleteTagType(Method):
         tag_type = tag_types[0]
 
         tag_type.delete()
-	self.object_ids = [tag_type['tag_type_id']]
+        self.object_ids = [tag_type['tag_type_id']]
 
         return 1

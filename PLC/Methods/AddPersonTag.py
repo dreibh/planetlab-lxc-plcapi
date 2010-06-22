@@ -55,7 +55,7 @@ class AddPersonTag(Method):
             raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
         tag_type = tag_types[0]
 
-	# checks for existence - does not allow several different settings
+        # checks for existence - does not allow several different settings
         conflicts = PersonTags(self.api,
                                         {'person_id':person['person_id'],
                                          'tag_type_id':tag_type['tag_type_id']})
@@ -64,16 +64,16 @@ class AddPersonTag(Method):
             raise PLCInvalidArgument, "Person %d already has setting %d"%(person['person_id'],
                                                                                tag_type['tag_type_id'])
 
-	# check permission : it not admin, is the user affiliated with the same site as this person
-	if 'admin' not in self.caller['roles']:
-	    # check caller is affiliated with at least one of Person's sites
-	    if len(set(person['site_ids']) & set(self.caller['site_ids'])) == 0:
-		raise PLCPermissionDenied, "Not a member of the person's sites: %s"%person['site_ids']
-	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
+        # check permission : it not admin, is the user affiliated with the same site as this person
+        if 'admin' not in self.caller['roles']:
+            # check caller is affiliated with at least one of Person's sites
+            if len(set(person['site_ids']) & set(self.caller['site_ids'])) == 0:
+                raise PLCPermissionDenied, "Not a member of the person's sites: %s"%person['site_ids']
+
+            required_min_role = tag_type ['min_role_id']
+            if required_min_role is not None and \
+                    min(self.caller['role_ids']) > required_min_role:
+                raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
 
         person_tag = PersonTag(self.api)
         person_tag['person_id'] = person['person_id']
@@ -81,6 +81,6 @@ class AddPersonTag(Method):
         person_tag['value'] = value
 
         person_tag.sync()
-	self.object_ids = [person_tag['person_tag_id']]
+        self.object_ids = [person_tag['person_tag_id']]
 
         return person_tag['person_tag_id']

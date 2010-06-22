@@ -23,7 +23,7 @@ class DeleteAddress(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, address_id):
         # Get associated address details
@@ -38,8 +38,8 @@ class DeleteAddress(Method):
 
         address.delete()
 
-	# Logging variables
+        # Logging variables
         self.event_objects = {'Address': [address['address_id']]}
-	self.message = 'Address %d deleted' % address['address_id']	
+        self.message = 'Address %d deleted' % address['address_id']
 
         return 1

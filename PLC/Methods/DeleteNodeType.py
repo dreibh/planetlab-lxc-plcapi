@@ -33,5 +33,5 @@ class DeleteNodeType(Method):
         node_type = node_types[0]
 
         node_type.delete()
-	
+
         return 1

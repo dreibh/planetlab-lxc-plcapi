@@ -34,6 +34,6 @@ class AddInitScript(Method):
         initscript = InitScript(self.api, initscript_fields)
         initscript.sync()
 
-	self.event_objects = {'InitScript': [initscript['initscript_id']]}
+        self.event_objects = {'InitScript': [initscript['initscript_id']]}
 
         return initscript['initscript_id']

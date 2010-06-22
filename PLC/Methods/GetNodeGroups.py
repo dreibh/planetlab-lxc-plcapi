@@ -27,6 +27,6 @@ class GetNodeGroups(Method):
         ]
 
     returns = [NodeGroup.fields]
-  
+
     def call(self, auth, nodegroup_filter = None, return_fields = None):
-	return NodeGroups(self.api, nodegroup_filter, return_fields)
+        return NodeGroups(self.api, nodegroup_filter, return_fields)

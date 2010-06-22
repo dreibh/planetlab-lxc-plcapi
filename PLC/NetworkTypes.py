@@ -26,16 +26,16 @@ class NetworkType(Row):
         }
 
     def validate_type(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Network type must be specified"
-	
-	# Make sure network type does not alredy exist
-	conflicts = NetworkTypes(self.api, [name])
+
+        # Make sure network type does not alredy exist
+        conflicts = NetworkTypes(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Network type name already in use"
 
-	return name
+        return name
 
 class NetworkTypes(Table):
     """
@@ -47,7 +47,7 @@ class NetworkTypes(Table):
 
         sql = "SELECT %s FROM network_types" % \
               ", ".join(NetworkType.fields)
-        
+
         if types:
             sql += " WHERE type IN (%s)" % ", ".join(map(api.db.quote, types))
 

@@ -1,5 +1,5 @@
-### $Id: Namespace.py 
-### $URL: 
+### $Id: Namespace.py
+### $URL:
 
 URN_PREFIX = "urn:publicid:IDN"
 
@@ -43,10 +43,10 @@ def slicename_to_hrn(auth_hrn, slicename):
 def email_to_hrn(auth_hrn, email):
     parts = email.split("@")
     username = parts[0]
-    username = username.replace(".", "_") 
+    username = username.replace(".", "_")
     person_hrn = ".".join([auth_hrn, username])
-    
-    return person_hrn 
+
+    return person_hrn
 
 def urn_to_hrn(urn):
     """
@@ -60,24 +60,24 @@ def urn_to_hrn(urn):
 
     name = urn[len(URN_PREFIX):]
     hrn_parts = name.split("+")
-    
+
     # type is always the second to last element in the list
     type = hrn_parts.pop(-2)
 
-    # convert hrn_parts (list) into hrn (str) by doing the following    
+    # convert hrn_parts (list) into hrn (str) by doing the following
     # remove blank elements
     # replace ':' with '.'
     # join list elements using '.'
-    hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part]) 
-   
-    return str(hrn), str(type) 
-    
-    
+    hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part])
+
+    return str(hrn), str(type)
+
+
 def hrn_to_urn(hrn, type=None):
     """
     convert an hrn and type to a urn string
     """
-    # if  this is already a urn dont do anything 
+    # if  this is already a urn dont do anything
     if not hrn or hrn.startswith(URN_PREFIX):
         return hrn
 

@@ -22,7 +22,7 @@ class AddBootState(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    
+
     def call(self, auth, name):
         boot_state = BootState(self.api)
         boot_state['boot_state'] = name

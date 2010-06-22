@@ -45,6 +45,6 @@ class UpdateTagType(Method):
 
         tag_type.update(tag_type_fields)
         tag_type.sync()
-	self.object_ids = [tag_type['tag_type_id']]
+        self.object_ids = [tag_type['tag_type_id']]
 
         return 1

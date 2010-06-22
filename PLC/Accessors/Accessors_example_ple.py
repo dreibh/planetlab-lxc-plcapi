@@ -16,9 +16,9 @@ import sys
 current_module = sys.modules[__name__]
 
 #### example 1 : attach vlan ids on interfaces
-# The third argument expose_in_api is a boolean flag that tells whether this tag may be handled 
+# The third argument expose_in_api is a boolean flag that tells whether this tag may be handled
 #   through the Add/Get/Update methods as a native field
-# 
+#
 #define_accessors(current_module, Interface, "Vlan", "vlan",
 #                  "interface/general", "tag for setting VLAN id",
 #                  get_roles=all_roles, set_roles=tech_roles)
@@ -35,17 +35,17 @@ current_module = sys.modules[__name__]
 #################### MySlice tags
 define_accessors(current_module, Node, "Reliability", "reliability",
                  # category
-                 "node/monitor/ui/header=R/type=int/rank=ad", 
+                 "node/monitor/ui/header=R/type=int/rank=ad",
                  # description : used to add a footnote to the table if header is set in category
                  "average reliability (% uptime) over the last week",
                   get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
 
 define_accessors(current_module, Node, "Load", "load",
-                 "node/monitor/ui/header=l/type=sortAlphaNumericBottom", 
+                 "node/monitor/ui/header=l/type=sortAlphaNumericBottom",
                  "average load (% CPU utilization) over the last week",
                   get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
 
 define_accessors(current_module, Node, "ASNumber", "asnumber",
-                 "node/location/ui/header=AS/type=sortAlphaNumericBottom/rank=z", 
+                 "node/location/ui/header=AS/type=sortAlphaNumericBottom/rank=z",
                  "Autonomous System id",
                  get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)

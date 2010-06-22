@@ -56,7 +56,7 @@ class AddSiteTag(Method):
             raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
         tag_type = tag_types[0]
 
-	# checks for existence - does not allow several different settings
+        # checks for existence - does not allow several different settings
         conflicts = SiteTags(self.api,
                                         {'site_id':site['site_id'],
                                          'tag_type_id':tag_type['tag_type_id']})
@@ -65,18 +65,18 @@ class AddSiteTag(Method):
             raise PLCInvalidArgument, "Site %d already has setting %d"%(site['site_id'],
                                                                                tag_type['tag_type_id'])
 
-	# check permission : it not admin, is the user affiliated with the right site
-	if 'admin' not in self.caller['roles']:
-	    # locate site
-	    site = Sites (self.api, site_id)[0]
-	    # check caller is affiliated with this site
-	    if self.caller['person_id'] not in site['person_ids']:
-		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified site setting, requires role %d",required_min_role
+        # check permission : it not admin, is the user affiliated with the right site
+        if 'admin' not in self.caller['roles']:
+            # locate site
+            site = Sites (self.api, site_id)[0]
+            # check caller is affiliated with this site
+            if self.caller['person_id'] not in site['person_ids']:
+                raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
+
+            required_min_role = tag_type ['min_role_id']
+            if required_min_role is not None and \
+                    min(self.caller['role_ids']) > required_min_role:
+                raise PLCPermissionDenied, "Not allowed to modify the specified site setting, requires role %d",required_min_role
 
         site_tag = SiteTag(self.api)
         site_tag['site_id'] = site['site_id']
@@ -84,6 +84,6 @@ class AddSiteTag(Method):
         site_tag['value'] = value
 
         site_tag.sync()
-	self.object_ids = [site_tag['site_tag_id']]
+        self.object_ids = [site_tag['site_tag_id']]
 
         return site_tag['site_tag_id']

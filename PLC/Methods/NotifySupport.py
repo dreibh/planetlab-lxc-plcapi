@@ -7,7 +7,7 @@ from PLC.sendmail import sendmail
 
 class NotifySupport(Method):
     """
-    Sends an e-mail message to the configured support address. 
+    Sends an e-mail message to the configured support address.
 
     Returns 1 if successful.
     """

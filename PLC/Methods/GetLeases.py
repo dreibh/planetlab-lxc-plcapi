@@ -35,7 +35,7 @@ class GetLeases(Method):
         Auth(),
         Mixed(Lease.fields['lease_id'],
               [Lease.fields['lease_id']],
-              LeaseFilter(Lease.fields)),    
+              LeaseFilter(Lease.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]
 
@@ -55,7 +55,7 @@ class GetLeases(Method):
         # Remove lease_id if not specified
         if added_fields:
             for lease in leases:
-		if 'lease_id' in lease:
-		    del lease['lease_id']
+                if 'lease_id' in lease:
+                    del lease['lease_id']
 
         return leases

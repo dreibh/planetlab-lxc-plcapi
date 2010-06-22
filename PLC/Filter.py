@@ -16,7 +16,7 @@ class Filter(Parameter, dict):
     """
     A type of parameter that represents a filter on one or more
     columns of a database table.
-    Special features provide support for negation, upper and lower bounds, 
+    Special features provide support for negation, upper and lower bounds,
     as well as sorting and clipping.
 
 
@@ -29,16 +29,16 @@ class Filter(Parameter, dict):
 
 
     filter should be a dictionary of field names and values
-    representing  the criteria for filtering. 
+    representing  the criteria for filtering.
     example : filter = { 'hostname' : '*.edu' , site_id : [34,54] }
 
 
-    Whether the filter represents an intersection (AND) or a union (OR) 
+    Whether the filter represents an intersection (AND) or a union (OR)
     of these criteria is determined as follows:
     * if the dictionnary has the '-AND' or the '-OR' key, this is chosen
-    * otherwise, the join_with argument, as provided to the sql method below, 
-      is expected to hold the 'AND' or 'OR' string 
-      this argument defaults to 'AND' and in most of the code, this default applies 
+    * otherwise, the join_with argument, as provided to the sql method below,
+      is expected to hold the 'AND' or 'OR' string
+      this argument defaults to 'AND' and in most of the code, this default applies
       as the join_with argument is left unspecified
 
 
@@ -63,32 +63,32 @@ class Filter(Parameter, dict):
     example :  filter = { '>time' : 1178531418 }
       in this example the integer value denotes a unix timestamp
 
-    * if a value is a sequence type, then it should represent 
+    * if a value is a sequence type, then it should represent
       a list of possible values for that field
     example : filter = { 'node_id' : [12,34,56] }
 
     * a (string) value containing either a * or a % character is
       treated as a (sql) pattern; * are replaced with % that is the
       SQL wildcard character.
-    example :  filter = { 'hostname' : '*.jp' } 
+    example :  filter = { 'hostname' : '*.jp' }
 
     * the filter's keys starting with '-' are special and relate to sorting and clipping
     * '-SORT' : a field name, or an ordered list of field names that are used for sorting
       these fields may start with + (default) or - for denoting increasing or decreasing order
     example : filter = { '-SORT' : [ '+node_id', '-hostname' ] }
     * '-OFFSET' : the number of first rows to be ommitted
-    * '-LIMIT' : the amount of rows to be returned 
+    * '-LIMIT' : the amount of rows to be returned
     example : filter = { '-OFFSET' : 100, '-LIMIT':25}
 
 
     Here are a few realistic examples
 
-    GetNodes ( { 'node_type' : 'regular' , 'hostname' : '*.edu' , 
+    GetNodes ( { 'node_type' : 'regular' , 'hostname' : '*.edu' ,
                  '-SORT' : 'hostname' , '-OFFSET' : 30 , '-LIMIT' : 25 } )
       would return regular (usual) nodes matching '*.edu' in alphabetical order from 31th to 55th
 
-    GetNodes ( { '~peer_id' : None } ) 
-      returns the foreign nodes - that have an integer peer_id 
+    GetNodes ( { '~peer_id' : None } )
+      returns the foreign nodes - that have an integer peer_id
 
     GetPersons ( { '|role_ids' : [ 20 , 40] } )
       would return all persons that have either pi (20) or tech (40) roles
@@ -110,7 +110,7 @@ class Filter(Parameter, dict):
         # Declare ourselves as a type of parameter that can take
         # either a value or a list of values for each of the specified
         # fields.
-        self.fields = dict ( [ ( field, Mixed (expected, [expected])) 
+        self.fields = dict ( [ ( field, Mixed (expected, [expected]))
                                  for (field,expected) in fields.iteritems() ] )
 
         # Null filter means no filter
@@ -121,10 +121,10 @@ class Filter(Parameter, dict):
         Returns a SQL conditional that represents this filter.
         """
 
-        if self.has_key('-AND'): 
+        if self.has_key('-AND'):
             del self['-AND']
             join_with='AND'
-        if self.has_key('-OR'): 
+        if self.has_key('-OR'):
             del self['-OR']
             join_with='OR'
 
@@ -138,20 +138,20 @@ class Filter(Parameter, dict):
         else:
             assert join_with in ("AND", "OR")
 
-        # init 
+        # init
         sorts = []
         clips = []
 
         for field, value in self.iteritems():
-	    # handle negation, numeric comparisons
-	    # simple, 1-depth only mechanism
+            # handle negation, numeric comparisons
+            # simple, 1-depth only mechanism
 
-	    modifiers={'~' : False, 
-		       '<' : False, '>' : False,
-		       '[' : False, ']' : False,
+            modifiers={'~' : False,
+                       '<' : False, '>' : False,
+                       '[' : False, ']' : False,
                        '-' : False,
                        '&' : False, '|' : False,
-		       }
+                       }
             def check_modifiers(field):
                 if field[0] in modifiers.keys():
                     modifiers[field[0]] = True
@@ -199,7 +199,7 @@ class Filter(Parameter, dict):
                 if isinstance(value, (list, tuple, set)):
                     # handling filters like '~slice_id':[]
                     # this should return true, as it's the opposite of 'slice_id':[] which is false
-                    # prior to this fix, 'slice_id':[] would have returned ``slice_id IN (NULL) '' which is unknown 
+                    # prior to this fix, 'slice_id':[] would have returned ``slice_id IN (NULL) '' which is unknown
                     # so it worked by coincidence, but the negation '~slice_ids':[] would return false too
                     if not value:
                         if modifiers['&'] or modifiers['|']:

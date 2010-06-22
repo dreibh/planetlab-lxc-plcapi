@@ -28,4 +28,4 @@ class SliceDelete(DeleteSlice):
 
     def call(self, auth, slice_name):
 
-	return DeleteSlice.call(self, auth, slice_name)
+        return DeleteSlice.call(self, auth, slice_name)

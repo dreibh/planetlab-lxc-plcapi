@@ -29,19 +29,19 @@ class SliceListNames(GetSlices):
         ]
 
     returns = [Slice.fields['name']]
-    
+
 
     def call(self, auth, prefix=None):
 
-	slice_filter = None
+        slice_filter = None
         if prefix:
             slice_filter = {'name': prefix+'*'}
-	
+
         slices = GetSlices.call(self, auth, slice_filter)
-	
+
         if not slices:
             raise PLCInvalidArgument, "No such slice"
-	
-	slice_names = [slice['name'] for slice in slices]
+
+        slice_names = [slice['name'] for slice in slices]
 
         return slice_names

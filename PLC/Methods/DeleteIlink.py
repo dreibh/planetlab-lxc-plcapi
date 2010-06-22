@@ -21,7 +21,7 @@ class DeleteIlink(Method):
     """
     Deletes the specified ilink
 
-    Attributes may require the caller to have a particular 
+    Attributes may require the caller to have a particular
     role in order to be deleted, depending on the related tag type.
     Admins may delete attributes of any slice or sliver.
 
@@ -50,26 +50,26 @@ class DeleteIlink(Method):
         tag_type = TagTypes (self.api,[tag_type_id])[0]
         required_min_role = tag_type ['min_role_id']
 
-	# check permission : it not admin, is the user affiliated with the right site<S>
-	if 'admin' not in self.caller['roles']:
+        # check permission : it not admin, is the user affiliated with the right site<S>
+        if 'admin' not in self.caller['roles']:
             for key in ['src_interface_id','dst_interface_id']:
                 # locate interface
                 interface_id=ilink[key]
                 interface = Interfaces (self.api,interface_id)[0]
                 node_id=interface['node_id']
                 node = Nodes (self.api,node_id) [0]
-	        # locate site
+                # locate site
                 site_id = node['site_id']
                 site = Sites (self.api, [site_id]) [0]
-	        # check caller is affiliated with this site
+                # check caller is affiliated with this site
                 if self.caller['person_id'] not in site['person_ids']:
                     raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-	    
+
                 if required_min_role is not None and \
                         min(self.caller['role_ids']) > required_min_role:
                     raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role
 
         ilink.delete()
-	self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
+        self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
 
         return 1

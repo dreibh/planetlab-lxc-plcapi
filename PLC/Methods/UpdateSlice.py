@@ -15,7 +15,7 @@ from PLC.SliceTags import SliceTags
 from PLC.Methods.AddSliceTag import AddSliceTag
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-can_update = ['instantiation', 'url', 'description', 'max_nodes', 'expires'] 
+can_update = ['instantiation', 'url', 'description', 'max_nodes', 'expires']
 
 class UpdateSlice(Method):
     """
@@ -51,15 +51,15 @@ class UpdateSlice(Method):
 
     def call(self, auth, slice_id_or_name, slice_fields):
 
-        # split provided fields 
+        # split provided fields
         [native,related,tags,rejected] = Row.split_fields(slice_fields,[Slice.fields,Slice.related_fields,Slice.tags])
-        
+
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
             raise PLCInvalidArgument, "Cannot update Slice column(s) %r"%rejected
 
-	slices = Slices(self.api, [slice_id_or_name])
+        slices = Slices(self.api, [slice_id_or_name])
         if not slices:
             raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
         slice = slices[0]
@@ -95,28 +95,28 @@ class UpdateSlice(Method):
             if 'admin' not in self.caller['roles'] and slice_fields['expires'] > max_expires:
                 raise PLCInvalidArgument, "Cannot renew a slice beyond 8 weeks from now"
 
-	    # XXX Make this a configurable policy
+            # XXX Make this a configurable policy
             if slice['description'] is None or not slice['description'].strip():
-		if 'description' not in slice_fields or slice_fields['description'] is None or \
-		   not slice_fields['description'].strip():
-		     raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"	
-               
-	    if slice['url'] is None or not slice['url'].strip():
-		if 'url' not in slice_fields or slice_fields['url'] is None or \
-		   not slice_fields['url'].strip():
+                if 'description' not in slice_fields or slice_fields['description'] is None or \
+                   not slice_fields['description'].strip():
+                    raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
+
+            if slice['url'] is None or not slice['url'].strip():
+                if 'url' not in slice_fields or slice_fields['url'] is None or \
+                   not slice_fields['url'].strip():
                     raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
             renewing=True
-	    
+
         if 'max_nodes' in slice_fields and slice_fields['max_nodes'] != slice['max_nodes']:
             if 'admin' not in self.caller['roles'] and \
                'pi' not in self.caller['roles']:
                 raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
 
-	# Make requested associations
+        # Make requested associations
         for (k,v) in related.iteritems():
             slice.associate(auth,k,v)
 
-	slice.update(slice_fields)
+        slice.update(slice_fields)
         slice.sync(commit=True)
 
         for (tagname,value) in tags.iteritems():
@@ -129,7 +129,7 @@ class UpdateSlice(Method):
             else:
                 UpdateSliceTag(self.api).__call__(auth,slice_tags[0]['slice_tag_id'],value)
 
-	self.event_objects = {'Slice': [slice['slice_id']]}
+        self.event_objects = {'Slice': [slice['slice_id']]}
         if 'name' in slice:
             self.message='Slice %s updated'%slice['name']
         else:

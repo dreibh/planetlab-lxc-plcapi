@@ -44,11 +44,11 @@ class Slice(Row):
         'peer_slice_id': Parameter(int, "Foreign slice identifier at peer", nullok = True),
         }
     related_fields = {
-	'persons': [Mixed(Parameter(int, "Person identifier"),
-			  Parameter(str, "Email address"))],
-	'nodes': [Mixed(Parameter(int, "Node identifier"),
-		        Parameter(str, "Fully qualified hostname"))]
-   	}
+        'persons': [Mixed(Parameter(int, "Person identifier"),
+                          Parameter(str, "Email address"))],
+        'nodes': [Mixed(Parameter(int, "Node identifier"),
+                        Parameter(str, "Fully qualified hostname"))]
+        }
 
     view_tags_name="view_slice_tags"
     tags = {}
@@ -101,21 +101,21 @@ class Slice(Row):
     def associate_persons(self, auth, field, value):
         """
         Adds persons found in value list to this slice (using AddPersonToSlice).
-	Deletes persons not found in value list from this slice (using DeletePersonFromSlice).
+        Deletes persons not found in value list from this slice (using DeletePersonFromSlice).
         """
-	
-	assert 'person_ids' in self
-	assert 'slice_id' in self
+
+        assert 'person_ids' in self
+        assert 'slice_id' in self
         assert isinstance(value, list)
 
-	(person_ids, emails) = self.separate_types(value)[0:2]
+        (person_ids, emails) = self.separate_types(value)[0:2]
 
-	# Translate emails into person_ids	
-	if emails:
-	    persons = Persons(self.api, emails, ['person_id']).dict('person_id')
-	    person_ids += persons.keys()
-	
-	# Add new ids, remove stale ids
+        # Translate emails into person_ids
+        if emails:
+            persons = Persons(self.api, emails, ['person_id']).dict('person_id')
+            person_ids += persons.keys()
+
+        # Add new ids, remove stale ids
         if self['person_ids'] != person_ids:
             from PLC.Methods.AddPersonToSlice import AddPersonToSlice
             from PLC.Methods.DeletePersonFromSlice import DeletePersonFromSlice
@@ -128,97 +128,97 @@ class Slice(Row):
                 DeletePersonFromSlice.__call__(DeletePersonFromSlice(self.api), auth, stale_person, self['slice_id'])
 
     def associate_nodes(self, auth, field, value):
-	"""
-	Adds nodes found in value list to this slice (using AddSliceToNodes).
-	Deletes nodes not found in value list from this slice (using DeleteSliceFromNodes).
-	"""
+        """
+        Adds nodes found in value list to this slice (using AddSliceToNodes).
+        Deletes nodes not found in value list from this slice (using DeleteSliceFromNodes).
+        """
 
         from PLC.Nodes import Nodes
 
-	assert 'node_ids' in self
-	assert 'slice_id' in self
-	assert isinstance(value, list)
-	
-	(node_ids, hostnames) = self.separate_types(value)[0:2]
-	
-	# Translate hostnames into node_ids
-	if hostnames:
-	    nodes = Nodes(self.api, hostnames, ['node_id']).dict('node_id')
-	    node_ids += nodes.keys()
-	
-	# Add new ids, remove stale ids
-	if self['node_ids'] != node_ids:
-	    from PLC.Methods.AddSliceToNodes import AddSliceToNodes
-	    from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
-	    new_nodes = set(node_ids).difference(self['node_ids'])
-	    stale_nodes = set(self['node_ids']).difference(node_ids)
-	    
-	    if new_nodes:
-		AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, self['slice_id'], list(new_nodes))
-	    if stale_nodes:
-		DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, self['slice_id'], list(stale_nodes))			
-    def associate_slice_tags(self, auth, fields, value):
-	"""
-	Deletes slice_tag_ids not found in value list (using DeleteSliceTag). 
-	Adds slice_tags if slice_fields w/o slice_id is found (using AddSliceTag).
-	Updates slice_tag if slice_fields w/ slice_id is found (using UpdateSlceiAttribute).  
-	"""
-	
-	assert 'slice_tag_ids' in self
-	assert isinstance(value, list)
+        assert 'node_ids' in self
+        assert 'slice_id' in self
+        assert isinstance(value, list)
 
-	(attribute_ids, blank, attributes) = self.separate_types(value)
-	
-	# There is no way to add attributes by id. They are
-	# associated with a slice when they are created.
-	# So we are only looking to delete here 
-	if self['slice_tag_ids'] != attribute_ids:
-	    from PLC.Methods.DeleteSliceTag import DeleteSliceTag
-	    stale_attributes = set(self['slice_tag_ids']).difference(attribute_ids)
-	
-	    for stale_attribute in stale_attributes:
-		DeleteSliceTag.__call__(DeleteSliceTag(self.api), auth, stale_attribute['slice_tag_id'])	 	
-	
-	# If dictionary exists, we are either adding new
+        (node_ids, hostnames) = self.separate_types(value)[0:2]
+
+        # Translate hostnames into node_ids
+        if hostnames:
+            nodes = Nodes(self.api, hostnames, ['node_id']).dict('node_id')
+            node_ids += nodes.keys()
+
+        # Add new ids, remove stale ids
+        if self['node_ids'] != node_ids:
+            from PLC.Methods.AddSliceToNodes import AddSliceToNodes
+            from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
+            new_nodes = set(node_ids).difference(self['node_ids'])
+            stale_nodes = set(self['node_ids']).difference(node_ids)
+
+            if new_nodes:
+                AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, self['slice_id'], list(new_nodes))
+            if stale_nodes:
+                DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, self['slice_id'], list(stale_nodes))
+    def associate_slice_tags(self, auth, fields, value):
+        """
+        Deletes slice_tag_ids not found in value list (using DeleteSliceTag).
+        Adds slice_tags if slice_fields w/o slice_id is found (using AddSliceTag).
+        Updates slice_tag if slice_fields w/ slice_id is found (using UpdateSlceiAttribute).
+        """
+
+        assert 'slice_tag_ids' in self
+        assert isinstance(value, list)
+
+        (attribute_ids, blank, attributes) = self.separate_types(value)
+
+        # There is no way to add attributes by id. They are
+        # associated with a slice when they are created.
+        # So we are only looking to delete here
+        if self['slice_tag_ids'] != attribute_ids:
+            from PLC.Methods.DeleteSliceTag import DeleteSliceTag
+            stale_attributes = set(self['slice_tag_ids']).difference(attribute_ids)
+
+            for stale_attribute in stale_attributes:
+                DeleteSliceTag.__call__(DeleteSliceTag(self.api), auth, stale_attribute['slice_tag_id'])
+
+        # If dictionary exists, we are either adding new
         # attributes or updating existing ones.
         if attributes:
             from PLC.Methods.AddSliceTag import AddSliceTag
             from PLC.Methods.UpdateSliceTag import UpdateSliceTag
-	
-	    added_attributes = filter(lambda x: 'slice_tag_id' not in x, attributes)
-	    updated_attributes = filter(lambda x: 'slice_tag_id' in x, attributes)
 
-	    for added_attribute in added_attributes:
-		if 'tag_type' in added_attribute:
-		    type = added_attribute['tag_type']
-		elif 'tag_type_id' in added_attribute:
-		    type = added_attribute['tag_type_id']
-		else:
-		    raise PLCInvalidArgument, "Must specify tag_type or tag_type_id"
+            added_attributes = filter(lambda x: 'slice_tag_id' not in x, attributes)
+            updated_attributes = filter(lambda x: 'slice_tag_id' in x, attributes)
 
-		if 'value' in added_attribute:
-		    value = added_attribute['value']
-		else:
-		    raise PLCInvalidArgument, "Must specify a value"
-		
-		if 'node_id' in added_attribute:
-		    node_id = added_attribute['node_id']
-		else:
-		    node_id = None
+            for added_attribute in added_attributes:
+                if 'tag_type' in added_attribute:
+                    type = added_attribute['tag_type']
+                elif 'tag_type_id' in added_attribute:
+                    type = added_attribute['tag_type_id']
+                else:
+                    raise PLCInvalidArgument, "Must specify tag_type or tag_type_id"
 
-		if 'nodegroup_id' in added_attribute:
-		    nodegroup_id = added_attribute['nodegroup_id']
-		else:
-		    nodegroup_id = None 
- 
-		AddSliceTag.__call__(AddSliceTag(self.api), auth, self['slice_id'], type, value, node_id, nodegroup_id)
-	    for updated_attribute in updated_attributes:
-		attribute_id = updated_attribute.pop('slice_tag_id')
-		if attribute_id not in self['slice_tag_ids']:
-		    raise PLCInvalidArgument, "Attribute doesnt belong to this slice" 
-		else:
-		    UpdateSliceTag.__call__(UpdateSliceTag(self.api), auth, attribute_id, updated_attribute)	 	 
-	
+                if 'value' in added_attribute:
+                    value = added_attribute['value']
+                else:
+                    raise PLCInvalidArgument, "Must specify a value"
+
+                if 'node_id' in added_attribute:
+                    node_id = added_attribute['node_id']
+                else:
+                    node_id = None
+
+                if 'nodegroup_id' in added_attribute:
+                    nodegroup_id = added_attribute['nodegroup_id']
+                else:
+                    nodegroup_id = None
+
+                AddSliceTag.__call__(AddSliceTag(self.api), auth, self['slice_id'], type, value, node_id, nodegroup_id)
+            for updated_attribute in updated_attributes:
+                attribute_id = updated_attribute.pop('slice_tag_id')
+                if attribute_id not in self['slice_tag_ids']:
+                    raise PLCInvalidArgument, "Attribute doesnt belong to this slice"
+                else:
+                    UpdateSliceTag.__call__(UpdateSliceTag(self.api), auth, attribute_id, updated_attribute)
+
     def sync(self, commit = True):
         """
         Add or update a slice.
@@ -264,7 +264,7 @@ class Slices(Table):
         for tagname in self.tag_columns:
             view= "%s left join %s using (%s)"%(view,Slice.tagvalue_view_name(tagname),
                                                 Slice.primary_key)
-            
+
         sql = "SELECT %s FROM %s WHERE is_deleted IS False" % \
               (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 

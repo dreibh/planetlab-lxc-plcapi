@@ -22,7 +22,7 @@ class AddNodeType(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    
+
     def call(self, auth, name):
         node_type = NodeType(self.api)
         node_type['node_type'] = name

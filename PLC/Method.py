@@ -73,7 +73,7 @@ class Method (object):
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
-    	
+
     def __call__(self, *args, **kwds):
         """
         Main entry point for all PLCAPI functions. Type checks
@@ -81,53 +81,53 @@ class Method (object):
         """
 
         try:
-	    start = time.time()
+            start = time.time()
 
             # legacy code cannot be type-checked, due to the way Method.args() works
             if not hasattr(self,"skip_typecheck"):
                 (min_args, max_args, defaults) = self.args()
-	        		
+
                 # Check that the right number of arguments were passed in
                 if len(args) < len(min_args) or len(args) > len(max_args):
                     raise PLCInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
                 for name, value, expected in zip(max_args, args, self.accepts):
                     self.type_check(name, value, expected, args)
-	
-	    result = self.call(*args, **kwds)
-	    runtime = time.time() - start
-	
+
+            result = self.call(*args, **kwds)
+            runtime = time.time() - start
+
             if self.api.config.PLC_API_DEBUG or hasattr(self, 'message'):
-		self.log(None, runtime, *args)
-	    	
-	    return result
+                self.log(None, runtime, *args)
+
+            return result
 
         except PLCFault, fault:
-	
-	    caller = ""
-	    if isinstance(self.caller, Person):
-            	caller = 'person_id %s'  % self.caller['person_id']
+
+            caller = ""
+            if isinstance(self.caller, Person):
+                caller = 'person_id %s'  % self.caller['person_id']
             elif isinstance(self.caller, Node):
                 caller = 'node_id %s'  % self.caller['node_id']
 
             # Prepend caller and method name to expected faults
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
-	    runtime = time.time() - start
-	    
-	    if self.api.config.PLC_API_DEBUG:
-		self.log(fault, runtime, *args)
-            
-	    raise fault
+            runtime = time.time() - start
+
+            if self.api.config.PLC_API_DEBUG:
+                self.log(fault, runtime, *args)
+
+            raise fault
 
     def log(self, fault, runtime, *args):
         """
-        Log the transaction 
-        """	
+        Log the transaction
+        """
 
-	# Do not log system or Get calls
+        # Do not log system or Get calls
         #if self.name.startswith('system') or self.name.startswith('Get'):
         #    return False
-        # Do not log ReportRunlevel 
+        # Do not log ReportRunlevel
         if self.name.startswith('system'):
             return False
         if self.name.startswith('ReportRunlevel'):
@@ -135,8 +135,8 @@ class Method (object):
 
         # Create a new event
         event = Event(self.api)
-	event['fault_code'] = 0
-	if fault:
+        event['fault_code'] = 0
+        if fault:
             event['fault_code'] = fault.faultCode
         event['runtime'] = runtime
 
@@ -163,7 +163,7 @@ class Method (object):
         # Log call representation
         # XXX Truncate to avoid DoS
         event['call'] = self.name + pprint.saferepr(newargs)
-	event['call_name'] = self.name
+        event['call_name'] = self.name
 
         # Both users and nodes can call some methods
         if isinstance(self.caller, Person):
@@ -175,16 +175,16 @@ class Method (object):
 
         if hasattr(self, 'event_objects') and isinstance(self.event_objects, dict):
             for key in self.event_objects.keys():
-		for object_id in self.event_objects[key]:
+                for object_id in self.event_objects[key]:
                     event.add_object(key, object_id, commit = False)
-	
 
-	# Set the message for this event
-	if fault:
-	    event['message'] = fault.faultString
-	elif hasattr(self, 'message'):
-            event['message'] = self.message	
-	
+
+        # Set the message for this event
+        if fault:
+            event['message'] = fault.faultString
+        elif hasattr(self, 'message'):
+            event['message'] = self.message
+
         # Commit
         event.sync()
 
@@ -269,7 +269,7 @@ class Method (object):
         That represents the minimum and maximum sets of arguments that
         this function accepts and the defaults for the optional arguments.
         """
-        
+
         # Inspect call. Remove self from the argument list.
         max_args = self.call.func_code.co_varnames[1:self.call.func_code.co_argcount]
         defaults = self.call.func_defaults
@@ -278,7 +278,7 @@ class Method (object):
 
         min_args = max_args[0:len(max_args) - len(defaults)]
         defaults = tuple([None for arg in min_args]) + defaults
-        
+
         return (min_args, max_args, defaults)
 
     def type_check(self, name, value, expected, args):
@@ -287,7 +287,7 @@ class Method (object):
         which may be a Python type, a typed value, a Parameter, a
         Mixed type, or a list or dictionary of possibly mixed types,
         values, Parameters, or Mixed types.
-        
+
         Extraneous members of lists must be of the same type as the
         last specified type. For example, if the expected argument
         type is [int, bool], then [1, False] and [14, True, False,

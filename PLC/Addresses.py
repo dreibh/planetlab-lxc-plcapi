@@ -87,7 +87,7 @@ class Addresses(Table):
     """
 
     def __init__(self, api, address_filter = None, columns = None):
-	Table.__init__(self, api, Address, columns)
+        Table.__init__(self, api, Address, columns)
 
         sql = "SELECT %s FROM view_addresses WHERE True" % \
               ", ".join(self.columns)

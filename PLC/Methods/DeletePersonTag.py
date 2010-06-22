@@ -54,18 +54,18 @@ class DeletePersonTag(Method):
 
         assert person_tag['person_tag_id'] in person['person_tag_ids']
 
-	# check permission : it not admin, is the user affiliated with the right person
-	if 'admin' not in self.caller['roles']:
-	    # check caller is affiliated with this person's site
-	    if len(set(person['site_ids']) & set(self.caller['site_ids'])) == 0:
-		raise PLCPermissionDenied, "Not a member of the person's sites: %s"%person['site_ids']
-	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
+        # check permission : it not admin, is the user affiliated with the right person
+        if 'admin' not in self.caller['roles']:
+            # check caller is affiliated with this person's site
+            if len(set(person['site_ids']) & set(self.caller['site_ids'])) == 0:
+                raise PLCPermissionDenied, "Not a member of the person's sites: %s"%person['site_ids']
+
+            required_min_role = tag_type ['min_role_id']
+            if required_min_role is not None and \
+                    min(self.caller['role_ids']) > required_min_role:
+                raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
 
         person_tag.delete()
-	self.object_ids = [person_tag['person_tag_id']]
+        self.object_ids = [person_tag['person_tag_id']]
 
         return 1

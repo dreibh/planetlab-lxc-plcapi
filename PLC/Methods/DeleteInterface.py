@@ -21,7 +21,7 @@ class DeleteInterface(Method):
 
     accepts = [
         Auth(),
-	Interface.fields['interface_id']
+        Interface.fields['interface_id']
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -33,16 +33,16 @@ class DeleteInterface(Method):
         interfaces = Interfaces(self.api, [interface_id])
         if not interfaces:
             raise PLCInvalidArgument, "No such interface %r"%interface_id
-	interface = interfaces[0]
-	
-	# Get node information
-	nodes = Nodes(self.api, [interface['node_id']])
-	if not nodes:
-		raise PLCInvalidArgument, "No such node %r"%node_id
-	node = nodes[0]
+        interface = interfaces[0]
+
+        # Get node information
+        nodes = Nodes(self.api, [interface['node_id']])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node %r"%node_id
+        node = nodes[0]
 
         # Authenticated functino
-	assert self.caller is not None
+        assert self.caller is not None
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
@@ -52,8 +52,8 @@ class DeleteInterface(Method):
 
         interface.delete()
 
-	# Logging variables
-	self.event_objects = {'Interface': [interface['interface_id']]}
-	self.message = "Interface %d deleted" % interface['interface_id']
+        # Logging variables
+        self.event_objects = {'Interface': [interface['interface_id']]}
+        self.message = "Interface %d deleted" % interface['interface_id']
 
         return 1

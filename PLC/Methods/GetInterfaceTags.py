@@ -37,7 +37,7 @@ class GetInterfaceTags(Method):
         ]
 
     returns = [InterfaceTag.fields]
-    
+
 
     def call(self, auth, interface_tag_filter = None, return_fields = None):
 

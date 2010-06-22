@@ -31,19 +31,19 @@ class SliceListUserSlices(GetSlices, GetPersons):
         ]
 
     returns = [Slice.fields['name']]
-    
+
 
     def call(self, auth, email):
 
-	persons = GetPersons.call(self, auth, [email])
-	if not persons:
-		return []
-	person = persons[0]
-	slice_ids = person['slice_ids']
-	if not slice_ids:
-		return []
-	
-	slices = GetSlices.call(self, auth, slice_ids)
-	slice_names = [slice['name'] for slice in slices]
+        persons = GetPersons.call(self, auth, [email])
+        if not persons:
+            return []
+        person = persons[0]
+        slice_ids = person['slice_ids']
+        if not slice_ids:
+            return []
+
+        slices = GetSlices.call(self, auth, slice_ids)
+        slice_names = [slice['name'] for slice in slices]
 
         return slice_names

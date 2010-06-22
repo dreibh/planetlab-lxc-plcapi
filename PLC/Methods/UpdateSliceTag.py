@@ -26,7 +26,7 @@ class UpdateSliceTag(Method):
     accepts = [
         Auth(),
         SliceTag.fields['slice_tag_id'],
-	Mixed(SliceTag.fields['value'],
+        Mixed(SliceTag.fields['value'],
               InitScript.fields['name'])
         ]
 
@@ -62,13 +62,13 @@ class UpdateSliceTag(Method):
             node_role_id = 20
             if slice_tag['min_role_id'] is not None and node_role_id > slice_tag['min_role_id']:
                 raise PLCPermissionDenied, "Not allowed to update the specified slice attribute"
-	
-	if slice_tag['tagname'] in ['initscript']:
+
+        if slice_tag['tagname'] in ['initscript']:
             initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
             if not initscripts:
-                raise PLCInvalidArgument, "No such plc initscript"	
+                raise PLCInvalidArgument, "No such plc initscript"
 
         slice_tag['value'] = unicode(value)
         slice_tag.sync()
-	self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
+        self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
         return 1

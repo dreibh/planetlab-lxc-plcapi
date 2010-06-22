@@ -16,7 +16,7 @@ class GetSessions(Method):
     filter will be returned. If return_fields is specified, only the
     specified details will be returned.
 
-    
+
     """
 
     roles = ['admin']
@@ -29,9 +29,9 @@ class GetSessions(Method):
         ]
 
     returns = [Session.fields]
-    
+
     def call(self, auth, session_filter = None):
 
         sessions = Sessions(self.api, session_filter)
-	
-	return sessions
+
+        return sessions

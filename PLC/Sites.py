@@ -31,7 +31,7 @@ class Site(Row):
         'login_base': Parameter(str, "Site slice prefix", max = 20),
         'is_public': Parameter(bool, "Publicly viewable site"),
         'enabled': Parameter(bool, "Has been enabled"),
-	'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0, nullok = True),
+        'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0, nullok = True),
         'longitude': Parameter(float, "Decimal longitude of the site", min = -180.0, max = 180.0, nullok = True),
         'url': Parameter(str, "URL of a page that describes the site", max = 254, nullok = True),
         'date_created': Parameter(int, "Date and time when site entry was created, in seconds since UNIX epoch", ro = True),
@@ -46,14 +46,14 @@ class Site(Row):
         'peer_id': Parameter(int, "Peer to which this site belongs", nullok = True),
         'peer_site_id': Parameter(int, "Foreign site identifier at peer", nullok = True),
         'site_tag_ids' : Parameter ([int], "List of tags attached to this site"),
-	'ext_consortium_id': Parameter(int, "external consortium id", nullok = True)
+        'ext_consortium_id': Parameter(int, "external consortium id", nullok = True)
         }
     related_fields = {
- 	'persons': [Mixed(Parameter(int, "Person identifier"),
+        'persons': [Mixed(Parameter(int, "Person identifier"),
                           Parameter(str, "Email address"))],
-	'addresses': [Mixed(Parameter(int, "Address identifer"),
+        'addresses': [Mixed(Parameter(int, "Address identifer"),
                             Filter(Address.fields))]
-	}
+        }
     view_tags_name = "view_site_tags"
     # tags are used by the Add/Get/Update methods to expose tags
     # this is initialized here and updated by the accessors factory
@@ -114,54 +114,54 @@ class Site(Row):
 
         self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
                        " where site_id = %d" % (self['site_id']) )
-        self.sync(commit)    
+        self.sync(commit)
 
 
     def associate_persons(self, auth, field, value):
-	"""
-	Adds persons found in value list to this site (using AddPersonToSite).
-	Deletes persons not found in value list from this site (using DeletePersonFromSite).
-	"""
-	
-	assert 'person_ids' in self
-	assert 'site_id' in self
-	assert isinstance(value, list)
+        """
+        Adds persons found in value list to this site (using AddPersonToSite).
+        Deletes persons not found in value list from this site (using DeletePersonFromSite).
+        """
 
-	(person_ids, emails) = self.separate_types(value)[0:2]
+        assert 'person_ids' in self
+        assert 'site_id' in self
+        assert isinstance(value, list)
 
-	# Translate emails into person_ids
-	if emails:
-	    persons = Persons(self.api, emails, ['person_id']).dict('person_id')
-	    person_ids += persons.keys()
+        (person_ids, emails) = self.separate_types(value)[0:2]
 
-	# Add new ids, remove stale ids
-	if self['person_ids'] != person_ids:
-	    from PLC.Methods.AddPersonToSite import AddPersonToSite
-	    from PLC.Methods.DeletePersonFromSite import DeletePersonFromSite
-	    new_persons = set(person_ids).difference(self['person_ids'])
-	    stale_persons = set(self['person_ids']).difference(person_ids)
-	 
-	    for new_person in new_persons:
-		AddPersonToSite.__call__(AddPersonToSite(self.api), auth, new_person, self['site_id'])
-	    for stale_person in stale_persons:
-		DeletePersonFromSite.__call__(DeletePersonFromSite(self.api), auth, stale_person, self['site_id'])		
+        # Translate emails into person_ids
+        if emails:
+            persons = Persons(self.api, emails, ['person_id']).dict('person_id')
+            person_ids += persons.keys()
+
+        # Add new ids, remove stale ids
+        if self['person_ids'] != person_ids:
+            from PLC.Methods.AddPersonToSite import AddPersonToSite
+            from PLC.Methods.DeletePersonFromSite import DeletePersonFromSite
+            new_persons = set(person_ids).difference(self['person_ids'])
+            stale_persons = set(self['person_ids']).difference(person_ids)
+
+            for new_person in new_persons:
+                AddPersonToSite.__call__(AddPersonToSite(self.api), auth, new_person, self['site_id'])
+            for stale_person in stale_persons:
+                DeletePersonFromSite.__call__(DeletePersonFromSite(self.api), auth, stale_person, self['site_id'])
 
     def associate_addresses(self, auth, field, value):
-	"""
-	Deletes addresses_ids not found in value list (using DeleteAddress).  
-	Adds address if slice_fields w/o address_id found in value list (using AddSiteAddress).
-	Update address if slice_fields w/ address_id found in value list (using UpdateAddress).
-	"""
-	
-	assert 'address_ids' in self
-	assert 'site_id' in self
+        """
+        Deletes addresses_ids not found in value list (using DeleteAddress).
+        Adds address if slice_fields w/o address_id found in value list (using AddSiteAddress).
+        Update address if slice_fields w/ address_id found in value list (using UpdateAddress).
+        """
+
+        assert 'address_ids' in self
+        assert 'site_id' in self
         assert isinstance(value, list)
 
         (address_ids, blank, addresses) = self.separate_types(value)
 
-	for address in addresses:
-	    if 'address_id' in address:
-		address_ids.append(address['address_id']) 		
+        for address in addresses:
+            if 'address_id' in address:
+                address_ids.append(address['address_id'])
 
         # Add new ids, remove stale ids
         if self['address_ids'] != address_ids:
@@ -169,20 +169,20 @@ class Site(Row):
             stale_addresses = set(self['address_ids']).difference(address_ids)
 
             for stale_address in stale_addresses:
-                DeleteAddress.__call__(DeleteAddress(self.api), auth, stale_address)	
-	
-	if addresses:
-	    from PLC.Methods.AddSiteAddress import AddSiteAddress
-	    from PLC.Methods.UpdateAddress import UpdateAddress
-		
-	    updated_addresses = filter(lambda address: 'address_id' in address, addresses)
-	    added_addresses = filter(lambda address: 'address_id' not in address, addresses)
-		
-	    for address in added_addresses:
-		AddSiteAddress.__call__(AddSiteAddress(self.api), auth, self['site_id'], address)	
-    	    for address in updated_addresses:
-		address_id = address.pop('address_id')
-		UpdateAddress.__call__(UpdateAddress(self.api), auth, address_id, address)
+                DeleteAddress.__call__(DeleteAddress(self.api), auth, stale_address)
+
+        if addresses:
+            from PLC.Methods.AddSiteAddress import AddSiteAddress
+            from PLC.Methods.UpdateAddress import UpdateAddress
+
+            updated_addresses = filter(lambda address: 'address_id' in address, addresses)
+            added_addresses = filter(lambda address: 'address_id' not in address, addresses)
+
+            for address in added_addresses:
+                AddSiteAddress.__call__(AddSiteAddress(self.api), auth, self['site_id'], address)
+            for address in updated_addresses:
+                address_id = address.pop('address_id')
+                UpdateAddress.__call__(UpdateAddress(self.api), auth, address_id, address)
 
     def delete(self, commit = True):
         """
@@ -243,12 +243,12 @@ class Sites(Table):
 
     def __init__(self, api, site_filter = None, columns = None):
         Table.__init__(self, api, Site, columns)
-	
+
         view = "view_sites"
         for tagname in self.tag_columns:
             view= "%s left join %s using (%s)"%(view,Site.tagvalue_view_name(tagname),
                                                 Site.primary_key)
-            
+
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
             (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 

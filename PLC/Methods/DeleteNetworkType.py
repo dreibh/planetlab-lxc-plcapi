@@ -24,7 +24,7 @@ class DeleteNetworkType(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, name):
         network_types = NetworkTypes(self.api, [name])

@@ -35,7 +35,7 @@ class GetPersonTags(Method):
         ]
 
     returns = [PersonTag.fields]
-    
+
 
     def call(self, auth, person_tag_filter = None, return_fields = None):
 

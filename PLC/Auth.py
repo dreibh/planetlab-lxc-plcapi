@@ -239,10 +239,10 @@ class BootAuth(Auth):
                     for interface in interfaces:
                         if interface['is_primary']:
                             break
-            
+
                 if not interface or not interface['is_primary']:
                     raise PLCAuthenticationFailure, "No primary network interface on record"
-            
+
                 if method.source is None:
                     raise PLCAuthenticationFailure, "Cannot determine IP address of requestor"
 
@@ -337,6 +337,6 @@ class PasswordAuth(Auth):
                 raise PLCAuthenticationFailure, "Password verification failed"
 
         if not set(person['roles']).intersection(method.roles):
-  	    raise PLCAuthenticationFailure, "Not allowed to call method"
+            raise PLCAuthenticationFailure, "Not allowed to call method"
 
         method.caller = person

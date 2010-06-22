@@ -26,17 +26,17 @@ class KeyType(Row):
         }
 
     def validate_key_type(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Key type must be specified"
-	
-	# Make sure key type does not alredy exist
-	conflicts = KeyTypes(self.api, [name])
+
+        # Make sure key type does not alredy exist
+        conflicts = KeyTypes(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Key type name already in use"
 
-	return name
-        
+        return name
+
 class KeyTypes(Table):
     """
     Representation of the key_types table in the database.
@@ -47,7 +47,7 @@ class KeyTypes(Table):
 
         sql = "SELECT %s FROM key_types" % \
               ", ".join(KeyType.fields)
-        
+
         if key_types:
             sql += " WHERE key_type IN (%s)" % ", ".join(map(api.db.quote, key_types))
 

@@ -26,16 +26,16 @@ class BootState(Row):
         }
 
     def validate_boot_state(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Boot state must be specified"
-	
-	# Make sure boot state does not alredy exist
-	conflicts = BootStates(self.api, [name])
+
+        # Make sure boot state does not alredy exist
+        conflicts = BootStates(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Boot state name already in use"
 
-	return name
+        return name
 
 class BootStates(Table):
     """
@@ -47,7 +47,7 @@ class BootStates(Table):
 
         sql = "SELECT %s FROM boot_states" % \
               ", ".join(BootState.fields)
-        
+
         if boot_states:
             sql += " WHERE boot_state IN (%s)" % ", ".join(map(api.db.quote, boot_states))
 

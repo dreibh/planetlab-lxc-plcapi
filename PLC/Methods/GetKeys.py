@@ -26,16 +26,16 @@ class GetKeys(Method):
         Auth(),
         Mixed([Mixed(Key.fields['key_id'])],
               Filter(Key.fields)),
-        Parameter([str], "List of fields to return", nullok = True)        
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [Key.fields]
 
 
     def call(self, auth, key_filter = None, return_fields = None):
-	keys = Keys(self.api, key_filter, return_fields)
+        keys = Keys(self.api, key_filter, return_fields)
 
-	# If we are not admin, make sure to only return our own keys       
+        # If we are not admin, make sure to only return our own keys
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
             keys = filter(lambda key: key['key_id'] in self.caller['key_ids'], keys)

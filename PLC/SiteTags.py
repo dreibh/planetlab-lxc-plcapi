@@ -28,8 +28,8 @@ class SiteTag(Row):
         'category': TagType.fields['category'],
         'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Site setting value"),
-	### relations
-	
+        ### relations
+
         }
 
 class SiteTags(Table):

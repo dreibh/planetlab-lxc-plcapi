@@ -76,7 +76,7 @@ class AddNode(Method):
         # since hostname was specified lets add the 'hrn' node tag
         root_auth = self.api.config.PLC_HRN_ROOT
         login_base = site['login_base']
-        tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])        
+        tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
@@ -89,7 +89,7 @@ class AddNode(Method):
                 UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
 
         self.event_objects = {'Site': [site['site_id']],
-                              'Node': [node['node_id']]}	
+                              'Node': [node['node_id']]}
         self.message = "Node %d=%s created" % (node['node_id'],node['hostname'])
-        
+
         return node['node_id']

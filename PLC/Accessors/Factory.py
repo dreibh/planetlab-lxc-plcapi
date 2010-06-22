@@ -28,19 +28,19 @@ from PLC.PersonTags import PersonTags, PersonTag
 from PLC.TagTypes import TagTypes, TagType
 
 # known classes : { class -> secondary_key }
-taggable_classes = { Node : {'table_class' : Nodes, 
+taggable_classes = { Node : {'table_class' : Nodes,
                              'joins_class' : NodeTags, 'join_class' : NodeTag,
                              'secondary_key': 'hostname'},
-                     Interface : {'table_class' : Interfaces, 
+                     Interface : {'table_class' : Interfaces,
                                   'joins_class': InterfaceTags, 'join_class': InterfaceTag,
                                   'secondary_key' : 'ip'},
-                     Slice: {'table_class' : Slices, 
+                     Slice: {'table_class' : Slices,
                              'joins_class': SliceTags, 'join_class': SliceTag,
                              'secondary_key':'name'},
-                     Site: {'table_class' : Sites, 
+                     Site: {'table_class' : Sites,
                              'joins_class': SiteTags, 'join_class': SiteTag,
                              'secondary_key':'login_base'},
-                     Person: {'table_class' : Persons, 
+                     Person: {'table_class' : Persons,
                              'joins_class': PersonTags, 'join_class': PersonTag,
                              'secondary_key':'email'},
 #                     Ilink : xxx
@@ -57,21 +57,21 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # Set<classname><methodsuffix> (auth, id_or_name, value) -> None
 # value is always a string, no cast nor typecheck for now
 #
-# The expose_in_api flag tells whether this tag may be handled 
+# The expose_in_api flag tells whether this tag may be handled
 #   through the Add/Get/Update methods as a native field
 #
-# note: tag_min_role_id gets attached to the tagtype instance, 
+# note: tag_min_role_id gets attached to the tagtype instance,
 # while get_roles and set_roles get attached to the created methods
 # this might need a cleanup
-# 
-# in addition a convenience method like e.g. LocateNodeArch is defined 
+#
+# in addition a convenience method like e.g. LocateNodeArch is defined
 # in the Accessor class; its purpose is to retrieve the tag, or to create it if needed
 
-def define_accessors (module, objclass, methodsuffix, tagname, 
-                      category, description, 
-                      get_roles=['admin'], set_roles=['admin'], 
+def define_accessors (module, objclass, methodsuffix, tagname,
+                      category, description,
+                      get_roles=['admin'], set_roles=['admin'],
                       tag_min_role_id=10, expose_in_api = False):
-    
+
     if objclass not in taggable_classes:
         try:
             raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class %s"%objclass.__name__
@@ -95,7 +95,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
                       {"__doc__":"Accessor 'set' method designed for %s objects using tag %s"%\
                            (classname,tagname)})
 
-    # accepts 
+    # accepts
     get_accepts = [ Auth () ]
     primary_key=objclass.primary_key
     secondary_key = taggable_classes[objclass]['secondary_key']
@@ -117,7 +117,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     setattr(set_class,'accepts',set_accepts)
     setattr(set_class,'returns', set_returns)
     setattr(set_class,'skip_typecheck',True)
-    
+
     table_class = taggable_classes[objclass]['table_class']
     joins_class = taggable_classes[objclass]['joins_class']
     join_class = taggable_classes[objclass]['join_class']
@@ -146,7 +146,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
             filter[secondary_key]=id_or_name
         joins = joins_class (self.api,filter,['value'])
         if not joins:
-            # xxx - we return None even if id_or_name is not valid 
+            # xxx - we return None even if id_or_name is not valid
             return None
         else:
             return joins[0]['value']
@@ -154,7 +154,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     # attach it
     setattr (get_class,"call",get_call)
 
-    # body of the set method 
+    # body of the set method
     def set_call (self, auth, id_or_name, value):
         # locate the object
         if isinstance (id_or_name, int):
@@ -165,7 +165,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         if not objs:
             raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
         primary_id = objs[0][primary_key]
-                           
+
         # locate the tag, see above
         locator = getattr(Accessor,locator_name)
         tag_type_id = locator(AccessorSingleton(self.api))
@@ -215,4 +215,3 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         methods=[]
     methods += [get_name,set_name]
     setattr(module,'methods',methods)
-

@@ -11,7 +11,7 @@ class DeleteLeases(Method):
     """
     Deletes a lease.
 
-    Users may only delete leases attached to their slices. 
+    Users may only delete leases attached to their slices.
     PIs may delete any of the leases for slices at their sites, or any
     slices of which they are members. Admins may delete any lease.
 
@@ -54,7 +54,7 @@ class DeleteLeases(Method):
                 slice['verified']=True
 
             lease.delete()
-	
+
         # Logging variables
         self.event_objects = {'Lease': lease_ids }
         self.message = 'Leases %r deleted' % lease_ids

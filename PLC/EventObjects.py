@@ -16,9 +16,9 @@ from PLC.Table import Row, Table
 
 class EventObject(Row):
     """
-    Representation of a row in the event_object table. 
+    Representation of a row in the event_object table.
     """
-    
+
     table_name = 'event_object'
     primary_key = 'event_id'
     fields = {
@@ -26,27 +26,27 @@ class EventObject(Row):
         'person_id': Parameter(int, "Identifier of person responsible for event, if any"),
         'node_id': Parameter(int, "Identifier of node responsible for event, if any"),
         'fault_code': Parameter(int, "Event fault code"),
-	'call_name': Parameter(str, "Call responsible for this event"),
-	'call': Parameter(str, "Call responsible for this event, including paramters"),
-	'message': Parameter(str, "High level description of this event"),
+        'call_name': Parameter(str, "Call responsible for this event"),
+        'call': Parameter(str, "Call responsible for this event, including paramters"),
+        'message': Parameter(str, "High level description of this event"),
         'runtime': Parameter(float, "Runtime of event"),
         'time': Parameter(int, "Date and time that the event took place, in seconds since UNIX epoch", ro = True),
         'object_id': Parameter(int, "ID of objects affected by this event"),
-	'object_type': Parameter(str, "What type of object is this event affecting")
-	}    
+        'object_type': Parameter(str, "What type of object is this event affecting")
+        }
 
 class EventObjects(Table):
     """
-    Representation of row(s) from the event_object table in the database. 
+    Representation of row(s) from the event_object table in the database.
     """
 
     def __init__(self, api, event_filter = None, columns = None):
         Table.__init__(self, api, EventObject, columns)
-	
-	sql = "SELECT %s FROM view_event_objects WHERE True" % \
+
+        sql = "SELECT %s FROM view_event_objects WHERE True" % \
             ", ".join(self.columns)
-        
-	if event_filter is not None:
+
+        if event_filter is not None:
             if isinstance(event_filter, (list, tuple, set)):
                 event_filter = Filter(EventObject.fields, {'event_id': event_filter})
                 sql += " AND (%s) %s" % event_filter.sql(api, "OR")
@@ -58,5 +58,5 @@ class EventObjects(Table):
                 sql += " AND (%s) %s" % event_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong event object filter %r"%event_filter
-        
-	self.selectall(sql)
+
+        self.selectall(sql)

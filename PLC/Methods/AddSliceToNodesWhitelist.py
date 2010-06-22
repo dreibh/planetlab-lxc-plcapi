@@ -24,7 +24,7 @@ class AddSliceToNodesWhitelist(Method):
         Auth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-	[Mixed(Node.fields['node_id'],
+        [Mixed(Node.fields['node_id'],
                Node.fields['hostname'])]
         ]
 
@@ -40,17 +40,17 @@ class AddSliceToNodesWhitelist(Method):
         if slice['peer_id'] is not None:
             raise PLCInvalidArgument, "Not a local slice"
 
-        # Get specified nodes, add them to the slice         
+        # Get specified nodes, add them to the slice
         nodes = Nodes(self.api, node_id_or_hostname_list)
-	for node in nodes:
-	    if node['peer_id'] is not None:
+        for node in nodes:
+            if node['peer_id'] is not None:
                 raise PLCInvalidArgument, "%s not a local node" % node['hostname']
             if slice['slice_id'] not in node['slice_ids_whitelist']:
                 slice.add_to_node_whitelist(node, commit = False)
-	    
+
         slice.sync()
 
-	self.event_objects = {'Node': [node['node_id'] for node in nodes],
-			      'Slice': [slice['slice_id']]}
+        self.event_objects = {'Node': [node['node_id'] for node in nodes],
+                              'Slice': [slice['slice_id']]}
 
         return 1

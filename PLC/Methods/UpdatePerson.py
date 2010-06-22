@@ -17,7 +17,7 @@ class UpdatePerson(Method):
     """
     Updates a person. Only the fields specified in person_fields are
     updated, all other fields are left untouched.
-    
+
     Users and techs can only update themselves. PIs can only update
     themselves and other non-PIs at their sites.
 
@@ -55,38 +55,38 @@ class UpdatePerson(Method):
         # Check if we can update this account
         if not self.caller.can_update(person):
             raise PLCPermissionDenied, "Not allowed to update specified account"
-	
-	# Make requested associations
+
+        # Make requested associations
         for field in related_fields:
             if field in person_fields:
                 person.associate(auth, field, person_fields[field])
                 person_fields.pop(field)
 
         person.update(person_fields)
-	person.update_last_updated(False)
+        person.update_last_updated(False)
         person.sync()
 
-	if 'enabled' in person_fields:
-	    To = [("%s %s" % (person['first_name'], person['last_name']), person['email'])]
-	    Cc = []	
-	    if person['enabled']:
-		Subject = "%s account enabled" % (self.api.config.PLC_NAME)
-		Body = "Your %s account has been enabled. Please visit %s to access your account." % (self.api.config.PLC_NAME, self.api.config.PLC_WWW_HOST) 
-	    else:
-		Subject = "%s account disabled" % (self.api.config.PLC_NAME)
-		Body = "Your %s account has been disabled. Please contact your PI or PlanetLab support for more information" % (self.api.config.PLC_NAME)
-	    sendmail(self.api, To = To, Cc = Cc, Subject = Subject, Body = Body)		
+        if 'enabled' in person_fields:
+            To = [("%s %s" % (person['first_name'], person['last_name']), person['email'])]
+            Cc = []
+            if person['enabled']:
+                Subject = "%s account enabled" % (self.api.config.PLC_NAME)
+                Body = "Your %s account has been enabled. Please visit %s to access your account." % (self.api.config.PLC_NAME, self.api.config.PLC_WWW_HOST)
+            else:
+                Subject = "%s account disabled" % (self.api.config.PLC_NAME)
+                Body = "Your %s account has been disabled. Please contact your PI or PlanetLab support for more information" % (self.api.config.PLC_NAME)
+            sendmail(self.api, To = To, Cc = Cc, Subject = Subject, Body = Body)
 
-			  	
-	# Logging variables
-	self.event_objects = {'Person': [person['person_id']]}
+
+        # Logging variables
+        self.event_objects = {'Person': [person['person_id']]}
 
         # Redact password
         if 'password' in person_fields:
             person_fields['password'] = "Removed by API"
         self.message = 'Person %d updated: %s.' % \
                        (person['person_id'], person_fields.keys())
-	if 'enabled' in person_fields:
-            self.message += ' Person enabled' 	
+        if 'enabled' in person_fields:
+            self.message += ' Person enabled'
 
         return 1

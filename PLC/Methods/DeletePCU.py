@@ -37,9 +37,9 @@ class DeletePCU(Method):
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
 
         pcu.delete()
-	
-	# Logging variables
-	self.event_objects = {'PCU': [pcu['pcu_id']]}
-	self.message = 'PCU %d deleted' % pcu['pcu_id']
+
+        # Logging variables
+        self.event_objects = {'PCU': [pcu['pcu_id']]}
+        self.message = 'PCU %d deleted' % pcu['pcu_id']
 
         return 1

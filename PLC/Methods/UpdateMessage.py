@@ -40,6 +40,6 @@ class UpdateMessage(Method):
 
         message.update(message_fields)
         message.sync()
-	self.event_objects = {'Message': [message['message_id']]}
+        self.event_objects = {'Message': [message['message_id']]}
 
         return 1

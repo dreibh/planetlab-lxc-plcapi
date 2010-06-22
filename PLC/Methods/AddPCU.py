@@ -35,7 +35,7 @@ class AddPCU(Method):
         ]
 
     returns = Parameter(int, 'New pcu_id (> 0) if successful')
-    
+
 
     def call(self, auth, site_id_or_login_base, pcu_fields):
         pcu_fields = dict(filter(can_update, pcu_fields.items()))
@@ -54,10 +54,10 @@ class AddPCU(Method):
         pcu['site_id'] = site['site_id']
         pcu.sync()
 
-	# Logging variables
-	self.event_objects = {'Site': [site['site_id']],
-			      'PCU': [pcu['pcu_id']]}
-	self.message = 'PCU %d added site %s' % \
-		(pcu['pcu_id'], site['site_id'])
+        # Logging variables
+        self.event_objects = {'Site': [site['site_id']],
+                              'PCU': [pcu['pcu_id']]}
+        self.message = 'PCU %d added site %s' % \
+                (pcu['pcu_id'], site['site_id'])
 
         return pcu['pcu_id']

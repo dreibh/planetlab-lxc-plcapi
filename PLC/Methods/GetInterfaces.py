@@ -31,6 +31,6 @@ class GetInterfaces(Method):
         ]
 
     returns = [Interface.fields]
-    
+
     def call(self, auth, interface_filter = None, return_fields = None):
         return Interfaces(self.api, interface_filter, return_fields)

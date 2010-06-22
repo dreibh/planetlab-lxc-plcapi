@@ -110,13 +110,13 @@ class PostgreSQL:
         return self.rowcount
 
     def next_id(self, table_name, primary_key):
-	sequence = "%(table_name)s_%(primary_key)s_seq" % locals()	
-	sql = "SELECT nextval('%(sequence)s')" % locals()
-	rows = self.selectall(sql, hashref = False)
-	if rows: 
-	    return rows[0][0]
-		
-	return None 
+        sequence = "%(table_name)s_%(primary_key)s_seq" % locals()
+        sql = "SELECT nextval('%(sequence)s')" % locals()
+        rows = self.selectall(sql, hashref = False)
+        if rows:
+            return rows[0][0]
+
+        return None
 
     def last_insert_id(self, table_name, primary_key):
         if isinstance(self.lastrowid, int):
@@ -128,7 +128,7 @@ class PostgreSQL:
 
         return None
 
-    # modified for psycopg2-2.0.7 
+    # modified for psycopg2-2.0.7
     # executemany is undefined for SELECT's
     # see http://www.python.org/dev/peps/pep-0249/
     # accepts either None, a single dict, a tuple of single dict - in which case it execute's

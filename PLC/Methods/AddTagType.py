@@ -42,6 +42,6 @@ class AddTagType(Method):
         tag_type = TagType(self.api, tag_type_fields)
         tag_type.sync()
 
-	self.object_ids = [tag_type['tag_type_id']]
+        self.object_ids = [tag_type['tag_type_id']]
 
         return tag_type['tag_type_id']

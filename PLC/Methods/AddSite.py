@@ -35,9 +35,9 @@ class AddSite(Method):
         site_fields = dict(filter(can_update, site_fields.items()))
         site = Site(self.api, site_fields)
         site.sync()
-	
-        # Logging variables 
+
+        # Logging variables
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d created' % site['site_id']
- 	
+
         return site['site_id']

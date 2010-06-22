@@ -14,8 +14,8 @@ class SliceInfo(Method):
     """
     Deprecated. Can be implemented with GetSlices.
 
-    Returns an array of structs containing details about slices. 
-    The summary can optionally include the list of nodes in and 
+    Returns an array of structs containing details about slices.
+    The summary can optionally include the list of nodes in and
     users of each slice.
 
     Users may only query slices of which they are members. PIs may
@@ -32,18 +32,18 @@ class SliceInfo(Method):
         Auth(),
         [Mixed(Slice.fields['name'])],
         Parameter(bool, "Whether or not to return users for the slices", nullok = True),
-	Parameter(bool, "Whether or not to return nodes for the slices", nullok = True)
+        Parameter(bool, "Whether or not to return nodes for the slices", nullok = True)
         ]
 
     returns = [Slice.fields]
-    
+
 
     def call(self, auth, slice_name_list=None, return_users=None, return_nodes=None):
-	# If we are not admin, make sure to return only viewable
-	# slices.
-	slice_filter = slice_name_list
-	slices = Slices(self.api, slice_filter)
-	if not slices:
+        # If we are not admin, make sure to return only viewable
+        # slices.
+        slice_filter = slice_name_list
+        slices = Slices(self.api, slice_filter)
+        if not slices:
             raise PLCInvalidArgument, "No such slice"
 
         if 'admin' not in self.caller['roles']:
@@ -56,22 +56,22 @@ class SliceInfo(Method):
 
             if not valid_slice_ids:
                 return []
-	
-	    slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
+
+            slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
 
 
-	for slice in slices:
-	    index = slices.index(slice)
-	    node_ids = slices[index].pop('node_ids')
-	    person_ids = slices[index].pop('person_ids')
-	    if return_users or return_users is None:
-		persons = Persons(self.api, person_ids)
-		emails = [person['email'] for person in persons]
-		slices[index]['users'] = emails
-	    if return_nodes or return_nodes is None:
-		nodes = Nodes(self.api, node_ids)
-		hostnames = [node['hostname'] for node in nodes]
-	        slices[index]['nodes'] = hostnames
-		
-	
+        for slice in slices:
+            index = slices.index(slice)
+            node_ids = slices[index].pop('node_ids')
+            person_ids = slices[index].pop('person_ids')
+            if return_users or return_users is None:
+                persons = Persons(self.api, person_ids)
+                emails = [person['email'] for person in persons]
+                slices[index]['users'] = emails
+            if return_nodes or return_nodes is None:
+                nodes = Nodes(self.api, node_ids)
+                hostnames = [node['hostname'] for node in nodes]
+                slices[index]['nodes'] = hostnames
+
+
         return slices

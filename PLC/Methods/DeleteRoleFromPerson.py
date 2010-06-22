@@ -10,7 +10,7 @@ from PLC.Roles import Role, Roles
 class DeleteRoleFromPerson(Method):
     """
     Deletes the specified role from the person.
-    
+
     PIs can only revoke the tech and user roles from users and techs
     at their sites. ins can revoke any role from any user.
 
@@ -59,11 +59,11 @@ class DeleteRoleFromPerson(Method):
 
         if role['role_id'] in person['role_ids']:
             person.remove_role(role)
-	
-	# Logging variables
-	self.event_objects = {'Person': [person['person_id']],
-			      'Role': [role['role_id']]}	
-	self.message = "Role %d revoked from person %d" % \
+
+        # Logging variables
+        self.event_objects = {'Person': [person['person_id']],
+                              'Role': [role['role_id']]}
+        self.message = "Role %d revoked from person %d" % \
                        (role['role_id'], person['person_id'])
 
         return 1

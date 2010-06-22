@@ -16,25 +16,25 @@ from PLC.Table import Row, Table
 
 class Event(Row):
     """
-    Representation of a row in the events table. 
+    Representation of a row in the events table.
     """
-    
+
     table_name = 'events'
     primary_key = 'event_id'
     fields = {
         'event_id': Parameter(int, "Event identifier"),
         'person_id': Parameter(int, "Identifier of person responsible for event, if any"),
         'node_id': Parameter(int, "Identifier of node responsible for event, if any"),
-	'auth_type': Parameter(int, "Type of auth used. i.e. AuthMethod"),
+        'auth_type': Parameter(int, "Type of auth used. i.e. AuthMethod"),
         'fault_code': Parameter(int, "Event fault code"),
-	'call_name': Parameter(str, "Call responsible for this event"),
-	'call': Parameter(str, "Call responsible for this event, including paramters"),
-	'message': Parameter(str, "High level description of this event"),
+        'call_name': Parameter(str, "Call responsible for this event"),
+        'call': Parameter(str, "Call responsible for this event, including paramters"),
+        'message': Parameter(str, "High level description of this event"),
         'runtime': Parameter(float, "Runtime of event"),
         'time': Parameter(int, "Date and time that the event took place, in seconds since UNIX epoch", ro = True),
         'object_ids': Parameter([int], "IDs of objects affected by this event"),
-	'object_types': Parameter([str], "What type of object were affected by this event")
-	}    
+        'object_types': Parameter([str], "What type of object were affected by this event")
+        }
 
     def add_object(self, object_type, object_id, commit = True):
         """
@@ -57,10 +57,10 @@ class Event(Row):
                 self.api.db.commit()
 
             self['object_ids'].append(object_id)
-    
+
 class Events(Table):
     """
-    Representation of row(s) from the events table in the database. 
+    Representation of row(s) from the events table in the database.
     """
 
     def __init__(self, api, event_filter = None, columns = None):

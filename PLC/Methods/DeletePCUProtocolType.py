@@ -10,7 +10,7 @@ class DeletePCUProtocolType(Method):
     """
     Deletes a PCU protocol type.
 
-    Returns 1 if successful, faults otherwise.	
+    Returns 1 if successful, faults otherwise.
     """
 
     roles = ['admin']
@@ -21,7 +21,7 @@ class DeletePCUProtocolType(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, protocol_type_id):
         protocol_types = PCUProtocolTypes(self.api, [protocol_type_id])
@@ -30,6 +30,6 @@ class DeletePCUProtocolType(Method):
 
         protocol_type = protocol_types[0]
         protocol_type.delete()
-	self.event_objects = {'PCUProtocolType': [protocol_type['pcu_protocol_type_id']]}
+        self.event_objects = {'PCUProtocolType': [protocol_type['pcu_protocol_type_id']]}
 
         return 1

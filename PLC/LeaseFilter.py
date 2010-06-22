@@ -4,7 +4,7 @@
 # Thierry Parmentelat -- INRIA
 #
 # Utilities for filtering on leases
-# 
+#
 
 from types import StringTypes
 from PLC.Faults import *
@@ -14,7 +14,7 @@ from PLC.Timestamp import Timestamp
 
 # supersede the generic Filter class to support time intersection
 class LeaseFilter (Filter):
-    
+
     # general notes on input parameters
     # int_timestamp: number of seconds since the epoch
     # str_timestamp: see Timestamp.sql_validate
@@ -28,12 +28,12 @@ class LeaseFilter (Filter):
                                       Parameter (tuple,"timeslot: the leases alive during this timeslot")),
                      }
 
-    def __init__(self, fields = {}, filter = {}, 
+    def __init__(self, fields = {}, filter = {},
                  doc = "Lease filter -- adds the 'alive' and 'clip' capabilities for filtering on leases"):
         Filter.__init__(self,fields,filter,doc)
-        self.fields.update (LeaseFilter.local_fields) 
+        self.fields.update (LeaseFilter.local_fields)
 
-    
+
     ## canonical type
     @staticmethod
     def quote (timestamp): return Timestamp.cast_long(timestamp)
@@ -116,10 +116,10 @@ class LeaseFilter (Filter):
         return (where_part,clip_part)
 
 ######## xxx not sure where this belongs yet
-# given a set of nodes, and a timeslot, 
+# given a set of nodes, and a timeslot,
 # returns the available leases that have at least a given duration
 def free_leases (api, node_ids, t_from, t_until, min_duration):
-    
+
     # get the leases for these nodes and timeslot
     filter = {'node_id':node_ids,
               'clip': (t_from, t_until),
@@ -170,5 +170,3 @@ def node_free_leases (node_id, node_leases, t_from, t_until):
             result.append( {'node_id':node_id,'t_from':current_time,'t_until':next_time})
             current_time = next_time
             is_on=True
-
-

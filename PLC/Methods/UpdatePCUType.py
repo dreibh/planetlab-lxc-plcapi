@@ -39,6 +39,6 @@ class UpdatePCUType(Method):
         pcu_type = pcu_types[0]
         pcu_type.update(pcu_type_fields)
         pcu_type.sync()
-	self.event_objects = {'PCUType': [pcu_type['pcu_type_id']]}	
+        self.event_objects = {'PCUType': [pcu_type['pcu_type_id']]}
 
         return 1

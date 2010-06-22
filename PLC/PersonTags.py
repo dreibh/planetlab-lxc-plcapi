@@ -28,8 +28,8 @@ class PersonTag(Row):
         'category': TagType.fields['category'],
         'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Person setting value"),
-	### relations
-	
+        ### relations
+
         }
 
 class PersonTags(Table):

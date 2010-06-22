@@ -69,7 +69,7 @@ class RebootNode(Method):
             # Ignore socket errors
             pass
 
-	self.event_objects = {'Node': [node['node_id']]}
-	self.message = "RebootNode called"
-	        
+        self.event_objects = {'Node': [node['node_id']]}
+        self.message = "RebootNode called"
+
         return 1

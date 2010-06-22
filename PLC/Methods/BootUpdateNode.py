@@ -59,7 +59,7 @@ class BootUpdateNode(Method):
 
         # Update primary interface state
         if node_fields.has_key('primary_network'):
-            primary_network = node_fields['primary_network'] 
+            primary_network = node_fields['primary_network']
 
             if 'interface_id' not in primary_network:
                 raise PLCInvalidArgument, "Interface not specified"

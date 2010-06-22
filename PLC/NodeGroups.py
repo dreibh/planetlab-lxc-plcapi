@@ -36,22 +36,22 @@ class NodeGroup(Row):
         'tagname' : Parameter(str, "Tag name that the nodegroup definition is based upon"),
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node group"),
         'node_ids' : Parameter([int], "List of node_ids that belong to this nodegroup"),
-	}
+        }
     related_fields = {
         }
 
     def validate_name(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
-                raise PLCInvalidArgument, "Invalid node group name"
-	
-	# Make sure node group does not alredy exist
-	conflicts = NodeGroups(self.api, [name])
-	for nodegroup in conflicts:
-            if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup['nodegroup_id']:
-               raise PLCInvalidArgument, "Node group name already in use"
+            raise PLCInvalidArgument, "Invalid node group name"
 
-	return name
+        # Make sure node group does not alredy exist
+        conflicts = NodeGroups(self.api, [name])
+        for nodegroup in conflicts:
+            if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup['nodegroup_id']:
+                raise PLCInvalidArgument, "Node group name already in use"
+
+        return name
 
     def associate_conf_files(self, auth, field, value):
         """
@@ -72,10 +72,10 @@ class NodeGroup(Row):
             stale_conf_files = set(self['conf_file_ids']).difference(conf_file_ids)
 
             for new_conf_file in new_conf_files:
-                AddConfFileToNodeGroup.__call__(AddConfFileToNodeGroup(self.api), 
+                AddConfFileToNodeGroup.__call__(AddConfFileToNodeGroup(self.api),
                                                 auth, new_conf_file, self['nodegroup_id'])
             for stale_conf_file in stale_conf_files:
-                DeleteConfFileFromNodeGroup.__call__(DeleteConfFileFromNodeGroup(self.api), 
+                DeleteConfFileFromNodeGroup.__call__(DeleteConfFileFromNodeGroup(self.api),
                                                      auth, stale_conf_file, self['nodegroup_id'])
 
 

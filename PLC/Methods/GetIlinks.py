@@ -37,7 +37,7 @@ class GetIlinks(Method):
         ]
 
     returns = [Ilink.fields]
-    
+
 
     def call(self, auth, ilink_filter = None, return_fields = None):
 

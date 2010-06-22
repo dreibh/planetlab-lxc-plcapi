@@ -45,7 +45,7 @@ class DeletePerson(Method):
             raise PLCPermissionDenied, "Not allowed to delete specified account"
 
         person.delete()
-	
+
         # Logging variables
         self.event_objects = {'Person': [person['person_id']]}
         self.message = 'Person %d deleted' % person['person_id']

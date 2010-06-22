@@ -27,24 +27,24 @@ class DeleteConfFileFromNode(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, conf_file_id, node_id_or_hostname):
-	# Get configuration file
+        # Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
             raise PLCInvalidArgument, "No such configuration file"
         conf_file = conf_files[0]
 
         # Get node
-	nodes = Nodes(self.api, [node_id_or_hostname])
-	if not nodes:
-		raise PLCInvalidArgument, "No such node"
-	node = nodes[0]
-	
-	# Link configuration file to node
+        nodes = Nodes(self.api, [node_id_or_hostname])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node"
+        node = nodes[0]
+
+        # Link configuration file to node
         if node['node_id'] in conf_file['node_ids']:
             conf_file.remove_node(node)
 
         # Log affected objects
-        self.event_objects = {'ConfFile': [conf_file_id], 
-			      'Node': [node['node_id']]}
+        self.event_objects = {'ConfFile': [conf_file_id],
+                              'Node': [node['node_id']]}
 
         return 1

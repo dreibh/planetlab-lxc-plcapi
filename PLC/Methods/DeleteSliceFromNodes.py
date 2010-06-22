@@ -10,7 +10,7 @@ from PLC.Auth import Auth
 class DeleteSliceFromNodes(Method):
     """
     Deletes the specified slice from the specified nodes. If the slice is
-    not associated with a node, no errors are returned. 
+    not associated with a node, no errors are returned.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -21,7 +21,7 @@ class DeleteSliceFromNodes(Method):
         Auth(),
        Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-	[Mixed(Node.fields['node_id'],
+        [Mixed(Node.fields['node_id'],
                Node.fields['hostname'])]
         ]
 
@@ -41,20 +41,20 @@ class DeleteSliceFromNodes(Method):
                 raise PLCPermissionDenied, "Not a member of the specified slice"
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
-	
-	# Remove slice from all nodes found
 
-	# Get specified nodes
+        # Remove slice from all nodes found
+
+        # Get specified nodes
         nodes = Nodes(self.api, node_id_or_hostname_list)
-	for node in nodes:
-	    if slice['peer_id'] is not None and node['peer_id'] is not None:
-		raise PLCPermissionDenied, "Not allowed to remove peer slice from peer node"
+        for node in nodes:
+            if slice['peer_id'] is not None and node['peer_id'] is not None:
+                raise PLCPermissionDenied, "Not allowed to remove peer slice from peer node"
             if slice['slice_id'] in node['slice_ids']:
                 slice.remove_node(node, commit = False)
 
         slice.sync()
-	
-	self.event_objects = {'Node': [node['node_id'] for node in nodes],
-			      'Slice': [slice['slice_id']]}	 
+
+        self.event_objects = {'Node': [node['node_id'] for node in nodes],
+                              'Slice': [slice['slice_id']]}
 
         return 1

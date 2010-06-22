@@ -49,7 +49,7 @@ class ReportRunlevel(Method):
                 node.update({field : report_fields[field]})
 
         node.sync(commit=True)
-        
+
         # skip logging in this case
         if former_level and 'run_level' in node and node['run_level'] == former_level:
             pass

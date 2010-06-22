@@ -49,8 +49,8 @@ class Person(Row):
         'enabled': Parameter(bool, "Has been enabled"),
         'password': Parameter(str, "Account password in crypt() form", max = 254),
         'verification_key': Parameter(str, "Reset password key", max = 254, nullok = True),
-	'verification_expires': Parameter(int, "Date and time when verification_key expires", nullok = True),
-	'last_updated': Parameter(int, "Date and time of last update", ro = True),
+        'verification_expires': Parameter(int, "Date and time when verification_key expires", nullok = True),
+        'last_updated': Parameter(int, "Date and time of last update", ro = True),
         'date_created': Parameter(int, "Date and time when account was created", ro = True),
         'role_ids': Parameter([int], "List of role identifiers"),
         'roles': Parameter([str], "List of roles"),
@@ -62,15 +62,15 @@ class Person(Row):
         'person_tag_ids' : Parameter ([int], "List of tags attached to this person"),
         }
     related_fields = {
-	'roles': [Mixed(Parameter(int, "Role identifier"),
-			Parameter(str, "Role name"))],
-	'sites': [Mixed(Parameter(int, "Site identifier"),
-			Parameter(str, "Site name"))],
-	'keys': [Mixed(Parameter(int, "Key identifier"),
-		       Filter(Key.fields))],
-	'slices': [Mixed(Parameter(int, "Slice identifier"),
-			 Parameter(str, "Slice name"))]
-	}	
+        'roles': [Mixed(Parameter(int, "Role identifier"),
+                        Parameter(str, "Role name"))],
+        'sites': [Mixed(Parameter(int, "Site identifier"),
+                        Parameter(str, "Site name"))],
+        'keys': [Mixed(Parameter(int, "Key identifier"),
+                       Filter(Key.fields))],
+        'slices': [Mixed(Parameter(int, "Slice identifier"),
+                         Parameter(str, "Slice name"))]
+        }
     view_tags_name = "view_person_tags"
     # tags are used by the Add/Get/Update methods to expose tags
     # this is initialized here and updated by the accessors factory
@@ -90,14 +90,14 @@ class Person(Row):
         if not email_re.match(email):
             raise invalid_email
 
-       	# check only against users on the same peer  
+        # check only against users on the same peer
         if 'peer_id' in self:
             namespace_peer_id = self['peer_id']
         else:
             namespace_peer_id = None
-         
-        conflicts = Persons(self.api, {'email':email,'peer_id':namespace_peer_id}) 
-	
+
+        conflicts = Persons(self.api, {'email':email,'peer_id':namespace_peer_id})
+
         for person in conflicts:
             if 'person_id' not in self or self['person_id'] != person['person_id']:
                 raise PLCInvalidArgument, "E-mail address already in use"
@@ -118,7 +118,7 @@ class Person(Row):
         else:
             # Generate a somewhat unique 8 character salt string
             salt = str(time.time()) + str(Random().random())
-            salt = md5(salt).hexdigest()[:8] 
+            salt = md5(salt).hexdigest()[:8]
             return crypt.crypt(password.encode(self.api.encoding), magic + salt + "$")
 
     validate_date_created = Row.validate_timestamp
@@ -211,42 +211,42 @@ class Person(Row):
         """
         Update last_updated field with current time
         """
-	
-	assert 'person_id' in self
-	assert self.table_name
-	
-	self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+
+        assert 'person_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
                        " where person_id = %d" % (self['person_id']) )
         self.sync(commit)
 
     def associate_roles(self, auth, field, value):
-	"""
-	Adds roles found in value list to this person (using AddRoleToPerson).
-	Deletes roles not found in value list from this person (using DeleteRoleFromPerson).
-	"""
-	
-	assert 'role_ids' in self
-	assert 'person_id' in self
-	assert isinstance(value, list)
-	
-	(role_ids, role_names) = self.separate_types(value)[0:2]
-	
-	# Translate roles into role_ids
-	if role_names:
-	    roles = Roles(self.api, role_names).dict('role_id')
-	    role_ids += roles.keys()
-	
-	# Add new ids, remove stale ids
-	if self['role_ids'] != role_ids:
-	    from PLC.Methods.AddRoleToPerson import AddRoleToPerson
-	    from PLC.Methods.DeleteRoleFromPerson import DeleteRoleFromPerson
-	    new_roles = set(role_ids).difference(self['role_ids'])
-	    stale_roles = set(self['role_ids']).difference(role_ids)
+        """
+        Adds roles found in value list to this person (using AddRoleToPerson).
+        Deletes roles not found in value list from this person (using DeleteRoleFromPerson).
+        """
 
-	    for new_role in new_roles:
-		AddRoleToPerson.__call__(AddRoleToPerson(self.api), auth, new_role, self['person_id'])
-	    for stale_role in stale_roles:
-		DeleteRoleFromPerson.__call__(DeleteRoleFromPerson(self.api), auth, stale_role, self['person_id'])
+        assert 'role_ids' in self
+        assert 'person_id' in self
+        assert isinstance(value, list)
+
+        (role_ids, role_names) = self.separate_types(value)[0:2]
+
+        # Translate roles into role_ids
+        if role_names:
+            roles = Roles(self.api, role_names).dict('role_id')
+            role_ids += roles.keys()
+
+        # Add new ids, remove stale ids
+        if self['role_ids'] != role_ids:
+            from PLC.Methods.AddRoleToPerson import AddRoleToPerson
+            from PLC.Methods.DeleteRoleFromPerson import DeleteRoleFromPerson
+            new_roles = set(role_ids).difference(self['role_ids'])
+            stale_roles = set(self['role_ids']).difference(role_ids)
+
+            for new_role in new_roles:
+                AddRoleToPerson.__call__(AddRoleToPerson(self.api), auth, new_role, self['person_id'])
+            for stale_role in stale_roles:
+                DeleteRoleFromPerson.__call__(DeleteRoleFromPerson(self.api), auth, stale_role, self['person_id'])
 
 
     def associate_sites(self, auth, field, value):
@@ -255,7 +255,7 @@ class Person(Row):
         Deletes person from site not found in value list (using DeletePersonFromSite).
         """
 
-	from PLC.Sites import Sites
+        from PLC.Sites import Sites
 
         assert 'site_ids' in self
         assert 'person_id' in self
@@ -282,44 +282,44 @@ class Person(Row):
 
 
     def associate_keys(self, auth, field, value):
-	"""
+        """
         Deletes key_ids not found in value list (using DeleteKey).
         Adds key if key_fields w/o key_id is found (using AddPersonKey).
         Updates key if key_fields w/ key_id is found (using UpdateKey).
         """
-	assert 'key_ids' in self
-	assert 'person_id' in self
-	assert isinstance(value, list)
-	
-	(key_ids, blank, keys) = self.separate_types(value)
-	
-	if self['key_ids'] != key_ids:
-	    from PLC.Methods.DeleteKey import DeleteKey
-	    stale_keys = set(self['key_ids']).difference(key_ids)
-	
-	    for stale_key in stale_keys:
-		DeleteKey.__call__(DeleteKey(self.api), auth, stale_key) 
+        assert 'key_ids' in self
+        assert 'person_id' in self
+        assert isinstance(value, list)
 
-	if keys:
-	    from PLC.Methods.AddPersonKey import AddPersonKey
-	    from PLC.Methods.UpdateKey import UpdateKey		
-	    updated_keys = filter(lambda key: 'key_id' in key, keys)
-	    added_keys = filter(lambda key: 'key_id' not in key, keys)
-		
-	    for key in added_keys:
-		AddPersonKey.__call__(AddPersonKey(self.api), auth, self['person_id'], key)
-	    for key in updated_keys:
-		key_id = key.pop('key_id')
-		UpdateKey.__call__(UpdateKey(self.api), auth, key_id, key)
-		  
-	
+        (key_ids, blank, keys) = self.separate_types(value)
+
+        if self['key_ids'] != key_ids:
+            from PLC.Methods.DeleteKey import DeleteKey
+            stale_keys = set(self['key_ids']).difference(key_ids)
+
+            for stale_key in stale_keys:
+                DeleteKey.__call__(DeleteKey(self.api), auth, stale_key)
+
+        if keys:
+            from PLC.Methods.AddPersonKey import AddPersonKey
+            from PLC.Methods.UpdateKey import UpdateKey
+            updated_keys = filter(lambda key: 'key_id' in key, keys)
+            added_keys = filter(lambda key: 'key_id' not in key, keys)
+
+            for key in added_keys:
+                AddPersonKey.__call__(AddPersonKey(self.api), auth, self['person_id'], key)
+            for key in updated_keys:
+                key_id = key.pop('key_id')
+                UpdateKey.__call__(UpdateKey(self.api), auth, key_id, key)
+
+
     def associate_slices(self, auth, field, value):
         """
         Adds person to slices found in value list (using AddPersonToSlice).
         Deletes person from slices found in value list (using DeletePersonFromSlice).
         """
 
-	from PLC.Slices import Slices
+        from PLC.Slices import Slices
 
         assert 'slice_ids' in self
         assert 'person_id' in self
@@ -343,7 +343,7 @@ class Person(Row):
                 AddPersonToSlice.__call__(AddPersonToSlice(self.api), auth, self['person_id'], new_slice)
             for stale_slice in stale_slices:
                 DeletePersonFromSlice.__call__(DeletePersonFromSlice(self.api), auth, self['person_id'], stale_slice)
-    
+
 
     def delete(self, commit = True):
         """
@@ -377,7 +377,7 @@ class Persons(Table):
         for tagname in self.tag_columns:
             view= "%s left join %s using (%s)"%(view,Person.tagvalue_view_name(tagname),
                                                 Person.primary_key)
-            
+
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
             (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 

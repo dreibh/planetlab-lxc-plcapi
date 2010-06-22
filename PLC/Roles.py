@@ -29,24 +29,24 @@ class Role(Row):
         }
 
     def validate_role_id(self, role_id):
-	# Make sure role does not already exist
-	conflicts = Roles(self.api, [role_id])
+        # Make sure role does not already exist
+        conflicts = Roles(self.api, [role_id])
         if conflicts:
             raise PLCInvalidArgument, "Role ID already in use"
 
         return role_id
 
     def validate_name(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Role must be specified"
-	
-	# Make sure role does not already exist
-	conflicts = Roles(self.api, [name])
+
+        # Make sure role does not already exist
+        conflicts = Roles(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Role name already in use"
 
-	return name
+        return name
 
 class Roles(Table):
     """
@@ -58,7 +58,7 @@ class Roles(Table):
 
         sql = "SELECT %s FROM roles WHERE True" % \
               ", ".join(Role.fields)
-        
+
         if role_filter is not None:
             if isinstance(role_filter, (list, tuple, set)):
                 # Separate the list into integers and strings

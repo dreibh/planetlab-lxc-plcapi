@@ -26,7 +26,7 @@ class GetAddresses(Method):
         ]
 
     returns = [Address.fields]
-    
+
 
     def call(self, auth, address_filter = None, return_fields = None):
         return Addresses(self.api, address_filter, return_fields)

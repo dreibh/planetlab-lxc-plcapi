@@ -111,7 +111,7 @@ class PLCAPI:
                 other_methods_map[method] = fullpath
 
     all_methods = native_methods + other_methods_map.keys()
-    
+
     def __init__(self, config = "/etc/planetlab/plc_config", encoding = "utf-8"):
         self.encoding = encoding
 
@@ -121,8 +121,8 @@ class PLCAPI:
 
         # Load configuration
         self.config = Config(config)
-	
-	# Initialize database connection
+
+        # Initialize database connection
         if self.config.PLC_DB_TYPE == "postgresql":
             from PLC.PostgreSQL import PostgreSQL
             self.db = PostgreSQL(self)
@@ -144,7 +144,7 @@ class PLCAPI:
         # Look up method
         if method not in self.all_methods:
             raise PLCInvalidAPIMethod, method
-        
+
         # Get new instance of method
         try:
             classname = method.split(".")[-1]

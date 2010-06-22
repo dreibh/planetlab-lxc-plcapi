@@ -13,7 +13,7 @@ class SliceUserDel(Method):
     Deprecated. Can be implemented with DeletePersonFromSlice.
 
     Removes the specified users from the specified slice. If the person is
-    already a member of the slice, no errors are returned. 
+    already a member of the slice, no errors are returned.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -31,7 +31,7 @@ class SliceUserDel(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, slice_name, user_list):
-	for user in user_list:
-	    DeletePersonFromSlice.call(self, auth, user, slice_name)
+        for user in user_list:
+            DeletePersonFromSlice.call(self, auth, user, slice_name)
 
         return 1

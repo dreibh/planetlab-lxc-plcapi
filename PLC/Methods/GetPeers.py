@@ -2,7 +2,7 @@
 # $URL$
 #
 # Thierry Parmentelat - INRIA
-# 
+#
 
 from PLC.Faults import *
 from PLC.Method import Method
@@ -29,20 +29,20 @@ class GetPeers (Method):
         Mixed([Mixed(Peer.fields['peer_id'],
                      Peer.fields['peername'])],
               Filter(Peer.fields)),
-        Parameter([str], "List of fields to return", nullok = True)        
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [Peer.fields]
 
     def call (self, auth, peer_filter = None, return_fields = None):
-        
+
         peers = Peers(self.api, peer_filter, return_fields)
 
         # Remove admin only fields
         if not isinstance(self.caller, Person) or \
                 'admin' not in self.caller['roles']:
-            for peer in peers:    
-		for field in ['key', 'cacert']:
+            for peer in peers:
+                for field in ['key', 'cacert']:
                     if field in peer:
                         del peer[field]
 

@@ -6,8 +6,8 @@ from PLC.Faults import *
 from PLC.Parameter import *
 from PLC.Slices import Slice, Slices
 
-from PLC.Accessors.Accessors_standard import *			# import slice accessors
-from PLC.Accessors.Accessors_omf import *			# import slice accessors
+from PLC.Accessors.Accessors_standard import *                  # import slice accessors
+from PLC.Accessors.Accessors_omf import *                       # import slice accessors
 
 class GetSliceFamily(Method):
     """
@@ -28,9 +28,9 @@ class GetSliceFamily(Method):
 
     returns = Parameter (str, "the slicefamily this slice should be based upon")
 
-    # 
+    #
     ### system slices - at least planetflow - still rely on 'vref'
-    # 
+    #
     def call(self, auth, slice_id_or_name):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
@@ -59,7 +59,7 @@ class GetSliceFamily(Method):
 
         # xxx would make sense to check the corresponding vserver rpms are available
         # in all node-families yum repos (and yumgroups, btw)
-        if vref: 
+        if vref:
             return "%s-%s-%s"%(vref,fcdistro,arch)
         else:
             return "%s-%s-%s"%(pldistro,fcdistro,arch)

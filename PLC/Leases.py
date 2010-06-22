@@ -58,10 +58,10 @@ class Lease(Row):
         # return a SQL string
         return Timestamp.sql_validate_utc(timestamp)
 
-    # round UP 
+    # round UP
     def validate_t_from(self,timestamp):
         return self.validate_time (timestamp, round_up=True)
-    # round DOWN 
+    # round DOWN
     def validate_t_until (self, timestamp):
         return self.validate_time (timestamp, round_up=False)
 

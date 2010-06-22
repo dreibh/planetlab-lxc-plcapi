@@ -14,9 +14,9 @@ from PLC.Filter import Filter
 
 class Message(Row):
     """
-    Representation of a row in the messages table. 
+    Representation of a row in the messages table.
     """
-    
+
     table_name = 'messages'
     primary_key = 'message_id'
     fields = {
@@ -25,15 +25,15 @@ class Message(Row):
         'template': Parameter(str, "Message template", nullok = True),
         'enabled': Parameter(bool, "Message is enabled"),
         }
-    
+
 class Messages(Table):
     """
-    Representation of row(s) from the messages table in the database. 
+    Representation of row(s) from the messages table in the database.
     """
 
     def __init__(self, api, message_filter = None, columns = None, enabled = None):
         Table.__init__(self, api, Message, columns)
-    
+
         sql = "SELECT %s from messages WHERE True" % \
               ", ".join(self.columns)
 

@@ -18,6 +18,6 @@ class GetRoles(Method):
         ]
 
     returns = [Role.fields]
-    
+
     def call(self, auth):
-	return Roles(self.api)
+        return Roles(self.api)

@@ -26,9 +26,9 @@ import sys
 current_module = sys.modules[__name__]
 
 #### example : attach vlan ids on interfaces
-# The third argument expose_in_api is a boolean flag that tells whether this tag may be handled 
+# The third argument expose_in_api is a boolean flag that tells whether this tag may be handled
 #   through the Add/Get/Update methods as a native field
-# 
+#
 #define_accessors(current_module, Interface, "Vlan", "vlan",
 #                  "interface/general", "tag for setting VLAN id",
 #                  get_roles=all_roles, set_roles=tech_roles)

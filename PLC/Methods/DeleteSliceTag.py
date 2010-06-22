@@ -56,6 +56,6 @@ class DeleteSliceTag(Method):
                 raise PLCPermissioinDenied, "Not allowed to delete the specified attribute"
 
         slice_tag.delete()
-	self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
+        self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
 
         return 1

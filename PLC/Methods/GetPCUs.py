@@ -34,7 +34,7 @@ class GetPCUs(Method):
     returns = [PCU.fields]
 
     def call(self, auth, pcu_filter = None, return_fields = None):
-	# If we are not admin
+        # If we are not admin
         if not (isinstance(self.caller, Person) and 'admin' in self.caller['roles']):
             # Return only the PCUs at our site
             valid_pcu_ids = []
@@ -69,7 +69,7 @@ class GetPCUs(Method):
         # Remove pcu_id if not specified
         if added_fields:
             for pcu in pcus:
-		if 'pcu_id' in pcu:
-		    del pcu['pcu_id']
+                if 'pcu_id' in pcu:
+                    del pcu['pcu_id']
 
         return pcus

@@ -29,4 +29,3 @@ class GetEvents(Method):
 
     def call(self, auth, event_filter = None, return_fields = None):
         return Events(self.api, event_filter, return_fields)
-

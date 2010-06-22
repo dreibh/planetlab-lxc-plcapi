@@ -21,7 +21,7 @@ class DeleteConfFile(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, conf_file_id):
         conf_files = ConfFiles(self.api, [conf_file_id])
@@ -30,6 +30,6 @@ class DeleteConfFile(Method):
 
         conf_file = conf_files[0]
         conf_file.delete()
-	self.event_objects = {'ConfFile': [conf_file['conf_file_id']]}
+        self.event_objects = {'ConfFile': [conf_file['conf_file_id']]}
 
         return 1

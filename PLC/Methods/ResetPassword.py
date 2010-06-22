@@ -37,14 +37,14 @@ class ResetPassword(Method):
         Auth(),
         Mixed(Person.fields['person_id'],
               Person.fields['email']),
-	Person.fields['verification_key'],
+        Person.fields['verification_key'],
         Person.fields['verification_expires']
         ]
 
     returns = Parameter(int, '1 if verification_key is valid')
 
     def call(self, auth, person_id_or_email, verification_key = None, verification_expires = None):
-	# Get account information
+        # Get account information
         # we need to search in local objects only
         if isinstance (person_id_or_email,StringTypes):
             filter={'email':person_id_or_email}
@@ -123,7 +123,7 @@ class ResetPassword(Method):
         else:
             print >> log, "Warning: No message template '%s'" % message_id
 
-	# Logging variables
+        # Logging variables
         self.event_objects = {'Person': [person['person_id']]}
         self.message = message_id
 

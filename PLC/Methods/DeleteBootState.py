@@ -33,5 +33,5 @@ class DeleteBootState(Method):
         boot_state = boot_states[0]
 
         boot_state.delete()
-	
+
         return 1

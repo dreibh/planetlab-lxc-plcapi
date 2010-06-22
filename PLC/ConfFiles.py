@@ -141,7 +141,7 @@ class ConfFiles(Table):
     """
 
     def __init__(self, api, conf_file_filter = None, columns = None):
-	Table.__init__(self, api, ConfFile, columns)
+        Table.__init__(self, api, ConfFile, columns)
 
         sql = "SELECT %s FROM view_conf_files WHERE True" % \
               ", ".join(self.columns)

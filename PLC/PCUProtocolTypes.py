@@ -23,27 +23,27 @@ class PCUProtocolType(Row):
     primary_key = 'pcu_protocol_type_id'
     join_tables = []
     fields = {
-	'pcu_protocol_type_id': Parameter(int, "PCU protocol type identifier"),
-	'pcu_type_id': Parameter(int, "PCU type identifier"), 
-	'port': Parameter(int, "PCU port"),
-	'protocol': Parameter(str, "Protocol"),
-	'supported': Parameter(bool, "Is the port/protocol supported by PLC") 
+        'pcu_protocol_type_id': Parameter(int, "PCU protocol type identifier"),
+        'pcu_type_id': Parameter(int, "PCU type identifier"),
+        'port': Parameter(int, "PCU port"),
+        'protocol': Parameter(str, "Protocol"),
+        'supported': Parameter(bool, "Is the port/protocol supported by PLC")
         }
 
     def validate_port(self, port):
-	# make sure port is not blank
-	
-	if not port:
+        # make sure port is not blank
+
+        if not port:
             raise PLCInvalidArgument, "Port must be specified"
-	
-	return port
+
+        return port
 
     def validate_protocol(self, protocol):
         # make sure port is not blank
         if not len(protocol):
             raise PLCInvalidArgument, "protocol must be specified"
 
-	return protocol
+        return protocol
 
 class PCUProtocolTypes(Table):
     """
@@ -55,8 +55,8 @@ class PCUProtocolTypes(Table):
 
         sql = "SELECT %s FROM pcu_protocol_type WHERE True" % \
               ", ".join(self.columns)
-        
-	if protocol_type_filter is not None:
+
+        if protocol_type_filter is not None:
             if isinstance(protocol_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = filter(lambda x: isinstance(x, (int, long)), protocol_type_filter)
@@ -70,7 +70,7 @@ class PCUProtocolTypes(Table):
 
                 sql += " AND (%s) %s" % protocol_type_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong pcu_protocol_type filter %r"%protocol_type_filter	
+                raise PLCInvalidArgument, "Wrong pcu_protocol_type filter %r"%protocol_type_filter
 
 
         self.selectall(sql)

@@ -36,11 +36,11 @@ class GetSliceTags(Method):
         ]
 
     returns = [SliceTag.fields]
-    
+
 
     def call(self, auth, slice_tag_filter = None, return_fields = None):
-	# If we are not admin, make sure to only return our own slice
-	# and sliver attributes.
+        # If we are not admin, make sure to only return our own slice
+        # and sliver attributes.
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
             # Get slices that we are able to view
@@ -84,7 +84,7 @@ class GetSliceTags(Method):
         # Remove slice_tag_id if not specified
         if added_fields:
             for slice_tag in slice_tags:
-		if 'slice_tag_id' in slice_tag:
-		    del slice_tag['slice_tag_id']
+                if 'slice_tag_id' in slice_tag:
+                    del slice_tag['slice_tag_id']
 
         return slice_tags

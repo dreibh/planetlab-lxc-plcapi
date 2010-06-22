@@ -29,8 +29,8 @@ class GetPersons(Method):
         Auth(),
         Mixed([Mixed(Person.fields['person_id'],
                      Person.fields['email'])],
-	      Parameter(str,"email"),
-              Parameter(int,"person_id"), 
+              Parameter(str,"email"),
+              Parameter(int,"person_id"),
               Filter(Person.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]
@@ -39,9 +39,9 @@ class GetPersons(Method):
     return_fields = dict(filter(lambda (field, value): field not in hidden_fields,
                                 Person.fields.items()))
     returns = [return_fields]
-    
+
     def call(self, auth, person_filter = None, return_fields = None):
-	# If we are not admin, make sure to only return viewable accounts
+        # If we are not admin, make sure to only return viewable accounts
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
@@ -61,8 +61,8 @@ class GetPersons(Method):
         if return_fields:
             return_fields = filter(lambda field: field not in hidden_fields,
                                    return_fields)
-	else:
-	    return_fields = self.return_fields.keys()
+        else:
+            return_fields = self.return_fields.keys()
 
         # Must query at least person_id, site_ids, and role_ids (see
         # Person.can_view() and below).
@@ -83,7 +83,7 @@ class GetPersons(Method):
         if added_fields:
             for person in persons:
                 for field in added_fields:
-		    if field in person:
-			del person[field]
+                    if field in person:
+                        del person[field]
 
         return persons

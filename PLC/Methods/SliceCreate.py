@@ -13,13 +13,13 @@ class SliceCreate(AddSlice):
     """
 
     status = "deprecated"
-    
+
     accepts = [
         Auth(),
         Slice.fields['name'],
         AddSlice.accepts[1]
         ]
-    
+
     returns = Parameter(int, 'New slice_id (> 0) if successful')
 
     def call(self, auth, name, slice_fields = {}):

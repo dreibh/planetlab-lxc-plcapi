@@ -1,6 +1,6 @@
 #
 # Thierry Parmentelat - INRIA
-# 
+#
 # $Id$
 # $URL$
 
@@ -26,7 +26,7 @@ class GetPeerData(Method):
     database as foreign objects. Also returns the list of foreign
     nodes in this database, for which the calling peer is
     authoritative, to assist in synchronization of slivers.
-    
+
     See the implementation of RefreshPeer for how this data is used.
     """
 
@@ -52,8 +52,8 @@ class GetPeerData(Method):
                              Node.fields)
         nodes = Nodes(self.api, {'peer_id': None}, node_fields);
         # filter out whitelisted nodes
-        nodes = [ n for n in nodes if not n['slice_ids_whitelist']] 
-        
+        nodes = [ n for n in nodes if not n['slice_ids_whitelist']]
+
 
         person_fields = filter(lambda field: field not in \
                                ['password', 'verification_key', 'verification_expires'],
@@ -62,16 +62,16 @@ class GetPeerData(Method):
         # XXX Optimize to return only those Persons, Keys, and Slices
         # necessary for slice creation on the calling peer's nodes.
 
-	# filter out special person
-	persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER,
-					       self.api.config.PLC_ROOT_USER],
-				     'peer_id': None}, person_fields)
+        # filter out special person
+        persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER,
+                                               self.api.config.PLC_ROOT_USER],
+                                     'peer_id': None}, person_fields)
 
-	# filter out system slices
+        # filter out system slices
         system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
-	slices = Slices(self.api, {'peer_id': None,
-				   '~slice_id':system_slice_ids.keys()})
-	
+        slices = Slices(self.api, {'peer_id': None,
+                                   '~slice_id':system_slice_ids.keys()})
+
         result = {
             'Sites': Sites(self.api, {'peer_id': None}),
             'Keys': Keys(self.api, {'peer_id': None}),

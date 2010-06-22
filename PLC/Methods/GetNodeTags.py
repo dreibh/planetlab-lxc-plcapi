@@ -37,7 +37,7 @@ class GetNodeTags(Method):
         ]
 
     returns = [NodeTag.fields]
-    
+
 
     def call(self, auth, node_tag_filter = None, return_fields = None):
 

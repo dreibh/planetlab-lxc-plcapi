@@ -36,7 +36,7 @@ class GetSiteTags(Method):
         ]
 
     returns = [SiteTag.fields]
-    
+
 
     def call(self, auth, site_tag_filter = None, return_fields = None):
 

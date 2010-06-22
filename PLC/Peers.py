@@ -2,7 +2,7 @@
 # $URL$
 #
 # Thierry Parmentelat - INRIA
-# 
+#
 
 import re
 from types import StringTypes
@@ -25,7 +25,7 @@ from PLC.Slices import Slice, Slices
 
 class Peer(Row):
     """
-    Stores the list of peering PLCs in the peers table. 
+    Stores the list of peering PLCs in the peers table.
     See the Row class for more details
     """
 
@@ -46,7 +46,7 @@ class Peer(Row):
         'key_ids': Parameter([int], "List of keys for which this peer is authoritative"),
         'node_ids': Parameter([int], "List of nodes for which this peer is authoritative"),
         'slice_ids': Parameter([int], "List of slices for which this peer is authoritative"),
-	}
+        }
 
     def validate_peername(self, peername):
         if not len(peername):
@@ -69,8 +69,8 @@ class Peer(Row):
             raise PLCInvalidArgument, "Peer URL scheme must be https"
         if path[-1] != '/':
             raise PLCInvalidArgument, "Peer URL should end with /"
-        
-	return url
+
+        return url
 
     def delete(self, commit = True):
         """
@@ -109,7 +109,7 @@ class Peer(Row):
         """
         Unassociate a site with this peer.
         """
-        
+
         remove = Row.remove_object(Site, 'peer_site')
         remove(self, site, commit)
 
@@ -124,12 +124,12 @@ class Peer(Row):
              'person_id': person['person_id'],
              'peer_person_id': peer_person_id},
             commit = commit)
-    
+
     def remove_person(self, person, commit = True):
         """
         Unassociate a site with this peer.
         """
-    
+
         remove = Row.remove_object(Person, 'peer_person')
         remove(self, person, commit)
 
@@ -149,7 +149,7 @@ class Peer(Row):
         """
         Unassociate a key with this peer.
         """
-    
+
         remove = Row.remove_object(Key, 'peer_key')
         remove(self, key, commit)
 
@@ -178,7 +178,7 @@ class Peer(Row):
         """
         Unassociate a node with this peer.
         """
-    
+
         remove = Row.remove_object(Node, 'peer_node')
         remove(self, node, commit)
         # attempt to manually update the 'hrn' tag
@@ -274,14 +274,14 @@ class Peer(Row):
             raise AttributeError, "type object 'Peer' has no attribute '%s'" % attr
 
 class Peers (Table):
-    """ 
+    """
     Maps to the peers table in the database
     """
-    
+
     def __init__ (self, api, peer_filter = None, columns = None):
         Table.__init__(self, api, Peer, columns)
 
-	sql = "SELECT %s FROM view_peers WHERE deleted IS False" % \
+        sql = "SELECT %s FROM view_peers WHERE deleted IS False" % \
               ", ".join(self.columns)
 
         if peer_filter is not None:
@@ -295,4 +295,4 @@ class Peers (Table):
                 peer_filter = Filter(Peer.fields, peer_filter)
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
 
-	self.selectall(sql)
+        self.selectall(sql)

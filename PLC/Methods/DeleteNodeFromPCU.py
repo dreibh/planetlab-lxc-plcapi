@@ -21,7 +21,7 @@ class DeleteNodeFromPCU(Method):
 
     accepts = [
         Auth(),
-	Mixed(Node.fields['node_id'],
+        Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
         PCU.fields['pcu_id']
         ]
@@ -29,7 +29,7 @@ class DeleteNodeFromPCU(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, node_id_or_hostname, pcu_id):
-	 # Get node
+         # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node"
@@ -52,16 +52,16 @@ class DeleteNodeFromPCU(Method):
                     break
             if not ok:
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
-	
-	# Removed node from PCU
-	
+
+        # Removed node from PCU
+
         if node['node_id'] in pcu['node_ids']:
             pcu.remove_node(node)
 
-	# Logging variables
-	self.event_objects = {'PCU': [pcu['pcu_id']],
-			      'Node': [node['node_id']]}	
-	self.message = 'Node %d removed from PCU %d' % \
-		(node['node_id'], pcu['pcu_id']) 
-	
-	return 1
+        # Logging variables
+        self.event_objects = {'PCU': [pcu['pcu_id']],
+                              'Node': [node['node_id']]}
+        self.message = 'Node %d removed from PCU %d' % \
+                (node['node_id'], pcu['pcu_id'])
+
+        return 1

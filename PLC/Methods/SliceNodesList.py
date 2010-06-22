@@ -14,7 +14,7 @@ class SliceNodesList(GetSlices, GetNodes):
     Deprecated. Can be implemented with GetSlices and GetNodes.
 
     """
-  
+
     status = "deprecated"
 
     roles = ['admin', 'pi', 'user']
@@ -25,18 +25,18 @@ class SliceNodesList(GetSlices, GetNodes):
         ]
 
     returns = [Node.fields['hostname']]
-    
+
 
     def call(self, auth, slice_name):
-	slices = GetSlices.call(self, auth, [slice_name])
-	if not slices:
-	    return []
+        slices = GetSlices.call(self, auth, [slice_name])
+        if not slices:
+            return []
 
-	slice = slices[0]
-	nodes = GetNodes.call(self, auth, slice['node_ids'])
-	if not nodes:
-	    return []
-	
-	node_hostnames = [node['hostname'] for node in nodes]		
-	
+        slice = slices[0]
+        nodes = GetNodes.call(self, auth, slice['node_ids'])
+        if not nodes:
+            return []
+
+        node_hostnames = [node['hostname'] for node in nodes]
+
         return node_hostnames

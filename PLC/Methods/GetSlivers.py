@@ -77,7 +77,7 @@ def get_slivers(api, auth, slice_filter, node = None):
         # Per-node sliver attributes take precedence over global
         # slice attributes, so set them first.
         # Then comes nodegroup slice attributes
-	# Followed by global slice attributes
+        # Followed by global slice attributes
         sliver_attributes = []
 
         if node is not None:
@@ -86,14 +86,14 @@ def get_slivers(api, auth, slice_filter, node = None):
                 attributes.append({'tagname': sliver_attribute['tagname'],
                                    'value': sliver_attribute['value']})
 
-	    # set nodegroup slice attributes
-	    for slice_tag in [ a for a in slice_tags if a['nodegroup_id'] in node['nodegroup_ids'] ]:
-	        # Do not set any nodegroup slice attributes for
+            # set nodegroup slice attributes
+            for slice_tag in [ a for a in slice_tags if a['nodegroup_id'] in node['nodegroup_ids'] ]:
+                # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
-	        if slice_tag not in slice_tags:
-		    attributes.append({'tagname': slice_tag['tagname'],
-				   'value': slice_tag['value']})
+                if slice_tag not in slice_tags:
+                    attributes.append({'tagname': slice_tag['tagname'],
+                                   'value': slice_tag['value']})
 
         for slice_tag in [ a for a in slice_tags if a['node_id'] is None ]:
             # Do not set any global slice attributes for
@@ -149,7 +149,7 @@ class GetSlivers(Method):
         'interfaces': [Interface.fields],
         'groups': [NodeGroup.fields['groupname']],
         'conf_files': [ConfFile.fields],
-	'initscripts': [InitScript.fields],
+        'initscripts': [InitScript.fields],
         'accounts': [{
             'name': Parameter(str, "unix style account name", max = 254),
             'keys': [{
@@ -222,7 +222,7 @@ class GetSlivers(Method):
         for conf_file in all_conf_files.values():
             if not conf_file['node_ids'] and not conf_file['nodegroup_ids']:
                 conf_files[conf_file['dest']] = conf_file
-        
+
         # Node group configuration files take precedence over global
         # ones. If a node belongs to multiple node groups for which
         # the same configuration file is defined, it is undefined
@@ -232,28 +232,28 @@ class GetSlivers(Method):
                 if conf_file_id in all_conf_files:
                     conf_file = all_conf_files[conf_file_id]
                     conf_files[conf_file['dest']] = conf_file
-        
+
         # Node configuration files take precedence over node group
         # configuration files.
         for conf_file_id in node['conf_file_ids']:
             if conf_file_id in all_conf_files:
                 conf_file = all_conf_files[conf_file_id]
-                conf_files[conf_file['dest']] = conf_file            
+                conf_files[conf_file['dest']] = conf_file
 
-	# Get all (enabled) initscripts
-	initscripts = InitScripts(self.api, {'enabled': True})	
+        # Get all (enabled) initscripts
+        initscripts = InitScripts(self.api, {'enabled': True})
 
         # Get system slices
         system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
         system_slice_ids = system_slice_tags.keys()
-	
-	# Get nm-controller slices
-        # xxx Thierry: should these really be exposed regardless of their mapping to nodes ?
-	controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')
-	controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
-	slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
 
-	slivers = get_slivers(self.api, auth, slice_ids, node)
+        # Get nm-controller slices
+        # xxx Thierry: should these really be exposed regardless of their mapping to nodes ?
+        controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')
+        controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
+        slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
+
+        slivers = get_slivers(self.api, auth, slice_ids, node)
 
         # get the special accounts and keys needed for the node
         # root
@@ -270,19 +270,19 @@ class GetSlivers(Method):
         # power users are pis and techs
         def get_site_power_user_keys(api,site_id_or_name):
             site = Sites (api,site_id_or_name,['person_ids'])[0]
-            key_ids = reduce (reduce_flatten_list, 
+            key_ids = reduce (reduce_flatten_list,
                               [ p['key_ids'] for p in \
-                                    Persons(api,{ 'person_id':site['person_ids'], 
-                                                  'enabled':True, '|role_ids' : [20, 40] }, 
+                                    Persons(api,{ 'person_id':site['person_ids'],
+                                                  'enabled':True, '|role_ids' : [20, 40] },
                                             ['key_ids']) ],
                               [])
             return [ key['key'] for key in Keys (api, key_ids) if key['key_type']=='ssh']
 
         # all admins regardless of their site
         def get_all_admin_keys(api):
-            key_ids = reduce (reduce_flatten_list, 
+            key_ids = reduce (reduce_flatten_list,
                               [ p['key_ids'] for p in \
-                                    Persons(api, {'peer_id':None, 'enabled':True, '|role_ids':[10] }, 
+                                    Persons(api, {'peer_id':None, 'enabled':True, '|role_ids':[10] },
                                             ['key_ids']) ],
                               [])
             return [ key['key'] for key in Keys (api, key_ids) if key['key_type']=='ssh']
@@ -308,7 +308,7 @@ class GetSlivers(Method):
         except:
             xmpp={'server':None,'user':None,'password':None}
 
-	node.update_last_contact()
+        node.update_last_contact()
 
         # expose leases & reservation policy
         # in a first implementation we only support none and lease_or_idle
@@ -319,7 +319,7 @@ class GetSlivers(Method):
         else:
             reservation_policy='lease_or_idle'
             # expose the leases for the next 24 hours
-            leases = [ dict ( [ (k,l[k]) for k in lease_exposed_fields ] ) 
+            leases = [ dict ( [ (k,l[k]) for k in lease_exposed_fields ] )
                        for l in Leases (self.api, {'node_id':node['node_id'],
                                                    'clip': (timestamp, timestamp+24*Duration.HOUR),
                                                    '-SORT': 't_from',
@@ -333,7 +333,7 @@ class GetSlivers(Method):
             'interfaces': interfaces,
             'groups': groups,
             'conf_files': conf_files.values(),
-	    'initscripts': initscripts,
+            'initscripts': initscripts,
             'slivers': slivers,
             'accounts': accounts,
             'xmpp':xmpp,

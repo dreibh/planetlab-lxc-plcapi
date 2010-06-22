@@ -17,12 +17,12 @@ can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
 class AddLeases(Method):
     """
-    Adds a new lease. 
+    Adds a new lease.
     Mandatory arguments are node(s), slice, t_from and t_until
     times can be either integers, datetime's, or human readable (see Timestamp)
 
     PIs may only add leases associated with their own sites (i.e.,
-    to a slice that belongs to their site). 
+    to a slice that belongs to their site).
     Users may only add leases associated with their own slices.
 
     Returns the new lease_ids if successful, faults otherwise.
@@ -32,7 +32,7 @@ class AddLeases(Method):
 
     accepts = [
         Auth(),
-	Mixed(Node.fields['node_id'],[Node.fields['node_id']],
+        Mixed(Node.fields['node_id'],[Node.fields['node_id']],
               Node.fields['hostname'],[Node.fields['hostname']],),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
@@ -92,7 +92,7 @@ class AddLeases(Method):
                 nodes.remove(node)
 
         self.event_objects = {'Slice': [slice['slice_id']],
-                              'Node': [node['node_id'] for node in nodes]}	
+                              'Node': [node['node_id'] for node in nodes]}
         self.message = "New leases %r on n=%r s=%s [%s -> %s]" % \
             (result_ids,[node['hostname'] for node in nodes],slice['name'],t_from,t_until)
 

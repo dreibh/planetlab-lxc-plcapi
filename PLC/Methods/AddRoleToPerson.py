@@ -10,7 +10,7 @@ from PLC.Roles import Role, Roles
 class AddRoleToPerson(Method):
     """
     Grants the specified role to the person.
-    
+
     PIs can only grant the tech and user roles to users and techs at
     their sites. Admins can grant any role to any user.
 
@@ -60,9 +60,9 @@ class AddRoleToPerson(Method):
         if role['role_id'] not in person['role_ids']:
             person.add_role(role)
 
-	self.event_objects = {'Person': [person['person_id']],
-			      'Role': [role['role_id']]}
-	self.message = "Role %d granted to person %d" % \
+        self.event_objects = {'Person': [person['person_id']],
+                              'Role': [role['role_id']]}
+        self.message = "Role %d granted to person %d" % \
                        (role['role_id'], person['person_id'])
 
         return 1

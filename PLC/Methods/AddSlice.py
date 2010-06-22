@@ -84,9 +84,9 @@ class AddSlice(Method):
                 "Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
                                                                                    len(site['slice_ids']),
                                                                                    site['max_slices'])
-	if not site['enabled']:
-	    raise PLCInvalidArgument, "Site %s is disabled and can cannot create slices" % (site['name'])
-	 
+        if not site['enabled']:
+            raise PLCInvalidArgument, "Site %s is disabled and can cannot create slices" % (site['name'])
+
         slice = Slice(self.api, native)
         slice['creator_person_id'] = self.caller['person_id']
         slice['site_id'] = site['site_id']
@@ -104,5 +104,5 @@ class AddSlice(Method):
 
         self.event_objects = {'Slice': [slice['slice_id']]}
         self.message = "Slice %d created" % slice['slice_id']
-    
+
         return slice['slice_id']

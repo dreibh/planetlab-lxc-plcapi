@@ -49,5 +49,5 @@ class UpdateIlink(Method):
         ilink['value'] = value
         ilink.sync()
 
-	self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
+        self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
         return 1

@@ -30,6 +30,6 @@ class DeleteAddressType(Method):
             raise PLCInvalidArgument, "No such address type"
         address_type = address_types[0]
         address_type.delete()
-	self.event_objects = {'AddressType': [address_type['address_type_id']]}
+        self.event_objects = {'AddressType': [address_type['address_type_id']]}
 
         return 1

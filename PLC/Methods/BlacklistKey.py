@@ -25,7 +25,7 @@ class BlacklistKey(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-   
+
     def call(self, auth, key_id):
         # Get associated key details
         keys = Keys(self.api, [key_id])
@@ -36,9 +36,9 @@ class BlacklistKey(Method):
         # N.B.: Can blacklist any key, even foreign ones
 
         key.blacklist()
-	
-	# Logging variables
-	self.event_objects = {'Key': [key['key_id']]}
-	self.message = 'Key %d blacklisted' % key['key_id']
+
+        # Logging variables
+        self.event_objects = {'Key': [key['key_id']]}
+        self.message = 'Key %d blacklisted' % key['key_id']
 
         return 1

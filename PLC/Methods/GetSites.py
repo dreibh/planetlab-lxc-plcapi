@@ -21,10 +21,10 @@ class GetSites(Method):
         Auth(),
         Mixed([Mixed(Site.fields['site_id'],
                      Site.fields['login_base'])],
-	      Parameter(str,"login_base"),
+              Parameter(str,"login_base"),
               Parameter(int,"site_id"),
               Filter(Site.fields)),
-        Parameter([str], "List of fields to return", nullok = True)        
+        Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [Site.fields]

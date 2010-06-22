@@ -10,7 +10,7 @@ class DeletePCUType(Method):
     """
     Deletes a PCU type.
 
-    Returns 1 if successful, faults otherwise.	
+    Returns 1 if successful, faults otherwise.
     """
 
     roles = ['admin']
@@ -21,7 +21,7 @@ class DeletePCUType(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, pcu_type_id):
         pcu_types = PCUTypes(self.api, [pcu_type_id])
@@ -30,6 +30,6 @@ class DeletePCUType(Method):
 
         pcu_type = pcu_types[0]
         pcu_type.delete()
-	self.event_objects = {'PCUType': [pcu_type['pcu_type_id']]}
+        self.event_objects = {'PCUType': [pcu_type['pcu_type_id']]}
 
         return 1

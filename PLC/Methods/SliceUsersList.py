@@ -17,7 +17,7 @@ class SliceUsersList(GetSlices, GetPersons):
 
     Users may only query slices of which they are members. PIs may
     query any of the slices at their sites. Admins may query any
-    slice. If a slice that cannot be queried is specified details 
+    slice. If a slice that cannot be queried is specified details
     about that slice will not be returned.
     """
 
@@ -28,20 +28,20 @@ class SliceUsersList(GetSlices, GetPersons):
     accepts = [
         Auth(),
         Slice.fields['name']
-	]
+        ]
 
     returns = [Person.fields['email']]
-    
+
 
     def call(self, auth, slice_name):
 
-	slice_filter = [slice_name]
+        slice_filter = [slice_name]
         slices = GetSlices.call(self, auth, slice_filter)
-	if not slices:
+        if not slices:
             return []
-	slice = slices[0]
-     
-	persons = GetPersons.call(self, auth, slice['person_ids'])
-	person_emails = [person['email'] for person in persons]
+        slice = slices[0]
+
+        persons = GetPersons.call(self, auth, slice['person_ids'])
+        person_emails = [person['email'] for person in persons]
 
         return person_emails

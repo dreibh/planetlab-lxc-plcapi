@@ -26,7 +26,7 @@ class DeleteAddressTypeFromAddress(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-    
+
 
     def call(self, auth, address_type_id_or_name, address_id):
         address_types = AddressTypes(self.api, [address_type_id_or_name])
@@ -44,7 +44,7 @@ class DeleteAddressTypeFromAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address.remove_address_type(address_type)
-	self.event_objects = {'Address' : [address['address_id']],
-			      'AddressType': [address_type['address_type_id']]}	
+        self.event_objects = {'Address' : [address['address_id']],
+                              'AddressType': [address_type['address_type_id']]}
 
         return 1

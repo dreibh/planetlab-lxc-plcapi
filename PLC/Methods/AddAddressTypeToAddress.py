@@ -29,7 +29,7 @@ class AddAddressTypeToAddress(Method):
 
 
     def call(self, auth, address_type_id_or_name, address_id):
-	address_types = AddressTypes(self.api, [address_type_id_or_name])
+        address_types = AddressTypes(self.api, [address_type_id_or_name])
         if not address_types:
             raise PLCInvalidArgument, "No such address type"
         address_type = address_types[0]
@@ -44,6 +44,6 @@ class AddAddressTypeToAddress(Method):
                 raise PLCPermissionDenied, "Address must be associated with one of your sites"
 
         address.add_address_type(address_type)
-	self.event_objects = {'Address': [address['address_id']]}
+        self.event_objects = {'Address': [address['address_id']]}
 
         return 1

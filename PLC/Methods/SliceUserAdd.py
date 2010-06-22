@@ -28,7 +28,7 @@ class SliceUserAdd(AddPersonToSlice):
 
     def call(self, auth, slice_name, user_list):
 
-	for user in user_list:
-	    AddPersonToSlice.call(self, auth, user, slice_name)
+        for user in user_list:
+            AddPersonToSlice.call(self, auth, user, slice_name)
 
         return 1

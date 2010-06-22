@@ -20,7 +20,7 @@ class AddInterface(Method):
 
     Adds a new network for a node. Any values specified in
     interface_fields are used, otherwise defaults are
-    used. 
+    used.
 
     If type is static, then ip, gateway, network, broadcast, netmask,
     and dns1 must all be specified in interface_fields. If type is
@@ -46,7 +46,7 @@ class AddInterface(Method):
 
     returns = Parameter(int, 'New interface_id (> 0) if successful')
 
-    
+
     def call(self, auth, node_id_or_hostname, interface_fields):
 
         [native,tags,rejected]=Row.split_fields(interface_fields,[Interface.fields,Interface.tags])
@@ -60,7 +60,7 @@ class AddInterface(Method):
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
             raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
-	node = nodes[0]
+        node = nodes[0]
 
         # Authenticated function
         assert self.caller is not None
@@ -72,17 +72,17 @@ class AddInterface(Method):
                 raise PLCPermissionDenied, "Not allowed to add an interface to the specified node"
 
         # Add interface
-	interface = Interface(self.api, native)
+        interface = Interface(self.api, native)
         interface['node_id'] = node['node_id']
-	# if this is the first interface, make it primary
-	if not node['interface_ids']:
-		interface['is_primary'] = True
+        # if this is the first interface, make it primary
+        if not node['interface_ids']:
+            interface['is_primary'] = True
         interface.sync()
-	
-	# Logging variables
-	self.event_objects = { 'Node': [node['node_id']], 
+
+        # Logging variables
+        self.event_objects = { 'Node': [node['node_id']],
                                'Interface' : [interface['interface_id']] }
-	self.message = "Interface %d added" % interface['interface_id']
+        self.message = "Interface %d added" % interface['interface_id']
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that

@@ -26,16 +26,16 @@ class NetworkMethod(Row):
         }
 
     def validate_method(self, name):
-	# Make sure name is not blank
+        # Make sure name is not blank
         if not len(name):
             raise PLCInvalidArgument, "Network method must be specified"
-	
-	# Make sure network method does not alredy exist
-	conflicts = NetworkMethods(self.api, [name])
+
+        # Make sure network method does not alredy exist
+        conflicts = NetworkMethods(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Network method name already in use"
 
-	return name
+        return name
 
 class NetworkMethods(Table):
     """
@@ -47,7 +47,7 @@ class NetworkMethods(Table):
 
         sql = "SELECT %s FROM network_methods" % \
               ", ".join(NetworkMethod.fields)
-        
+
         if methods:
             sql += " WHERE method IN (%s)" % ", ".join(map(api.db.quote, methods))
 

@@ -15,13 +15,13 @@ from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
 admin_only = [ 'key', 'session', 'boot_nonce', 'site_id']
-can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version'] + admin_only 
+can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version'] + admin_only
 
 class UpdateNode(Method):
     """
     Updates a node. Only the fields specified in node_fields are
     updated, all other fields are left untouched.
-    
+
     PIs and techs can update only the nodes at their sites. Only
     admins can update the key, session, and boot_nonce fields.
 
@@ -45,8 +45,8 @@ class UpdateNode(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, node_id_or_hostname, node_fields):
-        
-        # split provided fields 
+
+        # split provided fields
         [native,related,tags,rejected] = Row.split_fields(node_fields,[Node.fields,Node.related_fields,Node.tags])
 
         # type checking
@@ -85,7 +85,7 @@ class UpdateNode(Method):
         node.update(native)
         node.update_last_updated(commit=False)
         node.sync(commit=True)
-        
+
         # if hostname was modifed make sure to update the hrn
         # tag
         if 'hostname' in native:
@@ -94,8 +94,8 @@ class UpdateNode(Method):
             sites = Sites(self.api, node['site_id'], ['login_base'])
             site = sites[0]
             login_base = site['login_base']
-            tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname']) 
-            
+            tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])
+
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):

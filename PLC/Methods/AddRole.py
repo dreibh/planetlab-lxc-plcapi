@@ -29,6 +29,6 @@ class AddRole(Method):
         role['role_id'] = role_id
         role['name'] = name
         role.sync(insert = True)
-	self.event_objects = {'Role': [role['role_id']]}
+        self.event_objects = {'Role': [role['role_id']]}
 
         return 1

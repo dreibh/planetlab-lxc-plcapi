@@ -52,7 +52,7 @@ class PyCurlTransport(xmlrpclib.Transport):
         self.body = ""
         def body(buf):
             self.body += buf
-        self.curl.setopt(pycurl.WRITEFUNCTION, body)        
+        self.curl.setopt(pycurl.WRITEFUNCTION, body)
 
     def request(self, host, handler, request_body, verbose = 1):
         # Set verbosity
@@ -74,7 +74,7 @@ class PyCurlTransport(xmlrpclib.Transport):
         if errcode == 60:
             raise Exception, "PyCurl: SSL certificate validation failed"
         elif errcode != 200:
-	    raise Exception, "PyCurl: HTTP error %d -- %r" % (errcode,errmsg)
+            raise Exception, "PyCurl: HTTP error %d -- %r" % (errcode,errmsg)
 
         # Parse response
         p, u = self.getparser()

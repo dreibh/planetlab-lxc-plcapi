@@ -40,8 +40,8 @@ class Node(Row):
 
     table_name = 'nodes'
     primary_key = 'node_id'
-    join_tables = [ 'slice_node', 'peer_node', 'slice_tag', 
-                    'node_session', 'node_slice_whitelist', 
+    join_tables = [ 'slice_node', 'peer_node', 'slice_tag',
+                    'node_session', 'node_slice_whitelist',
                     'node_tag', 'conf_file_node', 'pcu_node', 'leases', ]
     fields = {
         'node_id': Parameter(int, "Node identifier"),
@@ -56,7 +56,7 @@ class Node(Row):
         'ssh_rsa_key': Parameter(str, "Last known SSH host key", max = 1024),
         'date_created': Parameter(int, "Date and time when node entry was created", ro = True),
         'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
-	'last_contact': Parameter(int, "Date and time when node last contacted plc", ro = True), 
+        'last_contact': Parameter(int, "Date and time when node last contacted plc", ro = True),
         'verified': Parameter(bool, "Whether the node configuration is verified correct", ro=False),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
@@ -64,7 +64,7 @@ class Node(Row):
         'conf_file_ids': Parameter([int], "List of configuration files specific to this node"),
         # 'root_person_ids': Parameter([int], "(Admin only) List of people who have root access to this node"),
         'slice_ids': Parameter([int], "List of slices on this node"),
-	'slice_ids_whitelist': Parameter([int], "List of slices allowed on this node"),
+        'slice_ids_whitelist': Parameter([int], "List of slices allowed on this node"),
         'pcu_ids': Parameter([int], "List of PCUs that control this node"),
         'ports': Parameter([int], "List of PCU ports that this node is connected to"),
         'peer_id': Parameter(int, "Peer to which this node belongs", nullok = True),
@@ -73,14 +73,14 @@ class Node(Row):
         'nodegroup_ids': Parameter([int], "List of node groups that this node is in"),
         }
     related_fields = {
-	'interfaces': [Mixed(Parameter(int, "Interface identifier"),
+        'interfaces': [Mixed(Parameter(int, "Interface identifier"),
                              Filter(Interface.fields))],
-	'conf_files': [Parameter(int, "ConfFile identifier")],
-	'slices': [Mixed(Parameter(int, "Slice identifier"),
+        'conf_files': [Parameter(int, "ConfFile identifier")],
+        'slices': [Mixed(Parameter(int, "Slice identifier"),
                          Parameter(str, "Slice name"))],
-	'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
+        'slices_whitelist': [Mixed(Parameter(int, "Slice identifier"),
                                    Parameter(str, "Slice name"))]
-	}
+        }
 
     view_tags_name = "view_node_tags"
     # tags are used by the Add/Get/Update methods to expose tags
@@ -115,16 +115,16 @@ class Node(Row):
     validate_last_contact = Row.validate_timestamp
 
     def update_last_contact(self, commit = True):
-	"""
-	Update last_contact field with current time
-	"""
-	
-	assert 'node_id' in self
-	assert self.table_name
+        """
+        Update last_contact field with current time
+        """
 
-	self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
-		       " where node_id = %d" % ( self['node_id']) )
-	self.sync(commit)
+        assert 'node_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
+                       " where node_id = %d" % ( self['node_id']) )
+        self.sync(commit)
 
 
     def update_last_updated(self, commit = True):
@@ -153,13 +153,13 @@ class Node(Row):
             if not node_tags:
                 AddNodeTag(self.api).__call__(shell.auth,node['node_id'],tagname,value)
             else:
-                UpdateNodeTag(self.api).__call__(shell.auth,node_tags[0]['node_tag_id'],value) 
-    
+                UpdateNodeTag(self.api).__call__(shell.auth,node_tags[0]['node_tag_id'],value)
+
     def associate_interfaces(self, auth, field, value):
         """
-        Delete interfaces not found in value list (using DeleteInterface)	
+        Delete interfaces not found in value list (using DeleteInterface)
         Add interfaces found in value list (using AddInterface)
-        Updates interfaces found w/ interface_id in value list (using UpdateInterface) 
+        Updates interfaces found w/ interface_id in value list (using UpdateInterface)
         """
 
         assert 'interface_ids' in self
@@ -177,70 +177,70 @@ class Node(Row):
                 DeleteInterface.__call__(DeleteInterface(self.api), auth, stale_interface['interface_id'])
 
     def associate_conf_files(self, auth, field, value):
-	"""
-	Add conf_files found in value list (AddConfFileToNode)
-	Delets conf_files not found in value list (DeleteConfFileFromNode)
-	"""
-	
-	assert 'conf_file_ids' in self
-	assert 'node_id' in self
-	assert isinstance(value, list)
-	
-	conf_file_ids = self.separate_types(value)[0]
-	
-	if self['conf_file_ids'] != conf_file_ids:
-	    from PLC.Methods.AddConfFileToNode import AddConfFileToNode
-	    from PLC.Methods.DeleteConfFileFromNode import DeleteConfFileFromNode
-	    new_conf_files = set(conf_file_ids).difference(self['conf_file_ids'])
-	    stale_conf_files = set(self['conf_file_ids']).difference(conf_file_ids)
-	
-	    for new_conf_file in new_conf_files:
-		AddConfFileToNode.__call__(AddConfFileToNode(self.api), auth, new_conf_file, self['node_id'])
-	    for stale_conf_file in stale_conf_files:
-		DeleteConfFileFromNode.__call__(DeleteConfFileFromNode(self.api), auth, stale_conf_file, self['node_id'])
+        """
+        Add conf_files found in value list (AddConfFileToNode)
+        Delets conf_files not found in value list (DeleteConfFileFromNode)
+        """
 
-    def associate_slices(self, auth, field, value):
-	"""
-	Add slices found in value list to (AddSliceToNode)
-	Delete slices not found in value list (DeleteSliceFromNode)
-	"""
-	
-	from PLC.Slices import Slices
-	
-	assert 'slice_ids' in self
-	assert 'node_id' in self
-	assert isinstance(value, list)
-	
-	(slice_ids, slice_names) = self.separate_types(value)[0:2]
-
-	if slice_names:
-	    slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
-	    slice_ids += slices.keys()
-
-	if self['slice_ids'] != slice_ids:
-	    from PLC.Methods.AddSliceToNodes import AddSliceToNodes
-	    from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
-	    new_slices = set(slice_ids).difference(self['slice_ids'])
-	    stale_slices = set(self['slice_ids']).difference(slice_ids)
-	
-	for new_slice in new_slices:
-	    AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, new_slice, [self['node_id']])
-	for stale_slice in stale_slices:
-	    DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, stale_slice, [self['node_id']]) 		 	
-
-    def associate_slices_whitelist(self, auth, field, value):
-	"""
-	Add slices found in value list to whitelist (AddSliceToNodesWhitelist)
-	Delete slices not found in value list from whitelist (DeleteSliceFromNodesWhitelist)
-	"""
-
-	from PLC.Slices import Slices
-
-	assert 'slice_ids_whitelist' in self
+        assert 'conf_file_ids' in self
         assert 'node_id' in self
         assert isinstance(value, list)
 
-	(slice_ids, slice_names) = self.separate_types(value)[0:2]
+        conf_file_ids = self.separate_types(value)[0]
+
+        if self['conf_file_ids'] != conf_file_ids:
+            from PLC.Methods.AddConfFileToNode import AddConfFileToNode
+            from PLC.Methods.DeleteConfFileFromNode import DeleteConfFileFromNode
+            new_conf_files = set(conf_file_ids).difference(self['conf_file_ids'])
+            stale_conf_files = set(self['conf_file_ids']).difference(conf_file_ids)
+
+            for new_conf_file in new_conf_files:
+                AddConfFileToNode.__call__(AddConfFileToNode(self.api), auth, new_conf_file, self['node_id'])
+            for stale_conf_file in stale_conf_files:
+                DeleteConfFileFromNode.__call__(DeleteConfFileFromNode(self.api), auth, stale_conf_file, self['node_id'])
+
+    def associate_slices(self, auth, field, value):
+        """
+        Add slices found in value list to (AddSliceToNode)
+        Delete slices not found in value list (DeleteSliceFromNode)
+        """
+
+        from PLC.Slices import Slices
+
+        assert 'slice_ids' in self
+        assert 'node_id' in self
+        assert isinstance(value, list)
+
+        (slice_ids, slice_names) = self.separate_types(value)[0:2]
+
+        if slice_names:
+            slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
+            slice_ids += slices.keys()
+
+        if self['slice_ids'] != slice_ids:
+            from PLC.Methods.AddSliceToNodes import AddSliceToNodes
+            from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
+            new_slices = set(slice_ids).difference(self['slice_ids'])
+            stale_slices = set(self['slice_ids']).difference(slice_ids)
+
+        for new_slice in new_slices:
+            AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, new_slice, [self['node_id']])
+        for stale_slice in stale_slices:
+            DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, stale_slice, [self['node_id']])
+
+    def associate_slices_whitelist(self, auth, field, value):
+        """
+        Add slices found in value list to whitelist (AddSliceToNodesWhitelist)
+        Delete slices not found in value list from whitelist (DeleteSliceFromNodesWhitelist)
+        """
+
+        from PLC.Slices import Slices
+
+        assert 'slice_ids_whitelist' in self
+        assert 'node_id' in self
+        assert isinstance(value, list)
+
+        (slice_ids, slice_names) = self.separate_types(value)[0:2]
 
         if slice_names:
             slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
@@ -255,8 +255,8 @@ class Node(Row):
         for new_slice in new_slices:
             AddSliceToNodesWhitelist.__call__(AddSliceToNodesWhitelist(self.api), auth, new_slice, [self['node_id']])
         for stale_slice in stale_slices:
-            DeleteSliceFromNodesWhitelist.__call__(DeleteSliceFromNodesWhitelist(self.api), auth, stale_slice, [self['node_id']]) 
-		
+            DeleteSliceFromNodesWhitelist.__call__(DeleteSliceFromNodesWhitelist(self.api), auth, stale_slice, [self['node_id']])
+
 
     def delete(self, commit = True):
         """
@@ -265,7 +265,7 @@ class Node(Row):
 
         assert 'node_id' in self
 
-	# we need to clean up InterfaceTags, so handling interfaces as part of join_tables does not work
+        # we need to clean up InterfaceTags, so handling interfaces as part of join_tables does not work
         # federated nodes don't have interfaces though so for smooth transition from 4.2 to 4.3
         if 'peer_id' in self and self['peer_id']:
             pass
@@ -299,7 +299,7 @@ class Nodes(Table):
         for tagname in self.tag_columns:
             view= "%s left join %s using (%s)"%(view,Node.tagvalue_view_name(tagname),
                                                 Node.primary_key)
-            
+
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
               (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
 

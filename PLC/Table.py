@@ -68,35 +68,35 @@ class Row(dict):
             if value is not None and hasattr(self, 'validate_' + key):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
-	
+
     def separate_types(self, items):
-	"""
-	Separate a list of different typed objects. 
-	Return a list for each type (ints, strs and dicts)
-	"""
-	
-	if isinstance(items, (list, tuple, set)):
-	    ints = filter(lambda x: isinstance(x, (int, long)), items)
-	    strs = filter(lambda x: isinstance(x, StringTypes), items)
-	    dicts = filter(lambda x: isinstance(x, dict), items)
-	    return (ints, strs, dicts)	 	
-	else:
-	    raise PLCInvalidArgument, "Can only separate list types" 
-	  	
+        """
+        Separate a list of different typed objects.
+        Return a list for each type (ints, strs and dicts)
+        """
+
+        if isinstance(items, (list, tuple, set)):
+            ints = filter(lambda x: isinstance(x, (int, long)), items)
+            strs = filter(lambda x: isinstance(x, StringTypes), items)
+            dicts = filter(lambda x: isinstance(x, dict), items)
+            return (ints, strs, dicts)
+        else:
+            raise PLCInvalidArgument, "Can only separate list types"
+
 
     def associate(self, *args):
-    	"""
-	Provides a means for high level api calls to associate objects
+        """
+        Provides a means for high level api calls to associate objects
         using low level calls.
-	"""
+        """
 
-	if len(args) < 3:
-	    raise PLCInvalidArgumentCount, "auth, field, value must be specified"
-	elif hasattr(self, 'associate_' + args[1]):
-	    associate = getattr(self, 'associate_'+args[1])
-	    associate(*args)
-	else:
-	    raise PLCInvalidArguemnt, "No such associate function associate_%s" % args[1]
+        if len(args) < 3:
+            raise PLCInvalidArgumentCount, "auth, field, value must be specified"
+        elif hasattr(self, 'associate_' + args[1]):
+            associate = getattr(self, 'associate_'+args[1])
+            associate(*args)
+        else:
+            raise PLCInvalidArguemnt, "No such associate function associate_%s" % args[1]
 
     def validate_timestamp (self, timestamp):
         return Timestamp.sql_validate(timestamp)
@@ -119,7 +119,7 @@ class Row(dict):
             assert isinstance(obj, classobj)
             assert isinstance(obj, Row)
             assert obj.primary_key in obj
-	    assert join_table in obj.join_tables
+            assert join_table in obj.join_tables
 
             # By default, just insert the primary keys of each object
             # into the join table.
@@ -137,7 +137,7 @@ class Row(dict):
 
             if commit:
                 self.api.db.commit()
-    
+
         return add
 
     add_object = classmethod(add_object)
@@ -152,7 +152,7 @@ class Row(dict):
             """
             Disassociate from the specified object.
             """
-    
+
             assert isinstance(self, Row)
             assert self.primary_key in self
             assert join_table in self.join_tables
@@ -160,10 +160,10 @@ class Row(dict):
             assert isinstance(obj, Row)
             assert obj.primary_key in obj
             assert join_table in obj.join_tables
-    
+
             self_id = self[self.primary_key]
             obj_id = obj[obj.primary_key]
-    
+
             self.api.db.do("DELETE FROM %s WHERE %s = %s AND %s = %s" % \
                            (join_table,
                             self.primary_key, self.api.db.param('self_id', self_id),
@@ -207,10 +207,10 @@ class Row(dict):
         Return the fields of obj that are mentioned in tags
         """
         if obj is None: obj=self
-        
-        return dict ( [ (key,value) for (key,value) in obj.iteritems() 
+
+        return dict ( [ (key,value) for (key,value) in obj.iteritems()
                         if key in self.tags and Row.is_writable(key,value,self.tags) ] )
-    
+
     # takes as input a list of columns, sort native fields from tags
     # returns 2 dicts and one list : fields, tags, rejected
     @classmethod
@@ -261,7 +261,7 @@ class Row(dict):
                 if field in candidate_dict.keys():
                     result[i][field]=value
                     found=True
-                    break 
+                    break
             if not found: rejected[field]=value
         result.append(rejected)
         return result
@@ -274,13 +274,13 @@ class Row(dict):
     @classmethod
     def tagvalue_view_create_sql (cls,tagname):
         """
-        returns a SQL sentence that creates a view named after the primary_key and tagname, 
+        returns a SQL sentence that creates a view named after the primary_key and tagname,
         with 2 columns
-        (*) column 1: primary_key 
+        (*) column 1: primary_key
         (*) column 2: actual tag value, renamed into tagname
         """
 
-        if not cls.view_tags_name: 
+        if not cls.view_tags_name:
             raise Exception, 'WARNING: class %s needs to set view_tags_name'%cls.__name__
 
         table_name=cls.table_name
@@ -336,15 +336,15 @@ class Row(dict):
         if not self.has_key(self.primary_key) or \
            keys == [self.primary_key] or \
            insert is True:
-	    
-	    # If primary key id is a serial int and it isnt included, get next id
-	    if self.fields[self.primary_key].type in (IntType, LongType) and \
-	       self.primary_key not in self:
-		pk_id = self.api.db.next_id(self.table_name, self.primary_key)
-		self[self.primary_key] = pk_id
-		db_fields[self.primary_key] = pk_id
-		keys = db_fields.keys()
-        	values = [self.api.db.param(key, value) for (key, value) in db_fields.items()]
+
+            # If primary key id is a serial int and it isnt included, get next id
+            if self.fields[self.primary_key].type in (IntType, LongType) and \
+               self.primary_key not in self:
+                pk_id = self.api.db.next_id(self.table_name, self.primary_key)
+                self[self.primary_key] = pk_id
+                db_fields[self.primary_key] = pk_id
+                keys = db_fields.keys()
+                values = [self.api.db.param(key, value) for (key, value) in db_fields.items()]
             # Insert new row
             sql = "INSERT INTO %s (%s) VALUES (%s)" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))

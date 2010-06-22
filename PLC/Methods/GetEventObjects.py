@@ -28,4 +28,3 @@ class GetEventObjects(Method):
 
     def call(self, auth, event_filter = None, return_fields = None):
         return EventObjects(self.api, event_filter, return_fields)
-

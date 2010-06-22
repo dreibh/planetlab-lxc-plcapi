@@ -21,7 +21,7 @@ class DeleteMessage(Method):
         ]
 
     returns = Parameter(int, '1 if successful')
-       
+
 
     def call(self, auth, message_id):
         # Get message information
@@ -31,6 +31,6 @@ class DeleteMessage(Method):
         message = messages[0]
 
         message.delete()
-	self.event_objects = {'Message': [message['message_id']]}
+        self.event_objects = {'Message': [message['message_id']]}
 
         return 1

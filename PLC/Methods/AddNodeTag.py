@@ -56,7 +56,7 @@ class AddNodeTag(Method):
             raise PLCInvalidArgument, "No such node tag type %r"%tag_type_id_or_name
         tag_type = tag_types[0]
 
-	# checks for existence - does not allow several different tags
+        # checks for existence - does not allow several different tags
         conflicts = NodeTags(self.api,
                                         {'node_id':node['node_id'],
                                          'tag_type_id':tag_type['tag_type_id']})
@@ -65,20 +65,20 @@ class AddNodeTag(Method):
             raise PLCInvalidArgument, "Node %d already has tag %d"%(node['node_id'],
                                                                                tag_type['tag_type_id'])
 
-	# check permission : it not admin, is the user affiliated with the right site
-	if 'admin' not in self.caller['roles']:
-	    # locate node
-	    node = Nodes (self.api,[node['node_id']])[0]
-	    # locate site
-	    site = Sites (self.api, [node['site_id']])[0]
-	    # check caller is affiliated with this site
-	    if self.caller['person_id'] not in site['person_ids']:
-		raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-	    
-	    required_min_role = tag_type ['min_role_id']
-	    if required_min_role is not None and \
-		    min(self.caller['role_ids']) > required_min_role:
-		raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d"%required_min_role
+        # check permission : it not admin, is the user affiliated with the right site
+        if 'admin' not in self.caller['roles']:
+            # locate node
+            node = Nodes (self.api,[node['node_id']])[0]
+            # locate site
+            site = Sites (self.api, [node['site_id']])[0]
+            # check caller is affiliated with this site
+            if self.caller['person_id'] not in site['person_ids']:
+                raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
+
+            required_min_role = tag_type ['min_role_id']
+            if required_min_role is not None and \
+                    min(self.caller['role_ids']) > required_min_role:
+                raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d"%required_min_role
 
         node_tag = NodeTag(self.api)
         node_tag['node_id'] = node['node_id']
@@ -86,6 +86,6 @@ class AddNodeTag(Method):
         node_tag['value'] = value
 
         node_tag.sync()
-	self.object_ids = [node_tag['node_tag_id']]
+        self.object_ids = [node_tag['node_tag_id']]
 
         return node_tag['node_tag_id']

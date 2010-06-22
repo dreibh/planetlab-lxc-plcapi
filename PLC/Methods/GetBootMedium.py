@@ -16,13 +16,13 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTag, NodeTags
 
-from PLC.Accessors.Accessors_standard import *			# import node accessors
+from PLC.Accessors.Accessors_standard import *                  # import node accessors
 
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
 # reservable nodes being more recent, we do not support the floppy stuff anymore
 allowed_actions = {
-    'regular' : 
+    'regular' :
     [ 'node-preview',
       'node-floppy',
       'node-iso',
@@ -30,7 +30,7 @@ allowed_actions = {
       'generic-iso',
       'generic-usb',
       ],
-    'reservable': 
+    'reservable':
     [ 'node-preview',
       'node-iso',
       'node-usb',
@@ -50,18 +50,18 @@ def compute_key():
 
 class GetBootMedium(Method):
     """
-    This method is a redesign based on former, supposedly dedicated, 
+    This method is a redesign based on former, supposedly dedicated,
     AdmGenerateNodeConfFile
 
-    As compared with its ancestor, this method provides a much more 
+    As compared with its ancestor, this method provides a much more
     detailed interface, that allows to
-    (*) either just preview the node config file -- in which case 
+    (*) either just preview the node config file -- in which case
         the node key is NOT recomputed, and NOT provided in the output
-    (*) or regenerate the node config file for storage on a floppy 
-        that is, exactly what the ancestor method used todo, 
+    (*) or regenerate the node config file for storage on a floppy
+        that is, exactly what the ancestor method used todo,
         including renewing the node's key
     (*) or regenerate the config file and bundle it inside an ISO or USB image
-    (*) or just provide the generic ISO or USB boot images 
+    (*) or just provide the generic ISO or USB boot images
         in which case of course the node_id_or_hostname parameter is not used
 
     action is expected among the following string constants according the
@@ -77,34 +77,34 @@ class GetBootMedium(Method):
 
     Apart for the preview mode, this method generates a new node key for the
     specified node, effectively invalidating any old boot medium.
-    Note that 'reservable' nodes do not support 'node-floppy', 
+    Note that 'reservable' nodes do not support 'node-floppy',
     'generic-iso' nor 'generic-usb'.
 
     In addition, two return mechanisms are supported.
-    (*) The default behaviour is that the file's content is returned as a 
+    (*) The default behaviour is that the file's content is returned as a
         base64-encoded string. This is how the ancestor method used to work.
         To use this method, pass an empty string as the file parameter.
 
-    (*) Or, for efficiency -- this makes sense only when the API is used 
-        by the web pages that run on the same host -- the caller may provide 
-        a filename, in which case the resulting file is stored in that location instead. 
-        The filename argument can use the following markers, that are expanded 
+    (*) Or, for efficiency -- this makes sense only when the API is used
+        by the web pages that run on the same host -- the caller may provide
+        a filename, in which case the resulting file is stored in that location instead.
+        The filename argument can use the following markers, that are expanded
         within the method
         - %d : default root dir (some builtin dedicated area under /var/tmp/)
                Using this is recommended, and enforced for non-admin users
-        - %n : the node's name when this makes sense, or a mktemp-like name when 
+        - %n : the node's name when this makes sense, or a mktemp-like name when
                generic media is requested
         - %s : a file suffix appropriate in the context (.txt, .iso or the like)
         - %v : the bootcd version string (e.g. 4.0)
         - %p : the PLC name
         - %f : the nodefamily
         - %a : arch
-        With the file-based return mechanism, the method returns the full pathname 
-        of the result file; 
+        With the file-based return mechanism, the method returns the full pathname
+        of the result file;
         ** WARNING **
         It is the caller's responsability to remove this file after use.
 
-    Options: an optional array of keywords. 
+    Options: an optional array of keywords.
         options are not supported for generic images
       Currently supported are
         - 'partition' - for USB actions only
@@ -115,19 +115,19 @@ class GetBootMedium(Method):
         tty - baudrate - parity - bits
         e.g. ttyS0:115200:n:8
         - 'variant:<variantname>'
-        passed to build.sh as -V <variant> 
+        passed to build.sh as -V <variant>
         variants are used to run a different kernel on the bootCD
         see kvariant.sh for how to create a variant
         - 'no-hangcheck' - disable hangcheck
 
     Tags: the following tags are taken into account when attached to the node:
         'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck'
-        
+
     Security:
         - Non-admins can only generate files for nodes at their sites.
         - Non-admins, when they provide a filename, *must* specify it in the %d area
 
-   Housekeeping: 
+   Housekeeping:
         Whenever needed, the method stores intermediate files in a
         private area, typically not located under the web server's
         accessible area, and are cleaned up by the method.
@@ -165,7 +165,7 @@ class GetBootMedium(Method):
         if len(parts) < 2:
             raise PLCInvalidArgument, "Node hostname %s is invalid"%node['hostname']
         return parts
-        
+
     # Generate the node (plnode.txt) configuration content.
     #
     # This function will create the configuration file a node
@@ -234,7 +234,7 @@ class GetBootMedium(Method):
         for setting in settings:
             if setting['category'] is not None:
                 categories.add(setting['category'])
-        
+
         for category in categories:
             category_settings = InterfaceTags(self.api,{'interface_id':interface['interface_id'],
                                                               'category':category})
@@ -259,9 +259,9 @@ class GetBootMedium(Method):
         arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
         if not node:
             return (pldistro,fcdistro,arch)
-        
+
         node_id=node['node_id']
-        
+
         # no support for deployment-based BootCD's, use kvariants instead
         node_pldistro = GetNodePldistro (self.api).call(auth, node_id)
         if node_pldistro: pldistro = node_pldistro
@@ -271,7 +271,7 @@ class GetBootMedium(Method):
 
         node_arch = GetNodeArch (self.api).call(auth,node_id)
         if node_arch: arch = node_arch
-        
+
         return (pldistro,fcdistro,arch)
 
     def bootcd_version (self):
@@ -279,7 +279,7 @@ class GetBootMedium(Method):
             return file(self.BOOTCDDIR + "/build/version.txt").readline().strip()
         except:
             raise Exception,"Unknown boot cd version - probably wrong bootcd dir : %s"%self.BOOTCDDIR
-    
+
     def cleantrash (self):
         for file in self.trash:
             if self.DEBUG:
@@ -288,7 +288,7 @@ class GetBootMedium(Method):
                 os.unlink(file)
 
     ### handle filename
-    # build the filename string 
+    # build the filename string
     # check for permissions and concurrency
     # returns the filename
     def handle_filename (self, filename, nodename, suffix, arch):
@@ -316,7 +316,7 @@ class GetBootMedium(Method):
             if os.path.exists(filename):
                 raise PLCInvalidArgument, "Resulting file %s already exists"%filename
 
-            ### we can now safely create the file, 
+            ### we can now safely create the file,
             ### either we are admin or under a controlled location
             filedir=os.path.dirname(filename)
             # dirname does not return "." for a local filename like its shell counterpart
@@ -340,13 +340,13 @@ class GetBootMedium(Method):
         if node_type in [ 'regular', 'reservable' ]:
 
             build_sh_options=""
-            if "cramfs" in build_sh_spec: 
+            if "cramfs" in build_sh_spec:
                 type += "_cramfs"
-            if "serial" in build_sh_spec: 
+            if "serial" in build_sh_spec:
                 build_sh_options += " -s %s"%build_sh_spec['serial']
             if "variant" in build_sh_spec:
                 build_sh_options += " -V %s"%build_sh_spec['variant']
-            
+
             for karg in build_sh_spec['kargs']:
                 build_sh_options += ' -k "%s"'%karg
 
@@ -362,7 +362,7 @@ class GetBootMedium(Method):
         if self.DEBUG:
             print "The build command line is %s" % command
 
-        return command 
+        return command
 
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
@@ -399,12 +399,12 @@ class GetBootMedium(Method):
             if options:
                 raise PLCInvalidArgument, "Options are not supported for node configs"
         else:
-            # create a dict for build.sh 
+            # create a dict for build.sh
             build_sh_spec={'kargs':[]}
             # use node tags as defaults
             # check for node tag equivalents
-            tags = NodeTags(self.api, 
-                            {'node_id': node['node_id'], 
+            tags = NodeTags(self.api,
+                            {'node_id': node['node_id'],
                              'tagname': ['serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck']},
                             ['tagname', 'value'])
             if tags:
@@ -456,9 +456,9 @@ class GetBootMedium(Method):
         # apply on globals
         for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
             setattr(self,attr,getattr(self,attr).replace("@NODEFAMILY@",self.nodefamily))
-            
+
         filename = self.handle_filename(filename, nodename, suffix, arch)
-        
+
         # log call
         if node:
             self.message='GetBootMedium on node %s - action=%s'%(nodename,action)
@@ -511,7 +511,7 @@ class GetBootMedium(Method):
 
             ### check we've got required material
             version = self.bootcd_version()
-            
+
             if not os.path.isfile(self.BOOTCDBUILD):
                 raise PLCAPIError, "Cannot locate bootcd/build.sh script %s"%self.BOOTCDBUILD
 
@@ -522,7 +522,7 @@ class GetBootMedium(Method):
                     os.chmod(self.WORKDIR,0777)
                 except:
                     raise PLCPermissionDenied, "Could not create dir %s"%self.WORKDIR
-            
+
             try:
                 # generate floppy config
                 floppy_text = self.floppy_contents(node,True)
@@ -552,7 +552,7 @@ class GetBootMedium(Method):
 
                 if not os.path.isfile (node_image):
                     raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
-            
+
                 # handle result
                 if filename:
                     ret=os.system('mv "%s" "%s"'%(node_image,filename))
@@ -570,7 +570,6 @@ class GetBootMedium(Method):
             except:
                 self.cleantrash()
                 raise
-                
+
         # we're done here, or we missed something
         raise PLCAPIError,'Unhandled action %s'%action
-

@@ -40,6 +40,6 @@ class AddPerson(Method):
 
         # Logging variables
         self.event_objects = {'Person': [person['person_id']]}
-        self.message = 'Person %d added' % person['person_id']	
+        self.message = 'Person %d added' % person['person_id']
 
         return person['person_id']

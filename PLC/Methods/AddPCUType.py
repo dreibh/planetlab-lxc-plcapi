@@ -7,7 +7,7 @@ from PLC.PCUTypes import PCUType, PCUTypes
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
-	     ['model', 'name']	
+             ['model', 'name']
 
 class AddPCUType(Method):
     """
@@ -23,15 +23,15 @@ class AddPCUType(Method):
     accepts = [
         Auth(),
         pcu_type_fields
-	]
+        ]
 
     returns = Parameter(int, 'New pcu_type_id (> 0) if successful')
 
-    
+
     def call(self, auth, pcu_type_fields):
-	pcu_type_fields = dict(filter(can_update, pcu_type_fields.items()))
+        pcu_type_fields = dict(filter(can_update, pcu_type_fields.items()))
         pcu_type = PCUType(self.api, pcu_type_fields)
-	pcu_type.sync()
-	self.event_object = {'PCUType': [pcu_type['pcu_type_id']]}	
+        pcu_type.sync()
+        self.event_object = {'PCUType': [pcu_type['pcu_type_id']]}
 
         return pcu_type['pcu_type_id']

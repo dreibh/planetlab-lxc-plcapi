@@ -10,7 +10,7 @@ from PLC.Auth import Auth
 class DeletePersonFromSlice(Method):
     """
     Deletes the specified person from the specified slice. If the person is
-    not a member of the slice, no errors are returned. 
+    not a member of the slice, no errors are returned.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -48,14 +48,14 @@ class DeletePersonFromSlice(Method):
 
         # If we are not admin, make sure the caller is a pi
         # of the site associated with the slice
-	if 'admin' not in self.caller['roles']:
-		if slice['site_id'] not in self.caller['site_ids']:
-			raise PLCPermissionDenied, "Not allowed to delete users from this slice"
+        if 'admin' not in self.caller['roles']:
+            if slice['site_id'] not in self.caller['site_ids']:
+                raise PLCPermissionDenied, "Not allowed to delete users from this slice"
 
-	if slice['slice_id'] in person['slice_ids']:
+        if slice['slice_id'] in person['slice_ids']:
             slice.remove_person(person)
-	
-	self.event_objects = {'Slice': [slice['slice_id']],
-			      'Person': [person['person_id']]}	
+
+        self.event_objects = {'Slice': [slice['slice_id']],
+                              'Person': [person['person_id']]}
 
         return 1

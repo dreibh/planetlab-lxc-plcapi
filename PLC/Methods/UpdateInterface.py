@@ -23,10 +23,10 @@ class UpdateInterface(Method):
     static, then ip, gateway, network, broadcast, netmask, and dns1
     must all be specified in interface_fields. If type is dhcp,
     these parameters, even if specified, are ignored.
-    
+
     PIs and techs may only update interfaces associated with their own
     nodes. Admins may update any interface network.
- 
+
     Returns 1 if successful, faults otherwise.
     """
 
@@ -37,8 +37,8 @@ class UpdateInterface(Method):
 
     accepts = [
         Auth(),
-	Interface.fields['interface_id'],
-     	accepted_fields
+        Interface.fields['interface_id'],
+        accepted_fields
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -52,17 +52,17 @@ class UpdateInterface(Method):
         if rejected:
             raise PLCInvalidArgument, "Cannot update Interface column(s) %r"%rejected
 
-	# Get interface information
-	interfaces = Interfaces(self.api, [interface_id])
-	if not interfaces:
+        # Get interface information
+        interfaces = Interfaces(self.api, [interface_id])
+        if not interfaces:
             raise PLCInvalidArgument, "No such interface"
 
-	interface = interfaces[0]
-		
+        interface = interfaces[0]
+
         # Authenticated function
         assert self.caller is not None
 
-	# If we are not an admin, make sure that the caller is a
+        # If we are not an admin, make sure that the caller is a
         # member of the site where the node exists.
         if 'admin' not in self.caller['roles']:
             nodes = Nodes(self.api, [interface['node_id']])
@@ -72,9 +72,9 @@ class UpdateInterface(Method):
             if node['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Not allowed to update interface"
 
-	interface.update(native)
+        interface.update(native)
         interface.sync()
-	
+
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
@@ -85,7 +85,7 @@ class UpdateInterface(Method):
             else:
                 UpdateInterfaceTag(self.api).__call__(auth,interface_tags[0]['interface_tag_id'],value)
 
-	self.event_objects = {'Interface': [interface['interface_id']]}
+        self.event_objects = {'Interface': [interface['interface_id']]}
         if 'ip' in interface:
             self.message = "Interface %s updated"%interface['ip']
         else:

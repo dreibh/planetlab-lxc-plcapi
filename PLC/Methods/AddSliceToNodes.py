@@ -25,7 +25,7 @@ class AddSliceToNodes(Method):
         Auth(),
         Mixed(Slice.fields['slice_id'],
               Slice.fields['name']),
-	[Mixed(Node.fields['node_id'],
+        [Mixed(Node.fields['node_id'],
                Node.fields['hostname'])]
         ]
 
@@ -48,26 +48,26 @@ class AddSliceToNodes(Method):
                 raise PLCPermissionDenied, "Not a member of the specified slice"
             elif slice['site_id'] not in self.caller['site_ids']:
                 raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
-	
-        # Get specified nodes, add them to the slice         
+
+        # Get specified nodes, add them to the slice
         nodes = Nodes(self.api, node_id_or_hostname_list, ['node_id', 'hostname', 'slice_ids', 'slice_ids_whitelist', 'site_id'])
-	
-	for node in nodes:
-	    # check the slice whitelist on each node first
-	    # allow  users at site to add node to slice, ignoring whitelist
-	    if node['slice_ids_whitelist'] and \
-	       slice['slice_id'] not in node['slice_ids_whitelist'] and \
-	       not set(self.caller['site_ids']).intersection([node['site_id']]):
-		raise PLCInvalidArgument, "%s is not allowed on %s (not on the whitelist)" % \
-		  (slice['name'], node['hostname'])
+
+        for node in nodes:
+            # check the slice whitelist on each node first
+            # allow  users at site to add node to slice, ignoring whitelist
+            if node['slice_ids_whitelist'] and \
+               slice['slice_id'] not in node['slice_ids_whitelist'] and \
+               not set(self.caller['site_ids']).intersection([node['site_id']]):
+                raise PLCInvalidArgument, "%s is not allowed on %s (not on the whitelist)" % \
+                  (slice['name'], node['hostname'])
             if slice['slice_id'] not in node['slice_ids']:
                 slice.add_node(node, commit = False)
 
         slice.sync()
 
         nodeids = [node['node_id'] for node in nodes]
-	self.event_objects = {'Node': nodeids,
-			      'Slice': [slice['slice_id']]}
+        self.event_objects = {'Node': nodeids,
+                              'Slice': [slice['slice_id']]}
         self.message = 'Slice %d added to nodes %s' % (slice['slice_id'], nodeids)
 
         return 1

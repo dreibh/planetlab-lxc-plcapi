@@ -35,6 +35,6 @@ class DeletePeer(Method):
         peer.delete()
 
         # Log affected objects
-	self.event_objects = {'Peer': [peer['peer_id']]}
+        self.event_objects = {'Peer': [peer['peer_id']]}
 
-	return 1
+        return 1

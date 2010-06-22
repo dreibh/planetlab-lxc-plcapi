@@ -20,7 +20,7 @@ class DeleteNodeGroup(Method):
     accepts = [
         Auth(),
         Mixed(NodeGroup.fields['nodegroup_id'],
-	      NodeGroup.fields['groupname'])
+              NodeGroup.fields['groupname'])
         ]
 
     returns = Parameter(int, '1 if successful')
@@ -36,8 +36,8 @@ class DeleteNodeGroup(Method):
 
         nodegroup.delete()
 
-	# Logging variables
-	self.event_objects = {'NodeGroup': [nodegroup['nodegroup_id']]}
-	self.message  = 'Node group %d deleted' % nodegroup['nodegroup_id']
- 
+        # Logging variables
+        self.event_objects = {'NodeGroup': [nodegroup['nodegroup_id']]}
+        self.message  = 'Node group %d deleted' % nodegroup['nodegroup_id']
+
         return 1

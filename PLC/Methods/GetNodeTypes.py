@@ -18,7 +18,7 @@ class GetNodeTypes(Method):
         ]
 
     returns = [NodeType.fields['node_type']]
-    
+
 
     def call(self, auth):
         return [node_type['node_type'] for node_type in NodeTypes(self.api)]

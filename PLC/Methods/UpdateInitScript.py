@@ -39,6 +39,6 @@ class UpdateInitScript(Method):
         initscript = initscripts[0]
         initscript.update(initscript_fields)
         initscript.sync()
-	self.event_objects = {'InitScript': [initscript['initscript_id']]}	
+        self.event_objects = {'InitScript': [initscript['initscript_id']]}
 
         return 1

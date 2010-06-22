@@ -29,24 +29,24 @@ class AddConfFileToNodeGroup(Method):
 
 
     def call(self, auth, conf_file_id, nodegroup_id_or_name):
-	# Get configuration file
+        # Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
             raise PLCInvalidArgument, "No such configuration file"
         conf_file = conf_files[0]
 
         # Get node
-	nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
-	if not nodegroups:
+        nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
+        if not nodegroups:
             raise PLCInvalidArgument, "No such node group"
-	nodegroup = nodegroups[0]
-	
-	# Link configuration file to node
+        nodegroup = nodegroups[0]
+
+        # Link configuration file to node
         if nodegroup['nodegroup_id'] not in conf_file['nodegroup_ids']:
             conf_file.add_nodegroup(nodegroup)
 
         # Log affected objects
-        self.event_objects = {'ConfFile': [conf_file_id], 
-			      'NodeGroup': [nodegroup['nodegroup_id']] }
+        self.event_objects = {'ConfFile': [conf_file_id],
+                              'NodeGroup': [nodegroup['nodegroup_id']] }
 
         return 1

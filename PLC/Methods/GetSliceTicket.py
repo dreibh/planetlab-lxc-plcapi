@@ -57,12 +57,12 @@ class GetSliceTicket(Method):
 
         # Tickets are the canonicalized XML-RPC methodResponse
         # representation of a partial GetSlivers() response, i.e.,
-	
-	initscripts = InitScripts(self.api, {'enabled': True})
+
+        initscripts = InitScripts(self.api, {'enabled': True})
 
         data = {
             'timestamp': int(time.time()),
-	    'initscripts': initscripts,
+            'initscripts': initscripts,
             'slivers': get_slivers(self.api, auth, [slice['slice_id']]),
             }
 

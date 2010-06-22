@@ -39,5 +39,5 @@ class UpdatePCUProtocolType(Method):
         protocol_type = protocol_types[0]
         protocol_type.update(protocol_type_fields)
         protocol_type.sync()
-	self.event_objects = {'PCUProtocolType': [protocol_type['pcu_protocol_type_id']]}	
+        self.event_objects = {'PCUProtocolType': [protocol_type['pcu_protocol_type_id']]}
         return 1

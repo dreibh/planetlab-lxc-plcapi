@@ -11,8 +11,8 @@ from PLC.KeyTypes import KeyType, KeyTypes
 
 class Key(Row):
     """
-    Representation of a row in the keys table. To use, instantiate with a 
-    dict of values. Update as you would a dict. Commit to the database 
+    Representation of a row in the keys table. To use, instantiate with a
+    dict of values. Update as you would a dict. Commit to the database
     with sync().
     """
 
@@ -32,18 +32,18 @@ class Key(Row):
         key_types = [row['key_type'] for row in KeyTypes(self.api)]
         if key_type not in key_types:
             raise PLCInvalidArgument, "Invalid key type"
-	return key_type
+        return key_type
 
     def validate_key(self, key):
-	# Key must not be blacklisted
-	rows = self.api.db.selectall("SELECT 1 from keys" \
-				     " WHERE key = %(key)s" \
+        # Key must not be blacklisted
+        rows = self.api.db.selectall("SELECT 1 from keys" \
+                                     " WHERE key = %(key)s" \
                                      " AND is_blacklisted IS True",
                                      locals())
-	if rows:
+        if rows:
             raise PLCInvalidArgument, "Key is blacklisted and cannot be used"
 
-	return key
+        return key
 
     def validate(self):
         # Basic validation
@@ -69,13 +69,13 @@ class Key(Row):
 
     def blacklist(self, commit = True):
         """
-	Permanently blacklist key (and all other identical keys),
-	preventing it from ever being added again. Because this could
-	affect multiple keys associated with multiple accounts, it
-	should be admin only.        
-	"""
+        Permanently blacklist key (and all other identical keys),
+        preventing it from ever being added again. Because this could
+        affect multiple keys associated with multiple accounts, it
+        should be admin only.
+        """
 
-	assert 'key_id' in self
+        assert 'key_id' in self
         assert 'key' in self
 
         # Get all matching keys
@@ -89,7 +89,7 @@ class Key(Row):
         self.api.db.do("UPDATE keys SET is_blacklisted = True" \
                        " WHERE key_id IN (%s)" % ", ".join(map(str, key_ids)))
 
-	# But disassociate them from all join tables
+        # But disassociate them from all join tables
         for table in self.join_tables:
             self.api.db.do("DELETE FROM %s WHERE key_id IN (%s)" % \
                            (table, ", ".join(map(str, key_ids))))
@@ -105,8 +105,8 @@ class Keys(Table):
 
     def __init__(self, api, key_filter = None, columns = None):
         Table.__init__(self, api, Key, columns)
-	
-	sql = "SELECT %s FROM view_keys WHERE is_blacklisted IS False" % \
+
+        sql = "SELECT %s FROM view_keys WHERE is_blacklisted IS False" % \
               ", ".join(self.columns)
 
         if key_filter is not None:
@@ -116,4 +116,4 @@ class Keys(Table):
                 key_filter = Filter(Key.fields, key_filter)
             sql += " AND (%s) %s" % key_filter.sql(api)
 
-	self.selectall(sql)
+        self.selectall(sql)
