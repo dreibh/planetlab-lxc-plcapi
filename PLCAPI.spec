@@ -37,7 +37,7 @@ Requires: mod_python
 Requires: mod_ssl
 Requires: SOAPpy
 # for the RebootNodeWithPCU method
-Requires: pcucontrol >= 1.6
+Requires: pcucontrol >= 1.0-6
 # for OMF integration
 Requires: pyaspects
 Requires: python-twisted-words
