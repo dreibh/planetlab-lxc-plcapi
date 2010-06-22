@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -138,6 +138,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jun 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-10
+- reservation granularity defined in plc-config-tty (requires myplc 5.0.5)
+- and readable through GetLeaseGranularity
+- GetSlivers to expose reservation_policy and lease_granularity
+- GetBootMedium fixed for reservable nodes
+- tweaks in pcucontrol (requires pcucontrol-1.0-6)
+- new Apache mod_wsgi python interface
+
 * Fri May 14 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-9
 - the leases system
 
