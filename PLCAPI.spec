@@ -34,6 +34,8 @@ Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
 Requires: mod_python
+# mod_wsgi will replace mod_python when we are ready
+Requires: mod_wsgi
 Requires: mod_ssl
 Requires: SOAPpy
 # for the RebootNodeWithPCU method
