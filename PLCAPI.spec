@@ -44,6 +44,8 @@ Requires: pcucontrol >= 1.0-6
 Requires: pyaspects
 Requires: python-twisted-words
 Requires: python-twisted-web
+# ldap
+Requires: python-ldap
 
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
