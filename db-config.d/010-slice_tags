@@ -137,6 +137,11 @@ slicetag_types = \
      'category' : 'slice/auth',
      'min_role_id': 20},
 
+    {'tagname': "ssh_key",
+     'description': "Sliver public ssh key.",
+     'category' : 'slice/auth',
+     'min_role_id': 20},
+
     # Capability to give a sliver access to unused raw disk
     {'tagname': "rawdisk",
      'description': "map unused raw disk devices into the slice",
