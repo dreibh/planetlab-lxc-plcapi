@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 10
+%define taglevel 11
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -142,6 +142,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Jun 26 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-11
+- addition of the 'ssh_key' slice tag
+- first draft of the LDAP interface
+
 * Tue Jun 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-10
 - reservation granularity defined in plc-config-tty (requires myplc 5.0.5)
 - and readable through GetLeaseGranularity
