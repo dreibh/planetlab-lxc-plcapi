@@ -4,7 +4,8 @@ import os
 import xmlrpclib
 
 from PLC.Slices import Slices
-from PLC.SliceTags import SliceTags
+from PLC.SliceTags import SliceTags, SliceTag
+from PLC.TagTypes import TagTypes
 from PLC.Nodes import Nodes
 from PLC.Config import Config
 from pyaspects.meta import MetaAspect
@@ -64,6 +65,13 @@ class BaseOMF(object):
     def get_slice_tags(self, api, slice_id):
         return SliceTags(api, slice_tag_filter = {'slice_id': slice_id})
 
+    def get_tag_type(self, api, tagname):
+        try:
+            tag = TagTypes(api, {'tagname':tagname})[0]
+            return tag
+        except IndexError:
+            return None
+
     def create_slice(self, slice):
         pass
 
@@ -108,6 +116,8 @@ class BaseOMF(object):
         elif api_method_name == "AddSliceToNodes" or api_method_name == "DeleteSliceFromNodes":
             slice_name_or_id = args[1]
             node_ids = args[2]
+        elif api_method_name == "AddSliceTag":
+            slice_name_or_id = args[1]
         else: # ignore the rest
             #self.logit(wobj.name, args, kwargs, data, "SLICE")
             return
@@ -126,6 +136,19 @@ class BaseOMF(object):
             for node_id in node_ids:
                 node_hostname = self.get_node_hostname(wobj.api, node_id)
                 self.delete_resource(slice['name'], node_hostname)
+        elif api_method_name == "AddSliceTag":
+            # OMF slices need to have dotsshmount vsys tag set to be
+            # able to access users' public keys.
+            tag_type_id_or_name = args[2]
+            omf_tag = self.get_tag_type(wobj.api, "omf_control")
+            vsys_tag = self.get_tag_type(wobj.api, "vsys")
+            if tag_type_id_or_name in (omf_tag['tagname'], omf_tag['tag_type_id']):
+                slice_tag = SliceTag(wobj.api)
+                slice_tag['slice_id'] = slice['slice_id']
+                slice_tag['tag_type_id'] = vsys_tag['tag_type_id']
+                slice_tag['value'] = u'dotsshmount'
+                slice_tag.sync()
+
 
         self.logit(wobj.name, args, kwargs, data, slice)
 
