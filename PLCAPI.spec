@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 11
+%define taglevel 12
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -142,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jun 28 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-5.0-12
+- automatically set vsys tag for omf controlled slices
+
 * Sat Jun 26 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-5.0-11
 - addition of the 'ssh_key' slice tag
 - first draft of the LDAP interface
