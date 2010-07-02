@@ -37,12 +37,30 @@ class PCU(Row):
         'model': Parameter(str, "PCU model string", max = 32, nullok = True),
         'node_ids': Parameter([int], "List of nodes that this PCU controls"),
         'ports': Parameter([int], "List of the port numbers that each node is connected to"),
+        'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
         }
 
     def validate_ip(self, ip):
         if not valid_ip(ip):
             raise PLCInvalidArgument, "Invalid IP address " + ip
         return ip
+
+    validate_last_updated = Row.validate_timestamp
+
+    def update_timestamp(self, col_name, commit = True):
+        """
+        Update col_name field with current time
+        """
+
+        assert 'pcu_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET %s = CURRENT_TIMESTAMP " % (self.table_name, col_name) + \
+                       " where pcu_id = %d" % (self['pcu_id']) )
+        self.sync(commit)
+
+    def update_last_updated(self, commit = True):
+        self.update_timestamp('last_updated', commit)
 
     def add_node(self, node, port, commit = True):
         """

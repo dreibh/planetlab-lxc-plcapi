@@ -392,6 +392,9 @@ CREATE TABLE nodes (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_download timestamp without time zone,
+    last_pcu_reboot timestamp without time zone,
+    last_pcu_confirmation timestamp without time zone,
     last_contact timestamp without time zone 	
 ) WITH OIDS;
 CREATE INDEX nodes_hostname_idx ON nodes (hostname);
@@ -457,7 +460,8 @@ CREATE TABLE interfaces (
     dns1 text,						-- Primary DNS server
     dns2 text,						-- Secondary DNS server
     bwlimit integer,					-- Bandwidth limit in bps
-    hostname text					-- Hostname of this interface
+    hostname text,					-- Hostname of this interface
+    last_updated timestamp without time zone -- When the interface was last updated
 ) WITH OIDS;
 CREATE INDEX interfaces_node_id_idx ON interfaces (node_id);
 
@@ -523,6 +527,7 @@ interfaces.dns1,
 interfaces.dns2,
 interfaces.bwlimit,
 interfaces.hostname,
+CAST(date_part('epoch', interfaces.last_updated) AS bigint) AS last_updated,
 COALESCE((SELECT interface_tag_ids FROM interface_tags WHERE interface_tags.interface_id = interfaces.interface_id), '{}') AS interface_tag_ids
 FROM interfaces;
 
@@ -662,6 +667,7 @@ CREATE TABLE pcus (
     username text,					-- Username, if applicable
     "password" text,					-- Password, if applicable
     model text,						-- Model, e.g. BayTech or iPal
+    last_updated timestamp without time zone,
     notes text						-- Random notes
 ) WITH OIDS;
 CREATE INDEX pcus_site_id_idx ON pcus (site_id);
@@ -1165,6 +1171,10 @@ nodes.key,
 CAST(date_part('epoch', nodes.date_created) AS bigint) AS date_created,
 CAST(date_part('epoch', nodes.last_updated) AS bigint) AS last_updated,
 CAST(date_part('epoch', nodes.last_contact) AS bigint) AS last_contact,  
+CAST(date_part('epoch', nodes.last_boot) AS bigint) AS last_boot,  
+CAST(date_part('epoch', nodes.last_download) AS bigint) AS last_download,  
+CAST(date_part('epoch', nodes.last_pcu_reboot) AS bigint) AS last_pcu_reboot,  
+CAST(date_part('epoch', nodes.last_pcu_confirmation) AS bigint) AS last_pcu_confirmation,  
 peer_node.peer_id,
 peer_node.peer_node_id,
 COALESCE((SELECT interface_ids FROM node_interfaces 
@@ -1222,12 +1232,23 @@ AS nodegroup_ids
 FROM conf_files;
 
 --------------------------------------------------------------------------------
+DROP VIEW view_pcus;
 CREATE OR REPLACE VIEW view_pcus AS
 SELECT
-pcus.*,
+pcus.pcu_id,
+pcus.site_id,
+pcus.hostname,
+pcus.ip,
+pcus.protocol,
+pcus.username,
+pcus.password,
+pcus.model,
+pcus.notes,
+CAST(date_part('epoch', pcus.last_updated) AS bigint) AS last_updated,
 COALESCE((SELECT node_ids FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS node_ids,
 COALESCE((SELECT ports FROM pcu_nodes WHERE pcu_nodes.pcu_id = pcus.pcu_id), '{}') AS ports
 FROM pcus;
+
 
 --------------------------------------------------------------------------------
 CREATE OR REPLACE VIEW view_sites AS

@@ -73,6 +73,7 @@ class UpdateInterface(Method):
                 raise PLCPermissionDenied, "Not allowed to update interface"
 
         interface.update(native)
+        interface.update_last_updated(commit=False)
         interface.sync()
 
         for (tagname,value) in tags.iteritems():

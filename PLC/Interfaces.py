@@ -67,6 +67,7 @@ class Interface(Row):
         'node_id': Parameter(int, "Node associated with this interface"),
         'is_primary': Parameter(bool, "Is the primary interface for this node"),
         'interface_tag_ids' : Parameter([int], "List of interface settings"),
+        'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
         }
 
     view_tags_name = "view_interface_tags"
@@ -208,6 +209,24 @@ class Interface(Row):
         elif method == "ipmi":
             if 'ip' not in self or not self['ip']:
                 raise PLCInvalidArgument, "For ipmi method, ip is required"
+
+    validate_last_updated = Row.validate_timestamp
+
+    def update_timestamp(self, col_name, commit = True):
+        """
+        Update col_name field with current time
+        """
+
+        assert 'interface_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET %s = CURRENT_TIMESTAMP " % (self.table_name, col_name) + \
+                       " where interface_id = %d" % (self['interface_id']) )
+        self.sync(commit)
+
+    def update_last_updated(self, commit = True):
+        self.update_timestamp('last_updated', commit)
+
 
 class Interfaces(Table):
     """

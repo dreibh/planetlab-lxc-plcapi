@@ -199,6 +199,7 @@ class GetBootMedium(Method):
         # renew the key and save it on the database
         if renew_key:
             node['key'] = compute_key()
+            node.update_last_download(commit=False)
             node.sync()
 
         # Generate node configuration file suitable for BootCD

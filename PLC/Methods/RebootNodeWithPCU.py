@@ -75,6 +75,8 @@ class RebootNodeWithPCU(Method):
         # p = pcu['ports'][i]
         ret = reboot.reboot_api(node, pcu, testrun)
 
+        node.update_last_pcu_reboot(commit=True) # commits new timestamp to node 
+
         self.event_objects = {'Node': [node['node_id']]}
         self.message = "RebootNodeWithPCU called"
 

@@ -1,11 +1,14 @@
 # $Id$
 # $URL$
+import time
+
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth, BootAuth, SessionAuth
 from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
+from PLC.Timestamp import *
 
 can_update = lambda (field, value): field in \
              ['method', 'mac', 'gateway', 'network',
@@ -82,6 +85,12 @@ class BootUpdateNode(Method):
 
         # indicate that node has booted & contacted PLC.
         node.update_last_contact()
+        node.update_last_boot()
+
+        current_time = int(time.time())
+        # if last_pcu_reboot is within 20 minutes of current_time, accept that the PCU is responsible
+        if Timestamp.cast_long(node['last_pcu_reboot']) >= current_time - 60*20:
+            node.update_last_pcu_confirmation(commit=False)
 
         node.sync(commit = True)
 

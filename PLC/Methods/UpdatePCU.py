@@ -45,6 +45,7 @@ class UpdatePCU(Method):
                 raise PLCPermissionDenied, "Not allowed to update that PCU"
 
         pcu.update(pcu_fields)
+        pcu.update_last_updated(commit=False)
         pcu.sync()
 
         # Logging variables

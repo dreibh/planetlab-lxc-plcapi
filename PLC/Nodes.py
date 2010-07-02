@@ -57,6 +57,10 @@ class Node(Row):
         'date_created': Parameter(int, "Date and time when node entry was created", ro = True),
         'last_updated': Parameter(int, "Date and time when node entry was created", ro = True),
         'last_contact': Parameter(int, "Date and time when node last contacted plc", ro = True),
+        'last_boot': Parameter(int, "Date and time when node last booted", ro = True),
+        'last_download': Parameter(int, "Date and time when node boot image was created", ro = True),
+        'last_pcu_reboot': Parameter(int, "Date and time when PCU reboot was attempted", ro = True),
+        'last_pcu_confirmation': Parameter(int, "Date and time when PCU reboot was confirmed", ro = True),
         'verified': Parameter(bool, "Whether the node configuration is verified correct", ro=False),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
@@ -113,31 +117,36 @@ class Node(Row):
     validate_date_created = Row.validate_timestamp
     validate_last_updated = Row.validate_timestamp
     validate_last_contact = Row.validate_timestamp
+    validate_last_boot = Row.validate_timestamp
+    validate_last_download = Row.validate_timestamp
+    validate_last_pcu_reboot = Row.validate_timestamp
+    validate_last_pcu_confirmation = Row.validate_timestamp
 
-    def update_last_contact(self, commit = True):
+    def update_timestamp(self, col_name, commit = True):
         """
-        Update last_contact field with current time
-        """
-
-        assert 'node_id' in self
-        assert self.table_name
-
-        self.api.db.do("UPDATE %s SET last_contact = CURRENT_TIMESTAMP " % (self.table_name) + \
-                       " where node_id = %d" % ( self['node_id']) )
-        self.sync(commit)
-
-
-    def update_last_updated(self, commit = True):
-        """
-        Update last_updated field with current time
+        Update col_name field with current time
         """
 
         assert 'node_id' in self
         assert self.table_name
 
-        self.api.db.do("UPDATE %s SET last_updated = CURRENT_TIMESTAMP " % (self.table_name) + \
+        self.api.db.do("UPDATE %s SET %s = CURRENT_TIMESTAMP " % (self.table_name, col_name) + \
                        " where node_id = %d" % (self['node_id']) )
         self.sync(commit)
+
+    def update_last_boot(self, commit = True):
+        self.update_timestamp('last_boot', commit)
+    def update_last_download(self, commit = True):
+        self.update_timestamp('last_download', commit)
+    def update_last_pcu_reboot(self, commit = True):
+        self.update_timestamp('last_pcu_reboot', commit)
+    def update_last_pcu_confirmation(self, commit = True):
+        self.update_timestamp('last_pcu_confirmation', commit)
+
+    def update_last_contact(self, commit = True):
+        self.update_timestamp('last_contact', commit)
+    def update_last_updated(self, commit = True):
+        self.update_timestamp('last_updated', commit)
 
     def update_tags(self, tags):
         from PLC.Shell import Shell
