@@ -41,7 +41,7 @@ Requires: SOAPpy
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
 # for OMF integration
-Requires: pyaspects
+Requires: pyaspects >= 0.4
 Requires: python-twisted-words
 Requires: python-twisted-web
 # ldap
