@@ -15,6 +15,8 @@ class BaseOMF(object):
 
     def __init__(self):
         self.config = Config("/etc/planetlab/plc_config")
+        self.slice = None
+
         # this was only for debugging, no need to log all method calls here -baris
         # self.log = open("/var/log/omf/plc_slice_calls.log", "a")
         self.log = None
@@ -90,27 +92,6 @@ class BaseOMF(object):
         slice_name_or_id = None
         node_ids = None
 
-        # DeleteSlice shall be handled before the actual method call;
-        # after the call we won't be able to acess the slice.
-        if api_method_name == "DeleteSlice":
-            slice_name_or_id = args[1]        
-        else: # ignore the rest
-            return
-
-        slice = self.get_slice(wobj.api, slice_name_or_id)
-        if not slice:
-            return
-
-        if api_method_name == "DeleteSlice":
-            self.delete_slice(slice['name'])
-
-        self.logit(wobj.name, args, kwargs, data, slice)
-
-    # aspect method
-    def after(self, wobj, data, *args, **kwargs):
-        api_method_name = wobj.name
-        slice_name_or_id = None
-        node_ids = None
         if api_method_name == "AddSlice":
             slice_name_or_id = args[1]['name']
         elif api_method_name == "AddSliceToNodes" or api_method_name == "DeleteSliceFromNodes":
@@ -118,13 +99,29 @@ class BaseOMF(object):
             node_ids = args[2]
         elif api_method_name == "AddSliceTag":
             slice_name_or_id = args[1]
+        elif api_method_name == "DeleteSlice":
+            slice_name_or_id = args[1]        
         else: # ignore the rest
             #self.logit(wobj.name, args, kwargs, data, "SLICE")
+            self.slice = None
             return
 
-        slice = self.get_slice(wobj.api, slice_name_or_id)
-        if not slice:
+        self.slice = self.get_slice(wobj.api, slice_name_or_id)
+
+        self.logit(wobj.name, args, kwargs, data, slice)
+
+    # aspect method
+    def after(self, wobj, data, *args, **kwargs):
+        if not self.slice:
             return
+
+        if data.has_key("method_return_value") and data['method_return_value'] == 1:
+            # return value 1 means that API call was successful, we can go on.
+            pass
+        else:
+            return
+
+        api_method_name = wobj.name
 
         if api_method_name == "AddSlice":
             self.create_slice(slice['name'])
@@ -132,6 +129,8 @@ class BaseOMF(object):
             for node_id in node_ids:
                 node_hostname = self.get_node_hostname(wobj.api, node_id)
                 self.add_resource(slice['name'], node_hostname)
+        elif api_method_name == "DeleteSlice":
+            self.delete_slice(slice['name'])
         elif api_method_name == "DeleteSliceFromNodes":
             for node_id in node_ids:
                 node_hostname = self.get_node_hostname(wobj.api, node_id)
@@ -148,7 +147,6 @@ class BaseOMF(object):
                 slice_tag['tag_type_id'] = vsys_tag['tag_type_id']
                 slice_tag['value'] = u'dotsshmount'
                 slice_tag.sync()
-
 
         self.logit(wobj.name, args, kwargs, data, slice)
 
