@@ -38,7 +38,11 @@ class BaseOMF(object):
         except ValueError:
             # we have a string
             slice_filter['name'] = id_or_name
-        slice = Slices(api, slice_filter = slice_filter)[0]
+        try:
+            slice = Slices(api, slice_filter = slice_filter)[0]
+            return slice
+        except IndexError:
+            return None
 # don't bother to check for slice tags for the moment. we'll only
 # create XMPP pubsub groups for all slices
 #
@@ -48,7 +52,6 @@ class BaseOMF(object):
 #             # OK, slice has the "omf" tag set.
 #             return slice
 #         return None
-        return slice
 
     def get_node_hostname(self, api, node_id_or_hostname):
         node_filter = {}
@@ -90,13 +93,11 @@ class BaseOMF(object):
     def before(self, wobj, data, *args, **kwargs):
         api_method_name = wobj.name
         slice_name_or_id = None
-        node_ids = None
 
         if api_method_name == "AddSlice":
             slice_name_or_id = args[1]['name']
         elif api_method_name == "AddSliceToNodes" or api_method_name == "DeleteSliceFromNodes":
             slice_name_or_id = args[1]
-            node_ids = args[2]
         elif api_method_name == "AddSliceTag":
             slice_name_or_id = args[1]
         elif api_method_name == "DeleteSlice":
@@ -112,29 +113,37 @@ class BaseOMF(object):
 
     # aspect method
     def after(self, wobj, data, *args, **kwargs):
-        if not self.slice:
-            return
-
-        if data.has_key("method_return_value") and data['method_return_value'] == 1:
-            # return value 1 means that API call was successful, we can go on.
-            pass
-        else:
-            return
-
         api_method_name = wobj.name
 
-        if api_method_name == "AddSlice":
-            self.create_slice(slice['name'])
-        elif api_method_name == "AddSliceToNodes":
+        if not self.slice:
+            if api_method_name == "AddSlice":
+                slice_name = args[1]['name']
+                self.slice = self.get_slice(wobj.api, slice_name)
+            else:
+                return
+
+        ret_val = None
+        if data.has_key("method_return_value"):
+            ret_val = data['method_return_value']
+
+        if api_method_name == "AddSlice" and ret_val > 0:
+            self.create_slice(self.slice['name'])
+
+        elif api_method_name == "AddSliceToNodes" and ret_val == 1:
+            node_ids = args[2]
             for node_id in node_ids:
                 node_hostname = self.get_node_hostname(wobj.api, node_id)
-                self.add_resource(slice['name'], node_hostname)
-        elif api_method_name == "DeleteSlice":
-            self.delete_slice(slice['name'])
-        elif api_method_name == "DeleteSliceFromNodes":
+                self.add_resource(self.slice['name'], node_hostname)
+
+        elif api_method_name == "DeleteSlice" and ret_val == 1:
+            self.delete_slice(self.slice['name'])
+
+        elif api_method_name == "DeleteSliceFromNodes" and ret_val == 1:
+            node_ids = args[2]
             for node_id in node_ids:
                 node_hostname = self.get_node_hostname(wobj.api, node_id)
-                self.delete_resource(slice['name'], node_hostname)
+                self.delete_resource(self.slice['name'], node_hostname)
+
         elif api_method_name == "AddSliceTag":
             # OMF slices need to have dotsshmount vsys tag set to be
             # able to access users' public keys.
@@ -143,12 +152,12 @@ class BaseOMF(object):
             vsys_tag = self.get_tag_type(wobj.api, "vsys")
             if tag_type_id_or_name in (omf_tag['tagname'], omf_tag['tag_type_id']):
                 slice_tag = SliceTag(wobj.api)
-                slice_tag['slice_id'] = slice['slice_id']
+                slice_tag['slice_id'] = self.slice['slice_id']
                 slice_tag['tag_type_id'] = vsys_tag['tag_type_id']
                 slice_tag['value'] = u'dotsshmount'
                 slice_tag.sync()
 
-        self.logit(wobj.name, args, kwargs, data, slice)
+        self.logit(wobj.name, args, kwargs, data, self.slice)
 
 
 
