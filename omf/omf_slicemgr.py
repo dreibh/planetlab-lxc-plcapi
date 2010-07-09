@@ -345,7 +345,7 @@ class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
             for i in iq.query.elements():
                 node = i['node']
                 if node.startswith(resource_prefix):
-                    self.command_que.put(self.delete_node, node)
+                    self.command_queue.put((self.delete_node, node))
 
         self.add_result_hook("discover", delete_slice_resources)
         self.discover()
