@@ -89,7 +89,7 @@ class BootUpdateNode(Method):
 
         current_time = int(time.time())
         # if last_pcu_reboot is within 20 minutes of current_time, accept that the PCU is responsible
-        if Timestamp.cast_long(node['last_pcu_reboot']) >= current_time - 60*20:
+        if node['last_pcu_reboot'] and Timestamp.cast_long(node['last_pcu_reboot']) >= current_time - 60*20:
             node.update_last_pcu_confirmation(commit=False)
 
         node.sync(commit = True)
