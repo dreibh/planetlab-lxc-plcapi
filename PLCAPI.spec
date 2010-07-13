@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 12
+%define taglevel 13
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -142,6 +142,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jul 13 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - plcapi-5.0-13
+- - Add timestamps to Nodes, PCUs and Interfaces to make concrete statements about a node's configuration state.
+- - OMF fixes
+
 * Mon Jun 28 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - PLCAPI-5.0-12
 - automatically set vsys tag for omf controlled slices
 
