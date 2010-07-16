@@ -6,7 +6,7 @@ import xmlrpclib
 from PLC.Slices import Slices
 from PLC.SliceTags import SliceTags, SliceTag
 from PLC.TagTypes import TagTypes
-from PLC.Nodes import Nodes
+from PLC.NodeTags import NodeTags
 from PLC.Config import Config
 from pyaspects.meta import MetaAspect
 
@@ -53,20 +53,20 @@ class BaseOMF(object):
 #             return slice
 #         return None
 
-    def get_node_hostname(self, api, node_id_or_hostname):
-        node_filter = {}
+    def get_node_hrn(self, api, node_id_or_hostname):
+        tag_filter = {'tagname': 'hrn'}
         try:
-            node_filter['node_id'] = int(str(node_id_or_hostname))
+            tag_filter['node_id'] = int(str(node_id_or_hostname))
         except ValueError:
             # we have a hostname
-            node_filter['hostname'] = node_id_or_hostname
+            tag_filter['hostname'] = node_id_or_hostname
 
         try:
-            node = Nodes(api, node_filter = node_filter)[0]
-            return node['hostname']
+            tag = NodeTags(api, node_tag_filter = tag_filter)[0]
+            return tag['value']
         except IndexError:
             return None
-        
+
     def get_slice_tags(self, api, slice_id):
         return SliceTags(api, slice_tag_filter = {'slice_id': slice_id})
 
@@ -132,8 +132,8 @@ class BaseOMF(object):
         elif api_method_name == "AddSliceToNodes" and ret_val == 1:
             node_ids = args[2]
             for node_id in node_ids:
-                node_hostname = self.get_node_hostname(wobj.api, node_id)
-                self.add_resource(self.slice['name'], node_hostname)
+                node_hrn = self.get_node_hrn(wobj.api, node_id)
+                self.add_resource(self.slice['name'], node_hrn)
 
         elif api_method_name == "DeleteSlice" and ret_val == 1:
             self.delete_slice(self.slice['name'])
@@ -141,8 +141,8 @@ class BaseOMF(object):
         elif api_method_name == "DeleteSliceFromNodes" and ret_val == 1:
             node_ids = args[2]
             for node_id in node_ids:
-                node_hostname = self.get_node_hostname(wobj.api, node_id)
-                self.delete_resource(self.slice['name'], node_hostname)
+                node_hrn = self.get_node_hrn(wobj.api, node_id)
+                self.delete_resource(self.slice['name'], node_hrn)
 
         elif api_method_name == "AddSliceTag":
             # OMF slices need to have dotsshmount vsys tag set to be
