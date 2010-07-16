@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 13
+%define taglevel 14
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -142,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jul 16 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - plcapi-5.0-14
+- use hrn in pubsub groups
+
 * Tue Jul 13 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - plcapi-5.0-13
 - - Add timestamps to Nodes, PCUs and Interfaces to make concrete statements about a node's configuration state.
 - - OMF fixes
