@@ -176,7 +176,7 @@ class Filter(Parameter, dict):
                         value = "NULL"
                     elif isinstance(value, StringTypes) and \
                             (value.find("*") > -1 or value.find("%") > -1):
-                        operator = "LIKE"
+                        operator = "ILIKE"
                         # insert *** in pattern instead of either * or %
                         # we dont use % as requests are likely to %-expansion later on
                         # actual replacement to % done in PostgreSQL.py
