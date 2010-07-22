@@ -92,6 +92,7 @@ class Node(Row):
     tags = { }
 
     def validate_hostname(self, hostname):
+        hostname = hostname.lower()
         if not valid_hostname(hostname):
             raise PLCInvalidArgument, "Invalid hostname"
 
