@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 14
+%define taglevel 15
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -142,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jul 28 2010 S.Çağlar Onur <caglar@cs.princeton.edu> - plcapi-5.0-15
+- convert hostnames to lower case and use ILIKE instead of LIKE
+
 * Fri Jul 16 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - plcapi-5.0-14
 - use hrn in pubsub groups
 
