@@ -14,6 +14,7 @@ import traceback
 import string
 
 import xmlrpclib
+import simplejson
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -207,3 +208,17 @@ class PLCAPI:
             data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
 
         return data
+
+    def handle_json(self, source, data):
+        """
+        Handle a JSON request 
+        """
+        method, args = simplejson.loads(data)
+        try:
+            result = self.call(source, method, *args)
+        except Exception, e:
+            result = str(e)
+       
+        return simplejson.dumps(result) 
+        
+        
