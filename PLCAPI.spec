@@ -38,6 +38,7 @@ Requires: mod_python
 Requires: mod_wsgi
 Requires: mod_ssl
 Requires: SOAPpy
+Requires: python-simplejson
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
 # for OMF integration
