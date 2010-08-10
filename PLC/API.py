@@ -15,6 +15,17 @@ import string
 
 import xmlrpclib
 import simplejson
+try:
+    # Try to use jsonlib before using simpljson. This is a hack to get around
+    # the fact that the version of simplejson avaialble for f8 is slightly 
+    # faster than xmlrpc but not as fast as jsonlib. There is no jsonlib 
+    # pacakge available for f8, so this has to be installed manually and
+    # is not expected to always be available. Remove this once we move away
+    # from f8 based MyPLC's         
+    import jsonlib
+    json = jsonlib
+except:
+    json = simplejson 
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -213,12 +224,12 @@ class PLCAPI:
         """
         Handle a JSON request 
         """
-        method, args = simplejson.loads(data)
+        method, args = json.loads(data)
         try:
             result = self.call(source, method, *args)
         except Exception, e:
             result = str(e)
        
-        return simplejson.dumps(result) 
+        return json.dumps(result) 
         
         
