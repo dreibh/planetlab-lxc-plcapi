@@ -54,7 +54,7 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 #
 # generates 2 method classes:
 # Get<classname><methodsuffix> (auth, id_or_name) -> value or None
-# Set<classname><methodsuffix> (auth, id_or_name, value) -> None
+# Set<classname><methodsuffix> (auth, id_or_name, value) -> value
 # value is always a string, no cast nor typecheck for now
 #
 # The expose_in_api flag tells whether this tag may be handled
@@ -201,6 +201,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         else:
             self.message += " %d "%objs[0][primary_key]
         self.message += "updated"
+        return value
 
     # attach it
     setattr (set_class,"call",set_call)
