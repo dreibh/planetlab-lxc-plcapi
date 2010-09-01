@@ -6,13 +6,17 @@
 #
 # just a placeholder for storing accessor-related tag checkers
 # this is filled by the accessors factory
+#
+# NOTE. If you ever come to manually delete a TagType that was created
+# by the Factory, you need to restart your python instance / web server
+# as the cached information then becomes wrong
 
 from PLC.TagTypes import TagTypes, TagType
 
 # implementation
 class Accessor (object) :
-    """This is placeholder for storing accessor-related tag checkers
-methods in this class are defined by the accessors factory
+    """This is placeholder for storing accessor-related tag checkers.
+Methods in this class are defined by the accessors factory
 
 This is implemented as a singleton, so we can cache results over time"""
 

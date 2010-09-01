@@ -25,9 +25,7 @@ from PLC.PersonTags import PersonTags, PersonTag
 # this is another story..
 #from PLC.Ilinks import Ilink
 
-from PLC.TagTypes import TagTypes, TagType
-
-# known classes : { class -> secondary_key }
+# known classes : { class -> details }
 taggable_classes = { Node : {'table_class' : Nodes,
                              'joins_class' : NodeTags, 'join_class' : NodeTag,
                              'secondary_key': 'hostname'},
