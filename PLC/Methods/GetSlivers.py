@@ -27,6 +27,7 @@ from PLC.Accessors.Accessors_standard import *
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
 
+# slice_filter essentially contains the slice_ids for the relevant slices (on the node + system & delegated slices)
 def get_slivers(api, auth, slice_filter, node = None):
     # Get slice information
     slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
