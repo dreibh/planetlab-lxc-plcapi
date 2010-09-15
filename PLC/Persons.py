@@ -362,7 +362,8 @@ class Person(Row):
 
         # Mark as deleted
         self['deleted'] = True
-        self.sync(commit)
+        # don't validate, so duplicates can be consistently removed
+        self.sync(commit, validate=False)
 
 class Persons(Table):
     """

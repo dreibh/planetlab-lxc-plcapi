@@ -315,13 +315,15 @@ class Row(dict):
         y = self.db_fields(y)
         return dict.__eq__(x, y)
 
-    def sync(self, commit = True, insert = None):
+    # validate becomes optional on sept. 2010
+    # we find it useful to use DeletePerson on duplicated entries
+    def sync(self, commit = True, insert = None, validate=True):
         """
         Flush changes back to the database.
         """
 
         # Validate all specified fields
-        self.validate()
+        if validate: self.validate()
 
         # Filter out fields that cannot be set or updated directly
         db_fields = self.db_fields()
