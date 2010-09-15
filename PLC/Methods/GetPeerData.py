@@ -47,17 +47,15 @@ class GetPeerData(Method):
         start = time.time()
 
         # Filter out various secrets
-        node_fields = filter(lambda field: field not in \
-                             ['boot_nonce', 'key', 'session', 'root_person_ids'],
-                             Node.fields)
+        node_fields = [ field for field in Node.fields if field \
+                            not in ['boot_nonce', 'key', 'session', 'root_person_ids']]
         nodes = Nodes(self.api, {'peer_id': None}, node_fields);
         # filter out whitelisted nodes
         nodes = [ n for n in nodes if not n['slice_ids_whitelist']]
 
 
-        person_fields = filter(lambda field: field not in \
-                               ['password', 'verification_key', 'verification_expires'],
-                               Person.fields)
+        person_fields = [ field for field in Person.fields if field \
+                              not in ['password', 'verification_key', 'verification_expires']]
 
         # XXX Optimize to return only those Persons, Keys, and Slices
         # necessary for slice creation on the calling peer's nodes.
