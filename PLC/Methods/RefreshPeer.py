@@ -35,14 +35,20 @@ commit_mode=True
 # compatibility mode is a bit slower but probably safer on the long run
 compatibility=True
 
+#################### debugging
 # for verbose output
 verbose=False
+# set to a filename for using cached data when debugging
+# WARNING: does not actually connect to the peer in this case
+use_cache=None
 # for debugging specific entries - display detailed info on selected objs 
 focus_type=None # set to e.g. 'Person'
 focus_ids=[]    # set to a list of ids (e.g. person_ids) - remote or local ids should work
+#### example
+#use_cache="/var/log/peers/getpeerdata.pickle"
 #verbose=True
 #focus_type='Person'
-#focus_ids=[29103,239578,28825]
+#focus_ids=[621,1088]
 
 #################### helpers
 def message (to_print=None,verbose_only=False):
@@ -108,6 +114,16 @@ class RefreshPeer(Method):
 
     returns = Parameter(int, "1 if successful")
 
+    ignore_site_fields=['peer_id', 'peer_site_id','last_updated', 'date_created',
+                        'address_ids', 'node_ids', 'person_ids', 'pcu_ids', 'slice_ids' ]
+    ignore_key_fields=['peer_id','peer_key_id', 'person_id']
+    ignore_person_fields=['peer_id','peer_person_id','last_updated','date_created',
+                          'roles','role_ids','key_ids','site_ids','slice_ids','person_tag_ids']
+    ignore_node_fields=['peer_id','peer_node_id','last_updated','last_contact','date_created',
+                        'node_tag_ids', 'interface_ids', 'slice_ids', 'nodegroup_ids','pcu_ids','ports']
+    ignore_slice_fields=['peer_id','peer_slice_id','created',
+                         'person_ids','slice_tag_ids','node_ids',]
+
     def call(self, auth, peer_id_or_peername):
         ret_val = None
         peername = Peers(self.api, [peer_id_or_peername], ['peername'])[0]['peername']
@@ -143,8 +159,20 @@ class RefreshPeer(Method):
         # Get peer data
         start = time.time()
         message('RefreshPeer starting up (commit_mode=%r)'%commit_mode)
-        message('Issuing GetPeerData')
-        peer_tables = peer.GetPeerData()
+        if not use_cache:
+            message('Issuing GetPeerData')
+            peer_tables = peer.GetPeerData()
+        else:
+            import pickle
+            if os.path.isfile(use_cache):
+                message("use_cache: WARNING: using cached getpeerdata")
+                peer_tables=pickle.load(file(use_cache,'rb'))
+            else:
+                message("use_cache: issuing getpeerdata")
+                peer_tables = peer.GetPeerData()
+                message("use_cache: saving in cache %s",use_cache)
+                pickle.dump(peer_tables,file(use_cache,'wb'))
+                
         # for smooth federation with 4.2 - ignore fields that are useless anyway, and rewrite boot_state
         boot_state_rewrite={'dbg':'safeboot','diag':'safeboot','disable':'disabled',
                             'inst':'reinstall','rins':'reinstall','new':'reinstall','rcnf':'reinstall'}
@@ -193,10 +221,13 @@ class RefreshPeer(Method):
 
             # peer_object_id, peer_object and object are dynamically bound in the loop below...
             # (local) object might be None if creating a new one
+            def in_focus():
+                if classname != focus_type: return False
+                return peer_object_id in focus_ids or \
+                    (object and primary_key in object and object[primary_key] in focus_ids)
+
             def message_focus (message):
-                if classname != focus_type: return
-                if peer_object_id in focus_ids or \
-                        (object and primary_key in object and object[primary_key] in focus_ids):
+                if in_focus():
                     # always show remote
                     message_verbose("peer_obj : %d [[%r]]"%(peer_object_id,peer_object),
                                     header='FOCUS '+message)
@@ -204,16 +235,27 @@ class RefreshPeer(Method):
                     if object: message_verbose("local_obj : <<%r>>"%(object),
                                                header='FOCUS '+message);
 
+
             # the function to compare a local object with its cadidate peer obj
             # xxx probably faster when compatibility is False...
             def equal_fields (object, peer_object, columns):
                 # fast version: must use __eq__() instead of == since
                 # peer_object may be a raw dict instead of a Peer object.
                 if not compatibility: return object.__eq__(peer_object)
-                else:
-                    for column in columns: 
+                elif not verbose:
+                    for column in columns:
+#                        if in_focus(): message ('FOCUS comparing column %s'%column)
                         if object[column] != peer_object[column]: return False
                     return True
+                else:
+                    result=True
+                    print 'COMPARING ',
+                    for column in columns:
+                        test= object[column] == peer_object[column]
+                        print column,test,
+                        if not test: result=False
+                    print '=>',result
+                    return result
 
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
@@ -235,7 +277,7 @@ class RefreshPeer(Method):
                     # comparison.
                     peer_object[primary_key] = object[primary_key]
 
-                    if equal_fields(object,peer_object, columns):
+                    if not equal_fields(object,peer_object, columns):
                         # Only update intrinsic fields
                         object.update(object.db_fields(peer_object))
                         message_focus ("DIFFERENCES : updated / syncing")
@@ -272,7 +314,8 @@ class RefreshPeer(Method):
                 synced[peer_object_id] = object
 
                 if action:
-                    message("%s: %s %d %s %s"%(peer['peername'], classname, object[primary_key], peer_object_name, action))
+                    message("%s: (%d/%d) %s %d %s %s"%(peer['peername'], count,total, classname, 
+                                                       object[primary_key], peer_object_name, action))
 
             message_verbose("Exiting sync on %s"%classname)
 
@@ -284,6 +327,10 @@ class RefreshPeer(Method):
         def intersect (l1,l2): 
             if compatibility: return list (set(l1).intersection(set(l2))) 
             else: return l1
+
+        # some fields definitely need to be ignored
+        def ignore (l1,l2):
+            return list (set(l1).difference(set(l2)))
 
         #
         # Synchronize foreign sites
@@ -305,7 +352,7 @@ class RefreshPeer(Method):
         sites_at_peer = dict([(site['site_id'], site) for site in peer_tables['Sites']])
 
         # Synchronize new set (still keyed on foreign site_id)
-        peer_sites = sync(old_peer_sites, sites_at_peer, Site, columns)
+        peer_sites = sync(old_peer_sites, sites_at_peer, Site, ignore (columns, RefreshPeer.ignore_site_fields))
 
         for peer_site_id, site in peer_sites.iteritems():
             # Bind any newly cached sites to peer
@@ -350,7 +397,7 @@ class RefreshPeer(Method):
                 continue
 
         # Synchronize new set (still keyed on foreign key_id)
-        peer_keys = sync(old_peer_keys, keys_at_peer, Key, columns)
+        peer_keys = sync(old_peer_keys, keys_at_peer, Key, ignore (columns, RefreshPeer.ignore_key_fields))
         for peer_key_id, key in peer_keys.iteritems():
             # Bind any newly cached keys to peer
             if peer_key_id not in old_peer_keys:
@@ -388,7 +435,7 @@ class RefreshPeer(Method):
         # XXX Do we care about membership in foreign site(s)?
 
         # Synchronize new set (still keyed on foreign person_id)
-        peer_persons = sync(old_peer_persons, persons_at_peer, Person, columns)
+        peer_persons = sync(old_peer_persons, persons_at_peer, Person, ignore (columns, RefreshPeer.ignore_person_fields))
 
         # transcoder : retrieve a local key_id from a peer_key_id
         key_transcoder = dict ( [ (key['key_id'],peer_key_id) \
@@ -471,7 +518,7 @@ class RefreshPeer(Method):
                 node['site_id'] = peer_sites[node['site_id']]['site_id']
 
         # Synchronize new set
-        peer_nodes = sync(old_peer_nodes, nodes_at_peer, Node, columns)
+        peer_nodes = sync(old_peer_nodes, nodes_at_peer, Node, ignore (columns, RefreshPeer.ignore_node_fields))
 
         for peer_node_id, node in peer_nodes.iteritems():
             # Bind any newly cached foreign nodes to peer
@@ -551,7 +598,7 @@ class RefreshPeer(Method):
                 slice['site_id'] = peer_sites[slice['site_id']]['site_id']
 
         # Synchronize new set
-        peer_slices = sync(old_peer_slices, slices_at_peer, Slice, columns)
+        peer_slices = sync(old_peer_slices, slices_at_peer, Slice, ignore (columns, RefreshPeer.ignore_slice_fields))
 
         message('Dealing with Slices (2)')
         # transcoder : retrieve a local node_id from a peer_node_id
