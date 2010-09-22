@@ -11,6 +11,25 @@ from PLC.Config import Config
 from pyaspects.meta import MetaAspect
 
 
+def ignore_exception(ExceptionType=None):
+    '''A decorator to ignore the given exception type. Use as
+    @ignore_exception() to ignore all exceptions.'''
+    def deco_ignore(f):
+        def f_ignore(*args, **kwargs):
+            if not ExceptionType:
+                try:
+                    return f(*args, **kwargs)
+                except:
+                    return None
+            else:
+                try:
+                    return f(*args, **kwargs)
+                except ExceptionType, e:
+                    return None
+        return f_ignore
+    return deco_ignore
+
+
 class BaseOMF(object):
 
     def __init__(self):
@@ -22,6 +41,7 @@ class BaseOMF(object):
         self.log = None
         
 
+    @ignore_exception()
     def logit(self, call, args, kwargs, data, slice):
         if not self.log: return
 
@@ -30,7 +50,7 @@ class BaseOMF(object):
         self.log.write("%s\n\n" % slice)
         self.log.flush()
 
-           
+    @ignore_exception()           
     def get_slice(self, api, id_or_name):
         slice_filter = {}
         try: # if integer
@@ -53,6 +73,7 @@ class BaseOMF(object):
 #             return slice
 #         return None
 
+    @ignore_exception()
     def get_node_hrn(self, api, node_id_or_hostname):
         tag_filter = {'tagname': 'hrn'}
         try:
@@ -67,9 +88,11 @@ class BaseOMF(object):
         except IndexError:
             return None
 
+    @ignore_exception()
     def get_slice_tags(self, api, slice_id):
         return SliceTags(api, slice_tag_filter = {'slice_id': slice_id})
 
+    @ignore_exception()
     def get_tag_type(self, api, tagname):
         try:
             tag = TagTypes(api, {'tagname':tagname})[0]
@@ -77,15 +100,19 @@ class BaseOMF(object):
         except IndexError:
             return None
 
+    @ignore_exception()
     def create_slice(self, slice):
         pass
 
+    @ignore_exception()
     def add_resource(self, slice, resource):
         pass
 
+    @ignore_exception()
     def delete_slice(self, slice):
         pass
 
+    @ignore_exception()
     def delete_resource(self, slice, resource):
         pass
 
@@ -171,15 +198,19 @@ class OMFAspect_xmlrpc(BaseOMF):
         slicemgr_url = self.config.PLC_OMF_SLICEMGR_URL
         self.server = xmlrpclib.ServerProxy(slicemgr_url, allow_none = 1)
 
+    @ignore_exception()
     def create_slice(self, slice):
         self.server.createSlice(slice)
 
+    @ignore_exception()
     def add_resource(self, slice, resource):
         self.server.addResource(slice, resource)
 
+    @ignore_exception()
     def delete_slice(self, slice):
         self.server.deleteSlice(slice)
         
+    @ignore_exception()
     def delete_resource(self, slice, resource):
         self.server.removeResource(slice, resource)
 
