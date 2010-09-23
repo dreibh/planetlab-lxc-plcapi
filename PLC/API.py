@@ -141,11 +141,14 @@ class PLCAPI:
         else:
             raise PLCAPIError, "Unsupported database type " + self.config.PLC_DB_TYPE
 
-        # Aspects modify the API injecting code before/after method
-        # calls. As of now we only have aspects for OMF integration,
-        # that's why we enable aspects only if PLC_OMF is set to true.
+        # Aspects modify the API by injecting code before, after or
+        # around method calls. -- http://github.com/baris/pyaspects/blob/master/README
+        # 
+        # As of now we only have aspects for OMF integration, that's
+        # why we enable aspects only if PLC_OMF is set to true.
         if self.config.PLC_OMF_ENABLED:
-            from aspects import apply_aspects; apply_aspects()
+            from aspects import apply_omf_aspect
+            apply_omf_aspect()
 
 
     def callable(self, method):
