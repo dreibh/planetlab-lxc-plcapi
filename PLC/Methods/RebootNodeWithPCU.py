@@ -78,6 +78,6 @@ class RebootNodeWithPCU(Method):
         node.update_last_pcu_reboot(commit=True) # commits new timestamp to node 
 
         self.event_objects = {'Node': [node['node_id']]}
-        self.message = "RebootNodeWithPCU called"
+        self.message = "RebootNodeWithPCU %s with %s returned %s" % (node['node_id'], pcu['pcu_id'], ret)
 
         return ret
