@@ -64,7 +64,7 @@ ifneq ($(PLC_now),$(PLC_files))
 PLC/__init__.py: force
 endif
 PLC/__init__.py: 
-	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd PLC; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
+	echo "This step is obsolete"
 
 ########## Methods/
 # the current content of __init__.py
@@ -77,7 +77,7 @@ ifneq ($(METHODS_now),$(METHODS_files))
 PLC/Methods/__init__.py: force
 endif
 PLC/Methods/__init__.py: 
-	(echo '## Please use make index to update this file' ; echo 'native_methods = """' ; cd PLC/Methods; ls -1 *.py system/*.py | grep -v __init__ | sed -e 's,.py$$,,' -e 's,system/,system.,' ; echo '""".split()') > $@
+	echo "This step is obsolete"
 
 ##########
 
