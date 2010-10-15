@@ -15,6 +15,7 @@ except ImportError:
     import sha
 import hmac
 import time
+import os
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
@@ -25,22 +26,13 @@ from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Boot import notify_owners
 
-def map_auth(auth):
-    if auth['AuthMethod'] == "session":
-        expected = SessionAuth()
-    elif auth['AuthMethod'] == "password" or \
-         auth['AuthMethod'] == "capability":
-        expected = PasswordAuth()
-    elif auth['AuthMethod'] == "gpg":
-        expected = GPGAuth()
-    elif auth['AuthMethod'] == "hmac" or \
-         auth['AuthMethod'] == "hmac_dummybox":
-        expected = BootAuth()
-    elif auth['AuthMethod'] == "anonymous":
-        expected = AnonymousAuth()
-    else:
-        raise PLCInvalidArgument("must be 'session', 'password', 'gpg', 'hmac', 'hmac_dummybox', or 'anonymous'", "AuthMethod")
-    return expected
+auth_methods = {'session': SessionAuth,
+                'password': PasswordAuth,
+                'capability': PasswordAuth,
+                'gpg': GPGAuth,
+                'hmac': BootAuth,
+                'hmac_dummybox': BootAuth,
+                'anonymous': AnonymousAuth}
 
 class Auth(Parameter):
     """
@@ -55,11 +47,17 @@ class Auth(Parameter):
         Parameter.__init__(self, auth, "API authentication structure")
 
     def check(self, method, auth, *args):
+        global auth_methods
+
         # Method.type_check() should have checked that all of the
         # mandatory fields were present.
         assert 'AuthMethod' in auth
 
-        expected = map_auth(auth)
+        if auth['AuthMethod'] in auth_methods:
+            expected = auth_methods[auth['AuthMethod']]()
+        else:
+            sm = "'" + "', '".join(auth_methods.keys()) + "'"
+            raise PLCInvalidArgument("must be " + sm, "AuthMethod")
 
         # Re-check using the specified authentication method
         method.type_check("auth", auth, expected, (auth,) + args)
@@ -340,3 +338,17 @@ class PasswordAuth(Auth):
             raise PLCAuthenticationFailure, "Not allowed to call method"
 
         method.caller = person
+
+path = os.path.dirname(__file__) + "/Auth.d"
+try:
+    extensions = os.listdir(path)
+except OSError, e:
+    extensions = []
+for extension in extensions:
+    if extension.startswith("."):
+        continue
+    if not extension.endswith(".py"):
+        continue
+    execfile("%s/%s" % (path, extension))
+del extension
+del extensions
