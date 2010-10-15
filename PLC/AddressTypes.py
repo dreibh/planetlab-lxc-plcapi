@@ -63,5 +63,13 @@ class AddressTypes(Table):
             elif isinstance(address_type_filter, dict):
                 address_type_filter = Filter(AddressType.fields, address_type_filter)
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
+            elif isinstance(address_type_filter, (int, long)):
+                address_type_filter = Filter(AddressType.fields, {'address_type_id': address_type_filter})
+                sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
+            elif isinstance(address_type_filter, StringTypes):
+                address_type_filter = Filter(AddressType.fields, {'name': address_type_filter})
+                sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong address type filter %r"%address_type_filter
 
         self.selectall(sql)

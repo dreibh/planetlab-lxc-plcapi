@@ -80,10 +80,7 @@ class Leases(Table):
 
 
         if lease_filter is not None:
-
-            if isinstance (lease_filter, int):
-                lease_filter = Filter (Lease.fields, {'lease_id': lease_filter})
-            elif isinstance(lease_filter, (list, tuple, set)):
+            if isinstance(lease_filter, (list, tuple, set, int, long)):
                 lease_filter = Filter(Lease.fields, {'lease_id': lease_filter})
             elif isinstance(lease_filter, dict):
                 lease_filter = LeaseFilter(Lease.fields, lease_filter)

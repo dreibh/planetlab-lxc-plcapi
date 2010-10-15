@@ -126,10 +126,12 @@ class PCUs(Table):
               ", ".join(self.columns)
 
         if pcu_filter is not None:
-            if isinstance(pcu_filter, (list, tuple, set)):
+            if isinstance(pcu_filter, (list, tuple, set, int, long)):
                 pcu_filter = Filter(PCU.fields, {'pcu_id': pcu_filter})
             elif isinstance(pcu_filter, dict):
                 pcu_filter = Filter(PCU.fields, pcu_filter)
+            else:
+                raise PLCInvalidArgument, "Wrong pcu filter %r"%pcu_filter
             sql += " AND (%s) %s" % pcu_filter.sql(api)
 
         self.selectall(sql)

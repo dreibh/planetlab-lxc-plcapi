@@ -47,12 +47,10 @@ class InterfaceTags(Table):
               ", ".join(self.columns)
 
         if interface_tag_filter is not None:
-            if isinstance(interface_tag_filter, (list, tuple, set)):
+            if isinstance(interface_tag_filter, (list, tuple, set, int, long)):
                 interface_tag_filter = Filter(InterfaceTag.fields, {'interface_tag_id': interface_tag_filter})
             elif isinstance(interface_tag_filter, dict):
                 interface_tag_filter = Filter(InterfaceTag.fields, interface_tag_filter)
-            elif isinstance(interface_tag_filter, int):
-                interface_tag_filter = Filter(InterfaceTag.fields, {'interface_tag_id': [interface_tag_filter]})
             else:
                 raise PLCInvalidArgument, "Wrong interface setting filter %r"%interface_tag_filter
             sql += " AND (%s) %s" % interface_tag_filter.sql(api)

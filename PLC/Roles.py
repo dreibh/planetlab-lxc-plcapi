@@ -69,5 +69,13 @@ class Roles(Table):
             elif isinstance(role_filter, dict):
                 role_filter = Filter(Role.fields, role_filter)
                 sql += " AND (%s) %s" % role_filter.sql(api, "AND")
+            elif isinstance(role_filter, (int, long)):
+                role_filter = Filter(Role.fields, {'role_id': role_filter})
+                sql += " AND (%s) %s" % role_filter.sql(api, "AND")
+            elif isinstance(role_filter, StringTypes):
+                role_filter = Filter(Role.fields, {'name': role_filter})
+                sql += " AND (%s) %s" % role_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong role filter %r"%role_filter
 
         self.selectall(sql)

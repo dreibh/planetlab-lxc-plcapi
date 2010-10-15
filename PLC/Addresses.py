@@ -93,7 +93,7 @@ class Addresses(Table):
               ", ".join(self.columns)
 
         if address_filter is not None:
-            if isinstance(address_filter, (list, tuple, set)):
+            if isinstance(address_filter, (list, tuple, set, int, long)):
                 address_filter = Filter(Address.fields, {'address_id': address_filter})
             elif isinstance(address_filter, dict):
                 address_filter = Filter(Address.fields, address_filter)

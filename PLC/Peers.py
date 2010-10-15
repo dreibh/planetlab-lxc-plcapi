@@ -294,5 +294,13 @@ class Peers (Table):
             elif isinstance(peer_filter, dict):
                 peer_filter = Filter(Peer.fields, peer_filter)
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
+            elif isinstance(peer_filter, (int, long)):
+                peer_filter = Filter(Peer.fields, {'peer_id': peer_filter})
+                sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
+            elif isinstance(peer_filter, StringTypes):
+                peer_filter = Filter(Peer.fields, {'peername': peer_filter})
+                sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong peer filter %r"%peer_filter
 
         self.selectall(sql)

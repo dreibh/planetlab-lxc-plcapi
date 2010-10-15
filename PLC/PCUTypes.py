@@ -77,10 +77,10 @@ class PCUTypes(Table):
                 pcu_type_filter = Filter(PCUType.fields, pcu_type_filter)
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
             elif isinstance (pcu_type_filter, StringTypes):
-                pcu_type_filter = Filter(PCUType.fields, {'model':[pcu_type_filter]})
+                pcu_type_filter = Filter(PCUType.fields, {'model':pcu_type_filter})
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
             elif isinstance (pcu_type_filter, int):
-                pcu_type_filter = Filter(PCUType.fields, {'pcu_type_id':[pcu_type_filter]})
+                pcu_type_filter = Filter(PCUType.fields, {'pcu_type_id':pcu_type_filter})
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong pcu_type filter %r"%pcu_type_filter

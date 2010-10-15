@@ -101,5 +101,13 @@ class NodeGroups(Table):
             elif isinstance(nodegroup_filter, dict):
                 nodegroup_filter = Filter(NodeGroup.fields, nodegroup_filter)
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
+            elif isinstance(nodegroup_filter, (int, long)):
+                nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': nodegroup_filter})
+                sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
+            elif isinstance(nodegroup_filter, StringTypes):
+                nodegroup_filter = Filter(NodeGroup.fields, {'groupname': nodegroup_filter})
+                sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong node group filter %r"%nodegroup_filter
 
         self.selectall(sql)

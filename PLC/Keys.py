@@ -110,10 +110,12 @@ class Keys(Table):
               ", ".join(self.columns)
 
         if key_filter is not None:
-            if isinstance(key_filter, (list, tuple, set)):
+            if isinstance(key_filter, (list, tuple, set, int, long)):
                 key_filter = Filter(Key.fields, {'key_id': key_filter})
             elif isinstance(key_filter, dict):
                 key_filter = Filter(Key.fields, key_filter)
+            else:
+                raise PLCInvalidArgument, "Wrong key filter %r"%key_filter
             sql += " AND (%s) %s" % key_filter.sql(api)
 
         self.selectall(sql)

@@ -45,12 +45,10 @@ class PersonTags(Table):
               ", ".join(self.columns)
 
         if person_tag_filter is not None:
-            if isinstance(person_tag_filter, (list, tuple, set)):
+            if isinstance(person_tag_filter, (list, tuple, set, int, long)):
                 person_tag_filter = Filter(PersonTag.fields, {'person_tag_id': person_tag_filter})
             elif isinstance(person_tag_filter, dict):
                 person_tag_filter = Filter(PersonTag.fields, person_tag_filter)
-            elif isinstance(person_tag_filter, int):
-                person_tag_filter = Filter(PersonTag.fields, {'person_tag_id': [person_tag_filter]})
             else:
                 raise PLCInvalidArgument, "Wrong person setting filter %r"%person_tag_filter
             sql += " AND (%s) %s" % person_tag_filter.sql(api)

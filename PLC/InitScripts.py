@@ -64,5 +64,13 @@ class InitScripts(Table):
             elif isinstance(initscript_filter, dict):
                 initscript_filter = Filter(InitScript.fields, initscript_filter)
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
+            elif isinstance(initscript_filter, (int, long)):
+                initscript_filter = Filter(InitScript.fields, {'initscript_id': initscript_filter})
+                sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
+            elif isinstance(initscript_filter, StringTypes):
+                initscript_filter = Filter(InitScript.fields, {'name': initscript_filter})
+                sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong initscript filter %r"%initscript_filter
 
         self.selectall(sql)

@@ -57,17 +57,11 @@ class PCUProtocolTypes(Table):
               ", ".join(self.columns)
 
         if protocol_type_filter is not None:
-            if isinstance(protocol_type_filter, (list, tuple, set)):
-                # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), protocol_type_filter)
-                protocol_type_filter = Filter(PCUProtocolType.fields, {'pcu_protocol_type_id': ints})
+            if isinstance(protocol_type_filter, (list, tuple, set, int, long)):
+                protocol_type_filter = Filter(PCUProtocolType.fields, {'pcu_protocol_type_id': protocol_type_filter})
                 sql += " AND (%s) %s" % protocol_type_filter.sql(api, "OR")
             elif isinstance(protocol_type_filter, dict):
                 protocol_type_filter = Filter(PCUProtocolType.fields, protocol_type_filter)
-                sql += " AND (%s) %s" % protocol_type_filter.sql(api, "AND")
-            elif isinstance (protocol_type_filter, int):
-                protocol_type_filter = Filter(PCUProtocolType.fields, {'pcu_protocol_type_id':[protocol_type_filter]})
-
                 sql += " AND (%s) %s" % protocol_type_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong pcu_protocol_type filter %r"%protocol_type_filter

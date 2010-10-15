@@ -325,10 +325,10 @@ class Nodes(Table):
                 node_filter = Filter(allowed_fields, node_filter)
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             elif isinstance (node_filter, StringTypes):
-                node_filter = Filter(Node.fields, {'hostname':[node_filter]})
+                node_filter = Filter(Node.fields, {'hostname':node_filter})
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
-            elif isinstance (node_filter, int):
-                node_filter = Filter(Node.fields, {'node_id':[node_filter]})
+            elif isinstance (node_filter, (int, long)):
+                node_filter = Filter(Node.fields, {'node_id':node_filter})
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong node filter %r"%node_filter

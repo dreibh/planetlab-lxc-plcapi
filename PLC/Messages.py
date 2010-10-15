@@ -41,11 +41,13 @@ class Messages(Table):
             sql += " AND enabled IS %s" % enabled
 
         if message_filter is not None:
-            if isinstance(message_filter, (list, tuple, set)):
+            if isinstance(message_filter, (list, tuple, set, int, long)):
                 message_filter = Filter(Message.fields, {'message_id': message_filter})
                 sql += " AND (%s) %s" % message_filter.sql(api, "OR")
             elif isinstance(message_filter, dict):
                 message_filter = Filter(Message.fields, message_filter)
                 sql += " AND (%s) %s" % message_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong message filter %r"%message_filter
 
         self.selectall(sql)

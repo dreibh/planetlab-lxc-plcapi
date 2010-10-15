@@ -147,7 +147,7 @@ class ConfFiles(Table):
               ", ".join(self.columns)
 
         if conf_file_filter is not None:
-            if isinstance(conf_file_filter, (list, tuple, set)):
+            if isinstance(conf_file_filter, (list, tuple, set, int, long)):
                 conf_file_filter = Filter(ConfFile.fields, {'conf_file_id': conf_file_filter})
             elif isinstance(conf_file_filter, dict):
                 conf_file_filter = Filter(ConfFile.fields, conf_file_filter)

@@ -393,10 +393,10 @@ class Persons(Table):
                 person_filter = Filter(Person.fields, person_filter)
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, StringTypes):
-                person_filter = Filter(Person.fields, {'email':[person_filter]})
+                person_filter = Filter(Person.fields, {'email':person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
-            elif isinstance (person_filter, int):
-                person_filter = Filter(Person.fields, {'person_id':[person_filter]})
+            elif isinstance (person_filter, (int, long)):
+                person_filter = Filter(Person.fields, {'person_id':person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong person filter %r"%person_filter

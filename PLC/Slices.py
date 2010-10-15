@@ -286,10 +286,10 @@ class Slices(Table):
                 slice_filter = Filter(Slice.fields, slice_filter)
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
             elif isinstance (slice_filter, StringTypes):
-                slice_filter = Filter(Slice.fields, {'name':[slice_filter]})
+                slice_filter = Filter(Slice.fields, {'name':slice_filter})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
-            elif isinstance (slice_filter, int):
-                slice_filter = Filter(Slice.fields, {'slice_id':[slice_filter]})
+            elif isinstance (slice_filter, (int, long)):
+                slice_filter = Filter(Slice.fields, {'slice_id':slice_filter})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument, "Wrong slice filter %r"%slice_filter

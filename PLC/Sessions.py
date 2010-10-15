@@ -82,6 +82,14 @@ class Sessions(Table):
             elif isinstance(session_filter, dict):
                 session_filter = Filter(Session.fields, session_filter)
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
+            elif isinstance(session_filter, (int, long)):
+                session_filter = Filter(Session.fields, {'person_id': session_filter})
+                sql += " AND (%s) %s" % session_filter.sql(api, "AND")
+            elif isinstance(session_filter, StringTypes):
+                session_filter = Filter(Session.fields, {'session_id': session_filter})
+                sql += " AND (%s) %s" % session_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong session filter"%session_filter
 
         if expires is not None:
             if expires >= 0:
