@@ -211,42 +211,31 @@ class Filter(Parameter, dict):
                             value = "FALSE"
                         clause = "%s %s %s" % (field, operator, value)
                     else:
-                        value = map(str, map(api.db.quote, value))
-                        do_join = True
                         vals = {}
                         for val in value:
                             base_op, val = get_op_and_val(val)
-                            if base_op != '=':
-                                do_join = False
                             if base_op in vals:
                                 vals[base_op].append(val)
                             else:
                                 vals[base_op] = [val]
-                        if do_join:
-                            if modifiers['&']:
-                                operator = "@>"
-                                value = "ARRAY[%s]" % ", ".join(value)
-                            elif modifiers['|']:
-                                operator = "&&"
-                                value = "ARRAY[%s]" % ", ".join(value)
-                            else:
-                                operator = "IN"
-                                value = "(%s)" % ", ".join(value)
-                            clause = "%s %s %s" % (field, operator, value)
-                        else:
-                            # We need something more complex
-                            subclauses = []
-                            for operator in vals.keys():
-                                if operator == '=':
-                                    subclauses.append("(%s IN (%s))" % (field, ",".join(vals[operator])))
-                                elif operator == 'IS':
-                                    subclauses.append("(%s IS NULL)" % field)
+                        subclauses = []
+                        for operator in vals.keys():
+                            if operator == '=':
+                                if modifiers['&']:
+                                    subclauses.append("(%s @> ARRAY[%s])" % (field, ",".join(vals[operator])))
+                                elif modifiers['|']:
+                                    subclauses.append("(%s && ARRAY[%s])" % (field, ",".join(vals[operator])))
                                 else:
-                                    for value in vals[operator]:
-                                        subclauses.append("(%s %s %s)" % (field, operator, value))
-                            clause = "(" + " OR ".join(subclauses) + ")"
+                                    subclauses.append("(%s IN (%s))" % (field, ",".join(vals[operator])))
+                            elif operator == 'IS':
+                                subclauses.append("(%s IS NULL)" % field)
+                            else:
+                                for value in vals[operator]:
+                                    subclauses.append("(%s %s %s)" % (field, operator, value))
+                        clause = "(" + " OR ".join(subclauses) + ")"
                 else:
                     operator, value = get_op_and_val(value)
+
                     clause = "%s %s %s" % (field, operator, value)
 
                 if modifiers['~']:
