@@ -26,14 +26,6 @@ from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Boot import notify_owners
 
-auth_methods = {'session': SessionAuth,
-                'password': PasswordAuth,
-                'capability': PasswordAuth,
-                'gpg': GPGAuth,
-                'hmac': BootAuth,
-                'hmac_dummybox': BootAuth,
-                'anonymous': AnonymousAuth}
-
 class Auth(Parameter):
     """
     Base class for all API authentication methods, as well as a class
@@ -338,6 +330,14 @@ class PasswordAuth(Auth):
             raise PLCAuthenticationFailure, "Not allowed to call method"
 
         method.caller = person
+
+auth_methods = {'session': SessionAuth,
+                'password': PasswordAuth,
+                'capability': PasswordAuth,
+                'gpg': GPGAuth,
+                'hmac': BootAuth,
+                'hmac_dummybox': BootAuth,
+                'anonymous': AnonymousAuth}
 
 path = os.path.dirname(__file__) + "/Auth.d"
 try:
