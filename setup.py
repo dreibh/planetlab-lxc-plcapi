@@ -22,4 +22,5 @@ setup(py_modules = ['ModPython'],
          ['migrations/README.txt',
           'migrations/extract-views.py'] 
          + glob('migrations/[0-9][0-9][0-9]*')),
+        ('extensions', ['extensions/README.txt']),
         ])
