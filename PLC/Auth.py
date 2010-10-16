@@ -350,5 +350,4 @@ for extension in extensions:
     if not extension.endswith(".py"):
         continue
     execfile("%s/%s" % (path, extension))
-del extension
 del extensions
