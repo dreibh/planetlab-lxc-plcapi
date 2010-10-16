@@ -2,6 +2,8 @@ Create a database extension by creating a tree like follows:
 
 - /usr/share/plc_api/extensions/<name>-up*
 Contains the SQL or script that sets up the extension's database needs.
+This needs to execute
+INSERT INTO plc_db_extensions VALUES ('<name>', <version>);
 
 - /usr/share/plc_api/extensions/<name>-down*
 Contains the SQL or script that removes the extension from the database.
