@@ -8,9 +8,6 @@
 # $URL$
 #
 
-# Metafiles - manage Legacy/ and Accessors by hand
-init := PLC/__init__.py PLC/Methods/__init__.py 
-
 # python-pycurl and python-psycopg2 avail. from fedora 5
 # we used to ship our own version of psycopg2 and pycurl, for fedora4
 # starting with 5.0, support for these two modules is taken out
@@ -25,7 +22,7 @@ bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: $(init) $(subdirs) 
+all: $(subdirs) 
 	python setup.py build
 
 install: 
@@ -34,8 +31,6 @@ install:
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
 	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
-
-$(subdirs): $(init)
 
 $(subdirs): %:
 	$(MAKE) -C $@
@@ -46,37 +41,7 @@ clean:
 	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
 	python setup.py clean && rm -rf build
 
-index: $(init)
-
-index-clean:
-	rm $(init)
-
-#################### regenerate indexes - not used by the build, as both files are svn added - please update as appropriate
-
-########## PLC/
-# the current content of __init__.py
-PLC_now := $(sort $(shell fgrep -v '"' PLC/__init__.py 2>/dev/null))
-# what should be declared
-PLC_paths := $(filter-out %/__init__.py, $(wildcard PLC/*.py))
-PLC_files := $(sort $(notdir $(PLC_paths:.py=)))
-
-ifneq ($(PLC_now),$(PLC_files))
-PLC/__init__.py: force
-endif
-PLC/__init__.py: 
-	echo "This step is obsolete"
-
-########## Methods/
-# the current content of __init__.py
-METHODS_now := $(sort $(shell fgrep -v '"' PLC/Methods/__init__.py 2>/dev/null))
-# what should be declared
-METHODS_paths := $(filter-out %/__init__.py, $(wildcard PLC/Methods/*.py PLC/Methods/system/*.py))
-METHODS_files := $(sort $(notdir $(subst system/, system., $(METHODS_paths:.py=))))
-
-ifneq ($(METHODS_now),$(METHODS_files))
-PLC/Methods/__init__.py: force
-endif
-PLC/Methods/__init__.py: 
+index:
 	echo "This step is obsolete"
 
 ##########
