@@ -20,6 +20,53 @@ set -x
 # Export so that we do not have to specify -p to psql invocations
 export PGPORT=$PLC_DB_PORT
 
+# Install extensions
+function extend_db()
+{
+    shopt -s nullglob
+    for file in /usr/share/plc_api/extensions/*-up; do
+	script=${file#*/}
+	name=${script%-up}
+	extension=${script##*}
+	version=$(psql -U $PLC_DB_USER --quiet --tuples-only --no-align -c \
+		  "SELECT version FROM plc_db_extensions WHERE name='$name' LIMIT 1" \
+		  $PLC_DB_NAME 2>/dev/null | awk '/^[0-9]+$/ { ver=$1 } END { print ver }')
+	if [ $version -eq 0 ]; then
+	    if [ "$extension" = "sql" ] ; then
+	        dialog " - $script (dbdumped)"
+	        dump_planetlab_db "before-$script"
+		psql -U $PLC_DB_USER -f $file $PLC_DB_NAME
+	    elif [ -x $file ] ; then
+	        dialog " - $script (dbdumped)"
+	        dump_planetlab_db "before-$script"
+		$file
+	    else
+	        dialog "\nWarning: extension $file not executable"
+	    fi
+	    check
+	fi
+	for file in /usr/share/plc_api/extensions/$name/migrations/[0-9]*-up-*; do
+	    script=${file#*/}
+	    index=${script%-up-*}
+	    extension=${script##*.}
+	    if [ $index -gt $version ] ; then
+		if [ "$extension" = "sql" ] ; then
+		    dialog " - $script (dbdumped)"
+		    dump_planetlab_db "before-$script"
+		    psql -U $PLC_DB_USER -f $file $PLC_DB_NAME
+		elif [ -x $file ] ; then
+		    dialog " - $script (dbdumped)"
+		    dump_planetlab_db "before-$script"
+		    $file
+		else
+		    dialog "\nWarning: migration $file not executable"
+		fi
+		check
+	    fi
+	done
+    done
+}
+
 # Updates the database by applying all migration scripts in
 # /usr/share/plc_api/migrations/N-up-*, where N is greater than the
 # current subversion. At least one of the migration scripts with the
@@ -116,6 +163,7 @@ case "$1" in
 
 	# Apply schema updates
 	migrate_db
+	extend_db
 
 	# Update the maintenance account username. This can't be
 	# done through the api-config script since it uses the
