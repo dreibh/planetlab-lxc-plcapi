@@ -30,7 +30,7 @@ function extend_db()
 	extension=${script##*.}
 	version=$(psql -U $PLC_DB_USER --quiet --tuples-only --no-align -c \
 		  "SELECT version FROM plc_db_extensions WHERE name='$name' LIMIT 1" \
-		  $PLC_DB_NAME 2>/dev/null | awk '/^[0-9]+$/ { ver=$1 } END { print ver }')
+		  $PLC_DB_NAME 2>/dev/null | awk 'BEGIN { ver=0 } /^[0-9]+$/ { ver=$1 } END { print ver }')
 	if [ $version -eq 0 ]; then
 	    if [ "$extension" = "sql" ] ; then
 	        dialog " - $script (dbdumped)"
