@@ -13,7 +13,7 @@
 # starting with 5.0, support for these two modules is taken out
 
 # Other stuff - doc not implicit, it's redone by myplc-docs
-subdirs := php php/xmlrpc
+subdirs := php/xmlrpc
 
 # autoconf compatible variables
 DESTDIR := /
