@@ -201,3 +201,17 @@ class PLCAPI
   // PLCAPI Methods
   //
 
+  function __call($name, $args)
+  {
+     array_unshift($args, $this->auth);
+     return $this->call($name, $args);
+  }
+}
+
+global $adm;
+
+$adm = new PLCAPI(array('AuthMethod' => "capability",
+			'Username' => PLC_API_MAINTENANCE_USER,
+			'AuthString' => PLC_API_MAINTENANCE_PASSWORD));
+
+?>
