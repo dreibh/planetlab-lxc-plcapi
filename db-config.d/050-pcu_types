@@ -12,7 +12,7 @@ pcu_types = [
      'name': 'Intel AMT v2.5 or v3.0 (Active Management Technology)', },
     
     {'model': 'DRAC',
-     'name': 'DRAC - Dell Remote Access Control (all versions)', },
+     'name': 'DRAC - Dell Remote Access Control (not Modular Chassis (MC))', },
     
     {'model': 'OpenIPMI',
      'name': 'OpenIPMI - Intelligent Platform Management Interface', },
