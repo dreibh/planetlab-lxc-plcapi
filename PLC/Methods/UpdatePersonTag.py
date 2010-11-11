@@ -54,7 +54,9 @@ class UpdatePersonTag(Method):
         if 'admin' not in self.caller['roles']:
             # check caller is affiliated with this person's person
             if not self.caller.can_update(person):
-                raise PLCPermissionDenied, "Not a member of the person's persons: %s"%person['person_ids']
+                raise PLCPermissionDenied, "person_id %s doesn't have access to person_tag_id %s" % (
+                    person['person_id'],
+                    person_tag['person_tag_id'])
 
             required_min_role = person_tag['min_role_id']
             if required_min_role is not None and \
