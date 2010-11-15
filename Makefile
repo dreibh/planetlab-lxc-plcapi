@@ -4,9 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2005 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 # python-pycurl and python-psycopg2 avail. from fedora 5
 # we used to ship our own version of psycopg2 and pycurl, for fedora4

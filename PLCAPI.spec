@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
 %define url $URL$
 
 %define name PLCAPI
