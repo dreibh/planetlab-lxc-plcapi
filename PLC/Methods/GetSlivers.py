@@ -123,6 +123,24 @@ def get_slivers(api, auth, slice_filter, node = None):
 
     return slivers
 
+### The pickle module, used in conjunction with caching has a restriction that it does not
+### work on "connection objects." It doesn't matter if the connection object has
+### an 'str' or 'repr' method, there is a taint check that throws an exception if
+### the pickled class is found to derive from a connection.
+### (To be moved to Method.py)
+
+def sanitize_for_pickle (obj):
+    if (isinstance(obj, dict)):
+        parent = dict(obj)
+        for k in parent.keys(): parent[k] = sanitize_for_pickle (parent[k])
+        return parent
+    elif (isinstance(obj, list)):
+        parent = list(obj)
+        parent = map(sanitize_for_pickle, parent)
+        return parent
+    else:
+        return obj
+
 class GetSlivers(Method):
     """
     Returns a struct containing information about the specified node
