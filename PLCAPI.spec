@@ -43,7 +43,9 @@ Requires: python-twisted-words
 Requires: python-twisted-web
 # ldap
 Requires: python-ldap
-
+# for memcache
+Requires: python-memcached
+Requires: memcached
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
 Conflicts: MyPLC <= 4.3
@@ -116,6 +118,10 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 install -D -m 755 omf/omf_slicemgr.py $RPM_BUILD_ROOT/usr/bin/omf_slicemgr.py
 install -D -m 755 omf/reset_xmpp_pubsub_nodes.py $RPM_BUILD_ROOT/usr/bin/reset_xmpp_pubsub_nodes.py
 mkdir -p $RPM_BUILD_ROOT/var/log/omf
+
+# Install ratelimit log
+touch $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
+chown apache:apache $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 
 %clean
 rm -rf $RPM_BUILD_ROOT
