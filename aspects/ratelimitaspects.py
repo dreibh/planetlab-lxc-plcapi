@@ -23,6 +23,8 @@ class BaseRateLimit(object):
         self.requests = 50 # Number of allowed requests in that time period
         self.expire_after = (self.minutes + 1) * 60
 
+        self.whitelist = []
+
     def before(self, wobj, data, *args, **kwargs):
         # ratelimit_128.112.139.115_201011091532 = 1
         # ratelimit_128.112.139.115_201011091533 = 14
@@ -33,7 +35,7 @@ class BaseRateLimit(object):
         api_method_name = wobj.name
         api_method_source = wobj.source
 
-        if api_method_source == None or api_method_source[0] == self.config.PLC_API_IP:
+        if api_method_source == None or api_method_source[0] == self.config.PLC_API_IP or api_method_source[0] in self.whitelist:
             return
 
         mc = memcache.Client(["%s:11211" % self.config.PLC_API_HOST])
