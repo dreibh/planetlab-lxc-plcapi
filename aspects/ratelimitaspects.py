@@ -51,9 +51,9 @@ class BaseRateLimit(object):
 
         mc = memcache.Client(["%s:11211" % self.config.PLC_API_HOST])
         now = datetime.now()
-        current_key = "%s_%s_%s" % (self.prefix, api_method_source[0], now.strftime("%Y%m%d%H%M"))
+        current_key = "%s_%s_%s_%s" % (self.prefix, api_method_caller, api_method_source[0], now.strftime("%Y%m%d%H%M"))
 
-        keys_to_check = ["%s_%s_%s" % (self.prefix, api_method_source[0], (now - timedelta(minutes = minute)).strftime("%Y%m%d%H%M")) for minute in range(self.minutes + 1)]
+        keys_to_check = ["%s_%s_%s_%s" % (self.prefix, api_method_caller, api_method_source[0], (now - timedelta(minutes = minute)).strftime("%Y%m%d%H%M")) for minute in range(self.minutes + 1)]
 
         try:
             value = mc.incr(current_key)
