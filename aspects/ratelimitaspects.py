@@ -40,13 +40,18 @@ class BaseRateLimit(object):
 
         api_method_name = wobj.name
         api_method_source = wobj.source
-        api_method_caller = args[0]["Username"]
+
+        # FIXME: Support  SessionAuth, GPGAuth, BootAuth and AnonymousAuth
+        try:
+            api_method_caller = args[0]["Username"]
+        except KeyError:
+            api_method_caller = "_"
 
         if api_method_source == None or api_method_source[0] == self.config.PLC_API_IP or api_method_source[0] in self.whitelist:
             return
 
         if api_method_caller == None:
-            self.log("%s called with Username = None" % api_method_source[0])
+            self.log("%s called from %s with Username = None" % (api_method_name, api_method_source[0]))
             return
 
         mc = memcache.Client(["%s:11211" % self.config.PLC_API_HOST])
