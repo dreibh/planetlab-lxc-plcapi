@@ -40,7 +40,11 @@ class BaseRateLimit(object):
 
         api_method_name = wobj.name
         api_method_source = wobj.source
-        api_method = args[0]["AuthMethod"]
+
+        try:
+            api_method = args[0]["AuthMethod"]
+        except:
+            return
 
         if api_method == "session":
             api_method_caller = args[0]["session"]
