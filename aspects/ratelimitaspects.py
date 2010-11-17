@@ -25,7 +25,7 @@ class BaseRateLimit(object):
 
         self.whitelist = []
 
-    def log(self, line)
+    def log(self, line):
         log = open("/var/log/plc_ratelimit.log", "a")
         date = datetime.now().strftime("%d/%m/%y %H:%M")
         log.write("%s - %s\n" % (date, line))
