@@ -1,9 +1,5 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 9423 $
 #
 
 from PLC.Faults import *
@@ -13,8 +9,10 @@ from PLC.Auth import Auth
 
 from PLC.Ilinks import Ilink, Ilinks
 from PLC.Interfaces import Interface, Interfaces
-
+from PLC.TagTypes import TagType, TagTypes
 from PLC.Sites import Sites
+
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class UpdateIlink(Method):
     """
@@ -43,9 +41,23 @@ class UpdateIlink(Method):
             raise PLCInvalidArgument, "No such ilink %r"%ilink_id
         ilink = ilinks[0]
 
-        # xxx see AddIlink for this - should be written once in the Ilink class I guess
-        # checks rights and stuff
+        src_if=Interfaces(self.api,ilink['src_interface_id'])[0]
+        dst_if=Interfaces(self.api,ilink['dst_interface_id'])[0]
+        tag_type_id = ilink['tag_type_id']
+        tag_type = TagTypes (self.api,[tag_type_id])[0]
 
+        # check authorizations
+        if 'admin' in self.caller['roles']:
+            pass
+        elif not AuthorizeHelpers.person_access_tag_type (self.api, self.caller, tag_type):
+            raise PLCPermissionDenied, "%s, no permission to use this tag type"%self.name
+        elif AuthorizeHelpers.interface_belongs_to_person (self.api, src_if, self.caller):
+            pass
+        elif src_if_id != dst_if_id and AuthorizeHelpers.interface_belongs_to_person (self.api, dst_if, self.caller):
+            pass
+        else:
+            raise PLCPermissionDenied, "%s: you must own either the src or dst interface"%self.name
+            
         ilink['value'] = value
         ilink.sync()
 

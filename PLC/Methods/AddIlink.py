@@ -1,9 +1,5 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 9423 $
 #
 from PLC.Faults import *
 from PLC.Method import Method
@@ -13,8 +9,9 @@ from PLC.Auth import Auth
 from PLC.TagTypes import TagType, TagTypes
 from PLC.Ilinks import Ilink, Ilinks
 from PLC.Interfaces import Interface, Interfaces
-
 from PLC.Sites import Sites
+
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddIlink(Method):
     """
@@ -65,21 +62,18 @@ class AddIlink(Method):
             raise PLCInvalidArgument, "Ilink (%s,%d,%d) already exists and has value %r"\
                 %(tag_type['name'],src_if_id,dst_if_id,ilink['value'])
 
-        if 'admin' not in self.caller['roles']:
-#       # check permission : it not admin, is the user affiliated with the right site(s) ????
-#           # locate node
-#           node = Nodes (self.api,[node['node_id']])[0]
-#           # locate site
-#           site = Sites (self.api, [node['site_id']])[0]
-#           # check caller is affiliated with this site
-#           if self.caller['person_id'] not in site['person_ids']:
-#               raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-
-            required_min_role = tag_type ['min_role_id']
-            if required_min_role is not None and \
-                    min(self.caller['role_ids']) > required_min_role:
-                raise PLCPermissionDenied, "Not allowed to modify the specified ilink, requires role %d",required_min_role
-
+        # check authorizations
+        if 'admin' in self.caller['roles']:
+            pass
+        elif not AuthorizeHelpers.person_access_tag_type (self.api, self.caller, tag_type):
+            raise PLCPermissionDenied, "%s, no permission to use this tag type"%self.name
+        elif AuthorizeHelpers.interface_belongs_to_person (self.api, src_if, self.caller):
+            pass
+        elif src_if_id != dst_if_id and AuthorizeHelpers.interface_belongs_to_person (self.api, dst_if, self.caller):
+            pass
+        else:
+            raise PLCPermissionDenied, "%s: you must one either the src or dst interface"%self.name
+            
         ilink = Ilink(self.api)
         ilink['tag_type_id'] = tag_type['tag_type_id']
         ilink['src_interface_id'] = src_if_id

@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 from types import StringTypes
 import string
 

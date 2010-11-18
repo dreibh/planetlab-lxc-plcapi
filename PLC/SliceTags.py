@@ -28,7 +28,6 @@ class SliceTag(Row):
         'tagname': TagType.fields['tagname'],
         'description': TagType.fields['description'],
         'category': TagType.fields['category'],
-        'min_role_id': TagType.fields['min_role_id'],
         'value': Parameter(str, "Slice attribute value"),
         }
 

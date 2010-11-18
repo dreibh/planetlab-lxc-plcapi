@@ -1,12 +1,16 @@
-# $Id$
-# $URL$
+#
+# Thierry Parmentelat - INRIA
+#
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Auth import Auth
+
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
-from PLC.Auth import Auth
+
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class DeleteSliceTag(Method):
     """
@@ -21,7 +25,7 @@ class DeleteSliceTag(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin', 'pi', 'user']
+    roles = ['admin', 'pi', 'user', 'tech']
 
     accepts = [
         Auth(),

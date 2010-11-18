@@ -69,6 +69,8 @@ CREATE TABLE tag_types (
     tag_type_id serial PRIMARY KEY,			-- ID
     tagname text UNIQUE NOT NULL,			-- Tag Name
     description text,					-- Optional Description
+-- this is deprecated -- see migrations/104*
+-- starting with subversion 104, a tag type has a SET OF roles attached to it
     min_role_id integer REFERENCES roles DEFAULT 10,	-- set minimal role required
     category text NOT NULL DEFAULT 'general'		-- Free text for grouping tags together
 ) WITH OIDS;

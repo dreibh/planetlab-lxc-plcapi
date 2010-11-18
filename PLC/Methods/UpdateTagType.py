@@ -8,7 +8,7 @@ from PLC.TagTypes import TagType, TagTypes
 from PLC.Auth import Auth
 
 can_update = lambda (field, value): field in \
-             ['tagname', 'description', 'category', 'min_role_id']
+             ['tagname', 'description', 'category']
 
 class UpdateTagType(Method):
     """

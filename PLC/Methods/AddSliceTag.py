@@ -1,15 +1,19 @@
-# $Id$
-# $URL$
+#
+# Thierry Parmentelat - INRIA
+#
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
+from PLC.Auth import Auth
+
 from PLC.TagTypes import TagType, TagTypes
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.InitScripts import InitScript, InitScripts
-from PLC.Auth import Auth
+
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddSliceTag(Method):
     """
@@ -122,8 +126,8 @@ class AddSliceTag(Method):
 
         # Check if slice attribute alreay exists
         slice_tags_check = SliceTags(self.api, {'slice_id': slice['slice_id'],
-                                                            'tagname': tag_type['tagname'],
-                                                            'value': value})
+                                                'tagname': tag_type['tagname'],
+                                                'value': value})
         for slice_tag_check in slice_tags_check:
             # do not compare between slice tag and sliver tag
             if 'node_id' not in slice_tag and slice_tag_check['node_id'] is not None:

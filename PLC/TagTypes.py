@@ -22,13 +22,14 @@ class TagType (Row):
 
     table_name = 'tag_types'
     primary_key = 'tag_type_id'
-    join_tables = ['node_tag', 'interface_tag', 'slice_tag', 'site_tag', 'person_tag' ]
+    join_tables = ['tag_type_role', 'node_tag', 'interface_tag', 'slice_tag', 'site_tag', 'person_tag' ]
     fields = {
         'tag_type_id': Parameter(int, "Node tag type identifier"),
         'tagname': Parameter(str, "Node tag type name", max = 100),
         'description': Parameter(str, "Node tag type description", max = 254),
         'category' : Parameter (str, "Node tag category", max=64, optional=True),
-        'min_role_id': Parameter(int, "Minimum (least powerful) role that can set or change this attribute"),
+        'role_ids': Parameter([int], "List of role identifiers"),
+        'roles': Parameter([str], "List of roles"),
         }
 
     def validate_name(self, name):
@@ -43,12 +44,9 @@ class TagType (Row):
 
         return name
 
-    def validate_min_role_id(self, role_id):
-        roles = [row['role_id'] for row in Roles(self.api)]
-        if role_id not in roles:
-            raise PLCInvalidArgument, "Invalid role"
+    add_role = Row.add_object(Role, 'tag_type_role')
+    remove_role = Row.remove_object(Role, 'tag_type_role')
 
-        return role_id
 
 class TagTypes(Table):
     """
@@ -59,7 +57,7 @@ class TagTypes(Table):
     def __init__(self, api, tag_type_filter = None, columns = None):
         Table.__init__(self, api, TagType, columns)
 
-        sql = "SELECT %s FROM tag_types WHERE True" % \
+        sql = "SELECT %s FROM view_tag_types WHERE True" % \
               ", ".join(self.columns)
 
         if tag_type_filter is not None:

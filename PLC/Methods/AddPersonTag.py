@@ -1,28 +1,23 @@
-# $Id: AddPersonTag.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: http://svn.planet-lab.org/svn/PLCAPI/tags/PLCAPI-4.3-27/PLC/Methods/AddPersonTag.py $
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 14587 $
 #
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
+from PLC.Persons import Person, Persons
 from PLC.TagTypes import TagType, TagTypes
 from PLC.PersonTags import PersonTag, PersonTags
-from PLC.Persons import Person, Persons
 
-from PLC.Nodes import Nodes
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddPersonTag(Method):
     """
     Sets the specified setting for the specified person
     to the specified value.
 
-    In general only tech(s), PI(s) and of course admin(s) are allowed to
-    do the change, but this is defined in the tag type object.
+    Admins have full access.  Non-admins can change their own tags.
 
     Returns the new person_tag_id (> 0) if successful, faults
     otherwise.
@@ -41,9 +36,6 @@ class AddPersonTag(Method):
 
     returns = Parameter(int, 'New person_tag_id (> 0) if successful')
 
-    object_type = 'Person'
-
-
     def call(self, auth, person_id, tag_type_id_or_name, value):
         persons = Persons(self.api, [person_id])
         if not persons:
@@ -56,24 +48,22 @@ class AddPersonTag(Method):
         tag_type = tag_types[0]
 
         # checks for existence - does not allow several different settings
-        conflicts = PersonTags(self.api,
-                                        {'person_id':person['person_id'],
-                                         'tag_type_id':tag_type['tag_type_id']})
+        conflicts = PersonTags(self.api, {'person_id':person['person_id'],
+                                          'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
-            raise PLCInvalidArgument, "Person %d already has setting %d"%(person['person_id'],
-                                                                               tag_type['tag_type_id'])
+            raise PLCInvalidArgument, "Person %d (%s) already has setting %d"% \
+                (person['person_id'],person['email'], tag_type['tag_type_id'])
 
-        # check permission : it not admin, is the user affiliated with the same site as this person
-        if 'admin' not in self.caller['roles']:
-            # check caller is affiliated with at least one of Person's sites
-            if len(set(person['site_ids']) & set(self.caller['site_ids'])) == 0:
-                raise PLCPermissionDenied, "Not a member of the person's sites: %s"%person['site_ids']
+        # check authorizations
+        if 'admin' in self.caller['roles']:
+            pass
+        # user can change tags on self
+        elif AuthorizeHelpers.person_access_person (self.api, self.caller, person):
+            pass
+        else:
+            raise PLCPermissionDenied, "%s: you can only change your own tags"%self.name
 
-            required_min_role = tag_type ['min_role_id']
-            if required_min_role is not None and \
-                    min(self.caller['role_ids']) > required_min_role:
-                raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
 
         person_tag = PersonTag(self.api)
         person_tag['person_id'] = person['person_id']

@@ -4,9 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 from types import StringTypes
 import socket
@@ -227,6 +224,12 @@ class Interface(Row):
     def update_last_updated(self, commit = True):
         self.update_timestamp('last_updated', commit)
 
+    def delete(self,commit=True):
+        ### need to cleanup ilinks
+        self.api.db.do("DELETE FROM ilink WHERE src_interface_id=%d OR dst_interface_id=%d" % \
+                           (self['interface_id'],self['interface_id']))
+        
+        Row.delete(self)
 
 class Interfaces(Table):
     """

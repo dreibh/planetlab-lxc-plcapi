@@ -1,9 +1,5 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 9423 $
 #
 
 from PLC.Faults import *
@@ -13,13 +9,18 @@ from PLC.Auth import Auth
 
 from PLC.Sites import Sites
 from PLC.Nodes import Node, Nodes
+from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
+
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class UpdateNodeTag(Method):
     """
     Updates the value of an existing node tag
 
-    Access rights depend on the node tag type.
+    Admins have full access.  Non-admins need to 
+    (1) have at least one of the roles attached to the tagtype, 
+    and (2) belong in the same site as the tagged subject.
 
     Returns 1 if successful, faults otherwise.
     """
@@ -34,36 +35,26 @@ class UpdateNodeTag(Method):
 
     returns = Parameter(int, '1 if successful')
 
-    object_type = 'Node'
-
     def call(self, auth, node_tag_id, value):
         node_tags = NodeTags(self.api, [node_tag_id])
         if not node_tags:
             raise PLCInvalidArgument, "No such node tag %r"%node_tag_id
         node_tag = node_tags[0]
 
-        ### reproducing a check from UpdateSliceTag, looks dumb though
-        nodes = Nodes(self.api, [node_tag['node_id']])
-        if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_tag['node_id']
-        node = nodes[0]
+        tag_type_id = node_tag['tag_type_id']
+        tag_type = TagTypes (self.api,[tag_type_id])[0]
+        node = Nodes (self.api, node_tag['node_id'])
 
-        assert node_tag['node_tag_id'] in node['node_tag_ids']
+        # check authorizations
+        if 'admin' in self.caller['roles']:
+            pass
+        elif not AuthorizeHelpers.person_access_tag_type (self.api, self.caller, tag_type):
+            raise PLCPermissionDenied, "%s, no permission to use this tag type"%self.name
+        elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
+            pass
+        else:
+            raise PLCPermissionDenied, "%s: you must belong in the same site as subject node"%self.name
 
-        # check permission : it not admin, is the user affiliated with the right site
-        if 'admin' not in self.caller['roles']:
-            # locate node
-            node = Nodes (self.api,[node['node_id']])[0]
-            # locate site
-            site = Sites (self.api, [node['site_id']])[0]
-            # check caller is affiliated with this site
-            if self.caller['person_id'] not in site['person_ids']:
-                raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-
-            required_min_role = node_tag['min_role_id']
-            if required_min_role is not None and \
-                    min(self.caller['role_ids']) > required_min_role:
-                raise PLCPermissionDenied, "Not allowed to modify the specified node tag, requires role %d",required_min_role
 
         node_tag['value'] = value
         node_tag.sync()

@@ -1,29 +1,26 @@
-# $Id: AddSiteTag.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: http://svn.planet-lab.org/svn/PLCAPI/tags/PLCAPI-4.3-27/PLC/Methods/AddSiteTag.py $
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 14587 $
 #
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
+from PLC.Sites import Site, Sites
+from PLC.Nodes import Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.SiteTags import SiteTag, SiteTags
-from PLC.Sites import Site, Sites
 
-from PLC.Nodes import Nodes
-from PLC.Sites import Sites
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddSiteTag(Method):
     """
     Sets the specified setting for the specified site
     to the specified value.
 
-    In general only tech(s), PI(s) and of course admin(s) are allowed to
-    do the change, but this is defined in the tag type object.
+    Admins have full access.  Non-admins need to 
+    (1) have at least one of the roles attached to the tagtype, 
+    and (2) belong in the same site as the tagged subject.
 
     Returns the new site_tag_id (> 0) if successful, faults
     otherwise.
@@ -42,9 +39,6 @@ class AddSiteTag(Method):
 
     returns = Parameter(int, 'New site_tag_id (> 0) if successful')
 
-    object_type = 'Site'
-
-
     def call(self, auth, site_id, tag_type_id_or_name, value):
         sites = Sites(self.api, [site_id])
         if not sites:
@@ -58,26 +52,23 @@ class AddSiteTag(Method):
 
         # checks for existence - does not allow several different settings
         conflicts = SiteTags(self.api,
-                                        {'site_id':site['site_id'],
-                                         'tag_type_id':tag_type['tag_type_id']})
+                             {'site_id':site['site_id'],
+                              'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
             raise PLCInvalidArgument, "Site %d already has setting %d"%(site['site_id'],
-                                                                               tag_type['tag_type_id'])
+                                                                        tag_type['tag_type_id'])
 
-        # check permission : it not admin, is the user affiliated with the right site
-        if 'admin' not in self.caller['roles']:
-            # locate site
-            site = Sites (self.api, site_id)[0]
-            # check caller is affiliated with this site
-            if self.caller['person_id'] not in site['person_ids']:
-                raise PLCPermissionDenied, "Not a member of the hosting site %s"%site['abbreviated_site']
-
-            required_min_role = tag_type ['min_role_id']
-            if required_min_role is not None and \
-                    min(self.caller['role_ids']) > required_min_role:
-                raise PLCPermissionDenied, "Not allowed to modify the specified site setting, requires role %d",required_min_role
-
+        # check authorizations
+        if 'admin' in self.caller['roles']:
+            pass
+        elif not AuthorizeHelpers.person_access_tag_type (self.api, self.caller, tag_type):
+            raise PLCPermissionDenied, "%s, no permission to use this tag type"%self.name
+        elif AuthorizeHelpers.person_belongs_to_site (self.api, self.caller, site):
+            pass
+        else:
+            raise PLCPermissionDenied, "%s: you must be part of the subject site"%self.name
+            
         site_tag = SiteTag(self.api)
         site_tag['site_id'] = site['site_id']
         site_tag['tag_type_id'] = tag_type['tag_type_id']
