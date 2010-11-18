@@ -12,9 +12,6 @@
 --
 -- NOTE: this file was first created for version 4.3, the filename might be confusing
 --
--- $Id$
--- $URL$
---
 
 SET client_encoding = 'UNICODE';
 
