@@ -61,7 +61,7 @@ class UpdatePersonTag(Method):
             required_min_role = person_tag['min_role_id']
             if required_min_role is not None and \
                     min(self.caller['role_ids']) > required_min_role:
-                raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d",required_min_role
+                raise PLCPermissionDenied, "Not allowed to modify the specified person setting, requires role %d" % required_min_role
 
         person_tag['value'] = value
         person_tag.sync()
