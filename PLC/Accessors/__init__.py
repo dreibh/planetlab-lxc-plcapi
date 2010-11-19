@@ -3,6 +3,6 @@
 __all__ = """
 Accessors_standard
 Accessors_wireless
-Accessors_omf
+Accessors_sliverauth
 Accessors_site
 """.split()
