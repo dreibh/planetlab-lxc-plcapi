@@ -47,8 +47,8 @@ class DeleteNodeTag(Method):
         # check authorizations
         if 'admin' in self.caller['roles']:
             pass
-        elif not AuthorizeHelpers.person_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, no permission to use this tag type"%self.name
+        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
+            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
         elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
             pass
         else:
