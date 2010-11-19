@@ -1,5 +1,5 @@
 -- reverting....
--- DELETE from roles WHERE name='node';
+DELETE from roles WHERE name='node';
 
 -- recreate the min_role_id column
 ALTER TABLE tag_types ADD COLUMN min_role_id integer REFERENCES roles;

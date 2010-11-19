@@ -17,14 +17,18 @@ from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddSliceTag(Method):
     """
-    Sets the specified attribute of the slice (or sliver, if
-    node_id_or_hostname is specified) to the specified value.
+    Sets the specified tag of the slice to the specified value.
+    If nodegroup is specified, this applies to all slivers of that group.
+    If node is specified, this only applies to a sliver.
 
-    Attributes may require the caller to have a particular role in
-    order to be set or changed. Users may only set attributes of
-    slices or slivers of which they are members. PIs may only set
-    attributes of slices or slivers at their sites, or of which they
-    are members. Admins may set attributes of any slice or sliver.
+    Admins have full access, including on nodegroups.
+
+    Non-admins need to have at least one of the roles 
+    attached to the tagtype. In addition:
+    (*) Users may only set tags of slices or slivers of which they are members. 
+    (*) PIs may only set tags of slices or slivers at their sites, or of which they
+    are members. 
+    (*) techs may only set tags of slivers at their sites.
 
     Returns the new slice_tag_id (> 0) if successful, faults
     otherwise.
@@ -60,23 +64,35 @@ class AddSliceTag(Method):
             raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
         tag_type = tag_types[0]
 
-        if not isinstance(self.caller, Node):
-            if ('admin' not in self.caller['roles']):
-                if self.caller['person_id'] in slice['person_ids']:
-                    pass
-                elif 'pi' not in self.caller['roles']:
-                    raise PLCPermissionDenied, "Not a member of the specified slice"
-                elif slice['site_id'] not in self.caller['site_ids']:
-                    raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
-
-                if tag_type['min_role_id'] is not None and \
-                       min(self.caller['role_ids']) > tag_type['min_role_id']:
-                    raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
-        else:
-            ### make node's min_role_id == PI min_role_id
-            node_role_id = 20
-            if tag_type['min_role_id'] is not None and node_role_id > tag_type['min_role_id']:
-                raise PLCPermissionDenied, "Not allowed to set the specified slice attribute"
+        # check authorizations
+        if 'admin' not in self.caller['roles']:
+            # this knows how to deal with self.caller being a node
+            if not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
+                raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
+            # node callers: check the node is in the slice
+            if isinstance(self.caller, Node): 
+                granted=AuthorizeHelpers.node_in_slice (self.api, self.caller, slice)
+            else:
+                if nodegroup_id_or_name:
+                    raise PLCPermissionDenied, "%s, cannot set slice tag on nodegroup"%self.name
+                # try all roles to find a match
+                granted=False
+                for role in self.caller['roles']:
+                    if role=='pi':
+                        if AuthorizeHelpers.person_in_slice(self.api, self.caller, slice): 
+                            granted=True ; break
+                        if node_id_or_hostname is not None and \
+                                AuthorizeHelpers.node_id_or_hostname_in_slice(self.api, node_id_or_hostname_in_slice, slice):
+                            granted=True ; break
+                    elif role=='user':
+                        if AuthorizeHelpers.person_in_slice(self.api, self.caller, slice):
+                            granted=True ; break
+                    elif role=='tech':
+                        if node_id_or_hostname is not None and \
+                                AuthorizeHelpers.node_id_or_hostname_in_slice(self.api, node_id_or_hostname_in_slice, slice):
+                        granted=True ; break
+            if not granted:
+                raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
 
         # if initscript is specified, validate value
         if tag_type['tagname'] in ['initscript']:
@@ -109,7 +125,8 @@ class AddSliceTag(Method):
             system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
             system_slice_ids = system_slice_tags.keys()
             if slice['slice_id'] not in system_slice_ids and node_id not in slice['node_ids']:
-                raise PLCInvalidArgument, "AddSliceTag: slice %s not on specified node %s nor is it a system slice (%r)"%(slice['name'],node['hostname'],system_slice_ids)
+                raise PLCInvalidArgument, "AddSliceTag: slice %s not on specified node %s nor is it a system slice (%r)"%\
+                    (slice['name'],node['hostname'],system_slice_ids)
             slice_tag['node_id'] = node['node_id']
 
         # Sliver attribute shared accross nodes if nodegroup is sepcified
@@ -124,7 +141,7 @@ class AddSliceTag(Method):
 
             slice_tag['nodegroup_id'] = nodegroup['nodegroup_id']
 
-        # Check if slice attribute alreay exists
+        # Check if slice attribute already exists
         slice_tags_check = SliceTags(self.api, {'slice_id': slice['slice_id'],
                                                 'tagname': tag_type['tagname'],
                                                 'value': value})

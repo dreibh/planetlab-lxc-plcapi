@@ -117,6 +117,8 @@ CREATE OR REPLACE VIEW view_ilinks AS
 SELECT * FROM tag_types 
 INNER JOIN ilink USING (tag_type_id);
 
--- INSERT INTO roles (role_id, name) VALUES (50, 'node');
+-- use this to allow nodes to set slice tags
+INSERT INTO roles (role_id, name) VALUES (50, 'node');
 
+--------------------
 UPDATE plc_db_version SET subversion = 104;

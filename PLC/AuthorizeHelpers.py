@@ -2,6 +2,8 @@
 # Thierry Parmentelat - INRIA
 #
 from PLC.Faults import *
+from PLC.Persons import Person
+from PLC.Nodes import Node
 
 class AuthorizeHelpers:
 
@@ -26,13 +28,34 @@ class AuthorizeHelpers:
         return site['site_id'] in person['site_ids']
 
     @staticmethod
-    def person_access_tag_type (api, person, tag_type):
-        return len(set(person['roles']).intersection(set(tag_type['roles'])))!=0
+    def caller_may_access_tag_type (api, caller, tag_type):
+        if isinstance(caller,Person):
+            return len(set(caller['roles']).intersection(set(tag_type['roles'])))!=0
+        elif isinstance(caller,Node):
+            return 'node' in tag_type['roles']
+        else:
+            raise PLCInvalidArgument, "caller_may_access_tag_type - unexpected arg"
 
     @staticmethod
     def person_access_person (api, caller_person, subject_person):
         # keep it simple for now - could be a bit more advanced for PIs maybe
-        return caller_person['person_id'] == subject_person['person_id']
+        try:    return caller_person['person_id'] == subject_person['person_id']
+        except: return False
 
+    @staticmethod
+    def person_in_slice (api, caller_person, slice):
+        return caller_person['person_id'] in slice['person_ids']
+
+    @staticmethod
+    def node_in_slice (api, caller_node, slice):
+        return caller_node['node_id'] in slice['node_ids']
+
+    @staticmethod
+    def node_id_or_hostname_in_slice (api, node_id_or_hostname, slice):
+        if isinstance (node_id_or_hostname,int):
+            return node_id_or_hostname in slice['node_ids']
+        else:
+            try:   return GetNodes(node_id_or_hostname_in_slice)[0]['node_id'] in slice['node_ids']
+            except:return False
 
 
