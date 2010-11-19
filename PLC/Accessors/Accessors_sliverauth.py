@@ -1,7 +1,3 @@
-# Thierry Parmentelat - INRIA
-# $Id$
-# $URL$
-
 from PLC.Nodes import Node
 from PLC.Interfaces import Interface
 from PLC.Slices import Slice
@@ -16,4 +12,9 @@ current_module = sys.modules[__name__]
 
 define_accessors(current_module, Slice, "OmfControl","omf_control",
                  "slice/usertools","Pre-install and configure OMF Resource Controller in slice if set",
+                 get_roles=all_roles, set_roles=all_roles, expose_in_api=True)
+
+
+define_accessors(current_module, Slice, "SliverHMAC","enable_hmac",
+                 "slice/usertools","Create HMAC keys for node in slice (slivers)",
                  get_roles=all_roles, set_roles=all_roles, expose_in_api=True)

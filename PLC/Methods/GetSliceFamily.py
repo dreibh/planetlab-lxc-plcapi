@@ -7,7 +7,7 @@ from PLC.Parameter import *
 from PLC.Slices import Slice, Slices
 
 from PLC.Accessors.Accessors_standard import *                  # import slice accessors
-from PLC.Accessors.Accessors_omf import *                       # import slice accessors
+from PLC.Accessors.Accessors_sliverauth import *                # import slice accessors
 
 class GetSliceFamily(Method):
     """
