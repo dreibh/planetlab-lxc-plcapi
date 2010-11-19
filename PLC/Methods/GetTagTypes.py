@@ -1,9 +1,5 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision: 9423 $
 #
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -25,6 +21,8 @@ class GetTagTypes(Method):
         Auth(),
         Mixed([Mixed(TagType.fields['tag_type_id'],
                      TagType.fields['tagname'])],
+              Mixed(TagType.fields['tag_type_id'],
+                     TagType.fields['tagname']),
               Filter(TagType.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]

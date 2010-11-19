@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id$
-# $URL$
 #################### slice tag types
 # xxx this should move to PLC/Accessors
 
@@ -11,159 +9,136 @@ slicetag_types = \
     {'tagname': "type",
      'description': "Type of slice (e.g. vserver)",
      'category' : 'slice/general',
-     'min_role_id': 20},
+     'roles': ['admin','pi']},
     
     # System slice
     {'tagname': "system",
      'description': "Is a default system slice (1) or not (0 or unset)",
-     'category' : 'slice/general',
-     'min_role_id': 10},
+     'category' : 'slice/general'},
     
     # Slice enabled (1) or suspended (0)
     {'tagname': "enabled",
      'description': "Slice enabled (1 or unset) or suspended (0)",
-     'category' : 'slice/general',
-     'min_role_id': 10},
+     'category' : 'slice/general'},
     
     # Slice reference image
     {'tagname': "vref",
      'description': "Reference image",
      'category' : 'slice/config',
-     'min_role_id': 30},
+     'roles' : ['admin','pi','user']},
     
     # Slice initialization script
     {'tagname': "initscript",
      'description': "Slice initialization script",
      'category' : 'slice/usertools',
-     'min_role_id': 30},
+     'roles' : ['admin','pi','user']},
     
     # IP Addresses for a Slice
     {'tagname': "ip_addresses",
      'description': "Add an ip address to a slice/sliver.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # CPU share
     {'tagname': "cpu_pct",
      'description': "Reserved CPU percent",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "cpu_share",
      'description': "Number of CPU shares",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # Bandwidth limits
     {'tagname': "net_min_rate",
      'description': "Minimum bandwidth (kbps)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_max_rate",
      'description': "Maximum bandwidth (kbps)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_i2_min_rate",
      'description': "Minimum bandwidth over I2 routes (kbps)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_i2_max_rate",
      'description': "Maximum bandwidth over I2 routes (kbps)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_max_kbyte",
      'description': "Maximum daily network Tx KByte limit.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_thresh_kbyte",
      'description': "KByte limit before warning and throttling.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_i2_max_kbyte",
      'description': "Maximum daily network Tx KByte limit to I2 hosts.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_i2_thresh_kbyte",
      'description': "KByte limit to I2 hosts before warning and throttling.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_share",
      'description': "Number of bandwidth shares",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     {'tagname': "net_i2_share",
      'description': "Number of bandwidth shares over I2 routes",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # Disk quota
     {'tagname': "disk_max",
      'description': "Disk quota (1k disk blocks)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # Proper operations
     {'tagname': "proper_op",
      'description': "Proper operation (e.g. bind_socket)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # VServer capabilities 
     {'tagname': "capabilities",
      'description': "VServer bcapabilities (separate by commas)",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # Vsys
     {'tagname': "vsys",
      'description': "Bind vsys script fd's to a slice's vsys directory.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # CoDemux
     {'tagname': "codemux",
      'description': "Demux HTTP between slices using localhost ports. Value in the form 'host, localhost port'.",
-     'category' : 'slice/rspec',
-     'min_role_id': 10},
+     'category' : 'slice/rspec'},
     
     # Delegation
     {'tagname': "delegations",
      'description': "Coma seperated list of slices to give delegation authority to.",
      'category' : 'slice/rspec',
-     'min_role_id': 30},
+     'roles' : ['admin','pi','user']},
 
     # Security capability to empower a slice to make an authenticated API call, set by silverauth NM plugin.
     {'tagname': "hmac",
      'description': "Sliver authorization key.",
      'category' : 'slice/auth',
-     'min_role_id': 20},
+     'roles': ['admin','pi']},
 
     {'tagname': "ssh_key",
      'description': "Sliver public ssh key.",
      'category' : 'slice/auth',
-     'min_role_id': 20},
+     'roles': ['admin','pi']},
 
     # Capability to give a sliver access to unused raw disk
     {'tagname': "rawdisk",
      'description': "map unused raw disk devices into the slice",
      'category' : 'slice/access', # we should get rid of this category thing
-     'min_role_id': 20},
+     'roles': ['admin','pi']},
 
     { 'tagname' : 'exempt_slice_until',
       'description' : 'Exclude this slice from MyOps until given date (YYYYMMDD)',
-      'category' : 'slice/myops', 
-      'min_role_id' : 10} ,
+      'category' : 'slice/myops'},
 
     # DistributedRateLimiting slice
     {'tagname': "drl",
      'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
-     'category' : 'slice/general',
-     'min_role_id': 10},
+     'category' : 'slice/general'},
 
     # OMF controlled slice
     {'tagname': "omf_control",
      'description': "Pre-install and configure OMF Resource Controller in slice if set",
-     'category' : 'slice/usertools',
-     'min_role_id': 10},
+     'category' : 'slice/usertools'},
 ]
 
 # add in the platform supported rlimits to the default_attribute_types
@@ -176,7 +151,6 @@ for entry in resource.__dict__.keys() + ["VLIMIT_OPENFD"]:
                 'tagname': "%s_%s"%(rlim,ty),
                 'description': "Per sliver RLIMIT %s_%s."%(rlim,ty),
                 'category': 'slice/limit',
-                'min_role_id': 10 #admin
                 }
             slicetag_types.append(attribute)
 

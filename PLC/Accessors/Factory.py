@@ -58,17 +58,22 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # The expose_in_api flag tells whether this tag may be handled
 #   through the Add/Get/Update methods as a native field
 #
-# note: tag_min_role_id gets attached to the tagtype instance,
+# note: roles get attached to the tagtype instance,
 # while get_roles and set_roles get attached to the created methods
 # this might need a cleanup
 #
 # in addition a convenience method like e.g. LocateNodeArch is defined
 # in the Accessor class; its purpose is to retrieve the tag, or to create it if needed
+# 
+# Legacy NOTE:
+# prior to plcapi-5.0-19, this used to accept an additional argument
+# named min_role_id; this was redundant and confusing, it has been
+# removed, we now use set_roles to restrict access on the corresponding tag
 
 def define_accessors (module, objclass, methodsuffix, tagname,
                       category, description,
-                      get_roles=['admin'], set_roles=['admin'],
-                      tag_min_role_id=10, expose_in_api = False):
+                      get_roles=['admin'], set_roles=['admin'], 
+                      expose_in_api = False):
 
     if objclass not in taggable_classes:
         try:
@@ -126,7 +131,7 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         return self.locate_or_create_tag (tagname=tagname,
                                           category=category,
                                           description=description,
-                                          min_role_id=tag_min_role_id)
+                                          roles=set_roles)
 
     # attach it to the Accessor class
     setattr(Accessor,locator_name,locate_or_create_tag)

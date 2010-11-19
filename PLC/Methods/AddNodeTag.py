@@ -65,7 +65,7 @@ class AddNodeTag(Method):
         if 'admin' in self.caller['roles']:
             pass
         elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
+            raise PLCPermissionDenied, "%s, forbidden tag %s (%s)"%(self.name,tag_type['tagname'],self.caller['email'])
         elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
             pass
         else:

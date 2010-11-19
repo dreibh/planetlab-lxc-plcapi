@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id: 010-node_tags 
-# $URL: 
 #################### node tag types
 
 # Setup default node tag types
@@ -10,7 +8,7 @@ nodetag_types = \
     {'tagname': 'hrn',
      'description': 'SFA human readable name',
      'category' : 'node/sfa',
-     'min_role_id': 40},
+     'roles' : ['admin','pi','user','tech']},
 ]
 
 for nodetag_type in nodetag_types:

@@ -10,6 +10,7 @@
 # as the cached information then becomes wrong
 
 from PLC.TagTypes import TagTypes, TagType
+from PLC.Roles import Roles, Role
 
 # implementation
 class Accessor (object) :
@@ -29,7 +30,7 @@ This is implemented as a singleton, so we can cache results over time"""
     def get_cache (self,tagname): return self.cache[tagname]
     def set_cache (self,tagname,tag_id): self.cache[tagname]=tag_id
 
-    def locate_or_create_tag (self,tagname,category, description, min_role_id):
+    def locate_or_create_tag (self, tagname, category, description, roles):
         "search tag type from tagname & create if needed"
 
         # cached ?
@@ -43,10 +44,16 @@ This is implemented as a singleton, so we can cache results over time"""
             # not found: create it
             tag_type_fields = {'tagname':tagname,
                                'category' :  category,
-                               'description' : description,
-                               'min_role_id': min_role_id}
+                               'description' : description}
             tag_type = TagType (self.api, tag_type_fields)
             tag_type.sync()
+            for role in roles:
+                try: 
+                    role_obj=Roles (self.api, role)[0]
+                    tag_type.add_role(role_obj)
+                except:
+                    # xxx todo find a more appropriate way of notifying this
+                    print "Accessor.locate_or_create_tag: Could not add role %r to tag_type %s"%(role,tagname)
         tag_type_id = tag_type['tag_type_id']
         self.set_cache(tagname,tag_type_id)
         return tag_type_id

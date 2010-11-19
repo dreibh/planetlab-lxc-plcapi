@@ -35,6 +35,9 @@ def SetTagType(tag_type):
         g_known_tag_types.sort()
     else:
         UpdateTagType(tag_type['tagname'], tag_type)
+    if 'roles' in tag_type:
+        for role in tag_type['roles']:
+            AddRoleToTagType(role,tag_type['tagname'])
 
 # Get list of existing (enabled, global) files
 g_conf_files = GetConfFiles()
