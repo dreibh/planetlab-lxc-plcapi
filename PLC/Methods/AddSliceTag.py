@@ -90,7 +90,7 @@ class AddSliceTag(Method):
                     elif role=='tech':
                         if node_id_or_hostname is not None and \
                                 AuthorizeHelpers.node_id_or_hostname_in_slice(self.api, node_id_or_hostname_in_slice, slice):
-                        granted=True ; break
+                            granted=True ; break
             if not granted:
                 raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
 
