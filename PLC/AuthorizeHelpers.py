@@ -2,24 +2,25 @@
 # Thierry Parmentelat - INRIA
 #
 from PLC.Faults import *
-from PLC.Persons import Person
-from PLC.Nodes import Node
+from PLC.Persons import Persons,Person
+from PLC.Sites import Sites,Site
+from PLC.Nodes import Nodes,Node
 
 class AuthorizeHelpers:
 
     @staticmethod
     def interface_belongs_to_person (api,interface, person):
         try:
-            node=api.GetNodes(interface['node_id'])[0]
-            return node_belong_to_person (api, node, person)
+            node=Nodes(api,[interface['node_id']])[0]
+            return AuthorizeHelpers.node_belong_to_person (api, node, person)
         except:
             return False
 
     @staticmethod
     def node_belongs_to_person (api, node, person):
         try:
-            site=api.GetSites(node['site_id'])[0]
-            return person_belongs_to_site (api, person, site)
+            site=Sites(api,[node['site_id']])[0]
+            return AuthorizeHelpers.person_belongs_to_site (api, person, site)
         except:
             return False
 
@@ -55,7 +56,7 @@ class AuthorizeHelpers:
         if isinstance (node_id_or_hostname,int):
             return node_id_or_hostname in slice['node_ids']
         else:
-            try:   return GetNodes(node_id_or_hostname_in_slice)[0]['node_id'] in slice['node_ids']
+            try:   return Nodes(api,node_id_or_hostname_in_slice)[0]['node_id'] in slice['node_ids']
             except:return False
 
 
