@@ -69,7 +69,8 @@ class AddNodeTag(Method):
         elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
             pass
         else:
-            raise PLCPermissionDenied, "%s: you must belong in the same site as subject node"%self.name
+            raise PLCPermissionDenied, "%s: caller %r must belong in the same site as subject node %s"%\
+                (self.name,self.caller,node['hostname'])
 
 
         node_tag = NodeTag(self.api)
