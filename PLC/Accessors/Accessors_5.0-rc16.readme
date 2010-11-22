@@ -1,0 +1,29 @@
+Starting with 5.0-rc16, tag types do not have a so-called
+'min_role_id' any more`, but rather a set of roles exactly like a
+person this impacts the way accessors are defined, as
+'define_accessors' does not support min_role_id anymore in addition,
+there was a rather confusing redundancy between 'min_role_id' and
+'set_roles', as the latter was used for implementing the access rights
+to the 'Set' method
+
+If you have defined accessors local to your site in Accessors_site.py,
+that actually use the min_role_id feature, then here is how to tweak
+them from this release on.
+
+If you want to keep the same kind of behaviour, just replace
+min_role_id with set_roles as per the table below
+
+min_role_id 	|	set_roles
+------------------------------------
+10		| ['admin']
+20		| ['admin','pi']
+30		| ['admin','pi','user']
+40		| ['admin','pi','user','tech']
+
+Now you might wish to take advantage of the new flexibility instead.
+
+Also please note that 'node' is now an explicit role, so if e.g. a
+slicetag needs to be set from the node directly, then it needs to have
+the 'node' role as well
+
+
