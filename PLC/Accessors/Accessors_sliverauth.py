@@ -1,3 +1,6 @@
+#
+# Thierry Parmentelat - INRIA
+#
 from PLC.Nodes import Node
 from PLC.Interfaces import Interface
 from PLC.Slices import Slice

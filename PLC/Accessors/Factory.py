@@ -1,7 +1,6 @@
+#
 # Thierry Parmentelat - INRIA
-# $Id$
-# $URL$
-
+#
 from types import NoneType
 
 from PLC.Faults import *
@@ -72,7 +71,7 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 
 def define_accessors (module, objclass, methodsuffix, tagname,
                       category, description,
-                      get_roles=['admin'], set_roles=['admin'], 
+                      get_roles=all_roles, admin_roles, 
                       expose_in_api = False):
 
     if objclass not in taggable_classes:
