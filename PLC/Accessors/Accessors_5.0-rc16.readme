@@ -24,6 +24,5 @@ Now you might wish to take advantage of the new flexibility instead.
 
 Also please note that 'node' is now an explicit role, so if e.g. a
 slicetag needs to be set from the node directly, then it needs to have
-the 'node' role as well
-
+the 'node' role as well.
 
