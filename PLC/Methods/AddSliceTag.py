@@ -26,9 +26,8 @@ class AddSliceTag(Method):
     Non-admins need to have at least one of the roles 
     attached to the tagtype. In addition:
     (*) Users may only set tags of slices or slivers of which they are members. 
-    (*) PIs may only set tags of slices or slivers at their sites, or of which they
-    are members. 
-    (*) techs may only set tags of slivers at their sites.
+    (*) PIs may only set tags of slices in their site
+    (*) techs cannot use this method
 
     Returns the new slice_tag_id (> 0) if successful, faults
     otherwise.
@@ -65,34 +64,43 @@ class AddSliceTag(Method):
         tag_type = tag_types[0]
 
         # check authorizations
-        if 'admin' not in self.caller['roles']:
-            # this knows how to deal with self.caller being a node
-            if not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-                raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-            # node callers: check the node is in the slice
-            if isinstance(self.caller, Node): 
-                granted=AuthorizeHelpers.node_in_slice (self.api, self.caller, slice)
-            else:
-                if nodegroup_id_or_name:
-                    raise PLCPermissionDenied, "%s, cannot set slice tag on nodegroup"%self.name
-                # try all roles to find a match
+        granted=False
+        if 'admin' in self.caller['roles']:
+            granted=True
+        # does caller have right role(s) ? this knows how to deal with self.caller being a node
+        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
+            granted=False
+        # node callers: check the node is in the slice
+        elif isinstance(self.caller, Node): 
+            # nodes can only set their own sliver tags
+            if node_id_or_hostname is None: 
                 granted=False
-                for role in self.caller['roles']:
-                    if role=='pi':
-                        if AuthorizeHelpers.person_in_slice(self.api, self.caller, slice): 
-                            granted=True ; break
-                        if node_id_or_hostname is not None and \
-                                AuthorizeHelpers.node_id_or_hostname_in_slice(self.api, node_id_or_hostname_in_slice, slice):
-                            granted=True ; break
-                    elif role=='user':
-                        if AuthorizeHelpers.person_in_slice(self.api, self.caller, slice):
-                            granted=True ; break
-                    elif role=='tech':
-                        if node_id_or_hostname is not None and \
-                                AuthorizeHelpers.node_id_or_hostname_in_slice(self.api, node_id_or_hostname_in_slice, slice):
-                            granted=True ; break
-            if not granted:
-                raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
+            elif not AuthorizeHelpers.node_match_id (self.api, self.caller, node_id_or_hostname):
+                granted=False
+            elif not AuthorizeHelpers.node_in_slice (self.api, self.caller, slice):
+                granted=False
+        # caller is a non-admin person
+        else:
+            # only admins can handle slice tags on a nodegroup
+            if nodegroup_id_or_name:
+                raise PLCPermissionDenied, "%s, cannot set slice tag %s on nodegroup - restricted to admins"%\
+                    (self.name,tag_type['tagname'])
+            # if a node is specified it is expected to be in the slice
+            if node_id_or_hostname:
+                if not AuthorizeHelpers.node_id_in_slice (self.api, node_id_or_hostname, slice):
+                    raise PLCPermissionDenied, "%s, node must be in slice when setting sliver tag"
+            # try all roles to find a match - tech are ignored b/c not in AddSliceTag.roles anyways
+            for role in AuthorizeHelpers.person_tag_type_common_roles(self.api,self.caller,tag_type):
+                # regular users need to be in the slice
+                if role=='user':
+                    if AuthorizeHelpers.person_in_slice(self.api, self.caller, slice):
+                        granted=True ; break
+                # for convenience, pi's can tweak all the slices in their site
+                elif role=='pi':
+                    if AuthorizeHelpers.slice_belongs_to_pi (self.api, slice, self.caller):
+                        granted=True ; break
+        if not granted:
+            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
 
         # if initscript is specified, validate value
         if tag_type['tagname'] in ['initscript']:

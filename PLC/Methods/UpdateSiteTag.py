@@ -49,7 +49,7 @@ class UpdateSiteTag(Method):
             pass
         elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
             raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-        elif AuthorizeHelpers.person_belongs_to_site (self.api, self.caller, site):
+        elif AuthorizeHelpers.person_in_site (self.api, self.caller, site):
             pass
         else:
             raise PLCPermissionDenied, "%s: you must be part of the subject site"%self.name

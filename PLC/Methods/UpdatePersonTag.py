@@ -42,7 +42,7 @@ class UpdatePersonTag(Method):
         if 'admin' in self.caller['roles']:
             pass
         # user can change tags on self
-        elif AuthorizeHelpers.person_access_person (self.api, self.caller, person):
+        elif AuthorizeHelpers.person_may_access_person (self.api, self.caller, person):
             pass
         else:
             raise PLCPermissionDenied, "%s: you can only change your own tags"%self.name
