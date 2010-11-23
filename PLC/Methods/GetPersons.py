@@ -52,6 +52,8 @@ class GetPersons(Method):
             if not valid_person_ids:
                 return []
 
+            # xxx this looks suspicious
+            # we need to add this restriction even if person_filter is defined
             if person_filter is None:
                 person_filter = valid_person_ids
 

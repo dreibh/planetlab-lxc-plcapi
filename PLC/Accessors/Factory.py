@@ -45,6 +45,7 @@ taggable_classes = { Node : {'table_class' : Nodes,
 
 # xxx probably defined someplace else
 admin_roles = ['admin']
+person_roles = [ 'admin', 'pi', 'tech', 'user' ]
 all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
 tech_roles = [ 'admin', 'pi', 'tech' ]
 

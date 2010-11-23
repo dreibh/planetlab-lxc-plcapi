@@ -1,5 +1,6 @@
-# $Id$
-# $URL$
+#
+# Thierry Parmentelat - INRIA
+#
 from types import StringTypes
 try:
     set

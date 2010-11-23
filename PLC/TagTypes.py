@@ -1,6 +1,3 @@
-# $Id$
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
 #
