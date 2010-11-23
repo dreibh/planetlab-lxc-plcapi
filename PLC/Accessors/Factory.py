@@ -71,7 +71,7 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 
 def define_accessors (module, objclass, methodsuffix, tagname,
                       category, description,
-                      get_roles=all_roles, admin_roles, 
+                      get_roles=all_roles, set_roles=admin_roles, 
                       expose_in_api = False):
 
     if objclass not in taggable_classes:
