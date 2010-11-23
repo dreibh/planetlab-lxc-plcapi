@@ -1,6 +1,5 @@
+#
 # Thierry Parmentelat - INRIA
-# $Id$
-# $URL$
 #
 # Accessors_site.py is the place where you can define your own local tag accessors
 # this will not be overwritten through rpm upgrades

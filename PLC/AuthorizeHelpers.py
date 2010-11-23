@@ -36,8 +36,8 @@ class AuthorizeHelpers:
         return caller_person['person_id'] in slice['person_ids']
 
     @staticmethod
-    def slice_in_site (api, slice, slice):
-        return caller_person['person_id'] in slice['person_ids']
+    def slice_in_site (api, slice, site):
+        return slice['site_id']==site['site_id']
 
     @staticmethod
     def node_id_in_slice (api, node_id_or_hostname, slice):
