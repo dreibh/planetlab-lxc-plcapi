@@ -70,6 +70,9 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # named min_role_id; this was redundant and confusing, it has been
 # removed, we now use set_roles to restrict access on the corresponding tag
 
+# the convention here is that methodsuffix should be mixed case, e.g. MyStuff
+# while tagname is expected to be lowercase
+# you then end up with e.g. GetPersonMyStuff
 def define_accessors (module, objclass, methodsuffix, tagname,
                       category, description,
                       get_roles=all_roles, set_roles=admin_roles, 
