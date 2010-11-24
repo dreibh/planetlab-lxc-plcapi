@@ -42,7 +42,11 @@ class DeleteNodeTag(Method):
 
         tag_type_id = node_tag['tag_type_id']
         tag_type = TagTypes (self.api,[tag_type_id])[0]
-        node = Nodes (self.api, node_tag['node_id'])
+
+        nodes = Nodes (self.api, node_tag['node_id'])
+        if not nodes:
+            raise PLCInvalidArgument, "No such node %d"%node_tag['node_id']
+        node=nodes[0]
 
         # check authorizations
         if 'admin' in self.caller['roles']:

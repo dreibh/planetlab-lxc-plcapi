@@ -41,7 +41,11 @@ class UpdateInterfaceTag(Method):
 
         tag_type_id = interface_tag['tag_type_id']
         tag_type = TagTypes (self.api,[tag_type_id])[0]
-        interface = Interfaces (self.api, interface_tag['interface_id'])
+
+        interfaces = Interfaces (self.api, interface_tag['interface_id'])
+        if not interfaces:
+            raise PLCInvalidArgument, "No such interface %d"%interface_tag['interface_id']
+        interface=interfaces[0]
 
         # check authorizations
         if 'admin' in self.caller['roles']:

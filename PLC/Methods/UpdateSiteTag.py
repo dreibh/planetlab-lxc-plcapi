@@ -42,7 +42,11 @@ class UpdateSiteTag(Method):
 
         tag_type_id = site_tag['tag_type_id']
         tag_type = TagTypes (self.api,[tag_type_id])[0]
-        site = Sites (self.api, site_tag['site_id'])
+
+        sites = Sites (self.api, site_tag['site_id'])
+        if not sites:
+            raise PLCInvalidArgument, "No such site %d"%site_tag['site_id']
+        site=sites[0]
         
         # check authorizations
         if 'admin' in self.caller['roles']:
