@@ -9,8 +9,6 @@ from PLC.Auth import Auth
 from PLC.PersonTags import PersonTag, PersonTags
 from PLC.Persons import Person, Persons
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
-
 class DeletePersonTag(Method):
     """
     Deletes the specified person setting
@@ -41,13 +39,7 @@ class DeletePersonTag(Method):
         person=persons[0]
 
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        # user can change tags on self
-        elif AuthorizeHelpers.person_may_access_person (self.api, self.caller, person):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you can only change your own tags"%self.name
+        person.caller_may_write_tag(self.api,self.caller,tag_type)
 
         person_tag.delete()
         self.object_ids = [person_tag['person_tag_id']]

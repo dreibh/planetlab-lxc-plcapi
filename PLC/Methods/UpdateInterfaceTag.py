@@ -48,15 +48,7 @@ class UpdateInterfaceTag(Method):
         interface=interfaces[0]
 
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-        elif AuthorizeHelpers.interface_belongs_to_person (self.api, interface, self.caller):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you must belong in the same site as subject interface"%self.name
-
+        interface.caller_may_write_tag(self.api, self.caller, tag_type)
 
         interface_tag['value'] = value
         interface_tag.sync()

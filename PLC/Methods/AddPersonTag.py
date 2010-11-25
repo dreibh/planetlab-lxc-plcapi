@@ -10,7 +10,6 @@ from PLC.Persons import Person, Persons
 from PLC.TagTypes import TagType, TagTypes
 from PLC.PersonTags import PersonTag, PersonTags
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class AddPersonTag(Method):
     """
@@ -56,14 +55,7 @@ class AddPersonTag(Method):
                 (person['person_id'],person['email'], tag_type['tag_type_id'])
 
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        # user can change tags on self
-        elif AuthorizeHelpers.person_may_access_person (self.api, self.caller, person):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you can only change your own tags"%self.name
-
+        person.caller_may_write_tag (self.api,self.caller,tag_type)
 
         person_tag = PersonTag(self.api)
         person_tag['person_id'] = person['person_id']

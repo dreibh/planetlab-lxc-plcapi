@@ -21,8 +21,6 @@ from PLC.SiteTags import SiteTags, SiteTag
 from PLC.Persons import Persons, Person
 from PLC.PersonTags import PersonTags, PersonTag
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
-
 # known classes : { class -> details }
 taggable_classes = { Node : {'table_class' : Nodes,
                              'joins_class' : NodeTags, 'join_class' : NodeTag,

@@ -48,15 +48,8 @@ class DeleteSiteTag(Method):
         site=sites[0]
         
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-        elif AuthorizeHelpers.person_in_site (self.api, self.caller, site):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you must be part of the subject site"%self.name
-            
+        site.caller_may_write_tag(self.api,self.caller,tag_type)
+
         site_tag.delete()
         self.object_ids = [site_tag['site_tag_id']]
 

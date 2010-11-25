@@ -11,8 +11,6 @@ from PLC.Nodes import Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.SiteTags import SiteTag, SiteTags
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
-
 class AddSiteTag(Method):
     """
     Sets the specified setting for the specified site
@@ -60,14 +58,7 @@ class AddSiteTag(Method):
                                                                         tag_type['tag_type_id'])
 
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-        elif AuthorizeHelpers.person_in_site (self.api, self.caller, site):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you must be part of the subject site"%self.name
+        site.caller_may_write_tag(self.api,self.caller,tag_type)
             
         site_tag = SiteTag(self.api)
         site_tag['site_id'] = site['site_id']
