@@ -4,9 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 import crypt
 try:
@@ -71,23 +68,23 @@ class GPGAuth(Auth):
             peers = Peers(method.api, [auth['name']])
             if peers:
                 if 'peer' not in method.roles:
-                    raise PLCAuthenticationFailure, "Not allowed to call method"
+                    raise PLCAuthenticationFailure, "GPGAuth: Not allowed to call method, missing 'peer' role"
 
                 method.caller = peer = peers[0]
                 keys = [peer['key']]
             else:
                 persons = Persons(method.api, {'email': auth['name'], 'enabled': True, 'peer_id': None})
                 if not persons:
-                    raise PLCAuthenticationFailure, "No such user '%s'" % auth['name']
+                    raise PLCAuthenticationFailure, "GPGAuth: No such user '%s'" % auth['name']
 
                 if not set(person['roles']).intersection(method.roles):
-                    raise PLCAuthenticationFailure, "Not allowed to call method"
+                    raise PLCAuthenticationFailure, "GPGAuth: Not allowed to call method, missing role"
 
                 method.caller = person = persons[0]
                 keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg", 'peer_id': None})
 
             if not keys:
-                raise PLCAuthenticationFailure, "No GPG key on record for peer or user '%s'"
+                raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"
 
             for key in keys:
                 try:
@@ -124,34 +121,34 @@ class SessionAuth(Auth):
         # Get session record
         sessions = Sessions(method.api, [auth['session']], expires = None)
         if not sessions:
-            raise PLCAuthenticationFailure, "No such session"
+            raise PLCAuthenticationFailure, "SessionAuth: No such session"
         session = sessions[0]
 
         try:
             if session['node_id'] is not None:
                 nodes = Nodes(method.api, {'node_id': session['node_id'], 'peer_id': None})
                 if not nodes:
-                    raise PLCAuthenticationFailure, "No such node"
+                    raise PLCAuthenticationFailure, "SessionAuth: No such node"
                 node = nodes[0]
 
                 if 'node' not in method.roles:
-                    raise PLCAuthenticationFailure, "Not allowed to call method"
+                    raise PLCAuthenticationFailure, "SessionAuth: Not allowed to call method, missing 'node' role"
 
                 method.caller = node
 
             elif session['person_id'] is not None and session['expires'] > time.time():
                 persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True, 'peer_id': None})
                 if not persons:
-                    raise PLCAuthenticationFailure, "No such account"
+                    raise PLCAuthenticationFailure, "SessionAuth: No such account"
                 person = persons[0]
 
                 if not set(person['roles']).intersection(method.roles):
-                    raise PLCPermissionDenied, "Not allowed to call method"
+                    raise PLCPermissionDenied, "Not allowed to call method, missing role"
 
                 method.caller = persons[0]
 
             else:
-                raise PLCAuthenticationFailure, "Invalid session"
+                raise PLCAuthenticationFailure, "SessionAuth: Invalid session"
 
         except PLCAuthenticationFailure, fault:
             session.delete()
@@ -202,12 +199,12 @@ class BootAuth(Auth):
         assert auth.has_key('node_id')
 
         if 'node' not in method.roles:
-            raise PLCAuthenticationFailure, "Not allowed to call method"
+            raise PLCAuthenticationFailure, "BootAuth: Not allowed to call method, missing 'node' role"
 
         try:
             nodes = Nodes(method.api, {'node_id': auth['node_id'], 'peer_id': None})
             if not nodes:
-                raise PLCAuthenticationFailure, "No such node"
+                raise PLCAuthenticationFailure, "BootAuth: No such node"
             node = nodes[0]
 
             if node['key']:
@@ -231,16 +228,16 @@ class BootAuth(Auth):
                             break
 
                 if not interface or not interface['is_primary']:
-                    raise PLCAuthenticationFailure, "No primary network interface on record"
+                    raise PLCAuthenticationFailure, "BootAuth: No primary network interface on record"
 
                 if method.source is None:
-                    raise PLCAuthenticationFailure, "Cannot determine IP address of requestor"
+                    raise PLCAuthenticationFailure, "BootAuth: Cannot determine IP address of requestor"
 
                 if interface['ip'] != method.source[0]:
-                    raise PLCAuthenticationFailure, "Requestor IP %s does not match node IP %s" % \
+                    raise PLCAuthenticationFailure, "BootAuth: Requestor IP %s does not match node IP %s" % \
                           (method.source[0], interface['ip'])
             else:
-                raise PLCAuthenticationFailure, "No node key or boot nonce"
+                raise PLCAuthenticationFailure, "BootAuth: No node key or boot nonce"
 
             # Yes, this is the "canonicalization" method used.
             args = self.canonicalize(args)
@@ -253,7 +250,7 @@ class BootAuth(Auth):
             digest = hmac.new(str(key), msg.encode('utf-8'), sha).hexdigest()
 
             if digest != auth['value']:
-                raise PLCAuthenticationFailure, "Call could not be authenticated"
+                raise PLCAuthenticationFailure, "BootAuth: Call could not be authenticated"
 
             method.caller = node
 
@@ -274,7 +271,7 @@ class AnonymousAuth(Auth):
 
     def check(self, method, auth, *args):
         if 'anonymous' not in method.roles:
-            raise PLCAuthenticationFailure, "Not allowed to call method anonymously"
+            raise PLCAuthenticationFailure, "AnonymousAuth: method cannot be called anonymously"
 
         method.caller = None
 
@@ -298,7 +295,7 @@ class PasswordAuth(Auth):
         # Get record (must be enabled)
         persons = Persons(method.api, {'email': auth['Username'].lower(), 'enabled': True, 'peer_id': None})
         if len(persons) != 1:
-            raise PLCAuthenticationFailure, "No such account"
+            raise PLCAuthenticationFailure, "PasswordAuth: No such account"
 
         person = persons[0]
 
@@ -309,13 +306,13 @@ class PasswordAuth(Auth):
             # only be used on particular machines (those in a list).
             sources = method.api.config.PLC_API_MAINTENANCE_SOURCES.split()
             if method.source is not None and method.source[0] not in sources:
-                raise PLCAuthenticationFailure, "Not allowed to login to maintenance account"
+                raise PLCAuthenticationFailure, "PasswordAuth: Not allowed to login to maintenance account"
 
             # Not sure why this is not stored in the DB
             password = method.api.config.PLC_API_MAINTENANCE_PASSWORD
 
             if auth['AuthString'] != password:
-                raise PLCAuthenticationFailure, "Maintenance account password verification failed"
+                raise PLCAuthenticationFailure, "PasswordAuth: Maintenance account password verification failed"
         else:
             # Compare encrypted plaintext against encrypted password stored in the DB
             plaintext = auth['AuthString'].encode(method.api.encoding)
@@ -324,10 +321,10 @@ class PasswordAuth(Auth):
             # Protect against blank passwords in the DB
             if password is None or password[:12] == "" or \
                crypt.crypt(plaintext, password[:12]) != password:
-                raise PLCAuthenticationFailure, "Password verification failed"
+                raise PLCAuthenticationFailure, "PasswordAuth: Password verification failed"
 
         if not set(person['roles']).intersection(method.roles):
-            raise PLCAuthenticationFailure, "Not allowed to call method"
+            raise PLCAuthenticationFailure, "PasswordAuth: Not allowed to call method, missing role"
 
         method.caller = person
 
