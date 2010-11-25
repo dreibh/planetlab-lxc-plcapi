@@ -77,6 +77,7 @@ class AuthorizeHelpers:
             site=Sites(api,[node['site_id']])[0]
             return AuthorizeHelpers.person_in_site (api, person, site)
         except:
+            import traceback
             return False
 
     # does the slice belong to the site that the (pi) user is in ?
@@ -84,3 +85,19 @@ class AuthorizeHelpers:
     def slice_belongs_to_pi (api, slice, pi):
         return slice['site_id'] in pi['site_ids']
 
+
+# authorization method - check if a given caller can set tag on this object
+# called in {Add,Update,Delete}NodeTags methods and in the accessors factory
+def caller_may_write_node_tag (node, api, caller, tag_type):
+    if 'admin' in caller['roles']:
+        pass
+    elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
+        raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
+    elif AuthorizeHelpers.node_belongs_to_person (api, node, caller):
+        pass
+    else:
+        raise PLCPermissionDenied, "Writing node tag: must belong in the same site as %s"%\
+            (node['hostname'])
+
+setattr(Node,'caller_may_write_tag',caller_may_write_node_tag)
+        

@@ -12,8 +12,6 @@ from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
-
 class DeleteNodeTag(Method):
     """
     Deletes the specified node tag
@@ -49,14 +47,7 @@ class DeleteNodeTag(Method):
         node=nodes[0]
 
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
-        elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: you must belong in the same site as subject node"%self.name
+        node.caller_may_write_tag(self.api,self.caller,tag_type)
 
         node_tag.delete()
         self.object_ids = [node_tag['node_tag_id']]

@@ -11,8 +11,6 @@ from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
 
-from PLC.AuthorizeHelpers import AuthorizeHelpers
-
 class AddNodeTag(Method):
     """
     Sets the specified tag for the specified node
@@ -60,18 +58,8 @@ class AddNodeTag(Method):
             raise PLCInvalidArgument, "Node %d already has tag %d"%(node['node_id'],
                                                                     tag_type['tag_type_id'])
 
-
         # check authorizations
-        if 'admin' in self.caller['roles']:
-            pass
-        elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s (%s)"%(self.name,tag_type['tagname'],self.caller['email'])
-        elif AuthorizeHelpers.node_belongs_to_person (self.api, node, self.caller):
-            pass
-        else:
-            raise PLCPermissionDenied, "%s: caller %r must belong in the same site as subject node %s"%\
-                (self.name,self.caller,node['hostname'])
-
+        node.caller_may_write_tag(self.api,self.caller,tag_type)
 
         node_tag = NodeTag(self.api)
         node_tag['node_id'] = node['node_id']
