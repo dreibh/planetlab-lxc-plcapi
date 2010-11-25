@@ -290,7 +290,6 @@ class Node(Row):
         self['deleted'] = True
         self.sync(commit)
 
-
 class Nodes(Table):
     """
     Representation of row(s) from the nodes table in the
