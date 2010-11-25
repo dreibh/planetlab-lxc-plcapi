@@ -21,8 +21,7 @@ from PLC.SiteTags import SiteTags, SiteTag
 from PLC.Persons import Persons, Person
 from PLC.PersonTags import PersonTags, PersonTag
 
-# this is another story..
-#from PLC.Ilinks import Ilink
+from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 # known classes : { class -> details }
 taggable_classes = { Node : {'table_class' : Nodes,
@@ -40,7 +39,6 @@ taggable_classes = { Node : {'table_class' : Nodes,
                      Person: {'table_class' : Persons,
                              'joins_class': PersonTags, 'join_class': PersonTag,
                              'secondary_key':'email'},
-#                     Ilink : xxx
                      }
 
 # xxx probably defined someplace else
@@ -117,12 +115,14 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     setattr(get_class,'roles',get_roles)
     setattr(get_class,'accepts',get_accepts)
     setattr(get_class,'returns', get_returns)
-    setattr(get_class,'skip_typecheck',True)
+# that was useful for legacy method only, but we now need type_checking
+#    setattr(get_class,'skip_type_check',True)
 
     setattr(set_class,'roles',set_roles)
     setattr(set_class,'accepts',set_accepts)
     setattr(set_class,'returns', set_returns)
-    setattr(set_class,'skip_typecheck',True)
+# that was useful for legacy method only, but we now need type_checking
+#    setattr(set_class,'skip_type_check',True)
 
     table_class = taggable_classes[objclass]['table_class']
     joins_class = taggable_classes[objclass]['joins_class']
@@ -143,7 +143,8 @@ def define_accessors (module, objclass, methodsuffix, tagname,
     def get_call (self, auth, id_or_name):
         # locate the tag, see above
         locator = getattr(Accessor,locator_name)
-        tag_type_id = locator(AccessorSingleton(self.api))
+        tag_type = locator(AccessorSingleton(self.api))
+        tag_type_id=tag_type['tag_type_id']
 
         filter = {'tag_type_id':tag_type_id}
         if isinstance (id_or_name,int):
@@ -167,16 +168,25 @@ def define_accessors (module, objclass, methodsuffix, tagname,
             filter={primary_key:id_or_name}
         else:
             filter={secondary_key:id_or_name}
-        objs = table_class(self.api, filter,[primary_key,secondary_key])
+# we need the full monty b/c of the permission system
+#        objs = table_class(self.api, filter,[primary_key,secondary_key])
+        objs = table_class(self.api, filter)
         if not objs:
             raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
-        primary_id = objs[0][primary_key]
+        # the object being tagged
+        obj=objs[0]
+        primary_id = obj[primary_key]
 
         # locate the tag, see above
         locator = getattr(Accessor,locator_name)
-        tag_type_id = locator(AccessorSingleton(self.api))
+        tag_type = locator(AccessorSingleton(self.api))
+        tag_type_id = tag_type['tag_type_id']
 
-        # locate the join object (e.g. NodeTag, SliceTag or InterfaceTag)
+        # check authorization
+        if hasattr(objclass,'caller_may_write_tag'):
+            obj.caller_may_write_tag (self.api,self.caller,tag_type)
+
+        # locate the join object (e.g. NodeTag or similar)
         filter = {'tag_type_id':tag_type_id}
         if isinstance (id_or_name,int):
             filter[primary_key]=id_or_name

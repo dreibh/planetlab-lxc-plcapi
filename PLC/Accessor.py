@@ -28,7 +28,7 @@ This is implemented as a singleton, so we can cache results over time"""
 
     def has_cache (self,tagname): return self.cache.has_key(tagname)
     def get_cache (self,tagname): return self.cache[tagname]
-    def set_cache (self,tagname,tag_id): self.cache[tagname]=tag_id
+    def set_cache (self,tagname,tag_type): self.cache[tagname]=tag_type
 
     def locate_or_create_tag (self, tagname, category, description, roles):
         "search tag type from tagname & create if needed"
@@ -54,9 +54,8 @@ This is implemented as a singleton, so we can cache results over time"""
                 except:
                     # xxx todo find a more appropriate way of notifying this
                     print "Accessor.locate_or_create_tag: Could not add role %r to tag_type %s"%(role,tagname)
-        tag_type_id = tag_type['tag_type_id']
-        self.set_cache(tagname,tag_type_id)
-        return tag_type_id
+        self.set_cache(tagname,tag_type)
+        return tag_type
 
 
 ####################

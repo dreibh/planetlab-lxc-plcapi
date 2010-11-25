@@ -4,10 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
-
 import xmlrpclib
 from types import *
 import textwrap
@@ -84,7 +80,8 @@ class Method (object):
             start = time.time()
 
             # legacy code cannot be type-checked, due to the way Method.args() works
-            if not hasattr(self,"skip_typecheck"):
+            # as of 5.0-rc16 we don't use skip_type_check anymore
+            if not hasattr(self,"skip_type_check"):
                 (min_args, max_args, defaults) = self.args()
 
                 # Check that the right number of arguments were passed in
