@@ -19,7 +19,7 @@ from PLC.Sites import Site
 from PLC.Persons import Person
 #from PLC.Ilinks import Ilink
 
-from PLC.Accessors.Factory import define_accessors, all_roles, tech_roles
+from PLC.Accessors.Factory import define_accessors, all_roles, person_roles, tech_roles
 
 import sys
 current_module = sys.modules[__name__]
