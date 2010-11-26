@@ -5,6 +5,8 @@ from PLC.Faults import *
 from PLC.Persons import Persons,Person
 from PLC.Sites import Sites,Site
 from PLC.Nodes import Nodes,Node
+from PLC.Interfaces import Interfaces,Interface
+from PLC.Slices import Slices,Slice
 
 class AuthorizeHelpers:
 
