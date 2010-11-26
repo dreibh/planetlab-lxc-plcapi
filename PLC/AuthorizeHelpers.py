@@ -149,7 +149,7 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
         granted=True
     # does caller have right role(s) ? this knows how to deal with caller being a node
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
-    granted=False
+        granted=False
     # node callers: check the node is in the slice
     elif isinstance(caller, Node): 
         # nodes can only set their own sliver tags
