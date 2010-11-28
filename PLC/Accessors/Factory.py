@@ -181,8 +181,9 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         tag_type_id = tag_type['tag_type_id']
 
         # check authorization
-        if hasattr(objclass,'caller_may_write_tag'):
-            obj.caller_may_write_tag (self.api,self.caller,tag_type)
+        if not hasattr(objclass,'caller_may_write_tag'):
+            raise PLCAuthenticationFailure, "class %s misses method caller_may_write_tag"%objclass.__name__
+        obj.caller_may_write_tag (self.api,self.caller,tag_type)
 
         # locate the join object (e.g. NodeTag or similar)
         filter = {'tag_type_id':tag_type_id}
