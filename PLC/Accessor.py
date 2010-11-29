@@ -21,6 +21,8 @@ This is implemented as a singleton, so we can cache results over time"""
 
     _instance = None
 
+    tag_locators={}
+
     def __init__ (self, api):
         self.api=api
         # 'tagname'=>'tag_id'
@@ -57,6 +59,23 @@ This is implemented as a singleton, so we can cache results over time"""
         self.set_cache(tagname,tag_type)
         return tag_type
 
+    # a locator is a function that retrieves - or creates - a tag_type instance
+    @staticmethod
+    def register_tag_locator (name, tag_locator):
+        Accessor.tag_locators[name]=tag_locator
+
+    @staticmethod
+    def retrieve_tag_locator (name):
+        return Accessor.tag_locators[name]
+    
+    # this is designed to be part of the 'service plc start' sequence
+    # it ensures the creation of all the tagtypes defined 
+    # in the various accessors
+    # it's not easy to have define_accessors do this because at
+    # load-time as we do not have an instance of API yet
+    def run_all_tag_locators (self):
+        for (name, tag_locator) in Accessor.tag_locators.items():
+            tag_locator(self)
 
 ####################
 # make it a singleton so we can cache stuff in there over time

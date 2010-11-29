@@ -131,20 +131,20 @@ def define_accessors (module, objclass, methodsuffix, tagname,
 
     # locate the tag and create it if needed
     # this method is attached to the Accessor class
-    def locate_or_create_tag (self):
+    def tag_locator (self):
         return self.locate_or_create_tag (tagname=tagname,
                                           category=category,
                                           description=description,
                                           roles=set_roles)
 
     # attach it to the Accessor class
-    setattr(Accessor,locator_name,locate_or_create_tag)
+    Accessor.register_tag_locator(locator_name,tag_locator)
 
     # body of the get method
     def get_call (self, auth, id_or_name):
         # locate the tag, see above
-        locator = getattr(Accessor,locator_name)
-        tag_type = locator(AccessorSingleton(self.api))
+        tag_locator = Accessor.retrieve_tag_locator(locator_name)
+        tag_type = tag_locator(AccessorSingleton(self.api))
         tag_type_id=tag_type['tag_type_id']
 
         filter = {'tag_type_id':tag_type_id}
@@ -179,8 +179,8 @@ def define_accessors (module, objclass, methodsuffix, tagname,
         primary_id = obj[primary_key]
 
         # locate the tag, see above
-        locator = getattr(Accessor,locator_name)
-        tag_type = locator(AccessorSingleton(self.api))
+        tag_locator = Accessor.retrieve_tag_locator(locator_name)
+        tag_type = tag_locator(AccessorSingleton(self.api))
         tag_type_id = tag_type['tag_type_id']
 
         # check authorization

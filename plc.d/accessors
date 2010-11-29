@@ -1,0 +1,14 @@
+#!/usr/bin/plcsh
+# -*- python -*-
+
+#
+# priority: 901
+#
+
+from PLC.Accessor import AccessorSingleton
+
+if __name__ == '__main__':
+    print "Ensuring creationg of accessor tags"
+    print 'api=%r'%api
+    AccessorSingleton(api).run_all_tag_locators()
+
