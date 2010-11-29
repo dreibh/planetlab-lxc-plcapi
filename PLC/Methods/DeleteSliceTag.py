@@ -10,6 +10,9 @@ from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices
 from PLC.Nodes import Node, Nodes
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class DeleteSliceTag(Method):
     """
     Deletes the specified slice or sliver attribute.

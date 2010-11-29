@@ -13,6 +13,9 @@ from PLC.SliceTags import SliceTag, SliceTags
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.InitScripts import InitScript, InitScripts
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class AddSliceTag(Method):
     """
     Sets the specified tag of the slice to the specified value.

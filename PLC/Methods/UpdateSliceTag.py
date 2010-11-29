@@ -13,6 +13,9 @@ from PLC.InitScripts import InitScript, InitScripts
 
 from PLC.AuthorizeHelpers import AuthorizeHelpers
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class UpdateSliceTag(Method):
     """
     Updates the value of an existing slice or sliver attribute.

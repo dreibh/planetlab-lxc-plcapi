@@ -11,6 +11,9 @@ from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class AddNodeTag(Method):
     """
     Sets the specified tag for the specified node

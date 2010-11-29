@@ -11,6 +11,7 @@ from PLC.Nodes import Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.SiteTags import SiteTag, SiteTags
 
+# need to import so the core classes get decorated with caller_may_write_tag
 from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 class DeleteSiteTag(Method):

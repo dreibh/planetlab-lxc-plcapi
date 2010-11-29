@@ -9,6 +9,9 @@ from PLC.Auth import Auth
 from PLC.PersonTags import PersonTag, PersonTags
 from PLC.Persons import Person, Persons
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class UpdatePersonTag(Method):
     """
     Updates the value of an existing person setting

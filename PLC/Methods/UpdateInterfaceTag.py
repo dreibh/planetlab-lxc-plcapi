@@ -12,6 +12,9 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.TagTypes import TagType, TagTypes
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 
+# need to import so the core classes get decorated with caller_may_write_tag
+from PLC.AuthorizeHelpers import AuthorizeHelpers
+
 class UpdateInterfaceTag(Method):
     """
     Updates the value of an existing interface setting
