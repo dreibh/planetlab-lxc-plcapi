@@ -1,5 +1,4 @@
-# $Id$
-# $URL$
+# log system for PLCAPI
 import time
 import sys
 import syslog
