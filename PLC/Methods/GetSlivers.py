@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import time
 
 from PLC.Faults import *
@@ -28,7 +26,7 @@ from PLC.Accessors.Accessors_standard import *
 MAXINT =  2L**31-1
 
 # slice_filter essentially contains the slice_ids for the relevant slices (on the node + system & delegated slices)
-def get_slivers(api, auth, slice_filter, node = None):
+def get_slivers(api, caller, auth, slice_filter, node = None):
     # Get slice information
     slices = Slices(api, slice_filter, ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
 
@@ -109,7 +107,7 @@ def get_slivers(api, auth, slice_filter, node = None):
         if slice['expires'] > MAXINT:  slice['expires']= MAXINT
 
         # expose the slice vref as computed by GetSliceFamily
-        family = GetSliceFamily (api).call(auth, slice['slice_id'])
+        family = GetSliceFamily (api,caller).call(auth, slice['slice_id'])
 
         slivers.append({
             'name': slice['name'],
@@ -272,7 +270,7 @@ class GetSlivers(Method):
         controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
         slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
 
-        slivers = get_slivers(self.api, auth, slice_ids, node)
+        slivers = get_slivers(self.api, self.caller, auth, slice_ids, node)
 
         # get the special accounts and keys needed for the node
         # root
@@ -314,7 +312,7 @@ class GetSlivers(Method):
         personsitekeys=get_all_admin_keys(self.api)
         accounts.append({'name':'root','keys':personsitekeys})
 
-        hrn = GetNodeHrn(self.api).call(auth,node['node_id'])
+        hrn = GetNodeHrn(self.api,self.caller).call(auth,node['node_id'])
 
         # XMPP config for omf federation
         try:

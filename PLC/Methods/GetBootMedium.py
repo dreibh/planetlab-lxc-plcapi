@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import random
 import base64
 import os
@@ -264,13 +262,13 @@ class GetBootMedium(Method):
         node_id=node['node_id']
 
         # no support for deployment-based BootCD's, use kvariants instead
-        node_pldistro = GetNodePldistro (self.api).call(auth, node_id)
+        node_pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
         if node_pldistro: pldistro = node_pldistro
 
-        node_fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
+        node_fcdistro = GetNodeFcdistro (self.api,self.caller).call(auth, node_id)
         if node_fcdistro: fcdistro = node_fcdistro
 
-        node_arch = GetNodeArch (self.api).call(auth,node_id)
+        node_arch = GetNodeArch (self.api,self.caller).call(auth,node_id)
         if node_arch: arch = node_arch
 
         return (pldistro,fcdistro,arch)

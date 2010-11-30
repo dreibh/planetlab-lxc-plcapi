@@ -40,10 +40,10 @@ class GetNodeFlavour(Method):
         # the deployment tag, if set, wins
         # xxx Thierry: this probably is wrong; we need fcdistro to be set anyway
         # for generating the proper yum config....
-        deployment = GetNodeDeployment (self.api).call(auth,node_id)
+        deployment = GetNodeDeployment (self.api,self.caller).call(auth,node_id)
         if deployment: return deployment
 
-        pldistro = GetNodePldistro (self.api).call(auth, node_id)
+        pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
         if not pldistro:
             pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
             SetNodePldistro(self.api).call(auth,node_id,pldistro)
@@ -53,12 +53,12 @@ class GetNodeFlavour(Method):
 
     def extensions (self, auth, node_id, fcdistro, arch):
         try:
-            return [ "%s-%s-%s"%(e,fcdistro,arch) for e in GetNodeExtensions(self.api).call(auth,node_id).split() ]
+            return [ "%s-%s-%s"%(e,fcdistro,arch) for e in GetNodeExtensions(self.api,self.caller).call(auth,node_id).split() ]
         except:
             return []
 
     def plain (self, auth, node_id):
-        return not not GetNodePlainBootstrapfs(self.api).call(auth,node_id)
+        return not not GetNodePlainBootstrapfs(self.api,self.caller).call(auth,node_id)
 
     def call(self, auth, node_id_or_name):
         # Get node information
@@ -68,13 +68,13 @@ class GetNodeFlavour(Method):
         node = nodes[0]
         node_id = node['node_id']
 
-        arch = GetNodeArch (self.api).call(auth,node_id)
+        arch = GetNodeArch (self.api,self.caller).call(auth,node_id)
         # if not set, use the global default and tag the node, in case the global default changes later on
         if not arch:
             arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
             SetNodeArch (self.api).call(auth,node_id,arch)
 
-        fcdistro = GetNodeFcdistro (self.api).call(auth, node_id)
+        fcdistro = GetNodeFcdistro (self.api,self.caller).call(auth, node_id)
         if not fcdistro:
             fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
             SetNodeFcdistro (self.api).call (auth, node_id, fcdistro)

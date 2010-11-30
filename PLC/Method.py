@@ -59,13 +59,18 @@ class Method (object):
 
         return True
 
-    def __init__(self, api):
+    def __init__(self, api,caller=None):
         self.name = self.__class__.__name__
         self.api = api
 
-        # Auth may set this to a Person instance (if an anonymous
-        # method, will remain None).
-        self.caller = None
+        if caller: 
+            # let a method call another one by propagating its caller
+            self.caller=caller
+        else:
+            # Auth may set this to a Person instance (if an anonymous
+            # method, will remain None).
+            self.caller = None
+        
 
         # API may set this to a (addr, port) tuple if known
         self.source = None

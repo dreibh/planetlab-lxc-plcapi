@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 from PLC.Method import Method
 from PLC.Auth import Auth
 from PLC.Faults import *
@@ -39,21 +37,21 @@ class GetSliceFamily(Method):
         slice = slices[0]
         slice_id = slice['slice_id']
 
-        arch = GetSliceArch (self.api).call(auth,slice_id)
+        arch = GetSliceArch (self.api,self.caller).call(auth,slice_id)
         if not arch: arch = self.api.config.PLC_FLAVOUR_SLICE_ARCH
 
-        pldistro = GetSlicePldistro (self.api).call(auth, slice_id)
+        pldistro = GetSlicePldistro (self.api,self.caller).call(auth, slice_id)
         if not pldistro: pldistro = self.api.config.PLC_FLAVOUR_SLICE_PLDISTRO
 
-        fcdistro = GetSliceFcdistro (self.api).call(auth, slice_id)
+        fcdistro = GetSliceFcdistro (self.api,self.caller).call(auth, slice_id)
         if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_SLICE_FCDISTRO
 
         # the vref tag, if set, wins over pldistro
-        vref = GetSliceVref (self.api).call(auth,slice_id)
+        vref = GetSliceVref (self.api,self.caller).call(auth,slice_id)
 
         # omf-control'ed slivers need the omf vserver reference image
         # this is to avoid asking users to set both tags 'omf_control' and 'vref'
-        if not vref and GetSliceOmfControl(self.api).call(auth,slice_id):
+        if not vref and GetSliceOmfControl(self.api,self.caller).call(auth,slice_id):
             SetSliceVref (self.api) (auth,slice_id,'omf')
             vref='omf'
 
