@@ -31,19 +31,17 @@ define_accessors(current_module, Slice, "Initscript","initscript",
                  "slice/usertools", "Slice initialization script",
                  set_roles=["admin","pi","user"], expose_in_api=True)
 
-# xxx the accessor factory should enforce the category and descriptions provided here.
-# and BTW the tag should be created right away as far as possible, or at least when a Get is issued
-# also note that the two 'arch' instances use here will end in the same unique TagType object,
-# so you should make sure to use the same category/description for both
+# xxx the accessor factory should enforce the category, descriptions and roles provided here.
+# BootManager might need to set any of these 3, so 'node' needs to be in set_roles
 define_accessors(current_module, Slice, "Arch", "arch",
                  "node/slice/config", "node arch or slivers arch",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
+                 set_roles=["pi","user","tech","node"], expose_in_api=True)
 define_accessors(current_module, Slice, "Pldistro", "pldistro",
                  "node/slice/config", "PlanetLab distribution to use for node or slivers",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
+                 set_roles=["pi","user","tech","node"], expose_in_api=True)
 define_accessors(current_module, Slice, "Fcdistro", "fcdistro",
                  "node/slice/config", "Fedora or CentOS distribution to use for node or slivers",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
+                 set_roles=["pi","user","tech","node"], expose_in_api=True)
 
 # Ditto for the GetNodeFlavour method
 define_accessors(current_module, Node, "Arch", "arch",
