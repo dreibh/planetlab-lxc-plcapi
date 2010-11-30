@@ -87,17 +87,23 @@ class AuthorizeHelpers:
     def slice_belongs_to_pi (api, slice, pi):
         return slice['site_id'] in pi['site_ids']
 
+    @staticmethod
+    def caller_is_node (api, caller, node):
+        return 'node_id' in caller and caller['node_id']==node['node_id']
+
 
 # authorization methods - check if a given caller can set tag on this object
 # called in {Add,Update,Delete}<Class>Tags methods, and in the accessors created in factory
 # attach these as <Class>.caller_may_write_tag so accessors can find it
 
 def caller_may_write_node_tag (node, api, caller, tag_type):
-    if 'admin' in caller['roles']:
+    if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
         raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
     elif AuthorizeHelpers.node_belongs_to_person (api, node, caller):
+        pass
+    elif AuthorizeHelpers.caller_is_node (api, caller, node):
         pass
     else:
         raise PLCPermissionDenied, "Writing node tag: must belong in the same site as %s"%\
@@ -107,7 +113,7 @@ setattr(Node,'caller_may_write_tag',caller_may_write_node_tag)
         
 
 def caller_may_write_interface_tag (interface, api, caller, tag_type):
-    if 'admin' in caller['roles']:
+    if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
         raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
@@ -121,7 +127,7 @@ setattr(Interface,'caller_may_write_tag',caller_may_write_interface_tag)
         
 
 def caller_may_write_site_tag (site, api, caller, tag_type):
-    if 'admin' in caller['roles']:
+    if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
         raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
@@ -134,7 +140,7 @@ setattr(Site,'caller_may_write_tag',caller_may_write_site_tag)
 
 
 def caller_may_write_person_tag (person, api, caller, tag_type):
-    if 'admin' in caller['roles']:
+    if 'roles' in caller and 'admin' in caller['roles']:
         pass
     # user can change tags on self
     elif AuthorizeHelpers.person_may_access_person (api, caller, person):
@@ -147,7 +153,7 @@ setattr(Person,'caller_may_write_tag',caller_may_write_person_tag)
 
 def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostname=None, nodegroup_id_or_name=None):
     granted=False
-    if 'admin' in caller['roles']:
+    if 'roles' in caller and 'admin' in caller['roles']:
         granted=True
     # does caller have right role(s) ? this knows how to deal with caller being a node
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):

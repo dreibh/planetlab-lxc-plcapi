@@ -46,7 +46,7 @@ class GetNodeFlavour(Method):
         pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
         if not pldistro:
             pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
-            SetNodePldistro(self.api).call(auth,node_id,pldistro)
+            SetNodePldistro(self.api,self.caller).call(auth,node_id,pldistro)
 
         # xxx would make sense to check the corresponding bootstrapfs is available
         return "%s-%s-%s"%(pldistro,fcdistro,arch)
@@ -72,12 +72,12 @@ class GetNodeFlavour(Method):
         # if not set, use the global default and tag the node, in case the global default changes later on
         if not arch:
             arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
-            SetNodeArch (self.api).call(auth,node_id,arch)
+            SetNodeArch (self.api,self.caller).call(auth,node_id,arch)
 
         fcdistro = GetNodeFcdistro (self.api,self.caller).call(auth, node_id)
         if not fcdistro:
             fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
-            SetNodeFcdistro (self.api).call (auth, node_id, fcdistro)
+            SetNodeFcdistro (self.api,self.caller).call (auth, node_id, fcdistro)
 
         # xxx could use some sanity checking, and could provide fallbacks
         return { 'nodefamily' : self.nodefamily(auth,node_id, fcdistro, arch),
