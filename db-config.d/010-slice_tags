@@ -2,6 +2,9 @@
 #################### slice tag types
 # xxx this should move to PLC/Accessors
 
+# vref is now defined in an accessor
+# initscript is now defined in an accessor
+    
 # Setup default slice tag types
 slicetag_types = \
 [
@@ -20,18 +23,6 @@ slicetag_types = \
     {'tagname': "enabled",
      'description': "Slice enabled (1 or unset) or suspended (0)",
      'category' : 'slice/general'},
-    
-    # Slice reference image
-    {'tagname': "vref",
-     'description': "Reference image",
-     'category' : 'slice/config',
-     'roles' : ['admin','pi','user']},
-    
-    # Slice initialization script
-    {'tagname': "initscript",
-     'description': "Slice initialization script",
-     'category' : 'slice/usertools',
-     'roles' : ['admin','pi','user']},
     
     # IP Addresses for a Slice
     {'tagname': "ip_addresses",
@@ -83,10 +74,11 @@ slicetag_types = \
      'description': "Disk quota (1k disk blocks)",
      'category' : 'slice/rspec'},
     
+    # deprecated in nov. 2010
     # Proper operations
-    {'tagname': "proper_op",
-     'description': "Proper operation (e.g. bind_socket)",
-     'category' : 'slice/rspec'},
+    #{'tagname': "proper_op",
+    # 'description': "Proper operation (e.g. bind_socket)",
+    # 'category' : 'slice/rspec'},
     
     # VServer capabilities 
     {'tagname': "capabilities",
@@ -95,7 +87,7 @@ slicetag_types = \
     
     # Vsys
     {'tagname': "vsys",
-     'description': "Bind vsys script fd's to a slice's vsys directory.",
+     'description': "Bind vsys script fd's to a slice's /vsys directory.",
      'category' : 'slice/rspec'},
     
     # CoDemux
