@@ -4,6 +4,18 @@
 # Accessors_site.py is the place where you can define your own local tag accessors
 # this will not be overwritten through rpm upgrades
 #
+# to ensure creation of new tag_types, just run 
+#   service plc start accessors
+# also for the running service to take the new accessors into account, you need to
+#   apachectl restart
+# or to stay on the safe side, simply do
+#   service plc restart
+#
+# please note however that if a tag_type already exists in the DB, then 
+# changing the corresponding accessors creation code WILL NOT alter the 
+# tag_type in the DB; that applies to roles and other desc. or categ. 
+# you will thus need to apply them manually 
+#
 # Now that Sites are taggable too, the name may be confusing, think of is as
 # Accessors_local.py
 #
