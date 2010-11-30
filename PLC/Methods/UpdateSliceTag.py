@@ -6,9 +6,10 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
-from PLC.SliceTags import SliceTag, SliceTags
+from PLC.TagTypes import TagTypes, TagType
 from PLC.Nodes import Node
 from PLC.Slices import Slice, Slices
+from PLC.SliceTags import SliceTag, SliceTags
 from PLC.InitScripts import InitScript, InitScripts
 
 from PLC.AuthorizeHelpers import AuthorizeHelpers
