@@ -45,7 +45,7 @@ class UpdateSliceTag(Method):
             raise PLCInvalidArgument, "No such slice attribute"
         slice_tag = slice_tags[0]
 
-        tag_type_id = node_tag['tag_type_id']
+        tag_type_id = slice_tag['tag_type_id']
         tag_type = TagTypes (self.api,[tag_type_id])[0]
 
         slices = Slices(self.api, [slice_tag['slice_id']])
