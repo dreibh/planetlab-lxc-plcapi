@@ -9,6 +9,7 @@ from PLC.Auth import Auth
 
 from PLC.Persons import Person, Persons
 from PLC.PersonTags import PersonTag, PersonTags
+from PLC.Sites import Sites, Site
 
 class GetPersonTags(Method):
     """
