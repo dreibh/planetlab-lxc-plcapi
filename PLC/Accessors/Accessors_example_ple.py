@@ -1,6 +1,4 @@
 # Thierry Parmentelat - INRIA
-# $Id: Accessors_site.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: http://svn.planet-lab.org/svn/PLCAPI/tags/PLCAPI-4.3-29/PLC/Accessors/Accessors_site.py $
 #
 
 methods=[]
@@ -38,14 +36,14 @@ define_accessors(current_module, Node, "Reliability", "reliability",
                  "node/monitor/ui/header=R/type=int/rank=ad",
                  # description : used to add a footnote to the table if header is set in category
                  "average reliability (% uptime) over the last week",
-                  get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
+                  set_roles=tech_roles, expose_in_api=True)
 
 define_accessors(current_module, Node, "Load", "load",
                  "node/monitor/ui/header=l/type=sortAlphaNumericBottom",
                  "average load (% CPU utilization) over the last week",
-                  get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
+                  set_roles=tech_roles, expose_in_api=True)
 
 define_accessors(current_module, Node, "ASNumber", "asnumber",
                  "node/location/ui/header=AS/type=sortAlphaNumericBottom/rank=z",
                  "Autonomous System id",
-                 get_roles=all_roles, set_roles=tech_roles, expose_in_api=True)
+                 set_roles=tech_roles, expose_in_api=True)

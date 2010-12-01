@@ -57,9 +57,8 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # The expose_in_api flag tells whether this tag may be handled
 #   through the Add/Get/Update methods as a native field
 #
-# note: roles get attached to the tagtype instance,
-# while get_roles and set_roles get attached to the created methods
-# this might need a cleanup
+# note: set_roles get attached as 'roles' to the tagtype instance,
+# also get_roles and set_roles get attached to the created methods
 #
 # in addition a convenience method like e.g. LocateNodeArch is defined
 # in the Accessor class; its purpose is to retrieve the tag, or to create it if needed
@@ -67,7 +66,7 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # Legacy NOTE:
 # prior to plcapi-5.0-19, this used to accept an additional argument
 # named min_role_id; this was redundant and confusing, it has been
-# removed, we now use set_roles to restrict access on the corresponding tag
+# removed, we now use set_roles to restrict write access on the corresponding tag
 
 # the convention here is that methodsuffix should be mixed case, e.g. MyStuff
 # while tagname is expected to be lowercase
