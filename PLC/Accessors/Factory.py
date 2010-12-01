@@ -72,10 +72,19 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # the convention here is that methodsuffix should be mixed case, e.g. MyStuff
 # while tagname is expected to be lowercase
 # you then end up with e.g. GetPersonMyStuff
-def define_accessors (module, objclass, methodsuffix, tagname,
-                      category, description,
-                      get_roles=all_roles, set_roles=admin_roles, 
-                      expose_in_api = False):
+
+# the entry point accepts a single class or a list of classes
+def define_accessors (module, objclasses, *args, **kwds):
+    if not isinstance(objclasses,list):
+        objclasses=[objclasses]
+    for objclass in objclasses:
+        define_accessors_ (module, objclass, *args, **kwds)
+
+# this is for one class
+def define_accessors_ (module, objclass, methodsuffix, tagname,
+                       category, description,
+                       get_roles=all_roles, set_roles=admin_roles, 
+                       expose_in_api = False):
 
     if objclass not in taggable_classes:
         try:
@@ -131,11 +140,12 @@ def define_accessors (module, objclass, methodsuffix, tagname,
 
     # locate the tag and create it if needed
     # this method is attached to the Accessor class
-    def tag_locator (self):
+    def tag_locator (self, enforce=False):
         return self.locate_or_create_tag (tagname=tagname,
                                           category=category,
                                           description=description,
-                                          roles=set_roles)
+                                          roles=set_roles,
+                                          enforce=enforce)
 
     # attach it to the Accessor class
     Accessor.register_tag_locator(locator_name,tag_locator)

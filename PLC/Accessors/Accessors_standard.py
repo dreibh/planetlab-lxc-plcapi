@@ -33,26 +33,17 @@ define_accessors(current_module, Slice, "Initscript","initscript",
 
 # xxx the accessor factory should enforce the category, descriptions and roles provided here.
 # BootManager might need to set any of these 3, so 'node' needs to be in set_roles
-define_accessors(current_module, Slice, "Arch", "arch",
+# to tweaks the installed version on nodes and slivers
+define_accessors(current_module, [Slice,Node], "Arch", "arch",
                  "node/slice/config", "node arch or slivers arch",
                  set_roles=["pi","user","tech","node"], expose_in_api=True)
-define_accessors(current_module, Slice, "Pldistro", "pldistro",
+define_accessors(current_module, [Slice,Node], "Pldistro", "pldistro",
                  "node/slice/config", "PlanetLab distribution to use for node or slivers",
                  set_roles=["pi","user","tech","node"], expose_in_api=True)
-define_accessors(current_module, Slice, "Fcdistro", "fcdistro",
+define_accessors(current_module, [Slice,Node], "Fcdistro", "fcdistro",
                  "node/slice/config", "Fedora or CentOS distribution to use for node or slivers",
                  set_roles=["pi","user","tech","node"], expose_in_api=True)
 
-# Ditto for the GetNodeFlavour method
-define_accessors(current_module, Node, "Arch", "arch",
-                 "node/slice/config", "node arch or slivers arch",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
-define_accessors(current_module, Node, "Pldistro", "pldistro",
-                 "node/slice/config", "PlanetLab distribution to use for node or slivers",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
-define_accessors(current_module, Node, "Fcdistro", "fcdistro",
-                 "node/slice/config", "Fedora or CentOS distribution to use for node or slivers",
-                 set_roles=["pi","user","tech"], expose_in_api=True)
 # node deployment (alpha, beta, ...)
 define_accessors(current_module, Node, "Deployment", "deployment",
                  "node/operation", 'typically "alpha", "beta", or "production"',

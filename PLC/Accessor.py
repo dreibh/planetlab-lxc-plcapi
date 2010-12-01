@@ -9,6 +9,8 @@
 # by the Factory, you need to restart your python instance / web server
 # as the cached information then becomes wrong
 
+from PLC.Debug import log 
+
 from PLC.TagTypes import TagTypes, TagType
 from PLC.Roles import Roles, Role
 
@@ -27,12 +29,13 @@ This is implemented as a singleton, so we can cache results over time"""
         self.api=api
         # 'tagname'=>'tag_id'
         self.cache={}
+        self.hash_name_to_role=dict ( [ (role['name'],role) for role in Roles(api)] )
 
     def has_cache (self,tagname): return self.cache.has_key(tagname)
     def get_cache (self,tagname): return self.cache[tagname]
     def set_cache (self,tagname,tag_type): self.cache[tagname]=tag_type
 
-    def locate_or_create_tag (self, tagname, category, description, roles):
+    def locate_or_create_tag (self, tagname, category, description, roles, enforce=False):
         "search tag type from tagname & create if needed"
 
         # cached ?
@@ -42,6 +45,22 @@ This is implemented as a singleton, so we can cache results over time"""
         tag_types = TagTypes (self.api, {'tagname':tagname})
         if tag_types:
             tag_type = tag_types[0]
+            # enforce should only be set by the 'service plc start accessors' sequence
+            if enforce:
+                try:
+                    tag_type.update({'category':category,'description':description})
+                    tag_type.sync()
+                    roles_to_add = set(roles).difference(set(tag_type['roles']))
+                    for rolename in roles_to_add:
+                        tag_type.add_role(self.hash_name_to_role[rolename])
+                    roles_to_delete = set(tag_type['roles']).difference(set(roles))
+                    for rolename in roles_to_delete:
+                        tag_type.remove_role(self.hash_name_to_role[rolename])
+                except:
+                    # this goes in boot.log ...
+                    print >> log, "WARNING, Could not enforce tag type, tagname=%s\n"%tagname
+                    traceback.print_exc(file=log)
+                    
         else:
             # not found: create it
             tag_type_fields = {'tagname':tagname,
@@ -70,12 +89,12 @@ This is implemented as a singleton, so we can cache results over time"""
     
     # this is designed to be part of the 'service plc start' sequence
     # it ensures the creation of all the tagtypes defined 
-    # in the various accessors
+    # in the various accessors, and enforces consistency to the DB
     # it's not easy to have define_accessors do this because at
     # load-time as we do not have an instance of API yet
     def run_all_tag_locators (self):
         for (name, tag_locator) in Accessor.tag_locators.items():
-            tag_locator(self)
+            tag_locator(self,enforce=True)
 
 ####################
 # make it a singleton so we can cache stuff in there over time
