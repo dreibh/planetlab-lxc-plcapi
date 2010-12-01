@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 18
+%define taglevel 19
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Dec 01 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-19
+- tag permissions system based on roles and not min_role_ids
+- accessors simplified accordingly (no more min_role_id)
+- new methods AddRoleToTagType and DeleteRoleFromTagType
+- accessor-related tagtypes are created sooner, and enforced
+- cleaned up redundancy between db-config.d and accessors
+
 * Thu Sep 16 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-18
 - fix RefreshPeer that was not working in 5.0-17
 
