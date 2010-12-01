@@ -8,7 +8,6 @@
 from PLC.Accessor import AccessorSingleton
 
 if __name__ == '__main__':
-    print "Ensuring creationg of accessor tags"
-    print 'api=%r'%api
+    print "service plc start accessors : ensuring creation and consistency of accessor tags"
     AccessorSingleton(api).run_all_tag_locators()
 
