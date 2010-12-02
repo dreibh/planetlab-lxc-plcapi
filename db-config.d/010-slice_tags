@@ -101,17 +101,6 @@ slicetag_types = \
      'category' : 'slice/rspec',
      'roles' : ['admin','pi','user']},
 
-    # Security capability to empower a slice to make an authenticated API call, set by silverauth NM plugin.
-    {'tagname': "hmac",
-     'description': "Sliver authorization key.",
-     'category' : 'slice/auth',
-     'roles': ['admin','pi']},
-
-    {'tagname': "ssh_key",
-     'description': "Sliver public ssh key.",
-     'category' : 'slice/auth',
-     'roles': ['admin','pi']},
-
     # Capability to give a sliver access to unused raw disk
     {'tagname': "rawdisk",
      'description': "map unused raw disk devices into the slice",
@@ -127,10 +116,6 @@ slicetag_types = \
      'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
      'category' : 'slice/general'},
 
-    # OMF controlled slice
-    {'tagname': "omf_control",
-     'description': "Pre-install and configure OMF Resource Controller in slice if set",
-     'category' : 'slice/usertools'},
 ]
 
 # add in the platform supported rlimits to the default_attribute_types
