@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 19
+%define taglevel 20
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Dec 03 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-20
+- fix the roles for ssh_key and hmac tags
+
 * Wed Dec 01 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-19
 - tag permissions system based on roles and not min_role_ids
 - accessors simplified accordingly (no more min_role_id)
