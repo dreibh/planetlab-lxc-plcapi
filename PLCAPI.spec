@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 21
+%define taglevel 22
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Dec 06 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-22
+- add admin role to accessor-related tags (arch, {fc,pl}distro)
+
 * Mon Dec 06 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-21
 - bugfix in {Update,Delete}PersonTag
 - updated xml doc for filters, accessors and tagtypes
