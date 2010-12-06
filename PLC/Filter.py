@@ -18,7 +18,7 @@ class Filter(Parameter, dict):
     A type of parameter that represents a filter on one or more
     columns of a database table.
     Special features provide support for negation, upper and lower bounds,
-    as well as sorting and clipping.
+    sorting and clipping and more...
 
 
     fields should be a dictionary of field names and types.
@@ -34,25 +34,7 @@ class Filter(Parameter, dict):
     example : filter = { 'hostname' : '*.edu' , site_id : [34,54] }
 
 
-    Whether the filter represents an intersection (AND) or a union (OR)
-    of these criteria is determined as follows:
-    * if the dictionnary has the '-AND' or the '-OR' key, this is chosen
-    * otherwise, the join_with argument, as provided to the sql method below,
-      is expected to hold the 'AND' or 'OR' string
-      this argument defaults to 'AND' and in most of the code, this default applies
-      as the join_with argument is left unspecified
-
-
     Special features:
-
-    * a field starting with '&' or '|' should refer to a sequence type
-      the semantic is then that the object value (expected to be a list)
-      should contain all (&) or any (|) value specified in the corresponding
-      filter value. See other examples below.
-    example : filter = { '|role_ids' : [ 20, 40 ] }
-    example : filter = { '|roles' : ['tech', 'pi'] }
-    example : filter = { '&roles' : ['admin', 'tech'] }
-    example : filter = { '&roles' : 'tech' }
 
     * a field starting with the ~ character means negation.
     example :  filter = { '~peer_id' : None }
@@ -73,14 +55,29 @@ class Filter(Parameter, dict):
       SQL wildcard character.
     example :  filter = { 'hostname' : '*.jp' }
 
+    * a field starting with '&' or '|' should refer to a sequence type
+      the semantics is then that the object value (expected to be a list)
+      should contain all (&) or any (|) value specified in the corresponding
+      filter value. See other examples below.
+    example : filter = { '|role_ids' : [ 20, 40 ] }
+    example : filter = { '|roles' : ['tech', 'pi'] }
+    example : filter = { '&roles' : ['admin', 'tech'] }
+    example : filter = { '&roles' : 'tech' }
+
     * the filter's keys starting with '-' are special and relate to sorting and clipping
-    * '-SORT' : a field name, or an ordered list of field names that are used for sorting
-      these fields may start with + (default) or - for denoting increasing or decreasing order
+      * '-SORT' : a field name, or an ordered list of field names that are used for sorting
+        these fields may start with + (default) or - for denoting increasing or decreasing order
     example : filter = { '-SORT' : [ '+node_id', '-hostname' ] }
-    * '-OFFSET' : the number of first rows to be ommitted
-    * '-LIMIT' : the amount of rows to be returned
+      * '-OFFSET' : the number of first rows to be ommitted
+      * '-LIMIT' : the amount of rows to be returned
     example : filter = { '-OFFSET' : 100, '-LIMIT':25}
 
+    * similarly the two special keys below allow to change the semantics of multi-keys filters
+      * '-AND' : select rows that match ALL the criteria (default)
+      * '-OR'  : select rows that match ANY criteria
+      The value attached to these keys is ignored. 
+      Please note however that because a Filter is a dict, you cannot provide two criteria on a given key.
+      
 
     Here are a few realistic examples
 
