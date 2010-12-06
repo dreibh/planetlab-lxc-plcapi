@@ -2,6 +2,7 @@
 
 __all__ = """
 Accessors_standard
+Accessors_myslice
 Accessors_wireless
 Accessors_sliverauth
 Accessors_site
