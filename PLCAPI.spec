@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 20
+%define taglevel 21
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Dec 06 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-21
+- bugfix in {Update,Delete}PersonTag
+- updated xml doc for filters, accessors and tagtypes
+- more explicit msg in case of missing roles
+- improvements in ratelimitaspects.py
+
 * Fri Dec 03 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-20
 - fix the roles for ssh_key and hmac tags
 
