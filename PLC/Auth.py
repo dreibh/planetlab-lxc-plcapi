@@ -132,7 +132,7 @@ class SessionAuth(Auth):
                 node = nodes[0]
 
                 if 'node' not in method.roles:
-                    raise PLCAuthenticationFailure, "SessionAuth: Not allowed to call method, missing 'node' role"
+                    raise PLCAuthenticationFailure, "SessionAuth: Not allowed to call method %s, missing 'node' role"%method.name
 
                 method.caller = node
 
@@ -143,9 +143,12 @@ class SessionAuth(Auth):
                 person = persons[0]
 
                 if not set(person['roles']).intersection(method.roles):
-                    raise PLCPermissionDenied, "Not allowed to call method, missing role"
+                    method_message="method %s has roles [%s]"%(method.name,','.join(method.roles))
+                    person_message="caller has roles [%s]"%','.join(person['roles'])
+                    # not PLCAuthenticationFailure b/c that would end the session..
+                    raise PLCPermissionDenied, "SessionAuth: missing role, %s -- %s"%(method_message,person_message)
 
-                method.caller = persons[0]
+                method.caller = person
 
             else:
                 raise PLCAuthenticationFailure, "SessionAuth: Invalid session"
@@ -324,7 +327,9 @@ class PasswordAuth(Auth):
                 raise PLCAuthenticationFailure, "PasswordAuth: Password verification failed"
 
         if not set(person['roles']).intersection(method.roles):
-            raise PLCAuthenticationFailure, "PasswordAuth: Not allowed to call method, missing role"
+            method_message="method %s has roles [%s]"%(method.name,','.join(method.roles))
+            person_message="caller has roles [%s]"%','.join(person['roles'])
+            raise PLCAuthenticationFailure, "PasswordAuth: missing role, %s -- %s"%(method_message,person_message)
 
         method.caller = person
 
