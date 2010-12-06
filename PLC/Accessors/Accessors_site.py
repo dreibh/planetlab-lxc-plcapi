@@ -24,7 +24,6 @@ from PLC.Interfaces import Interface
 from PLC.Slices import Slice
 from PLC.Sites import Site
 from PLC.Persons import Person
-#from PLC.Ilinks import Ilink
 
 from PLC.Accessors.Factory import define_accessors, all_roles, person_roles, tech_roles
 
