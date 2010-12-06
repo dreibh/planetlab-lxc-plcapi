@@ -37,6 +37,9 @@ class UpdatePersonTag(Method):
             raise PLCInvalidArgument, "No such person setting %r"%person_tag_id
         person_tag = person_tags[0]
 
+        tag_type_id = person_tag['tag_type_id']
+        tag_type = TagTypes (self.api,[tag_type_id])[0]
+
         persons = Persons (self.api, person_tag['person_id'])
         if not persons:
             raise PLCInvalidArgument, "No such person %d"%person_tag['person_id']
