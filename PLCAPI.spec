@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 22
+%define taglevel 23
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-23
+- builtin accessors for the myslice page
+- Get{Node,Interface}Tags allowed to techs
+- tweak in ratelimitaspect.py
+
 * Mon Dec 06 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-22
 - add admin role to accessor-related tags (arch, {fc,pl}distro)
 
