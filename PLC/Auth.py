@@ -139,12 +139,12 @@ class SessionAuth(Auth):
             elif session['person_id'] is not None and session['expires'] > time.time():
                 persons = Persons(method.api, {'person_id': session['person_id'], 'enabled': True, 'peer_id': None})
                 if not persons:
-                    raise PLCAuthenticationFailure, "SessionAuth: No such account"
+                    raise PLCAuthenticationFailure, "SessionAuth: No such enabled account"
                 person = persons[0]
 
                 if not set(person['roles']).intersection(method.roles):
                     method_message="method %s has roles [%s]"%(method.name,','.join(method.roles))
-                    person_message="caller has roles [%s]"%','.join(person['roles'])
+                    person_message="caller %s has roles [%s]"%(person['email'],','.join(person['roles']))
                     # not PLCAuthenticationFailure b/c that would end the session..
                     raise PLCPermissionDenied, "SessionAuth: missing role, %s -- %s"%(method_message,person_message)
 
@@ -328,7 +328,7 @@ class PasswordAuth(Auth):
 
         if not set(person['roles']).intersection(method.roles):
             method_message="method %s has roles [%s]"%(method.name,','.join(method.roles))
-            person_message="caller has roles [%s]"%','.join(person['roles'])
+            person_message="caller %s has roles [%s]"%(person['email'],','.join(person['roles']))
             raise PLCAuthenticationFailure, "PasswordAuth: missing role, %s -- %s"%(method_message,person_message)
 
         method.caller = person
