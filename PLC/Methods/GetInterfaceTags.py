@@ -22,7 +22,7 @@ class GetInterfaceTags(Method):
     the specified details will be returned.
     """
 
-    roles = ['admin', 'pi', 'user', 'node']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),
