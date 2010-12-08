@@ -17,14 +17,14 @@ all: PLCAPI.html
 
 # locating locally installed docbook43 dtd - fedora-specific
 remote-docbook-43 = http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd
-local-docbook-43 = $(wildcard /usr/share/sgml/docbook/xml-dtd-4.3-*/docbookx.dtd)
+local-docbook-43 = $(wildcard /usr/share/sgml/docbook/xml-dtd-4.3*/docbookx.dtd)
 docbook-43=$(if $(local-docbook-43),$(local-docbook-43),$(remote-docbook-43))
 
 PLCAPI.xml: PLCAPI.xml.in
 	$(if $(local-docbook-43), \
 	echo Using locally installed DTD $(local-docbook-43), \
 	echo WARNING - could not locate local DTD - using remote $(remote-docbook-43))
-	sed -e "s:@DOCBOOK-43@:$(docbook-43):" $< > $@
+	sed -e "s,@DOCBOOK-43@,$(docbook-43)," $< > $@
 
 .PLCAPI.xml.valid: Methods.xml
 
