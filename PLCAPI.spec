@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 35
+%define taglevel 36
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Wed Dec 08 2010 Daniel Hokka Zakrisson <dhokka@cs.princeton.edu> - plcapi-4.3-36
+- Use correct gateway for secondary interfaces.
+
 * Mon Feb 22 2010 Marc Fiuczynski <mef@cs.princeton.edu> - PLCAPI-4.3-35
 - - fix AddSlicetag() to not compare slice tags with sliver tags, and vice versa.
 
