@@ -184,10 +184,11 @@ class Interface(Row):
             # DHCP!
 
         elif method == "static":
-            if 'is_primary' in self and self['is_primary'] is True:
-                for key in ['gateway', 'dns1']:
-                    if key not in self or not self[key]:
+            for key in ['gateway', 'dns1']:
+                if key not in self or not self[key]:
+            	    if 'is_primary' in self and self['is_primary'] is True:
                         raise PLCInvalidArgument, "For static method primary network, %s is required" % key
+                else:
                     globals()[key] = self[key]
             for key in ['ip', 'network', 'broadcast', 'netmask']:
                 if key not in self or not self[key]:
