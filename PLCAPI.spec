@@ -2,7 +2,7 @@
 
 %define name PLCAPI
 %define version 5.0
-%define taglevel 23
+%define taglevel 24
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Dec 08 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-24
+- tweak doc extraction for fedora14
+
 * Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-23
 - builtin accessors for the myslice page
 - Get{Node,Interface}Tags allowed to techs
