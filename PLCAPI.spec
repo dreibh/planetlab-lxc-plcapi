@@ -56,7 +56,7 @@ Conflicts: MyPLC <= 4.3
 # BuildRequires: postgresql-devel
 
 # Standard xmlrpc.so that ships with PHP does not marshal NULL
-BuildRequires: php-devel
+BuildRequires: php-devel PyXML python-simplejson
 Obsoletes: php-xmlrpc
 Provides: php-xmlrpc
 
