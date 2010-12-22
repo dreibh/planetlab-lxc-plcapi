@@ -18,6 +18,7 @@ import memcache
 
 import os
 import sys
+import socket
 
 class BaseRateLimit(object):
 
@@ -105,7 +106,7 @@ Subject: %(subject)s
             api_method_caller = "unknown"
 
         # excludes
-        if api_method_source == None or api_method_source[0] == self.config.PLC_API_IP or api_method_source[0] in self.whitelist:
+        if api_method_source == None or api_method_source[0] == socket.gethostbyname(self.config.PLC_API_HOST) or api_method_source[0] in self.whitelist:
             return
 
         # sanity check
