@@ -1,5 +1,3 @@
-%define url $URL$
-
 %define name PLCAPI
 %define version 5.0
 %define taglevel 24
@@ -18,7 +16,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Vendor: PlanetLab
 Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
-URL: %(echo %{url} | cut -d ' ' -f 2)
+URL: %{SCMURL}
 
 Obsoletes: plcapilib
 
