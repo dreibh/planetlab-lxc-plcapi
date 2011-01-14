@@ -64,7 +64,7 @@ PLCHOST ?= testplc.onelab.eu
 
 ifdef GUEST
 SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)
-SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(GUEST)
+SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(GUEST) exec
 endif
 ifdef PLC
 SSHURL:=root@$(PLC):/
@@ -72,7 +72,7 @@ SSHCOMMAND:=ssh root@$(PLC)
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' --exclude Accessors_site.py
-RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
+RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
@@ -86,7 +86,7 @@ else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
-	$(SSHCOMMAND) exec apachectl graceful
+	$(SSHCOMMAND) apachectl graceful
 endif
 
 #################### convenience, for debugging only
