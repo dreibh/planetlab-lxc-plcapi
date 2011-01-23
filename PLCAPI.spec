@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 24
+%define taglevel 25
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jan 23 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-25
+- altered checking of optional fields in Interfaces
+- UpdateTagType more picky on inputs - msg when trying to set roles, which is not supported
+- has pyxml and python-simplejson as new deps
+
 * Wed Dec 08 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-24
 - tweak doc extraction for fedora14
 
