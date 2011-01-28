@@ -24,7 +24,7 @@ current_module = sys.modules[__name__]
 ### slice vref
 define_accessors(current_module, Slice, "Vref", "vref",
                  "slice/config", "vserver reference image name",
-                 set_roles=["admin","pi","user"], expose_in_api=True)
+                 set_roles=["admin","pi","user","node"], expose_in_api=True)
 define_accessors(current_module, Slice, "Initscript","initscript",
                  "slice/usertools", "Slice initialization script",
                  set_roles=["admin","pi","user"], expose_in_api=True)
