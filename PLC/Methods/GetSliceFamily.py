@@ -51,9 +51,12 @@ class GetSliceFamily(Method):
 
         # omf-control'ed slivers need the omf vserver reference image
         # this is to avoid asking users to set both tags 'omf_control' and 'vref'
-        if not vref and GetSliceOmfControl(self.api,self.caller).call(auth,slice_id):
-            SetSliceVref (self.api) (auth,slice_id,'omf')
-            vref='omf'
+        # protect against failure 
+        try:
+            if not vref and GetSliceOmfControl(self.api,self.caller).call(auth,slice_id):
+                SetSliceVref (self.api) (auth,slice_id,'omf')
+                vref='omf'
+        except: pass
 
         # xxx would make sense to check the corresponding vserver rpms are available
         # in all node-families yum repos (and yumgroups, btw)
