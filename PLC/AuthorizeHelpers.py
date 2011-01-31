@@ -50,6 +50,10 @@ class AuthorizeHelpers:
             except:return False
 
     @staticmethod
+    def node_in_slice (api, caller_node, slice):
+        return caller_node['node_id'] in slice['node_ids']
+
+    @staticmethod
     def node_id_in_site (api, node_id_or_hostname, site):
         if isinstance (node_id_or_hostname,int):
             return node_id_or_hostname in site['node_ids']
@@ -167,6 +171,8 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
             granted=False
         elif not AuthorizeHelpers.node_in_slice (api, caller, slice):
             granted=False
+        else:
+            granted=True
     # caller is a non-admin person
     else:
         # only admins can handle slice tags on a nodegroup
