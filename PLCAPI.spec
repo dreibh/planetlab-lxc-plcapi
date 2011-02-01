@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 25
+%define taglevel 26
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-26
+- SetSliceVref needed the node role
+- protect GetSliceFamily
+- Fix bugs in tag authorizations
+
 * Sun Jan 23 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-25
 - altered checking of optional fields in Interfaces
 - UpdateTagType more picky on inputs - msg when trying to set roles, which is not supported
