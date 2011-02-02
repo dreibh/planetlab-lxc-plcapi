@@ -135,7 +135,6 @@ class SessionAuth(Auth):
                     # using PermissionDenied rather than AuthenticationFailure here because
                     # if that fails we don't want to delete the session..
                     raise PLCPermissionDenied, "SessionAuth: Not allowed to call method %s, missing 'node' role"%method.name
-                    raise PLCAuthenticationFailure, "SessionAuth: Not allowed to call method %s, missing 'node' role"%method.name
 
                 method.caller = node
 
