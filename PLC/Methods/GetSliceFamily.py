@@ -50,13 +50,12 @@ class GetSliceFamily(Method):
         vref = GetSliceVref (self.api,self.caller).call(auth,slice_id)
 
         # omf-control'ed slivers need the omf vserver reference image
-        # this is to avoid asking users to set both tags 'omf_control' and 'vref'
-        # protect against failure 
-        try:
-            if not vref and GetSliceOmfControl(self.api,self.caller).call(auth,slice_id):
-                SetSliceVref (self.api) (auth,slice_id,'omf')
-                vref='omf'
-        except: pass
+        # we used to issue SetSliceVref (self.api) (auth,slice_id,'omf')
+        # to avoid asking users to set both tags 'omf_control' and 'vref'
+        # however we can't use SetSliceVref here because a node is only allowed 
+        # to set a sliver tag, not a slice tag
+        # and this somehow gets called from GetSlivers
+        # anyways it was a bad idea, let's have the UI do that instead
 
         # xxx would make sense to check the corresponding vserver rpms are available
         # in all node-families yum repos (and yumgroups, btw)
