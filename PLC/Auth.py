@@ -210,37 +210,12 @@ class BootAuth(Auth):
                 raise PLCAuthenticationFailure, "BootAuth: No such node"
             node = nodes[0]
 
+            # Jan 2011 : removing support for old boot CDs
             if node['key']:
                 key = node['key']
-            elif node['boot_nonce']:
-                # Allow very old nodes that do not have a node key in
-                # their configuration files to use their "boot nonce"
-                # instead. The boot nonce is a random value generated
-                # by the node itself and POSTed by the Boot CD when it
-                # requests the Boot Manager. This is obviously not
-                # very secure, so we only allow it to be used if the
-                # requestor IP is the same as the IP address we have
-                # on record for the node.
-                key = node['boot_nonce']
-
-                interface = None
-                if node['interface_ids']:
-                    interfaces = Interfaces(method.api, node['interface_ids'])
-                    for interface in interfaces:
-                        if interface['is_primary']:
-                            break
-
-                if not interface or not interface['is_primary']:
-                    raise PLCAuthenticationFailure, "BootAuth: No primary network interface on record"
-
-                if method.source is None:
-                    raise PLCAuthenticationFailure, "BootAuth: Cannot determine IP address of requestor"
-
-                if interface['ip'] != method.source[0]:
-                    raise PLCAuthenticationFailure, "BootAuth: Requestor IP %s does not match node IP %s" % \
-                          (method.source[0], interface['ip'])
             else:
-                raise PLCAuthenticationFailure, "BootAuth: No node key or boot nonce"
+                write_debug_line("BootAuth.check: could not get key")
+                raise PLCAuthenticationFailure, "BootAuth: No node key"
 
             # Yes, this is the "canonicalization" method used.
             args = self.canonicalize(args)
