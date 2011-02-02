@@ -157,19 +157,24 @@ setattr(Person,'caller_may_write_tag',caller_may_write_person_tag)
 
 def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostname=None, nodegroup_id_or_name=None):
     granted=False
+    reason=""
     if 'roles' in caller and 'admin' in caller['roles']:
         granted=True
     # does caller have right role(s) ? this knows how to deal with caller being a node
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
+        reason="caller may not access this tag type"
         granted=False
     # node callers: check the node is in the slice
     elif isinstance(caller, Node): 
         # nodes can only set their own sliver tags
         if node_id_or_hostname is None: 
+            reason="wrong node caller"
             granted=False
         elif not AuthorizeHelpers.node_match_id (api, caller, node_id_or_hostname):
+            reason="node mismatch"
             granted=False
         elif not AuthorizeHelpers.node_in_slice (api, caller, slice):
+            reason="slice not in node"
             granted=False
         else:
             granted=True
@@ -185,6 +190,7 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
                 raise PLCPermissionDenied, "%s, node must be in slice when setting sliver tag"
         # try all roles to find a match - tech are ignored b/c not in AddSliceTag.roles anyways
         for role in AuthorizeHelpers.person_tag_type_common_roles(api,caller,tag_type):
+            reason="user not in slice; or slice does not belong to pi's site"
             # regular users need to be in the slice
             if role=='user':
                 if AuthorizeHelpers.person_in_slice(api, caller, slice):
@@ -194,7 +200,7 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
                 if AuthorizeHelpers.slice_belongs_to_pi (api, slice, caller):
                     granted=True ; break
     if not granted:
-        raise PLCPermissionDenied, "Cannot write slice tag %s"%(tag_type['tagname'])
+        raise PLCPermissionDenied, "Cannot write slice tag %s - %s"%(tag_type['tagname'],reason)
 
 setattr(Slice,'caller_may_write_tag',caller_may_write_slice_tag)
 
