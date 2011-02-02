@@ -216,7 +216,6 @@ class BootAuth(Auth):
             if node['key']:
                 key = node['key']
             else:
-                write_debug_line("BootAuth.check: could not get key")
                 raise PLCAuthenticationFailure, "BootAuth: No node key"
 
             # Yes, this is the "canonicalization" method used.
