@@ -25,27 +25,27 @@ g_known_tag_types = [tag_type['tagname'] for tag_type in GetTagTypes()]
 g_known_tag_types.sort()
 
 def SetTagType(tag_type):
-    tagname=tag_type['tagname']
-    global g_known_tag_types
-    # handle 'roles' field differently
-    if 'roles' in tag_type:
-        roles=tag_type['roles']
-        del tag_type['roles']
-    else:
-        roles=['admin']
-    # just in case
-    if 'min_role_id' in tag_type:
-        print "WARNING: ignoring deprecated field min_role_id for tagtype %s"%tagname
-        del tag_type['min_role_id']
-    # Create/update default slice tag types
-    if tagname not in g_known_tag_types:
-        AddTagType(tag_type)
-        g_known_tag_types.append(tagname)
-        g_known_tag_types.sort()
-    else:
-        UpdateTagType(tagname, tag_type)
-    # enforce provided roles if present
     try:
+        tagname=tag_type['tagname']
+        global g_known_tag_types
+        # handle 'roles' field differently
+        if 'roles' in tag_type:
+            roles=tag_type['roles']
+            del tag_type['roles']
+        else:
+            roles=['admin']
+        # just in case
+        if 'min_role_id' in tag_type:
+            print "WARNING: ignoring deprecated field min_role_id for tagtype %s"%tagname
+            del tag_type['min_role_id']
+        # Create/update default slice tag types
+        if tagname not in g_known_tag_types:
+            AddTagType(tag_type)
+            g_known_tag_types.append(tagname)
+            g_known_tag_types.sort()
+        else:
+            UpdateTagType(tagname, tag_type)
+        # enforce provided roles if present
         old_roles=GetTagTypes(tagname)[0]['roles']
         for minus_role in set(old_roles).difference(set(roles)):
             DeleteRoleFromTagType(minus_role,tagname)
@@ -54,7 +54,7 @@ def SetTagType(tag_type):
     except:
         # something went wrong for that tagname, 
         # but don't want to break the whole startup sequence
-        print "Could not enforce roles on tagtype %s"%tagname
+        print "Could not enforce tagtype %s"%tagname
         pass
 
 # Get list of existing (enabled, global) files
