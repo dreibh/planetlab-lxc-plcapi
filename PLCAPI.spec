@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 26
+%define taglevel 27
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Feb 03 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-27
+- session auth: do *not* delete session when node runs a method that does not have 'node' role
+- session auth: remove support for bootonce in old boot CDs
+- give a reason when caller_may_write_slice_tag fails
+- remove ugly hack that was setting 'vref' to 'omf' - need to set both tags now
+
 * Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-26
 - SetSliceVref needed the node role
 - protect GetSliceFamily
