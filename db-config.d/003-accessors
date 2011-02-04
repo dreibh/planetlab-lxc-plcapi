@@ -1,0 +1,4 @@
+# -*-python-*-
+from PLC.Accessor import AccessorSingleton
+
+AccessorSingleton(api).run_all_tag_locators()
