@@ -2,7 +2,12 @@
 # -*- python -*-
 
 #
-# priority: 901
+# run this before the 'db' step
+# various object creation functions might depend
+# on the tagtype being created, like
+# 'vref' and 'initscript' for slices, and possibly more
+#
+# priority: 899
 #
 
 from PLC.Accessor import AccessorSingleton

@@ -1,8 +1,6 @@
 # -*-python-*-
 #################### 
 import sys, os
-import resource
-import traceback
 
 g_url = ""
 def GetMyPLCURL(): return g_url
@@ -51,14 +49,14 @@ def SetTagType(tag_type):
         for minus_role in set(old_roles).difference(set(roles)):
             DeleteRoleFromTagType(minus_role,tagname)
         for plus_role in set(roles).difference(set(old_roles)):
-            AddRoleToType(plus_role,tagname)
+            AddRoleToTagType(plus_role,tagname)
     except:
         # something went wrong for that tagname, 
         # but don't want to break the whole startup sequence
         print "Could not enforce tagtype %s --- beg"%tagname
+        import traceback
         traceback.print_exc()
         print "Could not enforce tagtype %s --- end"%tagname
-        pass
 
 # Get list of existing (enabled, global) files
 g_conf_files = GetConfFiles()
@@ -96,49 +94,56 @@ def SetConfFile(conf_file):
         UpdateConfFile(conf_file_id, conf_file)
 
 def SetSlice(slice, tags):
-    # Create or Update slice
-    slice_name = slice['name']
-    slices = GetSlices([slice_name])
-    if len(slices)==1:
-        slice_id = slices[0]['slice_id']
-        if slice.has_key('name'):
-            del slice['name']
-        UpdateSlice(slice_id, slice)
-        slice['name']=slice_name
-    else:
-        expires = None
-        if slice.has_key('expires'):
-            expires = slice['expires']
-            del slice['expires']
-        slice_id = AddSlice(slice)
-        if expires <> None:
-            UpdateSlice(slice_id, {'expires':expires})
-
-    # Get slice structure with all fields
-    slice = GetSlices([slice_name])[0]
-
-    # Create/delete all tags
-    # NOTE: update is not needed, since unspecified tags are deleted, 
-    #       and new tags are added
-    slice_tags = []
-    if slice['slice_tag_ids']:
-        # Delete unknown attributes
-        for slice_tag in GetSliceTags(slice['slice_tag_ids']):
-            # ignore sliver tags, as those are custom/run-time values
-            if slice_tag['node_id'] <> None: continue
-            if (slice_tag['tagname'], slice_tag['value']) not in tags:
-                DeleteSliceTag(slice_tag['slice_tag_id'])
-            else:
-                slice_tags.append((slice_tag['tagname'],slice_tag['value']))
-
-    # only add slice tags that are new
-    for (name, value) in tags:
-        if (name,value) not in slice_tags:
-            AddSliceTag(slice_name, name, value)            
+    try:
+        # Create or Update slice
+        slice_name = slice['name']
+        slices = GetSlices([slice_name])
+        if len(slices)==1:
+            slice_id = slices[0]['slice_id']
+            if slice.has_key('name'):
+                del slice['name']
+            UpdateSlice(slice_id, slice)
+            slice['name']=slice_name
         else:
-            # NOTE: this confirms that the user-specified tag is 
-            #       returned by GetSliceTags
-            pass
+            expires = None
+            if slice.has_key('expires'):
+                expires = slice['expires']
+                del slice['expires']
+            slice_id = AddSlice(slice)
+            if expires <> None:
+                UpdateSlice(slice_id, {'expires':expires})
+    
+        # Get slice structure with all fields
+        slice = GetSlices([slice_name])[0]
+    
+        # Create/delete all tags
+        # NOTE: update is not needed, since unspecified tags are deleted, 
+        #       and new tags are added
+        slice_tags = []
+        if slice['slice_tag_ids']:
+            # Delete unknown attributes
+            for slice_tag in GetSliceTags(slice['slice_tag_ids']):
+                # ignore sliver tags, as those are custom/run-time values
+                if slice_tag['node_id'] <> None: continue
+                if (slice_tag['tagname'], slice_tag['value']) not in tags:
+                    DeleteSliceTag(slice_tag['slice_tag_id'])
+                else:
+                    slice_tags.append((slice_tag['tagname'],slice_tag['value']))
+    
+        # only add slice tags that are new
+        for (name, value) in tags:
+            if (name,value) not in slice_tags:
+                AddSliceTag(slice_name, name, value)            
+            else:
+                # NOTE: this confirms that the user-specified tag is 
+                #       returned by GetSliceTags
+                pass
+    except:
+        # something went wrong for that tagname, 
+        print "Could not create init slice %s --- beg"%slice['name']
+        import traceback
+        traceback.print_exc()
+        print "Could not create init slice %s --- end"%slice['name']
 
 def SetMessage(message):
     messages = GetMessages([message['message_id']])

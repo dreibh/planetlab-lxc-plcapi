@@ -118,6 +118,7 @@ slicetag_types = \
 
 ]
 
+import resource
 # add in the platform supported rlimits to the default_attribute_types
 for entry in resource.__dict__.keys() + ["VLIMIT_OPENFD"]:
     if entry.find("LIMIT_")==1:
