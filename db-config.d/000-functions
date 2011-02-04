@@ -2,6 +2,7 @@
 #################### 
 import sys, os
 import resource
+import traceback
 
 g_url = ""
 def GetMyPLCURL(): return g_url
@@ -54,7 +55,9 @@ def SetTagType(tag_type):
     except:
         # something went wrong for that tagname, 
         # but don't want to break the whole startup sequence
-        print "Could not enforce tagtype %s"%tagname
+        print "Could not enforce tagtype %s --- beg"%tagname
+        traceback.print_exc()
+        print "Could not enforce tagtype %s --- end"%tagname
         pass
 
 # Get list of existing (enabled, global) files
