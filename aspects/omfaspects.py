@@ -177,7 +177,8 @@ class BaseOMF(object):
             tag_type_id_or_name = args[2]
             omf_tag = self.get_tag_type(wobj.api, "omf_control")
             vsys_tag = self.get_tag_type(wobj.api, "vsys")
-            if tag_type_id_or_name in (omf_tag['tagname'], omf_tag['tag_type_id']):
+            if omf_tag and vsys_tag \
+                    and tag_type_id_or_name in (omf_tag['tagname'], omf_tag['tag_type_id']):
                 slice_tag = SliceTag(wobj.api)
                 slice_tag['slice_id'] = self.slice['slice_id']
                 slice_tag['tag_type_id'] = vsys_tag['tag_type_id']
