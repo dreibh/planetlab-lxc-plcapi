@@ -312,8 +312,16 @@ class GetBootMedium(Method):
                     raise PLCInvalidArgument, "File %s not under %s"%(filename,self.WORKDIR)
 
             ### output should not exist (concurrent runs ..)
+            # numerous reports of issues with this policy
+            # looks like people sometime suspend/cancel their download
+            # and this leads to the old file sitting in there forever
+            # so, if the file is older than 5 minutes, we just trash
+            grace=5
+            if os.path.exists(filename) and os.path.getmtime(filename)-time.time() >= (grace*60):
+                os.unlink(filename)
             if os.path.exists(filename):
-                raise PLCInvalidArgument, "Resulting file %s already exists"%filename
+                raise PLCInvalidArgument, "Resulting file %s already exists - please try again in %d minutes"%\
+                    (filename,grace)
 
             ### we can now safely create the file,
             ### either we are admin or under a controlled location
