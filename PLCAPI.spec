@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 27
+%define taglevel 28
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 04 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-28
+- fix db-config sequence : accessors step now merged in, and occurs at the right time
+- db-config also more robust
+- no more explicit 'accessors' step in plc.d
+
 * Thu Feb 03 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-27
 - session auth: do *not* delete session when node runs a method that does not have 'node' role
 - session auth: remove support for bootonce in old boot CDs
