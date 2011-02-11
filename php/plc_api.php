@@ -49,8 +49,11 @@ class PLCAPI
     $file = $backtrace[$backtrace_level]['file'];
     $line = $backtrace[$backtrace_level]['line'];
 
-    $this->errors[] = 'PLCAPI error:  ' . $error_msg . ' in ' . $file . ' on line ' . $line;
-    error_log(end($this->errors));
+    $error_line='PLCAPI error:  ' . $error_msg ;
+    if ($file) $error_line .= ' in file ' . $file;
+    if ($line) $error_line .= ' on line ' . $line;
+    $this->errors[] = $error_line;
+    error_log($error_line);
   }
 
   function error()
