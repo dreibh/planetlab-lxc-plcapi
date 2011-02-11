@@ -317,7 +317,7 @@ class GetBootMedium(Method):
             # and this leads to the old file sitting in there forever
             # so, if the file is older than 5 minutes, we just trash
             grace=5
-            if os.path.exists(filename) and os.path.getmtime(filename)-time.time() >= (grace*60):
+            if os.path.exists(filename) and (time.time()-os.path.getmtime(filename)) >= (grace*60):
                 os.unlink(filename)
             if os.path.exists(filename):
                 raise PLCInvalidArgument, "Resulting file %s already exists - please try again in %d minutes"%\
