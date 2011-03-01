@@ -6,7 +6,7 @@
 
 %define name PLCAPI
 %define version 4.3
-%define taglevel 36
+%define taglevel 37
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 
 %changelog
+* Tue Mar 01 2011 S.Çağlar Onur <caglar@verivue.com> - plcapi-4.3-37
+- pass kernel arguments correctly to the build.sh
+
 * Wed Dec 08 2010 Daniel Hokka Zakrisson <dhokka@cs.princeton.edu> - plcapi-4.3-36
 - Use correct gateway for secondary interfaces.
 
