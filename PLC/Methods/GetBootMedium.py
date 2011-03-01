@@ -428,7 +428,7 @@ class GetBootMedium(Method):
                     if tag['tagname'] == 'kvariant':
                         build_sh_spec['variant'] = tag['value']
                     if tag['tagname'] == 'kargs':
-                        build_sh_spec['kargs'].append(tag['value'].split())
+                        build_sh_spec['kargs'] += tag['value'].split()
                     if tag['tagname'] == 'no-hangcheck':
                         build_sh_spec['kargs'].append('hcheck_reboot0')
             # then options can override tags
