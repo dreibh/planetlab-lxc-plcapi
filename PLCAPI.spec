@@ -44,6 +44,7 @@ Requires: python-ldap
 # for memcache
 Requires: python-memcached
 Requires: memcached
+Requires: Django
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
 Conflicts: MyPLC <= 4.3
