@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 29
+%define taglevel 30
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Mar 09 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-30
+- working draft for GetSliceSshKeys
+
 * Thu Feb 17 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-29
 - trash getbootmedium tmp file if already exists but is longer than 5 minutes old
 - (this is for people who cancel their download)
