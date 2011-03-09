@@ -22,6 +22,11 @@ from PLC.Methods.GetSliceFamily import GetSliceFamily
 
 from PLC.Accessors.Accessors_standard import *
 
+# Caching
+import os
+os.environ['DJANGO_SETTINGS_MODULE']='plc_django_settings'
+from cache_utils.decorators import cached
+
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
 
@@ -205,6 +210,21 @@ class GetSlivers(Method):
     }
 
     def call(self, auth, node_id_or_hostname = None):
+        try:
+            cache_opt = self.api.config.PLC_GETSLIVERS_CACHE
+        with AttributeError:
+            cache_opt = False
+
+        if (cache_opt):
+            return self.cacheable_call(auth, node_id_or_hostname)
+        else:
+            return self.raw_call(auth, node_id_or_hostname)
+
+    @cached(7200)
+    def cacheable_call(self, auth, node_id_or_hostname):
+        return self.raw_call(auth, node_id_or_hostname)
+
+    def raw_call(self, auth, node_id_or_hostname):
         timestamp = int(time.time())
 
         # Get node
@@ -343,7 +363,7 @@ class GetSlivers(Method):
                                                    }) ]
         granularity=self.api.config.PLC_RESERVATION_GRANULARITY
 
-        return {
+        raw_data = {
             'timestamp': timestamp,
             'node_id': node['node_id'],
             'hostname': node['hostname'],
@@ -358,4 +378,8 @@ class GetSlivers(Method):
             'reservation_policy': reservation_policy,
             'leases':leases,
             'lease_granularity': granularity,
-            }
+        }
+
+        sanitized_data = sanitize_for_pickle (raw_data)
+        return sanitized_data
+
