@@ -4,6 +4,7 @@ from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Nodes import Node, Nodes
 from PLC.SliceTags import SliceTag, SliceTags
+from PLC.Slices import Slice, Slices 
 
 class GetSliceSshKeys(Method):
     """
@@ -45,6 +46,6 @@ class GetSliceSshKeys(Method):
         # fetch nodes
         nodes=Nodes(api,node_ids)
         # hash on node_id
-        nodes_hash=dict([n['node_id'],n['hostname'] for n in nodes])
+        nodes_hash=dict( [ (n['node_id'],n['hostname']) for n in nodes])
         # return values hashed on hostname
         return dict([ (nodes_hash[nodes_hash[st['node_id']]],st['value']) for st in slice_tags])
