@@ -36,6 +36,9 @@ slicetag_types = \
     {'tagname': "cpu_share",
      'description': "Number of CPU shares",
      'category' : 'slice/rspec'},
+    {'tagname': "cpu_cores",
+     'description': "Number of CPU cores",
+     'category': 'slice/rspec'},
     
     # Bandwidth limits
     {'tagname': "net_min_rate",
