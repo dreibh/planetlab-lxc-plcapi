@@ -1,3 +1,5 @@
+from types import StringTypes
+
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
@@ -32,20 +34,20 @@ class GetSliceSshKeys(Method):
 
     def call(self, auth, slice_id_or_name):
         filter={}
-        if isinstance(int,slice_id_or_name):
+        if isinstance(slice_id_or_name,int):
             filter['slice_id']=slice_id_or_name
-        elif isinstance(str,slice_id_or_name):
+        elif isinstance(slice_id_or_name,StringTypes):
             filter['name']=slice_id_or_name
         filter['tagname']='ssh_key'
         # retrieve only sliver tags
         filter['~node_id']=None
         
         # slice_tags don't expose hostname, sigh..
-        slice_tags=SliceTags(api,filter)
+        slice_tags=SliceTags(self.api,filter,['node_id','tagname','value'])
         node_ids = [st['node_id'] for st in slice_tags]
         # fetch nodes
-        nodes=Nodes(api,node_ids)
+        nodes=Nodes(self.api,node_ids,['node_id','hostname'])
         # hash on node_id
         nodes_hash=dict( [ (n['node_id'],n['hostname']) for n in nodes])
         # return values hashed on hostname
-        return dict([ (nodes_hash[nodes_hash[st['node_id']]],st['value']) for st in slice_tags])
+        return dict([ (nodes_hash[st['node_id']],st['value']) for st in slice_tags])
