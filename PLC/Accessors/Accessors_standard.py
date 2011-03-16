@@ -25,8 +25,15 @@ current_module = sys.modules[__name__]
 define_accessors(current_module, Slice, "Vref", "vref",
                  "slice/config", "vserver reference image name",
                  set_roles=["admin","pi","user","node"], expose_in_api=True)
+# this contains the actual script text
+# if set, it supersedes 'initscript'
+define_accessors(current_module, Slice, "InitscriptBody","initscript_body",
+                 "slice/usertools", "Slice initialization script body",
+                 set_roles=["admin","pi","user"], expose_in_api=True)
+# this may contain a *name* that refers to the GetInitScripts
+# it was initially designed to share scripts among slices
 define_accessors(current_module, Slice, "Initscript","initscript",
-                 "slice/usertools", "Slice initialization script",
+                 "slice/usertools", "Slice initialization script name",
                  set_roles=["admin","pi","user"], expose_in_api=True)
 
 # BootManager might need to set any of these 3, so 'node' needs to be in set_roles
