@@ -840,7 +840,7 @@ CREATE TABLE initscripts (
     initscript_id serial PRIMARY KEY,			-- Initscript identifier
     name text NOT NULL,					-- Initscript name
     enabled bool NOT NULL DEFAULT true,			-- Initscript is active
-    script text NOT NULL,				-- Initscript body
+    script text NOT NULL,				-- Initscript code
     UNIQUE (name)
 ) WITH OIDS;
 CREATE INDEX initscripts_name_idx ON initscripts (name);

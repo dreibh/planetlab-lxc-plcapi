@@ -27,8 +27,8 @@ define_accessors(current_module, Slice, "Vref", "vref",
                  set_roles=["admin","pi","user","node"], expose_in_api=True)
 # this contains the actual script text
 # if set, it supersedes 'initscript'
-define_accessors(current_module, Slice, "InitscriptBody","initscript_body",
-                 "slice/usertools", "Slice initialization script body",
+define_accessors(current_module, Slice, "InitscriptCode","initscript_code",
+                 "slice/usertools", "Slice initialization script code",
                  set_roles=["admin","pi","user"], expose_in_api=True)
 # this may contain a *name* that refers to the GetInitScripts
 # it was initially designed to share scripts among slices
