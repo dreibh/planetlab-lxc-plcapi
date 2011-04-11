@@ -147,6 +147,10 @@ class PLCAPI:
         if self.config.PLC_OMF_ENABLED:
             from aspects import apply_omf_aspect
             apply_omf_aspect()
+        
+        if self.config.PLC_RATELIMIT_ENABLED:
+            from aspects import apply_ratelimit_aspect
+            apply_ratelimit_aspect()
 
 
     def callable(self, method):
