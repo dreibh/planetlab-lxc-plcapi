@@ -212,7 +212,7 @@ class GetSlivers(Method):
     def call(self, auth, node_id_or_hostname = None):
         try:
             cache_opt = self.api.config.PLC_GETSLIVERS_CACHE
-        with AttributeError:
+        except AttributeError:
             cache_opt = False
 
         if (cache_opt):
