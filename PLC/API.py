@@ -7,6 +7,7 @@
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
 
+import os
 import sys
 import traceback
 import string
@@ -151,6 +152,27 @@ class PLCAPI:
         if self.config.PLC_RATELIMIT_ENABLED:
             from aspects import apply_ratelimit_aspect
             apply_ratelimit_aspect()
+
+
+        # Enable Caching. Only for GetSlivers for the moment.
+        # TODO: we may consider to do this in an aspect like the ones above.
+        try:
+            if self.config.PLC_GETSLIVERS_CACHE:
+                getslivers_cache = true
+        except AttributeError:
+            getslivers_cache = false
+
+        if getslivers_cache:
+            os.environ['DJANGO_SETTINGS_MODULE']='plc_django_settings'
+            from cache_utils.decorators import cached
+            from PLC.Methods.GetSlivers import GetSlivers
+
+            @cached(7200)
+            def cacheable_call(cls, auth, node_id_or_hostname):
+                return cls.raw_call(auth, node_id_or_hostname)
+            
+            GetSlivers.call = cacheable_call
+            
 
 
     def callable(self, method):

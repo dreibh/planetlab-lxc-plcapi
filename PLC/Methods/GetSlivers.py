@@ -22,11 +22,6 @@ from PLC.Methods.GetSliceFamily import GetSliceFamily
 
 from PLC.Accessors.Accessors_standard import *
 
-# Caching
-import os
-os.environ['DJANGO_SETTINGS_MODULE']='plc_django_settings'
-from cache_utils.decorators import cached
-
 # XXX used to check if slice expiration time is sane
 MAXINT =  2L**31-1
 
@@ -210,19 +205,8 @@ class GetSlivers(Method):
     }
 
     def call(self, auth, node_id_or_hostname = None):
-        try:
-            cache_opt = self.api.config.PLC_GETSLIVERS_CACHE
-        except AttributeError:
-            cache_opt = False
-
-        if (cache_opt):
-            return self.cacheable_call(auth, node_id_or_hostname)
-        else:
-            return self.raw_call(auth, node_id_or_hostname)
-
-    @cached(7200)
-    def cacheable_call(self, auth, node_id_or_hostname):
         return self.raw_call(auth, node_id_or_hostname)
+
 
     def raw_call(self, auth, node_id_or_hostname):
         timestamp = int(time.time())
