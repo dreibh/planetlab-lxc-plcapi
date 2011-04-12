@@ -83,7 +83,7 @@ ifeq (,$(SSHURL))
 	@echo "  or   make sync PLCHOST=testplc.onelab.eu GUEST=vplc03.inria.fr"
 	@exit 1
 else
-	+$(RSYNC) plcsh PLC planetlab5.sql migrations $(SSHURL)/usr/share/plc_api/
+	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
 	$(SSHCOMMAND) apachectl graceful
