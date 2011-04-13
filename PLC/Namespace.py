@@ -1,6 +1,3 @@
-### $Id: Namespace.py
-### $URL:
-
 URN_PREFIX = "urn:publicid:IDN"
 
 def get_leaf(hrn):

@@ -4,6 +4,7 @@
 
 import re
 from types import StringTypes
+import traceback
 from urlparse import urlparse
 
 import PLC.Auth
@@ -174,7 +175,9 @@ class Peer(Row):
             tags = {'hrn': hrn}
             Node(self.api, node).update_tags(tags)
         except:
-            print >>log, "WARNING: could not find out hrn on hostname=%s"%node['hostname']
+            print >>log, "WARNING: (beg) could not find out hrn on hostname=%s"%node['hostname']
+            traceback.print_exc(5,log)
+            print >>log, "WARNING: (end) could not find out hrn on hostname=%s"%node['hostname']
 
     def remove_node(self, node, commit = True):
         """
