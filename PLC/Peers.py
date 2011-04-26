@@ -1,14 +1,14 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
 #
 
 import re
 from types import StringTypes
+import traceback
 from urlparse import urlparse
 
 import PLC.Auth
+from PLC.Debug import log
 from PLC.Faults import *
 from PLC.Namespace import hostname_to_hrn
 from PLC.Parameter import Parameter, Mixed
@@ -165,14 +165,19 @@ class Peer(Row):
              'peer_node_id': peer_node_id},
             commit = commit)
 
-        # attempt to manually update the 'hrn' tag
-        root_auth = self['hrn_root']
         sites = Sites(self.api, node['site_id'], ['login_base'])
         site = sites[0]
         login_base = site['login_base']
-        hrn = hostname_to_hrn(root_auth, login_base, node['hostname'])
-        tags = {'hrn': hrn}
-        Node(self.api, node).update_tags(tags)
+        try:
+            # attempt to manually update the 'hrn' tag with the remote prefix
+            hrn_root = self['hrn_root']
+            hrn = hostname_to_hrn(hrn_root, login_base, node['hostname'])
+            tags = {'hrn': hrn}
+            Node(self.api, node).update_tags(tags)
+        except:
+            print >>log, "WARNING: (beg) could not find out hrn on hostname=%s"%node['hostname']
+            traceback.print_exc(5,log)
+            print >>log, "WARNING: (end) could not find out hrn on hostname=%s"%node['hostname']
 
     def remove_node(self, node, commit = True):
         """
@@ -181,7 +186,7 @@ class Peer(Row):
 
         remove = Row.remove_object(Node, 'peer_node')
         remove(self, node, commit)
-        # attempt to manually update the 'hrn' tag
+        # attempt to manually update the 'hrn' tag now that the node is local
         root_auth = self.api.config.PLC_HRN_ROOT
         sites = Sites(self.api, node['site_id'], ['login_base'])
         site = sites[0]

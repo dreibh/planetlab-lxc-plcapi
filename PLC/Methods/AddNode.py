@@ -10,7 +10,7 @@ from PLC.Peers import Peers
 from PLC.Sites import Site, Sites
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
-from PLC.NodeTags import NodeTags
+from PLC.NodeTags import NodeTags, NodeTag
 from PLC.Methods.AddNodeTag import AddNodeTag
 from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
@@ -80,13 +80,22 @@ class AddNode(Method):
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
-            if not TagTypes(self.api,{'tagname':tagname}):
+            tag_types = TagTypes(self.api,{'tagname':tagname})
+            if not tag_types:
                 raise PLCInvalidArgument,"No such TagType %s"%tagname
+            tag_type = tag_types[0] 
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:
-                AddNodeTag(self.api).__call__(auth,node['node_id'],tagname,value)
+                node_tag = NodeTag(self.api)
+                node_tag['node_id'] = node['node_id']
+                node_tag['tag_type_id'] = tag_type['tag_type_id']
+                node_tag['tagname']  = tagname
+                node_tag['value'] = value
+                node_tag.sync()
             else:
-                UpdateNodeTag(self.api).__call__(auth,node_tags[0]['node_tag_id'],value)
+                node_tag = node_tags[0]
+                node_tag['value'] = value
+                node_tag.sync() 
 
         self.event_objects = {'Site': [site['site_id']],
                               'Node': [node['node_id']]}
