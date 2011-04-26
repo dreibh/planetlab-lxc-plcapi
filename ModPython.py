@@ -8,6 +8,7 @@
 #
 
 import sys
+import time
 import traceback
 import xmlrpclib
 from mod_python import apache
@@ -57,5 +58,6 @@ def handler(req):
 
     except Exception, err:
         # Log error in /var/log/httpd/(ssl_)?error_log
-        print >> log, err, traceback.format_exc()
+        t = "[" + time.ctime() + "] [error]"
+        print >> log, t, err, traceback.format_exc()
         return apache.HTTP_INTERNAL_SERVER_ERROR

@@ -43,6 +43,31 @@ class PLCAPI
     $this->multicall = false;
   }
 
+  function rec_join ($arg) {
+    if ( is_array($arg) ) {
+        $ret = "";
+        foreach ( $arg as $i ) {
+            $l = $this->rec_join($i);
+            # ignore html code.
+            if ( $l[0] != "<" ) { $ret .= $l . ", "; }
+        }
+        return $ret;
+    } else {
+        settype($arg, "string");
+        return $arg;
+    }
+  }
+
+  function backtrace_php () {
+    $backtrace = debug_backtrace();
+    $msg = "";
+    foreach( $backtrace as $line ) {
+        $msg .= "File '". $line['file'] . "' line " . $line['line'] . "\n";
+        $msg .= "    " . $line['function'] . "( "  . $this->rec_join($line['args']) . ")\n";
+    }
+    return $msg;
+  }
+
   function error_log($error_msg, $backtrace_level = 1)
   {
     $backtrace = debug_backtrace();
@@ -52,8 +77,13 @@ class PLCAPI
     $error_line='PLCAPI error:  ' . $error_msg ;
     if ($file) $error_line .= ' in file ' . $file;
     if ($line) $error_line .= ' on line ' . $line;
-    $this->errors[] = $error_line;
-    error_log($error_line);
+    $this->errors[] = $error_line
+    # TODO: setup a config variable for more detailed stack traces, for API errors.
+    if ( TRUE ){
+      error_log($error_line);
+    } else {
+       error_log($this->backtrace_php());
+    }
   }
 
   function error()
