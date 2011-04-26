@@ -19,6 +19,7 @@ from PLC.InitScripts import InitScript, InitScripts
 from PLC.Leases import Lease, Leases
 from PLC.Timestamp import Duration
 from PLC.Methods.GetSliceFamily import GetSliceFamily
+from PLC.PersonTags import PersonTag,PersonTags
 
 from PLC.Accessors.Accessors_standard import *
 
@@ -304,6 +305,21 @@ class GetSlivers(Method):
         # reduce ( reduce_flatten_list, [ [1] , [2,3] ], []) => [ 1,2,3 ]
         def reduce_flatten_list (x,y): return x+y
 
+        # root users are users marked with the tag 'isrootonsite'. Hack for Mlab and other sites in which admins participate in diagnosing problems.
+        def get_site_root_user_keys(api,site_id_or_name):
+           site = Sites (api,site_id_or_name,['person_ids'])[0]
+           all_site_persons = site['person_ids']
+           all_site_person_tags = PersonTags(self.api,{'person_id':all_site_persons,'tagname':'isrootonsite'},['value','person_id'])
+           site_root_person_tags = filter(lambda r:r['value']=='true',all_site_person_tags)
+           site_root_person_ids = map(lambda r:r['person_id'],site_root_person_tags)
+           key_ids = reduce (reduce_flatten_list,
+                             [ p['key_ids'] for p in \
+                                   Persons(api,{ 'person_id':site_root_person_ids,
+                                                 'enabled':True, '|role_ids' : [20, 40] },
+                                           ['key_ids']) ],
+                             [])
+           return [ key['key'] for key in Keys (api, key_ids) if key['key_type']=='ssh']
+
         # power users are pis and techs
         def get_site_power_user_keys(api,site_id_or_name):
             site = Sites (api,site_id_or_name,['person_ids'])[0]
@@ -328,8 +344,11 @@ class GetSlivers(Method):
         personsitekeys=get_site_power_user_keys(self.api,node['site_id'])
         accounts.append({'name':'site_admin','keys':personsitekeys})
 
-        # 'root' account setup on nodes from all 'admin' users
+        # 'root' account setup on nodes from all 'admin' users and ones marked with 'isrootonsite' for this site
+        siterootkeys=get_site_root_user_keys(self.api,node['site_id'])
         personsitekeys=get_all_admin_keys(self.api)
+        personsitekeys.extend(siterootkeys)
+
         accounts.append({'name':'root','keys':personsitekeys})
 
         hrn = GetNodeHrn(self.api,self.caller).call(auth,node['node_id'])
