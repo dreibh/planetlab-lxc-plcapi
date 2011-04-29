@@ -158,9 +158,9 @@ class PLCAPI:
         # TODO: we may consider to do this in an aspect like the ones above.
         try:
             if self.config.PLC_GETSLIVERS_CACHE:
-                getslivers_cache = true
+                getslivers_cache = True
         except AttributeError:
-            getslivers_cache = false
+            getslivers_cache = False
 
         if getslivers_cache:
             os.environ['DJANGO_SETTINGS_MODULE']='plc_django_settings'
