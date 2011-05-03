@@ -44,7 +44,7 @@ define_accessors(current_module, [Slice,Node], "Arch", "arch",
                  "node/slice/config", "node arch or slivers arch",
                  set_roles=["admin","pi","user","tech","node"], expose_in_api=True)
 define_accessors(current_module, [Slice,Node], "Pldistro", "pldistro",
-                 "node/slice/config", "PlanetLab distribution to use for node or slivers",
+                 "node/slice/config/sfa", "PlanetLab distribution to use for node or slivers",
                  set_roles=["admin","pi","user","tech","node"], expose_in_api=True)
 define_accessors(current_module, [Slice,Node], "Fcdistro", "fcdistro",
                  "node/slice/config", "Fedora or CentOS distribution to use for node or slivers",
