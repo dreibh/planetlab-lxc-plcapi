@@ -77,7 +77,7 @@ class PLCAPI
     $error_line='PLCAPI error:  ' . $error_msg ;
     if ($file) $error_line .= ' in file ' . $file;
     if ($line) $error_line .= ' on line ' . $line;
-    $this->errors[] = $error_line
+    $this->errors[] = $error_line;
     # TODO: setup a config variable for more detailed stack traces, for API errors.
     if ( TRUE ){
       error_log($error_line);
