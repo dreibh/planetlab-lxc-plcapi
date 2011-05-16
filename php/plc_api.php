@@ -61,9 +61,13 @@ class PLCAPI
   function backtrace_php () {
     $backtrace = debug_backtrace();
     $msg = "";
-    foreach( $backtrace as $line ) {
+    $len = count($backtrace);
+    $cnt = 1;
+    foreach( array_reverse($backtrace) as $line ) {
         $msg .= "File '". $line['file'] . "' line " . $line['line'] . "\n";
         $msg .= "    " . $line['function'] . "( "  . $this->rec_join($line['args']) . ")\n";
+        $cnt += 1;
+        if ( $cnt == $len ) { break; }
     }
     return $msg;
   }

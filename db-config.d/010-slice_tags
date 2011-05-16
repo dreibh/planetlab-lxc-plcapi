@@ -28,6 +28,9 @@ slicetag_types = \
     {'tagname': "ip_addresses",
      'description': "Add an ip address to a slice/sliver.",
      'category' : 'slice/rspec'},
+    {'tagname': "isolate_loopback",
+     'description': "Create an isolated loopback interface within the vserver rather than sharing with all vservers.",
+     'category' : 'slice/rspec'},
     
     # CPU share
     {'tagname': "cpu_pct",
