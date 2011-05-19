@@ -44,11 +44,11 @@ class GetPersons(Method):
            'admin' not in self.caller['roles']:
             # Get accounts that we are able to view
             valid_person_ids = [self.caller['person_id']]
-            if 'pi' in self.caller['roles'] and self.caller['site_ids']:
+            if ('pi' in self.caller['roles'] or 'tech' in self.caller['roles']) \
+               and self.caller['site_ids']:
                 sites = Sites(self.api, self.caller['site_ids'])
                 for site in sites:
                     valid_person_ids += site['person_ids']
-
             if not valid_person_ids:
                 return []
 
