@@ -7,6 +7,7 @@ from PLC.Filter import Filter
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
+from PLC.Nodes import Nodes
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
 
@@ -49,6 +50,11 @@ class GetSliceTags(Method):
                 sites = Sites(self.api, self.caller['site_ids'])
                 for site in sites:
                     valid_slice_ids += site['slice_ids']
+            # techs can view all slices on the nodes at their site
+            if 'tech' in self.caller['roles'] and self.caller['site_ids']:
+                nodes = Nodes(self.api, {'site_id': self.caller['site_ids']}, ['site_id', 'slice_ids'])
+                for node in nodes:
+                    valid_slice_ids.extend(node['slice_ids'])
 
             if not valid_slice_ids:
                 return []
