@@ -83,14 +83,30 @@ class BootUpdateNode(Method):
             interface.update(interface_fields)
             interface.sync(commit = False)
 
-        # indicate that node has booted & contacted PLC.
-        node.update_last_contact()
-        node.update_last_boot()
-
         current_time = int(time.time())
-        # if last_pcu_reboot is within 20 minutes of current_time, accept that the PCU is responsible
-        if node['last_pcu_reboot'] and Timestamp.cast_long(node['last_pcu_reboot']) >= current_time - 60*20:
-            node.update_last_pcu_confirmation(commit=False)
+
+        # ONLY UPDATE ONCE when the boot_state flag and ssh_rsa_key flag are NOT passed
+        if not node_fields.has_key('boot_state') and not node_fields.has_key('ssh_rsa_key'):
+
+            # record times spent on and off line by comparing last_contact with previous value of last_boot
+            if node['last_boot'] and node['last_contact']:
+                # last_boot is when the machine last called this API function.
+                # last_contact is the last time NM or RLA pinged the API.
+                node['last_time_spent_online'] = node['last_contact'] - node['last_boot']
+                node['last_time_spent_offline'] = current_time - Timestamp.cast_long(node['last_contact'])
+
+                node.update_readonly_int('last_time_spent_online')
+                node.update_readonly_int('last_time_spent_offline')
+                changed_fields.append('last_time_spent_online')
+                changed_fields.append('last_time_spent_offline')
+
+            # indicate that node has booted & contacted PLC.
+            node.update_last_contact()
+            node.update_last_boot()
+
+            # if last_pcu_reboot is within 20 minutes of current_time, accept that the PCU is responsible
+            if node['last_pcu_reboot'] and Timestamp.cast_long(node['last_pcu_reboot']) >= current_time - 60*20:
+                node.update_last_pcu_confirmation(commit=False)
 
         node.sync(commit = True)
 
