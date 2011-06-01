@@ -58,6 +58,8 @@ class Node(Row):
         'last_download': Parameter(int, "Date and time when node boot image was created", ro = True),
         'last_pcu_reboot': Parameter(int, "Date and time when PCU reboot was attempted", ro = True),
         'last_pcu_confirmation': Parameter(int, "Date and time when PCU reboot was confirmed", ro = True),
+        'last_time_spent_online': Parameter(int, "Length of time the node was last online before shutdown/failure", ro = True),
+        'last_time_spent_offline': Parameter(int, "Length of time the node was last offline after failure and before reboot", ro = True),
         'verified': Parameter(bool, "Whether the node configuration is verified correct", ro=False),
         'key': Parameter(str, "(Admin only) Node key", max = 256),
         'session': Parameter(str, "(Admin only) Node session value", max = 256, ro = True),
@@ -119,6 +121,15 @@ class Node(Row):
     validate_last_download = Row.validate_timestamp
     validate_last_pcu_reboot = Row.validate_timestamp
     validate_last_pcu_confirmation = Row.validate_timestamp
+
+    def update_readonly_int(self, col_name, commit = True):
+
+        assert 'node_id' in self
+        assert self.table_name
+
+        self.api.db.do("UPDATE %s SET %s = %s" % (self.table_name, col_name, self[col_name]) + \
+                        " where node_id = %d" % (self['node_id']) )
+        self.sync(commit)
 
     def update_timestamp(self, col_name, commit = True):
         """
