@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 32
+%define taglevel 33
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,23 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jun 07 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-33
+- ratelimit aspects
+- cache getslivers per node if PLC_GET_SIVERS_CACHE is enabled
+- requires Django for cache_utils
+- attempt to expose 'pldistro' to sfa
+- last_time_spent_online, last_time_spent_offline: new fields in Node
+- new slice tags 'isolate_loopback' and 'cpu_cores'
+- refresh-peer federation logs dump exceptions
+- modpython logs have a timestamp
+- more verbose/accurate php error reporting
+- postgresql listens on PLC_DB_HOST+localhost instead of 0.0.0.0
+- AddNode, UpdateNode: manage tags directly rather than through another method
+- BootUpdateNode: only update once
+- GetPersons: techs can access the list of persons on their site
+- GetSlices and GetSliceTags: techs can see slices on their nodes
+- GetSlivers: isrootonsite tag; cacheable
+
 * Tue Mar 22 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-32
 - rename initscript_body into initscript_code
 
