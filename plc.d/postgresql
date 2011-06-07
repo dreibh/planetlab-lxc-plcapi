@@ -79,8 +79,9 @@ case "$1" in
 	    check
 	fi
 
-	# Enable DB server. PostgreSQL >=8.0 defines listen_addresses,
-	# when run within a vserver, this may require localhost to be specified explicitly
+	# Enable DB server. drop Postgresql<=7.x
+	# PostgreSQL >=8.0 defines listen_addresses
+	# listen on a specific IP + localhost, more robust when run within a vserver
 	sed -i -e '/^listen_addresses/d' $postgresql_conf
 	echo "listen_addresses = '${PLC_DB_HOST},localhost'" >> $postgresql_conf
 	# tweak timezone to be 'UTC'
