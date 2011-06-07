@@ -98,8 +98,10 @@ class UpdateNode(Method):
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
-            if not TagTypes(self.api,{'tagname':tagname}):
+            tag_types = TagTypes(self.api,{'tagname':tagname})
+            if not tag_types:
                 raise PLCInvalidArgument,"No such TagType %s"%tagname
+            tag_type = tag_types[0]
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:
                 node_tag = NodeTag(self.api)

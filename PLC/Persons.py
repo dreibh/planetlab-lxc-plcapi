@@ -155,7 +155,7 @@ class Person(Row):
 
         1. We are the person.
         2. We are an admin.
-        3. We are a PI and the person is at one of our sites.
+        3. We are a PI or Tech and the person is at one of our sites.
         """
 
         assert isinstance(person, Person)
@@ -163,7 +163,7 @@ class Person(Row):
         if self.can_update(person):
             return True
 
-        if 'pi' in self['roles']:
+        if 'pi' in self['roles'] or 'tech' in self['roles']:
             if set(self['site_ids']).intersection(person['site_ids']):
                 # Can view people with equal or higher role IDs
                 return 'admin' not in person['roles']

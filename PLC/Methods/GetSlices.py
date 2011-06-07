@@ -5,6 +5,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Auth import Auth
 from PLC.Persons import Person, Persons
+from PLC.Nodes import Nodes
 from PLC.Sites import Site, Sites
 from PLC.Slices import Slice, Slices
 
@@ -43,10 +44,16 @@ class GetSlices(Method):
            'admin' not in self.caller['roles']:
             # Get slices that we are able to view
             valid_slice_ids = self.caller['slice_ids']
+            # pis can view all slices at their site
             if 'pi' in self.caller['roles'] and self.caller['site_ids']:
                 sites = Sites(self.api, self.caller['site_ids'])
                 for site in sites:
                     valid_slice_ids += site['slice_ids']
+            # techs can view all slices on the nodes at their site
+            if 'tech' in self.caller['roles'] and self.caller['site_ids']:
+                nodes = Nodes(self.api, {'site_id': self.caller['site_ids']}, ['site_id', 'slice_ids'])
+                for node in nodes:
+                    valid_slice_ids.extend(node['slice_ids'])
 
             if not valid_slice_ids:
                 return []
