@@ -11,14 +11,18 @@ class GetSession(Method):
     """
     Returns a new session key if a user or node authenticated
     successfully, faults otherwise.
+
+    Default value for 'expires' is 24 hours.  Otherwise, the returned 
+    session 'expires' in the given number of seconds.
     """
 
     roles = ['admin', 'pi', 'user', 'tech', 'node']
-    accepts = [Auth()]
+    accepts = [Auth(),
+               Parameter(int,"expires", nullok=True)]
     returns = Session.fields['session_id']
 
 
-    def call(self, auth):
+    def call(self, auth, expires=None):
         # Authenticated with a session key, just return it
         if auth.has_key('session'):
             return auth['session']
@@ -27,7 +31,10 @@ class GetSession(Method):
 
         if isinstance(self.caller, Person):
             # XXX Make this configurable
-            session['expires'] = int(time.time()) + (24 * 60 * 60)
+            if expires is None:
+                session['expires'] = int(time.time()) + (24 * 60 * 60)
+            else:
+                session['expires'] = int(time.time()) + int(expires)
 
         session.sync(commit = False)
 
