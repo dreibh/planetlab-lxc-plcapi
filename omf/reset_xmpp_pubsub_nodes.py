@@ -5,11 +5,11 @@ import xmlrpclib
 sys.path.append("/usr/bin/")
 from omf_slicemgr import *
 
-xmlrpc = xmlrpclib.ServerProxy("http://localhost:5053")
-
 xmppserver = config.PLC_OMF_XMPP_SERVER
 xmppuser = "@".join([config.PLC_OMF_XMPP_USER, xmppserver])
 xmpppass = config.PLC_OMF_XMPP_PASSWORD
+xmlrpc = xmlrpclib.ServerProxy(config.PLC_OMF_SLICEMGR_URL)
+
 pubsub = PubSubClient(xmppuser, xmpppass, verbose=False)
 
 
@@ -40,12 +40,24 @@ if __name__ == "__main__":
 
     print "Re-creating PubSub groups..."
     slices = GetSlices()
+    # optimizing the API calls
+    nodes = GetNodes ({},['node_id','hrn','peer_id'])
+    local_node_hash = dict ( [ (n['node_id'],n['hrn']) for n in nodes if n['peer_id'] is None ] )
+    foreign_node_hash = dict ( [ (n['node_id'],n['hrn']) for n in nodes if n['peer_id'] is not None ] )
+    total=len(slices)
+    counter=1
     for slice in slices:
+        print 40*'x' + " slice %s (%d/%d)"%(slice['name'],counter,total)
+        counter +=1
         xmlrpc.createSlice(slice['name'])
         for node_id in slice['node_ids']:
-            try:
-                hrn = GetNodeTags({'tagname':'hrn', 'node_id': node_id})[0]['value']
-                xmlrpc.addResource(slice['name'], hrn)
-            except IndexError:
-                if is_local_node(node_id, slice['name']):
+            # silently ignore foreign nodes
+            if node_id in foreign_node_hash: continue
+            elif node_id in local_node_hash:
+                hrn=local_node_hash[node_id]
+                if hrn:
+                    xmlrpc.addResource(slice['name'],hrn)
+                else:
                     print "WARNING: missing hrn tag for node_id: %s" % node_id
+            else:
+                print "Cannot find node with node_id %d (in slice %s)"%(node_id,slice['name'])
