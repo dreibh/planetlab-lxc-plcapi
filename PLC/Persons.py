@@ -359,6 +359,12 @@ class Person(Row):
 
         # Mark as deleted
         self['deleted'] = True
+
+        # delete will fail if verification_expires exists and isn't validated
+        if 'verification_expires' in self:
+            self['verification_expires'] = \
+            self.validate_verification_expires(self['verification_expires'])
+
         # don't validate, so duplicates can be consistently removed
         self.sync(commit, validate=False)
 
