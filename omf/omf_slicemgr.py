@@ -69,7 +69,7 @@ class BaseClient(object):
         # add protocol handlers
         xs.addObserver("/presence[@type='subscribe']", self.presence_subscribe)
         xs.addObserver("/presence[@type='unsubscribe']", self.presence_unsubscribe)
-        xs.addObserver("/precence", self.presence)
+        xs.addObserver("/presence", self.presence)
         xs.addObserver("/message[@type='chat']", self.message_chat)
 
     def presence_subscribe(self, m):
