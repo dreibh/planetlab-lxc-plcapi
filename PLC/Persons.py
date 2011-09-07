@@ -360,11 +360,10 @@ class Person(Row):
         # Mark as deleted
         self['deleted'] = True
 
-        # delete will fail if verification_expires exists and isn't validated
-        if 'verification_expires' in self:
-            #self['verification_expires'] = \
-            #self.validate_verification_expires(self['verification_expires'])
-            self.pop('verification_expires')
+        # delete will fail if timestamp fields aren't validated, so lets remove them
+        for field in ['verification_expires', 'date_created', 'last_updated']:
+            if field in self:
+                self.pop(field)
 
         # don't validate, so duplicates can be consistently removed
         self.sync(commit, validate=False)
