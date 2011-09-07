@@ -143,8 +143,8 @@ class Person(Row):
 
         if 'pi' in self['roles']:
             if set(self['site_ids']).intersection(person['site_ids']):
-                # Can update person is neither a PI or ADMIN
-                return (not (('pi' in person['roles']) or ('admin' in person['roles'])))
+                # non-admin users cannot update a person who is neither a PI or ADMIN
+                return (not set(['pi','admin']).intersection(person['roles']))
 
         return False
 
@@ -163,10 +163,10 @@ class Person(Row):
         if self.can_update(person):
             return True
 
-        if 'pi' in self['roles'] or 'tech' in self['roles']:
+        # pis and techs can see all people on their site
+        if set(['pi','tech']).intersection(self['roles']):
             if set(self['site_ids']).intersection(person['site_ids']):
-                # Can view people with equal or higher role IDs
-                return 'admin' not in person['roles']
+                return True
 
         return False
 

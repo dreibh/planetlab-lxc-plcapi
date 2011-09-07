@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 33
+%define taglevel 34
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Aug 31 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-34
+- GetSession has support for more than one day sessions
+- reset_xmpp_pubsub_nodes is much more efficient
+- reset_xmpp_pubsub_nodes uses the config instead of localhost:5053
+- bugfix - deleting a person in the middle of the signup process
+
 * Tue Jun 07 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-33
 - ratelimit aspects
 - cache getslivers per node if PLC_GET_SIVERS_CACHE is enabled
