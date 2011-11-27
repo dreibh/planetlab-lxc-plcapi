@@ -20,7 +20,7 @@ set -x
 PGDATA=/var/lib/pgsql/data
 postgresql_conf=$PGDATA/postgresql.conf
 pghba_conf=$PGDATA/pg_hba.conf
-postgresql_sysconfig=/etc/sysconfig/pgsql
+postgresql_sysconfig=/etc/sysconfig/pgsql/postgresql
 
 # Export so that we do not have to specify -p to psql invocations
 export PGPORT=$PLC_DB_PORT
