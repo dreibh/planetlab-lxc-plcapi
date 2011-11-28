@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.0
-%define taglevel 35
+%define taglevel 36
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Nov 28 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-36
+- tweaks in postgresql setup - in line with sfa
+
 * Mon Sep 26 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-35
 - slight tweaks in Persons.py
 
