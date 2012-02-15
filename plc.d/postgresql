@@ -70,8 +70,15 @@ case "$1" in
 	# PostgreSQL must be started at least once to bootstrap
 	# /var/lib/pgsql/data
 	if [ ! -f $postgresql_conf ] ; then
-	    service postgresql initdb &> /dev/null || :
-	    check
+# fedora 16 uses systemd
+# http://docs.fedoraproject.org/en-US/Fedora/16/html/Release_Notes/sect-Release_Notes-Changes_for_Sysadmin.html	    
+	    if type postgresql-setup >& /dev/null ; then
+		postgresql-setup initdb || :
+		check
+	    else
+		service postgresql initdb &> /dev/null || postgresql :
+		check
+	    fi
 	fi
 
 	######## /var/lib/pgsql/data/postgresql.conf
