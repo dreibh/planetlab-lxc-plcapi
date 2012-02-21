@@ -92,8 +92,8 @@ case "$1" in
 	echo "timezone='UTC'" >> $postgresql_conf
 
 	######## /var/lib/pgsql/data/pg_hba.conf
-	# Disable access to all DBs from all hosts
-	sed -i -e '/^\(host\|local\)/d' $pghba_conf
+    # Disable access to MyPLC and drupal DBs from all hosts
+    sed -i -e '/^\(host\|local\)\s\($PLC_DB_NAME\|drupal\)/d' $pghba_conf
 
 	# Enable passwordless localhost access
 	echo "local all all trust" >>$pghba_conf
