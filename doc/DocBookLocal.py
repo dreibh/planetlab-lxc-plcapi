@@ -7,6 +7,7 @@ import sys
 
 api = PLCAPI(None)
 methods = api.all_methods
+methods.sort()
 good_apis = []
 bad_apis = []
 for method in methods:
