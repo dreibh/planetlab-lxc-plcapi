@@ -51,7 +51,9 @@ case "$1" in
 	MESSAGE=$"Starting PostgreSQL server"
 	dialog "$MESSAGE"
 	
-	######## sysconfig 
+	######## sysconfig
+# xxx on f16, the systemd init script won't read /etc/sysconfig/pgsql/postgresql any more
+# need to find out how to perform this configuration, if still needed
 	# Set data directory and redirect startup output to /var/log/pgsql
 	mkdir -p $(dirname $postgresql_sysconfig)
 	touch $postgresql_sysconfig
