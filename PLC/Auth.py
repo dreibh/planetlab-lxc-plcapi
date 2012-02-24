@@ -71,25 +71,26 @@ class GPGAuth(Auth):
                     raise PLCAuthenticationFailure, "GPGAuth: Not allowed to call method, missing 'peer' role"
 
                 method.caller = peer = peers[0]
-                keys = [peer['key']]
+                gpg_keys = [ peer['key'] ]
             else:
                 persons = Persons(method.api, {'email': auth['name'], 'enabled': True, 'peer_id': None})
                 if not persons:
                     raise PLCAuthenticationFailure, "GPGAuth: No such user '%s'" % auth['name']
 
+                method.caller = person = persons[0]
                 if not set(person['roles']).intersection(method.roles):
                     raise PLCAuthenticationFailure, "GPGAuth: Not allowed to call method, missing role"
 
-                method.caller = person = persons[0]
                 keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg", 'peer_id': None})
+                gpg_keys = [ key['key'] for key in keys]
 
             if not keys:
                 raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"
 
-            for key in keys:
+            for gpg_key in gpg_keys:
                 try:
                     from PLC.GPG import gpg_verify
-                    gpg_verify(args, key, auth['signature'], method.name)
+                    gpg_verify(args, gpg_key, auth['signature'], method.name)
                     return
                 except PLCAuthenticationFailure, fault:
                     pass
