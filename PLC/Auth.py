@@ -86,7 +86,7 @@ class GPGAuth(Auth):
                 gpg_keys = [ key['key'] for key in keys ]
 
             if not gpg_keys:
-                raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"
+                raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"%auth['name']
 
             for gpg_key in gpg_keys:
                 try:
