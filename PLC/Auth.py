@@ -21,6 +21,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
 from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
+from PLC.Keys import Keys
 from PLC.Boot import notify_owners
 
 class Auth(Parameter):
@@ -82,7 +83,7 @@ class GPGAuth(Auth):
                     raise PLCAuthenticationFailure, "GPGAuth: Not allowed to call method, missing role"
 
                 keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg", 'peer_id': None})
-                gpg_keys = [ key['key'] for key in keys]
+                gpg_keys = [ key['key'] for key in keys ]
 
             if not keys:
                 raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"
