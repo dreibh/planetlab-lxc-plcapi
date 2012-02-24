@@ -85,7 +85,7 @@ class GPGAuth(Auth):
                 keys = Keys(method.api, {'key_id': person['key_ids'], 'key_type': "gpg", 'peer_id': None})
                 gpg_keys = [ key['key'] for key in keys ]
 
-            if not keys:
+            if not gpg_keys:
                 raise PLCAuthenticationFailure, "GPGAuth: No GPG key on record for peer or user '%s'"
 
             for gpg_key in gpg_keys:
