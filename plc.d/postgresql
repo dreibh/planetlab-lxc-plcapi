@@ -152,7 +152,8 @@ case "$1" in
 	if [ -z "$PLC_DB_PASSWORD" ] ; then
 	    PLC_DB_PASSWORD=$(uuidgen)
 	    plc-config --category=plc_db --variable=password --value="$PLC_DB_PASSWORD" --save=$local_config $local_config
-	    service plc reload
+        #service plc reload
+        reload force
 	fi
 	if ! psql -U $PLC_DB_USER -c "" template1 >/dev/null 2>&1 ; then
 	    psql -U postgres -c "CREATE USER $PLC_DB_USER PASSWORD '$PLC_DB_PASSWORD'" template1

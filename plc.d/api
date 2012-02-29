@@ -31,7 +31,8 @@ case "$1" in
 	if [ -z "$PLC_API_MAINTENANCE_PASSWORD" ] ; then
 	    PLC_API_MAINTENANCE_PASSWORD=$(uuidgen)
 	    plc-config --category=plc_api --variable=maintenance_password --value="$PLC_API_MAINTENANCE_PASSWORD" --save=$local_config $local_config
-	    service plc reload
+        #service plc reload
+        reload force
 	fi
 
 	# Make sure that all PLC servers are allowed to access the API
@@ -47,7 +48,8 @@ case "$1" in
         ) | sort -u))
 	PLC_API_MAINTENANCE_SOURCES=${PLC_API_MAINTENANCE_SOURCES[*]}
 	plc-config --category=plc_api --variable=maintenance_sources --value="$PLC_API_MAINTENANCE_SOURCES" --save=$local_config $local_config
-	service plc reload
+    #service plc reload
+    reload force
 
 	result "$MESSAGE"
 	;;
