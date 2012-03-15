@@ -149,8 +149,10 @@ def SetMessage(message):
     messages = GetMessages([message['message_id']])
     if len(messages)==0:
         AddMessage(message)
-    else:
-        UpdateMessage(message['message_id'],message)
+    ### Thierry 2012-03
+    # let people customize their messages if they want to
+    #else:
+    #    UpdateMessage(message['message_id'],message)
 
 # Get all model names
 g_pcu_models = [type['model'] for type in GetPCUTypes()]
