@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id$
-# $URL$
 #################### 
 # Create/update and populate the default site (should be site_id 1)
 

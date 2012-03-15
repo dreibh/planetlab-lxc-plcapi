@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id$
-# $URL$
 #################### 
 # Create/update the default administrator account (should be person_id 2).
 

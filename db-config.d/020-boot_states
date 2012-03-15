@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id: 012-slice_tags -1   $
-# $URL: svn+ssh://thierry@svn.planet-lab.org/svn/MyPLC/trunk/db-config.d/012-slice_tags $
 #################### slice tag types
 default_boot_states = [
     'boot',

@@ -1,6 +1,4 @@
 # -*-python-*-
-# $Id$
-# $URL$
 #################### body for messages
 
 installfailed = """Once the node meets these requirements, please reinitiate the install
