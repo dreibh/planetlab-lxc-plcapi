@@ -27,7 +27,7 @@ def valid_ipv4(ip):
 
 def valid_ipv6(ip):
     try:
-        ip = socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, ip)
+        ip = socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, ip))
         return True
     except socket.error:
         return False   
