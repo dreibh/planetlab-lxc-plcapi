@@ -18,24 +18,48 @@ from PLC.NetworkTypes import NetworkType, NetworkTypes
 from PLC.NetworkMethods import NetworkMethod, NetworkMethods
 import PLC.Nodes
 
-def valid_ip(ip):
+def valid_ipv4(ip):
     try:
         ip = socket.inet_ntoa(socket.inet_aton(ip))
         return True
     except socket.error:
         return False
 
-def in_same_network(address1, address2, netmask):
+def valid_ipv6(ip):
+    try:
+        ip = socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, ip)
+        return True
+    except socket.error:
+        return False   
+
+def valid_ip(ip):
+    return valid_ipv4(ip) or valid_ipv6(ip)
+
+def in_same_network_ipv4(address1, address2, netmask):
     """
     Returns True if two IPv4 addresses are in the same network. Faults
     if an address is invalid.
     """
-
     address1 = struct.unpack('>L', socket.inet_aton(address1))[0]
     address2 = struct.unpack('>L', socket.inet_aton(address2))[0]
     netmask = struct.unpack('>L', socket.inet_aton(netmask))[0]
 
     return (address1 & netmask) == (address2 & netmask)
+
+def in_same_network_ipv6(address1, address2, netmask):
+    """
+    Returns True if two IPv6 addresses are in the same network. Faults
+    if an address is invalid.
+    """
+    address1 = struct.unpack('>2Q', socket.inet_pton(socket.AF_INET6, address1))[0]
+    address2 = struct.unpack('>2Q', socket.inet_pton(socket.AF_INET6, address2))[0]
+    netmask = struct.unpack('>2Q', socket.inet_pton(socket.AF_INET6, netmask))[0]
+
+    return (address1 & netmask) == (address2 & netmask)
+
+def in_same_network(address1, address2, netmask):
+    return in_same_network_ipv4(address1, address2, netmask) or \
+           in_same_network_ipv6(address1, address2, netmask) 
 
 class Interface(Row):
     """
