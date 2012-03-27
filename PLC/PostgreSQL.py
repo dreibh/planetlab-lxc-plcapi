@@ -27,27 +27,6 @@ from PLC.Debug import profile, log
 from PLC.Faults import *
 from datetime import datetime as DateTimeType
 
-# From pgdb
-def _quote(x):
-    if isinstance(x, DateTimeType):
-        x = str(x)
-    elif isinstance(x, unicode):
-        x = x.encode( 'utf-8' )
-
-    if isinstance(x, types.StringType):
-        x = "'%s'" % str(x).replace("\\", "\\\\").replace("'", "''")
-    elif isinstance(x, (types.IntType, types.LongType, types.FloatType)):
-        pass
-    elif x is None:
-        x = 'NULL'
-    elif isinstance(x, (types.ListType, types.TupleType, set)):
-        x = 'ARRAY[%s]' % ', '.join(map(lambda x: str(_quote(x)), x))
-    elif hasattr(x, '__pg_repr__'):
-        x = x.__pg_repr__()
-    else:
-        raise pgdb.InterfaceError, 'do not know how to handle type %s' % type(x)
-    return x
-
 class PostgreSQL:
     def __init__(self, api):
         self.api = api
@@ -82,12 +61,21 @@ class PostgreSQL:
             self.connection.close()
             self.connection = None
 
-    @classmethod
     def quote(self, value):
         """
         Returns quoted version of the specified value.
         """
-        return _quote(value)
+        # The pgdb._quote function is good enough for general SQL
+        # quoting, except for array types.
+        if isinstance (value, (types.ListType, types.TupleType, set)):
+            'ARRAY[%s]' % ', '.join( [ str(self.quote(x)) for x in value ] )
+        else:
+            try:
+                # up to PyGreSQL-3.x, function was pgdb._quote
+                return pgdb._quote(value)
+            except:
+                # from PyGreSQL-4.0, it's a cursor method
+                return self.cursor()._quote(value)
 
     @classmethod
     def param(self, name, value):
