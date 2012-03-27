@@ -49,7 +49,7 @@ force:
 
 #################### devel tools
 tags:
-	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile -o -name '[0-9][0-9][0-9]*' ')' | xargs etags
+	find . '(' -name '*.py' -o -name '*.sql' -o -name '*.php' -o -name Makefile -o -name '[0-9][0-9][0-9]*' ')' | fgrep -v '.git/' | xargs etags
 
 .PHONY: tags
 
