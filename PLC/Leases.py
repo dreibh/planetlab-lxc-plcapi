@@ -1,8 +1,6 @@
 #
 # Functions for interacting with the leases table in the database
 #
-# $Id$
-# $URL$
 # Thierry Parmentelat -- INRIA
 #
 

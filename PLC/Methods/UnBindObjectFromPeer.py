@@ -1,6 +1,3 @@
-# $Id: UnBindObjectFromPeer.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: svn+ssh://svn.planet-lab.org/svn/PLCAPI/trunk/PLC/Methods/BindObjectToPeer.py $
-
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter

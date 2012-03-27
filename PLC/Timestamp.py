@@ -1,11 +1,6 @@
 #
 # Utilities to handle timestamps / durations from/to integers and strings
 #
-# $Id$
-# $URL$
-#
-
-#
 # datetime.{datetime,timedelta} are powerful tools, but these objects are not
 # natively marshalled over xmlrpc
 #

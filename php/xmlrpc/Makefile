@@ -4,8 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-#
 
 CC := gcc
 CFLAGS := -g -O2 -I. -Ilibxmlrpc -fPIC

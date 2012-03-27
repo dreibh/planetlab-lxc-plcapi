@@ -8,10 +8,6 @@
 // Mark Huang <mlhuang@cs.princeton.edu>
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
-// $Id$
-// $URL$
-//
-//
 
 require_once 'plc_config.php';
 

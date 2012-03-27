@@ -1,11 +1,6 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
 #
-# $Revision: 9423 $
-#
-
 
 from PLC.Faults import *
 from PLC.Method import Method

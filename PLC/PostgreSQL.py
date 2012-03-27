@@ -1,12 +1,9 @@
 #
-# PostgreSQL database interface. Sort of like DBI(3) (Database
-# independent interface for Perl).
+# PostgreSQL database interface. 
+# Sort of like DBI(3) (Database independent interface for Perl).
 #
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
-#
-# $Id$
-# $URL$
 #
 
 import psycopg2

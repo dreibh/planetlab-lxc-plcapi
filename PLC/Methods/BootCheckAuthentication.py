@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 from PLC.Methods.AuthCheck import AuthCheck
 
 class BootCheckAuthentication(AuthCheck):

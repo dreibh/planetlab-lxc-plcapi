@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import re
 
 from PLC.Faults import *

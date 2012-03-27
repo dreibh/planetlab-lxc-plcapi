@@ -1,9 +1,5 @@
-# $Id$
-# $URL$
 #
 # Thierry Parmentelat - INRIA
-#
-# $Revision$
 #
 from PLC.Faults import *
 from PLC.Parameter import Parameter

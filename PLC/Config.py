@@ -6,9 +6,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 import os
 import sys

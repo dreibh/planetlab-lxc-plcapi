@@ -1,11 +1,8 @@
-# $Id$
-# $URL$
 #
 # Functions for interacting with the initscripts table in the database
 #
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
-#
 #
 
 from types import StringTypes

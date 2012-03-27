@@ -6,9 +6,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 import xml.dom.minidom
 from xml.dom.minidom import Element, Text

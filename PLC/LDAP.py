@@ -3,10 +3,6 @@
 # Tony Mack  <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: LDAP.py 
-# $URL: svn+ssh://svn.planet-lab.org/svn/PLCAPI/trunk/PLC/LDAP.py $
-#
-#
 
 import ldap
 import traceback

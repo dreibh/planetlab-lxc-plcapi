@@ -4,9 +4,6 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2007 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 from PLC.Faults import *
 from PLC.Debug import log

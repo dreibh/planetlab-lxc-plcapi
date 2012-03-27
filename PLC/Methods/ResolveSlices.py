@@ -1,6 +1,3 @@
-# $Id$
-# $URL$
-
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter

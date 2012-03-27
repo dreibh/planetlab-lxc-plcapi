@@ -1,6 +1,3 @@
--- $Id$
--- $URL$
-
 -- revert cleanup on node_types
 INSERT INTO node_types VALUES ('dummynet');
 

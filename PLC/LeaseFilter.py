@@ -1,6 +1,4 @@
 #
-# $Id$
-# $URL$
 # Thierry Parmentelat -- INRIA
 #
 # Utilities for filtering on leases

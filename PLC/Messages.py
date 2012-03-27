@@ -4,9 +4,6 @@
 # Tony Mack <tmack@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id$
-# $URL$
-#
 
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table

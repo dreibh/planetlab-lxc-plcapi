@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import random
 import base64
 

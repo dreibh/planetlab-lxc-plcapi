@@ -1,6 +1,3 @@
--- $Id$
--- $URL$
-
 -- we're using the 'lease' nodetype to model reservable nodes
 INSERT INTO node_types VALUES ('reservable');
 -- also the dummynet node_type is obsolete

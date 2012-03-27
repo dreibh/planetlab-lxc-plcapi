@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import time
 
 from PLC.Faults import *

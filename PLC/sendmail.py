@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 import os
 import sys
 import pprint

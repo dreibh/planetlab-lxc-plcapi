@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 # Thierry Parmentelat -- INRIA
 
 from PLC.Method import Method
