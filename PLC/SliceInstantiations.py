@@ -49,6 +49,6 @@ class SliceInstantiations(Table):
               ", ".join(SliceInstantiation.fields)
 
         if instantiations:
-            sql += " WHERE instantiation IN (%s)" % ", ".join(map(api.db.quote, instantiations))
+            sql += " WHERE instantiation IN (%s)" % ", ".join( [ api.db.quote (i) for i in instantiations ] )
 
         self.selectall(sql)

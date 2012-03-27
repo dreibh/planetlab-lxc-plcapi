@@ -46,6 +46,6 @@ class NodeTypes(Table):
               ", ".join(NodeType.fields)
 
         if node_types:
-            sql += " WHERE node_type IN (%s)" % ", ".join(map(api.db.quote, node_types))
+            sql += " WHERE node_type IN (%s)" % ", ".join( [ api.db.quote (t) for t in node_types ] )
 
         self.selectall(sql)

@@ -49,6 +49,6 @@ class NetworkTypes(Table):
               ", ".join(NetworkType.fields)
 
         if types:
-            sql += " WHERE type IN (%s)" % ", ".join(map(api.db.quote, types))
+            sql += " WHERE type IN (%s)" % ", ".join( [ api.db.quote (t) for t in types ] )
 
         self.selectall(sql)

@@ -49,6 +49,6 @@ class KeyTypes(Table):
               ", ".join(KeyType.fields)
 
         if key_types:
-            sql += " WHERE key_type IN (%s)" % ", ".join(map(api.db.quote, key_types))
+            sql += " WHERE key_type IN (%s)" % ", ".join( [ api.db.quote (t) for t in key_types ] )
 
         self.selectall(sql)

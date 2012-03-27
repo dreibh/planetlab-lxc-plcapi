@@ -49,6 +49,6 @@ class NetworkMethods(Table):
               ", ".join(NetworkMethod.fields)
 
         if methods:
-            sql += " WHERE method IN (%s)" % ", ".join(map(api.db.quote, methods))
+            sql += " WHERE method IN (%s)" % ", ".join( [ api.db.quote (m) for m in methods ] )
 
         self.selectall(sql)

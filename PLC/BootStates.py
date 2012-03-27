@@ -49,6 +49,6 @@ class BootStates(Table):
               ", ".join(BootState.fields)
 
         if boot_states:
-            sql += " WHERE boot_state IN (%s)" % ", ".join(map(api.db.quote, boot_states))
+            sql += " WHERE boot_state IN (%s)" % ", ".join( [ api.db.quote (s) for s in boot_states ] )
 
         self.selectall(sql)
