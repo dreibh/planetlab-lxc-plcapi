@@ -57,14 +57,22 @@ tags:
 # 2 forms are supported
 # (*) if your plc root context has direct ssh access:
 # make sync PLC=private.one-lab.org
-# (*) otherwise, entering through the root context
-# make sync PLCHOST=testplc.onelab.eu GUEST=vplc03.inria.fr
+# (*) otherwise, under a vs-capable box, using /vservers/<> and vserver exec
+# make sync PLCHOST=vs64-1.pl.sophia.inria.fr GUEST=2012.04.02--f14-32-1-vplc26
+# (*) with an lxc-capable box, using /var/lib/lxc/<>/rootfs and ssh 
+# make sync PLCHOSTLXC=lxc64-1.pls.sophia.inria.fr GUEST=2012.04.02--lxc16-1-vplc25
 
 PLCHOST ?= testplc.onelab.eu
 
+ifdef PLCHOSTLXC
+VPLCNAME=$(lastword $(subst -, ,$(GUEST)))
+SSHURL:=root@$(PLCHOST):/var/lib/lxc/$(GUEST)/rootfs
+SSHCOMMAND:=ssh root@$(PLCHOSTLXC) ssh $(VPLCNAME)
+else
 ifdef GUEST
 SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)
 SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(GUEST) exec
+endif
 endif
 ifdef PLC
 SSHURL:=root@$(PLC):/
