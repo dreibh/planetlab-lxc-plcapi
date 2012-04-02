@@ -87,7 +87,8 @@ sync:
 ifeq (,$(SSHURL))
 	@echo "sync: I need more info from the command line, e.g."
 	@echo "  make sync PLC=boot.planetlab.eu"
-	@echo "  make sync PLCHOSTVS=vs64-1.pl.sophia.inria.fr GUESTNAME=
+	@echo "  make sync PLCHOSTVS=.. GUESTNAME=.."
+	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.. GUESTHOSTNAME=.."
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
