@@ -57,26 +57,25 @@ tags:
 # 2 forms are supported
 # (*) if your plc root context has direct ssh access:
 # make sync PLC=private.one-lab.org
-# (*) otherwise, under a vs-capable box, using /vservers/<> and vserver exec
-# make sync PLCHOST=vs64-1.pl.sophia.inria.fr GUEST=2012.04.02--f14-32-1-vplc26
-# (*) with an lxc-capable box, using /var/lib/lxc/<>/rootfs and ssh 
-# make sync PLCHOSTLXC=lxc64-1.pls.sophia.inria.fr GUEST=2012.04.02--lxc16-1-vplc25
+# (*) otherwise, for test deployments, use on your testmaster
+# $ run export
+# and cut'n paste the export lines before you run make sync
 
 PLCHOST ?= testplc.onelab.eu
 
-ifdef PLCHOSTLXC
-VPLCNAME=$(lastword $(subst -, ,$(GUEST)))
-SSHURL:=root@$(PLCHOST):/var/lib/lxc/$(GUEST)/rootfs
-SSHCOMMAND:=ssh root@$(PLCHOSTLXC) ssh $(VPLCNAME)
-else
-ifdef GUEST
-SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)
-SSHCOMMAND:=ssh root@$(PLCHOST) vserver $(GUEST) exec
-endif
-endif
 ifdef PLC
 SSHURL:=root@$(PLC):/
 SSHCOMMAND:=ssh root@$(PLC)
+else
+ifdef PLCHOSTLXC
+SSHURL:=root@$(PLCHOST):/var/lib/lxc/$(GUESTNAME)/rootfs
+SSHCOMMAND:=ssh root@$(PLCHOSTLXC) ssh $(GUESTHOSTNAME)
+else
+ifdef PLCHOSTVS
+SSHURL:=root@$(PLCHOSTVS):/vservers/$(GUESTNAME)
+SSHCOMMAND:=ssh root@$(PLCHOSTVS) vserver $(GUESTNAME) exec
+endif
+endif
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' --exclude Accessors_site.py
@@ -86,9 +85,9 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
 sync:
 ifeq (,$(SSHURL))
-	@echo "sync: You must define, either PLC, or PLCHOST & GUEST, on the command line"
-	@echo "  e.g. make sync PLC=boot.planetlab.eu"
-	@echo "  or   make sync PLCHOST=testplc.onelab.eu GUEST=vplc03.inria.fr"
+	@echo "sync: I need more info from the command line, e.g."
+	@echo "  make sync PLC=boot.planetlab.eu"
+	@echo "  make sync PLCHOSTVS=vs64-1.pl.sophia.inria.fr GUESTNAME=
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
