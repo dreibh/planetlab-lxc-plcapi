@@ -12,7 +12,6 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # UNICODEARRAY not exported yet
 psycopg2.extensions.register_type(psycopg2._psycopg.UNICODEARRAY)
 
-import pgdb
 import types
 from types import StringTypes, NoneType
 import traceback
@@ -69,10 +68,12 @@ class PostgreSQL:
         else:
             try:
                 # up to PyGreSQL-3.x, function was pgdb._quote
+                import pgdb
                 return pgdb._quote(value)
             except:
-                # from PyGreSQL-4.0, it's a cursor method
-                return self.cursor()._quote(value)
+                # with PyGreSQL-4.x, use psycopg2's adapt
+                from psycopg2.extensions import adapt
+                return adapt (value)
 
     @classmethod
     def param(self, name, value):
