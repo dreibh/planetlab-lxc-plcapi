@@ -61,14 +61,12 @@ tags:
 # $ run export
 # and cut'n paste the export lines before you run make sync
 
-PLCHOST ?= testplc.onelab.eu
-
 ifdef PLC
 SSHURL:=root@$(PLC):/
 SSHCOMMAND:=ssh root@$(PLC)
 else
 ifdef PLCHOSTLXC
-SSHURL:=root@$(PLCHOST):/var/lib/lxc/$(GUESTNAME)/rootfs
+SSHURL:=root@$(PLCHOSTLXC):/var/lib/lxc/$(GUESTNAME)/rootfs
 SSHCOMMAND:=ssh root@$(PLCHOSTLXC) ssh $(GUESTHOSTNAME)
 else
 ifdef PLCHOSTVS
