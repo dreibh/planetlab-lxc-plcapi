@@ -57,23 +57,50 @@ class PostgreSQL:
             self.connection.close()
             self.connection = None
 
+    @staticmethod
+    # From pgdb, and simplify code
+    def _quote(x):
+        if isinstance(x, DateTimeType):
+            x = str(x)
+        elif isinstance(x, unicode):
+            x = x.encode( 'utf-8' )
+    
+        if isinstance(x, types.StringType):
+            x = "'%s'" % str(x).replace("\\", "\\\\").replace("'", "''")
+        elif isinstance(x, (types.IntType, types.LongType, types.FloatType)):
+            pass
+        elif x is None:
+            x = 'NULL'
+        elif isinstance(x, (types.ListType, types.TupleType, set)):
+            x = 'ARRAY[%s]' % ', '.join(map(lambda x: str(_quote(x)), x))
+        elif hasattr(x, '__pg_repr__'):
+            x = x.__pg_repr__()
+        else:
+            raise PLCDBError, 'Cannot quote type %s' % type(x)
+        return x
+
+
     def quote(self, value):
         """
         Returns quoted version of the specified value.
         """
-        # The pgdb._quote function is good enough for general SQL
-        # quoting, except for array types.
-        if isinstance (value, (types.ListType, types.TupleType, set)):
-            'ARRAY[%s]' % ', '.join( [ str(self.quote(x)) for x in value ] )
-        else:
-            try:
-                # up to PyGreSQL-3.x, function was pgdb._quote
-                import pgdb
-                return pgdb._quote(value)
-            except:
-                # with PyGreSQL-4.x, use psycopg2's adapt
-                from psycopg2.extensions import adapt
-                return adapt (value)
+        return PostgreSQL._quote (value)
+
+# following is an unsuccessful attempt to re-use lib code as much as possible
+#    def quote(self, value):
+#        # The pgdb._quote function is good enough for general SQL
+#        # quoting, except for array types.
+#        if isinstance (value, (types.ListType, types.TupleType, set)):
+#            'ARRAY[%s]' % ', '.join( [ str(self.quote(x)) for x in value ] )
+#        else:
+#            try:
+#                # up to PyGreSQL-3.x, function was pgdb._quote
+#                import pgdb
+#                return pgdb._quote(value)
+#            except:
+#                # with PyGreSQL-4.x, use psycopg2's adapt
+#                from psycopg2.extensions import adapt
+#                return adapt (value)
 
     @classmethod
     def param(self, name, value):
