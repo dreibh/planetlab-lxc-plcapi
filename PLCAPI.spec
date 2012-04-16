@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.1
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Apr 16 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-1
+- fix gpg-authentication for Persons (thanks Jordan)
+- PostgreSQL.quote reviewed for f16/postgresql9 (used deprecated internal helper)
+- ip address/network check: v4 or v6
+- customized DB Message survive upgrade
+- make sync works in lxc-hosted tests
+- no svn keywords anymore
+
 * Fri Feb 24 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.0-37
 - fix sorting for methods list in docs
 - untested but needed tweak for postgres startup in f16
