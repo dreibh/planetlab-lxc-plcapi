@@ -90,8 +90,9 @@ class BaseClient(object):
     def presence(self, m):
         p = domish.Element(("jabber:client", "presence"))
         p['from'], p['to'] = m['to'], m['from']
-        presence.addElement("show", content="dnd")
-        presence.addElement("status", content="man at work")
+        # initially read presence.addElement, my wild guess.. -- Thierry
+        p.addElement("show", content="dnd")
+        p.addElement("status", content="man at work")
         self.xmlstream.send(p)
 
     def message_chat(self, m):
