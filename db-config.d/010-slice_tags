@@ -95,6 +95,10 @@ slicetag_types = \
     {'tagname': "vsys",
      'description': "Bind vsys script fd's to a slice's /vsys directory.",
      'category' : 'slice/rspec'},
+    {'tagname': "vsys_vnet",
+     'description': """Specify the IP range that can be used in a given slice
+for virtual devices involved in topologies, e.g. 192.168.100.0/24""",
+     'category': 'slice/rspec'},
     
     # CoDemux
     {'tagname': "codemux",
