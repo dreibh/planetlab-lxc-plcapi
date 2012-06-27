@@ -91,11 +91,12 @@ def get_slivers(api, caller, auth, slice_filter, node = None):
                 # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
-                if slice_tag not in slice_tags:
+                if slice_tag['tagname'] not in sliver_attributes:
+                    sliver_attributes.append(slice_tag['tagname'])
                     attributes.append({'tagname': slice_tag['tagname'],
-                                   'value': slice_tag['value']})
+                                       'value': slice_tag['value']})
 
-        for slice_tag in [ a for a in slice_tags if a['node_id'] is None ]:
+        for slice_tag in [ a for a in slice_tags if a['node_id'] is None and a['nodegroup_id'] is None ]:
             # Do not set any global slice attributes for
             # which there is at least one sliver attribute
             # already set.
