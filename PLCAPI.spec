@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.1
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jul 09 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-2
+- tweaks in interface initialization
+- has 'vsys_vnet' as a predefined tagtype
+- bugfix: prevent DeleteSliceFromNodes from messing with foreign slices
+- bugfix: GetSlivers & nodegroups
+- bugfix: in jabber groups management
+
 * Mon Apr 16 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-1
 - fix gpg-authentication for Persons (thanks Jordan)
 - PostgreSQL.quote reviewed for f16/postgresql9 (used deprecated internal helper)
