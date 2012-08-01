@@ -42,7 +42,10 @@ slicetag_types = \
     {'tagname': "cpu_cores",
      'description': "Number of CPU cores",
      'category': 'slice/rspec'},
-    
+    {'tagname': "cpu_freezable",
+     'description': "Slice processes should be frozen if cpu_cores is 0",
+     'category': 'slice/rspec'},     
+
     # Bandwidth limits
     {'tagname': "net_min_rate",
      'description': "Minimum bandwidth (kbps)",
