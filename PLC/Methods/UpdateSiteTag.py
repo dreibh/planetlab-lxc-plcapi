@@ -7,7 +7,6 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
 from PLC.Sites import Site, Sites
-from PLC.Nodes import Nodes
 from PLC.TagTypes import TagType, TagTypes
 from PLC.SiteTags import SiteTag, SiteTags
 

@@ -6,8 +6,9 @@ from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 
-from PLC.PersonTags import PersonTag, PersonTags
 from PLC.Persons import Person, Persons
+from PLC.TagTypes import TagType, TagTypes
+from PLC.PersonTags import PersonTag, PersonTags
 
 # need to import so the core classes get decorated with caller_may_write_tag
 from PLC.AuthorizeHelpers import AuthorizeHelpers
