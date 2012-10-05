@@ -6,4 +6,5 @@ Accessors_myslice
 Accessors_wireless
 Accessors_sliverauth
 Accessors_site
+Accessors_vicci
 """.split()
