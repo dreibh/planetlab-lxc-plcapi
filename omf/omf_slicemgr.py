@@ -338,7 +338,8 @@ class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
         self.command_queue.put(( self.create_node, "/".join([self.DOMAIN,slice,self.RESOURCES]) ))
 
     def add_resource(self, slice, resource):
-        self.command_queue.put(( self.create_node, "/".join([self.DOMAIN,slice,self.RESOURCES,resource]) ))
+        resname = "/".join([self.DOMAIN,slice,self.RESOURCES,resource])
+        self.command_queue.put(( self.create_node, resname ))
 
     def delete_slice(self, slice):
         slice_prefix = "/".join([self.DOMAIN,slice])
