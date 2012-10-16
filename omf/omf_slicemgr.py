@@ -3,6 +3,7 @@
 
 import os
 import sys
+import time
 import Queue
 from twisted.words.xish import domish
 from twisted.web import xmlrpc, server
@@ -337,7 +338,8 @@ class Slicemgr(xmlrpc.XMLRPC, PubSubClient):
         self.command_queue.put(( self.create_node, "/".join([self.DOMAIN,slice,self.RESOURCES]) ))
 
     def add_resource(self, slice, resource):
-        self.command_queue.put(( self.create_node, "/".join([self.DOMAIN,slice,self.RESOURCES,resource]) ))
+        resname = "/".join([self.DOMAIN,slice,self.RESOURCES,resource])
+        self.command_queue.put(( self.create_node, resname ))
 
     def delete_slice(self, slice):
         slice_prefix = "/".join([self.DOMAIN,slice])
@@ -366,9 +368,11 @@ if __name__ == "__main__":
     xmppserver = config.PLC_OMF_XMPP_SERVER
     xmppuser = "@".join([config.PLC_OMF_XMPP_USER, xmppserver])
     xmpppass = config.PLC_OMF_XMPP_PASSWORD
+    monthstring=time.strftime("%Y-%m")
     slicemgr = Slicemgr(xmppuser, xmpppass,
-                        log=open("/var/log/omf/pubsub_client.log", "a"),
-                        verbose=True)
+                        log=open("/var/log/omf/pubsub-client-%s.log"%monthstring, "a"),
+                        # used to be verbose=True but that amounts to huge totally helpless logs, so..
+                        verbose=False)
 
     t = task.LoopingCall(slicemgr.flush_commands)
     t.start(5.0) # check every 5 seconds
