@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.1
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Nov 23 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-4
+- tweak omf_slicemgr for smaller logs, split per month for easier cleaning
+- reset_xmpp_pubsub_nodes now hos options and usage
+- new Accessors for vicci
+
 * Fri Aug 31 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-3
 - fixed imports for tags management with sites and persons
 - add predefined 'cpu_freezable' tag
