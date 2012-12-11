@@ -46,8 +46,9 @@ define_accessors(current_module, [Slice,Node], "Arch", "arch",
 define_accessors(current_module, [Slice,Node], "Pldistro", "pldistro",
                  "node/slice/config/sfa", "PlanetLab distribution to use for node or slivers",
                  set_roles=["admin","pi","user","tech","node"], expose_in_api=True)
+# fc of course historically was for fedora core
 define_accessors(current_module, [Slice,Node], "Fcdistro", "fcdistro",
-                 "node/slice/config", "Fedora or CentOS distribution to use for node or slivers",
+                 "node/slice/config", "Linux distribution to use for node or slivers",
                  set_roles=["admin","pi","user","tech","node"], expose_in_api=True)
 
 # node deployment (alpha, beta, ...)
@@ -60,7 +61,11 @@ define_accessors(current_module, Node, "Extensions", "extensions",
                  set_roles=["admin"],expose_in_api=True)
 # access HRN - this is the ideal definition of roles, even if AddNodeTag cannot handle this
 define_accessors(current_module, Node, "Hrn","hrn",
-                 "node/sfa", "SFA human readable name",
+                 "node/person/sfa", "SFA human readable name",
+                 set_roles=all_roles, expose_in_api=True)
+# same for persons
+define_accessors(current_module, Person, "Hrn","hrn",
+                 "node/person/sfa", "SFA human readable name",
                  set_roles=all_roles, expose_in_api=True)
 
 # test nodes perform their installation from an uncompressed bootstrapfs
