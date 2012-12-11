@@ -360,8 +360,8 @@ tagname=arch               category=node/slice/config/ui/header=A/rank=x
 	</para></listitem>
 
 	<listitem><para> 
-	  The current limitation about tags as opposed to native
-	  fields is that, for performance, tags won't get returned
+	  The current limitations about tags, as opposed to native
+	  fields, is that for performance, tags won't get returned
 	  when using the implicit set of columns. So for instance:
 <programlisting>
 # get all details for 'pl1.foo.com' 
@@ -369,6 +369,20 @@ tagname=arch               category=node/slice/config/ui/header=A/rank=x
 # this did not return the 'arch' tag
 >>> 'arch' in node
 False
+</programlisting>
+	</para></listitem>
+
+	<listitem><para>
+	  For a similar reason, any tag used in the filter argument will <emphasis>have to</emphasis> be mentioned in the list of returned columns as well. For example:
+<programlisting>
+# if 'hrn' is not part of the result, this does not work
+>>> ns=GetNodes({'hrn':'ple.*'},['hostname'])
+Database error b59e068c-589a-4ad5-9dd8-63cc38f2a2eb:
+column "hrn" does not exist
+LINE 1: ...M view_nodes WHERE deleted IS False AND (True AND hrn ILIKE ...
+... abridged ...
+# this can be worked around by just returning 'hrn' as well
+>>> ns=GetNodes({'hrn':'ple.*'},['hrn','hostname'])
 </programlisting>
 	</para></listitem>
 
