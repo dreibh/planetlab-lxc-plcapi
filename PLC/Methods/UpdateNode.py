@@ -9,8 +9,6 @@ from PLC.Sites import Sites
 from PLC.Nodes import Node, Nodes
 from PLC.TagTypes import TagTypes
 from PLC.NodeTags import NodeTags, NodeTag
-from PLC.Methods.AddNodeTag import AddNodeTag
-from PLC.Methods.UpdateNodeTag import UpdateNodeTag
 
 admin_only = [ 'key', 'session', 'boot_nonce', 'site_id']
 can_update = ['hostname', 'node_type', 'boot_state', 'model', 'version'] + admin_only
@@ -112,6 +110,7 @@ class UpdateNode(Method):
                 node_tag = node_tags[0]
                 node_tag['value'] = value
                 node_tag.sync()
+
         # Logging variables
         self.event_objects = {'Node': [node['node_id']]}
         if 'hostname' in node:
