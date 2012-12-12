@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.1
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Dec 12 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-5
+- add hrn tag to persons, managed by AddPerson and AddPersonToSite
+- AddPerson and UpdatePerson are now tag-aware
+- as a side-effect AddPerson is more picky and rejects invalid fields
+- which results in a requirement to use sfa-2.1-22 with this tag
+- marginal improvement on the xml doc on tags
+
 * Fri Nov 23 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-4
 - tweak omf_slicemgr for smaller logs, split per month for easier cleaning
 - reset_xmpp_pubsub_nodes now hos options and usage
