@@ -34,17 +34,17 @@ site_id = sites[0]['site_id']
 UpdateSite(site_id, site)
 
 # The default administrator account must be associated with a site
-# in order to login.
-AddPersonToSite(admin['person_id'], site['site_id'])
-SetPersonPrimarySite(admin['person_id'], site['site_id'])
+# in order to login - see 001-admin_user
+AddPersonToSite(the_admin_id, site['site_id'])
+SetPersonPrimarySite(the_admin_id, site['site_id'])
 
 # Grant admin and PI roles to the default administrator account
-AddRoleToPerson(10, admin['person_id'])
-AddRoleToPerson(20, admin['person_id'])
+AddRoleToPerson(10, the_admin_id)
+AddRoleToPerson(20, the_admin_id)
 
 # Associate root ssh key with the default administrator
 keyfile=plc['root_ssh_key_pub']
-person = GetPersons(admin['person_id'])[0]
+person = GetPersons(the_admin_id)[0]
 keys = GetKeys(person['key_ids'])
 if os.path.exists(keyfile):
     sshkeyfp = file(keyfile,"r")
@@ -60,7 +60,7 @@ if os.path.exists(keyfile):
                 # should we delete other keys?
                 pass
     if not found:
-        key_id = AddPersonKey(admin['person_id'],{'key_type':'ssh','key':sshkey})
+        key_id = AddPersonKey(the_admin_id,{'key_type':'ssh','key':sshkey})
 else:
     if len(keys)==0:
         print "WARNING: default administrator does not have an ssh key"
