@@ -100,6 +100,13 @@ class AddSlice(Method):
             else:
                 UpdateSliceTag(self.api).__call__(auth,slice_tags[0]['slice_tag_id'],value)
 
+        # take PLC_VSYS_DEFAULTS into account for convenience
+        try:
+            values= [ value for value in api.config.PLC_VSYS_DEFAULTS.split(',') if value ]
+            for value in values:
+                AddSliceTag(self.api).__call__(auth,slice['slice_id'],'vsys',value)
+        except:
+            print "Could not set vsys tags as configured in PLC_VSYS_DEFAULTS"
         self.event_objects = {'Slice': [slice['slice_id']]}
         self.message = "Slice %d created" % slice['slice_id']
 
