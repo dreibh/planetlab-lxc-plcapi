@@ -1,6 +1,6 @@
 %define name PLCAPI
 %define version 5.1
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -145,6 +145,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Dec 19 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-6
+- implement PLC_VSYS_DEFAULTS in AddSlice
+
 * Wed Dec 12 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-5
 - add hrn tag to persons, managed by AddPerson and AddPersonToSite
 - AddPerson and UpdatePerson are now tag-aware
