@@ -93,6 +93,19 @@
 #endif
 /* ==================== end patch */
 
+/* ====================
+ * Thierry - Jan. 30 2013 
+ * patch for php - issues first triggered on f18 with php-5.4
+ * https://bugs.php.net/bug.php?id=60016 
+ * https://bugs.php.net/bug.php?id=60016 
+ */
+#if ZEND_MODULE_API_NO >= 20100525
+// No more defined with PHP 5.4
+#define function_entry zend_function_entry
+#define pval zval
+#endif
+/* ==================== end patch */
+
 /* ========== additional notes
  * in the process, I've also come across the following resources that might help 
  * if/when zend_get_parameters_ex gets deprecated (only generates warnings for now)
