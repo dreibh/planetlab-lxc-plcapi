@@ -27,7 +27,9 @@ Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
+%if "%{distro}" == "Fedora" && %{distrorelease} <= 18
 Requires: mod_python
+%endif
 # mod_wsgi will replace mod_python when we are ready
 Requires: mod_wsgi
 Requires: mod_ssl
