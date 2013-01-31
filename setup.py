@@ -13,7 +13,7 @@ setup(py_modules = ['ModPython'],
       packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'aspects'],
       scripts = ['plcsh', 'Server.py'],
       data_files = [
-        ('', ['planetlab5.sql']),
+        ('', ['planetlab5.sql' , 'ModWSGI.wsgi' ]),
         ('php', ['php/plc_api.php']),
         ('migrations', 
          ['migrations/README.txt',
