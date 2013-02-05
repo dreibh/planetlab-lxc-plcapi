@@ -14,7 +14,7 @@ setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', '
       data_files = [
         ('', ['planetlab5.sql']),
         # don't package for mod_python anymore
-        (' apache', ['apache/plc.wsgi']),
+        ('apache', ['apache/plc.wsgi']),
         ('php', ['php/plc_api.php']),
         ('migrations', 
          ['migrations/README.txt',
