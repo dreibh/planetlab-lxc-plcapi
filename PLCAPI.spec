@@ -27,11 +27,12 @@ Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
-%if "%{distro}" == "Fedora" && %{distrorelease} <= 17
+%if "%{distro}" == "Fedora" && %{distrorelease} < 16
 Requires: mod_python
-%endif
+%else
 # mod_wsgi will replace mod_python when we are ready
 Requires: mod_wsgi
+%endif
 Requires: mod_ssl
 Requires: SOAPpy
 Requires: python-simplejson
