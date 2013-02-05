@@ -9,11 +9,12 @@
 from distutils.core import setup
 from glob import glob
 
-setup(py_modules = ['ModPython'],
-      packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'aspects'],
+setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'aspects'],
       scripts = ['plcsh', 'Server.py'],
       data_files = [
-        ('', ['planetlab5.sql' , 'ModWSGI.wsgi' ]),
+        ('', ['planetlab5.sql']),
+        # don't package for mod_python anymore
+        (' apache', ['plc.wsgi']),
         ('php', ['php/plc_api.php']),
         ('migrations', 
          ['migrations/README.txt',
