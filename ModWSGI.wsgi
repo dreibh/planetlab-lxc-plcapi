@@ -2,8 +2,6 @@
 # Apache mod_wsgi python interface
 #
 # Copyright (C) 2004-2006 The Trustees of Princeton University
-# $Id: ModWSGI.py 14587 2009-07-19 13:18:50Z tmack $
-# $URL: svn+ssh://svn.planet-lab.org/svn/PLCAPI/trunk/ModWSGI.py $
 #
 
 import sys
