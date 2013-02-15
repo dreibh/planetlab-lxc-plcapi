@@ -18,7 +18,8 @@ Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
 URL: %{SCMURL}
 
-Obsoletes: plcapilib, PLCAPI
+Provides: PLCAPI
+Obsoletes: PLCAPI
 
 # We use set everywhere
 Requires: python >= 2.4
