@@ -13,8 +13,8 @@ setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', '
       scripts = ['plcsh', 'Server.py'],
       data_files = [
         ('', ['planetlab5.sql']),
-        # don't package for mod_python anymore
-        ('apache', ['apache/plc.wsgi']),
+        # package for mod_python and mod_wsgi, defer choice to myplc
+        ('apache', ['apache/ModPython.py', 'apache/__init__.py', 'apache/plc.wsgi']),
         ('php', ['php/plc_api.php']),
         ('migrations', 
          ['migrations/README.txt',
