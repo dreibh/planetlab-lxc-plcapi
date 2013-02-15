@@ -1,4 +1,4 @@
-%define name PLCAPI
+%define name plcapi
 %define version 5.1
 %define taglevel 6
 
@@ -18,7 +18,7 @@ Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
 URL: %{SCMURL}
 
-Obsoletes: plcapilib
+Obsoletes: plcapilib, PLCAPI
 
 # We use set everywhere
 Requires: python >= 2.4
@@ -27,7 +27,7 @@ Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
 Requires: httpd
-Requires: mod_wsgi
+# requirement to mod_python or mod_wsgi: deferred to myplc
 Requires: mod_ssl
 Requires: SOAPpy
 Requires: python-simplejson
