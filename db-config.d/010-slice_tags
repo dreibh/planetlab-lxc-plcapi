@@ -129,6 +129,10 @@ for virtual devices involved in topologies, e.g. 192.168.100.0/24""",
      'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
      'category' : 'slice/general'},
 
+    {'tagname' : 'interface',
+     'description' : 'The interface tag holds network configuraiton information until VirtualInterface objects are in PLCAPI',
+     'category' : 'slice/network'},
+
 ]
 
 import resource

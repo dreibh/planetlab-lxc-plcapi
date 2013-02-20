@@ -1,0 +1,26 @@
+# -*-python-*-
+#################### interface tag types
+# xxx this should move to PLC/Accessors
+
+interfacegag_types = \
+[
+    {'category': u'interface/ovs', 
+     'description': u'Name of Open vSwitch bridge', 
+     'tagname': u'ovs_bridge'},
+
+    # Used by M-lab for IPv6 addresses
+    {'category': u'interface/config', 
+     'description': u'IPv6 gateway', 
+     'tagname': u'ipv6_defaultgw'},
+    {'category': u'interface/config', 
+     'description': u'IPv6 address for the interface',
+     'tagname': u'ipv6addr'},
+    {'category': u'interface/config',
+     'description': u'IPv6 slice addresses',  
+     'tagname': u'ipv6addr_secondaries'},
+]
+
+for interfacetag_type in interfacetag_types:
+    SetTagType(interfacetag_type)
+    AddRoleToTagType('admin', interfacetag_type['tagname'])
+    AddRoleToTagType('tech', interfacetag_type['tagname'])
