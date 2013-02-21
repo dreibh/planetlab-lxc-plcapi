@@ -130,7 +130,7 @@ for virtual devices involved in topologies, e.g. 192.168.100.0/24""",
      'category' : 'slice/general'},
 
     {'tagname' : 'interface',
-     'description' : 'The interface tag holds network configuraiton information until VirtualInterface objects are in PLCAPI',
+     'description' : 'The interface tag holds network configuration information until VirtualInterface objects are in PLCAPI',
      'category' : 'slice/network'},
 
 ]

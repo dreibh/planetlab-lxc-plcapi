@@ -2,7 +2,7 @@
 #################### interface tag types
 # xxx this should move to PLC/Accessors
 
-interfacegag_types = \
+interfacetag_types = \
 [
     {'category': u'interface/ovs', 
      'description': u'Name of Open vSwitch bridge', 
