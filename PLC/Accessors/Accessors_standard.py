@@ -18,8 +18,10 @@ current_module = sys.modules[__name__]
 #
 
 # These following accessors are mostly of interest for implementing the
-# GetSliceFamily method, that takes into account the vref attribute,
-# as well as the 3 attributes below, and the PLC_FLAVOUR config category
+# The GetSliceFamily and GetNodeFlavour methods take into account various tags, 
+# esp. arch, fcdistro, pldistro, vref (for slices) and deployment (for nodes)
+# as well as the global PLC_FLAVOUR config category
+# in order to return all configuration details for a given node or slice
 
 ### slice vref
 define_accessors(current_module, Slice, "Vref", "vref",
