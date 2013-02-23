@@ -8,11 +8,13 @@
 # Setup default slice tag types
 slicetag_types = \
 [
-    # Slice type (only vserver is supported)
-    {'tagname': "type",
-     'description': "Type of slice (e.g. vserver)",
-     'category' : 'slice/general',
-     'roles': ['admin','pi']},
+
+### this applies on Node, not on Slice
+###    # Slice type (only vserver is supported)
+###    {'tagname': "type",
+###     'description': "Type of slice (e.g. vserver)",
+###     'category' : 'slice/general',
+###     'roles': ['admin','pi']},
     
     # System slice
     {'tagname': "system",
