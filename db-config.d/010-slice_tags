@@ -95,9 +95,11 @@ slicetag_types = \
      'category' : 'slice/rspec'},
     
     # Vsys
+    # need to allow this one so that slice can have that set from PLC_VSYS_DEFAULT
     {'tagname': "vsys",
      'description': "Bind vsys script fd's to a slice's /vsys directory.",
-     'category' : 'slice/rspec'},
+     'category' : 'slice/rspec',
+     'roles': AllPersonRoles()},
     {'tagname': "vsys_vnet",
      'description': """Specify the IP range that can be used in a given slice
 for virtual devices involved in topologies, e.g. 192.168.100.0/24""",

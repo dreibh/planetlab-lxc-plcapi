@@ -23,6 +23,8 @@ def SetRole(level, role):
 g_known_tag_types = [tag_type['tagname'] for tag_type in GetTagTypes()]
 g_known_tag_types.sort()
 
+def AllPersonRoles (): return [ 'pi','user','tech' ]
+
 def SetTagType(tag_type):
     try:
         tagname=tag_type['tagname']
