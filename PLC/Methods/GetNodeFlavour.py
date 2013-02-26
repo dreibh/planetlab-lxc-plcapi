@@ -1,3 +1,5 @@
+import traceback
+
 from PLC.Method import Method
 from PLC.Auth import Auth
 from PLC.Faults import *
@@ -15,7 +17,7 @@ class GetNodeFlavour(Method):
     optionnally overridden by any of the following tags if set on that node:
 
     'arch', 'pldistro', 'fcdistro',
-    'deployment', 'extensions',
+    'deployment', 'extensions', 'virt', 
     """
 
     roles = ['admin', 'user', 'node']
@@ -35,7 +37,7 @@ class GetNodeFlavour(Method):
 
 
     ########## nodefamily
-    def nodefamily (self, auth, node_id, fcdistro, arch):
+    def nodefamily (self, auth, node_id, fcdistro, pldistro, arch):
 
         # the deployment tag, if set, wins
         # xxx Thierry: this probably is wrong; we need fcdistro to be set anyway
@@ -43,13 +45,33 @@ class GetNodeFlavour(Method):
         deployment = GetNodeDeployment (self.api,self.caller).call(auth,node_id)
         if deployment: return deployment
 
-        pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
-        if not pldistro:
-            pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
-            SetNodePldistro(self.api,self.caller).call(auth,node_id,pldistro)
-
         # xxx would make sense to check the corresponding bootstrapfs is available
         return "%s-%s-%s"%(pldistro,fcdistro,arch)
+
+    ##########
+    # parse PLC_FLAVOUR_VIRT_MAP 
+    known_virts=['vs','lxc']
+    default_virt='vs'
+    def virt_from_virt_map (self, fcdistro):
+        map={}
+        try:
+            assigns=[x.strip() for x in self.api.config.PLC_FLAVOUR_VIRT_MAP.split(';')]
+            for assign in assigns:
+                (left,right)=[x.strip() for x in assign.split(':')]
+                if right not in GetNodeFlavour.known_virts:
+                    print "GetNodeFlavour, unknown 'virt' %s - ignored" % right
+                    continue
+                for fcdistro in [ x.strip() for x in left.split(',')]:
+                    map[fcdistro]=right
+        except:
+            print "GetNodeFlavour, issue with parsing PLC_FLAVOUR_VIRT_MAP=%s - returning '%s'"%\
+                (self.api.config.PLC_FLAVOUR_VIRT_MAP,GetNodeFlavour.default_virt)
+            traceback.print_exc()
+            return GetNodeFlavour.default_virt
+        if fcdistro in map:  return map[fcdistro]
+        if 'default' in map: return map['default']
+        return GetNodeFlavour.default_virt
+            
 
     def extensions (self, auth, node_id, fcdistro, arch):
         try:
@@ -79,9 +101,23 @@ class GetNodeFlavour(Method):
             fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
             SetNodeFcdistro (self.api,self.caller).call (auth, node_id, fcdistro)
 
+        pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
+        if not pldistro:
+            pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
+            SetNodePldistro(self.api,self.caller).call(auth,node_id,pldistro)
+
+        virt = GetNodeVirt (self.api,self.caller).call(auth, node_id)
+        if not virt:
+            virt = self.virt_from_virt_map (fcdistro)
+            SetNodeVirt (self.api, self.caller).call (auth, node_id, virt)
+
         # xxx could use some sanity checking, and could provide fallbacks
-        return { 'nodefamily' : self.nodefamily(auth,node_id, fcdistro, arch),
-                 'fcdistro' : fcdistro,
-                 'extensions' : self.extensions(auth,node_id, fcdistro, arch),
-                 'plain' : self.plain(auth,node_id),
-                 }
+        return {
+            'arch'      : arch,
+            'fcdistro'  : fcdistro,
+            'pldistro'  : pldistro,
+            'virt'      : virt,
+            'nodefamily': self.nodefamily(auth,node_id, fcdistro, pldistro, arch),
+            'extensions': self.extensions(auth,node_id, fcdistro, arch),
+            'plain'     : self.plain(auth,node_id),
+            }

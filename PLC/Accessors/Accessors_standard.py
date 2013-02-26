@@ -53,6 +53,12 @@ define_accessors(current_module, [Slice,Node], "Fcdistro", "fcdistro",
                  "node/slice/config", "Linux distribution to use for node or slivers",
                  set_roles=["admin","pi","user","tech","node"], expose_in_api=True)
 
+# the virtualization model to use - this is only used by the bootmanager for 
+# picking the right options e.g. prior to reinstalling
+# see PLC_FLAVOUR_VIRT_MAP to see how the default gets computed
+define_accessors(current_module, Node, "Virt", "virt",
+                 "node/operation", 'typically "vs" or "lxc"',
+                 set_roles=["admin"], expose_in_api=True)
 # node deployment (alpha, beta, ...)
 define_accessors(current_module, Node, "Deployment", "deployment",
                  "node/operation", 'typically "alpha", "beta", or "production"',
