@@ -52,7 +52,7 @@ class GetNodeFlavour(Method):
     # parse PLC_FLAVOUR_VIRT_MAP 
     known_virts=['vs','lxc']
     default_virt='vs'
-    def virt_from_virt_map (self, fcdistro):
+    def virt_from_virt_map (self, node_fcdistro):
         map={}
         try:
             assigns=[x.strip() for x in self.api.config.PLC_FLAVOUR_VIRT_MAP.split(';')]
@@ -68,7 +68,8 @@ class GetNodeFlavour(Method):
                 (self.api.config.PLC_FLAVOUR_VIRT_MAP,GetNodeFlavour.default_virt)
             traceback.print_exc()
             return GetNodeFlavour.default_virt
-        if fcdistro in map:  return map[fcdistro]
+#        print 'virt_from_virt_map, using map',map
+        if node_fcdistro in map:  return map[node_fcdistro]
         if 'default' in map: return map['default']
         return GetNodeFlavour.default_virt
             
