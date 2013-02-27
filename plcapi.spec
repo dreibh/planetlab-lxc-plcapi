@@ -1,6 +1,6 @@
 %define name plcapi
-%define version 5.1
-%define taglevel 6
+%define version 5.2
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
