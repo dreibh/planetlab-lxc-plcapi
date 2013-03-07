@@ -110,7 +110,9 @@ class GetNodeFlavour(Method):
         virt = GetNodeVirt (self.api,self.caller).call(auth, node_id)
         if not virt:
             virt = self.virt_from_virt_map (fcdistro)
-            SetNodeVirt (self.api, self.caller).call (auth, node_id, virt)
+            # do not save in node - if a node was e.g. f14 and it gets set to f16
+            # we do not want to have to re-set virt
+            # SetNodeVirt (self.api, self.caller).call (auth, node_id, virt)
 
         # xxx could use some sanity checking, and could provide fallbacks
         return {
