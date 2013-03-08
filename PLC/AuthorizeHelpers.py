@@ -200,8 +200,8 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
                 if AuthorizeHelpers.slice_belongs_to_pi (api, slice, caller):
                     granted=True ; break
     if not granted:
-        try: print "DEBUG: caller=%s"%caller
-        except: pass
+#        try: print "DEBUG: caller=%s"%caller
+#        except: pass
         raise PLCPermissionDenied, "Cannot write slice tag %s - %s"%(tag_type['tagname'],reason)
 
 setattr(Slice,'caller_may_write_tag',caller_may_write_slice_tag)
