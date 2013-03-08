@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.2
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,16 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Mar 08 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-1
+- new slice tag 'interface' for configuring a virtual interface
+- new builtin 030-interface_tags
+- new node accessor and tag 'virt' for mixing lxc & vs nodes
+- also exposed in GetNodeFlavour based on fcdistro and PLC_FLAVOUR_VIRT_MAP
+- moved ModPypthon and plc.wsgi in the apache/ subdir
+- renamed PLCAPI.spec into plcapi.spec
+- removed old and unused tag 'type' on slices(!) - original intention seemed like virt
+- support for php-5.4
+
 * Wed Dec 19 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.1-6
 - implement PLC_VSYS_DEFAULTS in AddSlice
 
