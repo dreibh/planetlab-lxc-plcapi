@@ -273,6 +273,8 @@ class GetBootMedium(Method):
 
         return (pldistro,fcdistro,arch)
 
+    # xxx Thierry : 5.2.1 build/version.txt for some reason is empty, that's why 
+    # the weird name with downloaded image filenames
     def bootcd_version (self):
         try:
             return file(self.BOOTCDDIR + "/build/version.txt").readline().strip()
