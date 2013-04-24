@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.2
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Apr 24 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-2
+- use SFA code for computing hrn's when available
+
 * Fri Mar 08 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-1
 - new slice tag 'interface' for configuring a virtual interface
 - new builtin 030-interface_tags
