@@ -4,6 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Nodes import Node, Nodes
 from PLC.Slices import Slice, Slices
 from PLC.Auth import Auth
+from PLC.Plugins import PluginManager
 
 class DeleteSliceFromNodes(Method):
     """
@@ -57,5 +58,7 @@ class DeleteSliceFromNodes(Method):
 
         self.event_objects = {'Node': [node['node_id'] for node in nodes],
                               'Slice': [slice['slice_id']]}
+
+        PluginManager(self.api, auth).notify("slice.DeleteFromNodes", self.event_objects)
 
         return 1
