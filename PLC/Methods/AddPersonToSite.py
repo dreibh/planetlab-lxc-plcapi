@@ -81,7 +81,10 @@ class AddPersonToSite(Method):
                     person_tag['value'] = value
                     person_tag.sync() 
         except Exception,e:
-            print "Warning, cannot maintain person's hrn, %s"%e
+            print "BEG Warning, cannot maintain person's hrn, %s"%e
+            import traceback
+            traceback.print_exc()
+            print "END Warning, cannot maintain person's hrn, %s"%e
                 
 
         return 1
