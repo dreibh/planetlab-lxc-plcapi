@@ -5,7 +5,6 @@ from PLC.Nodes import Node, Nodes
 from PLC.Slices import Slice, Slices
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
-from PLC.Plugins import PluginManager
 
 class AddSliceToNodes(Method):
     """
@@ -69,7 +68,5 @@ class AddSliceToNodes(Method):
         self.event_objects = {'Node': nodeids,
                               'Slice': [slice['slice_id']]}
         self.message = 'Slice %d added to nodes %s' % (slice['slice_id'], nodeids)
-
-        PluginManager(self.api, auth).notify("slice.AddToNodes", self.event_objects)
 
         return 1
