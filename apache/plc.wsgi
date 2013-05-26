@@ -14,14 +14,12 @@ from PLC.API import PLCAPI
 
 api = PLCAPI()
 
-# recipe from this page
-# http://code.google.com/p/modwsgi/wiki/DebuggingTechniques
-# let ErrorMiddleware deal with exceptions
 def application(environ, start_response):
-    status = '200 OK'
-    if environ.get('REQUEST_METHOD') != 'POST':
-        content_type = 'text/html'
-        output = """
+    try:
+        status = '200 OK'
+        if environ.get('REQUEST_METHOD') != 'POST':
+            content_type = 'text/html'
+            output = """
 <html><head>
 <title>PLCAPI WSGI XML-RPC/SOAP Interface</title>
 </head><body>
@@ -29,15 +27,20 @@ def application(environ, start_response):
 <p>Please use XML-RPC or SOAP to access the PLCAPI.</p>
 </body></html>
 """
-    else:
-        api.environ = environ
-        content_type = 'text/xml'
-        ip = environ.get('REMOTE_ADDR')
-        port = environ.get('REMOTE_PORT')
-        output = api.handle((ip,port),environ.get('wsgi.input').read())
-        # Shut down database connection, otherwise up to MaxClients DB
-        # connections will remain open.
-        api.db.close()
+        else:
+            api.environ = environ
+            content_type = 'text/xml'
+            ip = environ.get('REMOTE_ADDR')
+            port = environ.get('REMOTE_PORT')
+            output = api.handle((ip,port),  environ.get('wsgi.input').read())
+            # Shut down database connection, otherwise up to MaxClients DB
+            # connections will remain open.
+            api.db.close()
+    except Exception, err:
+        status = '500 Internal Server Error'
+        content_type = 'text/html'
+        output = 'Internal Server Error'
+        print >> log, err, traceback.format_exc()
 
     # Write response
     response_headers = [('Content-type', '%s' % content_type),
@@ -45,5 +48,3 @@ def application(environ, start_response):
     start_response(status, response_headers)
     return [output] 
 
-from paste.exceptions.errormiddleware import ErrorMiddleware
-application = ErrorMiddleware(application, debug=True)
