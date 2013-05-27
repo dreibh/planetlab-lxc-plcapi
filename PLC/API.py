@@ -155,6 +155,9 @@ class PLCAPI:
             from aspects import apply_ratelimit_aspect
             apply_ratelimit_aspect()
 
+        if getattr(self.config, "PLC_NETCONFIG_ENABLED", False):
+            from aspects.netconfigaspects import apply_netconfig_aspect
+            apply_netconfig_aspect()
 
         # Enable Caching. Only for GetSlivers for the moment.
         # TODO: we may consider to do this in an aspect like the ones above.
