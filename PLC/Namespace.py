@@ -35,4 +35,4 @@ if hostname_to_hrn is None:
 
 if email_to_hrn is None:
     def email_to_hrn (auth_hrn, email):
-        return '.'.join([auth,email.split('@')[0].replace(".", "_").replace("+", "_")])
+        return '.'.join([auth_hrn,email.split('@')[0].replace(".", "_").replace("+", "_")])
