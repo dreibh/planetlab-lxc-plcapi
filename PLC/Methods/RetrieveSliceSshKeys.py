@@ -27,12 +27,14 @@ class RetrieveSliceSshKeys(Method):
     accepts = [
         Auth(),
         Mixed(Slice.fields['slice_id'],
-              Slice.fields['name'])
+              Slice.fields['name']),
+        Filter(Node.fields),
         ]
 
     returns = Parameter (dict, " ssh keys hashed on hostnames")
 
-    def call(self, auth, slice_id_or_name):
+    def call(self, auth, slice_id_or_name, node_filter=None):
+        
         filter={}
         if isinstance(slice_id_or_name,int):
             filter['slice_id']=slice_id_or_name
@@ -41,6 +43,12 @@ class RetrieveSliceSshKeys(Method):
         filter['tagname']='ssh_key'
         # retrieve only sliver tags
         filter['~node_id']=None
+        if node_filter:
+            # make sure we only deal with local nodes
+            node_filter['peer_id']=None
+            nodes = Nodes(self.api, node_filter, ['node_id'])
+            node_ids = [ node ['node_id'] for node in nodes ]
+            filter['node_id']=node_ids
         
         # slice_tags don't expose hostname, sigh..
         slice_tags=SliceTags(self.api,filter,['node_id','tagname','value'])
