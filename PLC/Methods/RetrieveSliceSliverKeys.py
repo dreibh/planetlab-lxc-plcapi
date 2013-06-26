@@ -8,7 +8,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.SliceTags import SliceTag, SliceTags
 from PLC.Slices import Slice, Slices 
 
-class RetrieveSliceSshKeys(Method):
+class RetrieveSliceSliverKeys(Method):
     """
     This method exposes the public ssh keys for a slice's slivers.
     It expects a slice name or id, and returns a dictionary on hostnames.
