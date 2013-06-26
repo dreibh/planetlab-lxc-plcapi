@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.2
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jun 26 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-4
+- drop GetSliceSshKeys, new RetrieveSlicePersonKeys and RetrieveSliceSliverKeys
+
 * Wed May 29 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-3
 - enable netconfig aspects if PLC_NETCONFIG_ENABLED
 
