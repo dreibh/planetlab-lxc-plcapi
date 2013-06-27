@@ -119,6 +119,7 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 #mkdir -p $RPM_BUILD_ROOT/var/log/omf
 
 # Install ratelimit log
+mkdir -p $RPM_BUILD_ROOT/var/log
 touch $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 chown apache:apache $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 
