@@ -1,12 +1,7 @@
 from pyaspects.weaver import weave_class_method
 
 from PLC.Method import Method
-from aspects.omfaspects import OMFAspect
 from aspects.ratelimitaspects import RateLimitAspect
-
-def apply_omf_aspect():
-    # track all PLC methods to add OMF hooks
-    weave_class_method(OMFAspect(), Method, "__call__")
 
 def apply_ratelimit_aspect():
     weave_class_method(RateLimitAspect(), Method, "__call__")

@@ -145,12 +145,6 @@ class PLCAPI:
         # Aspects modify the API by injecting code before, after or
         # around method calls. -- http://github.com/baris/pyaspects/blob/master/README
         # 
-        # As of now we only have aspects for OMF integration, that's
-        # why we enable aspects only if PLC_OMF is set to true.
-        if self.config.PLC_OMF_ENABLED:
-            from aspects import apply_omf_aspect
-            apply_omf_aspect()
-        
         if self.config.PLC_RATELIMIT_ENABLED:
             from aspects import apply_ratelimit_aspect
             apply_ratelimit_aspect()
