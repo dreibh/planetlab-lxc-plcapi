@@ -341,13 +341,10 @@ class GetSlivers(Method):
         # XMPP config for omf federation
         try:
             if not self.api.config.PLC_OMF_ENABLED:
-                raise Exception,"OMF disabled"
-            xmpp={'server':self.api.config.PLC_OMF_XMPP_SERVER,
-                  'user':self.api.config.PLC_OMF_XMPP_USER,
-                  'password':self.api.config.PLC_OMF_XMPP_PASSWORD,
-                  }
+                raise Exception,"OMF not enabled"
+            xmpp={'server':self.api.config.PLC_OMF_XMPP_SERVER}
         except:
-            xmpp={'server':None,'user':None,'password':None}
+            xmpp={'server':None}
 
         node.update_last_contact()
 
