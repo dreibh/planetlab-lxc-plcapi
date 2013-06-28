@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.2
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jun 28 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-7
+- also cleanup omf-slicemgr initscript
+
 * Fri Jun 28 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-6
 - tear down omf-related aspects as this is no longer needed with omfv6
 
