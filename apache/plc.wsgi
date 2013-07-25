@@ -12,8 +12,6 @@ import traceback
 from PLC.Debug import log
 from PLC.API import PLCAPI
 
-api = PLCAPI()
-
 def application(environ, start_response):
     try:
         status = '200 OK'
@@ -28,6 +26,12 @@ def application(environ, start_response):
 </body></html>
 """
         else:
+            # Thomas Dreibholz <dreibh@simula.no>
+            # Note that this function is called within multiple threads!
+            # "api" MUST be a local variable instead of a global one.
+            # Otherwise, this causes concurrent accesses to the same
+            # object within different threads!
+            api = PLCAPI()
             api.environ = environ
             content_type = 'text/xml'
             ip = environ.get('REMOTE_ADDR')
