@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.2
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Sep 20 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-9
+- add an hrn accessor for slice so the SFA code can keep track of the federation-wide name of the slice
+
 * Wed Aug 28 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-8
 - fix for wsgi-based deployments, each thread has its own api()
 
