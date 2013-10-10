@@ -25,6 +25,10 @@ try:
 except:
     email_to_hrn=None
 
+try:
+    from sfa.planetlab.plxrn import slicename_to_hrn
+except:
+    slicename_to_hrn=None
 #################### if not found, bring our own local version
 import re
 def escape(token): return re.sub(r'([^\\])\.', r'\1\.', token)
@@ -36,3 +40,7 @@ if hostname_to_hrn is None:
 if email_to_hrn is None:
     def email_to_hrn (auth_hrn, email):
         return '.'.join([auth_hrn,email.split('@')[0].replace(".", "_").replace("+", "_")])
+
+if slicename_to_hrn is None:
+    def slicename_to_hrn (auth_hrn, slicename):
+        return ".".join([auth_hrn] + slicename.split("_",1))
