@@ -68,8 +68,8 @@ define_accessors(current_module, Node, "Extensions", "extensions",
                  "node/config", "space-separated list of extensions to install",
                  set_roles=["admin"],expose_in_api=True)
 # access HRN - this is the ideal definition of roles, even if AddNodeTag cannot handle this
-define_accessors(current_module, [Node,Person,Slice] , "Hrn", "hrn",
-                 "node/person/slice/sfa", "SFA human readable name",
+define_accessors(current_module, [Node,Person,Slice,Site] , "Hrn", "hrn",
+                 "node/person/slice/site/sfa", "SFA human readable name",
                  set_roles=all_roles, expose_in_api=True)
 
 # test nodes perform their installation from an uncompressed bootstrapfs
