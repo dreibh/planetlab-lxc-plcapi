@@ -108,3 +108,8 @@ define_accessors(current_module, Interface, "Alias", "alias",
 define_accessors(current_module, Interface, "Backdoor", "backdoor",
                  "interface/hidden", "For testing new settings",
                  set_roles=admin_roles)
+
+# we need to identify objects created through SFA interfaces
+define_accessors(current_module, [Person,Slice,Site] , "SfaCreated", "sfa_created",
+                 "person/slice/site/sfa", "Tag objects created through SFA interfaces",
+                 set_roles=all_roles, expose_in_api=True)
