@@ -7,6 +7,7 @@ from PLC.Persons import Person, Persons
 from PLC.sendmail import sendmail
 from PLC.TagTypes import TagTypes
 from PLC.PersonTags import PersonTags, PersonTag
+from PLC.Namespace import email_to_hrn
 
 related_fields = Person.related_fields.keys()
 can_update = ['first_name', 'last_name', 'title', 'email',
@@ -85,6 +86,14 @@ class UpdatePerson(Method):
                 Body = "Your %s account has been disabled. Please contact your PI or PlanetLab support for more information" % (self.api.config.PLC_NAME)
             sendmail(self.api, To = To, Cc = Cc, Subject = Subject, Body = Body)
 
+        # if email was modifed make sure to update the hrn tag
+        if 'email' in native:
+            old_hrn=PersonTags(self.api,{'tagname':'hrn','person_id':person['person_id']})[0]['value']
+            if old_hrn :
+                root_auth = self.api.config.PLC_HRN_ROOT
+                login_base = old_hrn.split('.')[-2]
+                hrn=email_to_hrn("%s.%s"%(root_auth,login_base),person['email'])
+                tags['hrn'] = hrn
 
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
