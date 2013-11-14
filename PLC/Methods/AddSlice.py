@@ -90,6 +90,10 @@ class AddSlice(Method):
         slice['site_id'] = site['site_id']
         slice.sync()
 
+        # Set Slice HRN
+        root_auth = self.api.config.PLC_HRN_ROOT
+        tags['hrn'] = '.'.join([root_auth, login_base, name.split("_")[1]])
+
         for (tagname,value) in tags.iteritems():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
