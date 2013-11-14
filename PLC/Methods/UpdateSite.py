@@ -4,6 +4,9 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
+from PLC.SiteTags import SiteTags
+from PLC.Methods.UpdateSiteTag import UpdateSiteTag
+
 related_fields = Site.related_fields.keys()
 can_update = lambda (field, value): field in \
              ['name', 'abbreviated_name', 'login_base',
@@ -75,5 +78,13 @@ class UpdateSite(Method):
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d updated: %s' % \
                 (site['site_id'], ", ".join(site_fields.keys()))
+
+        # Update Site HRN if login_base changed
+        if 'login_base' in site_fields:
+            root_auth = self.api.config.PLC_HRN_ROOT
+            tagname = 'hrn'
+            tagvalue = '.'.join([root_auth, site['login_base']])
+            site_tags=SiteTags(self.api,{'tagname':tagname,'site_id':site['site_id']})
+            UpdateSiteTag(self.api).__call__(auth,site_tags[0]['site_tag_id'],tagvalue)
 
         return 1
