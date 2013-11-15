@@ -88,8 +88,9 @@ class UpdatePerson(Method):
 
         # if email was modifed make sure to update the hrn tag
         if 'email' in native:
-            old_hrn=PersonTags(self.api,{'tagname':'hrn','person_id':person['person_id']})[0]['value']
-            if old_hrn :
+            hrn_tag=PersonTags(self.api,{'tagname':'hrn','person_id':person['person_id']})
+            if hrn_tag:
+                old_hrn = hrn_tag[0]['value']
                 root_auth = self.api.config.PLC_HRN_ROOT
                 login_base = old_hrn.split('.')[-2]
                 hrn=email_to_hrn("%s.%s"%(root_auth,login_base),person['email'])
