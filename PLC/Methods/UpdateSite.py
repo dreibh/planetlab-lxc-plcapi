@@ -5,6 +5,7 @@ from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
 from PLC.SiteTags import SiteTags
+from PLC.Methods.AddSiteTag import AddSiteTag
 from PLC.Methods.UpdateSiteTag import UpdateSiteTag
 
 related_fields = Site.related_fields.keys()
@@ -85,6 +86,9 @@ class UpdateSite(Method):
             tagname = 'hrn'
             tagvalue = '.'.join([root_auth, site['login_base']])
             site_tags=SiteTags(self.api,{'tagname':tagname,'site_id':site['site_id']})
-            UpdateSiteTag(self.api).__call__(auth,site_tags[0]['site_tag_id'],tagvalue)
+            if not site_tags:
+                AddSiteTag(self.api).__call__(auth,site['site_id'],tagname,tagvalue)
+            else:
+                UpdateSiteTag(self.api).__call__(auth,site_tags[0]['site_tag_id'],tagvalue)
 
         return 1
