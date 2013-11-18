@@ -4,6 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
 
+from PLC.TagTypes import TagTypes
 from PLC.SiteTags import SiteTags
 from PLC.Methods.AddSiteTag import AddSiteTag
 from PLC.Methods.UpdateSiteTag import UpdateSiteTag
@@ -85,10 +86,14 @@ class UpdateSite(Method):
             root_auth = self.api.config.PLC_HRN_ROOT
             tagname = 'hrn'
             tagvalue = '.'.join([root_auth, site['login_base']])
-            site_tags=SiteTags(self.api,{'tagname':tagname,'site_id':site['site_id']})
-            if not site_tags:
-                AddSiteTag(self.api).__call__(auth,site['site_id'],tagname,tagvalue)
-            else:
-                UpdateSiteTag(self.api).__call__(auth,site_tags[0]['site_tag_id'],tagvalue)
+            # check if the tagtype instance exists
+            tag_types = TagTypes(self.api,{'tagname':tagname})
+            if tag_types:
+                site_tags=SiteTags(self.api,{'tagname':tagname,'site_id':site['site_id']})
+                if not site_tags:
+                    AddSiteTag(self.api).__call__(auth,int(site['site_id']),tagname,tagvalue)
+                else:
+                    UpdateSiteTag(self.api).__call__(auth,site_tags[0]['site_tag_id'],tagvalue)
+
 
         return 1
