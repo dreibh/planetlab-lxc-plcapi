@@ -78,7 +78,7 @@ class AddPersonToSite(Method):
                     person_tag.sync()
                 else:
                     person_tag = person_tags[0]
-                    person_tag['value'] = value
+                    person_tag['value'] = hrn
                     person_tag.sync() 
         except Exception,e:
             print "BEG Warning, cannot maintain person's hrn, %s"%e
