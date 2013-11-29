@@ -47,6 +47,7 @@ class GetPeerData(Method):
         # Filter out various secrets
         node_fields = [ field for field in Node.fields if field \
                             not in ['boot_nonce', 'key', 'session', 'root_person_ids']]
+        node_fields += ['hrn']
         nodes = Nodes(self.api, {'peer_id': None}, node_fields);
         # filter out whitelisted nodes
         nodes = [ n for n in nodes if not n['slice_ids_whitelist']]
@@ -55,26 +56,57 @@ class GetPeerData(Method):
         person_fields = [ field for field in Person.fields if field \
                               not in ['password', 'verification_key', 'verification_expires']]
 
-        # XXX Optimize to return only those Persons, Keys, and Slices
-        # necessary for slice creation on the calling peer's nodes.
+        site_fields = Site.fields
+        slice_fields = Slice.fields
+        try:
+            person_fields += ['sfa_created','hrn']
+            site_fields += ['sfa_created','hrn']
+            slice_fields +=['sfa_created','hrn']
+        
+            # XXX Optimize to return only those Persons, Keys, and Slices
+            # necessary for slice creation on the calling peer's nodes.
 
-        # filter out special person
-        persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER,
-                                               self.api.config.PLC_ROOT_USER],
-                                     'peer_id': None}, person_fields)
+            # filter out special person
+        
+            persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER, self.api.config.PLC_ROOT_USER], 'peer_id': None}, person_fields)
 
-        # filter out system slices
-        system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
-        slices = Slices(self.api, {'peer_id': None,
-                                   '~slice_id':system_slice_ids.keys()})
+            # filter out system slices
+            system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+            slices = Slices(self.api, {'peer_id': None,'~slice_id':system_slice_ids.keys()}, slice_fields)
+
+            sites = Sites(self.api, {'peer_id': None}, site_fields)
+       
+            # filter out objects with  sfa_created=True
+            filtered_sites = [site for site in sites if site.get('sfa_created', None) != 'True']
+            filtered_slices = [slice for slice in slices if slice.get('sfa_created', None) != 'True']
+            filtered_persons = [person for person in persons if person.get('sfa_created', None) != 'True']  
+
+        except:
+            # handle peers with old version of MyPLC that does not support 'sfa_created' and 'hrn' fields for Site/Slice/Person 
+ 
+            # XXX Optimize to return only those Persons, Keys, and Slices
+            # necessary for slice creation on the calling peer's nodes.
+
+            # filter out special person
+
+            filtered_persons = Persons(self.api, {'~email':[self.api.config.PLC_API_MAINTENANCE_USER, self.api.config.PLC_ROOT_USER], 'peer_id': None}, person_fields)
+
+            # filter out system slices
+            system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
+            filtered_slices = Slices(self.api, {'peer_id': None,
+                                   '~slice_id':system_slice_ids.keys()}, slice_fields)
+
+            filtered_sites = Sites(self.api, {'peer_id': None}, site_fields)
+
 
         result = {
-            'Sites': Sites(self.api, {'peer_id': None}),
+            'Sites': filtered_sites,
             'Keys': Keys(self.api, {'peer_id': None}),
             'Nodes': nodes,
-            'Persons': persons,
-            'Slices': slices,
+            'Persons': filtered_persons,
+            'Slices': filtered_slices,
             }
+
 
         if isinstance(self.caller, Peer):
             result['PeerNodes'] = Nodes(self.api, {'peer_id': self.caller['peer_id']})
