@@ -47,8 +47,11 @@ class GetPeerData(Method):
         # Filter out various secrets
         node_fields = [ field for field in Node.fields if field \
                             not in ['boot_nonce', 'key', 'session', 'root_person_ids']]
-        node_fields += ['hrn']
-        nodes = Nodes(self.api, {'peer_id': None}, node_fields);
+        try:
+            node_fields += ['hrn']
+            nodes = Nodes(self.api, {'peer_id': None}, node_fields)
+        except:
+            nodes = Nodes(self.api, {'peer_id': None}, node_fields)
         # filter out whitelisted nodes
         nodes = [ n for n in nodes if not n['slice_ids_whitelist']]
 
