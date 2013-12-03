@@ -59,12 +59,13 @@ class GetPeerData(Method):
         person_fields = [ field for field in Person.fields if field \
                               not in ['password', 'verification_key', 'verification_expires']]
 
-        site_fields = Site.fields
-        slice_fields = Slice.fields
+        site_fields = [field for field in Site.fields]
+        slice_fields = [field for field in Slice.fields]
+
         try:
             person_fields += ['sfa_created','hrn']
             site_fields += ['sfa_created','hrn']
-            slice_fields +=['sfa_created','hrn']
+            slice_fields += ['sfa_created','hrn']
         
             # XXX Optimize to return only those Persons, Keys, and Slices
             # necessary for slice creation on the calling peer's nodes.
