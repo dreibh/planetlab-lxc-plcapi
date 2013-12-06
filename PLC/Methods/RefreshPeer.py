@@ -21,6 +21,7 @@ from PLC.BootStates import BootState, BootStates
 from PLC.Nodes import Node, Nodes
 from PLC.SliceInstantiations import SliceInstantiations
 from PLC.Slices import Slice, Slices
+from PLC.Roles import Role, Roles
 
 #################### settings
 # initial version was doing only one final commit
@@ -118,7 +119,7 @@ class RefreshPeer(Method):
                         'address_ids', 'node_ids', 'person_ids', 'pcu_ids', 'slice_ids' ]
     ignore_key_fields=['peer_id','peer_key_id', 'person_id']
     ignore_person_fields=['peer_id','peer_person_id','last_updated','date_created',
-                          'roles','role_ids','key_ids','site_ids','slice_ids','person_tag_ids']
+                          'key_ids','slice_ids','person_tag_ids']
     ignore_node_fields=['peer_id','peer_node_id','last_updated','last_contact','date_created',
                         'node_tag_ids', 'interface_ids', 'slice_ids', 'nodegroup_ids','pcu_ids','ports']
     ignore_slice_fields=['peer_id','peer_slice_id','created',
@@ -448,6 +449,7 @@ class RefreshPeer(Method):
                 person['peer_id'] = peer_id
                 person['peer_person_id'] = peer_person_id
                 person['key_ids'] = []
+     
 
             # User as viewed by peer
             peer_person = persons_at_peer[peer_person_id]
@@ -671,6 +673,69 @@ class RefreshPeer(Method):
             # by hand, are not touched.
 
         timers['slices'] = time.time() - start
+
+
+        #
+        # Persons x Sites
+        #
+        start = time.time()
+
+        message('Dealing Sites X Persons relationship')
+
+        for peer_site_id, site in peer_sites.iteritems():
+            # Site as viewed by peer
+            peer_site = sites_at_peer[peer_site_id]
+
+            # Persons that are currently part of the site
+            old_site_person_ids = [ person_transcoder[person_id] for person_id in site['person_ids'] \
+                                   if person_id in person_transcoder and person_transcoder[person_id] in peer_persons]
+
+            # Perons that should be part of the site
+            site_person_ids = [ person_id for person_id in peer_site['person_ids'] if person_id in peer_persons]
+
+            # Remove stale persons from site
+            for person_id in (set(old_site_person_ids) - set(site_person_ids)):
+                site.remove_person(peer_persons[person_id], commit = commit_mode)
+                message ("%s person %s removed from site %s"%(peer['peername'], peer_persons[person_id]['email'], site['login_base']))
+
+            # Add new persons to site
+            for person_id in (set(site_person_ids) - set(old_site_person_ids)):
+                site.add_person(peer_persons[person_id], commit = commit_mode)
+                message ("%s person %s added into site %s"%(peer['peername'], peer_persons[person_id]['email'], site['login_base']))
+
+        timers['sites-persons'] = time.time() - start
+
+
+        #
+        # Persons x Roles
+        #
+        start = time.time()
+
+        message('Dealing with Persons Roles relationship')
+        
+        roles = Roles(self.api)
+        roles_dict = dict([(role['role_id'], role) for role in roles])
+        for peer_person_id, person in peer_persons.iteritems():
+            # Person as viewed by peer
+            peer_person = persons_at_peer[peer_person_id]
+
+            # Roles that are currently attributed for the person
+            old_person_role_ids = [ role_id for role_id in person['role_ids'] ]
+
+            # Roles that should be attributed to the person
+            person_role_ids = [ role_id for role_id in peer_person['role_ids'] ]
+
+            # Remove stale roles
+            for role_id in (set(old_person_role_ids) - set(person_role_ids)):
+                person.remove_role(roles_dict[role_id], commit = commit_mode)
+                message ("%s role %s removed from person %s"%(peer['peername'], roles_dict[role_id]['name'], person['email']))
+
+            # Add new roles to person
+            for role_id in (set(person_role_ids) - set(old_person_role_ids)):
+                person.add_role(roles_dict[role_id], commit = commit_mode)
+                message ("%s role %s added from person %s"%(peer['peername'], roles_dict[role_id]['name'], person['email']))
+
+        timers['persons-roles'] = time.time() - start
 
         # Update peer itself and commit
         peer.sync(commit = True)
