@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -146,6 +146,16 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Dec 10 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-1
+- create accessor 'hrn' for site as well
+- create accessors 'sfa_created' for site/slice/person
+- AddSite() and AddSlice() set respectively Site HRN and Slice HRN.
+- UpdatePerson() updates Person HRN according to updated email.
+- UpdateSite() updates Site HRN according to updated login_base.
+- Fix AddPersonToSite().
+- GetPeerData() ignores Sites/Slices/Persons that have tag sfa_created=='True'
+- RefreshPeer() manages Site*Person and Person*Role relationships.
+
 * Thu Oct 10 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.2-10
 - provide a slicename_to_hrn function
 
