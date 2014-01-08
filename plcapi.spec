@@ -54,7 +54,9 @@ Conflicts: MyPLC <= 4.3
 # BuildRequires: postgresql-devel
 
 # Standard xmlrpc.so that ships with PHP does not marshal NULL
-BuildRequires: php-devel PyXML python-simplejson
+# for building the wsdl interface we used to require PyXML
+# but this has gone with f20 so turning this off for now
+BuildRequires: php-devel python-simplejson
 Obsoletes: php-xmlrpc
 Provides: php-xmlrpc
 
@@ -81,7 +83,8 @@ through Apache mod_python.
 # 
 # Build __init__.py metafiles and PHP API. 
 %{__make} %{?_smp_mflags}
-%{__make} -C wsdl
+## turning off wsdl generation for now
+#%{__make} -C wsdl
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -108,9 +111,10 @@ mkdir -p ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
 cp db-config.d/* ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
 chmod 444 ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d/*
 
-# Install wsdl
-echo "* Installing wsdl"
-install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
+## turning off wsdl generation for now
+## Install wsdl
+#echo "* Installing wsdl"
+#install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
 ## Thierry - June 2013 - omfv6 does not require xmpp pubsub nodes management any more
 ## Install omf_slicemgr.py
@@ -139,7 +143,8 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 /etc/plc.d
 /etc/planetlab/db-config.d
-/var/www/html/wsdl/plcapi.wsdl
+## turning off wsdl generation for now
+#/var/www/html/wsdl/plcapi.wsdl
 #/usr/bin/omf_slicemgr.py*
 #/usr/bin/reset_xmpp_pubsub_nodes.py*
 /var/log/plc_api_ratelimit.log
