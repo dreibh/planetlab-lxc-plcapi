@@ -20,7 +20,7 @@ for method in methods:
 DocBook(good_apis).Process()
 
 if len(bad_apis):
-    sys.stderr.write("UNEXPECTED: There are %d non-callable methods:\n")
+    sys.stderr.write("UNEXPECTED: There are %d non-callable methods:\n"%(len(bad_apis)))
     for bad_api,e in bad_apis:
         sys.stderr.write("\t%s:%s\n" % (bad_api,e))
     sys.exit(-1)
