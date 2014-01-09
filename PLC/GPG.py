@@ -13,10 +13,9 @@ import xmlrpclib
 import shutil
 from types import StringTypes
 from StringIO import StringIO
-from xml.dom import minidom
-from xml.dom.ext import Canonicalize
 from subprocess import Popen, PIPE, call
 from tempfile import NamedTemporaryFile, mkdtemp
+from lxml import etree
 
 from PLC.Faults import *
 
@@ -28,16 +27,14 @@ def canonicalize(args, methodname = None, methodresponse = False):
     """
 
     xml = xmlrpclib.dumps(args, methodname, methodresponse, encoding = 'utf-8', allow_none = 1)
-    dom = minidom.parseString(xml)
-
+    dom = etree.fromstring(xml)
+    canonical=etree.tostring(dom)
+    # pre-f20 version was using Canonicalize from PyXML 
+    # from xml.dom.ext import Canonicalize
     # Canonicalize(), though it claims to, does not encode unicode
     # nodes to UTF-8 properly and throws an exception unless you write
     # the stream to a file object, so just encode it ourselves.
-    buf = StringIO()
-    Canonicalize(dom, output = buf)
-    xml = buf.getvalue().encode('utf-8')
-
-    return xml
+    return canonical.encode('utf-8')
 
 def gpg_export(keyring, armor = True):
     """
