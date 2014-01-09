@@ -21,17 +21,17 @@ URL: %{SCMURL}
 Provides: PLCAPI
 Obsoletes: PLCAPI
 
+# requirement to mod_python or mod_wsgi: deferred to myplc
+Requires: httpd mod_ssl
+Requires: Django
+Requires: postgresql >= 8.2, postgresql-server >= 8.2
 # We use set everywhere
 Requires: python >= 2.4
-Requires: postgresql >= 8.2, postgresql-server >= 8.2
 Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
 # used in GPG.py as a replacement to PyXML's Canonicalize
 Requires: python-lxml
-Requires: httpd
-# requirement to mod_python or mod_wsgi: deferred to myplc
-Requires: mod_ssl
 Requires: SOAPpy
 Requires: python-simplejson
 # for the RebootNodeWithPCU method
@@ -43,9 +43,7 @@ Requires: python-twisted-web
 # ldap
 Requires: python-ldap
 # for memcache
-Requires: python-memcached
-Requires: memcached
-Requires: Django
+Requires: memcached python-memcached
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
 Conflicts: MyPLC <= 4.3
