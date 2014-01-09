@@ -12,7 +12,6 @@ import os, sys
 import time
 import pdb
 import xml.dom.minidom
-import xml.dom.ext
 import inspect
 import globals
 
@@ -152,5 +151,5 @@ add_wsdl_ports_and_bindings(wsdl)
 add_wsdl_service(wsdl)
 
 
-xml.dom.ext.PrettyPrint(wsdl)
+print wsdl.toprettyxml()
 
