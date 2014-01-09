@@ -26,7 +26,7 @@ Requires: httpd mod_ssl
 Requires: Django
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
 # We use set everywhere
-Requires: python >= 2.4
+Requires: python >= 2.7
 Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl

@@ -23,12 +23,6 @@ from PLC.Parameter import Parameter, Mixed, python_type, xmlrpc_type
 
 api = PLCAPI(None)
 
-try:
-    set
-except NameError:
-    from sets import Set
-    set = Set
-
 # Class functions
 
 def param_type(param):

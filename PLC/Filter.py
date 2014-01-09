@@ -2,12 +2,6 @@
 # Thierry Parmentelat - INRIA
 #
 from types import StringTypes
-try:
-    set
-except NameError:
-    from sets import Set
-    set = Set
-
 import time
 
 from PLC.Faults import *
