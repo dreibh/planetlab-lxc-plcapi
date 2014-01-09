@@ -27,6 +27,8 @@ Requires: postgresql >= 8.2, postgresql-server >= 8.2
 Requires: postgresql-python
 Requires: python-psycopg2
 Requires: python-pycurl
+# used in GPG.py as a replacement to PyXML's Canonicalize
+Requires: python-lxml
 Requires: httpd
 # requirement to mod_python or mod_wsgi: deferred to myplc
 Requires: mod_ssl
