@@ -26,7 +26,7 @@ class Site(Row):
         'site_id': Parameter(int, "Site identifier"),
         'name': Parameter(str, "Full site name", max = 254),
         'abbreviated_name': Parameter(str, "Abbreviated site name", max = 50),
-        'login_base': Parameter(str, "Site slice prefix", max = 20),
+        'login_base': Parameter(str, "Site slice prefix", max = 32),
         'is_public': Parameter(bool, "Publicly viewable site"),
         'enabled': Parameter(bool, "Has been enabled"),
         'latitude': Parameter(float, "Decimal latitude of the site", min = -90.0, max = 90.0, nullok = True),
