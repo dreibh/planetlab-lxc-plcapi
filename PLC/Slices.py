@@ -27,7 +27,7 @@ class Slice(Row):
     fields = {
         'slice_id': Parameter(int, "Slice identifier"),
         'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
-        'name': Parameter(str, "Slice name", max = 32),
+        'name': Parameter(str, "Slice name", max = 64),
         'instantiation': Parameter(str, "Slice instantiation state"),
         'url': Parameter(str, "URL further describing this slice", max = 254, nullok = True),
         'description': Parameter(str, "Slice description", max = 2048, nullok = True),
