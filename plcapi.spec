@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -148,6 +148,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Mar 21 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-2
+- don't use PyXML that is deprecated in f20, use lxml instead
+- higher max size for login_base (32 vs 20) and slice name (64 vs 32)
+
 * Tue Dec 10 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-1
 - create accessor 'hrn' for site as well
 - create accessors 'sfa_created' for site/slice/person
