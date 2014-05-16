@@ -29,13 +29,13 @@ class DeletePersonFromSlice(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument, "No such account %s"%person_id_or_email
         person = persons[0]
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument, "No such slice %s"%slice_id_or_name
         slice = slices[0]
 
         # N.B. Allow foreign users to be added to local slices and
@@ -48,7 +48,7 @@ class DeletePersonFromSlice(Method):
         # of the site associated with the slice
         if 'admin' not in self.caller['roles']:
             if slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete users from this slice"
+                raise PLCPermissionDenied, "Not allowed to delete users from slice %s"%slice_id_or_name
 
         if slice['slice_id'] in person['slice_ids']:
             slice.remove_person(person)
