@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -148,6 +148,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jun 02 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-3
+- provide more context in messages from AddPersonToSlice and DeletePersonFromSlice
+
 * Fri Mar 21 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-2
 - don't use PyXML that is deprecated in f20, use lxml instead
 - higher max size for login_base (32 vs 20) and slice name (64 vs 32)
