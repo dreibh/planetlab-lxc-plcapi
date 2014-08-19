@@ -281,7 +281,8 @@ class Slices(Table):
                 slice_filter = Filter(Slice.fields, {'slice_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "OR")
             elif isinstance(slice_filter, dict):
-                slice_filter = Filter(Slice.fields, slice_filter)
+                allowed_fields=dict(Slice.fields.items()+Slice.tags.items())
+                slice_filter = Filter(allowed_fields, slice_filter)
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
             elif isinstance (slice_filter, StringTypes):
                 slice_filter = Filter(Slice.fields, {'name':slice_filter})
