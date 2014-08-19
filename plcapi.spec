@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -148,6 +148,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Aug 19 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-4
+- enable filtering on tags (like hrn) with GetPersons and GetSites
+
 * Mon Jun 02 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-3
 - provide more context in messages from AddPersonToSlice and DeletePersonFromSlice
 
