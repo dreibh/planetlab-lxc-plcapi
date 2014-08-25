@@ -258,7 +258,8 @@ class Sites(Table):
                 site_filter = Filter(Site.fields, {'site_id': ints, 'login_base': strs})
                 sql += " AND (%s) %s" % site_filter.sql(api, "OR")
             elif isinstance(site_filter, dict):
-                site_filter = Filter(Site.fields, site_filter)
+                allowed_fields=dict(Site.fields.items()+Site.tags.items())
+                site_filter = Filter(allowed_fields, site_filter)
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             elif isinstance (site_filter, StringTypes):
                 site_filter = Filter(Site.fields, {'login_base':site_filter})
