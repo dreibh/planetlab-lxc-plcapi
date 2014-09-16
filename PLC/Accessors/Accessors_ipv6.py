@@ -19,6 +19,6 @@ define_accessors(current_module, Interface, "SliversIPv6Prefix", "sliversipv6pre
 
 #### IPv6 address assigned to the sliver of a particular node!
 define_accessors(current_module, Slice, "IPv6Address", "ipv6_address",
-                 "slice/usertools","IPv6 address assigned to the sliver on a particular node",
+                 "slice/usertools","IPv6 address assigned to the sliver in a particular node",
                  set_roles=all_roles, expose_in_api=True)
 
