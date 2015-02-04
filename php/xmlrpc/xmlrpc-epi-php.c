@@ -51,8 +51,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /**********************************************************************
 * BUGS:                                                               *
 *  - when calling a php user function, there appears to be no way to  *
@@ -105,6 +103,18 @@
 #define pval zval
 #endif
 /* ==================== end patch */
+
+/* ====================
+ * Thierry - Jan. 2 2015 
+ * patch for php - issues first triggered on f21 with php-5.6
+ * somebody somehow seems to have undefined 
+ * the IS_CONSTANT_ARRAY constant
+ * 
+ * however I'd rather not change the code that runs 
+ * on older releases, so see for the ugly ifdef below
+ * 
+/* ==================== end patch */
+
 
 /* ========== additional notes
  * in the process, I've also come across the following resources that might help 
@@ -1454,7 +1464,10 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(php_output_options* out, zval* value, zva
             type = xmlrpc_string;
             break;
          case IS_ARRAY:
+/* jan. 2 2015 - see note in file header */
+#ifdef IS_CONSTANT_ARRAY
          case IS_CONSTANT_ARRAY:
+#endif
             type = xmlrpc_vector;
             break;
          case IS_OBJECT:

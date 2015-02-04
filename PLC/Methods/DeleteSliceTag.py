@@ -27,7 +27,7 @@ class DeleteSliceTag(Method):
     Returns 1 if successful, faults otherwise.
     """
 
-    roles = ['admin', 'pi', 'user', 'tech']
+    roles = ['admin', 'pi', 'user', 'tech', 'node']
 
     accepts = [
         Auth(),

@@ -32,7 +32,12 @@ Requires: python-psycopg2
 Requires: python-pycurl
 # used in GPG.py as a replacement to PyXML's Canonicalize
 Requires: python-lxml
+# Fedora had support for SOAPpy up to fedora20
+# https://lists.fedoraproject.org/pipermail/devel/2014-June/199730.html
+# https://lists.fedoraproject.org/pipermail/devel/2014-June/200379.html
+%if ("%{distro}" == "Fedora" && %{distrorelease} <= 20) || ("%{distro}" != "Fedora")
 Requires: SOAPpy
+%endif
 Requires: python-simplejson
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6

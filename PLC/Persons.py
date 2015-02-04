@@ -78,7 +78,7 @@ class Person(Row):
         Validate email address. Stolen from Mailman.
         """
         email = email.lower()
-        invalid_email = PLCInvalidArgument("Invalid e-mail address")
+        invalid_email = PLCInvalidArgument("Invalid e-mail address %s"%email)
 
         if not email:
             raise invalid_email
