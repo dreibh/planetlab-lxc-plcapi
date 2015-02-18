@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -153,6 +153,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 18 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-6
+- extensions for the ipv6 feature
+- DeleteSliceTag can be run with the 'node' auth
+- xmlrpc-epi-php.c has has a tweak for f21/php-5.6
+- also SOAPpy is not present in f21 anymore, so drop that dep. with f>=21
+
 * Tue Aug 19 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-5
 - allow GetSlices to filter on tags as well
 
