@@ -14,6 +14,8 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTag, NodeTags
 
+from PLC.Debug import log
+
 from PLC.Accessors.Accessors_standard import *                  # import node accessors
 
 # could not define this in the class..
@@ -282,7 +284,7 @@ class GetBootMedium(Method):
     def cleantrash (self):
         for file in self.trash:
             if self.DEBUG:
-                print 'DEBUG -- preserving',file
+                print >> log, 'DEBUG -- preserving',file
             else:
                 os.unlink(file)
 
@@ -367,7 +369,7 @@ class GetBootMedium(Method):
                                                                  log_file)
 
         if self.DEBUG:
-            print "The build command line is %s" % command
+            print >> log, "The build command line is %s" % command
 
         return command
 
@@ -392,7 +394,8 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
         node = nodes[0]
 
-        if self.DEBUG: print "%s required on node %s. Node type is: %s" \
+        if self.DEBUG:
+            print >> log, "%s requested on node %s. Node type is: %s" \
                 % (action, node['node_id'], node['node_type'])
 
         # check the required action against the node type
@@ -573,7 +576,11 @@ class GetBootMedium(Method):
                     result = file(node_image).read()
                     self.trash.append(node_image)
                     self.cleantrash()
-                    return base64.b64encode(result)
+                    print >> log, "GetBootMedium - done with build.sh"
+                    encoded_result = base64.b64encode(result)
+                    print >> log, "GetBootMedium - done with base64 encoding - lengths=%s - %s"\
+                        %(len(result),len(encoded_result))
+                    return encoded_result
             except:
                 self.cleantrash()
                 raise

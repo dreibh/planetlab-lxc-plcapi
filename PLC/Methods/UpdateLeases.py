@@ -98,7 +98,8 @@ class UpdateLeases(Method):
                 if UpdateLeases.debug:
                     print 'lease_fields',lease_fields
                     for k in [ 't_from', 't_until'] :
-                        if k in lease_fields: print k,'aka',Timestamp.sql_validate_utc(lease_fields[k])
+                        if k in lease_fields:
+                            print k,'aka',Timestamp.sql_validate_utc(lease_fields[k])
 
                 lease.update(lease_fields)
                 lease.sync()

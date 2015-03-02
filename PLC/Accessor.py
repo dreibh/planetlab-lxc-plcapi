@@ -74,7 +74,7 @@ This is implemented as a singleton, so we can cache results over time"""
                     tag_type.add_role(role_obj)
                 except:
                     # xxx todo find a more appropriate way of notifying this
-                    print "Accessor.locate_or_create_tag: Could not add role %r to tag_type %s"%(role,tagname)
+                    print >> log, "Accessor.locate_or_create_tag: Could not add role %r to tag_type %s"%(role,tagname)
         self.set_cache(tagname,tag_type)
         return tag_type
 

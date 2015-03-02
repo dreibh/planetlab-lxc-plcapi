@@ -8,6 +8,8 @@ from PLC.PersonTags import PersonTags, PersonTag
 from PLC.Namespace import email_to_hrn
 from PLC.TagTypes import TagTypes
 
+from PLC.Debug import log
+
 class AddPersonToSite(Method):
     """
     Adds the specified person to the specified site. If the person is
@@ -81,10 +83,10 @@ class AddPersonToSite(Method):
                     person_tag['value'] = hrn
                     person_tag.sync() 
         except Exception,e:
-            print "BEG Warning, cannot maintain person's hrn, %s"%e
+            print >> log, "BEG Warning, cannot maintain person's hrn, %s"%e
             import traceback
-            traceback.print_exc()
-            print "END Warning, cannot maintain person's hrn, %s"%e
+            traceback.print_exc(file=log)
+            print >> log, "END Warning, cannot maintain person's hrn, %s"%e
                 
 
         return 1

@@ -137,7 +137,7 @@ class RefreshPeer(Method):
             file_lock.unlock()
             message("RefreshPeer caught exception - BEG")
             import traceback
-            traceback.print_exc()
+            traceback.print_exc(file=log)
             message("RefreshPeer caught exception - END")
             raise Exception, e
         file_lock.unlock()
@@ -250,12 +250,12 @@ class RefreshPeer(Method):
                     return True
                 else:
                     result=True
-                    print 'COMPARING ',
+#                    print >> log, 'COMPARING ',
                     for column in columns:
                         test= object[column] == peer_object[column]
-                        print column,test,
+#                        print >> log, column,test,
                         if not test: result=False
-                    print '=>',result
+#                    print >> log, '=>',result
                     return result
 
             # Add/update new/existing objects
