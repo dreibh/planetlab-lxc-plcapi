@@ -68,11 +68,6 @@ else
 ifdef PLCHOSTLXC
 SSHURL:=root@$(PLCHOSTLXC):/vservers/$(GUESTNAME)
 SSHCOMMAND:=ssh root@$(PLCHOSTLXC) virsh -c lxc:/// lxc-enter-namespace $(GUESTNAME) -- /usr/bin/env 
-else
-ifdef PLCHOSTVS
-SSHURL:=root@$(PLCHOSTVS):/vservers/$(GUESTNAME)
-SSHCOMMAND:=ssh root@$(PLCHOSTVS) vserver $(GUESTNAME) exec
-endif
 endif
 endif
 
@@ -85,8 +80,7 @@ sync:
 ifeq (,$(SSHURL))
 	@echo "sync: I need more info from the command line, e.g."
 	@echo "  make sync PLC=boot.planetlab.eu"
-	@echo "  make sync PLCHOSTVS=.. GUESTNAME=.."
-	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.. GUESTHOSTNAME=.."
+	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.."
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/

@@ -110,7 +110,8 @@ class LeaseFilter (Filter):
                 where_part += " %s %s(%s)" %(self.join_with,self.negation[k],method(self,self.local[k]))
             except Exception,e:
                 raise PLCInvalidArgument,"LeaseFilter: something wrong with filter key %s, val was %r -- %r"%(k,v,e)
-        if Filter.debug: print 'LeaseFilter.sql: where_part=',where_part,'clip_part',clip_part
+        if Filter.debug:
+            print >> log, 'LeaseFilter.sql: where_part=',where_part,'clip_part',clip_part
         return (where_part,clip_part)
 
 ######## xxx not sure where this belongs yet

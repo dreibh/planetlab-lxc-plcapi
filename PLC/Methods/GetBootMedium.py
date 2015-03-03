@@ -14,6 +14,8 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTag, NodeTags
 
+from PLC.Debug import log
+
 from PLC.Accessors.Accessors_standard import *                  # import node accessors
 
 # could not define this in the class..
@@ -117,9 +119,10 @@ class GetBootMedium(Method):
         variants are used to run a different kernel on the bootCD
         see kvariant.sh for how to create a variant
         - 'no-hangcheck' - disable hangcheck
+        - 'systemd-debug' - turn on systemd debug in bootcd
 
     Tags: the following tags are taken into account when attached to the node:
-        'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck'
+        'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck', 'systemd-debug'
 
     Security:
         - Non-admins can only generate files for nodes at their sites.
@@ -282,7 +285,7 @@ class GetBootMedium(Method):
     def cleantrash (self):
         for file in self.trash:
             if self.DEBUG:
-                print 'DEBUG -- preserving',file
+                print >> log, 'DEBUG -- preserving',file
             else:
                 os.unlink(file)
 
@@ -367,7 +370,7 @@ class GetBootMedium(Method):
                                                                  log_file)
 
         if self.DEBUG:
-            print "The build command line is %s" % command
+            print >> log, "The build command line is %s" % command
 
         return command
 
@@ -392,7 +395,8 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
         node = nodes[0]
 
-        if self.DEBUG: print "%s required on node %s. Node type is: %s" \
+        if self.DEBUG:
+            print >> log, "%s requested on node %s. Node type is: %s" \
                 % (action, node['node_id'], node['node_type'])
 
         # check the required action against the node type
@@ -412,20 +416,23 @@ class GetBootMedium(Method):
             # check for node tag equivalents
             tags = NodeTags(self.api,
                             {'node_id': node['node_id'],
-                             'tagname': ['serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck']},
+                             'tagname': ['serial', 'cramfs', 'kvariant', 'kargs',
+                                         'no-hangcheck', 'systemd-debug' ]},
                             ['tagname', 'value'])
             if tags:
                 for tag in tags:
                     if tag['tagname'] == 'serial':
                         build_sh_spec['serial'] = tag['value']
-                    if tag['tagname'] == 'cramfs':
+                    elif tag['tagname'] == 'cramfs':
                         build_sh_spec['cramfs'] = True
-                    if tag['tagname'] == 'kvariant':
+                    elif tag['tagname'] == 'kvariant':
                         build_sh_spec['variant'] = tag['value']
-                    if tag['tagname'] == 'kargs':
+                    elif tag['tagname'] == 'kargs':
                         build_sh_spec['kargs'] += tag['value'].split()
-                    if tag['tagname'] == 'no-hangcheck':
+                    elif tag['tagname'] == 'no-hangcheck':
                         build_sh_spec['kargs'].append('hcheck_reboot0')
+                    elif tag['tagname'] == 'systemd-debug':
+                        build_sh_spec['kargs'].append('systemd.log_level=debug')
             # then options can override tags
             for option in options:
                 if option == "cramfs":
@@ -443,6 +450,8 @@ class GetBootMedium(Method):
                     build_sh_spec['variant']=option.replace("variant:","")
                 elif option == "no-hangcheck":
                     build_sh_spec['kargs'].append('hcheck_reboot0')
+                elif option == "systemd-debug":
+                    build_sh_spec['kargs'].append('systemd.log_level=debug')
                 else:
                     raise PLCInvalidArgument, "unknown option %s"%option
 
@@ -573,7 +582,11 @@ class GetBootMedium(Method):
                     result = file(node_image).read()
                     self.trash.append(node_image)
                     self.cleantrash()
-                    return base64.b64encode(result)
+                    print >> log, "GetBootMedium - done with build.sh"
+                    encoded_result = base64.b64encode(result)
+                    print >> log, "GetBootMedium - done with base64 encoding - lengths=%s - %s"\
+                        %(len(result),len(encoded_result))
+                    return encoded_result
             except:
                 self.cleantrash()
                 raise
