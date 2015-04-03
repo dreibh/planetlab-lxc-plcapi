@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Apr 03 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-7
+- reviewed logging strategy, no more direct print but use log instead
+
 * Wed Feb 18 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-6
 - extensions for the ipv6 feature
 - DeleteSliceTag can be run with the 'node' auth
