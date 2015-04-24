@@ -27,7 +27,7 @@ class BootState(Row):
         if not len(name):
             raise PLCInvalidArgument, "Boot state must be specified"
 
-        # Make sure boot state does not alredy exist
+        # Make sure boot state does not already exist
         conflicts = BootStates(self.api, [name])
         if conflicts:
             raise PLCInvalidArgument, "Boot state name already in use"
