@@ -153,6 +153,7 @@ class GetBootMedium(Method):
     BOOTCDBUILD = "/usr/share/bootcd-@NODEFAMILY@/build.sh"
     GENERICDIR = "/var/www/html/download-@NODEFAMILY@/"
     WORKDIR = "/var/tmp/bootmedium"
+    LOGDIR = "/var/tmp/bootmedium/logs/"
     DEBUG = False
     # uncomment this to preserve temporary area and bootcustom logs
     #DEBUG = True
@@ -164,7 +165,7 @@ class GetBootMedium(Method):
         # Split hostname into host and domain parts
         parts = node['hostname'].split(".", 1)
         if len(parts) < 2:
-            raise PLCInvalidArgument, "Node hostname %s is invalid"%node['hostname']
+            raise PLCInvalidArgument("Node hostname {} is invalid".format(node['hostname']))
         return parts
 
     # Generate the node (plnode.txt) configuration content.
@@ -177,13 +178,15 @@ class GetBootMedium(Method):
 
         # Do basic checks
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument("Not a local node {}".format(node['hostname']))
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to generate a configuration file for %s"%node['hostname']
+                raise PLCPermissionDenied(
+                    "Not allowed to generate a configuration file for {}"\
+                    .format(node['hostname']))
 
         # Get interface for this node
         primary = None
@@ -193,9 +196,10 @@ class GetBootMedium(Method):
                 primary = interface
                 break
         if primary is None:
-            raise PLCInvalidArgument, "No primary network configured on %s"%node['hostname']
+            raise PLCInvalidArgument(
+                "No primary network configured on {}".format(node['hostname']))
 
-        ( host, domain ) = self.split_hostname (node)
+        host, domain = self.split_hostname (node)
 
         # renew the key and save it on the database
         if renew_key:
@@ -207,27 +211,28 @@ class GetBootMedium(Method):
         file = ""
 
         if renew_key:
-            file += 'NODE_ID="%d"\n' % node['node_id']
-            file += 'NODE_KEY="%s"\n' % node['key']
+            file += 'NODE_ID="{}"\n'.format(node['node_id'])
+            file += 'NODE_KEY="{}"\n'.format(node['key'])
             # not used anywhere, just a note for operations people
-            file += 'KEY_RENEWAL_DATE="%s"\n' % time.strftime('%Y/%m/%d at %H:%M +0000',time.gmtime())
+            file += 'KEY_RENEWAL_DATE="{}"\n'\
+                .format(time.strftime('%Y/%m/%d at %H:%M +0000',time.gmtime()))
 
         if primary['mac']:
-            file += 'NET_DEVICE="%s"\n' % primary['mac'].lower()
+            file += 'NET_DEVICE="{}"\n'.format(primary['mac'].lower())
 
-        file += 'IP_METHOD="%s"\n' % primary['method']
+        file += 'IP_METHOD="{}"\n'.format(primary['method'])
 
         if primary['method'] == 'static':
-            file += 'IP_ADDRESS="%s"\n' % primary['ip']
-            file += 'IP_GATEWAY="%s"\n' % primary['gateway']
-            file += 'IP_NETMASK="%s"\n' % primary['netmask']
-            file += 'IP_NETADDR="%s"\n' % primary['network']
-            file += 'IP_BROADCASTADDR="%s"\n' % primary['broadcast']
-            file += 'IP_DNS1="%s"\n' % primary['dns1']
-            file += 'IP_DNS2="%s"\n' % (primary['dns2'] or "")
+            file += 'IP_ADDRESS="{}"\n'.format(primary['ip'])
+            file += 'IP_GATEWAY="{}"\n'.format(primary['gateway'])
+            file += 'IP_NETMASK="{}"\n'.format(primary['netmask'])
+            file += 'IP_NETADDR="{}"\n'.format(primary['network'])
+            file += 'IP_BROADCASTADDR="{}"\n'.format(primary['broadcast'])
+            file += 'IP_DNS1="{}"\n'.format(primary['dns1'])
+            file += 'IP_DNS2="{}"\n'.format(primary['dns2'] or "")
 
-        file += 'HOST_NAME="%s"\n' % host
-        file += 'DOMAIN_NAME="%s"\n' % domain
+        file += 'HOST_NAME="{}"\n'.format(host)
+        file += 'DOMAIN_NAME="{}"\n'.format(domain)
 
         # define various interface settings attached to the primary interface
         settings = InterfaceTags (self.api, {'interface_id':interface['interface_id']})
@@ -238,18 +243,19 @@ class GetBootMedium(Method):
                 categories.add(setting['category'])
 
         for category in categories:
-            category_settings = InterfaceTags(self.api,{'interface_id':interface['interface_id'],
-                                                              'category':category})
+            category_settings = InterfaceTags(self.api,{'interface_id' : interface['interface_id'],
+                                                        'category' : category})
             if category_settings:
-                file += '### Category : %s\n'%category
+                file += '### Category : {}\n'.format(category)
                 for setting in category_settings:
-                    file += '%s_%s="%s"\n'%(category.upper(),setting['tagname'].upper(),setting['value'])
+                    file += '{}_{}="{}"\n'\
+                        .format(category.upper(), setting['tagname'].upper(), setting['value'])
 
         for interface in interfaces:
             if interface['method'] == 'ipmi':
-                file += 'IPMI_ADDRESS="%s"\n' % interface['ip']
+                file += 'IPMI_ADDRESS="{}"\n'.format(interface['ip'])
                 if interface['mac']:
-                    file += 'IPMI_MAC="%s"\n' % interface['mac'].lower()
+                    file += 'IPMI_MAC="{}"\n'.format(interface['mac'].lower())
                 break
 
         return file
@@ -262,17 +268,20 @@ class GetBootMedium(Method):
         if not node:
             return (pldistro,fcdistro,arch)
 
-        node_id=node['node_id']
+        node_id = node['node_id']
 
         # no support for deployment-based BootCD's, use kvariants instead
         node_pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
-        if node_pldistro: pldistro = node_pldistro
+        if node_pldistro:
+            pldistro = node_pldistro
 
         node_fcdistro = GetNodeFcdistro (self.api,self.caller).call(auth, node_id)
-        if node_fcdistro: fcdistro = node_fcdistro
+        if node_fcdistro:
+            fcdistro = node_fcdistro
 
         node_arch = GetNodeArch (self.api,self.caller).call(auth,node_id)
-        if node_arch: arch = node_arch
+        if node_arch:
+            arch = node_arch
 
         return (pldistro,fcdistro,arch)
 
@@ -280,7 +289,8 @@ class GetBootMedium(Method):
         try:
             return file(self.BOOTCDDIR + "/build/version.txt").readline().strip()
         except:
-            raise Exception,"Unknown boot cd version - probably wrong bootcd dir : %s"%self.BOOTCDDIR
+            raise Exception("Unknown boot cd version - probably wrong bootcd dir : {}"\
+                            .format(self.BOOTCDDIR))
 
     def cleantrash (self):
         for file in self.trash:
@@ -312,7 +322,7 @@ class GetBootMedium(Method):
         if filename != '':
             if 'admin' not in self.caller['roles']:
                 if ( filename.index(self.WORKDIR) != 0):
-                    raise PLCInvalidArgument, "File %s not under %s"%(filename,self.WORKDIR)
+                    raise PLCInvalidArgument("File {} not under {}".format(filename, self.WORKDIR))
 
             ### output should not exist (concurrent runs ..)
             # numerous reports of issues with this policy
@@ -323,8 +333,9 @@ class GetBootMedium(Method):
             if os.path.exists(filename) and (time.time()-os.path.getmtime(filename)) >= (grace*60):
                 os.unlink(filename)
             if os.path.exists(filename):
-                raise PLCInvalidArgument, "Resulting file %s already exists - please try again in %d minutes"%\
-                    (filename,grace)
+                raise PLCInvalidArgument(
+                    "Resulting file {} already exists - please try again in {} minutes"\
+                    .format(filename, grace))
 
             ### we can now safely create the file,
             ### either we are admin or under a controlled location
@@ -335,44 +346,53 @@ class GetBootMedium(Method):
                     try:
                         os.makedirs (filedir,0777)
                     except:
-                        raise PLCPermissionDenied, "Could not create dir %s"%filedir
+                        raise PLCPermissionDenied("Could not create dir {}".format(filedir))
 
         return filename
 
-    # Build the command line to be executed
-    # according the node type
-    def build_command(self, node_type, build_sh_spec, node_image, type, floppy_file, log_file):
+    def build_command(self, nodename, node_type, build_sh_spec, node_image, type, floppy_file):
+        """
+        returns a tuple
+        (*) build command to be run
+        (*) location of the log_file
+        """
 
         command = ""
 
         # regular node, make build's arguments
         # and build the full command line to be called
-        if node_type in [ 'regular', 'reservable' ]:
+        if node_type not in [ 'regular', 'reservable' ]:
+            print >> log, "GetBootMedium.build_command: unexpected node_type {}".format(node_type)
+            return command, None
+        
+        build_sh_options=""
+        if "cramfs" in build_sh_spec:
+            type += "_cramfs"
+        if "serial" in build_sh_spec:
+            build_sh_options += " -s {}".format(build_sh_spec['serial'])
+        if "variant" in build_sh_spec:
+            build_sh_options += " -V {}".format(build_sh_spec['variant'])
 
-            build_sh_options=""
-            if "cramfs" in build_sh_spec:
-                type += "_cramfs"
-            if "serial" in build_sh_spec:
-                build_sh_options += " -s %s"%build_sh_spec['serial']
-            if "variant" in build_sh_spec:
-                build_sh_options += " -V %s"%build_sh_spec['variant']
+        for karg in build_sh_spec['kargs']:
+            build_sh_options += ' -k "{}"'.format(karg)
 
-            for karg in build_sh_spec['kargs']:
-                build_sh_options += ' -k "%s"'%karg
+        import time
+        date = time.strftime('%Y-%m-%d-%H-%M', time.gmtime())
+        if not os.path.isdir(self.LOGDIR):
+            os.makedirs(self.LOGDIR)
+        log_file = "{}/{}-{}.log".format(self.LOGDIR, date, nodename)
 
-            log_file="%s.log"%node_image
+        command = '{} -f "{}" -o "{}" -t "{}" {} > {} 2>&1'\
+                  .format(self.BOOTCDBUILD,
+                          floppy_file,
+                          node_image,
+                          type,
+                          build_sh_options,
+                          log_file)
+        
+        print >> log, "The build command line is {}".format(command)
 
-            command = '%s -f "%s" -o "%s" -t "%s" %s &> %s' % (self.BOOTCDBUILD,
-                                                                 floppy_file,
-                                                                 node_image,
-                                                                 type,
-                                                                 build_sh_options,
-                                                                 log_file)
-
-        if self.DEBUG:
-            print >> log, "The build command line is %s" % command
-
-        return command
+        return command, log_file
 
     def call(self, auth, node_id_or_hostname, action, filename, options = []):
 
@@ -380,35 +400,34 @@ class GetBootMedium(Method):
 
         ### compute file suffix and type
         if action.find("-iso") >= 0 :
-            suffix=".iso"
-            type = "iso"
+            suffix = ".iso"
+            type   = "iso"
         elif action.find("-usb") >= 0:
-            suffix=".usb"
-            type = "usb"
+            suffix = ".usb"
+            type   = "usb"
         else:
-            suffix=".txt"
-            type = "txt"
+            suffix = ".txt"
+            type   = "txt"
 
         # check for node existence and get node_type
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+            raise PLCInvalidArgument("No such node {}".format(node_id_or_hostname))
         node = nodes[0]
 
-        if self.DEBUG:
-            print >> log, "%s requested on node %s. Node type is: %s" \
-                % (action, node['node_id'], node['node_type'])
+        print >> log, "GetBootMedium: {} requested on node {}. Node type is: {}"\
+            .format(action, node['node_id'], node['node_type'])
 
         # check the required action against the node type
         node_type = node['node_type']
         if action not in allowed_actions[node_type]:
-            raise PLCInvalidArgument, "Action %s not valid for %s nodes, valid actions are %s" \
-                                   % (action, node_type, "|".join(allowed_actions[node_type]))
+            raise PLCInvalidArgument("Action {} not valid for {} nodes, valid actions are {}"\
+                                   .format(action, node_type, "|".join(allowed_actions[node_type])))
 
         # handle / canonicalize options
         if type == "txt":
             if options:
-                raise PLCInvalidArgument, "Options are not supported for node configs"
+                raise PLCInvalidArgument("Options are not supported for node configs")
         else:
             # create a dict for build.sh
             build_sh_spec={'kargs':[]}
@@ -439,7 +458,7 @@ class GetBootMedium(Method):
                     build_sh_spec['cramfs']=True
                 elif option == 'partition':
                     if type != "usb":
-                        raise PLCInvalidArgument, "option 'partition' is for USB images only"
+                        raise PLCInvalidArgument("option 'partition' is for USB images only")
                     else:
                         type="usb_partition"
                 elif option == "serial":
@@ -453,7 +472,7 @@ class GetBootMedium(Method):
                 elif option == "systemd-debug":
                     build_sh_spec['kargs'].append('systemd.log_level=debug')
                 else:
-                    raise PLCInvalidArgument, "unknown option %s"%option
+                    raise PLCInvalidArgument("unknown option {}".format(option))
 
         # compute nodename according the action
         if action.find("node-") == 0:
@@ -466,8 +485,8 @@ class GetBootMedium(Method):
             nodename = "".join(map(hexa2,tempbytes))
 
         # get nodefamily
-        (pldistro,fcdistro,arch) = self.get_nodefamily(node,auth)
-        self.nodefamily="%s-%s-%s"%(pldistro,fcdistro,arch)
+        (pldistro,fcdistro,arch) = self.get_nodefamily(node, auth)
+        self.nodefamily="{}-{}-{}".format(pldistro, fcdistro, arch)
 
         # apply on globals
         for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
@@ -477,28 +496,27 @@ class GetBootMedium(Method):
 
         # log call
         if node:
-            self.message='GetBootMedium on node %s - action=%s'%(nodename,action)
+            self.message='GetBootMedium on node {} - action={}'.format(nodename, action)
             self.event_objects={'Node': [ node ['node_id'] ]}
         else:
-            self.message='GetBootMedium - generic - action=%s'%action
+            self.message='GetBootMedium - generic - action={}'.format(action)
 
         ### generic media
         if action == 'generic-iso' or action == 'generic-usb':
             if options:
-                raise PLCInvalidArgument, "Options are not supported for generic images"
+                raise PLCInvalidArgument("Options are not supported for generic images")
             # this raises an exception if bootcd is missing
             version = self.bootcd_version()
-            generic_name = "%s-BootCD-%s%s"%(self.api.config.PLC_NAME,
-                                             version,
-                                             suffix)
-            generic_path = "%s/%s" % (self.GENERICDIR,generic_name)
+            generic_name = "{}-BootCD-{}{}".format(self.api.config.PLC_NAME, version, suffix)
+            generic_path = "{}/{}".format(self.GENERICDIR, generic_name)
 
             if filename:
-                ret=os.system ('cp "%s" "%s"'%(generic_path,filename))
+                ret=os.system ('cp "{}" "{}"'.format(generic_path, filename))
                 if ret==0:
                     return filename
                 else:
-                    raise PLCPermissionDenied, "Could not copy %s into %s"%(generic_path,filename)
+                    raise PLCPermissionDenied("Could not copy {} into {}"\
+                                              .format(generic_path, filename))
             else:
                 ### return the generic medium content as-is, just base64 encoded
                 return base64.b64encode(file(generic_path).read())
@@ -511,7 +529,7 @@ class GetBootMedium(Method):
                 try:
                     file(filename,'w').write(floppy)
                 except:
-                    raise PLCPermissionDenied, "Could not write into %s"%filename
+                    raise PLCPermissionDenied("Could not write into {}".format(filename))
                 return filename
             else:
                 return floppy
@@ -529,7 +547,7 @@ class GetBootMedium(Method):
             version = self.bootcd_version()
 
             if not os.path.isfile(self.BOOTCDBUILD):
-                raise PLCAPIError, "Cannot locate bootcd/build.sh script %s"%self.BOOTCDBUILD
+                raise PLCAPIError("Cannot locate bootcd/build.sh script {}".format(self.BOOTCDBUILD))
 
             # create the workdir if needed
             if not os.path.isdir(self.WORKDIR):
@@ -537,45 +555,44 @@ class GetBootMedium(Method):
                     os.makedirs(self.WORKDIR,0777)
                     os.chmod(self.WORKDIR,0777)
                 except:
-                    raise PLCPermissionDenied, "Could not create dir %s"%self.WORKDIR
+                    raise PLCPermissionDenied("Could not create dir {}".format(self.WORKDIR))
 
             try:
                 # generate floppy config
-                floppy_text = self.floppy_contents(node,True)
+                floppy_text = self.floppy_contents(node, True)
                 # store it
-                floppy_file = "%s/%s.txt"%(self.WORKDIR,nodename)
+                floppy_file = "{}/{}.txt".format(self.WORKDIR, nodename)
                 try:
                     file(floppy_file,"w").write(floppy_text)
                 except:
-                    raise PLCPermissionDenied, "Could not write into %s"%floppy_file
+                    raise PLCPermissionDenied("Could not write into {}".format(floppy_file))
 
                 self.trash.append(floppy_file)
 
-                node_image = "%s/%s%s"%(self.WORKDIR,nodename,suffix)
-                log_file="%s.log"%node_image
+                node_image = "{}/{}{}".format(self.WORKDIR, nodename, suffix)
 
-                command = self.build_command(node_type, build_sh_spec, node_image, type, floppy_file, log_file)
+                command, log_file = self.build_command(nodename, node_type, build_sh_spec,
+                                                       node_image, type, floppy_file)
 
                 # invoke the image build script
                 if command != "":
-                    ret=os.system(command)
+                    ret = os.system(command)
 
                 if ret != 0:
-                    raise PLCAPIError, "%s failed Command line was: %s Error logs: %s" % \
-                              (self.BOOTCDBUILD,  command, file(log_file).read())
-
-                self.trash.append(log_file)
+                    raise PLCAPIError("{} failed Command line was: {} See logs in {}"\
+                                      .format(self.BOOTCDBUILD, command, log_file))
 
                 if not os.path.isfile (node_image):
-                    raise PLCAPIError,"Unexpected location of build.sh output - %s"%node_image
+                    raise PLCAPIError("Unexpected location of build.sh output - {}".format(node_image))
 
                 # handle result
                 if filename:
-                    ret=os.system('mv "%s" "%s"'%(node_image,filename))
+                    ret = os.system('mv "{}" "{}"'.format(node_image, filename))
                     if ret != 0:
                         self.trash.append(node_image)
                         self.cleantrash()
-                        raise PLCAPIError, "Could not move node image %s into %s"%(node_image,filename)
+                        raise PLCAPIError("Could not move node image {} into {}"\
+                                          .format(node_image, filename))
                     self.cleantrash()
                     return filename
                 else:
@@ -584,12 +601,12 @@ class GetBootMedium(Method):
                     self.cleantrash()
                     print >> log, "GetBootMedium - done with build.sh"
                     encoded_result = base64.b64encode(result)
-                    print >> log, "GetBootMedium - done with base64 encoding - lengths=%s - %s"\
-                        %(len(result),len(encoded_result))
+                    print >> log, "GetBootMedium - done with base64 encoding - lengths: raw={} - b64={}"\
+                        .format(len(result), len(encoded_result))
                     return encoded_result
             except:
                 self.cleantrash()
                 raise
 
         # we're done here, or we missed something
-        raise PLCAPIError,'Unhandled action %s'%action
+        raise PLCAPIError('Unhandled action {}'.format(action))
