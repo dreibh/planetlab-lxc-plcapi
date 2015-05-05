@@ -67,7 +67,7 @@ SSHCOMMAND:=ssh root@$(PLC)
 else
 ifdef PLCHOSTLXC
 SSHURL:=root@$(PLCHOSTLXC):/vservers/$(GUESTNAME)
-SSHCOMMAND:=ssh root@$(PLCHOSTLXC) virsh -c lxc:/// lxc-enter-namespace $(GUESTNAME) -- /usr/bin/env 
+SSHCOMMAND:=ssh root@$(PLCHOSTLXC) ssh -o StrictHostKeyChecking=no -o LogLevel=quiet $(GUESTHOSTNAME)
 endif
 endif
 
@@ -86,7 +86,8 @@ else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
-	$(SSHCOMMAND) apachectl graceful
+	$(SSHCOMMAND) /etc/plc.d/httpd stop
+	$(SSHCOMMAND) /etc/plc.d/httpd start
 endif
 
 #################### convenience, for debugging only

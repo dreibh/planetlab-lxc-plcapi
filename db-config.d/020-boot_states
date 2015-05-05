@@ -6,6 +6,7 @@ default_boot_states = [
     'safeboot',
     'install',
     'reinstall',
+    'upgrade',
     'disabled',
 ]
 current_boot_states = GetBootStates()
