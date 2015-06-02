@@ -37,18 +37,6 @@ class GetSliceFamily(Method):
         slice = slices[0]
         slice_id = slice['slice_id']
 
-        arch = GetSliceArch (self.api,self.caller).call(auth,slice_id)
-        if not arch: arch = self.api.config.PLC_FLAVOUR_SLICE_ARCH
-
-        pldistro = GetSlicePldistro (self.api,self.caller).call(auth, slice_id)
-        if not pldistro: pldistro = self.api.config.PLC_FLAVOUR_SLICE_PLDISTRO
-
-        fcdistro = GetSliceFcdistro (self.api,self.caller).call(auth, slice_id)
-        if not fcdistro: fcdistro = self.api.config.PLC_FLAVOUR_SLICE_FCDISTRO
-
-        # the vref tag, if set, wins over pldistro
-        vref = GetSliceVref (self.api,self.caller).call(auth,slice_id)
-
         # omf-control'ed slivers need the omf vserver reference image
         # we used to issue SetSliceVref (self.api) (auth,slice_id,'omf')
         # to avoid asking users to set both tags 'omf_control' and 'vref'
@@ -57,9 +45,17 @@ class GetSliceFamily(Method):
         # and this somehow gets called from GetSlivers
         # anyways it was a bad idea, let's have the UI do that instead
 
+        # the vref tag, if set, wins over pldistro
+        pldistro = GetSliceVref(self.api,self.caller).call(auth,slice_id) \
+                   or GetSlicePldistro (self.api,self.caller).call(auth, slice_id) \
+                   or self.api.config.PLC_FLAVOUR_SLICE_PLDISTRO
+
+        fcdistro = GetSliceFcdistro (self.api,self.caller).call(auth, slice_id) \
+                   or self.api.config.PLC_FLAVOUR_SLICE_FCDISTRO
+
+        arch = GetSliceArch (self.api,self.caller).call(auth,slice_id) \
+               or self.api.config.PLC_FLAVOUR_SLICE_ARCH
+
         # xxx would make sense to check the corresponding vserver rpms are available
         # in all node-families yum repos (and yumgroups, btw)
-        if vref:
-            return "%s-%s-%s"%(vref,fcdistro,arch)
-        else:
-            return "%s-%s-%s"%(pldistro,fcdistro,arch)
+        return "%s-%s-%s"%(pldistro,fcdistro,arch)
