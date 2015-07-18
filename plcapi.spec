@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jun 26 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-9
+- new bootstate 'upgrade' is like reinstall but leaves slices intact
+
 * Fri Apr 24 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-8
 - GetBootMedium now keeps logs of created bootCD's in /var/tmp/bootmedium
 
