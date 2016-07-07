@@ -452,6 +452,7 @@ class GetBootMedium(Method):
                         build_sh_spec['kargs'].append('hcheck_reboot0')
                     elif tag['tagname'] == 'systemd-debug':
                         build_sh_spec['kargs'].append('systemd.log_level=debug')
+                        build_sh_spec['kargs'].append('systemd.log_target=console')
             # then options can override tags
             for option in options:
                 if option == "cramfs":
