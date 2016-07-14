@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -153,6 +153,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jul 10 2016 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-10
+- GetBootMedium with systemd-debug option : add kernel arg systemd.log_target=console
+
 * Fri Jun 26 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-9
 - new bootstate 'upgrade' is like reinstall but leaves slices intact
 
