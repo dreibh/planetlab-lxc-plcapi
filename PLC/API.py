@@ -13,20 +13,6 @@ import traceback
 import string
 
 import xmlrpclib
-import simplejson
-# use this one
-json=simplejson
-#try:
-#    # Try to use jsonlib before using simpljson. This is a hack to get around
-#    # the fact that the version of simplejson available for f8 is slightly 
-#    # faster than xmlrpc but not as fast as jsonlib. There is no jsonlib 
-#    # package available for f8, so this has to be installed manually and
-#    # is not expected to always be available. Remove this once we move away
-#    # from f8 based MyPLC's         
-#    import jsonlib
-#    json = jsonlib
-#except:
-#    json = simplejson 
 
 # See "2.2 Characters" in the XML specification:
 #
