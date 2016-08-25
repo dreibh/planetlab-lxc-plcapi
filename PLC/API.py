@@ -25,7 +25,7 @@ invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
 str_xml_escape_table = string.maketrans("".join((chr(x) for x in invalid_codepoints)),
                                         "?" * len(invalid_codepoints))
 # loosely inspired from
-# http://www.terminally-incoherent.com/blog/2010/05/06/character-mapping-must-return-integer-none-or-unicode/
+# http://stackoverflow.com/questions/1324067/how-do-i-get-str-translate-to-work-with-unicode-strings
 unicode_xml_escape_table = { invalid : u"?" for invalid in invalid_codepoints}
 
 def xmlrpclib_escape(s, replace = string.replace):
