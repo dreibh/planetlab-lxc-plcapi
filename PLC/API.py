@@ -20,8 +20,13 @@ import xmlrpclib
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
+invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
+# broke with f24, somehow we get a unicode as an incoming string to be translated
+str_xml_escape_table = string.maketrans("".join((chr(x) for x in invalid_codepoints)),
+                                        "?" * len(invalid_codepoints))
+# loosely inspired from
+# http://www.terminally-incoherent.com/blog/2010/05/06/character-mapping-must-return-integer-none-or-unicode/
+unicode_xml_escape_table = { invalid : u"?" for invalid in invalid_codepoints}
 
 def xmlrpclib_escape(s, replace = string.replace):
     """
@@ -36,7 +41,23 @@ def xmlrpclib_escape(s, replace = string.replace):
     s = replace(s, ">", "&gt;",)
 
     # Replace invalid 7-bit control characters with '?'
-    return s.translate(xml_escape_table)
+    if isinstance(s, str):
+        return s.translate(str_xml_escape_table)
+    else:
+        return s.translate(unicode_xml_escape_table)
+
+def test_xmlrpclib_escape():
+    inputs = [
+        # full ASCII 
+        "".join( (chr(x) for x in range(128))),
+        # likewise but as a unicode string up to 256
+        u"".join( (unichr(x) for x in range(256))),
+        ]
+    for input in inputs:
+        print "==================== xmlrpclib_escape INPUT"
+        print type(input), '->', input
+        print "==================== xmlrpclib_escape OUTPUT"
+        print xmlrpclib_escape(input)
 
 def xmlrpclib_dump(self, value, write):
     """
@@ -244,4 +265,6 @@ class PLCAPI:
        
         return json.dumps(result) 
         
-        
+# one simple unit test        
+if __name__ == '__main__':
+    test_xmlrpclib_escape()
