@@ -13,20 +13,6 @@ import traceback
 import string
 
 import xmlrpclib
-import simplejson
-# use this one
-json=simplejson
-#try:
-#    # Try to use jsonlib before using simpljson. This is a hack to get around
-#    # the fact that the version of simplejson available for f8 is slightly 
-#    # faster than xmlrpc but not as fast as jsonlib. There is no jsonlib 
-#    # package available for f8, so this has to be installed manually and
-#    # is not expected to always be available. Remove this once we move away
-#    # from f8 based MyPLC's         
-#    import jsonlib
-#    json = jsonlib
-#except:
-#    json = simplejson 
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -34,8 +20,13 @@ json=simplejson
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
+invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
+# broke with f24, somehow we get a unicode as an incoming string to be translated
+str_xml_escape_table = string.maketrans("".join((chr(x) for x in invalid_codepoints)),
+                                        "?" * len(invalid_codepoints))
+# loosely inspired from
+# http://stackoverflow.com/questions/1324067/how-do-i-get-str-translate-to-work-with-unicode-strings
+unicode_xml_escape_table = { invalid : u"?" for invalid in invalid_codepoints}
 
 def xmlrpclib_escape(s, replace = string.replace):
     """
@@ -50,7 +41,23 @@ def xmlrpclib_escape(s, replace = string.replace):
     s = replace(s, ">", "&gt;",)
 
     # Replace invalid 7-bit control characters with '?'
-    return s.translate(xml_escape_table)
+    if isinstance(s, str):
+        return s.translate(str_xml_escape_table)
+    else:
+        return s.translate(unicode_xml_escape_table)
+
+def test_xmlrpclib_escape():
+    inputs = [
+        # full ASCII 
+        "".join( (chr(x) for x in range(128))),
+        # likewise but as a unicode string up to 256
+        u"".join( (unichr(x) for x in range(256))),
+        ]
+    for input in inputs:
+        print "==================== xmlrpclib_escape INPUT"
+        print type(input), '->', input
+        print "==================== xmlrpclib_escape OUTPUT"
+        print xmlrpclib_escape(input)
 
 def xmlrpclib_dump(self, value, write):
     """
@@ -258,4 +265,6 @@ class PLCAPI:
        
         return json.dumps(result) 
         
-        
+# one simple unit test        
+if __name__ == '__main__':
+    test_xmlrpclib_escape()

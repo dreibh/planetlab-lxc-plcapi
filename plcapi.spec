@@ -38,7 +38,7 @@ Requires: python-lxml
 %if ("%{distro}" == "Fedora" && %{distrorelease} <= 20) || ("%{distro}" != "Fedora")
 Requires: SOAPpy
 %endif
-Requires: python-simplejson
+#Requires: python-simplejson
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
 # for OMF integration
@@ -61,7 +61,8 @@ Conflicts: MyPLC <= 4.3
 # Standard xmlrpc.so that ships with PHP does not marshal NULL
 # for building the wsdl interface we used to require PyXML
 # but this has gone with f20 so turning this off for now
-BuildRequires: php-devel python-simplejson
+BuildRequires: php-devel
+#BuildRequires: python-simplejson
 Obsoletes: php-xmlrpc
 Provides: php-xmlrpc
 
