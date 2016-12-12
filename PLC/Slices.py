@@ -60,7 +60,7 @@ class Slice(Row):
         # 2. Begins with login_base (letters or numbers).
         # 3. Then single underscore after login_base.
         # 4. Then letters, numbers, or underscores.
-        good_name = r'^[a-z0-9]+_[a-zA-Z0-9_]+$'
+        good_name = r'^[a-z0-9\.]+_[a-zA-Z0-9_\.]+$'
         if not name or \
            not re.match(good_name, name):
             raise PLCInvalidArgument, "Invalid slice name"
