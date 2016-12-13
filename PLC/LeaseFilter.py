@@ -2,7 +2,9 @@
 # Thierry Parmentelat -- INRIA
 #
 # Utilities for filtering on leases
-#
+
+import time
+import calendar
 
 from types import StringTypes
 from PLC.Faults import *
@@ -36,6 +38,13 @@ class LeaseFilter (Filter):
                 str,  "str_timestamp: leases alive after at that time"),
             Parameter(
                 tuple, "timeslot: the leases alive during this timeslot")),
+        ########## macros
+        # {'day' : 0} : all leases from today and on
+        # {'day' : 1} : all leases today (localtime at the myplc)
+        # {'day' : 2} : all leases today and tomorrow (localtime at the myplc)
+        # etc..
+        'day': Parameter(int, "clip on a number of days from today and on;"
+                         " 0 means no limit in the future"),
     }
 
     def __init__(self, fields={}, filter={},
@@ -100,8 +109,27 @@ class LeaseFilter (Filter):
             raise PLCInvalidArgument("LeaseFilter: clip field {}"
                                      .format(clip))
 
+    # the whole key to implementing day is to compute today's beginning 
+    def today_start(self):
+        # a struct_time
+        st = time.localtime()
+        seconds_today = st.tm_hour * 3600 + st.tm_min * 60 + st.tm_sec
+        return int(time.time()) - seconds_today
+
     # supersede the generic Filter 'sql' method
     def sql(self, api, join_with="AND"):
+        # implement 'day' as a clip
+        if 'day' in self:
+            if 'clip' in self:
+                raise PLCInvalidArgument("LeaseFilter cannot have both 'clip' and 'day'")
+            today = self.today_start()
+            nb_days = self['day']
+            if nb_days == 0:
+                self['clip'] = today
+            else:
+                self['clip'] = (today, today + nb_days * 24 * 3600)
+            del self['day']
+                
         # preserve locally what belongs to us, hide it from the superclass
         # self.local is a dict    local_key : user_value
         # self.negation is a dict  local_key : string
