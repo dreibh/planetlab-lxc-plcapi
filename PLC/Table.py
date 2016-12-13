@@ -193,12 +193,13 @@ class Row(dict):
         for this object, and are not marked as a read-only Parameter.
         """
 
-        if obj is None: obj = self
+        if obj is None:
+            obj = self
 
         db_fields = self.api.db.fields(self.table_name)
-        return dict ( [ (key,value) for (key,value) in obj.items()
+        return dict ( [ (key, value) for (key, value) in obj.items()
                         if key in db_fields and
-                        Row.is_writable(key,value,self.fields) ] )
+                        Row.is_writable(key, value, self.fields) ] )
 
     def tag_fields (self, obj=None):
         """
@@ -351,11 +352,11 @@ class Row(dict):
         else:
             # Update existing row
             columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
-            sql = "UPDATE %s SET " % self.table_name + \
-                  ", ".join(columns) + \
-                  " WHERE %s = %s" % \
-                  (self.primary_key,
-                   self.api.db.param(self.primary_key, self[self.primary_key]))
+            sql = "UPDATE {} SET {} WHERE {} = {}"\
+                  .format(self.table_name,
+                          ", ".join(columns),
+                          self.primary_key,
+                          self.api.db.param(self.primary_key, self[self.primary_key]))                                               
 
         self.api.db.do(sql, db_fields)
 
