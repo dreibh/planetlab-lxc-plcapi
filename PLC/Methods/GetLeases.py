@@ -27,7 +27,7 @@ class GetLeases(Method):
 
     """
 
-    roles = ['admin', 'pi', 'user', 'node']
+    roles = ['admin', 'pi', 'user', 'node', 'anonymous']
 
     accepts = [
         Auth(),
