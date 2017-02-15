@@ -244,7 +244,7 @@ class PLCAPI
 // this tentatively allows to tune mainstream xmlrpc php lib
 // so as to achieve the same behaviour as with our patched lib
 $GLOBALS['xmlrpc_null_extension'] = true;
-$GLOBALS['$xmlrpc_null_apache_encodingn'] = true;
+$GLOBALS['$xmlrpc_null_apache_encoding'] = true;
 
 global $adm;
 
