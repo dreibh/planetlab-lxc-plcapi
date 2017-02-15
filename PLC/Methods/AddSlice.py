@@ -13,7 +13,7 @@ from PLC.SliceTags import SliceTags
 from PLC.Methods.AddSliceTag import AddSliceTag
 from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-from PLC.Debug import log
+from PLC.Logger import logger
 
 can_update = ['name', 'instantiation', 'url', 'description', 'max_nodes']
 
@@ -112,9 +112,7 @@ class AddSlice(Method):
             for value in values:
                 AddSliceTag(self.api).__call__(auth,slice['slice_id'],'vsys',value)
         except:
-            print >> log, "Could not set vsys tags as configured in PLC_VSYS_DEFAULTS"
-            import traceback
-            traceback.print_exc(file=log)
+            logger.exception("Could not set vsys tags as configured in PLC_VSYS_DEFAULTS")
         self.event_objects = {'Slice': [slice['slice_id']]}
         self.message = "Slice %d created" % slice['slice_id']
 

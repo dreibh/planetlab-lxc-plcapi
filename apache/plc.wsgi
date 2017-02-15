@@ -9,7 +9,7 @@ import sys
 sys.path.append('/usr/share/plc_api')
 sys.stdout = sys.stderr
 import traceback
-from PLC.Debug import log
+from PLC.Logger import logger
 from PLC.API import PLCAPI
 
 def application(environ, start_response):
@@ -40,11 +40,11 @@ def application(environ, start_response):
             # Shut down database connection, otherwise up to MaxClients DB
             # connections will remain open.
             api.db.close()
-    except Exception, err:
+    except Exception as err:
         status = '500 Internal Server Error'
         content_type = 'text/html'
         output = 'Internal Server Error'
-        print >> log, err, traceback.format_exc()
+        logger.exception("INTERNAL ERROR !!")
 
     # Write response
     response_headers = [('Content-type', '%s' % content_type),

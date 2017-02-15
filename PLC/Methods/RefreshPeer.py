@@ -6,7 +6,7 @@ import sys
 import fcntl
 import time
 
-from PLC.Debug import log
+from PLC.Logger import logger
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -52,15 +52,13 @@ focus_ids=[]    # set to a list of ids (e.g. person_ids) - remote or local ids s
 #focus_ids=[621,1088]
 
 #################### helpers
-def message (to_print=None,verbose_only=False):
+def message(to_print=None, verbose_only=False):
     if verbose_only and not verbose:
         return
-    print >> log, time.strftime("%m-%d-%H-%M-%S:"),
-    if to_print:
-        print >>log, to_print
+    logger.info(to_print)
 
 def message_verbose(to_print=None, header='VERBOSE'):
-    message("%s> %r"%(header,to_print),verbose_only=True)
+    message("%s> %r"%(header, to_print), verbose_only=True)
 
 
 #################### to avoid several instances running at the same time
@@ -227,7 +225,7 @@ class RefreshPeer(Method):
                 return peer_object_id in focus_ids or \
                     (object and primary_key in object and object[primary_key] in focus_ids)
 
-            def message_focus (message):
+            def message_focus(message):
                 if in_focus():
                     # always show remote
                     message_verbose("peer_obj : %d [[%r]]"%(peer_object_id,peer_object),
@@ -250,19 +248,17 @@ class RefreshPeer(Method):
                     return True
                 else:
                     result=True
-#                    print >> log, 'COMPARING ',
                     for column in columns:
                         test= object[column] == peer_object[column]
-#                        print >> log, column,test,
                         if not test: result=False
-#                    print >> log, '=>',result
                     return result
 
             # Add/update new/existing objects
             for peer_object_id, peer_object in peer_objects.iteritems():
                 peer_object_name=""
                 if secondary_key: peer_object_name="(%s)"%peer_object[secondary_key]
-                message_verbose ('%s peer_object_id=%d %s (%d/%d)'%(classname,peer_object_id,peer_object_name,count,total))
+                message_verbose('%s peer_object_id=%d %s (%d/%d)'
+                                %(classname,peer_object_id,peer_object_name,count,total))
                 count += 1
                 if peer_object_id in synced:
                     message("Warning: %s Skipping already added %s: %r"%(
@@ -281,11 +277,11 @@ class RefreshPeer(Method):
                     if not equal_fields(object,peer_object, columns):
                         # Only update intrinsic fields
                         object.update(object.db_fields(peer_object))
-                        message_focus ("DIFFERENCES : updated / syncing")
+                        message_focus("DIFFERENCES : updated / syncing")
                         sync = True
                         action = "changed"
                     else:
-                        message_focus ("UNCHANGED - left intact / not syncing")
+                        message_focus("UNCHANGED - left intact / not syncing")
                         sync = False
                         action = None
 
@@ -297,26 +293,28 @@ class RefreshPeer(Method):
                     object = classobj(self.api, peer_object)
                     # Replace foreign identifier with new local identifier
                     del object[primary_key]
-                    message_focus ("NEW -- created with clean id - syncing")
+                    message_focus("NEW -- created with clean id - syncing")
                     sync = True
                     action = "added"
 
                 if sync:
-                    message_verbose("syncing %s %d - commit_mode=%r"%(classname,peer_object_id,commit_mode))
+                    message_verbose("syncing %s %d - commit_mode=%r"
+                                    %(classname,peer_object_id,commit_mode))
                     try:
                         object.sync(commit = commit_mode)
                     except PLCInvalidArgument, err:
                         # Skip if validation fails
                         # XXX Log an event instead of printing to logfile
-                        message("Warning: %s Skipping invalid %s %r : %r"%(\
-                                peer['peername'], classname, peer_object, err))
+                        message("Warning: %s Skipping invalid %s %r : %r"%
+                                (peer['peername'], classname, peer_object, err))
                         continue
 
                 synced[peer_object_id] = object
 
                 if action:
-                    message("%s: (%d/%d) %s %d %s %s"%(peer['peername'], count,total, classname, 
-                                                       object[primary_key], peer_object_name, action))
+                    message("%s: (%d/%d) %s %d %s %s"
+                            %(peer['peername'], count,total, classname, 
+                              object[primary_key], peer_object_name, action))
 
             message_verbose("Exiting sync on %s"%classname)
 
@@ -353,7 +351,8 @@ class RefreshPeer(Method):
         sites_at_peer = dict([(site['site_id'], site) for site in peer_tables['Sites']])
 
         # Synchronize new set (still keyed on foreign site_id)
-        peer_sites = sync(old_peer_sites, sites_at_peer, Site, ignore (columns, RefreshPeer.ignore_site_fields))
+        peer_sites = sync(old_peer_sites, sites_at_peer, Site,
+                          ignore(columns, RefreshPeer.ignore_site_fields))
 
         for peer_site_id, site in peer_sites.iteritems():
             # Bind any newly cached sites to peer
@@ -398,7 +397,8 @@ class RefreshPeer(Method):
                 continue
 
         # Synchronize new set (still keyed on foreign key_id)
-        peer_keys = sync(old_peer_keys, keys_at_peer, Key, ignore (columns, RefreshPeer.ignore_key_fields))
+        peer_keys = sync(old_peer_keys, keys_at_peer, Key,
+                         ignore(columns, RefreshPeer.ignore_key_fields))
         for peer_key_id, key in peer_keys.iteritems():
             # Bind any newly cached keys to peer
             if peer_key_id not in old_peer_keys:
@@ -436,7 +436,8 @@ class RefreshPeer(Method):
         # XXX Do we care about membership in foreign site(s)?
 
         # Synchronize new set (still keyed on foreign person_id)
-        peer_persons = sync(old_peer_persons, persons_at_peer, Person, ignore (columns, RefreshPeer.ignore_person_fields))
+        peer_persons = sync(old_peer_persons, persons_at_peer, Person,
+                            ignore(columns, RefreshPeer.ignore_person_fields))
 
         # transcoder : retrieve a local key_id from a peer_key_id
         key_transcoder = dict ( [ (key['key_id'],peer_key_id) \

@@ -8,7 +8,7 @@ from PLC.PersonTags import PersonTags, PersonTag
 from PLC.Namespace import email_to_hrn
 from PLC.TagTypes import TagTypes
 
-from PLC.Debug import log
+from PLC.Logger import logger
 
 class AddPersonToSite(Method):
     """
@@ -65,12 +65,12 @@ class AddPersonToSite(Method):
         try:
             had_no_site= (len (person['site_ids']) == 0)
             if had_no_site: 
-                login_base=site['login_base']
+                login_base = site['login_base']
                 root_auth = self.api.config.PLC_HRN_ROOT
-                hrn=email_to_hrn("%s.%s"%(root_auth,login_base),person['email'])
-                tagname='hrn'
+                hrn = email_to_hrn("%s.%s"%(root_auth,login_base),person['email'])
+                tagname = 'hrn'
                 tag_type = TagTypes(self.api,{'tagname':tagname})[0]
-                person_tags=PersonTags(self.api,{'tagname':tagname,'person_id':person['person_id']})
+                person_tags = PersonTags(self.api,{'tagname':tagname,'person_id':person['person_id']})
                 if not person_tags:
                     person_tag = PersonTag(self.api)
                     person_tag['person_id'] = person['person_id']
@@ -82,11 +82,8 @@ class AddPersonToSite(Method):
                     person_tag = person_tags[0]
                     person_tag['value'] = hrn
                     person_tag.sync() 
-        except Exception,e:
-            print >> log, "BEG Warning, cannot maintain person's hrn, %s"%e
-            import traceback
-            traceback.print_exc(file=log)
-            print >> log, "END Warning, cannot maintain person's hrn, %s"%e
-                
+        except Exception as e:
+            logger.exception("ERROR cannot maintain person's hrn, {}"
+                             .format(person_id_or_email))
 
         return 1

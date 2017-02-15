@@ -16,7 +16,7 @@ from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type, xmlrpc_type
 from PLC.Auth import Auth
-from PLC.Debug import profile, log
+from PLC.Debug import profile
 from PLC.Events import Event, Events
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons

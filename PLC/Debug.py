@@ -3,18 +3,7 @@ import time
 import sys
 import syslog
 
-class unbuffered:
-    """
-    Write to /var/log/httpd/error_log. See
-
-    http://www.modpython.org/FAQ/faqw.py?req=edit&file=faq02.003.htp
-    """
-
-    def write(self, data):
-        sys.stderr.write(data)
-        sys.stderr.flush()
-
-log = unbuffered()
+from PLC.Logger import logger
 
 def profile(callable):
     """
@@ -41,7 +30,7 @@ def profile(callable):
         end = time.time()
         args = map(str, args)
         args += ["%s = %s" % (name, str(value)) for (name, value) in kwds.items()]
-        print >> log, "%s (%s): %f s" % (callable.__name__, ", ".join(args), end - start)
+        logger.info("%s (%s): %f s" % (callable.__name__, ", ".join(args), end - start))
         return result
 
     return wrapper

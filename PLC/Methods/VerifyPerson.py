@@ -3,7 +3,7 @@ import base64
 import time
 import urllib
 
-from PLC.Debug import log
+from PLC.Logger import logger
 from PLC.Faults import *
 from PLC.Method import Method
 from PLC.Parameter import Parameter, Mixed
@@ -143,7 +143,7 @@ class VerifyPerson(Method):
                      Subject = message['subject'] % params,
                      Body = message['template'] % params)
         else:
-            print >> log, "Warning: No message template '%s'" % message_id
+            logger.warning("No message template '%s'" % message_id)
 
         # Logging variables
         self.event_objects = {'Person': [person['person_id']]}

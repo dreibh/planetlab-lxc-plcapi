@@ -13,7 +13,7 @@ import traceback
 import xmlrpclib
 from mod_python import apache
 
-from PLC.Debug import log
+from PLC.Logger import logger
 
 from PLC.API import PLCAPI
 api = PLCAPI()
@@ -56,8 +56,6 @@ def handler(req):
 
         return apache.OK
 
-    except Exception, err:
-        # Log error in /var/log/httpd/(ssl_)?error_log
-        t = "[" + time.ctime() + "] [error]"
-        print >> log, t, err, traceback.format_exc()
+    except Exception as err:
+        logger.exception("INTERNAL ERROR !!")
         return apache.HTTP_INTERNAL_SERVER_ERROR

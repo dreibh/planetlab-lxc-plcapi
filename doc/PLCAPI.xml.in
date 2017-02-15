@@ -559,9 +559,9 @@ node_ids = plc_api.GetSlices(auth,slice_name,['node_ids'])[0]['node_ids']
 slice_nodes = plc_api.GetNodes(auth,node_ids,['hostname'])
 
 # store in a file
-f=open('mynodes.txt','w')
-for node in slice_nodes:
-    print >>f,node['hostname']
+with ('mynodes.txt','a') as f:
+    for node in slice_nodes:
+        f.write(node['hostname'] + "\n")
 f.close()
 </programlisting>
   </section>

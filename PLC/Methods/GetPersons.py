@@ -5,6 +5,7 @@ from PLC.Filter import Filter
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
 from PLC.Auth import Auth
+from PLC.Logger import logger
 
 hidden_fields = ['password', 'verification_key', 'verification_expires']
 
@@ -39,6 +40,10 @@ class GetPersons(Method):
     returns = [return_fields]
 
     def call(self, auth, person_filter = None, return_fields = None):
+
+        logger.info("incoming GetPersons, filter={}, return fields={}"
+                    .format(person_filter, return_fields))
+
         # If we are not admin, make sure to only return viewable accounts
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:

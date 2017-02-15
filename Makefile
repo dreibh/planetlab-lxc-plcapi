@@ -80,12 +80,13 @@ sync:
 ifeq (,$(SSHURL))
 	@echo "sync: I need more info from the command line, e.g."
 	@echo "  make sync PLC=boot.planetlab.eu"
-	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.."
+	@echo "  make sync PLCHOSTLXC=.. GUESTHOSTNAME=.. GUESTNAME=.."
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
+	+$(RSYNC) apache/plc.wsgi $(SSHURL)/usr/share/plc_api/apache/
 	$(SSHCOMMAND) /etc/plc.d/httpd stop
 	$(SSHCOMMAND) /etc/plc.d/httpd start
 endif

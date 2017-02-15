@@ -141,6 +141,8 @@ class PLCAPI:
 
         # Load configuration
         self.config = Config(config)
+#        print("config has keys {}"
+#              .format(vars(self.config).keys()))
 
         # Initialize database connection
         if self.config.PLC_DB_TYPE == "postgresql":
