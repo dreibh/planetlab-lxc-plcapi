@@ -139,6 +139,9 @@ class PLCAPI
     $url .= $this->server . ':' . $this->port . '/' . $this->path;
     curl_setopt($curl, CURLOPT_URL, $url);
 
+    // this tentatively allows to tune mainstream xmlrpc php lib
+    // so as to achieve the same behaviour as with our patched lib
+    $xmlrpc_null_extension = TRUE;
     // Marshal the XML-RPC request as a POST variable. <nil/> is an
     // extension to the XML-RPC spec that is supported in our custom
     // version of xmlrpc.so via the 'allow_null' output_encoding key.
