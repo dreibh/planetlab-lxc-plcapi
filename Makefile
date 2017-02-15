@@ -76,7 +76,7 @@ ifeq (,$(SSHURL))
 	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.."
 	@exit 1
 else
-	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
+	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects php $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
 	$(SSHCOMMAND) /etc/plc.d/httpd stop

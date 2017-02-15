@@ -19,13 +19,13 @@ class GetSites(Method):
         Auth(),
         Mixed([Mixed(Site.fields['site_id'],
                      Site.fields['login_base'])],
-              Parameter(str,"login_base"),
-              Parameter(int,"site_id"),
+              Parameter(str, "login_base"),
+              Parameter(int, "site_id"),
               Filter(Site.fields)),
         Parameter([str], "List of fields to return", nullok = True)
         ]
 
     returns = [Site.fields]
 
-    def call(self, auth, site_filter = None, return_fields = None):
+    def call(self, auth, site_filter = None, return_fields=None):
         return Sites(self.api, site_filter, return_fields)
