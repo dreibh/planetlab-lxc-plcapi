@@ -50,18 +50,19 @@ class Lease(Row):
         # retrieve configured granularity
         granularity = self.api.config.PLC_RESERVATION_GRANULARITY
         # the trick for rounding up rather than down
-        if round_up: timestamp += (granularity-1)
+        if round_up:
+            timestamp += (granularity-1)
         # round down
         timestamp = (timestamp/granularity) * granularity
         # return a SQL string
         return Timestamp.sql_validate_utc(timestamp)
 
     # round UP
-    def validate_t_from(self,timestamp):
-        return self.validate_time (timestamp, round_up=True)
+    def validate_t_from(self, timestamp):
+        return self.validate_time(timestamp, round_up=True)
     # round DOWN
     def validate_t_until (self, timestamp):
-        return self.validate_time (timestamp, round_up=False)
+        return self.validate_time(timestamp, round_up=False)
 
 class Leases(Table):
     """

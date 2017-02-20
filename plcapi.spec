@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.3
-%define taglevel 10
+%define taglevel 11
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -154,6 +154,18 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 08 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-11
+- mostly issued for the R2lab deployment
+- *** major
+- * dots allowed in login_base and slice name
+- * new lease filter 'day'
+- *** minor
+- * more explicit message in case of overlapping resas
+- * bugfix: escaping unicode in xml
+- * GetLeases allowed to anonymous callers
+- *** miscell
+- * use plain json library
+
 * Sun Jul 10 2016 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-10
 - GetBootMedium with systemd-debug option : add kernel arg systemd.log_target=console
 

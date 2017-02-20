@@ -69,8 +69,8 @@ class Site(Row):
         if not len(login_base):
             raise PLCInvalidArgument, "Login base must be specified"
 
-        if not set(login_base).issubset(string.lowercase + string.digits):
-            raise PLCInvalidArgument, "Login base must consist only of lowercase ASCII letters or numbers"
+        if not set(login_base).issubset(string.lowercase + string.digits + '.'):
+            raise PLCInvalidArgument, "Login base must consist only of lowercase ASCII letters or numbers or dots"
 
         conflicts = Sites(self.api, [login_base])
         for site in conflicts:
