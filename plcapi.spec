@@ -52,19 +52,21 @@ Requires: memcached python-memcached
 ### avoid having yum complain about updates, as stuff is moving around
 # plc.d/api
 Conflicts: MyPLC <= 4.3
+# xmlrpc
+Requires: php-xmlrpc
 
 # We use psycopg2
 #
 # but we don't need to rebuild it as we depend on distro's packages - baris
 # BuildRequires: postgresql-devel
 
-# Standard xmlrpc.so that ships with PHP does not marshal NULL
-# for building the wsdl interface we used to require PyXML
-# but this has gone with f20 so turning this off for now
-BuildRequires: php-devel
-#BuildRequires: python-simplejson
-Obsoletes: php-xmlrpc
-Provides: php-xmlrpc
+### # Standard xmlrpc.so that ships with PHP does not marshal NULL
+### # for building the wsdl interface we used to require PyXML
+### # but this has gone with f20 so turning this off for now
+### BuildRequires: php-devel
+### #BuildRequires: python-simplejson
+### Obsoletes: php-xmlrpc
+### Provides: php-xmlrpc
 
 # PostgreSQL and SOAPpy are necessary to run the API server, but not
 # plcsh. Since the only supported method of running the server is via
@@ -99,11 +101,11 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 ln -s %{_datadir}/plc_api/plcsh $RPM_BUILD_ROOT/%{_bindir}/plcsh
 
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/php.d
-cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
-; Enable xmlrpc extension module
-extension=xmlrpc.so
-EOF
+### mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/php.d
+### cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
+### ; Enable xmlrpc extension module
+### extension=xmlrpc.so
+### EOF
 
 # Install initscripts
 echo "* Installing initscripts"
@@ -134,7 +136,7 @@ chown apache:apache $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%define php_extension_dir %(php-config --extension-dir)
+###%define php_extension_dir %(php-config --extension-dir)
 
 %files
 %defattr(-,root,root,-)
@@ -142,8 +144,8 @@ rm -rf $RPM_BUILD_ROOT
 #%dir /var/log/omf/
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
-%{php_extension_dir}/xmlrpc.so
-%{_sysconfdir}/php.d/xmlrpc.ini
+### %{php_extension_dir}/xmlrpc.so
+### %{_sysconfdir}/php.d/xmlrpc.ini
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 /etc/plc.d
 /etc/planetlab/db-config.d
