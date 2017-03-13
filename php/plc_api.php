@@ -142,7 +142,9 @@ class PLCAPI
     // Marshal the XML-RPC request as a POST variable. <nil/> is an
     // extension to the XML-RPC spec that is supported in our custom
     // version of xmlrpc.so via the 'allow_null' output_encoding key.
-    $request = xmlrpc_encode_request($method, $args, array('allow_null' => TRUE));
+    $request = xmlrpc_encode_request($method, $args, array('null_extension'));
+    error_log("ENCODED: " . $method . "(" . $args . ")");
+    error_log("OBTAINED: " . $request);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
     // Construct the HTTP header
