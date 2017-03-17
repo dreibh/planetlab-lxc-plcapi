@@ -39,9 +39,10 @@ def profile(callable):
         start = time.time()
         result = callable(*args, **kwds)
         end = time.time()
-        args = map(str, args)
-        args += ["%s = %s" % (name, str(value)) for (name, value) in kwds.items()]
-        print >> log, "%s (%s): %f s" % (callable.__name__, ", ".join(args), end - start)
+        params = map(str, args)
+        params += ["{} = {}".format(name, value) for (name, value) in kwds.items()]
+        params = ", ".join(params)
+        print >> log, "{} ({}) {:f}s -> {}".format(callable.__name__, params, end - start, result)
         return result
 
     return wrapper

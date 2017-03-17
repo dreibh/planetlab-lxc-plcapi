@@ -139,13 +139,12 @@ class PLCAPI
     $url .= $this->server . ':' . $this->port . '/' . $this->path;
     curl_setopt($curl, CURLOPT_URL, $url);
 
-    // this tentatively allows to tune mainstream xmlrpc php lib
-    // so as to achieve the same behaviour as with our patched lib
-    $xmlrpc_null_extension = TRUE;
     // Marshal the XML-RPC request as a POST variable. <nil/> is an
     // extension to the XML-RPC spec that is supported in our custom
     // version of xmlrpc.so via the 'allow_null' output_encoding key.
-    $request = xmlrpc_encode_request($method, $args, array('allow_null' => TRUE));
+    $request = xmlrpc_encode_request($method, $args, array('null_extension'));
+    error_log("ENCODED: " . $method . "(" . $args . ")");
+    error_log("OBTAINED: " . $request);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
     // Construct the HTTP header
@@ -244,10 +243,15 @@ class PLCAPI
   }
 }
 
+// this tentatively allows to tune mainstream xmlrpc php lib
+// so as to achieve the same behaviour as with our patched lib
+$GLOBALS['xmlrpc_null_extension'] = true;
+$GLOBALS['$xmlrpc_null_apache_encoding'] = true;
+
 global $adm;
 
 $adm = new PLCAPI(array('AuthMethod' => "capability",
-			'Username' => PLC_API_MAINTENANCE_USER,
+			'Username'   => PLC_API_MAINTENANCE_USER,
 			'AuthString' => PLC_API_MAINTENANCE_PASSWORD));
 
 ?>

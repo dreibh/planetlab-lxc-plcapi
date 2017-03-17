@@ -393,11 +393,11 @@ class Persons(Table):
                 person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
                 sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
-                allowed_fields=dict(Person.fields.items()+Person.tags.items())
+                allowed_fields = dict(Person.fields.items() + Person.tags.items())
                 person_filter = Filter(allowed_fields, person_filter)
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, StringTypes):
-                person_filter = Filter(Person.fields, {'email':person_filter})
+                person_filter = Filter(Person.fields, {'email' : person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, (int, long)):
                 person_filter = Filter(Person.fields, {'person_id':person_filter})

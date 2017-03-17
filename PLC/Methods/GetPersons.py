@@ -50,7 +50,7 @@ class GetPersons(Method):
                 for site in sites:
                     valid_person_ids += site['person_ids']
             if not valid_person_ids:
-                return []
+                return[]
 
             # this may look suspicious; what if person_filter is not None ?
             # turns out the results are getting filtered again below, so we're safe
@@ -70,7 +70,7 @@ class GetPersons(Method):
         # Must query at least person_id, site_ids, and role_ids (see
         # Person.can_view() and below).
         if return_fields is not None:
-            added_fields = set(['person_id', 'site_ids', 'role_ids','roles']).difference(return_fields)
+            added_fields = set(['person_id', 'site_ids', 'role_ids', 'roles']).difference(return_fields)
             return_fields += added_fields
         else:
             added_fields = []
