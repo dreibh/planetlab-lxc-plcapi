@@ -9,6 +9,24 @@
 // Copyright (C) 2005-2006 The Trustees of Princeton University
 //
 
+//ini_set('error_reporting', 1);
+
+/*
+ * May 2017 - Ciro Scognamiglio <c.scognamiglio@cslash.net>
+ *
+ * xmlrpc php module is not compatible anymore with the PLCAPI class,
+ * if the package phpxmlrpc is installed in the same dir it will be used instead
+ *
+ * https://github.com/gggeek/phpxmlrpc
+ *
+ * If the package is not found the php module XML-RPC is used if available
+ *
+ */
+if (file_exists(__DIR__ . '/phpxmlrpc/src/Autoloader.php')) {
+    include_once __DIR__ . '/phpxmlrpc/src/Autoloader.php';
+    PhpXmlRpc\Autoloader::register();
+}
+
 require_once 'plc_config.php';
 
 class PLCAPI
@@ -114,11 +132,107 @@ class PLCAPI
 				'params' => $args);
       return NULL;
     } else {
-      return $this->internal_call ($method, $args, 3);
+      return $this->internal_call($method, $args, 3);
     }
   }
 
-  function internal_call($method, $args = NULL, $backtrace_level = 2)
+  /*
+   * Use PhpXmlRpc\Value before encoding the request
+   */
+  function xmlrpcValue($value) {
+      switch(gettype($value)) {
+          case 'array':
+              $members = array();
+              foreach($value as $vk => $vv) {
+                  $members[$vk] = $this->xmlrpcValue($vv);
+              }
+
+              if (array_key_exists(0, $value)) {
+                  return new PhpXmlRpc\Value(
+                      $members,
+                      'array'
+                  );
+              } else {
+                  return new PhpXmlRpc\Value(
+                      $members,
+                      'struct'
+                  );
+              }
+
+              break;
+          case 'null':
+              return new PhpXmlRpc\Value(null, 'null');
+              break;
+          case 'integer':
+              return new PhpXmlRpc\Value($value, 'int');
+              break;
+          default:
+            if (empty($value)) {
+                return new PhpXmlRpc\Value(null, 'null');
+            } else {
+                return new PhpXmlRpc\Value($value);
+            }
+
+              break;
+      }
+  }
+
+    function internal_call($method, $args = NULL, $backtrace_level = 2)
+    {
+        if (class_exists('PhpXmlRpc\\PhpXmlRpc')) {
+            return $this->internal_call_phpxmlrpc($method, $args, $backtrace_level);
+        } else {
+            return $this->internal_call_xmlrpc($method, $args, $backtrace_level);
+        }
+    }
+
+  /*
+   * the new internal call, will use PhpXmlRpc
+   */
+  function internal_call_phpxmlrpc($method, $args = NULL, $backtrace_level = 2)
+  {
+
+
+      PhpXmlRpc\PhpXmlRpc::$xmlrpc_null_extension = true;
+
+      if ($this->port == 443) {
+          $url = 'https://';
+      } else {
+          $url = 'http://';
+      }
+
+      // Set the URL for the request
+      $url .= $this->server . ':' . $this->port . '/' . $this->path;
+
+      $client = new PhpXmlRpc\Client($url);
+      $client->setSSLVerifyPeer(false);
+      /*
+       * 1 -> not verify CN
+       * 2 -> verify CN (default)
+       */
+      $client->setSSLVerifyHost(1);
+
+      $values = $this->xmlrpcValue($args);
+
+      $response = $client->send(new PhpXmlRpc\Request($method, $values));
+
+
+      if (!$response->faultCode()) {
+          $encoder = new PhpXmlRpc\Encoder();
+          $v = $encoder->decode($response->value());
+
+          return $v;
+      } else {
+          $this->error_log("An error occurred [" . $response->faultCode() . "] ".
+              $response->faultString());
+          return NULL;
+      }
+  }
+
+  /*
+   * The original internal call that uses php XML-RPC
+   */
+  function internal_call_xmlrpc($method, $args = NULL, $backtrace_level = 2)
   {
     $curl = curl_init();
 
@@ -142,7 +256,7 @@ class PLCAPI
     // Marshal the XML-RPC request as a POST variable. <nil/> is an
     // extension to the XML-RPC spec that is supported in our custom
     // version of xmlrpc.so via the 'allow_null' output_encoding key.
-    $request = xmlrpc_encode_request($method, $args, array('allow_null' => TRUE));
+    $request = xmlrpc_encode_request($method, $args, array('null_extension'));
     curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
     // Construct the HTTP header
@@ -192,14 +306,19 @@ class PLCAPI
     $this->multicall = true;
   }
 
+  function xmlrpc_is_fault($arr)
+    {
+        // check if xmlrpc_is_fault exists
+        return is_array($arr) && array_key_exists('faultCode', $arr) && array_key_exists('faultString', $arr);
+    }
   function commit()
   {
     if (!empty ($this->calls)) {
       $ret = array();
-      $results = $this->internal_call ('system.multicall', array ($this->calls));
+      $results = $this->internal_call('system.multicall', array ($this->calls));
       foreach ($results as $result) {
         if (is_array($result)) {
-          if (xmlrpc_is_fault($result)) {
+          if ($this->xmlrpc_is_fault($result)) {
             $this->error_log('Fault Code ' . $result['faultCode'] . ': ' .
                              $result['faultString'], 1, true);
             $ret[] = NULL;
