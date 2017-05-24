@@ -160,6 +160,13 @@ class PLCAPI
               }
 
               break;
+          case 'double':
+              return new PhpXmlRpc\Value($value, 'double');
+              break;
+          case 'boolean':
+              return new PhpXmlRpc\Value($value, 'boolean');
+              break;
+          case 'NULL':
           case 'null':
               return new PhpXmlRpc\Value(null, 'null');
               break;
