@@ -10,7 +10,6 @@
 # starting with 5.0, support for these two modules is taken out
 
 # Other stuff - doc not implicit, it's redone by myplc-docs
-subdirs := php/xmlrpc
 
 # autoconf compatible variables
 DESTDIR := /
@@ -19,7 +18,7 @@ bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: $(subdirs) 
+all: 
 	python setup.py build
 
 install: 
@@ -27,15 +26,9 @@ install:
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
-	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
-
-$(subdirs): %:
-	$(MAKE) -C $@
 
 clean: 
 	find . -name '*.pyc' | xargs rm -f
-	rm -f $(INIT)
-	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
 	python setup.py clean && rm -rf build
 
 index:
@@ -45,7 +38,7 @@ index:
 
 force:
 
-.PHONY: all install force clean index tags $(subdirs)
+.PHONY: all install force clean index tags
 
 #################### devel tools
 tags:
