@@ -147,7 +147,7 @@ class PLCAPI
                   $members[$vk] = $this->xmlrpcValue($vv);
               }
 
-              if (array_key_exists(0, $value)) {
+              if ((array_key_exists(0, $value)) || (empty($value))) {
                   return new PhpXmlRpc\Value(
                       $members,
                       'array'
@@ -174,12 +174,7 @@ class PLCAPI
               return new PhpXmlRpc\Value($value, 'int');
               break;
           default:
-            if (empty($value)) {
-                return new PhpXmlRpc\Value(null, 'null');
-            } else {
-                return new PhpXmlRpc\Value($value);
-            }
-
+              return new PhpXmlRpc\Value($value);
               break;
       }
   }
@@ -198,7 +193,11 @@ class PLCAPI
    */
   function internal_call_phpxmlrpc($method, $args = NULL, $backtrace_level = 2)
   {
-
+//
+//      echo '<pre>';
+//      var_dump($method);
+//      var_dump($args);
+//      echo '</pre>';
 
       PhpXmlRpc\PhpXmlRpc::$xmlrpc_null_extension = true;
 
