@@ -123,8 +123,12 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 #install -D -m 755 omf/reset_xmpp_pubsub_nodes.py $RPM_BUILD_ROOT/usr/bin/reset_xmpp_pubsub_nodes.py
 #mkdir -p $RPM_BUILD_ROOT/var/log/omf
 
-# Install ratelimit log
+# Create log file for plcapi
 mkdir -p $RPM_BUILD_ROOT/var/log
+touch $RPM_BUILD_ROOT/var/log/plcapi.log
+chown apache:apache $RPM_BUILD_ROOT/var/log/plcapi.log
+
+# Install ratelimit log
 touch $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 chown apache:apache $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 
