@@ -151,6 +151,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/plcapi.wsdl
 #/usr/bin/omf_slicemgr.py*
 #/usr/bin/reset_xmpp_pubsub_nodes.py*
+/var/log/plcapi.log
 /var/log/plc_api_ratelimit.log
 
 
