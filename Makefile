@@ -21,11 +21,19 @@ PWD := $(shell pwd)
 all: 
 	python setup.py build
 
-install: 
+install: install-python install-phpxmlrpc
+
+install-python:
 	python setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
+
+# phpxmlrpc is a git subtree; we just ship all its contents
+# under /usr/share/plc_api/php/phpxmlrpc
+install-phpxmlrpc:
+	mkdir -p $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
+	rsync --exclude .git -ai php/phpxmlrpc/ $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 
 clean: 
 	find . -name '*.pyc' | xargs rm -f
