@@ -64,7 +64,8 @@ Conflicts: MyPLC <= 4.3
 # * don't use our own that is way too old
 # * instead - thank you Ciro - we pull it as a git subtree from
 # https://github.com/gggeek/phpxmlrpc.git
-# Requires: php-xmlrpc
+# that stuff requires the following though
+Requires: php-xml
 ####################
 
 
