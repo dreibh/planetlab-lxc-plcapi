@@ -53,15 +53,21 @@ Requires: memcached python-memcached
 # plc.d/api
 Conflicts: MyPLC <= 4.3
 
+####################
+# obsolete
+####################
 # standard xmlrpc.so that ships with PHP does not marshal NULL
 # prior to May 2017 we used to ship our own brew of xmlrpc but
 # that does not build anymore on f25
 # So bottom line is:
 # * don't use fedora's php-xmlrpc (no support for marshalling NULL)
 # * don't use our own that is way too old
-# * instead, thanks to Ciro we pull it from
+# * instead - thank you Ciro - we pull it as a git subtree from
 # https://github.com/gggeek/phpxmlrpc.git
-# Requires: php-xmlrpc
+# that stuff requires the following though
+Requires: php-xml
+####################
+
 
 # PostgreSQL and SOAPpy are necessary to run the API server, but not
 # plcsh. Since the only supported method of running the server is via
@@ -96,12 +102,6 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 ln -s %{_datadir}/plc_api/plcsh $RPM_BUILD_ROOT/%{_bindir}/plcsh
 
-### mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/php.d
-### cat > $RPM_BUILD_ROOT/%{_sysconfdir}/php.d/xmlrpc.ini <<EOF
-### ; Enable xmlrpc extension module
-### extension=xmlrpc.so
-### EOF
-
 # Install initscripts
 echo "* Installing initscripts"
 find plc.d | cpio -p -d -u ${RPM_BUILD_ROOT}/etc/
@@ -123,8 +123,12 @@ install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 #install -D -m 755 omf/reset_xmpp_pubsub_nodes.py $RPM_BUILD_ROOT/usr/bin/reset_xmpp_pubsub_nodes.py
 #mkdir -p $RPM_BUILD_ROOT/var/log/omf
 
-# Install ratelimit log
+# Create log file for plcapi
 mkdir -p $RPM_BUILD_ROOT/var/log
+touch $RPM_BUILD_ROOT/var/log/plcapi.log
+chown apache:apache $RPM_BUILD_ROOT/var/log/plcapi.log
+
+# Install ratelimit log
 touch $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 chown apache:apache $RPM_BUILD_ROOT/var/log/plc_api_ratelimit.log
 
@@ -139,14 +143,13 @@ rm -rf $RPM_BUILD_ROOT
 #%dir /var/log/omf/
 %{_datadir}/plc_api/*
 %{_bindir}/plcsh
-### %{php_extension_dir}/xmlrpc.so
-### %{_sysconfdir}/php.d/xmlrpc.ini
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 /etc/plc.d
 /etc/planetlab/db-config.d
 /var/www/html/wsdl/plcapi.wsdl
 #/usr/bin/omf_slicemgr.py*
 #/usr/bin/reset_xmpp_pubsub_nodes.py*
+/var/log/plcapi.log
 /var/log/plc_api_ratelimit.log
 
 
