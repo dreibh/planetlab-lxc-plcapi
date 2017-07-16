@@ -155,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Jul 16 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.4-0
+- embed phpxmlrpc as a git subtree from github (OK with fedora24 and 25, probably sooner too)
+- logs in /var/log/plcapi.log
+- context managers for most open files
 
 * Wed Feb 08 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-11
 - mostly issued for the R2lab deployment
