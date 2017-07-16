@@ -1,6 +1,6 @@
 %define name plcapi
-%define version 5.3
-%define taglevel 11
+%define version 5.4
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -154,6 +154,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jul 16 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.4-0
+
 * Wed Feb 08 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.3-11
 - mostly issued for the R2lab deployment
 - *** major
