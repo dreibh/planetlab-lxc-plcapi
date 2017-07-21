@@ -16,6 +16,7 @@ from PLC.Table import Row, Table
 from PLC.NodeTypes import NodeTypes
 from PLC.BootStates import BootStates
 from PLC.Interfaces import Interface, Interfaces
+from PLC.TagTypes import TagType, TagTypes
 
 def valid_hostname(hostname):
     # 1. Each part begins and ends with a letter or number.

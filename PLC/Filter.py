@@ -6,6 +6,7 @@ import time
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type
+from PLC.Logger import logger
 
 class Filter(Parameter, dict):
     """
@@ -266,5 +267,6 @@ class Filter(Parameter, dict):
         if clips:
             clip_part += " " + " ".join(clips)
         if Filter.debug:
-            print >> log, 'Filter.sql: where_part=',where_part,'clip_part',clip_part
-        return (where_part,clip_part)
+            logger.debug('Filter.sql: where_part={} - clip_part={}'
+                         .format(where_part, clip_part))
+        return where_part, clip_part

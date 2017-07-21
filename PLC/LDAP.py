@@ -6,7 +6,7 @@
 
 import ldap
 import traceback
-from PLC.Debug import profile, log
+from PLC.Debug import profile
 from PLC.Faults import *
 
 

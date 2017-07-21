@@ -19,7 +19,8 @@ import commands
 import re
 from pprint import pformat
 
-from PLC.Debug import profile, log
+from PLC.Logger import logger
+from PLC.Debug import profile
 from PLC.Faults import *
 from datetime import datetime as DateTimeType
 
@@ -175,21 +176,22 @@ class PostgreSQL:
 
             if not params:
                 if self.debug:
-                    print >> log,'execute0',query
+                    logger.debug('execute0: {}'.format(query))
                 cursor.execute(query)
-            elif isinstance(params,dict):
+            elif isinstance(params, dict):
                 if self.debug:
-                    print >> log,'execute-dict: params',params,'query',query%params
-                cursor.execute(query,params)
+                    logger.debug('execute-dict: params {} query {}'
+                                 .format(params, query%params))
+                cursor.execute(query, params)
             elif isinstance(params,tuple) and len(params)==1:
                 if self.debug:
-                    print >> log,'execute-tuple',query%params[0]
+                    logger.debug('execute-tuple {}'.format(query%params[0]))
                 cursor.execute(query,params[0])
             else:
                 param_seq=(params,)
                 if self.debug:
                     for params in param_seq:
-                        print >> log,'executemany',query%params
+                        logger.debug('executemany {}'.format(query%params))
                 cursor.executemany(query, param_seq)
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
@@ -199,12 +201,8 @@ class PostgreSQL:
             except:
                 pass
             uuid = commands.getoutput("uuidgen")
-            print >> log, "Database error %s:" % uuid
-            print >> log, e
-            print >> log, "Query:"
-            print >> log, query
-            print >> log, "Params:"
-            print >> log, pformat(params)
+            message = "Database error {}: - Query {} - Params {}".format(uuid, query, pformat(params))
+            logger.exception(message)
             raise PLCDBError("Please contact " + \
                              self.api.config.PLC_NAME + " Support " + \
                              "<" + self.api.config.PLC_MAIL_SUPPORT_ADDRESS + ">" + \

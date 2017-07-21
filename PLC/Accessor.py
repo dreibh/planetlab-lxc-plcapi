@@ -9,7 +9,7 @@
 # by the Factory, you need to restart your python instance / web server
 # as the cached information then becomes wrong
 
-from PLC.Debug import log 
+from PLC.Logger import logger
 
 from PLC.TagTypes import TagTypes, TagType
 from PLC.Roles import Roles, Role
@@ -57,9 +57,9 @@ This is implemented as a singleton, so we can cache results over time"""
                     for rolename in roles_to_delete:
                         tag_type.remove_role(self.hash_name_to_role[rolename])
                 except:
-                    # this goes in boot.log ...
-                    print >> log, "WARNING, Could not enforce tag type, tagname=%s\n"%tagname
-                    traceback.print_exc(file=log)
+                    logger.exception("WARNING, Could not enforce tag type, tagname={}\n"
+                                     .format(tagname))
+
                     
         else:
             # not found: create it
@@ -74,7 +74,9 @@ This is implemented as a singleton, so we can cache results over time"""
                     tag_type.add_role(role_obj)
                 except:
                     # xxx todo find a more appropriate way of notifying this
-                    print >> log, "Accessor.locate_or_create_tag: Could not add role %r to tag_type %s"%(role,tagname)
+                    logger.exception("Accessor.locate_or_create_tag: "
+                                     "Could not add role {} to tag_type {}"
+                                     .format(role,tagname))
         self.set_cache(tagname,tag_type)
         return tag_type
 

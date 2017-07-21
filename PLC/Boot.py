@@ -6,7 +6,7 @@
 #
 
 from PLC.Faults import *
-from PLC.Debug import log
+from PLC.Logger import logger
 from PLC.Messages import Message, Messages
 from PLC.Persons import Person, Persons
 from PLC.Sites import Site, Sites
@@ -17,7 +17,7 @@ def notify_owners(method, node, message_id,
                   fault = None):
     messages = Messages(method.api, [message_id], enabled = True)
     if not messages:
-        print >> log, "No such message template '%s'" % message_id
+        logger.error("No such message template '%s'" % message_id)
         return 1
     message = messages[0]
 

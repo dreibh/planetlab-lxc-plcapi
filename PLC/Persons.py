@@ -16,7 +16,6 @@ import re
 import crypt
 
 from PLC.Faults import *
-from PLC.Debug import log
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
 from PLC.Table import Row, Table

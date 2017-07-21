@@ -14,7 +14,7 @@ from PLC.Interfaces import Interface, Interfaces
 from PLC.InterfaceTags import InterfaceTag, InterfaceTags
 from PLC.NodeTags import NodeTag, NodeTags
 
-from PLC.Debug import log
+from PLC.Logger import logger
 
 from PLC.Accessors.Accessors_standard import *                  # import node accessors
 
@@ -295,7 +295,7 @@ class GetBootMedium(Method):
     def cleantrash (self):
         for file in self.trash:
             if self.DEBUG:
-                print >> log, 'DEBUG -- preserving',file
+                logger.debug('DEBUG -- preserving trash file {}'.format(file))
             else:
                 os.unlink(file)
 
@@ -362,7 +362,7 @@ class GetBootMedium(Method):
         # regular node, make build's arguments
         # and build the full command line to be called
         if node_type not in [ 'regular', 'reservable' ]:
-            print >> log, "GetBootMedium.build_command: unexpected node_type {}".format(node_type)
+            logger.error("GetBootMedium.build_command: unexpected node_type {}".format(node_type))
             return command, None
         
         build_sh_options=""
@@ -390,7 +390,7 @@ class GetBootMedium(Method):
                           build_sh_options,
                           log_file)
         
-        print >> log, "The build command line is {}".format(command)
+        logger.info("The build command line is {}".format(command))
 
         return command, log_file
 
@@ -415,8 +415,8 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument("No such node {}".format(node_id_or_hostname))
         node = nodes[0]
 
-        print >> log, "GetBootMedium: {} requested on node {}. Node type is: {}"\
-            .format(action, node['node_id'], node['node_type'])
+        logger.info("GetBootMedium: {} requested on node {}. Node type is: {}"\
+            .format(action, node['node_id'], node['node_type']))
 
         # check the required action against the node type
         node_type = node['node_type']
@@ -600,10 +600,10 @@ class GetBootMedium(Method):
                     result = file(node_image).read()
                     self.trash.append(node_image)
                     self.cleantrash()
-                    print >> log, "GetBootMedium - done with build.sh"
+                    logger.info("GetBootMedium - done with build.sh")
                     encoded_result = base64.b64encode(result)
-                    print >> log, "GetBootMedium - done with base64 encoding - lengths: raw={} - b64={}"\
-                        .format(len(result), len(encoded_result))
+                    logger.info("GetBootMedium - done with base64 encoding - lengths: raw={} - b64={}"
+                                .format(len(result), len(encoded_result)))
                     return encoded_result
             except:
                 self.cleantrash()

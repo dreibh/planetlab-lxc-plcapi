@@ -6,7 +6,7 @@ from email.MIMEText import MIMEText
 from email.Header import Header
 from smtplib import SMTP
 
-from PLC.Debug import log
+from PLC.Logger import logger
 from PLC.Faults import *
 
 def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
@@ -86,7 +86,8 @@ def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
     msg['X-Mailer'] = "Python/" + sys.version.split(" ")[0]
 
     if not api.config.PLC_MAIL_ENABLED:
-        print >> log, "From: %(From)s, To: %(To)s, Subject: %(Subject)s" % msg
+        logger.info("PLC_MAIL_ENABLED not set")
+        logger.info("From: %(From)s, To: %(To)s, Subject: %(Subject)s" % msg)
         return
 
     s = SMTP()

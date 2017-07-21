@@ -16,7 +16,7 @@ class Schema:
 
     def parse (self):
         if self.output:
-            outfile = open(self.output,"w")
+            outfile = open(self.output, "a")
         else:
             outfile = sys.stdout
         contents = file(self.input).read()
@@ -40,7 +40,7 @@ class Schema:
                 out_line=match.group(1)
             match=Schema.view.match(out_line)
             if match:
-                print >>outfile, out_line,';'
+                outfile.write("{};\n".format(out_line))
         if outfile != sys.stdout:
             outfile.close()
 

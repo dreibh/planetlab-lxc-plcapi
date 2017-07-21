@@ -1,5 +1,6 @@
 import traceback
 
+from PLC.Logger import logger
 from PLC.Method import Method
 from PLC.Auth import Auth
 from PLC.Faults import *
@@ -59,14 +60,13 @@ class GetNodeFlavour(Method):
             for assign in assigns:
                 (left,right)=[x.strip() for x in assign.split(':')]
                 if right not in GetNodeFlavour.known_virts:
-                    print >> log, "GetNodeFlavour, unknown 'virt' %s - ignored" % right
+                    logger.error("GetNodeFlavour, unknown 'virt' %s - ignored" % right)
                     continue
                 for fcdistro in [ x.strip() for x in left.split(',')]:
                     map[fcdistro]=right
         except:
-            print >> log, "GetNodeFlavour, issue with parsing PLC_FLAVOUR_VIRT_MAP=%s - returning '%s'"%\
-                (self.api.config.PLC_FLAVOUR_VIRT_MAP,GetNodeFlavour.default_virt)
-            traceback.print_exc(file=log)
+            logger.exception("GetNodeFlavour, issue with parsing PLC_FLAVOUR_VIRT_MAP=%s - returning '%s'"%\
+                             (self.api.config.PLC_FLAVOUR_VIRT_MAP, GetNodeFlavour.default_virt))
             return GetNodeFlavour.default_virt
 #        print 'virt_from_virt_map, using map',map
         if node_fcdistro in map:  return map[node_fcdistro]

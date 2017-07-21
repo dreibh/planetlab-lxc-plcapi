@@ -10,7 +10,6 @@
 # starting with 5.0, support for these two modules is taken out
 
 # Other stuff - doc not implicit, it's redone by myplc-docs
-subdirs := php/xmlrpc
 
 # autoconf compatible variables
 DESTDIR := /
@@ -19,23 +18,25 @@ bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: $(subdirs) 
+all: 
 	python setup.py build
 
-install: 
+install: install-python install-phpxmlrpc
+
+install-python:
 	python setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
-	install -D -m 755 php/xmlrpc/xmlrpc.so $(DESTDIR)/$(shell php-config --extension-dir)/xmlrpc.so
 
-$(subdirs): %:
-	$(MAKE) -C $@
+# phpxmlrpc is a git subtree; we just ship all its contents
+# under /usr/share/plc_api/php/phpxmlrpc
+install-phpxmlrpc:
+	mkdir -p $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
+	rsync --exclude .git -ai php/phpxmlrpc/ $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 
 clean: 
 	find . -name '*.pyc' | xargs rm -f
-	rm -f $(INIT)
-	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
 	python setup.py clean && rm -rf build
 
 index:
@@ -45,7 +46,7 @@ index:
 
 force:
 
-.PHONY: all install force clean index tags $(subdirs)
+.PHONY: all install force clean index tags
 
 #################### devel tools
 tags:
@@ -80,12 +81,13 @@ sync:
 ifeq (,$(SSHURL))
 	@echo "sync: I need more info from the command line, e.g."
 	@echo "  make sync PLC=boot.planetlab.eu"
-	@echo "  make sync PLCHOSTLXC=.. GUESTNAME=.."
+	@echo "  make sync PLCHOSTLXC=.. GUESTHOSTNAME=.. GUESTNAME=.."
 	@exit 1
 else
 	+$(RSYNC) plcsh PLC planetlab5.sql migrations aspects $(SSHURL)/usr/share/plc_api/
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
+	+$(RSYNC) apache/plc.wsgi $(SSHURL)/usr/share/plc_api/apache/
 	$(SSHCOMMAND) /etc/plc.d/httpd stop
 	$(SSHCOMMAND) /etc/plc.d/httpd start
 endif
