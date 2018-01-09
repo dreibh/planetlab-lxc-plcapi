@@ -40,7 +40,7 @@ Requires: SOAPpy
 %endif
 #Requires: python-simplejson
 # for the RebootNodeWithPCU method
-Requires: pcucontrol >= 1.0-6
+Recommends: pcucontrol >= 1.0-6
 # for OMF integration
 Requires: pyaspects >= 0.4
 Requires: python-twisted-words
