@@ -113,3 +113,9 @@ define_accessors(current_module, Interface, "Backdoor", "backdoor",
 define_accessors(current_module, [Person,Slice,Site] , "SfaCreated", "sfa_created",
                  "person/slice/site/sfa", "Tag objects created through SFA interfaces",
                  set_roles=all_roles, expose_in_api=True)
+
+# set any value to this tag to prevent a site from showing up
+# in the person registration form
+define_accessors(current_module, Site, "DisabledRegistration", "disabled_registration",
+                 "site", "Sites that have a non-void value are excluded from the drop-down list on the registration form",
+                 set_roles=admin_roles, expose_in_api=True)
