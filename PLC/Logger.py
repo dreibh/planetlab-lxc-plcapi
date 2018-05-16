@@ -6,7 +6,8 @@ import logging.config
 
 plcapi_logging_config = {
     'version' : 1,
-    'disable_existing_loggers' : True,
+# we may be imported by something else, like sfa, so do not do that:
+#    'disable_existing_loggers' : True,
     'formatters': { 
         'standard': { 
             'format': '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
