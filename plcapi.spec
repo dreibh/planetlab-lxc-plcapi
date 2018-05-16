@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.4
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -154,6 +154,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed May 16 2018 Thierry <Parmentelat> - plcapi-5.4-1
+- define accessor for site tag disabled_registration (used in plewww-5.2-9)
+- set disable_existing_loggers = False in logging config, that otherwise voids sfa logs
+
 * Sun Jul 16 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - plcapi-5.4-0
 - embed phpxmlrpc as a git subtree from github (OK with fedora24 and 25, probably sooner too)
 - logs in /var/log/plcapi.log
