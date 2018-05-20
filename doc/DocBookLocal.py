@@ -14,13 +14,14 @@ for method in methods:
     try:
         good_api = api.callable(method)
         good_apis.append(good_api)
-    except PLCInvalidAPIMethod, e:
-        bad_apis.append((method,e))
+    except PLCInvalidAPIMethod as exc:
+        bad_apis.append((method, exc))
 
 DocBook(good_apis).Process()
 
-if len(bad_apis):
-    sys.stderr.write("UNEXPECTED: There are %d non-callable methods:\n"%(len(bad_apis)))
-    for bad_api,e in bad_apis:
-        sys.stderr.write("\t%s:%s\n" % (bad_api,e))
+if bad_apis:
+    sys.stderr.write("UNEXPECTED: There are %d non-callable methods:\n"
+                     % (len(bad_apis)))
+    for method, exc in bad_apis:
+        sys.stderr.write("\tmethod=<%s> exc=%s\n" % (method, exc))
     sys.exit(-1)

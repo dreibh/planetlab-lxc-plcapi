@@ -20,7 +20,6 @@ contents = [
 for dir, pattern in contents:
     prefix = len(dir) + 1
     matches = glob.glob("{}/{}".format(dir, pattern))
-    print(matches)
     for match in matches:
         filename = match[prefix:][:-3]
         python_name = filename if dir == '.' \
