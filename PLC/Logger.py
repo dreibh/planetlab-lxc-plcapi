@@ -1,3 +1,5 @@
+# pylint: disable=c0103
+
 import logging
 import logging.config
 
@@ -5,25 +7,22 @@ import logging.config
 # that goes into /var/log/plcapi.log
 
 plcapi_logging_config = {
-    'version' : 1,
-# we may be imported by something else, like sfa, so:
-    'disable_existing_loggers' : False,
-    'formatters': { 
-        'standard': { 
-            'format': '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
-            'datefmt': '%m-%d %H:%M:%S'
-        },
-        'shorter': { 
-            'format': '%(asctime)s %(levelname)s %(message)s',
-            'datefmt': '%d %H:%M:%S'
+    'version': 1,
+    # IMPORTANT: we may be imported by something else, like sfa, so:
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'datefmt': '%m-%d %H:%M:%S',
+            'format': ('%(asctime)s %(levelname)s '
+                       '%(filename)s:%(lineno)d %(message)s'),
         },
     },
     'handlers': {
         'plcapi': {
+            'filename': '/var/log/plcapi.log',
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'standard',
-            'filename' : '/var/log/plcapi.log',
         },
     },
     'loggers': {
