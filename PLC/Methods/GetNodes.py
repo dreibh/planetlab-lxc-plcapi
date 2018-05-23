@@ -5,8 +5,9 @@ from PLC.Filter import Filter
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
+from PLC.Logger import logger
 
-admin_only = ['key', 'session', 'boot_nonce' ]
+admin_only = ['key', 'session', 'boot_nonce']
 
 class GetNodes(Method):
     """
@@ -29,23 +30,27 @@ class GetNodes(Method):
         Auth(),
         Mixed([Mixed(Node.fields['node_id'],
                      Node.fields['hostname'])],
-              Parameter(str,"hostname"),
-              Parameter(int,"node_id"),
+              Parameter(str, "hostname"),
+              Parameter(int, "node_id"),
               Filter(Node.fields)),
-        Parameter([str], "List of fields to return", nullok = True),
+        Parameter([str], "List of fields to return", nullok=True),
         ]
 
     returns = [Node.fields]
 
 
-    def call(self, auth, node_filter = None, return_fields = None):
+    def call(self, auth, node_filter=None, return_fields=None):
 
         # Must query at least slice_ids_whitelist
         if return_fields is not None:
-            added_fields = set(['slice_ids_whitelist', 'site_id']).difference(return_fields)
+            added_fields = (set(['slice_ids_whitelist', 'site_id'])
+                            .difference(return_fields))
             return_fields += added_fields
         else:
-            added_fields =[]
+            added_fields = []
+
+        logger.info("incoming GetNodes, filter={}, return fields={}"
+                    .format(node_filter, return_fields))
 
         # Get node information
         nodes = Nodes(self.api, node_filter, return_fields)
