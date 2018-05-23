@@ -9,7 +9,7 @@ native_methods = []
 toppath = os.path.dirname(__file__)
 
 # do not blindly scan this directory, as when using devel tools
-# like `make sync` we can easily end up with more files that needed
+# like `make sync` we can easily end up with more files than needed
 # which breaks in production
 
 contents = [
@@ -18,8 +18,9 @@ contents = [
 ]
 
 for dir, pattern in contents:
-    prefix = len(dir) + 1
-    matches = glob.glob("{}/{}".format(dir, pattern))
+    matches = glob.glob("{}/{}/{}".format(toppath, dir, pattern))
+    # count 2 slashes
+    prefix = len(toppath) + 1 + len(dir) + 1
     for match in matches:
         filename = match[prefix:][:-3]
         python_name = filename if dir == '.' \
