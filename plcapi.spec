@@ -23,7 +23,8 @@ Obsoletes: PLCAPI
 
 # requirement to mod_python or mod_wsgi: deferred to myplc
 Requires: httpd mod_ssl
-Requires: Django
+# f29 does not come with an rpm for that; use pip instead
+# Requires: Django
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
 # We use set everywhere
 Requires: python >= 2.7
@@ -43,8 +44,9 @@ Requires: SOAPpy
 Requires: pcucontrol >= 1.0-6
 # for OMF integration
 Requires: pyaspects >= 0.4
-Requires: python-twisted-words
-Requires: python-twisted-web
+# again, these are no longer available in f29
+# Requires: python-twisted-words
+# Requires: python-twisted-web
 # ldap
 Requires: python-ldap
 # for memcache
