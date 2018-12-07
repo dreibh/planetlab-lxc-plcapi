@@ -29,7 +29,7 @@ class Session(Row):
 
     def validate_expires(self, expires):
         if expires < time.time():
-            raise PLCInvalidArgument, "Expiration date must be in the future"
+            raise PLCInvalidArgument("Expiration date must be in the future")
 
         return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
 
@@ -44,14 +44,14 @@ class Session(Row):
         add(self, node, commit = commit)
 
     def sync(self, commit = True, insert = None):
-        if not self.has_key('session_id'):
+        if 'session_id' not in self:
             # Before a new session is added, delete expired sessions
             expired = Sessions(self.api, expires = -int(time.time()))
             for session in expired:
                 session.delete(commit)
 
             # Generate 32 random bytes
-            bytes = random.sample(xrange(0, 256), 32)
+            bytes = random.sample(range(0, 256), 32)
             # Base64 encode their string representation
             self['session_id'] = base64.b64encode("".join(map(chr, bytes)))
             # Force insert
@@ -73,21 +73,21 @@ class Sessions(Table):
         if session_filter is not None:
             if isinstance(session_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), session_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), session_filter)
+                ints = [x for x in session_filter if isinstance(x, int)]
+                strs = [x for x in session_filter if isinstance(x, StringTypes)]
                 session_filter = Filter(Session.fields, {'person_id': ints, 'session_id': strs})
                 sql += " AND (%s) %s" % session_filter.sql(api, "OR")
             elif isinstance(session_filter, dict):
                 session_filter = Filter(Session.fields, session_filter)
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
-            elif isinstance(session_filter, (int, long)):
+            elif isinstance(session_filter, int):
                 session_filter = Filter(Session.fields, {'person_id': session_filter})
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
             elif isinstance(session_filter, StringTypes):
                 session_filter = Filter(Session.fields, {'session_id': session_filter})
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong session filter"%session_filter
+                raise PLCInvalidArgument("Wrong session filter"%session_filter)
 
         if expires is not None:
             if expires >= 0:

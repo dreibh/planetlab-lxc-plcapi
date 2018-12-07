@@ -71,7 +71,7 @@ class GetSlices(Method):
         # Filter out slices that are not viewable
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
-            slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
+            slices = [slice for slice in slices if slice['slice_id'] in valid_slice_ids]
 
         # Remove slice_id if not specified
         if added_fields:

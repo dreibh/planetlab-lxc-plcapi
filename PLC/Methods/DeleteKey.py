@@ -27,15 +27,15 @@ class DeleteKey(Method):
         # Get associated key details
         keys = Keys(self.api, [key_id])
         if not keys:
-            raise PLCInvalidArgument, "No such key"
+            raise PLCInvalidArgument("No such key")
         key = keys[0]
 
         if key['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local key"
+            raise PLCInvalidArgument("Not a local key")
 
         if 'admin' not in self.caller['roles']:
             if key['key_id'] not in self.caller['key_ids']:
-                raise PLCPermissionDenied, "Key must be associated with your account"
+                raise PLCPermissionDenied("Key must be associated with your account")
 
         key.delete()
 

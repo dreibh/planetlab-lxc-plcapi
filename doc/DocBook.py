@@ -18,7 +18,7 @@ from PLC.Parameter import Parameter, Mixed, xmlrpc_type, python_type
 class TrimText(Text):
     """text"""
     def __init__(self, text = None):
-        self.data = unicode(text)
+        self.data = str(text)
 
     def writexml(self, writer, indent="", addindent="", newl=""):
         Text.writexml(self, writer, "", "", "")
@@ -91,7 +91,7 @@ class paramElement(Element):
         if isinstance(param, dict):
             itemizedlist = Element('itemizedlist')
             self.appendChild(itemizedlist)
-            for name, subparam in param.iteritems():
+            for name, subparam in param.items():
                 itemizedlist.appendChild(paramElement(name, subparam))
 
         elif isinstance(param, (list, tuple, set)) and len(param):
@@ -148,4 +148,4 @@ class DocBook:
             returns.appendChild(paramElement(None, func.returns))
             section.appendChild(returns)
 
-            print section.toprettyxml(encoding = "UTF-8")
+            print(section.toprettyxml(encoding = "UTF-8"))

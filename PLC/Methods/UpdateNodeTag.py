@@ -39,7 +39,7 @@ class UpdateNodeTag(Method):
     def call(self, auth, node_tag_id, value):
         node_tags = NodeTags(self.api, [node_tag_id])
         if not node_tags:
-            raise PLCInvalidArgument, "No such node tag %r"%node_tag_id
+            raise PLCInvalidArgument("No such node tag %r"%node_tag_id)
         node_tag = node_tags[0]
 
         tag_type_id = node_tag['tag_type_id']
@@ -47,7 +47,7 @@ class UpdateNodeTag(Method):
 
         nodes = Nodes (self.api, node_tag['node_id'])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %d"%node_tag['node_id']
+            raise PLCInvalidArgument("No such node %d"%node_tag['node_id'])
         node=nodes[0]
 
         # check authorizations

@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 from PLC.Peers import Peer, Peers
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['peername', 'peer_url', 'key', 'cacert', 'shortname', 'hrn_root']
 
 class UpdatePeer(Method):
@@ -17,7 +17,7 @@ class UpdatePeer(Method):
 
     roles = ['admin']
 
-    peer_fields = dict(filter(can_update, Peer.fields.items()))
+    peer_fields = dict(list(filter(can_update, list(Peer.fields.items()))))
 
     accepts = [
         Auth(),
@@ -29,17 +29,17 @@ class UpdatePeer(Method):
     returns = Parameter(int, "1 if successful")
 
     def call(self, auth, peer_id_or_name, peer_fields):
-        peer_fields = dict(filter(can_update, peer_fields.items()))
+        peer_fields = dict(list(filter(can_update, list(peer_fields.items()))))
 
         # Get account information
         peers = Peers(self.api, [peer_id_or_name])
         if not peers:
-            raise PLCInvalidArgument, "No such peer"
+            raise PLCInvalidArgument("No such peer")
         peer = peers[0]
 
         if isinstance(self.caller, Peer):
             if self.caller['peer_id'] != peer['peer_id']:
-                raise PLCPermissionDenied, "Not allowed to update specified peer"
+                raise PLCPermissionDenied("Not allowed to update specified peer")
 
         peer.update(peer_fields)
         peer.sync()

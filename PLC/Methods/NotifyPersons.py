@@ -32,7 +32,7 @@ class NotifyPersons(Method):
         persons = Persons(self.api, person_filter,
                           ['person_id', 'first_name', 'last_name', 'email'])
         if not persons:
-            raise PLCInvalidArgument, "No such user(s)"
+            raise PLCInvalidArgument("No such user(s)")
 
         # Send email
         sendmail(self.api,

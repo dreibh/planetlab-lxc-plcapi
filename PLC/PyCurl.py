@@ -7,14 +7,14 @@
 #
 
 import os
-import xmlrpclib
-import pycurl
+import xmlrpc.client
+from . import pycurl
 from tempfile import NamedTemporaryFile
 
-class PyCurlTransport(xmlrpclib.Transport):
+class PyCurlTransport(xmlrpc.client.Transport):
     def __init__(self, uri, cert = None, timeout = 300):
-        if hasattr(xmlrpclib.Transport,'__init__'):
-            xmlrpclib.Transport.__init__(self)
+        if hasattr(xmlrpc.client.Transport,'__init__'):
+            xmlrpc.client.Transport.__init__(self)
         self.curl = pycurl.Curl()
 
         # Suppress signals
@@ -65,13 +65,13 @@ class PyCurlTransport(xmlrpclib.Transport):
             response = self.body
             self.body = ""
             errmsg="<no known errmsg>"
-        except pycurl.error, err:
+        except pycurl.error as err:
             (errcode, errmsg) = err
 
         if errcode == 60:
-            raise Exception, "PyCurl: SSL certificate validation failed"
+            raise Exception("PyCurl: SSL certificate validation failed")
         elif errcode != 200:
-            raise Exception, "PyCurl: HTTP error %d -- %r" % (errcode,errmsg)
+            raise Exception("PyCurl: HTTP error %d -- %r" % (errcode,errmsg))
 
         # Parse response
         p, u = self.getparser()

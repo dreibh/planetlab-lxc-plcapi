@@ -42,7 +42,7 @@ class SliceExtendedInfo(Method):
         slice_filter = slice_name_list
         slices = Slices(self.api, slice_filter)
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument("No such slice")
 
         if 'admin' not in self.caller['roles']:
             # Get slices that we are able to view
@@ -55,7 +55,7 @@ class SliceExtendedInfo(Method):
             if not valid_slice_ids:
                 return []
 
-            slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
+            slices = [slice for slice in slices if slice['slice_id'] in valid_slice_ids]
 
         for slice in slices:
             index = slices.index(slice)

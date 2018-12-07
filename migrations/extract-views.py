@@ -46,7 +46,7 @@ class Schema:
 
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:
-        print 'Usage:',sys.argv[0],'input [output]'
+        print('Usage:',sys.argv[0],'input [output]')
         sys.exit(1)
     input=sys.argv[1]
     try:

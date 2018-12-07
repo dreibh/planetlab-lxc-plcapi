@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Messages import Message, Messages
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['template', 'enabled']
 
 class UpdateMessage(Method):
@@ -17,7 +17,7 @@ class UpdateMessage(Method):
 
     roles = ['admin']
 
-    message_fields = dict(filter(can_update, Message.fields.items()))
+    message_fields = dict(list(filter(can_update, list(Message.fields.items()))))
 
     accepts = [
         Auth(),
@@ -28,12 +28,12 @@ class UpdateMessage(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, message_id, message_fields):
-        message_fields = dict(filter(can_update, message_fields.items()))
+        message_fields = dict(list(filter(can_update, list(message_fields.items()))))
 
         # Get message information
         messages = Messages(self.api, [message_id])
         if not messages:
-            raise PLCInvalidArgument, "No such message"
+            raise PLCInvalidArgument("No such message")
         message = messages[0]
 
         message.update(message_fields)

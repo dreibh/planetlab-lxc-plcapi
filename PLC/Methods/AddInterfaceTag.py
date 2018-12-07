@@ -44,12 +44,12 @@ class AddInterfaceTag(Method):
     def call(self, auth, interface_id, tag_type_id_or_name, value):
         interfaces = Interfaces(self.api, [interface_id])
         if not interfaces:
-            raise PLCInvalidArgument, "No such interface %r"%interface_id
+            raise PLCInvalidArgument("No such interface %r"%interface_id)
         interface = interfaces[0]
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("No such tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # checks for existence - does not allow several different settings
@@ -58,8 +58,8 @@ class AddInterfaceTag(Method):
                                          'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
-            raise PLCInvalidArgument, "Interface %d already has setting %d"%(interface['interface_id'],
-                                                                               tag_type['tag_type_id'])
+            raise PLCInvalidArgument("Interface %d already has setting %d"%(interface['interface_id'],
+                                                                               tag_type['tag_type_id']))
 
         # check authorizations
         interface.caller_may_write_tag(self.api,self.caller,tag_type)

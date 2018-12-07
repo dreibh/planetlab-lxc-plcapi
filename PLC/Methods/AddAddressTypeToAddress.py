@@ -29,17 +29,17 @@ class AddAddressTypeToAddress(Method):
     def call(self, auth, address_type_id_or_name, address_id):
         address_types = AddressTypes(self.api, [address_type_id_or_name])
         if not address_types:
-            raise PLCInvalidArgument, "No such address type"
+            raise PLCInvalidArgument("No such address type")
         address_type = address_types[0]
 
         addresses = Addresses(self.api, [address_id])
         if not addresses:
-            raise PLCInvalidArgument, "No such address"
+            raise PLCInvalidArgument("No such address")
         address = addresses[0]
 
         if 'admin' not in self.caller['roles']:
             if address['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Address must be associated with one of your sites"
+                raise PLCPermissionDenied("Address must be associated with one of your sites")
 
         address.add_address_type(address_type)
         self.event_objects = {'Address': [address['address_id']]}

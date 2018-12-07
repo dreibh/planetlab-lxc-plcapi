@@ -27,7 +27,7 @@ class DeletePeer(Method):
         # Get account information
         peers = Peers(self.api, [peer_id_or_name])
         if not peers:
-            raise PLCInvalidArgument, "No such peer"
+            raise PLCInvalidArgument("No such peer")
 
         peer = peers[0]
         peer.delete()

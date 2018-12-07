@@ -15,7 +15,7 @@ psycopg2.extensions.register_type(psycopg2._psycopg.UNICODEARRAY)
 import types
 from types import StringTypes, NoneType
 import traceback
-import commands
+import subprocess
 import re
 from pprint import pformat
 
@@ -63,21 +63,21 @@ class PostgreSQL:
     def _quote(x):
         if isinstance(x, DateTimeType):
             x = str(x)
-        elif isinstance(x, unicode):
+        elif isinstance(x, str):
             x = x.encode( 'utf-8' )
     
-        if isinstance(x, types.StringType):
+        if isinstance(x, bytes):
             x = "'%s'" % str(x).replace("\\", "\\\\").replace("'", "''")
-        elif isinstance(x, (types.IntType, types.LongType, types.FloatType)):
+        elif isinstance(x, (int, float)):
             pass
         elif x is None:
             x = 'NULL'
-        elif isinstance(x, (types.ListType, types.TupleType, set)):
-            x = 'ARRAY[%s]' % ', '.join(map(lambda x: str(_quote(x)), x))
+        elif isinstance(x, (list, tuple, set)):
+            x = 'ARRAY[%s]' % ', '.join([str(_quote(x)) for x in x])
         elif hasattr(x, '__pg_repr__'):
             x = x.__pg_repr__()
         else:
-            raise PLCDBError, 'Cannot quote type %s' % type(x)
+            raise PLCDBError('Cannot quote type %s' % type(x))
         return x
 
 
@@ -195,12 +195,12 @@ class PostgreSQL:
                 cursor.executemany(query, param_seq)
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
-        except Exception, e:
+        except Exception as e:
             try:
                 self.rollback()
             except:
                 pass
-            uuid = commands.getoutput("uuidgen")
+            uuid = subprocess.getoutput("uuidgen")
             message = "Database error {}: - Query {} - Params {}".format(uuid, query, pformat(params))
             logger.exception(message)
             raise PLCDBError("Please contact " + \
@@ -229,7 +229,7 @@ class PostgreSQL:
             # Return each row as a dictionary keyed on field name
             # (like DBI selectrow_hashref()).
             labels = [column[0] for column in self.description]
-            rows = [dict(zip(labels, row)) for row in rows]
+            rows = [dict(list(zip(labels, row))) for row in rows]
 
         if key_field is not None and key_field in labels:
             # Return rows as a dictionary keyed on the specified field
@@ -244,7 +244,7 @@ class PostgreSQL:
         """
 
         if hasattr(self, 'fields_cache'):
-            if self.fields_cache.has_key((table, notnull, hasdef)):
+            if (table, notnull, hasdef) in self.fields_cache:
                 return self.fields_cache[(table, notnull, hasdef)]
         else:
             self.fields_cache = {}

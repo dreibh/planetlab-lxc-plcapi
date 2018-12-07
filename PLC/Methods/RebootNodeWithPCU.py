@@ -42,7 +42,7 @@ class RebootNodeWithPCU(Method):
     # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
 
         if testrun is None:
             testrun = False
@@ -56,17 +56,17 @@ class RebootNodeWithPCU(Method):
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to reboot nodes from specified site"
+                raise PLCPermissionDenied("Not allowed to reboot nodes from specified site")
 
         # Verify that the node has pcus associated with it.
         pcus = PCUs(self.api, {'pcu_id' : node['pcu_ids']} )
         if not pcus:
-            raise PLCInvalidArgument, "No PCUs associated with Node"
+            raise PLCInvalidArgument("No PCUs associated with Node")
 
         pcu = pcus[0]
 
         if not external_dependency:
-            raise PLCNotImplemented, "Could not load external module to attempt reboot"
+            raise PLCNotImplemented("Could not load external module to attempt reboot")
 
         # model, hostname, port,
         # i = pcu['node_ids'].index(node['node_id'])

@@ -30,13 +30,13 @@ class DeleteInterface(Method):
         # Get interface information
         interfaces = Interfaces(self.api, [interface_id])
         if not interfaces:
-            raise PLCInvalidArgument, "No such interface %r"%interface_id
+            raise PLCInvalidArgument("No such interface %r"%interface_id)
         interface = interfaces[0]
 
         # Get node information
         nodes = Nodes(self.api, [interface['node_id']])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id
+            raise PLCInvalidArgument("No such node %r"%node_id)
         node = nodes[0]
 
         # Authenticated functino
@@ -46,7 +46,7 @@ class DeleteInterface(Method):
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete this interface"
+                raise PLCPermissionDenied("Not allowed to delete this interface")
 
         interface.delete()
 

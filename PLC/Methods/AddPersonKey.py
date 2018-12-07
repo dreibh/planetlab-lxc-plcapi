@@ -5,7 +5,7 @@ from PLC.Keys import Key, Keys
 from PLC.Persons import Person, Persons
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in ['key_type','key']
+can_update = lambda field_value: field_value[0] in ['key_type','key']
 
 class AddPersonKey(Method):
     """
@@ -18,7 +18,7 @@ class AddPersonKey(Method):
 
     roles = ['admin', 'pi', 'tech', 'user']
 
-    key_fields = dict(filter(can_update, Key.fields.items()))
+    key_fields = dict(list(filter(can_update, list(Key.fields.items()))))
 
     accepts = [
         Auth(),
@@ -30,21 +30,21 @@ class AddPersonKey(Method):
     returns = Parameter(int, 'New key_id (> 0) if successful')
 
     def call(self, auth, person_id_or_email, key_fields):
-        key_fields = dict(filter(can_update, key_fields.items()))
+        key_fields = dict(list(filter(can_update, list(key_fields.items()))))
 
         # Get account details
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         # If we are not admin, make sure caller is adding a key to their account
         if 'admin' not in self.caller['roles']:
             if person['person_id'] != self.caller['person_id']:
-                raise PLCPermissionDenied, "You may only modify your own keys"
+                raise PLCPermissionDenied("You may only modify your own keys")
 
         key = Key(self.api, key_fields)
         key.sync(commit = False)

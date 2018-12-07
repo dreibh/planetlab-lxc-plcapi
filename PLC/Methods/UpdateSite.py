@@ -9,8 +9,8 @@ from PLC.SiteTags import SiteTags
 from PLC.Methods.AddSiteTag import AddSiteTag
 from PLC.Methods.UpdateSiteTag import UpdateSiteTag
 
-related_fields = Site.related_fields.keys()
-can_update = lambda (field, value): field in \
+related_fields = list(Site.related_fields.keys())
+can_update = lambda field_value: field_value[0] in \
              ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
               'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id'] + \
@@ -29,7 +29,7 @@ class UpdateSite(Method):
 
     roles = ['admin', 'pi']
 
-    site_fields = dict(filter(can_update, Site.fields.items() + Site.related_fields.items()))
+    site_fields = dict(list(filter(can_update, list(Site.fields.items()) + list(Site.related_fields.items()))))
 
     accepts = [
         Auth(),
@@ -41,16 +41,16 @@ class UpdateSite(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, site_id_or_login_base, site_fields):
-        site_fields = dict(filter(can_update, site_fields.items()))
+        site_fields = dict(list(filter(can_update, list(site_fields.items()))))
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
         site = sites[0]
 
         if site['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local site"
+            raise PLCInvalidArgument("Not a local site")
 
         # Authenticated function
         assert self.caller is not None
@@ -59,7 +59,7 @@ class UpdateSite(Method):
         # member of the site.
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to modify specified site"
+                raise PLCPermissionDenied("Not allowed to modify specified site")
 
             # Remove admin only fields
             for key in 'max_slices', 'max_slivers', 'login_base':
@@ -79,7 +79,7 @@ class UpdateSite(Method):
         # Logging variables
         self.event_objects = {'Site': [site['site_id']]}
         self.message = 'Site %d updated: %s' % \
-                (site['site_id'], ", ".join(site_fields.keys()))
+                (site['site_id'], ", ".join(list(site_fields.keys())))
 
         # Update Site HRN if login_base changed
         if 'login_base' in site_fields:

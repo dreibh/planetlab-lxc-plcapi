@@ -34,7 +34,7 @@ class GetPlcRelease(Method):
 
         matchers = {}
         result = {}
-        for field in regexps.keys():
+        for field in list(regexps.keys()):
             matchers[field] = re.compile(regexps[field])
             result[field]={}
 
@@ -44,16 +44,16 @@ class GetPlcRelease(Method):
                 line=line.strip()
                 if comment_matcher.match(line):
                     continue
-                for field in regexps.keys():
+                for field in list(regexps.keys()):
                     m=matchers[field].match(line)
                     if m:
                         (key,value)=m.groups(['key','value'])
                         result[field][key]=value
                         break
                 else:
-                    if not result.has_key('unexpected'):
+                    if 'unexpected' not in result:
                         result['unexpected']=""
                     result['unexpected'] += (line+"\n")
         except:
-            raise PLCNotImplemented, 'Cannot open /etc/myplc-release'
+            raise PLCNotImplemented('Cannot open /etc/myplc-release')
         return result

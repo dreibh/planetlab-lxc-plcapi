@@ -29,26 +29,26 @@ class AddPersonToSlice(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account %s"%person_id_or_email
+            raise PLCInvalidArgument("No such account %s"%person_id_or_email)
         person = persons[0]
 
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %s"%slice_id_or_name
+            raise PLCInvalidArgument("No such slice %s"%slice_id_or_name)
         slice = slices[0]
 
         # N.B. Allow foreign users to be added to local slices and
         # local users to be added to foreign slices (and, of course,
         # local users to be added to local slices).
         if person['peer_id'] is not None and slice['peer_id'] is not None:
-            raise PLCInvalidArgument, "Cannot add foreign users to foreign slices"
+            raise PLCInvalidArgument("Cannot add foreign users to foreign slices")
 
         # If we are not admin, make sure the caller is a PI
         # of the site associated with the slice
         if 'admin' not in self.caller['roles']:
             if slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to add users to slice %s"%slice_id_or_name
+                raise PLCPermissionDenied("Not allowed to add users to slice %s"%slice_id_or_name)
 
         if slice['slice_id'] not in person['slice_ids']:
             slice.add_person(person)

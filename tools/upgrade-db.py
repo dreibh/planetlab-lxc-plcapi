@@ -17,18 +17,18 @@ import pgdb
 
 config = {}
 config_file = "/etc/planetlab/plc_config"
-execfile(config_file, config)
+exec(compile(open(config_file).read(), config_file, 'exec'), config)
 upgrade_config_file = "plcdb.3-4.conf"
 schema_file = "planetlab4.sql"
 temp_dir = "/tmp"
 
 
 def usage():
-        print "Usage: %s [OPTION] UPGRADE_CONFIG_FILE " % sys.argv[0]
-        print "Options:"
-        print "     -s, --schema=FILE       Upgraded Database Schema"
-        print "     -t, --temp-dir=DIR      Temp Directory"
-        print "     --help                  This message"
+        print("Usage: %s [OPTION] UPGRADE_CONFIG_FILE " % sys.argv[0])
+        print("Options:")
+        print("     -s, --schema=FILE       Upgraded Database Schema")
+        print("     -t, --temp-dir=DIR      Temp Directory")
+        print("     --help                  This message")
         sys.exit(1)
 
 try:
@@ -37,8 +37,8 @@ try:
                                      ["schema=",
                                       "temp-dir=",
                                       "help"])
-except getopt.GetoptError, err:
-	print "Error: ", err.msg
+except getopt.GetoptError as err:
+	print("Error: ", err.msg)
         usage()
 
 for (opt, optval) in opts:
@@ -51,7 +51,7 @@ for (opt, optval) in opts:
 try:
 	upgrade_config_file = argv[0]
 except IndexError:
-	print "Error: too few arguments"
+	print("Error: too few arguments")
         usage()
 
 schema = {}
@@ -64,18 +64,18 @@ temp_tables = {}
 # load conf file for this upgrade
 try:
         upgrade_config = {}
-        execfile(upgrade_config_file, upgrade_config)
+        exec(compile(open(upgrade_config_file).read(), upgrade_config_file, 'exec'), upgrade_config)
         upgrade_config.pop('__builtins__')
 	db_version_previous = upgrade_config['DB_VERSION_PREVIOUS']
         db_version_new = upgrade_config['DB_VERSION_NEW']
 
-except IOError, fault:
-        print "Error: upgrade config file (%s) not found. Exiting" % \
-		(fault)
+except IOError as fault:
+        print("Error: upgrade config file (%s) not found. Exiting" % \
+		(fault))
         sys.exit(1) 
-except KeyError, fault:
-	print "Error: %s not set in upgrade confing (%s). Exiting" % \
-		(fault, upgrade_config_file)
+except KeyError as fault:
+	print("Error: %s not set in upgrade confing (%s). Exiting" % \
+		(fault, upgrade_config_file))
 	sys.exit(1)
 
 
@@ -94,7 +94,7 @@ def archive_db(database, archived_database):
                      (archived_database, database, archived_database)
 	exit_status = os.system(archive_db)
         if exit_status:
-                print "Error: unable to archive database. Upgrade failed"
+                print("Error: unable to archive database. Upgrade failed")
                 sys.exit(1)
         #print "Status: %s has been archived. now named %s" % (database, archived_database)
 
@@ -107,11 +107,11 @@ def encode_utf8(inputfile_name, outputfile_name):
 		for line in inputfile:
 			if line.upper().find('SET CLIENT_ENCODING') > -1:
 				continue
-			outputfile.write(unicode(line, 'iso-8859-1').encode('utf8'))
+			outputfile.write(str(line, 'iso-8859-1').encode('utf8'))
 		inputfile.close()
 		outputfile.close()		
 	except:
-		print 'error encoding file'
+		print('error encoding file')
 		raise
 
 def create_item_from_schema(item_name):
@@ -122,14 +122,14 @@ def create_item_from_schema(item_name):
 			    (config['PLC_DB_NAME'], config['PLC_DB_USER'],"".join(body_list) ) )
 		if exit_status:
 			raise Exception
-        except Exception, fault:
-                print 'Error: create %s failed. Check schema.' % item_name
+        except Exception as fault:
+                print('Error: create %s failed. Check schema.' % item_name)
 		sys.exit(1)
 		raise fault
 
         except KeyError:
-                print "Error: cannot create %s. definition not found in %s" % \
-                        (key, schema_file)
+                print("Error: cannot create %s. definition not found in %s" % \
+                        (key, schema_file))
                 return False
 
 def fix_row(row, table_name, table_fields):
@@ -190,8 +190,8 @@ def generate_temp_table(table_name, db):
                         table_fields.append(field_parts[0])
                         old_fields.append(field_parts[1])
                         if field_parts[2:]:	
-				joins.update(set(filter(lambda x: not x.find('=') > -1, field_parts[2:])))
-				wheres.update(set(filter(lambda x: x.find('=') > -1, field_parts[2:])))
+				joins.update(set([x for x in field_parts[2:] if not x.find('=') > -1]))
+				wheres.update(set([x for x in field_parts[2:] if x.find('=') > -1]))
 		
 		# get indices of fields that cannot be null
 		(type, body_list) = schema[table_name]
@@ -234,7 +234,7 @@ def generate_temp_table(table_name, db):
 			if row == None:
 				continue
 			# do not attempt to write rows with null primary keys
-			if filter(lambda x: row[x] == None, primary_key_indices):
+			if [x for x in primary_key_indices if row[x] == None]:
 				continue 
                         for i in range(len(row)):
 				# convert nulls into something pg can understand
@@ -261,14 +261,14 @@ def generate_temp_table(table_name, db):
                 #print "WARNING: cannot upgrade %s. upgrade def not found. skipping" % \
                 #       (table_name)
                 return False
-        except IndexError, fault:
-                print "Error: error found in upgrade config file. " \
+        except IndexError as fault:
+                print("Error: error found in upgrade config file. " \
                       "check %s configuration. Aborting " % \
-                      (table_name)
+                      (table_name))
                 sys.exit(1)
         except:
-                print "Error: configuration for %s doesnt match db schema. " \
-		      " Aborting" % (table_name)
+                print("Error: configuration for %s doesnt match db schema. " \
+		      " Aborting" % (table_name))
                 try:
                         db.rollback()
                 except:
@@ -285,22 +285,22 @@ try:
 	cursor.execute("SELECT relname from pg_class where relname = 'plc_db_version'")
 	rows = cursor.fetchall()
 	if not rows:
-		print "Warning: current db has no version. Unable to validate config file."
+		print("Warning: current db has no version. Unable to validate config file.")
 	else:
 		cursor.execute("SELECT version FROM plc_db_version")
 		rows = cursor.fetchall()
 		if not rows or not rows[0]:
-			print "Warning: current db has no version. Unable to validate config file."
+			print("Warning: current db has no version. Unable to validate config file.")
 		elif rows[0][0] == db_version_new:
-               		print "Status: Versions are the same. No upgrade necessary."
+               		print("Status: Versions are the same. No upgrade necessary.")
         		sys.exit()
 		elif not rows[0][0] == db_version_previous:
-			print "Stauts: DB_VERSION_PREVIOUS in config file (%s) does not" \
-			      " match current db version %d" % (upgrade_config_file, rows[0][0])
+			print("Stauts: DB_VERSION_PREVIOUS in config file (%s) does not" \
+			      " match current db version %d" % (upgrade_config_file, rows[0][0]))
 			sys.exit()
 		else:
-			print "STATUS: attempting upgrade from %d to %d" % \
-                                (db_version_previous, db_version_new)	
+			print("STATUS: attempting upgrade from %d to %d" % \
+                                (db_version_previous, db_version_new))	
 	
 	# check db encoding
 	sql = " SELECT pg_catalog.pg_encoding_to_char(d.encoding)" \
@@ -309,7 +309,7 @@ try:
 	cursor.execute(sql)
 	rows = cursor.fetchall()
 	if rows[0][0] not in ['UTF8', 'UNICODE']:
-		print "WARNING: db encoding is not utf8. Attempting to encode"
+		print("WARNING: db encoding is not utf8. Attempting to encode")
 		db.close()
 		# generate db dump
 		dump_file = '%s/dump.sql' % (temp_dir)
@@ -317,10 +317,10 @@ try:
 		dump_cmd = 'pg_dump -i %s -U postgres -f %s > /dev/null 2>&1' % \
 			   (config['PLC_DB_NAME'], dump_file)
 		if os.system(dump_cmd):
-			print "ERROR: during db dump. Exiting."
+			print("ERROR: during db dump. Exiting.")
 			sys.exit(1)
 		# encode dump to utf8
-		print "Status: encoding database dump"
+		print("Status: encoding database dump")
 		encode_utf8(dump_file, dump_file_encoded)
 		# archive original db
 		archive_db(config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_sqlascii_archived')
@@ -329,9 +329,9 @@ try:
 			       'psql -a -U  %s %s < %s > /dev/null 2>&1;'   % \
 			  (config['PLC_DB_NAME'], config['PLC_DB_USER'], \
 			   config['PLC_DB_NAME'], dump_file_encoded) 
-		print "Status: recreating database as utf8"
+		print("Status: recreating database as utf8")
 		if os.system(recreate_cmd):
-			print "Error: database encoding failed. Aborting"
+			print("Error: database encoding failed. Aborting")
 			sys.exit(1)
 		
 		os.remove(dump_file_encoded)
@@ -382,7 +382,7 @@ try:
 						break
 				schema[item_name] = (item_type, fields)
 			else:
-				print "Error: unknown type %s" % item_type
+				print("Error: unknown type %s" % item_type)
 		elif line.startswith("INSERT"):
 			inserts.append(line)
 		index = index + 1
@@ -390,7 +390,7 @@ try:
 except:
 	raise
 
-print "Status: generating temp tables"
+print("Status: generating temp tables")
 # generate all temp tables
 for key in schema_items_ordered:
 	(type, body_list) = schema[key]
@@ -401,18 +401,18 @@ for key in schema_items_ordered:
 cursor.close()
 db.close()
 
-print "Status: archiving database"
+print("Status: archiving database")
 archive_db(config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived')
 os.system('createdb -U postgres -E UTF8 %s > /dev/null; ' % config['PLC_DB_NAME'])
 
-print "Status: upgrading database"
+print("Status: upgrading database")
 # attempt to create and load all items from schema into temp db
 try:
 	for key in schema_items_ordered:
 		(type, body_list) = schema[key]
 		create_item_from_schema(key)
 		if type == 'TABLE':
-			if upgrade_config.has_key(key):				
+			if key in upgrade_config:				
 				# attempt to populate with temp table data
 				table_def = upgrade_config[key].replace('(', '').replace(')', '').split(',')
 				table_fields = [field.strip().split(':')[0] for field in table_def]
@@ -422,10 +422,10 @@ try:
 					      ", ".join(table_fields), temp_tables[key] )
 				exit_status = os.system(insert_cmd)
 				if exit_status:
-					print "Error: upgrade %s failed" % key
+					print("Error: upgrade %s failed" % key)
 					sys.exit(1)
 				# update the primary key sequence
-				if sequences.has_key(key):
+				if key in sequences:
 					sequence = key +"_"+ sequences[key] +"_seq"
 					update_seq = "psql %s %s -c " \
 					     " \"select setval('%s', max(%s)) FROM %s;\" > /dev/null" % \
@@ -433,18 +433,18 @@ try:
 					      sequences[key], key)
 					exit_status = os.system(update_seq)
 					if exit_status:
-						print "Error: sequence %s update failed" % sequence
+						print("Error: sequence %s update failed" % sequence)
 						sys.exit(1)
 			else:
 				# check if there are any insert stmts in schema for this table
-				print "Warning: %s has no temp data file. Unable to populate with old data" % key
+				print("Warning: %s has no temp data file. Unable to populate with old data" % key)
 				for insert_stmt in inserts:
 					if insert_stmt.find(key) > -1:
                 				insert_cmd = 'psql %s postgres -qc "%s;" > /dev/null 2>&1' % \
                              			(config['PLC_DB_NAME'], insert_stmt)
                 				os.system(insert_cmd) 
 except:
-	print "Error: failed to populate db. Unarchiving original database and aborting"
+	print("Error: failed to populate db. Unarchiving original database and aborting")
 	undo_command = "dropdb -U postgres %s > /dev/null; psql template1 postgres -qc" \
                        " 'ALTER DATABASE %s RENAME TO %s;';  > /dev/null" % \
                        (config['PLC_DB_NAME'], config['PLC_DB_NAME']+'_archived', config['PLC_DB_NAME'])
@@ -454,4 +454,4 @@ except:
 	
 #remove_temp_tables()
 
-print "upgrade complete"
+print("upgrade complete")

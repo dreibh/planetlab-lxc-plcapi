@@ -25,12 +25,12 @@ class SliceInstantiation(Row):
     def validate_instantiation(self, instantiation):
         # Make sure name is not blank
         if not len(instantiation):
-            raise PLCInvalidArgument, "Slice instantiation state name must be specified"
+            raise PLCInvalidArgument("Slice instantiation state name must be specified")
 
         # Make sure slice instantiation does not alredy exist
         conflicts = SliceInstantiations(self.api, [instantiation])
         if conflicts:
-            raise PLCInvalidArgument, "Slice instantiation state name already in use"
+            raise PLCInvalidArgument("Slice instantiation state name already in use")
 
         return instantiation
 

@@ -145,5 +145,5 @@ add_wsdl_ports_and_bindings(wsdl)
 add_wsdl_service(wsdl)
 
 
-print wsdl.toprettyxml()
+print(wsdl.toprettyxml())
 

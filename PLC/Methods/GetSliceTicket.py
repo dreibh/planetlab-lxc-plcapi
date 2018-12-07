@@ -42,15 +42,15 @@ class GetSliceTicket(Method):
     def call(self, auth, slice_id_or_name):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument("No such slice")
         slice = slices[0]
 
         # Allow peers to obtain tickets for their own slices
         if slice['peer_id'] is not None:
             if not isinstance(self.caller, Peer):
-                raise PLCInvalidArgument, "Not a local slice"
+                raise PLCInvalidArgument("Not a local slice")
             elif slice['peer_id'] != self.caller['peer_id']:
-                raise PLCInvalidArgument, "Only the authoritative peer may obtain tickets for that slice"
+                raise PLCInvalidArgument("Only the authoritative peer may obtain tickets for that slice")
 
         # Tickets are the canonicalized XML-RPC methodResponse
         # representation of a partial GetSlivers() response, i.e.,

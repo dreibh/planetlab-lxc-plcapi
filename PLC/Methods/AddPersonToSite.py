@@ -35,20 +35,20 @@ class AddPersonToSite(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
         site = sites[0]
 
         if site['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local site"
+            raise PLCInvalidArgument("Not a local site")
 
         if site['site_id'] not in person['site_ids']:
             site.add_person(person)

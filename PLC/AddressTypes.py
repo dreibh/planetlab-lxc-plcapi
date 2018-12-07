@@ -29,13 +29,13 @@ class AddressType(Row):
     def validate_name(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Address type must be specified"
+            raise PLCInvalidArgument("Address type must be specified")
 
         # Make sure address type does not already exist
         conflicts = AddressTypes(self.api, [name])
         for address_type_id in conflicts:
             if 'address_type_id' not in self or self['address_type_id'] != address_type_id:
-                raise PLCInvalidArgument, "Address type name already in use"
+                raise PLCInvalidArgument("Address type name already in use")
 
         return name
 
@@ -53,20 +53,20 @@ class AddressTypes(Table):
         if address_type_filter is not None:
             if isinstance(address_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), address_type_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), address_type_filter)
+                ints = [x for x in address_type_filter if isinstance(x, int)]
+                strs = [x for x in address_type_filter if isinstance(x, StringTypes)]
                 address_type_filter = Filter(AddressType.fields, {'address_type_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "OR")
             elif isinstance(address_type_filter, dict):
                 address_type_filter = Filter(AddressType.fields, address_type_filter)
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
-            elif isinstance(address_type_filter, (int, long)):
+            elif isinstance(address_type_filter, int):
                 address_type_filter = Filter(AddressType.fields, {'address_type_id': address_type_filter})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
             elif isinstance(address_type_filter, StringTypes):
                 address_type_filter = Filter(AddressType.fields, {'name': address_type_filter})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong address type filter %r"%address_type_filter
+                raise PLCInvalidArgument("Wrong address type filter %r"%address_type_filter)
 
         self.selectall(sql)

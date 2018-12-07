@@ -135,7 +135,7 @@ class LeaseFilter (Filter):
         # self.negation is a dict  local_key : string
         self.local = {}
         self.negation = {}
-        for (k, v) in LeaseFilter.local_fields.items():
+        for (k, v) in list(LeaseFilter.local_fields.items()):
             if k in self:
                 self.local[k] = self[k]
                 del self[k]
@@ -146,7 +146,7 @@ class LeaseFilter (Filter):
                 self.negation[k] = "NOT "
         # run the generic filtering code
         (where_part, clip_part) = Filter.sql(self, api, join_with)
-        for (k, v) in self.local.items():
+        for (k, v) in list(self.local.items()):
             try:
                 # locate hook function associated with key
                 method = LeaseFilter.__dict__['sql_' + k]
@@ -154,7 +154,7 @@ class LeaseFilter (Filter):
                               .format(self.join_with,
                                       self.negation[k],
                                       method(self, self.local[k]))
-            except Exception, e:
+            except Exception as e:
                 raise PLCInvalidArgument(
                     "LeaseFilter: something wrong with filter"
                     "key {}, val was {} -- {}".format(k, v, e))

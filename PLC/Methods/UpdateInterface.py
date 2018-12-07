@@ -48,12 +48,12 @@ class UpdateInterface(Method):
         # type checking
         native= Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot update Interface column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot update Interface column(s) %r"%rejected)
 
         # Get interface information
         interfaces = Interfaces(self.api, [interface_id])
         if not interfaces:
-            raise PLCInvalidArgument, "No such interface"
+            raise PLCInvalidArgument("No such interface")
 
         interface = interfaces[0]
 
@@ -65,19 +65,19 @@ class UpdateInterface(Method):
         if 'admin' not in self.caller['roles']:
             nodes = Nodes(self.api, [interface['node_id']])
             if not nodes:
-                raise PLCPermissionDenied, "Interface is not associated with a node"
+                raise PLCPermissionDenied("Interface is not associated with a node")
             node = nodes[0]
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to update interface"
+                raise PLCPermissionDenied("Not allowed to update interface")
 
         interface.update(native)
         interface.update_last_updated(commit=False)
         interface.sync()
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             interface_tags=InterfaceTags(self.api,{'tagname':tagname,'interface_id':interface['interface_id']})
             if not interface_tags:
                 AddInterfaceTag(self.api).__call__(auth,interface['interface_id'],tagname,value)
@@ -89,6 +89,6 @@ class UpdateInterface(Method):
             self.message = "Interface %s updated"%interface['ip']
         else:
             self.message = "Interface %d updated"%interface['interface_id']
-        self.message += "[%s]." % ", ".join(interface_fields.keys())
+        self.message += "[%s]." % ", ".join(list(interface_fields.keys()))
 
         return 1

@@ -67,11 +67,11 @@ class Events(Table):
               ", ".join(self.columns)
 
         if event_filter is not None:
-            if isinstance(event_filter, (list, tuple, set, int, long)):
+            if isinstance(event_filter, (list, tuple, set, int)):
                 event_filter = Filter(Event.fields, {'event_id': event_filter})
             elif isinstance(event_filter, dict):
                 event_filter = Filter(Event.fields, event_filter)
             else:
-                raise PLCInvalidArgument, "Wrong event object filter %r"%event_filter
+                raise PLCInvalidArgument("Wrong event object filter %r"%event_filter)
             sql += " AND (%s) %s" % event_filter.sql(api)
         self.selectall(sql)

@@ -24,7 +24,7 @@ class DeletePCUType(Method):
     def call(self, auth, pcu_type_id):
         pcu_types = PCUTypes(self.api, [pcu_type_id])
         if not pcu_types:
-            raise PLCInvalidArgument, "No such pcu type"
+            raise PLCInvalidArgument("No such pcu type")
 
         pcu_type = pcu_types[0]
         pcu_type.delete()

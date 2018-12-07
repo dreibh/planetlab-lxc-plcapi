@@ -31,14 +31,14 @@ class PCUProtocolType(Row):
         # make sure port is not blank
 
         if not port:
-            raise PLCInvalidArgument, "Port must be specified"
+            raise PLCInvalidArgument("Port must be specified")
 
         return port
 
     def validate_protocol(self, protocol):
         # make sure port is not blank
         if not len(protocol):
-            raise PLCInvalidArgument, "protocol must be specified"
+            raise PLCInvalidArgument("protocol must be specified")
 
         return protocol
 
@@ -54,14 +54,14 @@ class PCUProtocolTypes(Table):
               ", ".join(self.columns)
 
         if protocol_type_filter is not None:
-            if isinstance(protocol_type_filter, (list, tuple, set, int, long)):
+            if isinstance(protocol_type_filter, (list, tuple, set, int)):
                 protocol_type_filter = Filter(PCUProtocolType.fields, {'pcu_protocol_type_id': protocol_type_filter})
                 sql += " AND (%s) %s" % protocol_type_filter.sql(api, "OR")
             elif isinstance(protocol_type_filter, dict):
                 protocol_type_filter = Filter(PCUProtocolType.fields, protocol_type_filter)
                 sql += " AND (%s) %s" % protocol_type_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong pcu_protocol_type filter %r"%protocol_type_filter
+                raise PLCInvalidArgument("Wrong pcu_protocol_type filter %r"%protocol_type_filter)
 
 
         self.selectall(sql)

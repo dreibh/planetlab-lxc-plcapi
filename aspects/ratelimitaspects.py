@@ -145,13 +145,12 @@ Subject: %(subject)s
                 if (api_method == "session" and api_method_caller.__contains__("@")) or (api_method == "password" or api_method == "capability"):
                     self.mail(api_method_caller)
 
-            raise PLCPermissionDenied, "Maximum allowed number of API calls exceeded"
+            raise PLCPermissionDenied("Maximum allowed number of API calls exceeded")
 
     def after(self, wobj, data, *args, **kwargs):
         return
 
-class RateLimitAspect_class(BaseRateLimit):
-    __metaclass__ = MetaAspect
+class RateLimitAspect_class(BaseRateLimit, metaclass=MetaAspect):
     name = "ratelimitaspect_class"
 
     def __init__(self):

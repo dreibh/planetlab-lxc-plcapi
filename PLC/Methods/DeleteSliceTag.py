@@ -39,7 +39,7 @@ class DeleteSliceTag(Method):
     def call(self, auth, slice_tag_id):
         slice_tags = SliceTags(self.api, [slice_tag_id])
         if not slice_tags:
-            raise PLCInvalidArgument, "No such slice attribute"
+            raise PLCInvalidArgument("No such slice attribute")
         slice_tag = slice_tags[0]
 
         tag_type_id = slice_tag['tag_type_id']
@@ -47,7 +47,7 @@ class DeleteSliceTag(Method):
 
         slices = Slices(self.api, [slice_tag['slice_id']])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %d"%slice_tag['slice_id']
+            raise PLCInvalidArgument("No such slice %d"%slice_tag['slice_id'])
         slice = slices[0]
 
         assert slice_tag['slice_tag_id'] in slice['slice_tag_ids']

@@ -8,7 +8,7 @@
 
 import os
 import pydoc
-import xmlrpclib
+import xmlrpc.client
 
 from PLC.API import PLCAPI
 from PLC.Parameter import Mixed
@@ -38,8 +38,8 @@ class Callable:
 
         if self.auth and \
            (not args or not isinstance(args[0], dict) or \
-            (not args[0].has_key('AuthMethod') and \
-             not args[0].has_key('session'))):
+            ('AuthMethod' not in args[0] and \
+             'session' not in args[0])):
             args = (self.auth,) + args
 
         if self.shell.multi:
@@ -85,7 +85,7 @@ class Shell:
             self.config = self.api.config
             self.url = None
             self.server = None
-        except Exception, err:
+        except Exception as err:
             # Try connecting to the API server via XML-RPC
             self.api = PLCAPI(None)
 
@@ -94,13 +94,13 @@ class Shell:
                     self.config = Config()
                 else:
                     self.config = Config(config)
-            except Exception, err:
+            except Exception as err:
                 # Try to continue if no configuration file is available
                 self.config = None
 
             if url is None:
                 if self.config is None:
-                    raise Exception, "Must specify API URL"
+                    raise Exception("Must specify API URL")
 
                 url = "https://" + self.config.PLC_API_HOST + \
                       ":" + str(self.config.PLC_API_PORT) + \
@@ -111,9 +111,9 @@ class Shell:
 
             self.url = url
             if cacert is not None:
-                self.server = xmlrpclib.ServerProxy(url, PyCurlTransport(url, cacert), allow_none = 1)
+                self.server = xmlrpc.client.ServerProxy(url, PyCurlTransport(url, cacert), allow_none = 1)
             else:
-                self.server = xmlrpclib.ServerProxy(url, allow_none = 1)
+                self.server = xmlrpc.client.ServerProxy(url, allow_none = 1)
 
         # Set up authentication structure
 
@@ -143,7 +143,7 @@ class Shell:
             self.auth = {'AuthMethod': "anonymous"}
         elif method == "session":
             if session is None:
-                raise Exception, "Must specify session"
+                raise Exception("Must specify session")
 
             if os.path.exists(session):
                 session = file(session).read()
@@ -151,10 +151,10 @@ class Shell:
             self.auth = {'AuthMethod': "session", 'session': session}
         else:
             if user is None:
-                raise Exception, "Must specify username"
+                raise Exception("Must specify username")
 
             if password is None:
-                raise Exception, "Must specify password"
+                raise Exception("Must specify password")
 
             self.auth = {'AuthMethod': method,
                          'Username': user,
@@ -178,7 +178,7 @@ class Shell:
             if api_function.accepts and \
                (isinstance(api_function.accepts[0], Auth) or \
                 (isinstance(api_function.accepts[0], Mixed) and \
-                 filter(lambda param: isinstance(param, Auth), api_function.accepts[0]))):
+                 [param for param in api_function.accepts[0] if isinstance(param, Auth)])):
                 auth = self.auth
             else:
                 auth = None
@@ -233,7 +233,7 @@ class Shell:
 
     def begin(self):
         if self.calls:
-            raise Exception, "multicall already in progress"
+            raise Exception("multicall already in progress")
 
         self.multi = True
 
@@ -244,11 +244,11 @@ class Shell:
             results = self.system.multicall(self.calls)
             for result in results:
                 if type(result) == type({}):
-                    raise xmlrpclib.Fault(result['faultCode'], result['faultString'])
+                    raise xmlrpc.client.Fault(result['faultCode'], result['faultString'])
                 elif type(result) == type([]):
                     ret.append(result[0])
                 else:
-                    raise ValueError, "unexpected type in multicall result"
+                    raise ValueError("unexpected type in multicall result")
         else:
             ret = None
 

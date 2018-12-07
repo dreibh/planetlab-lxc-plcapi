@@ -43,12 +43,12 @@ class AddSiteTag(Method):
     def call(self, auth, site_id, tag_type_id_or_name, value):
         sites = Sites(self.api, [site_id])
         if not sites:
-            raise PLCInvalidArgument, "No such site %r"%site_id
+            raise PLCInvalidArgument("No such site %r"%site_id)
         site = sites[0]
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("No such tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # checks for existence - does not allow several different settings
@@ -57,8 +57,8 @@ class AddSiteTag(Method):
                               'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
-            raise PLCInvalidArgument, "Site %d already has setting %d"%(site['site_id'],
-                                                                        tag_type['tag_type_id'])
+            raise PLCInvalidArgument("Site %d already has setting %d"%(site['site_id'],
+                                                                        tag_type['tag_type_id']))
 
         # check authorizations
         site.caller_may_write_tag(self.api,self.caller,tag_type)

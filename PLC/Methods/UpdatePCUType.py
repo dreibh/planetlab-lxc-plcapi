@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.PCUTypes import PCUType, PCUTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['model', 'name']
 
 class UpdatePCUType(Method):
@@ -17,7 +17,7 @@ class UpdatePCUType(Method):
 
     roles = ['admin']
 
-    pcu_type_fields = dict(filter(can_update, PCUType.fields.items()))
+    pcu_type_fields = dict(list(filter(can_update, list(PCUType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -28,11 +28,11 @@ class UpdatePCUType(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, pcu_type_id, pcu_type_fields):
-        pcu_type_fields = dict(filter(can_update, pcu_type_fields.items()))
+        pcu_type_fields = dict(list(filter(can_update, list(pcu_type_fields.items()))))
 
         pcu_types = PCUTypes(self.api, [pcu_type_id])
         if not pcu_types:
-            raise PLCInvalidArgument, "No such pcu type"
+            raise PLCInvalidArgument("No such pcu type")
 
         pcu_type = pcu_types[0]
         pcu_type.update(pcu_type_fields)

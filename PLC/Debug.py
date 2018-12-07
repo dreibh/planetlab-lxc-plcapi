@@ -28,8 +28,8 @@ def profile(callable):
         start = time.time()
         result = callable(*args, **kwds)
         end = time.time()
-        args = map(str, args)
-        args += ["%s = %s" % (name, str(value)) for (name, value) in kwds.items()]
+        args = list(map(str, args))
+        args += ["%s = %s" % (name, str(value)) for (name, value) in list(kwds.items())]
         logger.info("%s (%s): %f s" % (callable.__name__, ", ".join(args), end - start))
         return result
 

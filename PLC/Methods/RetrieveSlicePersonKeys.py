@@ -7,6 +7,7 @@ from PLC.Auth import Auth
 from PLC.Slices import Slice, Slices 
 from PLC.Persons import Person, Persons
 from PLC.Keys import Key, Keys
+from functools import reduce
 
 class RetrieveSlicePersonKeys(Method):
     """

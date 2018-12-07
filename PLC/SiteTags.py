@@ -42,12 +42,12 @@ class SiteTags(Table):
               ", ".join(self.columns)
 
         if site_tag_filter is not None:
-            if isinstance(site_tag_filter, (list, tuple, set, int, long)):
+            if isinstance(site_tag_filter, (list, tuple, set, int)):
                 site_tag_filter = Filter(SiteTag.fields, {'site_tag_id': site_tag_filter})
             elif isinstance(site_tag_filter, dict):
                 site_tag_filter = Filter(SiteTag.fields, site_tag_filter)
             else:
-                raise PLCInvalidArgument, "Wrong site setting filter %r"%site_tag_filter
+                raise PLCInvalidArgument("Wrong site setting filter %r"%site_tag_filter)
             sql += " AND (%s) %s" % site_tag_filter.sql(api)
 
 

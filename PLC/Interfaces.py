@@ -97,18 +97,18 @@ class Interface(Row):
     def validate_method(self, method):
         network_methods = [row['method'] for row in NetworkMethods(self.api)]
         if method not in network_methods:
-            raise PLCInvalidArgument, "Invalid addressing method %s"%method
+            raise PLCInvalidArgument("Invalid addressing method %s"%method)
         return method
 
     def validate_type(self, type):
         network_types = [row['type'] for row in NetworkTypes(self.api)]
         if type not in network_types:
-            raise PLCInvalidArgument, "Invalid address type %s"%type
+            raise PLCInvalidArgument("Invalid address type %s"%type)
         return type
 
     def validate_ip(self, ip):
         if ip and not valid_ip(ip):
-            raise PLCInvalidArgument, "Invalid IP address %s"%ip
+            raise PLCInvalidArgument("Invalid IP address %s"%ip)
         return ip
 
     def validate_mac(self, mac):
@@ -126,7 +126,7 @@ class Interface(Row):
                 bytes[i] = "%02x" % byte
             mac = ":".join(bytes)
         except:
-            raise PLCInvalidArgument, "Invalid MAC address %s"%mac
+            raise PLCInvalidArgument("Invalid MAC address %s"%mac)
 
         return mac
 
@@ -142,7 +142,7 @@ class Interface(Row):
             return bwlimit
 
         if bwlimit < 500000:
-            raise PLCInvalidArgument, 'Minimum bw is 500 kbs'
+            raise PLCInvalidArgument('Minimum bw is 500 kbs')
 
         return bwlimit
 
@@ -152,14 +152,14 @@ class Interface(Row):
             return hostname
 
         if not PLC.Nodes.valid_hostname(hostname):
-            raise PLCInvalidArgument, "Invalid hostname %s"%hostname
+            raise PLCInvalidArgument("Invalid hostname %s"%hostname)
 
         return hostname
 
     def validate_node_id(self, node_id):
         nodes = PLC.Nodes.Nodes(self.api, [node_id])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %d"%node_id
+            raise PLCInvalidArgument("No such node %d"%node_id)
 
         return node_id
 
@@ -171,7 +171,7 @@ class Interface(Row):
         if is_primary:
             nodes = PLC.Nodes.Nodes(self.api, [self['node_id']])
             if not nodes:
-                raise PLCInvalidArgument, "No such node %d"%node_id
+                raise PLCInvalidArgument("No such node %d"%node_id)
             node = nodes[0]
 
             if node['interface_ids']:
@@ -180,7 +180,7 @@ class Interface(Row):
                     if ('interface_id' not in self or \
                         self['interface_id'] != interface['interface_id']) and \
                        interface['is_primary']:
-                        raise PLCInvalidArgument, "Can only set one primary interface per node"
+                        raise PLCInvalidArgument("Can only set one primary interface per node")
 
         return is_primary
 
@@ -197,12 +197,12 @@ class Interface(Row):
 
         if method == "proxy" or method == "tap":
             if 'mac' in self and self['mac']:
-                raise PLCInvalidArgument, "For %s method, mac should not be specified" % method
+                raise PLCInvalidArgument("For %s method, mac should not be specified" % method)
             if 'ip' not in self or not self['ip']:
-                raise PLCInvalidArgument, "For %s method, ip is required" % method
+                raise PLCInvalidArgument("For %s method, ip is required" % method)
             if method == "tap" and ('gateway' not in self or not self['gateway']):
-                raise PLCInvalidArgument, "For tap method, gateway is required and should be " \
-                      "the IP address of the node that proxies for this address"
+                raise PLCInvalidArgument("For tap method, gateway is required and should be " \
+                      "the IP address of the node that proxies for this address")
             # Should check that the proxy address is reachable, but
             # there's no way to tell if the only primary interface is
             # DHCP!
@@ -212,30 +212,30 @@ class Interface(Row):
                 for key in ['gateway', 'dns1']:
                     if key not in self or not self[key]:
                         if 'is_primary' in self and self['is_primary'] is True:
-                            raise PLCInvalidArgument, "For static method primary network, %s is required" % key
+                            raise PLCInvalidArgument("For static method primary network, %s is required" % key)
                     else:
                         globals()[key] = self[key]
                 for key in ['ip', 'network', 'broadcast', 'netmask']:
                     if key not in self or not self[key]:
-                        raise PLCInvalidArgument, "For static method, %s is required" % key
+                        raise PLCInvalidArgument("For static method, %s is required" % key)
                     globals()[key] = self[key]
                 if not in_same_network(ip, network, netmask):
-                    raise PLCInvalidArgument, "IP address %s is inconsistent with network %s/%s" % \
-                          (ip, network, netmask)
+                    raise PLCInvalidArgument("IP address %s is inconsistent with network %s/%s" % \
+                          (ip, network, netmask))
                 if not in_same_network(broadcast, network, netmask):
-                    raise PLCInvalidArgument, "Broadcast address %s is inconsistent with network %s/%s" % \
-                          (broadcast, network, netmask)
+                    raise PLCInvalidArgument("Broadcast address %s is inconsistent with network %s/%s" % \
+                          (broadcast, network, netmask))
                 if 'gateway' in globals() and not in_same_network(ip, gateway, netmask):
-                    raise PLCInvalidArgument, "Gateway %s is not reachable from %s/%s" % \
-                          (gateway, ip, netmask)
+                    raise PLCInvalidArgument("Gateway %s is not reachable from %s/%s" % \
+                          (gateway, ip, netmask))
             elif self['type'] == 'ipv6':
                 for key in ['ip', 'gateway']:
                     if key not in self or not self[key]:
-                        raise PLCInvalidArgument, "For static ipv6 method, %s is required" % key
+                        raise PLCInvalidArgument("For static ipv6 method, %s is required" % key)
                     globals()[key] = self[key]
         elif method == "ipmi":
             if 'ip' not in self or not self['ip']:
-                raise PLCInvalidArgument, "For ipmi method, ip is required"
+                raise PLCInvalidArgument("For ipmi method, ip is required")
 
     validate_last_updated = Row.validate_timestamp
 
@@ -278,17 +278,17 @@ class Interfaces(Table):
                                                 Interface.primary_key)
 
         sql = "SELECT %s FROM %s WHERE True" % \
-            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+            (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
 
         if interface_filter is not None:
             if isinstance(interface_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), interface_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), interface_filter)
+                ints = [x for x in interface_filter if isinstance(x, int)]
+                strs = [x for x in interface_filter if isinstance(x, StringTypes)]
                 interface_filter = Filter(Interface.fields, {'interface_id': ints, 'ip': strs})
                 sql += " AND (%s) %s" % interface_filter.sql(api, "OR")
             elif isinstance(interface_filter, dict):
-                allowed_fields=dict(Interface.fields.items()+Interface.tags.items())
+                allowed_fields=dict(list(Interface.fields.items())+list(Interface.tags.items()))
                 interface_filter = Filter(allowed_fields, interface_filter)
                 sql += " AND (%s) %s" % interface_filter.sql(api)
             elif isinstance(interface_filter, int):
@@ -298,6 +298,6 @@ class Interfaces(Table):
                 interface_filter = Filter(Interface.fields, {'ip':[interface_filter]})
                 sql += " AND (%s) %s" % interface_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong interface filter %r"%interface_filter
+                raise PLCInvalidArgument("Wrong interface filter %r"%interface_filter)
 
         self.selectall(sql)

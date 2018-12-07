@@ -8,7 +8,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.TagTypes import TagType, TagTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['tagname', 'description', 'category']
 
 class AddTagType(Method):
@@ -22,7 +22,7 @@ class AddTagType(Method):
 
     roles = ['admin']
 
-    tag_type_fields = dict(filter(can_update, TagType.fields.items()))
+    tag_type_fields = dict(list(filter(can_update, list(TagType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -33,7 +33,7 @@ class AddTagType(Method):
 
 
     def call(self, auth, tag_type_fields):
-        tag_type_fields = dict(filter(can_update, tag_type_fields.items()))
+        tag_type_fields = dict(list(filter(can_update, list(tag_type_fields.items()))))
         tag_type = TagType(self.api, tag_type_fields)
         tag_type.sync()
 

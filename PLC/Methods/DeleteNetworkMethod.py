@@ -27,7 +27,7 @@ class DeleteNetworkMethod(Method):
     def call(self, auth, name):
         network_methods = NetworkMethods(self.api, [name])
         if not network_methods:
-            raise PLCInvalidArgument, "No such network method"
+            raise PLCInvalidArgument("No such network method")
         network_method = network_methods[0]
 
         network_method.delete()

@@ -9,7 +9,7 @@ from PLC.TagTypes import TagTypes
 from PLC.PersonTags import PersonTags, PersonTag
 from PLC.Namespace import email_to_hrn
 
-related_fields = Person.related_fields.keys()
+related_fields = list(Person.related_fields.keys())
 can_update = ['first_name', 'last_name', 'title', 'email',
               'password', 'phone', 'url', 'bio', 'accepted_aup',
               'enabled'] + related_fields
@@ -48,7 +48,7 @@ class UpdatePerson(Method):
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot update Person column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot update Person column(s) %r"%rejected)
 
         # Authenticated function
         assert self.caller is not None
@@ -56,18 +56,18 @@ class UpdatePerson(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account %s"%person_id_or_email
+            raise PLCInvalidArgument("No such account %s"%person_id_or_email)
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account %s"%person_id_or_email
+            raise PLCInvalidArgument("Not a local account %s"%person_id_or_email)
 
         # Check if we can update this account
         if not self.caller.can_update(person):
-            raise PLCPermissionDenied, "Not allowed to update specified account"
+            raise PLCPermissionDenied("Not allowed to update specified account")
 
         # Make requested associations
-        for k,v in related.iteritems():
+        for k,v in related.items():
             person.associate (auth, k, v)
 
         person.update(native)
@@ -96,11 +96,11 @@ class UpdatePerson(Method):
                 hrn=email_to_hrn("%s.%s"%(root_auth,login_base),person['email'])
                 tags['hrn'] = hrn
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             tag_types = TagTypes(self.api,{'tagname':tagname})
             if not tag_types:
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             tag_type = tag_types[0]
             person_tags=PersonTags(self.api,{'tagname':tagname,'person_id':person['person_id']})
             if not person_tags:
@@ -122,7 +122,7 @@ class UpdatePerson(Method):
         if 'password' in person_fields:
             person_fields['password'] = "Removed by API"
         self.message = 'Person %d updated: %s.' % \
-                       (person['person_id'], person_fields.keys())
+                       (person['person_id'], list(person_fields.keys()))
         if 'enabled' in person_fields:
             self.message += ' Person enabled'
 

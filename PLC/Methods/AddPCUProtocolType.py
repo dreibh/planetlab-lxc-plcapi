@@ -5,7 +5,7 @@ from PLC.PCUProtocolTypes import PCUProtocolType, PCUProtocolTypes
 from PLC.PCUTypes import PCUType, PCUTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['pcu_type_id', 'port', 'protocol', 'supported']
 
 class AddPCUProtocolType(Method):
@@ -17,7 +17,7 @@ class AddPCUProtocolType(Method):
 
     roles = ['admin']
 
-    protocol_type_fields = dict(filter(can_update, PCUProtocolType.fields.items()))
+    protocol_type_fields = dict(list(filter(can_update, list(PCUProtocolType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -33,20 +33,20 @@ class AddPCUProtocolType(Method):
         # Check if pcu type exists
         pcu_types = PCUTypes(self.api, [pcu_type_id_or_model])
         if not pcu_types:
-            raise PLCInvalidArgument, "No such pcu type"
+            raise PLCInvalidArgument("No such pcu type")
         pcu_type = pcu_types[0]
 
 
         # Check if this port is already used
         if 'port' not in protocol_type_fields:
-            raise PLCInvalidArgument, "Must specify a port"
+            raise PLCInvalidArgument("Must specify a port")
         else:
             protocol_types = PCUProtocolTypes(self.api, {'pcu_type_id': pcu_type['pcu_type_id']})
             for protocol_type in protocol_types:
                 if protocol_type['port'] == protocol_type_fields['port']:
-                    raise PLCInvalidArgument, "Port alreay in use"
+                    raise PLCInvalidArgument("Port alreay in use")
 
-        protocol_type_fields = dict(filter(can_update, protocol_type_fields.items()))
+        protocol_type_fields = dict(list(filter(can_update, list(protocol_type_fields.items()))))
         protocol_type = PCUProtocolType(self.api, protocol_type_fields)
         protocol_type['pcu_type_id'] = pcu_type['pcu_type_id']
         protocol_type.sync()

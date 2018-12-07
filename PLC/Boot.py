@@ -33,7 +33,7 @@ def notify_owners(method, node, message_id,
     if include_pis or include_techs:
         sites = Sites(method.api, [node['site_id']])
         if not sites:
-            raise PLCAPIError, "No site associated with node"
+            raise PLCAPIError("No site associated with node")
         site = sites[0]
 
         persons = Persons(method.api, site['person_ids'])

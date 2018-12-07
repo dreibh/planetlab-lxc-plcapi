@@ -24,7 +24,7 @@ class DeletePCUProtocolType(Method):
     def call(self, auth, protocol_type_id):
         protocol_types = PCUProtocolTypes(self.api, [protocol_type_id])
         if not protocol_types:
-            raise PLCInvalidArgument, "No such pcu protocol type"
+            raise PLCInvalidArgument("No such pcu protocol type")
 
         protocol_type = protocol_types[0]
         protocol_type.delete()

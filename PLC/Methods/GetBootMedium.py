@@ -40,7 +40,7 @@ allowed_actions = {
 # compute a new key
 def compute_key():
     # Generate 32 random bytes
-    bytes = random.sample(xrange(0, 256), 32)
+    bytes = random.sample(range(0, 256), 32)
     # Base64 encode their string representation
     key = base64.b64encode("".join(map(chr, bytes)))
     # Boot Manager cannot handle = in the key
@@ -344,7 +344,7 @@ class GetBootMedium(Method):
             if filedir:
                 if not os.path.exists(filedir):
                     try:
-                        os.makedirs (filedir,0777)
+                        os.makedirs (filedir,0o777)
                     except:
                         raise PLCPermissionDenied("Could not create dir {}".format(filedir))
 
@@ -481,7 +481,7 @@ class GetBootMedium(Method):
         else:
             node = None
             # compute a 8 bytes random number
-            tempbytes = random.sample (xrange(0,256), 8);
+            tempbytes = random.sample (range(0,256), 8);
             def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
             nodename = "".join(map(hexa2,tempbytes))
 
@@ -553,8 +553,8 @@ class GetBootMedium(Method):
             # create the workdir if needed
             if not os.path.isdir(self.WORKDIR):
                 try:
-                    os.makedirs(self.WORKDIR,0777)
-                    os.chmod(self.WORKDIR,0777)
+                    os.makedirs(self.WORKDIR,0o777)
+                    os.chmod(self.WORKDIR,0o777)
                 except:
                     raise PLCPermissionDenied("Could not create dir {}".format(self.WORKDIR))
 

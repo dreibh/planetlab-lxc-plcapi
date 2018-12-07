@@ -9,10 +9,10 @@
 #
 
 import os
-import xmlrpclib
+import xmlrpc.client
 import shutil
 from types import StringTypes
-from StringIO import StringIO
+from io import StringIO
 from subprocess import Popen, PIPE, call
 from tempfile import NamedTemporaryFile, mkdtemp
 from lxml import etree
@@ -26,7 +26,7 @@ def canonicalize(args, methodname = None, methodresponse = False):
     True).
     """
 
-    xml = xmlrpclib.dumps(args, methodname, methodresponse, encoding = 'utf-8', allow_none = 1)
+    xml = xmlrpc.client.dumps(args, methodname, methodresponse, encoding = 'utf-8', allow_none = 1)
     dom = etree.fromstring(xml)
     canonical=etree.tostring(dom)
     # pre-f20 version was using Canonicalize from PyXML 
@@ -59,7 +59,7 @@ def gpg_export(keyring, armor = True):
     shutil.rmtree(homedir)
 
     if rc:
-        raise PLCAuthenticationFailure, "GPG export failed with return code %d: %s" % (rc, err)
+        raise PLCAuthenticationFailure("GPG export failed with return code %d: %s" % (rc, err))
 
     return export
 
@@ -107,7 +107,7 @@ def gpg_sign(args, secret_keyring, keyring, methodname = None, methodresponse = 
     shutil.rmtree(homedir)
 
     if rc:
-        raise PLCAuthenticationFailure, "GPG signing failed with return code %d: %s" % (rc, err)
+        raise PLCAuthenticationFailure("GPG signing failed with return code %d: %s" % (rc, err))
 
     return signature
 
@@ -173,6 +173,6 @@ def gpg_verify(args, key, signature = None, methodname = None, methodresponse = 
         keyfile.close()
 
     if rc:
-        raise PLCAuthenticationFailure, "GPG verification failed with return code %d: %s" % (rc, err)
+        raise PLCAuthenticationFailure("GPG verification failed with return code %d: %s" % (rc, err))
 
     return message

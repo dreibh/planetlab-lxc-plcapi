@@ -21,7 +21,7 @@ class AuthorizeHelpers:
         elif isinstance(caller,Node):
             return 'node' in tag_type['roles']
         else:
-            raise PLCInvalidArgument, "caller_may_access_tag_type - unexpected arg"
+            raise PLCInvalidArgument("caller_may_access_tag_type - unexpected arg")
 
     @staticmethod
     def person_may_access_person (api, caller_person, subject_person):
@@ -104,14 +104,14 @@ def caller_may_write_node_tag (node, api, caller, tag_type):
     if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
-        raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
+        raise PLCPermissionDenied("Role mismatch for writing tag %s"%(tag_type['tagname']))
     elif AuthorizeHelpers.node_belongs_to_person (api, node, caller):
         pass
     elif AuthorizeHelpers.caller_is_node (api, caller, node):
         pass
     else:
-        raise PLCPermissionDenied, "Writing node tag: must belong in the same site as %s"%\
-            (node['hostname'])
+        raise PLCPermissionDenied("Writing node tag: must belong in the same site as %s"%\
+            (node['hostname']))
 
 setattr(Node,'caller_may_write_tag',caller_may_write_node_tag)
         
@@ -120,12 +120,12 @@ def caller_may_write_interface_tag (interface, api, caller, tag_type):
     if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
-        raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
+        raise PLCPermissionDenied("Role mismatch for writing tag %s"%(tag_type['tagname']))
     elif AuthorizeHelpers.interface_belongs_to_person (api, interface, caller):
         pass
     else:
-        raise PLCPermissionDenied, "Writing interface tag: must belong in the same site as %s"%\
-            (interface['ip'])
+        raise PLCPermissionDenied("Writing interface tag: must belong in the same site as %s"%\
+            (interface['ip']))
         
 setattr(Interface,'caller_may_write_tag',caller_may_write_interface_tag)
         
@@ -134,11 +134,11 @@ def caller_may_write_site_tag (site, api, caller, tag_type):
     if 'roles' in caller and 'admin' in caller['roles']:
         pass
     elif not AuthorizeHelpers.caller_may_access_tag_type (api, caller, tag_type):
-        raise PLCPermissionDenied, "Role mismatch for writing tag %s"%(tag_type['tagname'])
+        raise PLCPermissionDenied("Role mismatch for writing tag %s"%(tag_type['tagname']))
     elif AuthorizeHelpers.person_in_site (api, caller, site):
         pass
     else:
-        raise PLCPermissionDenied, "Writing site tag: must be part of site"%site['login_base']
+        raise PLCPermissionDenied("Writing site tag: must be part of site"%site['login_base'])
 
 setattr(Site,'caller_may_write_tag',caller_may_write_site_tag)
 
@@ -150,7 +150,7 @@ def caller_may_write_person_tag (person, api, caller, tag_type):
     elif AuthorizeHelpers.person_may_access_person (api, caller, person):
         pass
     else:
-        raise PLCPermissionDenied, "Writing person tag: you can only change your own tags"
+        raise PLCPermissionDenied("Writing person tag: you can only change your own tags")
 
 setattr(Person,'caller_may_write_tag',caller_may_write_person_tag)
 
@@ -182,12 +182,12 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
     else:
         # only admins can handle slice tags on a nodegroup
         if nodegroup_id_or_name:
-            raise PLCPermissionDenied, "Cannot set slice tag %s on nodegroup - restricted to admins"%\
-                (tag_type['tagname'])
+            raise PLCPermissionDenied("Cannot set slice tag %s on nodegroup - restricted to admins"%\
+                (tag_type['tagname']))
         # if a node is specified it is expected to be in the slice
         if node_id_or_hostname:
             if not AuthorizeHelpers.node_id_in_slice (api, node_id_or_hostname, slice):
-                raise PLCPermissionDenied, "%s, node must be in slice when setting sliver tag"
+                raise PLCPermissionDenied("%s, node must be in slice when setting sliver tag")
         # try all roles to find a match - tech are ignored b/c not in AddSliceTag.roles anyways
         for role in AuthorizeHelpers.person_tag_type_common_roles(api,caller,tag_type):
             reason="user not in slice; or slice does not belong to pi's site"
@@ -202,7 +202,7 @@ def caller_may_write_slice_tag (slice, api, caller, tag_type, node_id_or_hostnam
     if not granted:
 #        try: print "DEBUG: caller=%s"%caller
 #        except: pass
-        raise PLCPermissionDenied, "Cannot write slice tag %s - %s"%(tag_type['tagname'],reason)
+        raise PLCPermissionDenied("Cannot write slice tag %s - %s"%(tag_type['tagname'],reason))
 
 setattr(Slice,'caller_may_write_tag',caller_may_write_slice_tag)
 

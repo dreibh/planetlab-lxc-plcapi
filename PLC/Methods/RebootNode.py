@@ -34,7 +34,7 @@ class RebootNode(Method):
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
 
         node = nodes[0]
 
@@ -45,11 +45,11 @@ class RebootNode(Method):
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
+                raise PLCPermissionDenied("Not allowed to delete nodes from specified site")
 
         session = node['session']
         if not session:
-            raise PLCInvalidArgument, "No session key on record for that node (i.e., has never successfully booted)"
+            raise PLCInvalidArgument("No session key on record for that node (i.e., has never successfully booted)")
         session = session.strip()
 
         # Only use the hostname as a backup, try to use the primary ID
@@ -63,7 +63,7 @@ class RebootNode(Method):
 
         try:
             udp_pod(host, session)
-        except socket.error, e:
+        except socket.error as e:
             # Ignore socket errors
             pass
 

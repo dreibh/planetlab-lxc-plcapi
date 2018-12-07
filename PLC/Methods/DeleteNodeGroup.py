@@ -28,7 +28,7 @@ class DeleteNodeGroup(Method):
         # Get account information
         nodegroups = NodeGroups(self.api, [node_group_id_or_name])
         if not nodegroups:
-            raise PLCInvalidArgument, "No such node group"
+            raise PLCInvalidArgument("No such node group")
 
         nodegroup = nodegroups[0]
 

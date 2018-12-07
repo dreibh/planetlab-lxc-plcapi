@@ -99,4 +99,4 @@ def xmlrpc_type(arg):
         # documentation purposes.
         return "mixed"
     else:
-        raise PLCAPIError, "XML-RPC cannot marshal %s objects" % arg_type
+        raise PLCAPIError("XML-RPC cannot marshal %s objects" % arg_type)

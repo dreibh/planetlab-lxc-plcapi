@@ -35,8 +35,7 @@ class GetPersons(Method):
         ]
 
     # Filter out password field
-    return_fields = dict(filter(lambda (field, value): field not in hidden_fields,
-                                Person.fields.items()))
+    return_fields = dict([field_value for field_value in list(Person.fields.items()) if field_value[0] not in hidden_fields])
     returns = [return_fields]
 
     def call(self, auth, person_filter = None, return_fields = None):
@@ -67,10 +66,9 @@ class GetPersons(Method):
 
         # Filter out password field
         if return_fields:
-            return_fields = filter(lambda field: field not in hidden_fields,
-                                   return_fields)
+            return_fields = [field for field in return_fields if field not in hidden_fields]
         else:
-            return_fields = self.return_fields.keys()
+            return_fields = list(self.return_fields.keys())
 
         # Must query at least person_id, site_ids, and role_ids (see
         # Person.can_view() and below).
@@ -85,7 +83,7 @@ class GetPersons(Method):
         # Filter out accounts that are not viewable
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
-            persons = filter(self.caller.can_view, persons)
+            persons = list(filter(self.caller.can_view, persons))
 
         # Remove added fields if not specified
         if added_fields:

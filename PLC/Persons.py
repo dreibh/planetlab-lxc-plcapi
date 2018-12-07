@@ -96,7 +96,7 @@ class Person(Row):
 
         for person in conflicts:
             if 'person_id' not in self or self['person_id'] != person['person_id']:
-                raise PLCInvalidArgument, "E-mail address already in use"
+                raise PLCInvalidArgument("E-mail address already in use")
 
         return email
 
@@ -230,7 +230,7 @@ class Person(Row):
         # Translate roles into role_ids
         if role_names:
             roles = Roles(self.api, role_names).dict('role_id')
-            role_ids += roles.keys()
+            role_ids += list(roles.keys())
 
         # Add new ids, remove stale ids
         if self['role_ids'] != role_ids:
@@ -262,7 +262,7 @@ class Person(Row):
         # Translate roles into role_ids
         if site_names:
             sites = Sites(self.api, site_names, ['site_id']).dict('site_id')
-            site_ids += sites.keys()
+            site_ids += list(sites.keys())
 
         # Add new ids, remove stale ids
         if self['site_ids'] != site_ids:
@@ -299,8 +299,8 @@ class Person(Row):
         if keys:
             from PLC.Methods.AddPersonKey import AddPersonKey
             from PLC.Methods.UpdateKey import UpdateKey
-            updated_keys = filter(lambda key: 'key_id' in key, keys)
-            added_keys = filter(lambda key: 'key_id' not in key, keys)
+            updated_keys = [key for key in keys if 'key_id' in key]
+            added_keys = [key for key in keys if 'key_id' not in key]
 
             for key in added_keys:
                 AddPersonKey.__call__(AddPersonKey(self.api), auth, self['person_id'], key)
@@ -326,7 +326,7 @@ class Person(Row):
         # Translate roles into role_ids
         if slice_names:
             slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
-            slice_ids += slices.keys()
+            slice_ids += list(slices.keys())
 
         # Add new ids, remove stale ids
         if self['slice_ids'] != slice_ids:
@@ -382,26 +382,26 @@ class Persons(Table):
                                                 Person.primary_key)
 
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
-            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+            (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
 
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), person_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), person_filter)
+                ints = [x for x in person_filter if isinstance(x, int)]
+                strs = [x for x in person_filter if isinstance(x, StringTypes)]
                 person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
                 sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
-                allowed_fields=dict(Person.fields.items()+Person.tags.items())
+                allowed_fields=dict(list(Person.fields.items())+list(Person.tags.items()))
                 person_filter = Filter(allowed_fields, person_filter)
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, StringTypes):
                 person_filter = Filter(Person.fields, {'email':person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
-            elif isinstance (person_filter, (int, long)):
+            elif isinstance (person_filter, int):
                 person_filter = Filter(Person.fields, {'person_id':person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong person filter %r"%person_filter
+                raise PLCInvalidArgument("Wrong person filter %r"%person_filter)
 
         self.selectall(sql)

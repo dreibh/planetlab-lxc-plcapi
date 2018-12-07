@@ -28,7 +28,7 @@ class BlacklistKey(Method):
         # Get associated key details
         keys = Keys(self.api, [key_id])
         if not keys:
-            raise PLCInvalidArgument, "No such key"
+            raise PLCInvalidArgument("No such key")
         key = keys[0]
 
         # N.B.: Can blacklist any key, even foreign ones

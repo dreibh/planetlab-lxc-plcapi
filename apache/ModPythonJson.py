@@ -9,7 +9,7 @@
 
 import sys
 import traceback
-import xmlrpclib
+import xmlrpc.client
 from mod_python import apache
 
 from PLC.Logger import logger
@@ -55,6 +55,6 @@ def handler(req):
 
         return apache.OK
 
-    except Exception, err:
+    except Exception as err:
         logger.exception("INTERNAL ERROR !!")
         return apache.HTTP_INTERNAL_SERVER_ERROR

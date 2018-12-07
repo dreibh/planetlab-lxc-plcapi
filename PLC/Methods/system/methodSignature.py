@@ -1,5 +1,6 @@
 from PLC.Parameter import Parameter, Mixed
 from PLC.Method import Method, xmlrpc_type
+from functools import reduce
 
 class methodSignature(Method):
     """

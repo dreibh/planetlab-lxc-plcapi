@@ -10,7 +10,7 @@
 import sys
 import time
 import traceback
-import xmlrpclib
+import xmlrpc.client
 from mod_python import apache
 
 from PLC.Logger import logger

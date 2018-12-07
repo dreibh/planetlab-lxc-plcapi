@@ -24,7 +24,7 @@ class DeleteConfFile(Method):
     def call(self, auth, conf_file_id):
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
-            raise PLCInvalidArgument, "No such configuration file"
+            raise PLCInvalidArgument("No such configuration file")
 
         conf_file = conf_files[0]
         conf_file.delete()

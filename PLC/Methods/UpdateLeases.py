@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 from PLC.Faults import *
 from PLC.Method import Method
@@ -10,7 +10,7 @@ from PLC.Timestamp import Timestamp, Duration
 from PLC.Leases import Lease, Leases
 from PLC.Slices import Slice, Slices
 
-can_update = lambda (field, value): field in ['t_from', 't_until', 'duration']
+can_update = lambda field_value: field_value[0] in ['t_from', 't_until', 'duration']
 
 
 class UpdateLeases(Method):
@@ -29,7 +29,7 @@ class UpdateLeases(Method):
 
     roles = ['admin', 'pi', 'tech', 'user']
 
-    lease_fields = dict(filter(can_update, Lease.fields.items()))
+    lease_fields = dict(list(filter(can_update, list(Lease.fields.items()))))
 
     accepts = [
         Auth(),
@@ -47,7 +47,7 @@ class UpdateLeases(Method):
 #    debug=True
 
     def call(self, auth, lease_ids, input_fields):
-        input_fields = dict(filter(can_update, input_fields.items()))
+        input_fields = dict(list(filter(can_update, list(input_fields.items()))))
 
         if 'duration' in input_fields:
             if 't_from' in input_fields and 't_until' in input_fields:
@@ -126,7 +126,7 @@ class UpdateLeases(Method):
                 lease.update(lease_fields)
                 lease.sync()
                 updated_ids.append(lease['lease_id'])
-            except Exception, e:
+            except Exception as e:
                 errors.append(
                     "Could not update lease {} - check new time limits ? -- {}"
                     .format(lease['lease_id'], e))
@@ -134,7 +134,7 @@ class UpdateLeases(Method):
         # Logging variables
         self.event_objects = {'Lease': updated_ids}
         self.message = 'lease {} updated: {}'\
-                       .format(lease_ids, ", ".join(input_fields.keys()))
+                       .format(lease_ids, ", ".join(list(input_fields.keys())))
 
         return {'updated_ids': updated_ids,
                 'errors': errors}

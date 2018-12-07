@@ -45,12 +45,12 @@ class SliceTags(Table):
               ", ".join(self.columns)
 
         if slice_tag_filter is not None:
-            if isinstance(slice_tag_filter, (list, tuple, set, int, long)):
+            if isinstance(slice_tag_filter, (list, tuple, set, int)):
                 slice_tag_filter = Filter(SliceTag.fields, {'slice_tag_id': slice_tag_filter})
             elif isinstance(slice_tag_filter, dict):
                 slice_tag_filter = Filter(SliceTag.fields, slice_tag_filter)
             else:
-                raise PLCInvalidArgument, "Wrong slice tag filter %r"%slice_tag_filter
+                raise PLCInvalidArgument("Wrong slice tag filter %r"%slice_tag_filter)
             sql += " AND (%s) %s" % slice_tag_filter.sql(api)
 
         self.selectall(sql)

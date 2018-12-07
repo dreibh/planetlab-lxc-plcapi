@@ -4,7 +4,7 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-import xmlrpclib
+import xmlrpc.client
 from types import *
 import textwrap
 import os
@@ -104,7 +104,7 @@ class Method (object):
 
             return result
 
-        except PLCFault, fault:
+        except PLCFault as fault:
 
             caller = ""
             if isinstance(self.caller, Person):
@@ -151,13 +151,13 @@ class Method (object):
                     newargs.append(arg)
                     continue
                 # what type of auth this is
-                if arg.has_key('AuthMethod'):
+                if 'AuthMethod' in arg:
                     auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
                     auth_method = arg['AuthMethod']
                     if auth_method in auth_methods:
                         event['auth_type'] = auth_method
                 for password in 'AuthString', 'session', 'password':
-                    if arg.has_key(password):
+                    if password in arg:
                         arg = arg.copy()
                         arg[password] = "Removed by API"
                 newargs.append(arg)
@@ -176,7 +176,7 @@ class Method (object):
         event.sync(commit = False)
 
         if hasattr(self, 'event_objects') and isinstance(self.event_objects, dict):
-            for key in self.event_objects.keys():
+            for key in list(self.event_objects.keys()):
                 for object_id in self.event_objects[key]:
                     event.add_object(key, object_id, commit = False)
 
@@ -240,7 +240,7 @@ class Method (object):
 
             # Indent struct fields and mixed types
             if isinstance(param, dict):
-                for name, subparam in param.iteritems():
+                for name, subparam in param.items():
                     text += param_text(name, subparam, indent + step, step)
             elif isinstance(param, Mixed):
                 for subparam in param:
@@ -273,8 +273,8 @@ class Method (object):
         """
 
         # Inspect call. Remove self from the argument list.
-        max_args = self.call.func_code.co_varnames[1:self.call.func_code.co_argcount]
-        defaults = self.call.func_defaults
+        max_args = self.call.__code__.co_varnames[1:self.call.__code__.co_argcount]
+        defaults = self.call.__defaults__
         if defaults is None:
             defaults = ()
 
@@ -305,7 +305,7 @@ class Method (object):
                 try:
                     self.type_check(name, value, item, args)
                     return
-                except PLCInvalidArgument, fault:
+                except PLCInvalidArgument as fault:
                     pass
             raise fault
 
@@ -353,20 +353,20 @@ class Method (object):
         if expected_type in StringTypes:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
-                raise PLCInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+                raise PLCInvalidArgument("%s must be at least %d bytes long" % (name, min))
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
-                raise PLCInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+                raise PLCInvalidArgument("%s must be at most %d bytes long" % (name, max))
         elif expected_type in (list, tuple, set):
             if min is not None and len(value) < min:
-                raise PLCInvalidArgument, "%s must contain at least %d items" % (name, min)
+                raise PLCInvalidArgument("%s must contain at least %d items" % (name, min))
             if max is not None and len(value) > max:
-                raise PLCInvalidArgument, "%s must contain at most %d items" % (name, max)
+                raise PLCInvalidArgument("%s must contain at most %d items" % (name, max))
         else:
             if min is not None and value < min:
-                raise PLCInvalidArgument, "%s must be > %s" % (name, str(min))
+                raise PLCInvalidArgument("%s must be > %s" % (name, str(min)))
             if max is not None and value > max:
-                raise PLCInvalidArgument, "%s must be < %s" % (name, str(max))
+                raise PLCInvalidArgument("%s must be < %s" % (name, str(max)))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple, set)):
@@ -380,13 +380,13 @@ class Method (object):
         # If a struct with particular (or required) types of items is
         # expected.
         elif isinstance(expected, dict):
-            for key in value.keys():
+            for key in list(value.keys()):
                 if key in expected:
                     self.type_check(name + "['%s']" % key, value[key], expected[key], args)
-            for key, subparam in expected.iteritems():
+            for key, subparam in expected.items():
                 if isinstance(subparam, Parameter) and \
                    subparam.optional is not None and \
-                   not subparam.optional and key not in value.keys():
+                   not subparam.optional and key not in list(value.keys()):
                     raise PLCInvalidArgument("'%s' not specified" % key, name)
 
         if auth is not None:

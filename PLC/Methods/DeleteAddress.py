@@ -27,12 +27,12 @@ class DeleteAddress(Method):
         # Get associated address details
         addresses = Addresses(self.api, address_id)
         if not addresses:
-            raise PLCInvalidArgument, "No such address"
+            raise PLCInvalidArgument("No such address")
         address = addresses[0]
 
         if 'admin' not in self.caller['roles']:
             if address['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Address must be associated with one of your sites"
+                raise PLCPermissionDenied("Address must be associated with one of your sites")
 
         address.delete()
 

@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.PCUTypes import PCUType, PCUTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['model', 'name']
 
 class AddPCUType(Method):
@@ -16,7 +16,7 @@ class AddPCUType(Method):
 
     roles = ['admin']
 
-    pcu_type_fields = dict(filter(can_update, PCUType.fields.items()))
+    pcu_type_fields = dict(list(filter(can_update, list(PCUType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -27,7 +27,7 @@ class AddPCUType(Method):
 
 
     def call(self, auth, pcu_type_fields):
-        pcu_type_fields = dict(filter(can_update, pcu_type_fields.items()))
+        pcu_type_fields = dict(list(filter(can_update, list(pcu_type_fields.items()))))
         pcu_type = PCUType(self.api, pcu_type_fields)
         pcu_type.sync()
         self.event_object = {'PCUType': [pcu_type['pcu_type_id']]}

@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.AddressTypes import AddressType, AddressTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field not in ['address_type_id']
+can_update = lambda field_value: field_value[0] not in ['address_type_id']
 
 class AddAddressType(Method):
     """
@@ -16,7 +16,7 @@ class AddAddressType(Method):
 
     roles = ['admin']
 
-    address_type_fields = dict(filter(can_update, AddressType.fields.items()))
+    address_type_fields = dict(list(filter(can_update, list(AddressType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -27,7 +27,7 @@ class AddAddressType(Method):
 
 
     def call(self, auth, address_type_fields):
-        address_type_fields = dict(filter(can_update, address_type_fields.items()))
+        address_type_fields = dict(list(filter(can_update, list(address_type_fields.items()))))
         address_type = AddressType(self.api, address_type_fields)
         address_type.sync()
 

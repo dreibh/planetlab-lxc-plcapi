@@ -31,29 +31,29 @@ class AddRoleToPerson(Method):
         # Get role
         roles = Roles(self.api, [role_id_or_name])
         if not roles:
-            raise PLCInvalidArgument, "Invalid role '%s'" % unicode(role_id_or_name)
+            raise PLCInvalidArgument("Invalid role '%s'" % str(role_id_or_name))
         role = roles[0]
 
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         # Authenticated function
         assert self.caller is not None
 
         # Check if we can update this account
         if not self.caller.can_update(person):
-            raise PLCPermissionDenied, "Not allowed to update specified account"
+            raise PLCPermissionDenied("Not allowed to update specified account")
 
         # Can only grant lesser (higher) roles to others
         if 'admin' not in self.caller['roles'] and \
            role['role_id'] <= min(self.caller['role_ids']):
-            raise PLCInvalidArgument, "Not allowed to grant that role"
+            raise PLCInvalidArgument("Not allowed to grant that role")
 
         if role['role_id'] not in person['role_ids']:
             person.add_role(role)

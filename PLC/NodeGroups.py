@@ -40,13 +40,13 @@ class NodeGroup(Row):
     def validate_name(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Invalid node group name"
+            raise PLCInvalidArgument("Invalid node group name")
 
         # Make sure node group does not alredy exist
         conflicts = NodeGroups(self.api, [name])
         for nodegroup in conflicts:
             if 'nodegroup_id' not in self or self['nodegroup_id'] != nodegroup['nodegroup_id']:
-                raise PLCInvalidArgument, "Node group name already in use"
+                raise PLCInvalidArgument("Node group name already in use")
 
         return name
 
@@ -91,20 +91,20 @@ class NodeGroups(Table):
         if nodegroup_filter is not None:
             if isinstance(nodegroup_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), nodegroup_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), nodegroup_filter)
+                ints = [x for x in nodegroup_filter if isinstance(x, int)]
+                strs = [x for x in nodegroup_filter if isinstance(x, StringTypes)]
                 nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'groupname': strs})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "OR")
             elif isinstance(nodegroup_filter, dict):
                 nodegroup_filter = Filter(NodeGroup.fields, nodegroup_filter)
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
-            elif isinstance(nodegroup_filter, (int, long)):
+            elif isinstance(nodegroup_filter, int):
                 nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': nodegroup_filter})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
             elif isinstance(nodegroup_filter, StringTypes):
                 nodegroup_filter = Filter(NodeGroup.fields, {'groupname': nodegroup_filter})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong node group filter %r"%nodegroup_filter
+                raise PLCInvalidArgument("Wrong node group filter %r"%nodegroup_filter)
 
         self.selectall(sql)

@@ -36,7 +36,7 @@ class DeleteSiteTag(Method):
     def call(self, auth, site_tag_id):
         site_tags = SiteTags(self.api, [site_tag_id])
         if not site_tags:
-            raise PLCInvalidArgument, "No such site tag %r"%site_tag_id
+            raise PLCInvalidArgument("No such site tag %r"%site_tag_id)
         site_tag = site_tags[0]
 
         tag_type_id = site_tag['tag_type_id']
@@ -44,7 +44,7 @@ class DeleteSiteTag(Method):
 
         sites = Sites (self.api, site_tag['site_id'])
         if not sites:
-            raise PLCInvalidArgument, "No such site %d"%site_tag['site_id']
+            raise PLCInvalidArgument("No such site %d"%site_tag['site_id'])
         site=sites[0]
         
         # check authorizations

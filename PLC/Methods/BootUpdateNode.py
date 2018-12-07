@@ -8,7 +8,7 @@ from PLC.Nodes import Node, Nodes
 from PLC.Interfaces import Interface, Interfaces
 from PLC.Timestamp import *
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['method', 'mac', 'gateway', 'network',
               'broadcast', 'netmask', 'dns1', 'dns2']
 
@@ -22,7 +22,7 @@ class BootUpdateNode(Method):
 
     roles = ['node']
 
-    interface_fields = dict(filter(can_update, Interface.fields.items()))
+    interface_fields = dict(list(filter(can_update, list(Interface.fields.items()))))
 
     accepts = [
         Mixed(BootAuth(), SessionAuth()),
@@ -39,7 +39,7 @@ class BootUpdateNode(Method):
     def call(self, auth, node_fields):
 
         if not isinstance(self.caller, Node):
-            raise PLCInvalidArgument,"Caller is expected to be a node"
+            raise PLCInvalidArgument("Caller is expected to be a node")
 
         node = self.caller
 
@@ -47,35 +47,35 @@ class BootUpdateNode(Method):
         # otherwise the db gets spammed with meaningless entries
         changed_fields = []
         # Update node state
-        if node_fields.has_key('boot_state'):
+        if 'boot_state' in node_fields:
             if node['boot_state'] != node_fields['boot_state']: changed_fields.append('boot_state')
             node['boot_state'] = node_fields['boot_state']
         ### for legacy BootManager
-        if node_fields.has_key('ssh_host_key'):
+        if 'ssh_host_key' in node_fields:
             if node['ssh_rsa_key'] != node_fields['ssh_host_key']: changed_fields.append('ssh_rsa_key')
             node['ssh_rsa_key'] = node_fields['ssh_host_key']
-        if node_fields.has_key('ssh_rsa_key'):
+        if 'ssh_rsa_key' in node_fields:
             if node['ssh_rsa_key'] != node_fields['ssh_rsa_key']: changed_fields.append('ssh_rsa_key')
             node['ssh_rsa_key'] = node_fields['ssh_rsa_key']
 
         # Update primary interface state
-        if node_fields.has_key('primary_network'):
+        if 'primary_network' in node_fields:
             primary_network = node_fields['primary_network']
 
             if 'interface_id' not in primary_network:
-                raise PLCInvalidArgument, "Interface not specified"
+                raise PLCInvalidArgument("Interface not specified")
             if primary_network['interface_id'] not in node['interface_ids']:
-                raise PLCInvalidArgument, "Interface not associated with calling node"
+                raise PLCInvalidArgument("Interface not associated with calling node")
 
             interfaces = Interfaces(self.api, [primary_network['interface_id']])
             if not interfaces:
-                raise PLCInvalidArgument, "No such interface %r"%interface_id
+                raise PLCInvalidArgument("No such interface %r"%interface_id)
             interface = interfaces[0]
 
             if not interface['is_primary']:
-                raise PLCInvalidArgument, "Not the primary interface on record"
+                raise PLCInvalidArgument("Not the primary interface on record")
 
-            interface_fields = dict(filter(can_update, primary_network.items()))
+            interface_fields = dict(list(filter(can_update, list(primary_network.items()))))
             for field in interface_fields:
                 if interface[field] != primary_network[field] : changed_fields.append('Interface.'+field)
             interface.update(interface_fields)
@@ -84,7 +84,7 @@ class BootUpdateNode(Method):
         current_time = int(time.time())
 
         # ONLY UPDATE ONCE when the boot_state flag and ssh_rsa_key flag are NOT passed
-        if not node_fields.has_key('boot_state') and not node_fields.has_key('ssh_rsa_key'):
+        if 'boot_state' not in node_fields and 'ssh_rsa_key' not in node_fields:
 
             # record times spent on and off line by comparing last_contact with previous value of last_boot
             if node['last_boot'] and node['last_contact']:

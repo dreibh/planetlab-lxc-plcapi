@@ -4,7 +4,7 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-import ldap
+from . import ldap
 import traceback
 from PLC.Debug import profile
 from PLC.Faults import *
@@ -35,8 +35,8 @@ class LDAP:
                    self.connection.bind(dn, pw, ldap.AUTH_SIMPLE)
                 else:
                    self.connection.bind_s(dn, pw, ldap.AUTH_SIMPLE)
-            except ldap.LDAPError, e:
-                raise PLCLDAPError, "Unable to bind to server: %s" % e
+            except ldap.LDAPError as e:
+                raise PLCLDAPError("Unable to bind to server: %s" % e)
         return connection 
 
     def close(self):
@@ -66,7 +66,7 @@ class LDAP:
     def to_ldap_filter(search_filter):
         search_filter = pl_to_ldap(search_filter) 
         values = []
-        for (key,value) in search_filter.items():
+        for (key,value) in list(search_filter.items()):
             values.append("(%s=%s)" % (key,value))
         
         return "(&%s)" % "".join(values)        

@@ -75,16 +75,16 @@ class Leases(Table):
 
         # the view that we're selecting upon: start with view_leases
         view = "view_leases"
-        sql = "SELECT %s FROM %s WHERE true" % (", ".join(self.columns.keys()),view)
+        sql = "SELECT %s FROM %s WHERE true" % (", ".join(list(self.columns.keys())),view)
 
 
         if lease_filter is not None:
-            if isinstance(lease_filter, (list, tuple, set, int, long)):
+            if isinstance(lease_filter, (list, tuple, set, int)):
                 lease_filter = Filter(Lease.fields, {'lease_id': lease_filter})
             elif isinstance(lease_filter, dict):
                 lease_filter = LeaseFilter(Lease.fields, lease_filter)
             else:
-                raise PLCInvalidArgument, "Wrong lease filter %r"%lease_filter
+                raise PLCInvalidArgument("Wrong lease filter %r"%lease_filter)
             sql += " AND (%s) %s" % lease_filter.sql(api)
 
         self.selectall(sql)

@@ -96,4 +96,4 @@ def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
     s.close()
 
     if rejected:
-        raise PLCAPIError, "Error sending message to " + ", ".join(rejected.keys())
+        raise PLCAPIError("Error sending message to " + ", ".join(list(rejected.keys())))

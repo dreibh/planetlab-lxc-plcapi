@@ -31,13 +31,13 @@ class TagType (Row):
 
     def validate_name(self, name):
         if not len(name):
-            raise PLCInvalidArgument, "tag type name must be set"
+            raise PLCInvalidArgument("tag type name must be set")
 
         conflicts = TagTypes(self.api, [name])
         for tag_type in conflicts:
             if 'tag_type_id' not in self or \
                    self['tag_type_id'] != tag_type['tag_type_id']:
-                raise PLCInvalidArgument, "tag type name already in use"
+                raise PLCInvalidArgument("tag type name already in use")
 
         return name
 
@@ -60,20 +60,20 @@ class TagTypes(Table):
         if tag_type_filter is not None:
             if isinstance(tag_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), tag_type_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), tag_type_filter)
+                ints = [x for x in tag_type_filter if isinstance(x, int)]
+                strs = [x for x in tag_type_filter if isinstance(x, StringTypes)]
                 tag_type_filter = Filter(TagType.fields, {'tag_type_id': ints, 'tagname': strs})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "OR")
             elif isinstance(tag_type_filter, dict):
                 tag_type_filter = Filter(TagType.fields, tag_type_filter)
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "AND")
-            elif isinstance(tag_type_filter, (int, long)):
+            elif isinstance(tag_type_filter, int):
                 tag_type_filter = Filter(TagType.fields, {'tag_type_id':tag_type_filter})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "AND")
             elif isinstance(tag_type_filter, StringTypes):
                 tag_type_filter = Filter(TagType.fields, {'tagname':tag_type_filter})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong tag type filter %r"%tag_type_filter
+                raise PLCInvalidArgument("Wrong tag type filter %r"%tag_type_filter)
 
         self.selectall(sql)

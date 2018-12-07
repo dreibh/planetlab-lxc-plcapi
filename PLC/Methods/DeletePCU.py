@@ -27,12 +27,12 @@ class DeletePCU(Method):
         # Get associated PCU details
         pcus = PCUs(self.api, [pcu_id])
         if not pcus:
-            raise PLCInvalidArgument, "No such PCU"
+            raise PLCInvalidArgument("No such PCU")
         pcu = pcus[0]
 
         if 'admin' not in self.caller['roles']:
             if pcu['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to update that PCU"
+                raise PLCPermissionDenied("Not allowed to update that PCU")
 
         pcu.delete()
 

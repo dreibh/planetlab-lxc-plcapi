@@ -34,7 +34,7 @@ class Accessor(object):
         self.hash_name_to_role = {role['name']: role for role in Roles(api)}
 
     def has_cache(self, tagname):
-        return self.cache.has_key(tagname)
+        return tagname in self.cache
 
     def get_cache(self, tagname):
         return self.cache[tagname]
@@ -106,7 +106,7 @@ class Accessor(object):
     # it's not easy to have define_accessors do this because at
     # load-time as we do not have an instance of API yet
     def run_all_tag_locators(self):
-        for (name, tag_locator) in Accessor.tag_locators.items():
+        for (name, tag_locator) in list(Accessor.tag_locators.items()):
             tag_locator(self, enforce=True)
 
 ####################

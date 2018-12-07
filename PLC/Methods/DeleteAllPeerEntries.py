@@ -85,19 +85,19 @@ class DeleteAllPeerEntries(Method):
                 (Site, Sites)):
             classname = singular.__name__
             objs = plural(self.api, {'peer_id': peer_id})
-            print("Found {len} {classname}s from peer {peername}"
+            print(("Found {len} {classname}s from peer {peername}"
                   .format(len=len(objs),
                           classname=classname,
-                          peername=peername))
+                          peername=peername)))
             if dry_run:
                 print("dry-run mode: skipping actual deletion")
             else:
-                print("Deleting {classname}s".format(classname=classname))
+                print(("Deleting {classname}s".format(classname=classname)))
                 for obj in objs:
-                    print '.',
+                    print('.', end=' ')
                     sys.stdout.flush()
                     obj.delete(commit=commit_mode)
-                print
+                print()
 
         # Update peer itself and commit
         peer.sync(commit=True)

@@ -24,7 +24,7 @@ class GetSession(Method):
 
     def call(self, auth, expires=None):
         # Authenticated with a session key, just return it
-        if auth.has_key('session'):
+        if 'session' in auth:
             return auth['session']
 
         session = Session(self.api)

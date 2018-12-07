@@ -28,7 +28,7 @@ class DeleteTagType(Method):
     def call(self, auth, tag_type_id_or_name):
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such node tag type"
+            raise PLCInvalidArgument("No such node tag type")
         tag_type = tag_types[0]
 
         tag_type.delete()

@@ -29,18 +29,18 @@ class DeletePerson(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         # Authenticated function
         assert self.caller is not None
 
         # Check if we can update this account
         if not self.caller.can_update(person):
-            raise PLCPermissionDenied, "Not allowed to delete specified account"
+            raise PLCPermissionDenied("Not allowed to delete specified account")
 
         person.delete()
 

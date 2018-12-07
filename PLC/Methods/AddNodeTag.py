@@ -44,12 +44,12 @@ class AddNodeTag(Method):
     def call(self, auth, node_id, tag_type_id_or_name, value):
         nodes = Nodes(self.api, [node_id])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id
+            raise PLCInvalidArgument("No such node %r"%node_id)
         node = nodes[0]
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such node tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("No such node tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # checks for existence - does not allow several different tags
@@ -58,8 +58,8 @@ class AddNodeTag(Method):
                                          'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
-            raise PLCInvalidArgument, "Node %d already has tag %d"%(node['node_id'],
-                                                                    tag_type['tag_type_id'])
+            raise PLCInvalidArgument("Node %d already has tag %d"%(node['node_id'],
+                                                                    tag_type['tag_type_id']))
 
         # check authorizations
         node.caller_may_write_tag(self.api,self.caller,tag_type)

@@ -66,14 +66,14 @@ def _construct(id, data):
 
 def icmp_pod(host,key):
     uid = os.getuid()
-    if uid <> 0:
-        print "must be root to send icmp pod"
+    if uid != 0:
+        print("must be root to send icmp pod")
         return
 
     s = socket(AF_INET, SOCK_RAW, getprotobyname("icmp"))
     packet = _construct(0, key) # make a ping packet
     addr = (host,1)
-    print 'pod sending icmp-based reboot request to %s' % host
+    print('pod sending icmp-based reboot request to %s' % host)
     for i in range(1,10):
         s.sendto(packet, addr)
 
@@ -82,7 +82,7 @@ def udp_pod(host,key,fromaddr=('', 0)):
     s = socket(AF_INET, SOCK_DGRAM)
     s.bind(fromaddr)
     packet = key
-    print 'pod sending udp-based reboot request to %s' % host
+    print('pod sending udp-based reboot request to %s' % host)
     for i in range(1,10):
         s.sendto(packet, addr)
 

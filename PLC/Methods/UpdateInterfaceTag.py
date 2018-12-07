@@ -39,7 +39,7 @@ class UpdateInterfaceTag(Method):
     def call(self, auth, interface_tag_id, value):
         interface_tags = InterfaceTags(self.api, [interface_tag_id])
         if not interface_tags:
-            raise PLCInvalidArgument, "No such interface setting %r"%interface_tag_id
+            raise PLCInvalidArgument("No such interface setting %r"%interface_tag_id)
         interface_tag = interface_tags[0]
 
         tag_type_id = interface_tag['tag_type_id']
@@ -47,7 +47,7 @@ class UpdateInterfaceTag(Method):
 
         interfaces = Interfaces (self.api, interface_tag['interface_id'])
         if not interfaces:
-            raise PLCInvalidArgument, "No such interface %d"%interface_tag['interface_id']
+            raise PLCInvalidArgument("No such interface %d"%interface_tag['interface_id'])
         interface=interfaces[0]
 
         # check authorizations

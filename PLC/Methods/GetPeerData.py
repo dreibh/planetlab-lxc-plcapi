@@ -76,7 +76,7 @@ class GetPeerData(Method):
 
             # filter out system slices
             system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
-            slices = Slices(self.api, {'peer_id': None,'~slice_id':system_slice_ids.keys()}, slice_fields)
+            slices = Slices(self.api, {'peer_id': None,'~slice_id':list(system_slice_ids.keys())}, slice_fields)
 
             sites = Sites(self.api, {'peer_id': None}, site_fields)
        
@@ -98,7 +98,7 @@ class GetPeerData(Method):
             # filter out system slices
             system_slice_ids = SliceTags(self.api, {'name': 'system', 'value': '1'}).dict('slice_id')
             filtered_slices = Slices(self.api, {'peer_id': None,
-                                   '~slice_id':system_slice_ids.keys()}, slice_fields)
+                                   '~slice_id':list(system_slice_ids.keys())}, slice_fields)
 
             filtered_sites = Sites(self.api, {'peer_id': None}, site_fields)
 

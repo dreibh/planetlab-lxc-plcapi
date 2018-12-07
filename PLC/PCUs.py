@@ -39,7 +39,7 @@ class PCU(Row):
 
     def validate_ip(self, ip):
         if not valid_ip(ip):
-            raise PLCInvalidArgument, "Invalid IP address " + ip
+            raise PLCInvalidArgument("Invalid IP address " + ip)
         return ip
 
     validate_last_updated = Row.validate_timestamp
@@ -66,7 +66,7 @@ class PCU(Row):
 
         assert 'pcu_id' in self
         assert isinstance(node, Node)
-        assert isinstance(port, (int, long))
+        assert isinstance(port, int)
         assert 'node_id' in node
 
         pcu_id = self['pcu_id']
@@ -123,12 +123,12 @@ class PCUs(Table):
               ", ".join(self.columns)
 
         if pcu_filter is not None:
-            if isinstance(pcu_filter, (list, tuple, set, int, long)):
+            if isinstance(pcu_filter, (list, tuple, set, int)):
                 pcu_filter = Filter(PCU.fields, {'pcu_id': pcu_filter})
             elif isinstance(pcu_filter, dict):
                 pcu_filter = Filter(PCU.fields, pcu_filter)
             else:
-                raise PLCInvalidArgument, "Wrong pcu filter %r"%pcu_filter
+                raise PLCInvalidArgument("Wrong pcu filter %r"%pcu_filter)
             sql += " AND (%s) %s" % pcu_filter.sql(api)
 
         self.selectall(sql)

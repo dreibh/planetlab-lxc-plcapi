@@ -40,12 +40,12 @@ class NodeTags(Table):
               ", ".join(self.columns)
 
         if node_tag_filter is not None:
-            if isinstance(node_tag_filter, (list, tuple, set, int, long)):
+            if isinstance(node_tag_filter, (list, tuple, set, int)):
                 node_tag_filter = Filter(NodeTag.fields, {'node_tag_id': node_tag_filter})
             elif isinstance(node_tag_filter, dict):
                 node_tag_filter = Filter(NodeTag.fields, node_tag_filter)
             else:
-                raise PLCInvalidArgument, "Wrong node tag filter %r"%node_tag_filter
+                raise PLCInvalidArgument("Wrong node tag filter %r"%node_tag_filter)
             sql += " AND (%s) %s" % node_tag_filter.sql(api)
 
 

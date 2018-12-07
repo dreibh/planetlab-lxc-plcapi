@@ -59,7 +59,7 @@ class Site(Row):
 
     def validate_name(self, name):
         if not len(name):
-            raise PLCInvalidArgument, "Name must be specified"
+            raise PLCInvalidArgument("Name must be specified")
 
         return name
 
@@ -67,29 +67,29 @@ class Site(Row):
 
     def validate_login_base(self, login_base):
         if not len(login_base):
-            raise PLCInvalidArgument, "Login base must be specified"
+            raise PLCInvalidArgument("Login base must be specified")
 
         if not set(login_base).issubset(string.lowercase + string.digits + '.'):
-            raise PLCInvalidArgument, "Login base must consist only of lowercase ASCII letters or numbers or dots"
+            raise PLCInvalidArgument("Login base must consist only of lowercase ASCII letters or numbers or dots")
 
         conflicts = Sites(self.api, [login_base])
         for site in conflicts:
             if 'site_id' not in self or self['site_id'] != site['site_id']:
-                raise PLCInvalidArgument, "login_base already in use"
+                raise PLCInvalidArgument("login_base already in use")
 
         return login_base
 
     def validate_latitude(self, latitude):
-        if not self.has_key('longitude') or \
+        if 'longitude' not in self or \
            self['longitude'] is None:
-            raise PLCInvalidArgument, "Longitude must also be specified"
+            raise PLCInvalidArgument("Longitude must also be specified")
 
         return latitude
 
     def validate_longitude(self, longitude):
-        if not self.has_key('latitude') or \
+        if 'latitude' not in self or \
            self['latitude'] is None:
-            raise PLCInvalidArgument, "Latitude must also be specified"
+            raise PLCInvalidArgument("Latitude must also be specified")
 
         return longitude
 
@@ -130,7 +130,7 @@ class Site(Row):
         # Translate emails into person_ids
         if emails:
             persons = Persons(self.api, emails, ['person_id']).dict('person_id')
-            person_ids += persons.keys()
+            person_ids += list(persons.keys())
 
         # Add new ids, remove stale ids
         if self['person_ids'] != person_ids:
@@ -173,8 +173,8 @@ class Site(Row):
             from PLC.Methods.AddSiteAddress import AddSiteAddress
             from PLC.Methods.UpdateAddress import UpdateAddress
 
-            updated_addresses = filter(lambda address: 'address_id' in address, addresses)
-            added_addresses = filter(lambda address: 'address_id' not in address, addresses)
+            updated_addresses = [address for address in addresses if 'address_id' in address]
+            added_addresses = [address for address in addresses if 'address_id' not in address]
 
             for address in added_addresses:
                 AddSiteAddress.__call__(AddSiteAddress(self.api), auth, self['site_id'], address)
@@ -248,26 +248,26 @@ class Sites(Table):
                                                 Site.primary_key)
 
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
-            (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+            (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
 
         if site_filter is not None:
             if isinstance(site_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), site_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), site_filter)
+                ints = [x for x in site_filter if isinstance(x, int)]
+                strs = [x for x in site_filter if isinstance(x, StringTypes)]
                 site_filter = Filter(Site.fields, {'site_id': ints, 'login_base': strs})
                 sql += " AND (%s) %s" % site_filter.sql(api, "OR")
             elif isinstance(site_filter, dict):
-                allowed_fields=dict(Site.fields.items()+Site.tags.items())
+                allowed_fields=dict(list(Site.fields.items())+list(Site.tags.items()))
                 site_filter = Filter(allowed_fields, site_filter)
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             elif isinstance (site_filter, StringTypes):
                 site_filter = Filter(Site.fields, {'login_base':site_filter})
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
-            elif isinstance (site_filter, (int, long)):
+            elif isinstance (site_filter, int):
                 site_filter = Filter(Site.fields, {'site_id':site_filter})
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong site filter %r"%site_filter
+                raise PLCInvalidArgument("Wrong site filter %r"%site_filter)
 
         self.selectall(sql)

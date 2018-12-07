@@ -10,16 +10,16 @@ from pprint import pprint
 schema_file = None
 config_file = "/etc/planetlab/plc_config"
 config = {}
-execfile(config_file, config)
+exec(compile(open(config_file).read(), config_file, 'exec'), config)
 
 def usage():
-        print "Usage: %s SCHEMA_FILE " % sys.argv[0]
+        print("Usage: %s SCHEMA_FILE " % sys.argv[0])
         sys.exit(1)
 
 try:
        	schema_file  = sys.argv[1]
 except IndexError:
-        print "Error: too few arguments"
+        print("Error: too few arguments")
         usage()
 
 # all foreing keys exist as primary kyes in another table
@@ -97,7 +97,7 @@ try:
                 result = desc.readlines()
 		if primary_key_parts[0] in ['slices']:
 			sql  = sql + " where name not like '%_deleted'"
-		elif filter(lambda line: line.find("deleted") > -1, result):
+		elif [line for line in result if line.find("deleted") > -1]:
 			sql = sql + " where deleted = false"
 
 		cursor.execute(sql)
@@ -107,16 +107,16 @@ try:
  		# also, ignore null foreign keys, not considered zombied
 		zombie_keys_func = lambda key: key not in primary_key_rows and not key == [None]
 		zombie_keys_list = [zombie_key[0] for zombie_key in filter(zombie_keys_func, foreign_rows)]
-		print zombie_keys_list
+		print(zombie_keys_list)
 		# delete these zombie records
 		if zombie_keys_list:
-			print " -> Deleting %d zombie record(s) from %s after checking %s" % \
-                        		(len(zombie_keys_list), foreign_key_parts[0], primary_key_parts[0])
+			print(" -> Deleting %d zombie record(s) from %s after checking %s" % \
+                        		(len(zombie_keys_list), foreign_key_parts[0], primary_key_parts[0]))
 			sql_delete = 'DELETE FROM %s WHERE %s IN %s' % \
 			(foreign_key_parts[0], foreign_key_parts[1], tuple(zombie_keys_list))
 			cursor.execute(sql_delete)
 			db.commit()
 		#zombie_keys[foreign_key] = zombie_keys_list
-	print "done"
+	print("done")
 except pgdb.DatabaseError:
 	raise

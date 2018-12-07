@@ -62,7 +62,7 @@ class GetPCUs(Method):
 
         # Filter out PCUs that are not viewable
         if not (isinstance(self.caller, Person) and 'admin' in self.caller['roles']):
-            pcus = filter(lambda pcu: pcu['pcu_id'] in valid_pcu_ids, pcus)
+            pcus = [pcu for pcu in pcus if pcu['pcu_id'] in valid_pcu_ids]
 
         # Remove pcu_id if not specified
         if added_fields:

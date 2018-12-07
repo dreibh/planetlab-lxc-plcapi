@@ -87,9 +87,9 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
 
     if objclass not in taggable_classes:
         try:
-            raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class %s"%objclass.__name__
+            raise PLCInvalidArgument("PLC.Accessors.Factory: unknown class %s"%objclass.__name__)
         except:
-            raise PLCInvalidArgument,"PLC.Accessors.Factory: unknown class ??"
+            raise PLCInvalidArgument("PLC.Accessors.Factory: unknown class ??")
 
     # side-effect on, say, Node.tags, if required
     if expose_in_api:
@@ -182,7 +182,7 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
 #        objs = table_class(self.api, filter,[primary_key,secondary_key])
         objs = table_class(self.api, filter)
         if not objs:
-            raise PLCInvalidArgument, "Cannot set tag on %s %r"%(objclass.__name__,id_or_name)
+            raise PLCInvalidArgument("Cannot set tag on %s %r"%(objclass.__name__,id_or_name))
         # the object being tagged
         obj=objs[0]
         primary_id = obj[primary_key]
@@ -194,7 +194,7 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
 
         # check authorization
         if not hasattr(objclass,'caller_may_write_tag'):
-            raise PLCAuthenticationFailure, "class %s misses method caller_may_write_tag"%objclass.__name__
+            raise PLCAuthenticationFailure("class %s misses method caller_may_write_tag"%objclass.__name__)
         obj.caller_may_write_tag (self.api,self.caller,tag_type)
 
         # locate the join object (e.g. NodeTag or similar)
