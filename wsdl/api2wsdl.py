@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Sapan Bhatia <sapanb@cs.princeton.edu>
 #
 # Generates a WSDL for plcapi
 # Current limitations:
-# - Invalid for the following reasons 
+# - Invalid for the following reasons
 # - The types are python types, not WSDL types
-# - I'm not sure of what to do with the auth structure 
+# - I'm not sure of what to do with the auth structure
 
 import os, sys
 import time
@@ -49,7 +49,7 @@ def add_wsdl_ports_and_bindings (wsdl):
         #print "\n".join(lines)
         #print
 
-        
+
         in_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:message"))
         in_el.setAttribute("name", function.name + "_in")
 
@@ -61,8 +61,8 @@ def add_wsdl_ports_and_bindings (wsdl):
                 arg_part = in_el.appendChild(wsdl.createElement("wsdl:part"))
                 arg_part.setAttribute("name", argname)
                 arg_part.setAttribute("type", param_type(argtype))
-                
-        # Return type            
+
+        # Return type
         return_type = function.returns
         out_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:message"))
         out_el.setAttribute("name", function.name + "_out")
@@ -74,7 +74,7 @@ def add_wsdl_ports_and_bindings (wsdl):
 
         port_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:portType"))
         port_el.setAttribute("name", function.name + "_port")
-        
+
         op_el = port_el.appendChild(wsdl.createElement("wsdl:operation"))
         op_el.setAttribute("name", function.name)
         op_el.appendChild(wsdl.createElement("wsdl:input")).setAttribute("message","tns:" + function.name + "_in")
@@ -85,31 +85,31 @@ def add_wsdl_ports_and_bindings (wsdl):
         bind_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:binding"))
         bind_el.setAttribute("name", function.name + "_binding")
         bind_el.setAttribute("type", "tns:" + function.name + "_port")
-        
+
         soap_bind = bind_el.appendChild(wsdl.createElement("soap:binding"))
         soap_bind.setAttribute("style", "rpc")
         soap_bind.setAttribute("transport","http://schemas.xmlsoap.org/soap/http")
 
-        
+
         wsdl_op = bind_el.appendChild(wsdl.createElement("wsdl:operation"))
         wsdl_op.setAttribute("name", function.name)
         wsdl_op.appendChild(wsdl.createElement("soap:operation")).setAttribute("soapAction",
                 "urn:" + function.name)
 
-        
+
         wsdl_input = wsdl_op.appendChild(wsdl.createElement("wsdl:input"))
         input_soap_body = wsdl_input.appendChild(wsdl.createElement("soap:body"))
         input_soap_body.setAttribute("use", "encoded")
         input_soap_body.setAttribute("namespace", "urn:" + function.name)
         input_soap_body.setAttribute("encodingStyle","http://schemas.xmlsoap.org/soap/encoding/")
 
-        
+
         wsdl_output = wsdl_op.appendChild(wsdl.createElement("wsdl:output"))
         output_soap_body = wsdl_output.appendChild(wsdl.createElement("soap:body"))
         output_soap_body.setAttribute("use", "encoded")
         output_soap_body.setAttribute("namespace", "urn:" + function.name)
         output_soap_body.setAttribute("encodingStyle","http://schemas.xmlsoap.org/soap/encoding/")
-        
+
 
 def add_wsdl_service(wsdl):
     service_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:service"))
@@ -134,11 +134,11 @@ def get_wsdl_definitions():
         xmlns:tns="xmlns:%s"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>""" % (globals.plc_ns,globals.plc_ns)
-        
+
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
 
     return wsdl
-    
+
 
 wsdl = get_wsdl_definitions()
 add_wsdl_ports_and_bindings(wsdl)
@@ -146,4 +146,3 @@ add_wsdl_service(wsdl)
 
 
 print(wsdl.toprettyxml())
-

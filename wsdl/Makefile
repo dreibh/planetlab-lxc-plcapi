@@ -3,7 +3,7 @@
 all: plcapi.wsdl
 
 plcapi.wsdl:
-	PYTHONPATH=../ python api2wsdl.py > $@
+	PYTHONPATH=../ python3 api2wsdl.py > $@
 
 clean:
 	rm -f plcapi.wsdl
