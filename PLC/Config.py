@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # PLCAPI configuration store. Supports XML-based configuration file
 # format exported by MyPLC.

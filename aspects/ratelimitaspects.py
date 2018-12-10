@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #-*- coding: utf-8 -*-
 #
 # S.Çağlar Onur <caglar@cs.princeton.edu>

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Generates a DocBook section documenting all PLCAPI methods on
 # stdout.
