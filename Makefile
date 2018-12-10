@@ -18,13 +18,13 @@ bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: 
-	python setup.py build
+all:
+	python3 setup.py build
 
 install: install-python install-phpxmlrpc
 
 install-python:
-	python setup.py install \
+	python3 setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
@@ -35,9 +35,9 @@ install-phpxmlrpc:
 	mkdir -p $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 	rsync --exclude .git -ai php/phpxmlrpc/ $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 
-clean: 
+clean:
 	find . -name '*.pyc' | xargs rm -f
-	python setup.py clean && rm -rf build
+	python3 setup.py clean && rm -rf build
 
 index:
 	echo "This step is obsolete"
@@ -101,4 +101,3 @@ endif
 +%: varname=$(subst +,,$@)
 +%:
 	@echo "$($(varname))"
-
