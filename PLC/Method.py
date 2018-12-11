@@ -338,7 +338,7 @@ class Method:
 
         # Integers and long integers are also special types. Accept
         # either int or long types if an int or long is expected.
-    elif expected_type is int and isinstance(value, int):
+        elif expected_type is int and isinstance(value, int):
             pass
 
         elif not isinstance(value, expected_type):
