@@ -3,7 +3,6 @@
 #
 
 import re
-from types import StringTypes
 import traceback
 from urllib.parse import urlparse
 
@@ -291,7 +290,7 @@ class Peers (Table):
             if isinstance(peer_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in peer_filter if isinstance(x, int)]
-                strs = [x for x in peer_filter if isinstance(x, StringTypes)]
+                strs = [x for x in peer_filter if isinstance(x, str)]
                 peer_filter = Filter(Peer.fields, {'peer_id': ints, 'peername': strs})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "OR")
             elif isinstance(peer_filter, dict):
@@ -300,7 +299,7 @@ class Peers (Table):
             elif isinstance(peer_filter, int):
                 peer_filter = Filter(Peer.fields, {'peer_id': peer_filter})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
-            elif isinstance(peer_filter, StringTypes):
+            elif isinstance(peer_filter, str):
                 peer_filter = Filter(Peer.fields, {'peername': peer_filter})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
             else:

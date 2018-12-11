@@ -1,5 +1,5 @@
 #
-# PostgreSQL database interface. 
+# PostgreSQL database interface.
 # Sort of like DBI(3) (Database independent interface for Perl).
 #
 # Mark Huang <mlhuang@cs.princeton.edu>
@@ -13,7 +13,6 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 psycopg2.extensions.register_type(psycopg2._psycopg.UNICODEARRAY)
 
 import types
-from types import StringTypes, NoneType
 import traceback
 import subprocess
 import re
@@ -65,7 +64,7 @@ class PostgreSQL:
             x = str(x)
         elif isinstance(x, str):
             x = x.encode( 'utf-8' )
-    
+
         if isinstance(x, bytes):
             x = "'%s'" % str(x).replace("\\", "\\\\").replace("'", "''")
         elif isinstance(x, (int, float)):
@@ -106,14 +105,14 @@ class PostgreSQL:
     @classmethod
     def param(self, name, value):
         # None is converted to the unquoted string NULL
-        if isinstance(value, NoneType):
+        if isinstance(value, type(None)):
             conversion = "s"
         # True and False are also converted to unquoted strings
         elif isinstance(value, bool):
             conversion = "s"
         elif isinstance(value, float):
             conversion = "f"
-        elif not isinstance(value, StringTypes):
+        elif not isinstance(value, str):
             conversion = "d"
         else:
             conversion = "s"

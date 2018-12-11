@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 try:
     from hashlib import md5
 except ImportError:
@@ -388,14 +387,14 @@ class Persons(Table):
             if isinstance(person_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in person_filter if isinstance(x, int)]
-                strs = [x for x in person_filter if isinstance(x, StringTypes)]
+                strs = [x for x in person_filter if isinstance(x, str)]
                 person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
                 sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
                 allowed_fields=dict(list(Person.fields.items())+list(Person.tags.items()))
                 person_filter = Filter(allowed_fields, person_filter)
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
-            elif isinstance (person_filter, StringTypes):
+            elif isinstance (person_filter, str):
                 person_filter = Filter(Person.fields, {'email':person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, int):

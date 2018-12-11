@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -54,7 +53,7 @@ class AddressTypes(Table):
             if isinstance(address_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in address_type_filter if isinstance(x, int)]
-                strs = [x for x in address_type_filter if isinstance(x, StringTypes)]
+                strs = [x for x in address_type_filter if isinstance(x, str)]
                 address_type_filter = Filter(AddressType.fields, {'address_type_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "OR")
             elif isinstance(address_type_filter, dict):
@@ -63,7 +62,7 @@ class AddressTypes(Table):
             elif isinstance(address_type_filter, int):
                 address_type_filter = Filter(AddressType.fields, {'address_type_id': address_type_filter})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
-            elif isinstance(address_type_filter, StringTypes):
+            elif isinstance(address_type_filter, str):
                 address_type_filter = Filter(AddressType.fields, {'name': address_type_filter})
                 sql += " AND (%s) %s" % address_type_filter.sql(api, "AND")
             else:

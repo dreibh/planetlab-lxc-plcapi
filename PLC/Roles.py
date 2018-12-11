@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -60,7 +59,7 @@ class Roles(Table):
             if isinstance(role_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in role_filter if isinstance(x, int)]
-                strs = [x for x in role_filter if isinstance(x, StringTypes)]
+                strs = [x for x in role_filter if isinstance(x, str)]
                 role_filter = Filter(Role.fields, {'role_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % role_filter.sql(api, "OR")
             elif isinstance(role_filter, dict):
@@ -69,7 +68,7 @@ class Roles(Table):
             elif isinstance(role_filter, int):
                 role_filter = Filter(Role.fields, {'role_id': role_filter})
                 sql += " AND (%s) %s" % role_filter.sql(api, "AND")
-            elif isinstance(role_filter, StringTypes):
+            elif isinstance(role_filter, str):
                 role_filter = Filter(Role.fields, {'name': role_filter})
                 sql += " AND (%s) %s" % role_filter.sql(api, "AND")
             else:

@@ -1,4 +1,3 @@
-from types import StringTypes, IntType, LongType
 import time
 import calendar
 
@@ -75,7 +74,7 @@ class Row(dict):
 
         if isinstance(items, (list, tuple, set)):
             ints = [x for x in items if isinstance(x, int)]
-            strs = [x for x in items if isinstance(x, StringTypes)]
+            strs = [x for x in items if isinstance(x, str)]
             dicts = [x for x in items if isinstance(x, dict)]
             return (ints, strs, dicts)
         else:
@@ -339,8 +338,8 @@ class Row(dict):
            insert is True:
 
             # If primary key id is a serial int and it isnt included, get next id
-            if self.fields[self.primary_key].type in (IntType, LongType) and \
-               self.primary_key not in self:
+            if (self.fields[self.primary_key].type is int
+                    and self.primary_key not in self):
                 pk_id = self.api.db.next_id(self.table_name, self.primary_key)
                 self[self.primary_key] = pk_id
                 db_fields[self.primary_key] = pk_id
@@ -356,7 +355,7 @@ class Row(dict):
                   .format(self.table_name,
                           ", ".join(columns),
                           self.primary_key,
-                          self.api.db.param(self.primary_key, self[self.primary_key]))                                               
+                          self.api.db.param(self.primary_key, self[self.primary_key]))
 
         self.api.db.do(sql, db_fields)
 

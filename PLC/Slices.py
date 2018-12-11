@@ -1,4 +1,3 @@
-from types import StringTypes
 import time
 import re
 
@@ -277,14 +276,14 @@ class Slices(Table):
             if isinstance(slice_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in slice_filter if isinstance(x, int)]
-                strs = [x for x in slice_filter if isinstance(x, StringTypes)]
+                strs = [x for x in slice_filter if isinstance(x, str)]
                 slice_filter = Filter(Slice.fields, {'slice_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "OR")
             elif isinstance(slice_filter, dict):
                 allowed_fields=dict(list(Slice.fields.items())+list(Slice.tags.items()))
                 slice_filter = Filter(allowed_fields, slice_filter)
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
-            elif isinstance (slice_filter, StringTypes):
+            elif isinstance (slice_filter, str):
                 slice_filter = Filter(Slice.fields, {'name':slice_filter})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
             elif isinstance (slice_filter, int):

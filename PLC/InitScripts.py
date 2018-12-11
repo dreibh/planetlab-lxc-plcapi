@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -55,7 +54,7 @@ class InitScripts(Table):
             if isinstance(initscript_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in initscript_filter if isinstance(x, int)]
-                strs = [x for x in initscript_filter if isinstance(x, StringTypes)]
+                strs = [x for x in initscript_filter if isinstance(x, str)]
                 initscript_filter = Filter(InitScript.fields, {'initscript_id': ints, 'name': strs })
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "OR")
             elif isinstance(initscript_filter, dict):
@@ -64,7 +63,7 @@ class InitScripts(Table):
             elif isinstance(initscript_filter, int):
                 initscript_filter = Filter(InitScript.fields, {'initscript_id': initscript_filter})
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
-            elif isinstance(initscript_filter, StringTypes):
+            elif isinstance(initscript_filter, str):
                 initscript_filter = Filter(InitScript.fields, {'name': initscript_filter})
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
             else:

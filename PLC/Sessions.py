@@ -1,4 +1,3 @@
-from types import StringTypes
 import random
 import base64
 import time
@@ -74,7 +73,7 @@ class Sessions(Table):
             if isinstance(session_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in session_filter if isinstance(x, int)]
-                strs = [x for x in session_filter if isinstance(x, StringTypes)]
+                strs = [x for x in session_filter if isinstance(x, str)]
                 session_filter = Filter(Session.fields, {'person_id': ints, 'session_id': strs})
                 sql += " AND (%s) %s" % session_filter.sql(api, "OR")
             elif isinstance(session_filter, dict):
@@ -83,7 +82,7 @@ class Sessions(Table):
             elif isinstance(session_filter, int):
                 session_filter = Filter(Session.fields, {'person_id': session_filter})
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
-            elif isinstance(session_filter, StringTypes):
+            elif isinstance(session_filter, str):
                 session_filter = Filter(Session.fields, {'session_id': session_filter})
                 sql += " AND (%s) %s" % session_filter.sql(api, "AND")
             else:

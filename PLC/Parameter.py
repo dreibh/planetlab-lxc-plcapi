@@ -5,7 +5,7 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import *
+# from types import *
 from PLC.Faults import *
 
 class Parameter:
@@ -80,19 +80,19 @@ def xmlrpc_type(arg):
 
     arg_type = python_type(arg)
 
-    if arg_type == NoneType:
+    if arg_type is type(None):
         return "nil"
-    elif arg_type == IntType or arg_type == LongType:
+    elif arg_type is int:
         return "int"
-    elif arg_type == bool:
+    elif arg_type is bool:
         return "boolean"
-    elif arg_type == FloatType:
+    elif arg_type is float:
         return "double"
-    elif arg_type in StringTypes:
+    elif arg_type is str:
         return "string"
-    elif arg_type == ListType or arg_type == TupleType:
+    elif arg_type in (list, tuple):
         return "array"
-    elif arg_type == DictType:
+    elif arg_type is dict:
         return "struct"
     elif arg_type == Mixed:
         # Not really an XML-RPC type but return "mixed" for

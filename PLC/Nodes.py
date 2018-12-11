@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 import re
 
 from PLC.Faults import *
@@ -325,14 +324,14 @@ class Nodes(Table):
             if isinstance(node_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in node_filter if isinstance(x, int)]
-                strs = [x for x in node_filter if isinstance(x, StringTypes)]
+                strs = [x for x in node_filter if isinstance(x, str)]
                 node_filter = Filter(Node.fields, {'node_id': ints, 'hostname': strs})
                 sql += " AND (%s) %s" % node_filter.sql(api, "OR")
             elif isinstance(node_filter, dict):
                 allowed_fields=dict(list(Node.fields.items())+list(Node.tags.items()))
                 node_filter = Filter(allowed_fields, node_filter)
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
-            elif isinstance (node_filter, StringTypes):
+            elif isinstance (node_filter, str):
                 node_filter = Filter(Node.fields, {'hostname':node_filter})
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             elif isinstance (node_filter, int):

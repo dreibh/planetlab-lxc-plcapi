@@ -5,8 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed
 from PLC.Filter import Filter
@@ -92,7 +90,7 @@ class NodeGroups(Table):
             if isinstance(nodegroup_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in nodegroup_filter if isinstance(x, int)]
-                strs = [x for x in nodegroup_filter if isinstance(x, StringTypes)]
+                strs = [x for x in nodegroup_filter if isinstance(x, str)]
                 nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': ints, 'groupname': strs})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "OR")
             elif isinstance(nodegroup_filter, dict):
@@ -101,7 +99,7 @@ class NodeGroups(Table):
             elif isinstance(nodegroup_filter, int):
                 nodegroup_filter = Filter(NodeGroup.fields, {'nodegroup_id': nodegroup_filter})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
-            elif isinstance(nodegroup_filter, StringTypes):
+            elif isinstance(nodegroup_filter, str):
                 nodegroup_filter = Filter(NodeGroup.fields, {'groupname': nodegroup_filter})
                 sql += " AND (%s) %s" % nodegroup_filter.sql(api, "AND")
             else:

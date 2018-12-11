@@ -1,7 +1,6 @@
 #
 # Thierry Parmentelat - INRIA
 #
-from types import StringTypes
 import time
 
 from PLC.Faults import *
@@ -70,9 +69,9 @@ class Filter(Parameter, dict):
     * similarly the two special keys below allow to change the semantics of multi-keys filters
       * '-AND' : select rows that match ALL the criteria (default)
       * '-OR'  : select rows that match ANY criteria
-      The value attached to these keys is ignored. 
+      The value attached to these keys is ignored.
       Please note however that because a Filter is a dict, you cannot provide two criteria on a given key.
-      
+
 
     Here are a few realistic examples
 
@@ -167,7 +166,7 @@ class Filter(Parameter, dict):
                     if value is None:
                         operator = "IS"
                         value = "NULL"
-                    elif isinstance(value, StringTypes) and \
+                    elif isinstance(value, str) and \
                             (value.find("*") > -1 or value.find("%") > -1):
                         operator = "ILIKE"
                         # insert *** in pattern instead of either * or %

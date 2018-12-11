@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 import socket
 import struct
 
@@ -30,7 +29,7 @@ def valid_ipv6(ip):
         ip = socket.inet_ntop(socket.AF_INET6, socket.inet_pton(socket.AF_INET6, ip))
         return True
     except socket.error:
-        return False   
+        return False
 
 def valid_ip(ip):
     return valid_ipv4(ip) or valid_ipv6(ip)
@@ -59,7 +58,7 @@ def in_same_network_ipv6(address1, address2, netmask):
 
 def in_same_network(address1, address2, netmask):
     return in_same_network_ipv4(address1, address2, netmask) or \
-           in_same_network_ipv6(address1, address2, netmask) 
+           in_same_network_ipv6(address1, address2, netmask)
 
 class Interface(Row):
     """
@@ -258,7 +257,7 @@ class Interface(Row):
         ### need to cleanup ilinks
         self.api.db.do("DELETE FROM ilink WHERE src_interface_id=%d OR dst_interface_id=%d" % \
                            (self['interface_id'],self['interface_id']))
-        
+
         Row.delete(self)
 
 class Interfaces(Table):
@@ -284,7 +283,7 @@ class Interfaces(Table):
             if isinstance(interface_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in interface_filter if isinstance(x, int)]
-                strs = [x for x in interface_filter if isinstance(x, StringTypes)]
+                strs = [x for x in interface_filter if isinstance(x, str)]
                 interface_filter = Filter(Interface.fields, {'interface_id': ints, 'ip': strs})
                 sql += " AND (%s) %s" % interface_filter.sql(api, "OR")
             elif isinstance(interface_filter, dict):
@@ -294,7 +293,7 @@ class Interfaces(Table):
             elif isinstance(interface_filter, int):
                 interface_filter = Filter(Interface.fields, {'interface_id': [interface_filter]})
                 sql += " AND (%s) %s" % interface_filter.sql(api)
-            elif isinstance (interface_filter, StringTypes):
+            elif isinstance (interface_filter, str):
                 interface_filter = Filter(Interface.fields, {'ip':[interface_filter]})
                 sql += " AND (%s) %s" % interface_filter.sql(api, "AND")
             else:

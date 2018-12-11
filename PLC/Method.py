@@ -11,8 +11,6 @@ import os
 import time
 import pprint
 
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type, xmlrpc_type
 from PLC.Auth import Auth
@@ -63,14 +61,14 @@ class Method (object):
         self.name = self.__class__.__name__
         self.api = api
 
-        if caller: 
+        if caller:
             # let a method call another one by propagating its caller
             self.caller=caller
         else:
             # Auth may set this to a Person instance (if an anonymous
             # method, will remain None).
             self.caller = None
-        
+
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
@@ -335,7 +333,7 @@ class Method (object):
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.
-        if expected_type in StringTypes and isinstance(value, StringTypes):
+        if expected_type is str and isinstance(value, str):
             pass
 
         # Integers and long integers are also special types. Accept
@@ -350,7 +348,7 @@ class Method (object):
                                      name)
 
         # If a minimum or maximum (length, value) has been specified
-        if expected_type in StringTypes:
+        if expected_type is str:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
                 raise PLCInvalidArgument("%s must be at least %d bytes long" % (name, min))

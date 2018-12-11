@@ -1,4 +1,3 @@
-from types import StringTypes
 import string
 
 from PLC.Faults import *
@@ -254,14 +253,14 @@ class Sites(Table):
             if isinstance(site_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in site_filter if isinstance(x, int)]
-                strs = [x for x in site_filter if isinstance(x, StringTypes)]
+                strs = [x for x in site_filter if isinstance(x, str)]
                 site_filter = Filter(Site.fields, {'site_id': ints, 'login_base': strs})
                 sql += " AND (%s) %s" % site_filter.sql(api, "OR")
             elif isinstance(site_filter, dict):
                 allowed_fields=dict(list(Site.fields.items())+list(Site.tags.items()))
                 site_filter = Filter(allowed_fields, site_filter)
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
-            elif isinstance (site_filter, StringTypes):
+            elif isinstance (site_filter, str):
                 site_filter = Filter(Site.fields, {'login_base':site_filter})
                 sql += " AND (%s) %s" % site_filter.sql(api, "AND")
             elif isinstance (site_filter, int):

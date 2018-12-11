@@ -1,8 +1,6 @@
 #
 # Thierry Parmentelat - INRIA
 #
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -61,7 +59,7 @@ class TagTypes(Table):
             if isinstance(tag_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
                 ints = [x for x in tag_type_filter if isinstance(x, int)]
-                strs = [x for x in tag_type_filter if isinstance(x, StringTypes)]
+                strs = [x for x in tag_type_filter if isinstance(x, str)]
                 tag_type_filter = Filter(TagType.fields, {'tag_type_id': ints, 'tagname': strs})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "OR")
             elif isinstance(tag_type_filter, dict):
@@ -70,7 +68,7 @@ class TagTypes(Table):
             elif isinstance(tag_type_filter, int):
                 tag_type_filter = Filter(TagType.fields, {'tag_type_id':tag_type_filter})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "AND")
-            elif isinstance(tag_type_filter, StringTypes):
+            elif isinstance(tag_type_filter, str):
                 tag_type_filter = Filter(TagType.fields, {'tagname':tag_type_filter})
                 sql += " AND (%s) %s" % tag_type_filter.sql(api, "AND")
             else:

@@ -3,8 +3,6 @@ import base64
 import time
 import urllib.request, urllib.parse, urllib.error
 
-from types import StringTypes
-
 from PLC.Logger import logger
 from PLC.Faults import *
 from PLC.Method import Method
@@ -44,10 +42,10 @@ class ResetPassword(Method):
     def call(self, auth, person_id_or_email, verification_key = None, verification_expires = None):
         # Get account information
         # we need to search in local objects only
-        if isinstance (person_id_or_email,StringTypes):
-            filter={'email':person_id_or_email}
+        if isinstance (person_id_or_email, str):
+            filter = {'email': person_id_or_email}
         else:
-            filter={'person_id':person_id_or_email}
+            filter = {'person_id': person_id_or_email}
         filter['peer_id']=None
         persons = Persons(self.api, filter)
         if not persons:
