@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-# from types import *
 from PLC.Faults import *
 
 class Parameter:
@@ -15,11 +14,11 @@ class Parameter:
     sub-parameters (i.e., dict fields).
     """
 
-    def __init__(self, typeval, doc = "",
-                 min = None, max = None,
-                 optional = None,
-                 ro = False,
-                 nullok = False):
+    def __init__(self, typeval, doc="",
+                 min=None, max=None,
+                 optional=None,
+                 ro=False,
+                 nullok=False):
         # Basic type of the parameter. Must be a builtin type
         # that can be marshalled by XML-RPC.
         self.type = typeval

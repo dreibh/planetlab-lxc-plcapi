@@ -1,7 +1,7 @@
 #
 # Thierry Parmentelat - INRIA
 #
-from types import NoneType
+# pylint: disable=c0103, c0111
 
 from PLC.Faults import *
 
@@ -25,28 +25,29 @@ from PLC.PersonTags import PersonTags, PersonTag
 from PLC.AuthorizeHelpers import AuthorizeHelpers
 
 # known classes : { class -> details }
-taggable_classes = { Node : {'table_class' : Nodes,
-                             'joins_class' : NodeTags, 'join_class' : NodeTag,
-                             'secondary_key': 'hostname'},
-                     Interface : {'table_class' : Interfaces,
-                                  'joins_class': InterfaceTags, 'join_class': InterfaceTag,
-                                  'secondary_key' : 'ip'},
-                     Slice: {'table_class' : Slices,
-                             'joins_class': SliceTags, 'join_class': SliceTag,
-                             'secondary_key':'name'},
-                     Site: {'table_class' : Sites,
-                             'joins_class': SiteTags, 'join_class': SiteTag,
-                             'secondary_key':'login_base'},
-                     Person: {'table_class' : Persons,
-                             'joins_class': PersonTags, 'join_class': PersonTag,
-                             'secondary_key':'email'},
-                     }
+taggable_classes = {
+    Node : {'table_class' : Nodes,
+            'joins_class' : NodeTags, 'join_class' : NodeTag,
+            'secondary_key': 'hostname'},
+    Interface : {'table_class' : Interfaces,
+                 'joins_class': InterfaceTags, 'join_class': InterfaceTag,
+                 'secondary_key' : 'ip'},
+    Slice: {'table_class' : Slices,
+            'joins_class': SliceTags, 'join_class': SliceTag,
+            'secondary_key':'name'},
+    Site: {'table_class' : Sites,
+           'joins_class': SiteTags, 'join_class': SiteTag,
+           'secondary_key':'login_base'},
+    Person: {'table_class' : Persons,
+             'joins_class': PersonTags, 'join_class': PersonTag,
+             'secondary_key':'email'},
+}
 
 # xxx probably defined someplace else
 admin_roles = ['admin']
-person_roles = [ 'admin', 'pi', 'tech', 'user' ]
-all_roles = [ 'admin', 'pi', 'tech', 'user', 'node' ]
-tech_roles = [ 'admin', 'pi', 'tech' ]
+person_roles = ['admin', 'pi', 'tech', 'user']
+all_roles = ['admin', 'pi', 'tech', 'user', 'node']
+tech_roles = ['admin', 'pi', 'tech']
 
 #
 # generates 2 method classes:
@@ -62,7 +63,7 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 #
 # in addition a convenience method like e.g. LocateNodeArch is defined
 # in the Accessor class; its purpose is to retrieve the tag, or to create it if needed
-# 
+#
 # Legacy NOTE:
 # prior to plcapi-5.0-19, this used to accept an additional argument
 # named min_role_id; this was redundant and confusing, it has been
@@ -73,17 +74,17 @@ tech_roles = [ 'admin', 'pi', 'tech' ]
 # you then end up with e.g. GetPersonMyStuff
 
 # the entry point accepts a single class or a list of classes
-def define_accessors (module, objclasses, *args, **kwds):
-    if not isinstance(objclasses,list):
-        objclasses=[objclasses]
+def define_accessors(module, objclasses, *args, **kwds):
+    if not isinstance(objclasses, list):
+        objclasses = [objclasses]
     for objclass in objclasses:
-        define_accessors_ (module, objclass, *args, **kwds)
+        define_accessors_(module, objclass, *args, **kwds)
 
 # this is for one class
-def define_accessors_ (module, objclass, methodsuffix, tagname,
-                       category, description,
-                       get_roles=all_roles, set_roles=admin_roles, 
-                       expose_in_api = False):
+def define_accessors_(module, objclass, methodsuffix, tagname,
+                      category, description,
+                      get_roles=all_roles, set_roles=admin_roles,
+                      expose_in_api=False):
 
     if objclass not in taggable_classes:
         try:
@@ -93,43 +94,45 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
 
     # side-effect on, say, Node.tags, if required
     if expose_in_api:
-        getattr(objclass,'tags')[tagname]=Parameter(str,"accessor")
+        getattr(objclass, 'tags')[tagname] = Parameter(str, "accessor")
 
-    classname=objclass.__name__
+    classname = objclass.__name__
     get_name = "Get" + classname + methodsuffix
     set_name = "Set" + classname + methodsuffix
     locator_name = "Locate" + classname + methodsuffix
 
     # accessor method objects under PLC.Method.Method
-    get_class = type (get_name, (Method,),
-                      {"__doc__":"Accessor 'get' method designed for %s objects using tag %s"%\
-                           (classname,tagname)})
-    set_class = type (set_name, (Method,),
-                      {"__doc__":"Accessor 'set' method designed for %s objects using tag %s"%\
-                           (classname,tagname)})
+    get_class = type(get_name, (Method,),
+                     {"__doc__":
+                      "Accessor 'get' method designed for %s objects using tag %s"%\
+                        (classname, tagname)})
+    set_class = type(set_name, (Method,),
+                     {"__doc__":
+                      "Accessor 'set' method designed for %s objects using tag %s"%\
+                        (classname, tagname)})
 
     # accepts
-    get_accepts = [ Auth () ]
-    primary_key=objclass.primary_key
+    get_accepts = [Auth()]
+    primary_key = objclass.primary_key
     secondary_key = taggable_classes[objclass]['secondary_key']
-    get_accepts += [ Mixed (objclass.fields[primary_key], objclass.fields[secondary_key]) ]
+    get_accepts += [Mixed(objclass.fields[primary_key], objclass.fields[secondary_key])]
     # for set, idem set of arguments + one additional arg, the new value
-    set_accepts = get_accepts + [ Parameter (str,"New tag value") ]
+    set_accepts = get_accepts + [Parameter(str, "New tag value")]
 
     # returns
-    get_returns = Mixed (Parameter (str), Parameter(NoneType))
-    set_returns = Parameter(NoneType)
+    get_returns = Mixed(Parameter(str), Parameter(type(None)))
+    set_returns = Parameter(type(None))
 
     # store in classes
-    setattr(get_class,'roles',get_roles)
-    setattr(get_class,'accepts',get_accepts)
-    setattr(get_class,'returns', get_returns)
+    setattr(get_class, 'roles', get_roles)
+    setattr(get_class, 'accepts', get_accepts)
+    setattr(get_class, 'returns', get_returns)
 # that was useful for legacy method only, but we now need type_checking
 #    setattr(get_class,'skip_type_check',True)
 
-    setattr(set_class,'roles',set_roles)
-    setattr(set_class,'accepts',set_accepts)
-    setattr(set_class,'returns', set_returns)
+    setattr(set_class, 'roles', set_roles)
+    setattr(set_class, 'accepts', set_accepts)
+    setattr(set_class, 'returns', set_returns)
 # that was useful for legacy method only, but we now need type_checking
 #    setattr(set_class,'skip_type_check',True)
 
@@ -139,29 +142,30 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
 
     # locate the tag and create it if needed
     # this method is attached to the Accessor class
-    def tag_locator (self, enforce=False):
-        return self.locate_or_create_tag (tagname=tagname,
-                                          category=category,
-                                          description=description,
-                                          roles=set_roles,
-                                          enforce=enforce)
+    def tag_locator(self, enforce=False):
+        return self.locate_or_create_tag(
+            tagname=tagname,
+            category=category,
+            description=description,
+            roles=set_roles,
+            enforce=enforce)
 
     # attach it to the Accessor class
-    Accessor.register_tag_locator(locator_name,tag_locator)
+    Accessor.register_tag_locator(locator_name, tag_locator)
 
     # body of the get method
-    def get_call (self, auth, id_or_name):
+    def get_call(self, auth, id_or_name):
         # locate the tag, see above
         tag_locator = Accessor.retrieve_tag_locator(locator_name)
         tag_type = tag_locator(AccessorSingleton(self.api))
-        tag_type_id=tag_type['tag_type_id']
+        tag_type_id = tag_type['tag_type_id']
 
-        filter = {'tag_type_id':tag_type_id}
-        if isinstance (id_or_name,int):
-            filter[primary_key]=id_or_name
+        filter = {'tag_type_id': tag_type_id}
+        if isinstance(id_or_name, int):
+            filter[primary_key] = id_or_name
         else:
-            filter[secondary_key]=id_or_name
-        joins = joins_class (self.api,filter,['value'])
+            filter[secondary_key] = id_or_name
+        joins = joins_class(self.api, filter, ['value'])
         if not joins:
             # xxx - we return None even if id_or_name is not valid
             return None
@@ -169,22 +173,22 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
             return joins[0]['value']
 
     # attach it
-    setattr (get_class,"call",get_call)
+    setattr(get_class, "call", get_call)
 
     # body of the set method
-    def set_call (self, auth, id_or_name, value):
+    def set_call(self, auth, id_or_name, value):
         # locate the object
-        if isinstance (id_or_name, int):
-            filter={primary_key:id_or_name}
+        if isinstance(id_or_name, int):
+            filter = {primary_key:id_or_name}
         else:
-            filter={secondary_key:id_or_name}
+            filter = {secondary_key:id_or_name}
 # we need the full monty b/c of the permission system
 #        objs = table_class(self.api, filter,[primary_key,secondary_key])
         objs = table_class(self.api, filter)
         if not objs:
-            raise PLCInvalidArgument("Cannot set tag on %s %r"%(objclass.__name__,id_or_name))
+            raise PLCInvalidArgument("Cannot set tag on %s %r"%(objclass.__name__, id_or_name))
         # the object being tagged
-        obj=objs[0]
+        obj = objs[0]
         primary_id = obj[primary_key]
 
         # locate the tag, see above
@@ -193,36 +197,37 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
         tag_type_id = tag_type['tag_type_id']
 
         # check authorization
-        if not hasattr(objclass,'caller_may_write_tag'):
-            raise PLCAuthenticationFailure("class %s misses method caller_may_write_tag"%objclass.__name__)
-        obj.caller_may_write_tag (self.api,self.caller,tag_type)
+        if not hasattr(objclass, 'caller_may_write_tag'):
+            raise PLCAuthenticationFailure(
+                "class %s misses method caller_may_write_tag"%objclass.__name__)
+        obj.caller_may_write_tag(self.api, self.caller, tag_type)
 
         # locate the join object (e.g. NodeTag or similar)
-        filter = {'tag_type_id':tag_type_id}
-        if isinstance (id_or_name,int):
-            filter[primary_key]=id_or_name
+        filter = {'tag_type_id': tag_type_id}
+        if isinstance(id_or_name, int):
+            filter[primary_key] = id_or_name
         else:
-            filter[secondary_key]=id_or_name
-        joins = joins_class (self.api,filter)
+            filter[secondary_key] = id_or_name
+        joins = joins_class(self.api, filter)
         # setting to something non void
         if value is not None:
             if not joins:
-                join = join_class (self.api)
-                join['tag_type_id']=tag_type_id
-                join[primary_key]=primary_id
-                join['value']=value
+                join = join_class(self.api)
+                join['tag_type_id'] = tag_type_id
+                join[primary_key] = primary_id
+                join['value'] = value
                 join.sync()
             else:
-                joins[0]['value']=value
+                joins[0]['value'] = value
                 joins[0].sync()
         # providing an empty value means clean up
         else:
             if joins:
-                join=joins[0]
+                join = joins[0]
                 join.delete()
         # log it
-        self.event_objects= { objclass.__name__ : [primary_id] }
-        self.message=objclass.__name__
+        self.event_objects = {objclass.__name__ : [primary_id]}
+        self.message = objclass.__name__
         if secondary_key in objs[0]:
             self.message += " %s "%objs[0][secondary_key]
         else:
@@ -231,15 +236,15 @@ def define_accessors_ (module, objclass, methodsuffix, tagname,
         return value
 
     # attach it
-    setattr (set_class,"call",set_call)
+    setattr(set_class, "call", set_call)
 
     # define in module
-    setattr(module,get_name,get_class)
-    setattr(module,set_name,set_class)
+    setattr(module, get_name, get_class)
+    setattr(module, set_name, set_class)
     # add in <module>.methods
     try:
-        methods=getattr(module,'methods')
-    except:
-        methods=[]
-    methods += [get_name,set_name]
-    setattr(module,'methods',methods)
+        methods = getattr(module, 'methods')
+    except Exception:
+        methods = []
+    methods += [get_name, set_name]
+    setattr(module, 'methods', methods)

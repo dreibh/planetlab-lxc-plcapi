@@ -1,7 +1,6 @@
 import os
 import sys
 import pprint
-from types import StringTypes
 from email.MIMEText import MIMEText
 from email.Header import Header
 from smtplib import SMTP

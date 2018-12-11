@@ -14,7 +14,7 @@ from PLC.Parameter import Parameter, Mixed
 # a dummy class mostly used as a namespace
 class Timestamp:
 
-    debug=False
+    debug = False
 #    debug=True
 
     # this is how we expose times to SQL
