@@ -1,8 +1,8 @@
 import os
 import sys
 import pprint
-from email.MIMEText import MIMEText
-from email.Header import Header
+from email.mime.text import MIMEText
+from email.header import Header
 from smtplib import SMTP
 
 from PLC.Logger import logger
