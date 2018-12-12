@@ -42,13 +42,6 @@ Requires: SOAPpy
 #Requires: python-simplejson
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
-# for OMF integration
-Requires: pyaspects >= 0.4
-# again, these are no longer available in f29
-# Requires: python-twisted-words
-# Requires: python-twisted-web
-# ldap
-Requires: python-ldap
 # for memcache
 Requires: memcached python-memcached
 ### avoid having yum complain about updates, as stuff is moving around
@@ -91,8 +84,8 @@ through Apache mod_python.
 # python-pycurl and python-psycopg2 avail. from fedora 5
 # we used to ship our own version of psycopg2 and pycurl, for fedora4
 # starting with 4.3, support for these two modules is taken out
-# 
-# Build __init__.py metafiles and PHP API. 
+#
+# Build __init__.py metafiles and PHP API.
 %{__make} %{?_smp_mflags}
 %{__make} -C wsdl
 
@@ -604,18 +597,18 @@ rm -rf $RPM_BUILD_ROOT
 
 * Fri May 09 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-7
 - no more doc packaged outside of myplc-docs - doc/ cleaned up
-- enhancements in doc on filters 
+- enhancements in doc on filters
 - bootcd-aware GetBootMedium merged from onelab
 
 * Thu May 08 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-6
 - checkpoint while the new myplc-docs package is underway
 - bugfix: GetSlivers & conf files
-- doc: removed target files 
+- doc: removed target files
 
 * Wed Apr 23 2008 Stephen Soltesz <soltesz@cs.princeton.edu> - PLCAPI-4.2-5
 - Removed conditions on the persons, site, and nodes indexes.  previsouly only
 - the non-deleted fields were index, resulting in massivly slow queries.
-- 
+-
 
 * Wed Mar 26 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-3 PLCAPI-4.2-4
 - plcsh: better handling of options when running as a shell script
@@ -623,7 +616,7 @@ rm -rf $RPM_BUILD_ROOT
 - tweaks for accepted args in GetPCUTypes and BootNotifyOwners
 
 * Thu Feb 14 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-2 PLCAPI-4.2-3
-- GetBootMedium support for build.sh full options, incl. serial & console_spec 
+- GetBootMedium support for build.sh full options, incl. serial & console_spec
 - GetBootMedium simpler, cleaner and safer use of tmpdirs in (dated from bootcustom.sh)
 
 * Fri Feb 01 2008 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - PLCAPI-4.2-1 PLCAPI-4.2-2
@@ -634,7 +627,7 @@ rm -rf $RPM_BUILD_ROOT
 - plcsh adds its own path to sys.path
 - fix so GetNodes can be called from a Node
 
-* Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> - 
+* Fri Oct 27 2006 Mark Huang <mlhuang@CS.Princeton.EDU> -
 - Initial build.
 
 %define module_current_branch 4.3

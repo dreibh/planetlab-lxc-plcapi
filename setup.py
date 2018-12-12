@@ -9,7 +9,7 @@
 from distutils.core import setup
 from glob import glob
 
-setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors', 'aspects'],
+setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors'],
       scripts = ['plcsh', 'Server.py'],
       data_files = [
         ('', ['planetlab5.sql']),
