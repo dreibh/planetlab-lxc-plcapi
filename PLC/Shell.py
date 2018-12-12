@@ -146,7 +146,8 @@ class Shell:
                 raise Exception("Must specify session")
 
             if os.path.exists(session):
-                session = file(session).read()
+                with open(session) as feed:
+                    session = feed.read()
 
             self.auth = {'AuthMethod': "session", 'session': session}
         else:

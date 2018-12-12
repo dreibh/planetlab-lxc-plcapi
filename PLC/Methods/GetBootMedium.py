@@ -1,3 +1,5 @@
+# pylint: disable=c0111, c0103
+
 import random
 import base64
 import os
@@ -16,7 +18,7 @@ from PLC.NodeTags import NodeTag, NodeTags
 
 from PLC.Logger import logger
 
-from PLC.Accessors.Accessors_standard import *                  # import node accessors
+from PLC.Accessors.Accessors_standard import *              # node accessors
 
 # could not define this in the class..
 # create a dict with the allowed actions for each type of node
@@ -287,7 +289,8 @@ class GetBootMedium(Method):
 
     def bootcd_version (self):
         try:
-            return file(self.BOOTCDDIR + "/build/version.txt").readline().strip()
+            with open(self.BOOTCDDIR + "/build/version.txt") as feed:
+                return feed.readline().strip()
         except:
             raise Exception("Unknown boot cd version - probably wrong bootcd dir : {}"\
                             .format(self.BOOTCDDIR))
@@ -364,7 +367,7 @@ class GetBootMedium(Method):
         if node_type not in [ 'regular', 'reservable' ]:
             logger.error("GetBootMedium.build_command: unexpected node_type {}".format(node_type))
             return command, None
-        
+
         build_sh_options=""
         if "cramfs" in build_sh_spec:
             type += "_cramfs"
@@ -389,7 +392,7 @@ class GetBootMedium(Method):
                           type,
                           build_sh_options,
                           log_file)
-        
+
         logger.info("The build command line is {}".format(command))
 
         return command, log_file
@@ -520,7 +523,8 @@ class GetBootMedium(Method):
                                               .format(generic_path, filename))
             else:
                 ### return the generic medium content as-is, just base64 encoded
-                return base64.b64encode(file(generic_path).read())
+                with open(generic_path) as feed:
+                    return base64.b64encode(feed.read())
 
         ### config file preview or regenerated
         if action == 'node-preview' or action == 'node-floppy':
@@ -528,7 +532,8 @@ class GetBootMedium(Method):
             floppy = self.floppy_contents (node,renew_key)
             if filename:
                 try:
-                    file(filename,'w').write(floppy)
+                    with open(filename, 'w') as writer:
+                        writer.write(floppy)
                 except:
                     raise PLCPermissionDenied("Could not write into {}".format(filename))
                 return filename
@@ -564,7 +569,8 @@ class GetBootMedium(Method):
                 # store it
                 floppy_file = "{}/{}.txt".format(self.WORKDIR, nodename)
                 try:
-                    file(floppy_file,"w").write(floppy_text)
+                    with open(floppy_file, "w") as writer:
+                        writer.write(floppy_text)
                 except:
                     raise PLCPermissionDenied("Could not write into {}".format(floppy_file))
 
@@ -583,7 +589,7 @@ class GetBootMedium(Method):
                     raise PLCAPIError("{} failed Command line was: {} See logs in {}"\
                                       .format(self.BOOTCDBUILD, command, log_file))
 
-                if not os.path.isfile (node_image):
+                if not os.path.isfile(node_image):
                     raise PLCAPIError("Unexpected location of build.sh output - {}".format(node_image))
 
                 # handle result
@@ -597,7 +603,8 @@ class GetBootMedium(Method):
                     self.cleantrash()
                     return filename
                 else:
-                    result = file(node_image).read()
+                    with open(node_image) as feed:
+                        result = feed.read()
                     self.trash.append(node_image)
                     self.cleantrash()
                     logger.info("GetBootMedium - done with build.sh")

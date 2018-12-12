@@ -40,7 +40,7 @@ parser.add_option("--help", action = "store_true", dest="help", default=False,
 
 if not args and options.help:
     parser.print_help()
-    sys.exit(1)    
+    sys.exit(1)
 
 # If user is specified but password is not
 if options.user is not None and options.password is None:
@@ -69,7 +69,7 @@ except Exception as err:
     parser.print_help()
     sys.exit(1)
 
-# If called by a script 
+# If called by a script
 if args:
     if not os.path.exists(args[0]):
         print('File %s not found'%args[0])
@@ -82,7 +82,7 @@ if args:
         # use args as sys.argv for the next shell, so our own options get removed for the next script
         sys.argv = args
         script = sys.argv[0]
-        # Add of script to sys.path 
+        # Add of script to sys.path
         path = os.path.dirname(os.path.abspath(script))
         sys.path.append(path)
         exec(compile(open(script).read(), script, 'exec'))
@@ -114,7 +114,9 @@ else:
     # Load command history
     history_path = os.path.join(os.environ["HOME"], ".plcapi_history")
     try:
-        file(history_path, 'a').close()
+        # check directory: pretend to open
+        with open(history_path, 'a') as check:
+            pass
         readline.read_history_file(history_path)
         atexit.register(readline.write_history_file, history_path)
     except IOError:

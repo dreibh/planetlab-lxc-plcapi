@@ -1,5 +1,5 @@
 # -*-python-*-
-#################### 
+####################
 # Create/update and populate the default site (should be site_id 1)
 
 ### plc_www holds the contents of the PLC_WWW configuration category
@@ -47,9 +47,8 @@ keyfile=plc['root_ssh_key_pub']
 person = GetPersons(the_admin_id)[0]
 keys = GetKeys(person['key_ids'])
 if os.path.exists(keyfile):
-    sshkeyfp = file(keyfile,"r")
-    sshkey = sshkeyfp.read()
-    sshkeyfp.close()
+    with open(keyfile) as feed:
+        sshkey = feed.read()
 
     found=False
     for key in keys:
