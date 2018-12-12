@@ -163,18 +163,6 @@ class PLCAPI:
             raise PLCAPIError("Unsupported database type "
                               + self.config.PLC_DB_TYPE)
 
-        # Aspects modify the API by injecting code before, after or
-        # around method calls.
-        # http://github.com/baris/pyaspects/blob/master/README
-        #
-        if self.config.PLC_RATELIMIT_ENABLED:
-            from aspects import apply_ratelimit_aspect
-            apply_ratelimit_aspect()
-
-        if getattr(self.config, "PLC_NETCONFIG_ENABLED", False):
-            from aspects.netconfigaspects import apply_netconfig_aspect
-            apply_netconfig_aspect()
-
         # Enable Caching. Only for GetSlivers for the moment.
         # TODO: we may consider to do this in an aspect like the ones above.
         try:

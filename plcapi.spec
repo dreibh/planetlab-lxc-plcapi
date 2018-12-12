@@ -35,8 +35,6 @@ Requires: python3-pycurl
 Requires: python3-lxml
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
-# for OMF integration - xxx aspects needs porting too
-Requires: pyaspects >= 0.4
 # for memcache
 Requires: memcached python3-memcached
 
