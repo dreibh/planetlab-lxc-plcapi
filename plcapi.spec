@@ -33,16 +33,10 @@ Requires: python3-psycopg2
 Requires: python3-pycurl
 # used in GPG.py as a replacement to PyXML's Canonicalize
 Requires: python3-lxml
-#Requires: python3-simplejson
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
 # for OMF integration - xxx aspects needs porting too
 Requires: pyaspects >= 0.4
-# again, these are no longer available in f29
-# Requires: python-twisted-words
-# Requires: python-twisted-web
-# ldap
-Requires: python3-ldap
 # for memcache
 Requires: memcached python3-memcached
 
