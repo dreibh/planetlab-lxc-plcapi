@@ -24,8 +24,7 @@ class Schema:
         parts = contents.split(";")
         for part in parts:
             # normalize: remove comments, linebreaks, trailing spaces..
-            normalized=''
-            lines=part.split('\n');
+            lines = part.split('\n')
             out_lines = []
             for line in lines:
                 # remove comment
@@ -52,7 +51,6 @@ if __name__ == '__main__':
     input = sys.argv[1]
     try:
         output = sys.argv[2]
-    except:
+    except Exception:
         output = None
     Schema(input, output).parse()
-
