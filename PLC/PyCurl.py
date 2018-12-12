@@ -8,7 +8,7 @@
 
 import os
 import xmlrpc.client
-from . import pycurl
+import pycurl
 from tempfile import NamedTemporaryFile
 
 class PyCurlTransport(xmlrpc.client.Transport):
