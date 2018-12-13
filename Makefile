@@ -73,9 +73,9 @@ endif
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' --exclude Accessors_site.py
-RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
+RSYNC_EXCLUDES		:= --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
-RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
+RSYNC			:= rsync -ai $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
 sync:
 ifeq (,$(SSHURL))
@@ -88,8 +88,7 @@ else
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
 	+$(RSYNC) apache/plc.wsgi $(SSHURL)/usr/share/plc_api/apache/
-	$(SSHCOMMAND) /etc/plc.d/httpd stop
-	$(SSHCOMMAND) /etc/plc.d/httpd start
+	$(SSHCOMMAND) systemctl restart httpd
 endif
 
 #################### convenience, for debugging only
