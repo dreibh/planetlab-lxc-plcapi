@@ -32,7 +32,8 @@ parser.add_option("-s", "--session", help = "API session key")
 parser.add_option("-u", "--user", help = "API user name")
 parser.add_option("-p", "--password", help = "API password")
 parser.add_option("-r", "--role", help = "API role")
-parser.add_option("-x", "--xmlrpc", action = "store_true", default = False, help = "Use XML-RPC interface")
+parser.add_option("-x", "--xmlrpc", action = "store_true",
+                  default = False, help = "Use XML-RPC interface")
 # pass this to the invoked shell if any
 parser.add_option("--help", action = "store_true", dest="help", default=False,
                   help = "show this help message and exit")
@@ -85,7 +86,8 @@ if args:
         # Add of script to sys.path
         path = os.path.dirname(os.path.abspath(script))
         sys.path.append(path)
-        exec(compile(open(script).read(), script, 'exec'))
+        with open(script) as feed:
+            exec(script.read())
 
 # Otherwise, run an interactive shell environment
 else:
