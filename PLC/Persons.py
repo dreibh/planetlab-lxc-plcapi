@@ -377,11 +377,11 @@ class Persons(Table):
 
         view = "view_persons"
         for tagname in self.tag_columns:
-            view= "%s left join %s using (%s)"%(view,Person.tagvalue_view_name(tagname),
+            view= "%s left join %s using (%s)"%(view, Person.tagvalue_view_name(tagname),
                                                 Person.primary_key)
 
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
-            (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
+            (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())), view)
 
         if person_filter is not None:
             if isinstance(person_filter, (list, tuple, set)):
@@ -391,14 +391,14 @@ class Persons(Table):
                 person_filter = Filter(Person.fields, {'person_id': ints, 'email': strs})
                 sql += " AND (%s) %s" % person_filter.sql(api, "OR")
             elif isinstance(person_filter, dict):
-                allowed_fields=dict(list(Person.fields.items())+list(Person.tags.items()))
+                allowed_fields = dict(list(Person.fields.items())+list(Person.tags.items()))
                 person_filter = Filter(allowed_fields, person_filter)
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, str):
-                person_filter = Filter(Person.fields, {'email':person_filter})
+                person_filter = Filter(Person.fields, {'email': person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             elif isinstance (person_filter, int):
-                person_filter = Filter(Person.fields, {'person_id':person_filter})
+                person_filter = Filter(Person.fields, {'person_id': person_filter})
                 sql += " AND (%s) %s" % person_filter.sql(api, "AND")
             else:
                 raise PLCInvalidArgument("Wrong person filter %r"%person_filter)
