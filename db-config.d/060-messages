@@ -1,5 +1,5 @@
 # -*-python-*-
-#################### body for messages
+# body for messages
 
 installfailed = """Once the node meets these requirements, please reinitiate the install
 by visiting:
@@ -130,7 +130,7 @@ requirements.
     {'message_id': "authfail",
      'subject': "%(hostname)s failed to authenticate",
      'template':
-"""
+     """
 %(hostname)s failed to authenticate for the following reason:
 
 %(fault)s
@@ -164,7 +164,7 @@ message, please reply so that we can help investigate the problem.
     {'message_id': "notinstalled",
      'subject': "%(hostname)s is not installed",
      'template':
-"""
+     """
 %(hostname)s failed to boot because it has either never been
 installed, or the installation is corrupt.
 
@@ -183,7 +183,7 @@ message, please reply so that we may investigate the problem.
     {'message_id': "missingkernel",
      'subject': "%(hostname)s is missing its production kernel",
      'template':
-"""
+     """
 %(hostname)s failed to boot because the filesystem is missing its production
 kernel.
 
@@ -199,7 +199,7 @@ We will investigate the problem shortly.
     {'message_id': "filesystemcorrupted",
      'subject': "%(hostname)s may have corrupt filesystem",
      'template':
-"""
+     """
 %(hostname)s failed to boot because the filesystem appears to be corrupted. 
 
 No action is needed from you at this time; this message is merely
@@ -214,7 +214,7 @@ We will investigate the problem shortly.
     {'message_id': "mountfailed",
      'subject': "%(hostname)s could not mount filesystem",
      'template':
-"""
+     """
 %(hostname)s failed to boot because the boot scripts could not mount the 
 filesystem.
 
@@ -230,7 +230,7 @@ We will investigate the problem shortly.
     {'message_id': "hostnamenotresolve",
      'subject': "%(hostname)s does not resolve",
      'template':
-"""
+     """
 %(hostname)s failed to boot because its hostname does not resolve, or
 does resolve but does not match its configured IP address.
 
@@ -271,7 +271,7 @@ message, please reply so that we may investigate the problem.
     {'message_id': "nodetectednetwork",
      'subject': "%(hostname)s has unsupported network hardware",
      'template':
-"""
+     """
 
 %(hostname)s failed to boot because it has network hardware that is
 unsupported by the current production kernel. If it has booted

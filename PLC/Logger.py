@@ -1,10 +1,16 @@
 # pylint: disable=c0103
 
+import os
 import logging
 import logging.config
 
 # we essentially need one all-purpose logger
 # that goes into /var/log/plcapi.log
+
+# for debugging
+global_filename = "/var/log/plcapi.log"
+if 'PLCAPILOG' in os.environ:
+    global_filename = os.environ['PLCAPILOG']
 
 plcapi_logging_config = {
     'version': 1,
@@ -19,7 +25,7 @@ plcapi_logging_config = {
     },
     'handlers': {
         'plcapi': {
-            'filename': '/var/log/plcapi.log',
+            'filename': global_filename,
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'standard',

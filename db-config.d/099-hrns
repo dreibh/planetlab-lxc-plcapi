@@ -1,6 +1,7 @@
 # -*-python-*-
-#################### 
+####################
 # quick and dirty, make sure all hrns are set on local nodes
 # could/should get trashed somedy
 
-for node in GetNodes({'peer_id':None}): UpdateNode(node['node_id'],{'hostname':node['hostname']})
+for node in GetNodes({'peer_id': None}):
+    UpdateNode(node['node_id'], {'hostname': node['hostname']})

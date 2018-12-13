@@ -1,9 +1,14 @@
 # -*-python-*-
 ####################
-import sys, os
+import sys
+import os
 
 g_url = ""
+
+
 def GetMyPLCURL(): return g_url
+
+
 def SetMyPLCURL(url):
     global g_url
     g_url = url
@@ -13,21 +18,25 @@ def SetMyPLCURL(url):
 g_known_tag_types = [tag_type['tagname'] for tag_type in GetTagTypes()]
 g_known_tag_types.sort()
 
-def AllPersonRoles (): return [ 'pi','user','tech' ]
+
+def AllPersonRoles():
+    return ['pi', 'user', 'tech']
+
 
 def SetTagType(tag_type):
     try:
-        tagname=tag_type['tagname']
+        tagname = tag_type['tagname']
         global g_known_tag_types
         # handle 'roles' field differently
         if 'roles' in tag_type:
-            roles=tag_type['roles']
+            roles = tag_type['roles']
             del tag_type['roles']
         else:
-            roles=['admin']
+            roles = ['admin']
         # just in case
         if 'min_role_id' in tag_type:
-            print("WARNING: ignoring deprecated field min_role_id for tagtype %s"%tagname)
+            print(
+                "WARNING: ignoring deprecated field min_role_id for tagtype %s" % tagname)
             del tag_type['min_role_id']
         # Create/update default slice tag types
         if tagname not in g_known_tag_types:
@@ -37,24 +46,25 @@ def SetTagType(tag_type):
         else:
             UpdateTagType(tagname, tag_type)
         # enforce provided roles if present
-        old_roles=GetTagTypes(tagname)[0]['roles']
+        old_roles = GetTagTypes(tagname)[0]['roles']
         for minus_role in set(old_roles).difference(set(roles)):
-            DeleteRoleFromTagType(minus_role,tagname)
+            DeleteRoleFromTagType(minus_role, tagname)
         for plus_role in set(roles).difference(set(old_roles)):
-            AddRoleToTagType(plus_role,tagname)
+            AddRoleToTagType(plus_role, tagname)
     except:
         # something went wrong for that tagname,
         # but don't want to break the whole startup sequence
-        print("Could not enforce tagtype %s --- beg"%tagname)
+        print("Could not enforce tagtype %s --- beg" % tagname)
         import traceback
         traceback.print_exc()
-        print("Could not enforce tagtype %s --- end"%tagname)
+        print("Could not enforce tagtype %s --- end" % tagname)
+
 
 # Get list of existing (enabled, global) files
 g_conf_files = GetConfFiles()
-g_conf_files = [conf_file for conf_file in g_conf_files if conf_file['enabled'] and \
-                    not conf_file['node_ids'] and \
-                    not conf_file['nodegroup_ids']]
+g_conf_files = [conf_file for conf_file in g_conf_files if conf_file['enabled'] and
+                not conf_file['node_ids'] and
+                not conf_file['nodegroup_ids']]
 g_dests = [conf_file['dest'] for conf_file in g_conf_files]
 g_conf_files = dict(list(zip(g_dests, g_conf_files)))
 
@@ -63,17 +73,19 @@ g_oldinitscripts = GetInitScripts()
 g_oldinitscript_names = [script['name'] for script in g_oldinitscripts]
 g_oldinitscripts = dict(list(zip(g_oldinitscript_names, g_oldinitscripts)))
 
+
 def SetInitScript(initscript):
     global g_oldinitscripts, g_oldinitscript_names
     if initscript['name'] not in g_oldinitscript_names:
         initscript_id = AddInitScript(initscript)
         g_oldinitscript_names.append(initscript['name'])
-        initscript['initscript_id']=initscript_id
-        g_oldinitscripts[initscript['name']]=initscript
+        initscript['initscript_id'] = initscript_id
+        g_oldinitscripts[initscript['name']] = initscript
     else:
         orig_initscript = g_oldinitscripts[initscript['name']]
         initscript_id = orig_initscript['initscript_id']
         UpdateInitScript(initscript_id, initscript)
+
 
 def SetConfFile(conf_file):
     global g_conf_files, g_dests
@@ -84,17 +96,18 @@ def SetConfFile(conf_file):
         conf_file_id = orig_conf_file['conf_file_id']
         UpdateConfFile(conf_file_id, conf_file)
 
+
 def SetSlice(slice, tags):
     try:
         # Create or Update slice
         slice_name = slice['name']
         slices = GetSlices([slice_name])
-        if len(slices)==1:
+        if len(slices) == 1:
             slice_id = slices[0]['slice_id']
             if 'name' in slice:
                 del slice['name']
             UpdateSlice(slice_id, slice)
-            slice['name']=slice_name
+            slice['name'] = slice_name
         else:
             expires = None
             if 'expires' in slice:
@@ -102,7 +115,7 @@ def SetSlice(slice, tags):
                 del slice['expires']
             slice_id = AddSlice(slice)
             if expires is not None:
-                UpdateSlice(slice_id, {'expires':expires})
+                UpdateSlice(slice_id, {'expires': expires})
 
         # Get slice structure with all fields
         slice = GetSlices([slice_name])[0]
@@ -120,11 +133,12 @@ def SetSlice(slice, tags):
                 if (slice_tag['tagname'], slice_tag['value']) not in tags:
                     DeleteSliceTag(slice_tag['slice_tag_id'])
                 else:
-                    slice_tags.append((slice_tag['tagname'],slice_tag['value']))
+                    slice_tags.append(
+                        (slice_tag['tagname'], slice_tag['value']))
 
         # only add slice tags that are new
         for (name, value) in tags:
-            if (name,value) not in slice_tags:
+            if (name, value) not in slice_tags:
                 AddSliceTag(slice_name, name, value)
             else:
                 # NOTE: this confirms that the user-specified tag is
@@ -132,22 +146,25 @@ def SetSlice(slice, tags):
                 pass
     except:
         # something went wrong for that tagname,
-        print("Could not create init slice %s --- beg"%slice['name'])
+        print("Could not create init slice %s --- beg" % slice['name'])
         import traceback
         traceback.print_exc()
-        print("Could not create init slice %s --- end"%slice['name'])
+        print("Could not create init slice %s --- end" % slice['name'])
+
 
 def SetMessage(message):
     messages = GetMessages([message['message_id']])
-    if len(messages)==0:
+    if len(messages) == 0:
         AddMessage(message)
-    ### Thierry 2012-03
+    # Thierry 2012-03
     # let people customize their messages if they want to
-    #else:
+    # else:
     #    UpdateMessage(message['message_id'],message)
+
 
 # Get all model names
 g_pcu_models = [type['model'] for type in GetPCUTypes()]
+
 
 def SetPCUType(pcu_type):
     global g_pcu_models
