@@ -60,14 +60,16 @@ class PostgreSQL:
 
     @staticmethod
     # From pgdb, and simplify code
+    # this is **very different** from the python2 code !
     def _quote(x):
         if isinstance(x, DateTimeType):
             x = str(x)
-        elif isinstance(x, str):
-            x = x.encode('utf-8')
+        elif isinstance(x, bytes):
+            x = x.decode('utf-8')
 
-        if isinstance(x, bytes):
-            x = "'%s'" % str(x).replace("\\", "\\\\").replace("'", "''")
+        if isinstance(x, str):
+            x = x.replace("\\", "\\\\").replace("'", "''")
+            x = f"'{x}'"
         elif isinstance(x, (int, float)):
             pass
         elif x is None:
