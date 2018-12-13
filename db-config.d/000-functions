@@ -8,16 +8,6 @@ def SetMyPLCURL(url):
     global g_url
     g_url = url
 
-# Get all currently registered roles
-g_role_names = [ role['name'] for role in GetRoles()]
-g_role_names.sort()
-
-def SetRole(level, role):
-    global g_role_names
-    if role not in g_role_names:
-        AddRole(level, role)
-        g_role_names.append(role)
-        g_role_names.sort()
 
 # Get list of existing tag types
 g_known_tag_types = [tag_type['tagname'] for tag_type in GetTagTypes()]
