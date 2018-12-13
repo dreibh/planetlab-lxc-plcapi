@@ -50,5 +50,6 @@ def application(environ, start_response):
     response_headers = [('Content-type', '%s' % content_type),
                        ('Content-Length', str(len(output)))]
     start_response(status, response_headers)
-    return [output] 
-
+    # with python3 wsgi expects a bytes object here
+    output = output.encode()
+    return [output]
