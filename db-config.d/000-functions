@@ -1,5 +1,5 @@
 # -*-python-*-
-#################### 
+####################
 import sys, os
 
 g_url = ""
@@ -37,7 +37,7 @@ def SetTagType(tag_type):
             roles=['admin']
         # just in case
         if 'min_role_id' in tag_type:
-            print "WARNING: ignoring deprecated field min_role_id for tagtype %s"%tagname
+            print("WARNING: ignoring deprecated field min_role_id for tagtype %s"%tagname)
             del tag_type['min_role_id']
         # Create/update default slice tag types
         if tagname not in g_known_tag_types:
@@ -53,26 +53,25 @@ def SetTagType(tag_type):
         for plus_role in set(roles).difference(set(old_roles)):
             AddRoleToTagType(plus_role,tagname)
     except:
-        # something went wrong for that tagname, 
+        # something went wrong for that tagname,
         # but don't want to break the whole startup sequence
-        print "Could not enforce tagtype %s --- beg"%tagname
+        print("Could not enforce tagtype %s --- beg"%tagname)
         import traceback
         traceback.print_exc()
-        print "Could not enforce tagtype %s --- end"%tagname
+        print("Could not enforce tagtype %s --- end"%tagname)
 
 # Get list of existing (enabled, global) files
 g_conf_files = GetConfFiles()
-g_conf_files = filter(lambda conf_file: conf_file['enabled'] and \
+g_conf_files = [conf_file for conf_file in g_conf_files if conf_file['enabled'] and \
                     not conf_file['node_ids'] and \
-                    not conf_file['nodegroup_ids'],
-                    g_conf_files)
+                    not conf_file['nodegroup_ids']]
 g_dests = [conf_file['dest'] for conf_file in g_conf_files]
-g_conf_files = dict(zip(g_dests, g_conf_files))
+g_conf_files = dict(list(zip(g_dests, g_conf_files)))
 
 # Get list of existing initscripts
 g_oldinitscripts = GetInitScripts()
 g_oldinitscript_names = [script['name'] for script in g_oldinitscripts]
-g_oldinitscripts = dict(zip(g_oldinitscript_names, g_oldinitscripts))
+g_oldinitscripts = dict(list(zip(g_oldinitscript_names, g_oldinitscripts)))
 
 def SetInitScript(initscript):
     global g_oldinitscripts, g_oldinitscript_names
@@ -85,7 +84,7 @@ def SetInitScript(initscript):
         orig_initscript = g_oldinitscripts[initscript['name']]
         initscript_id = orig_initscript['initscript_id']
         UpdateInitScript(initscript_id, initscript)
-        
+
 def SetConfFile(conf_file):
     global g_conf_files, g_dests
     if conf_file['dest'] not in g_dests:
@@ -102,50 +101,51 @@ def SetSlice(slice, tags):
         slices = GetSlices([slice_name])
         if len(slices)==1:
             slice_id = slices[0]['slice_id']
-            if slice.has_key('name'):
+            if 'name' in slice:
                 del slice['name']
             UpdateSlice(slice_id, slice)
             slice['name']=slice_name
         else:
             expires = None
-            if slice.has_key('expires'):
+            if 'expires' in slice:
                 expires = slice['expires']
                 del slice['expires']
             slice_id = AddSlice(slice)
-            if expires <> None:
+            if expires is not None:
                 UpdateSlice(slice_id, {'expires':expires})
-    
+
         # Get slice structure with all fields
         slice = GetSlices([slice_name])[0]
-    
+
         # Create/delete all tags
-        # NOTE: update is not needed, since unspecified tags are deleted, 
+        # NOTE: update is not needed, since unspecified tags are deleted,
         #       and new tags are added
         slice_tags = []
         if slice['slice_tag_ids']:
             # Delete unknown attributes
             for slice_tag in GetSliceTags(slice['slice_tag_ids']):
                 # ignore sliver tags, as those are custom/run-time values
-                if slice_tag['node_id'] <> None: continue
+                if slice_tag['node_id'] is not None:
+                    continue
                 if (slice_tag['tagname'], slice_tag['value']) not in tags:
                     DeleteSliceTag(slice_tag['slice_tag_id'])
                 else:
                     slice_tags.append((slice_tag['tagname'],slice_tag['value']))
-    
+
         # only add slice tags that are new
         for (name, value) in tags:
             if (name,value) not in slice_tags:
-                AddSliceTag(slice_name, name, value)            
+                AddSliceTag(slice_name, name, value)
             else:
-                # NOTE: this confirms that the user-specified tag is 
+                # NOTE: this confirms that the user-specified tag is
                 #       returned by GetSliceTags
                 pass
     except:
-        # something went wrong for that tagname, 
-        print "Could not create init slice %s --- beg"%slice['name']
+        # something went wrong for that tagname,
+        print("Could not create init slice %s --- beg"%slice['name'])
         import traceback
         traceback.print_exc()
-        print "Could not create init slice %s --- end"%slice['name']
+        print("Could not create init slice %s --- end"%slice['name'])
 
 def SetMessage(message):
     messages = GetMessages([message['message_id']])
@@ -174,4 +174,3 @@ def SetPCUType(pcu_type):
         # for each protocol, also add this.
         for ptype in protocol_types:
             AddPCUProtocolType(id, ptype)
-

@@ -1,156 +1,156 @@
 # -*-python-*-
-#################### slice tag types
+# slice tag types
 # xxx this should move to PLC/Accessors
 
 # vref is now defined in an accessor
 # initscript is now defined in an accessor
-    
+
 # Setup default slice tag types
 slicetag_types = \
-[
+    [
 
-### this applies on Node, not on Slice
-###    # Slice type (only vserver is supported)
-###    {'tagname': "type",
-###     'description': "Type of slice (e.g. vserver)",
-###     'category' : 'slice/general',
-###     'roles': ['admin','pi']},
-    
-    # System slice
-    {'tagname': "system",
-     'description': "Is a default system slice (1) or not (0 or unset)",
-     'category' : 'slice/general'},
-    
-    # Slice enabled (1) or suspended (0)
-    {'tagname': "enabled",
-     'description': "Slice enabled (1 or unset) or suspended (0)",
-     'category' : 'slice/general'},
-    
-    # IP Addresses for a Slice
-    {'tagname': "ip_addresses",
-     'description': "Add an ip address to a slice/sliver.",
-     'category' : 'slice/rspec'},
-    {'tagname': "isolate_loopback",
-     'description': "Create an isolated loopback interface within the vserver rather than sharing with all vservers.",
-     'category' : 'slice/rspec'},
-    
-    # CPU share
-    {'tagname': "cpu_pct",
-     'description': "Reserved CPU percent",
-     'category' : 'slice/rspec'},
-    {'tagname': "cpu_share",
-     'description': "Number of CPU shares",
-     'category' : 'slice/rspec'},
-    {'tagname': "cpu_cores",
-     'description': "Number of CPU cores",
-     'category': 'slice/rspec'},
-    {'tagname': "cpu_freezable",
-     'description': "Slice processes should be frozen if cpu_cores is 0",
-     'category': 'slice/rspec'},     
+        # this applies on Node, not on Slice
+        # Slice type (only vserver is supported)
+        # {'tagname': "type",
+        # 'description': "Type of slice (e.g. vserver)",
+        # 'category' : 'slice/general',
+        # 'roles': ['admin','pi']},
 
-    # Bandwidth limits
-    {'tagname': "net_min_rate",
-     'description': "Minimum bandwidth (kbps)",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_max_rate",
-     'description': "Maximum bandwidth (kbps)",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_i2_min_rate",
-     'description': "Minimum bandwidth over I2 routes (kbps)",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_i2_max_rate",
-     'description': "Maximum bandwidth over I2 routes (kbps)",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_max_kbyte",
-     'description': "Maximum daily network Tx KByte limit.",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_thresh_kbyte",
-     'description': "KByte limit before warning and throttling.",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_i2_max_kbyte",
-     'description': "Maximum daily network Tx KByte limit to I2 hosts.",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_i2_thresh_kbyte",
-     'description': "KByte limit to I2 hosts before warning and throttling.",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_share",
-     'description': "Number of bandwidth shares",
-     'category' : 'slice/rspec'},
-    {'tagname': "net_i2_share",
-     'description': "Number of bandwidth shares over I2 routes",
-     'category' : 'slice/rspec'},
-    
-    # Disk quota
-    {'tagname': "disk_max",
-     'description': "Disk quota (1k disk blocks)",
-     'category' : 'slice/rspec'},
-    
-    # deprecated in nov. 2010
-    # Proper operations
-    #{'tagname': "proper_op",
-    # 'description': "Proper operation (e.g. bind_socket)",
-    # 'category' : 'slice/rspec'},
-    
-    # VServer capabilities 
-    {'tagname': "capabilities",
-     'description': "VServer bcapabilities (separate by commas)",
-     'category' : 'slice/rspec'},
-    
-    # Vsys
-    # need to allow this one so that slice can have that set from PLC_VSYS_DEFAULT
-    {'tagname': "vsys",
-     'description': "Bind vsys script fd's to a slice's /vsys directory.",
-     'category' : 'slice/rspec',
-     'roles': AllPersonRoles()},
-    {'tagname': "vsys_vnet",
-     'description': """Specify the IP range that can be used in a given slice
+        # System slice
+        {'tagname': "system",
+         'description': "Is a default system slice (1) or not (0 or unset)",
+         'category': 'slice/general'},
+
+        # Slice enabled (1) or suspended (0)
+        {'tagname': "enabled",
+         'description': "Slice enabled (1 or unset) or suspended (0)",
+         'category': 'slice/general'},
+
+        # IP Addresses for a Slice
+        {'tagname': "ip_addresses",
+         'description': "Add an ip address to a slice/sliver.",
+         'category': 'slice/rspec'},
+        {'tagname': "isolate_loopback",
+         'description': "Create an isolated loopback interface within the vserver rather than sharing with all vservers.",
+         'category': 'slice/rspec'},
+
+        # CPU share
+        {'tagname': "cpu_pct",
+         'description': "Reserved CPU percent",
+         'category': 'slice/rspec'},
+        {'tagname': "cpu_share",
+         'description': "Number of CPU shares",
+         'category': 'slice/rspec'},
+        {'tagname': "cpu_cores",
+         'description': "Number of CPU cores",
+         'category': 'slice/rspec'},
+        {'tagname': "cpu_freezable",
+         'description': "Slice processes should be frozen if cpu_cores is 0",
+         'category': 'slice/rspec'},
+
+        # Bandwidth limits
+        {'tagname': "net_min_rate",
+         'description': "Minimum bandwidth (kbps)",
+         'category': 'slice/rspec'},
+        {'tagname': "net_max_rate",
+         'description': "Maximum bandwidth (kbps)",
+         'category': 'slice/rspec'},
+        {'tagname': "net_i2_min_rate",
+         'description': "Minimum bandwidth over I2 routes (kbps)",
+         'category': 'slice/rspec'},
+        {'tagname': "net_i2_max_rate",
+         'description': "Maximum bandwidth over I2 routes (kbps)",
+         'category': 'slice/rspec'},
+        {'tagname': "net_max_kbyte",
+         'description': "Maximum daily network Tx KByte limit.",
+         'category': 'slice/rspec'},
+        {'tagname': "net_thresh_kbyte",
+         'description': "KByte limit before warning and throttling.",
+         'category': 'slice/rspec'},
+        {'tagname': "net_i2_max_kbyte",
+         'description': "Maximum daily network Tx KByte limit to I2 hosts.",
+         'category': 'slice/rspec'},
+        {'tagname': "net_i2_thresh_kbyte",
+         'description': "KByte limit to I2 hosts before warning and throttling.",
+         'category': 'slice/rspec'},
+        {'tagname': "net_share",
+         'description': "Number of bandwidth shares",
+         'category': 'slice/rspec'},
+        {'tagname': "net_i2_share",
+         'description': "Number of bandwidth shares over I2 routes",
+         'category': 'slice/rspec'},
+
+        # Disk quota
+        {'tagname': "disk_max",
+         'description': "Disk quota (1k disk blocks)",
+         'category': 'slice/rspec'},
+
+        # deprecated in nov. 2010
+        # Proper operations
+        # {'tagname': "proper_op",
+        # 'description': "Proper operation (e.g. bind_socket)",
+        # 'category' : 'slice/rspec'},
+
+        # VServer capabilities
+        {'tagname': "capabilities",
+         'description': "VServer bcapabilities (separate by commas)",
+         'category': 'slice/rspec'},
+
+        # Vsys
+        # need to allow this one so that slice can have that set from PLC_VSYS_DEFAULT
+        {'tagname': "vsys",
+         'description': "Bind vsys script fd's to a slice's /vsys directory.",
+         'category': 'slice/rspec',
+         'roles': AllPersonRoles()},
+        {'tagname': "vsys_vnet",
+         'description': """Specify the IP range that can be used in a given slice
 for virtual devices involved in topologies, e.g. 192.168.100.0/24""",
-     'category': 'slice/rspec'},
-    
-    # CoDemux
-    {'tagname': "codemux",
-     'description': "Demux HTTP between slices using localhost ports. Value in the form 'host, localhost port'.",
-     'category' : 'slice/rspec'},
-    
-    # Delegation
-    {'tagname': "delegations",
-     'description': "Coma seperated list of slices to give delegation authority to.",
-     'category' : 'slice/rspec',
-     'roles' : ['admin','pi','user']},
+         'category': 'slice/rspec'},
 
-    # Capability to give a sliver access to unused raw disk
-    {'tagname': "rawdisk",
-     'description': "map unused raw disk devices into the slice",
-     'category' : 'slice/access', # we should get rid of this category thing
-     'roles': ['admin','pi']},
+        # CoDemux
+        {'tagname': "codemux",
+         'description': "Demux HTTP between slices using localhost ports. Value in the form 'host, localhost port'.",
+         'category': 'slice/rspec'},
 
-    { 'tagname' : 'exempt_slice_until',
-      'description' : 'Exclude this slice from MyOps until given date (YYYYMMDD)',
-      'category' : 'slice/myops'},
+        # Delegation
+        {'tagname': "delegations",
+         'description': "Coma seperated list of slices to give delegation authority to.",
+         'category': 'slice/rspec',
+         'roles': ['admin', 'pi', 'user']},
 
-    # DistributedRateLimiting slice
-    {'tagname': "drl",
-     'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
-     'category' : 'slice/general'},
+        # Capability to give a sliver access to unused raw disk
+        {'tagname': "rawdisk",
+         'description': "map unused raw disk devices into the slice",
+         'category': 'slice/access',  # we should get rid of this category thing
+         'roles': ['admin', 'pi']},
 
-    {'tagname' : 'interface',
-     'description' : 'The interface tag holds network configuration information until VirtualInterface objects are in PLCAPI',
-     'category' : 'slice/network'},
+        {'tagname': 'exempt_slice_until',
+         'description': 'Exclude this slice from MyOps until given date (YYYYMMDD)',
+         'category': 'slice/myops'},
 
-]
+        # DistributedRateLimiting slice
+        {'tagname': "drl",
+         'description': "Is a default Distributed Rate Limiting slice (1) or not (0 or unset)",
+         'category': 'slice/general'},
+
+        {'tagname': 'interface',
+         'description': 'The interface tag holds network configuration information until VirtualInterface objects are in PLCAPI',
+         'category': 'slice/network'},
+
+    ]
 
 import resource
 # add in the platform supported rlimits to the default_attribute_types
-for entry in resource.__dict__.keys() + ["VLIMIT_OPENFD"]:
-    if entry.find("LIMIT_")==1:
+for entry in list(resource.__dict__.keys()) + ["VLIMIT_OPENFD"]:
+    if entry.find("LIMIT_") == 1:
         rlim = entry[len("RLIMIT_"):]
         rlim = rlim.lower()
-        for ty in ("min","soft","hard"):
+        for ty in ("min", "soft", "hard"):
             attribute = {
-                'tagname': "%s_%s"%(rlim,ty),
-                'description': "Per sliver RLIMIT %s_%s."%(rlim,ty),
+                'tagname': "%s_%s" % (rlim, ty),
+                'description': "Per sliver RLIMIT %s_%s." % (rlim, ty),
                 'category': 'slice/limit',
-                }
+            }
             slicetag_types.append(attribute)
 
 for slicetag_type in slicetag_types:

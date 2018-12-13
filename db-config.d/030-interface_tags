@@ -1,24 +1,24 @@
 # -*-python-*-
-#################### interface tag types
+# interface tag types
 # xxx this should move to PLC/Accessors
 
 interfacetag_types = \
-[
-    {'category': u'interface/ovs', 
-     'description': u'Name of Open vSwitch bridge', 
-     'tagname': u'ovs_bridge'},
+    [
+        {'category': 'interface/ovs',
+         'description': 'Name of Open vSwitch bridge',
+         'tagname': 'ovs_bridge'},
 
-    # Used by M-lab for IPv6 addresses
-    {'category': u'interface/config', 
-     'description': u'IPv6 gateway', 
-     'tagname': u'ipv6_defaultgw'},
-    {'category': u'interface/config', 
-     'description': u'IPv6 address for the interface',
-     'tagname': u'ipv6addr'},
-    {'category': u'interface/config',
-     'description': u'IPv6 slice addresses',  
-     'tagname': u'ipv6addr_secondaries'},
-]
+        # Used by M-lab for IPv6 addresses
+        {'category': 'interface/config',
+         'description': 'IPv6 gateway',
+         'tagname': 'ipv6_defaultgw'},
+        {'category': 'interface/config',
+         'description': 'IPv6 address for the interface',
+         'tagname': 'ipv6addr'},
+        {'category': 'interface/config',
+         'description': 'IPv6 slice addresses',
+         'tagname': 'ipv6addr_secondaries'},
+    ]
 
 for interfacetag_type in interfacetag_types:
     SetTagType(interfacetag_type)

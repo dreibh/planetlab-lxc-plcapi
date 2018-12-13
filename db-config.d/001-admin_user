@@ -1,23 +1,25 @@
 # -*-python-*-
-#################### 
+####################
 # Create/update the default administrator account (should be person_id 2).
 
-the_admin_id=2
-admin = { 'first_name': "Default",
-          'last_name': "Administrator",
-          'email': plc['root_user'],
-          'password': plc['root_password'] }
+the_admin_id = 2
+
+admin = {'first_name': "Default",
+         'last_name': "Administrator",
+         'email': plc['root_user'],
+         'password': plc['root_password']}
+
 persons = GetPersons(the_admin_id)
+
 if not persons:
     # AddPerson won't let you pass a person_id
     person_id = AddPerson(admin)
     if person_id != the_admin_id:
         # Huh? Someone deleted the account manually from the database.
         DeletePerson(person_id)
-        raise Exception, "Someone deleted the \"%s %s\" account from the database!" % \
-              (admin['first_name'], admin['last_name'])
-    UpdatePerson(person_id, { 'enabled': True })
+        raise Exception("Someone deleted the \"%s %s\" account from the database!" %
+                        (admin['first_name'], admin['last_name']))
+    UpdatePerson(person_id, {'enabled': True})
 else:
     person_id = persons[0]['person_id']
     UpdatePerson(person_id, admin)
-
