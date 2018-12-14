@@ -298,14 +298,16 @@ class Method:
         """
 
         # If any of a number of types is acceptable
-        if isinstance(expected, Mixed):
+        # try them one by one, if one succeeds then it's fine
+        if expected and isinstance(expected, Mixed):
+            to_raise = None
             for item in expected:
                 try:
                     self.type_check(name, value, item, args)
                     return
                 except PLCInvalidArgument as fault:
-                    pass
-            raise fault
+                    to_raise = fault
+            raise to_raise
 
         # If an authentication structure is expected, save it and
         # authenticate after basic type checking is done.
