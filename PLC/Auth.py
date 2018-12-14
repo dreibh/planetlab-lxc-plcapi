@@ -23,7 +23,7 @@ from PLC.Sessions import Session, Sessions
 from PLC.Peers import Peer, Peers
 from PLC.Keys import Keys
 from PLC.Boot import notify_owners
-
+from PLC.Logger import logger
 
 class Auth(Parameter):
     """
@@ -299,9 +299,11 @@ class PasswordAuth(Auth):
         assert 'Username' in auth
 
         # Get record (must be enabled)
+        normalized = auth['Username'].lower()
         persons = Persons(method.api, {
-                          'email': auth['Username'].lower(), 'enabled': True, 'peer_id': None})
+                          'email': normalized, 'enabled': True, 'peer_id': None})
         if len(persons) != 1:
+            logger.info(f"PasswordAuth failed with {normalized}, got {len(persons)} matches")
             raise PLCAuthenticationFailure("PasswordAuth: No such account")
 
         person = persons[0]
