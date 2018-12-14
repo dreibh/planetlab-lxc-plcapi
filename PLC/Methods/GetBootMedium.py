@@ -42,12 +42,12 @@ allowed_actions = {
 # compute a new key
 def compute_key():
     # Generate 32 random bytes
-    bytes = random.sample(range(0, 256), 32)
+    int8s = random.sample(range(0, 256), 32)
     # Base64 encode their string representation
-    key = base64.b64encode("".join(map(chr, bytes)))
+    key = base64.b64encode(bytes(int8s))
     # Boot Manager cannot handle = in the key
     # XXX this sounds wrong, as it might prevent proper decoding
-    key = key.replace("=", "")
+    key = key.replace(b"=", b"")
     return key
 
 class GetBootMedium(Method):
