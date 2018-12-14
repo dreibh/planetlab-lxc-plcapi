@@ -88,7 +88,7 @@ else
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
 	+$(RSYNC) apache/plc.wsgi $(SSHURL)/usr/share/plc_api/apache/
-	$(SSHCOMMAND) "/etc/plc.d/httpd stop; /etc/plc.d/httpd start"
+	$(SSHCOMMAND) systemctl restart plc
 endif
 
 #################### convenience, for debugging only
