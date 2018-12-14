@@ -87,7 +87,7 @@ if args:
         path = os.path.dirname(os.path.abspath(script))
         sys.path.append(path)
         with open(script) as feed:
-            exec(script.read())
+            exec(feed.read())
 
 # Otherwise, run an interactive shell environment
 else:
