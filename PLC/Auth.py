@@ -324,7 +324,7 @@ class PasswordAuth(Auth):
                     "PasswordAuth: Maintenance account password verification failed")
         else:
             # Compare encrypted plaintext against encrypted password stored in the DB
-            plaintext = auth['AuthString'].encode(method.api.encoding)
+            plaintext = auth['AuthString']
             password = person['password']
 
             # Protect against blank passwords in the DB
