@@ -27,7 +27,7 @@ def canonicalize(args, methodname = None, methodresponse = False):
 
     xml = xmlrpc.client.dumps(args, methodname, methodresponse, encoding = 'utf-8', allow_none = 1)
     dom = etree.fromstring(xml)
-    canonical=etree.tostring(dom)
+    canonical = etree.tostring(dom)
     # pre-f20 version was using Canonicalize from PyXML
     # from xml.dom.ext import Canonicalize
     # Canonicalize(), though it claims to, does not encode unicode

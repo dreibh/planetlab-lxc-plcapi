@@ -6,10 +6,7 @@
 #
 
 import crypt
-try:
-    from hashlib import sha1 as sha
-except ImportError:
-    import sha
+from hashlib import sha1 as sha
 import hmac
 import time
 import os
@@ -184,12 +181,6 @@ class BootAuth(Auth):
     PlanetLab version 3.x node authentication structure. Used by the
     Boot Manager to make authenticated calls to the API based on a
     unique node key or boot nonce value.
-
-    The original parameter serialization code did not define the byte
-    encoding of strings, or the string encoding of all other types. We
-    define the byte encoding to be UTF-8, and the string encoding of
-    all other types to be however Python version 2.3 unicode() encodes
-    them.
     """
 
     def __init__(self):
@@ -245,10 +236,7 @@ class BootAuth(Auth):
             args.sort()
             msg = "[" + "".join(args) + "]"
 
-            # We encode in UTF-8 before calculating the HMAC, which is
-            # an 8-bit algorithm.
-            # python 2.6 insists on receiving a 'str' as opposed to a 'unicode'
-            digest = hmac.new(str(key), msg.encode('utf-8'), sha).hexdigest()
+            digest = hmac.new(key.encode('utf-8'), msg.encode('utf-8'), sha).hexdigest()
 
             if digest != auth['value']:
                 raise PLCAuthenticationFailure(

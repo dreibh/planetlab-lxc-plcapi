@@ -50,9 +50,9 @@ class Session(Row):
                 session.delete(commit)
 
             # Generate 32 random bytes
-            bytes = random.sample(range(0, 256), 32)
+            int8s = random.sample(range(0, 256), 32)
             # Base64 encode their string representation
-            self['session_id'] = base64.b64encode("".join(map(chr, bytes)))
+            self['session_id'] = base64.b64encode(bytes(int8s))
             # Force insert
             insert = True
 

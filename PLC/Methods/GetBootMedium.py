@@ -46,7 +46,6 @@ def compute_key():
     # Base64 encode their string representation
     key = base64.b64encode(bytes(int8s))
     # Boot Manager cannot handle = in the key
-    # XXX this sounds wrong, as it might prevent proper decoding
     key = key.replace(b"=", b"")
     return key
 
