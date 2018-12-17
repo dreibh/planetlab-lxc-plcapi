@@ -451,8 +451,13 @@ class GetBootMedium(Method):
                     elif tag['tagname'] == 'no-hangcheck':
                         build_sh_spec['kargs'].append('hcheck_reboot0')
                     elif tag['tagname'] == 'systemd-debug':
+                        #
                         build_sh_spec['kargs'].append('systemd.log_level=debug')
                         build_sh_spec['kargs'].append('systemd.log_target=console')
+                        build_sh_spec['kargs'].append(
+                            'systemd.default_standard_output=journal+console')
+                        build_sh_spec['kargs'].append(
+                            'systemd.default_standard_error=journal+console')
             # then options can override tags
             for option in options:
                 if option == "cramfs":
@@ -472,6 +477,11 @@ class GetBootMedium(Method):
                     build_sh_spec['kargs'].append('hcheck_reboot0')
                 elif option == "systemd-debug":
                     build_sh_spec['kargs'].append('systemd.log_level=debug')
+                    build_sh_spec['kargs'].append('systemd.log_target=console')
+                    build_sh_spec['kargs'].append(
+                        'systemd.default_standard_output=journal+console')
+                    build_sh_spec['kargs'].append(
+                        'systemd.default_standard_error=journal+console')
                 else:
                     raise PLCInvalidArgument("unknown option {}".format(option))
 
