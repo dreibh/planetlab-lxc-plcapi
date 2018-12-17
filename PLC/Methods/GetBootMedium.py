@@ -602,7 +602,7 @@ class GetBootMedium(Method):
                     self.cleantrash()
                     return filename
                 else:
-                    with open(node_image) as feed:
+                    with open(node_image, "rb") as feed:
                         result = feed.read()
                     self.trash.append(node_image)
                     self.cleantrash()
