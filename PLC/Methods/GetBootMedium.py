@@ -24,20 +24,20 @@ from PLC.Accessors.Accessors_standard import *              # node accessors
 # create a dict with the allowed actions for each type of node
 # reservable nodes being more recent, we do not support the floppy stuff anymore
 allowed_actions = {
-    'regular' :
-    [ 'node-preview',
-      'node-floppy',
-      'node-iso',
-      'node-usb',
-      'generic-iso',
-      'generic-usb',
-      ],
-    'reservable':
-    [ 'node-preview',
-      'node-iso',
-      'node-usb',
-      ],
-    }
+    'regular' : [
+        'node-preview',
+        'node-floppy',
+        'node-iso',
+        'node-usb',
+        'generic-iso',
+        'generic-usb',
+    ],
+    'reservable': [
+        'node-preview',
+        'node-iso',
+        'node-usb',
+    ],
+}
 
 # compute a new key
 def compute_key():
@@ -142,9 +142,9 @@ class GetBootMedium(Method):
         Auth(),
         Mixed(Node.fields['node_id'],
               Node.fields['hostname']),
-        Parameter (str, "Action mode, expected value depends of the type of node"),
-        Parameter (str, "Empty string for verbatim result, resulting file full path otherwise"),
-        Parameter ([str], "Options"),
+        Parameter(str, "Action mode, expected value depends of the type of node"),
+        Parameter(str, "Empty string for verbatim result, resulting file full path otherwise"),
+        Parameter([str], "Options"),
         ]
 
     returns = Parameter(str, "Node boot medium, either inlined, or filename, depending on the filename parameter")
@@ -162,7 +162,7 @@ class GetBootMedium(Method):
     ### returns (host, domain) :
     # 'host' : host part of the hostname
     # 'domain' : domain part of the hostname
-    def split_hostname (self, node):
+    def split_hostname(self, node):
         # Split hostname into host and domain parts
         parts = node['hostname'].split(".", 1)
         if len(parts) < 2:
@@ -175,7 +175,7 @@ class GetBootMedium(Method):
     # composed by:
     #  - a common part, regardless of the 'node_type' tag
     #  - XXX a special part, depending on the 'node_type' tag value.
-    def floppy_contents (self, node, renew_key):
+    def floppy_contents(self, node, renew_key):
 
         # Do basic checks
         if node['peer_id'] is not None:
@@ -200,7 +200,7 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument(
                 "No primary network configured on {}".format(node['hostname']))
 
-        host, domain = self.split_hostname (node)
+        host, domain = self.split_hostname(node)
 
         # renew the key and save it on the database
         if renew_key:
@@ -236,7 +236,7 @@ class GetBootMedium(Method):
         file += 'DOMAIN_NAME="{}"\n'.format(domain)
 
         # define various interface settings attached to the primary interface
-        settings = InterfaceTags (self.api, {'interface_id':interface['interface_id']})
+        settings = InterfaceTags(self.api, {'interface_id':interface['interface_id']})
 
         categories = set()
         for setting in settings:
@@ -262,31 +262,31 @@ class GetBootMedium(Method):
         return file
 
     # see also GetNodeFlavour that does similar things
-    def get_nodefamily (self, node, auth):
+    def get_nodefamily(self, node, auth):
         pldistro = self.api.config.PLC_FLAVOUR_NODE_PLDISTRO
         fcdistro = self.api.config.PLC_FLAVOUR_NODE_FCDISTRO
         arch = self.api.config.PLC_FLAVOUR_NODE_ARCH
         if not node:
-            return (pldistro,fcdistro,arch)
+            return pldistro, fcdistro, arch
 
         node_id = node['node_id']
 
         # no support for deployment-based BootCD's, use kvariants instead
-        node_pldistro = GetNodePldistro (self.api,self.caller).call(auth, node_id)
+        node_pldistro = GetNodePldistro(self.api,self.caller).call(auth, node_id)
         if node_pldistro:
             pldistro = node_pldistro
 
-        node_fcdistro = GetNodeFcdistro (self.api,self.caller).call(auth, node_id)
+        node_fcdistro = GetNodeFcdistro(self.api,self.caller).call(auth, node_id)
         if node_fcdistro:
             fcdistro = node_fcdistro
 
-        node_arch = GetNodeArch (self.api,self.caller).call(auth,node_id)
+        node_arch = GetNodeArch(self.api,self.caller).call(auth,node_id)
         if node_arch:
             arch = node_arch
 
-        return (pldistro,fcdistro,arch)
+        return pldistro, fcdistro, arch
 
-    def bootcd_version (self):
+    def bootcd_version(self):
         try:
             with open(self.BOOTCDDIR + "/build/version.txt") as feed:
                 return feed.readline().strip()
@@ -294,7 +294,7 @@ class GetBootMedium(Method):
             raise Exception("Unknown boot cd version - probably wrong bootcd dir : {}"\
                             .format(self.BOOTCDDIR))
 
-    def cleantrash (self):
+    def cleantrash(self):
         for file in self.trash:
             if self.DEBUG:
                 logger.debug('DEBUG -- preserving trash file {}'.format(file))
@@ -305,25 +305,25 @@ class GetBootMedium(Method):
     # build the filename string
     # check for permissions and concurrency
     # returns the filename
-    def handle_filename (self, filename, nodename, suffix, arch):
+    def handle_filename(self, filename, nodename, suffix, arch):
         # allow to set filename to None or any other empty value
         if not filename: filename=''
-        filename = filename.replace ("%d",self.WORKDIR)
-        filename = filename.replace ("%n",nodename)
-        filename = filename.replace ("%s",suffix)
-        filename = filename.replace ("%p",self.api.config.PLC_NAME)
+        filename = filename.replace("%d", self.WORKDIR)
+        filename = filename.replace("%n", nodename)
+        filename = filename.replace("%s", suffix)
+        filename = filename.replace("%p", self.api.config.PLC_NAME)
         # let's be cautious
-        try: filename = filename.replace ("%f", self.nodefamily)
+        try: filename = filename.replace("%f", self.nodefamily)
         except: pass
-        try: filename = filename.replace ("%a", arch)
+        try: filename = filename.replace("%a", arch)
         except: pass
-        try: filename = filename.replace ("%v",self.bootcd_version())
+        try: filename = filename.replace("%v", self.bootcd_version())
         except: pass
 
         ### Check filename location
         if filename != '':
             if 'admin' not in self.caller['roles']:
-                if ( filename.index(self.WORKDIR) != 0):
+                if filename.index(self.WORKDIR) != 0:
                     raise PLCInvalidArgument("File {} not under {}".format(filename, self.WORKDIR))
 
             ### output should not exist (concurrent runs ..)
@@ -331,7 +331,7 @@ class GetBootMedium(Method):
             # looks like people sometime suspend/cancel their download
             # and this leads to the old file sitting in there forever
             # so, if the file is older than 5 minutes, we just trash
-            grace=5
+            grace = 5
             if os.path.exists(filename) and (time.time()-os.path.getmtime(filename)) >= (grace*60):
                 os.unlink(filename)
             if os.path.exists(filename):
@@ -341,12 +341,12 @@ class GetBootMedium(Method):
 
             ### we can now safely create the file,
             ### either we are admin or under a controlled location
-            filedir=os.path.dirname(filename)
+            filedir = os.path.dirname(filename)
             # dirname does not return "." for a local filename like its shell counterpart
             if filedir:
                 if not os.path.exists(filedir):
                     try:
-                        os.makedirs (filedir,0o777)
+                        os.makedirs(filedir, 0o777)
                     except:
                         raise PLCPermissionDenied("Could not create dir {}".format(filedir))
 
@@ -367,7 +367,7 @@ class GetBootMedium(Method):
             logger.error("GetBootMedium.build_command: unexpected node_type {}".format(node_type))
             return command, None
 
-        build_sh_options=""
+        build_sh_options = ""
         if "cramfs" in build_sh_spec:
             type += "_cramfs"
         if "serial" in build_sh_spec:
@@ -396,9 +396,12 @@ class GetBootMedium(Method):
 
         return command, log_file
 
-    def call(self, auth, node_id_or_hostname, action, filename, options = []):
+    def call(self, auth, node_id_or_hostname, action, filename, options=None):
 
-        self.trash=[]
+        if options is None:
+            options = []
+
+        self.trash = []
 
         ### compute file suffix and type
         if action.find("-iso") >= 0 :
@@ -417,14 +420,15 @@ class GetBootMedium(Method):
             raise PLCInvalidArgument("No such node {}".format(node_id_or_hostname))
         node = nodes[0]
 
-        logger.info("GetBootMedium: {} requested on node {}. Node type is: {}"\
+        logger.info("GetBootMedium: {} requested on node {}. Node type is: {}"
             .format(action, node['node_id'], node['node_type']))
 
         # check the required action against the node type
         node_type = node['node_type']
         if action not in allowed_actions[node_type]:
-            raise PLCInvalidArgument("Action {} not valid for {} nodes, valid actions are {}"\
-                                   .format(action, node_type, "|".join(allowed_actions[node_type])))
+            raise PLCInvalidArgument(
+                "Action {} not valid for {} nodes, valid actions are {}"
+                .format(action, node_type, "|".join(allowed_actions[node_type])))
 
         # handle / canonicalize options
         if type == "txt":
@@ -432,13 +436,13 @@ class GetBootMedium(Method):
                 raise PLCInvalidArgument("Options are not supported for node configs")
         else:
             # create a dict for build.sh
-            build_sh_spec={'kargs':[]}
+            build_sh_spec = {'kargs':[]}
             # use node tags as defaults
             # check for node tag equivalents
             tags = NodeTags(self.api,
                             {'node_id': node['node_id'],
                              'tagname': ['serial', 'cramfs', 'kvariant', 'kargs',
-                                         'no-hangcheck', 'systemd-debug' ]},
+                                         'no-hangcheck', 'systemd-debug']},
                             ['tagname', 'value'])
             if tags:
                 for tag in tags:
@@ -458,18 +462,18 @@ class GetBootMedium(Method):
             # then options can override tags
             for option in options:
                 if option == "cramfs":
-                    build_sh_spec['cramfs']=True
+                    build_sh_spec['cramfs'] = True
                 elif option == 'partition':
                     if type != "usb":
                         raise PLCInvalidArgument("option 'partition' is for USB images only")
                     else:
-                        type="usb_partition"
+                        type = "usb_partition"
                 elif option == "serial":
-                    build_sh_spec['serial']='default'
+                    build_sh_spec['serial'] = 'default'
                 elif option.find("serial:") == 0:
-                    build_sh_spec['serial']=option.replace("serial:","")
+                    build_sh_spec['serial'] = option.replace("serial:", "")
                 elif option.find("variant:") == 0:
-                    build_sh_spec['variant']=option.replace("variant:","")
+                    build_sh_spec['variant'] = option.replace("variant:", "")
                 elif option == "no-hangcheck":
                     build_sh_spec['kargs'].append('hcheck_reboot0')
                 elif option == "systemd-debug":
@@ -483,29 +487,31 @@ class GetBootMedium(Method):
         else:
             node = None
             # compute a 8 bytes random number
-            tempbytes = random.sample (range(0,256), 8);
-            def hexa2 (c): return chr((c>>4)+65) + chr ((c&16)+65)
-            nodename = "".join(map(hexa2,tempbytes))
+            tempbytes = random.sample(range(0, 256), 8);
+            def hexa2(c):
+                return chr((c>>4)+65) + chr((c&16)+65)
+            nodename = "".join(map(hexa2, tempbytes))
 
         # get nodefamily
-        (pldistro,fcdistro,arch) = self.get_nodefamily(node, auth)
-        self.nodefamily="{}-{}-{}".format(pldistro, fcdistro, arch)
+        pldistro, fcdistro, arch = self.get_nodefamily(node, auth)
+        self.nodefamily = "{}-{}-{}".format(pldistro, fcdistro, arch)
 
         # apply on globals
-        for attr in [ "BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR" ]:
-            setattr(self,attr,getattr(self,attr).replace("@NODEFAMILY@",self.nodefamily))
+        for attr in ["BOOTCDDIR", "BOOTCDBUILD", "GENERICDIR"]:
+            setattr(self, attr,
+                    getattr(self, attr).replace("@NODEFAMILY@", self.nodefamily))
 
         filename = self.handle_filename(filename, nodename, suffix, arch)
 
         # log call
         if node:
-            self.message='GetBootMedium on node {} - action={}'.format(nodename, action)
-            self.event_objects={'Node': [ node ['node_id'] ]}
+            self.message = 'GetBootMedium on node {} - action={}'.format(nodename, action)
+            self.event_objects = {'Node': [node ['node_id']]}
         else:
-            self.message='GetBootMedium - generic - action={}'.format(action)
+            self.message = 'GetBootMedium - generic - action={}'.format(action)
 
         ### generic media
-        if action == 'generic-iso' or action == 'generic-usb':
+        if action in ('generic-iso', 'generic-usb'):
             if options:
                 raise PLCInvalidArgument("Options are not supported for generic images")
             # this raises an exception if bootcd is missing
@@ -514,8 +520,8 @@ class GetBootMedium(Method):
             generic_path = "{}/{}".format(self.GENERICDIR, generic_name)
 
             if filename:
-                ret=os.system ('cp "{}" "{}"'.format(generic_path, filename))
-                if ret==0:
+                ret = os.system('cp "{}" "{}"'.format(generic_path, filename))
+                if ret == 0:
                     return filename
                 else:
                     raise PLCPermissionDenied("Could not copy {} into {}"\
@@ -528,7 +534,7 @@ class GetBootMedium(Method):
         ### config file preview or regenerated
         if action == 'node-preview' or action == 'node-floppy':
             renew_key = (action == 'node-floppy')
-            floppy = self.floppy_contents (node,renew_key)
+            floppy = self.floppy_contents(node, renew_key)
             if filename:
                 try:
                     with open(filename, 'w') as writer:
@@ -546,19 +552,20 @@ class GetBootMedium(Method):
         # - build and invoke the build command
         # - delivery the resulting image file
 
-        if action == 'node-iso' or action == 'node-usb':
+        if action in ('node-iso', 'node-usb'):
 
             ### check we've got required material
             version = self.bootcd_version()
 
             if not os.path.isfile(self.BOOTCDBUILD):
-                raise PLCAPIError("Cannot locate bootcd/build.sh script {}".format(self.BOOTCDBUILD))
+                raise PLCAPIError("Cannot locate bootcd/build.sh script {}"
+                                  .format(self.BOOTCDBUILD))
 
             # create the workdir if needed
             if not os.path.isdir(self.WORKDIR):
                 try:
-                    os.makedirs(self.WORKDIR,0o777)
-                    os.chmod(self.WORKDIR,0o777)
+                    os.makedirs(self.WORKDIR, 0o777)
+                    os.chmod(self.WORKDIR, 0o777)
                 except:
                     raise PLCPermissionDenied("Could not create dir {}".format(self.WORKDIR))
 
@@ -589,7 +596,8 @@ class GetBootMedium(Method):
                                       .format(self.BOOTCDBUILD, command, log_file))
 
                 if not os.path.isfile(node_image):
-                    raise PLCAPIError("Unexpected location of build.sh output - {}".format(node_image))
+                    raise PLCAPIError("Unexpected location of build.sh output - {}"
+                                      .format(node_image))
 
                 # handle result
                 if filename:
@@ -608,7 +616,11 @@ class GetBootMedium(Method):
                     self.cleantrash()
                     logger.info("GetBootMedium - done with build.sh")
                     encoded_result = base64.b64encode(result)
-                    logger.info("GetBootMedium - done with base64 encoding - lengths: raw={} - b64={}"
+                    # stupidly enough, we need to decode this as str now
+                    # so that we remain compatible with former python2 PLCAPI
+                    encoded_result = encoded_result.decode()
+                    logger.info("GetBootMedium - done with base64 encoding -"
+                                " lengths: raw={} - b64={}"
                                 .format(len(result), len(encoded_result)))
                     return encoded_result
             except:
