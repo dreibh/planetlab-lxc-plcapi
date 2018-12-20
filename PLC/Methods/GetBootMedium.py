@@ -122,10 +122,12 @@ class GetBootMedium(Method):
         variants are used to run a different kernel on the bootCD
         see kvariant.sh for how to create a variant
         - 'no-hangcheck' - disable hangcheck
+        - 'systemd-console' - redirect systemd services outputs in console
         - 'systemd-debug' - turn on systemd debug in bootcd
 
     Tags: the following tags are taken into account when attached to the node:
-        'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck', 'systemd-debug'
+        'serial', 'cramfs', 'kvariant', 'kargs', 'no-hangcheck',
+        'systemd-console', 'systemd-debug',
 
     Security:
         - Non-admins can only generate files for nodes at their sites.
@@ -441,11 +443,12 @@ class GetBootMedium(Method):
             build_sh_spec = {'kargs':[]}
             # use node tags as defaults
             # check for node tag equivalents
-            tags = NodeTags(self.api,
-                            {'node_id': node['node_id'],
-                             'tagname': ['serial', 'cramfs', 'kvariant', 'kargs',
-                                         'no-hangcheck', 'systemd-debug']},
-                            ['tagname', 'value'])
+            tags = NodeTags(
+                self.api,
+                {'node_id': node['node_id'],
+                 'tagname': ['serial', 'cramfs', 'kvariant', 'kargs',
+                             'no-hangcheck', 'systemd-console', 'systemd-debug', ]},
+                ['tagname', 'value'])
             if tags:
                 for tag in tags:
                     if tag['tagname'] == 'serial':
@@ -458,14 +461,14 @@ class GetBootMedium(Method):
                         build_sh_spec['kargs'] += tag['value'].split()
                     elif tag['tagname'] == 'no-hangcheck':
                         build_sh_spec['kargs'].append('hcheck_reboot0')
-                    elif tag['tagname'] == 'systemd-debug':
-                        #
-                        build_sh_spec['kargs'].append('systemd.log_level=debug')
+                    elif tag['tagname'] == 'systemd-console':
                         build_sh_spec['kargs'].append('systemd.log_target=console')
                         build_sh_spec['kargs'].append(
                             'systemd.default_standard_output=journal+console')
                         build_sh_spec['kargs'].append(
                             'systemd.default_standard_error=journal+console')
+                    elif tag['tagname'] == 'systemd-debug':
+                        build_sh_spec['kargs'].append('systemd.log_level=debug')
             # then options can override tags
             for option in options:
                 if option == "cramfs":
@@ -483,13 +486,14 @@ class GetBootMedium(Method):
                     build_sh_spec['variant'] = option.replace("variant:", "")
                 elif option == "no-hangcheck":
                     build_sh_spec['kargs'].append('hcheck_reboot0')
-                elif option == "systemd-debug":
-                    build_sh_spec['kargs'].append('systemd.log_level=debug')
+                elif option == "systemd-console":
                     build_sh_spec['kargs'].append('systemd.log_target=console')
                     build_sh_spec['kargs'].append(
                         'systemd.default_standard_output=journal+console')
                     build_sh_spec['kargs'].append(
                         'systemd.default_standard_error=journal+console')
+                elif option == "systemd-debug":
+                    build_sh_spec['kargs'].append('systemd.log_level=debug')
                 else:
                     raise PLCInvalidArgument("unknown option {}".format(option))
 
