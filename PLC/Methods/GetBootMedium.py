@@ -44,9 +44,11 @@ def compute_key():
     # Generate 32 random bytes
     int8s = random.sample(range(0, 256), 32)
     # Base64 encode their string representation
-    key = base64.b64encode(bytes(int8s))
+    # and, importantly, decode back to return a str
+    # this is important as otherwise we pollute node.txt
+    key = base64.b64encode(bytes(int8s)).decode()
     # Boot Manager cannot handle = in the key
-    key = key.replace(b"=", b"")
+    key = key.replace("=", "")
     return key
 
 class GetBootMedium(Method):
@@ -538,8 +540,8 @@ class GetBootMedium(Method):
                                               .format(generic_path, filename))
             else:
                 ### return the generic medium content as-is, just base64 encoded
-                with open(generic_path) as feed:
-                    return base64.b64encode(feed.read())
+                with open(generic_path, "rb") as feed:
+                    return base64.b64encode(feed.read()).decode()
 
         ### config file preview or regenerated
         if action == 'node-preview' or action == 'node-floppy':
@@ -625,10 +627,9 @@ class GetBootMedium(Method):
                     self.trash.append(node_image)
                     self.cleantrash()
                     logger.info("GetBootMedium - done with build.sh")
-                    encoded_result = base64.b64encode(result)
                     # stupidly enough, we need to decode this as str now
                     # so that we remain compatible with former python2 PLCAPI
-                    encoded_result = encoded_result.decode()
+                    encoded_result = base64.b64encode(result).decode()
                     logger.info("GetBootMedium - done with base64 encoding -"
                                 " lengths: raw={} - b64={}"
                                 .format(len(result), len(encoded_result)))

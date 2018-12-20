@@ -68,9 +68,9 @@ class GenerateNodeConfFile(Method):
             # Generate 32 random bytes
             int8s = random.sample(range(0, 256), 32)
             # Base64 encode their string representation
-            node['key'] = base64.b64encode(bytes(int8s))
+            node['key'] = base64.b64encode(bytes(int8s)).decode()
             # XXX Boot Manager cannot handle = in the key
-            node['key'] = node['key'].replace(b"=", b"")
+            node['key'] = node['key'].replace("=", "")
             # Save it
             node.sync()
 

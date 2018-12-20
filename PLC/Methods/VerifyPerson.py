@@ -65,7 +65,7 @@ class VerifyPerson(Method):
         # Generate 32 random bytes
         int8s = random.sample(range(0, 256), 32)
         # Base64 encode their string representation
-        random_key = base64.b64encode(bytes(int8s))
+        random_key = base64.b64encode(bytes(int8s)).decode()
 
         if verification_key is None or \
         (verification_key is not None and person['verification_expires'] and \
