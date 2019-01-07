@@ -1,6 +1,6 @@
 %define name plcapi
 %define version 5.4
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -149,6 +149,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jan 07 2019 Thierry Parmentelat <thierry.parmentelat@inria.fr> - plcapi-5.4-2
+- last version based on python2, runs on f27 and f29
+- removed dependency to aspects, and so to rate limits
+- remove dependency to the Django rpm that is no longer available in f29
+- remove deps to python-twisted
+- use systemctl rather than service to manage postgresql
+
 * Wed May 16 2018 Thierry <Parmentelat> - plcapi-5.4-1
 - define accessor for site tag disabled_registration (used in plewww-5.2-9)
 - set disable_existing_loggers = False in logging config, that otherwise voids sfa logs
