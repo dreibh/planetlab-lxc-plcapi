@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in ['groupname','value']
+can_update = lambda field_value: field_value[0] in ['groupname','value']
 
 class UpdateNodeGroup(Method):
     """
@@ -15,7 +15,7 @@ class UpdateNodeGroup(Method):
 
     roles = ['admin']
 
-    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    nodegroup_fields = dict(list(filter(can_update, list(NodeGroup.fields.items()))))
 
     accepts = [
         Auth(),
@@ -27,12 +27,12 @@ class UpdateNodeGroup(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, nodegroup_id_or_name, nodegroup_fields):
-        nodegroup_fields = dict(filter(can_update, nodegroup_fields.items()))
+        nodegroup_fields = dict(list(filter(can_update, list(nodegroup_fields.items()))))
 
         # Get nodegroup information
         nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
         if not nodegroups:
-            raise PLCInvalidArgument, "No such nodegroup %r"%nodegroup_id_or_name
+            raise PLCInvalidArgument("No such nodegroup %r"%nodegroup_id_or_name)
         nodegroup = nodegroups[0]
 
         nodegroup.update(nodegroup_fields)
@@ -41,5 +41,5 @@ class UpdateNodeGroup(Method):
         # Logging variables
         self.event_objects = {'NodeGroup': [nodegroup['nodegroup_id']]}
         self.message = 'Node group %d updated: %s' % \
-                (nodegroup['nodegroup_id'], ", ".join(nodegroup_fields.keys()))
+                (nodegroup['nodegroup_id'], ", ".join(list(nodegroup_fields.keys())))
         return 1

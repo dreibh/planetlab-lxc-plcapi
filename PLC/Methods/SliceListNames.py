@@ -38,7 +38,7 @@ class SliceListNames(GetSlices):
         slices = GetSlices.call(self, auth, slice_filter)
 
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument("No such slice")
 
         slice_names = [slice['name'] for slice in slices]
 

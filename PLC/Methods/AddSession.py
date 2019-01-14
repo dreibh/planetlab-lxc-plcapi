@@ -26,7 +26,7 @@ class AddSession(Method):
         persons = Persons(self.api, [person_id_or_email], ['person_id', 'email'])
 
         if not persons:
-            raise PLCInvalidArgument, "No such person"
+            raise PLCInvalidArgument("No such person")
 
         person = persons[0]
         session = Session(self.api)

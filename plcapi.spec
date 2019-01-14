@@ -1,6 +1,6 @@
 %define name plcapi
-%define version 5.4
-%define taglevel 1
+%define version 7.0
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -27,26 +27,16 @@ Requires: httpd mod_ssl
 # Requires: Django
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
 # We use set everywhere
-Requires: python >= 2.7
-Requires: postgresql-python
-Requires: python-psycopg2
-Requires: python-pycurl
+Requires: python3
+Requires: python3-postgresql
+Requires: python3-psycopg2
+Requires: python3-pycurl
 # used in GPG.py as a replacement to PyXML's Canonicalize
-Requires: python-lxml
-# Fedora had support for SOAPpy up to fedora20
-# https://lists.fedoraproject.org/pipermail/devel/2014-June/199730.html
-# https://lists.fedoraproject.org/pipermail/devel/2014-June/200379.html
-%if ("%{distro}" == "Fedora" && %{distrorelease} <= 20) || ("%{distro}" != "Fedora")
-Requires: SOAPpy
-%endif
-#Requires: python-simplejson
+Requires: python3-lxml
 # for the RebootNodeWithPCU method
 Requires: pcucontrol >= 1.0-6
 # for memcache
-Requires: memcached python-memcached
-### avoid having yum complain about updates, as stuff is moving around
-# plc.d/api
-Conflicts: MyPLC <= 4.3
+Requires: memcached python3-memcached
 
 ####################
 # obsolete
@@ -87,7 +77,6 @@ through Apache mod_python.
 #
 # Build __init__.py metafiles and PHP API.
 %{__make} %{?_smp_mflags}
-%{__make} -C wsdl
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -107,10 +96,6 @@ echo "* Installing db-config.d files"
 mkdir -p ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
 cp db-config.d/* ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d
 chmod 444 ${RPM_BUILD_ROOT}/etc/planetlab/db-config.d/*
-
-# Install wsdl
-echo "* Installing wsdl"
-install -D -m 644 wsdl/plcapi.wsdl $RPM_BUILD_ROOT/var/www/html/wsdl/plcapi.wsdl
 
 ## Thierry - June 2013 - omfv6 does not require xmpp pubsub nodes management any more
 ## Install omf_slicemgr.py
@@ -141,7 +126,6 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) %{_datadir}/plc_api/PLC/Accessors/Accessors_site.py
 /etc/plc.d
 /etc/planetlab/db-config.d
-/var/www/html/wsdl/plcapi.wsdl
 #/usr/bin/omf_slicemgr.py*
 #/usr/bin/reset_xmpp_pubsub_nodes.py*
 /var/log/plcapi.log
@@ -149,6 +133,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Jan 07 2019 Thierry Parmentelat <thierry.parmentelat@inria.fr> - plcapi-7.0-0
+- based on python3, runs on f27 and f29
+- removed dependency to aspects, and so to rate limits
+- remove dependency to the Django rpm that is no longer available in f29
+- remove deps to python-twisted
+- use systemctl rather than service to manage postgresql
+
 * Wed May 16 2018 Thierry <Parmentelat> - plcapi-5.4-1
 - define accessor for site tag disabled_registration (used in plewww-5.2-9)
 - set disable_existing_loggers = False in logging config, that otherwise voids sfa logs

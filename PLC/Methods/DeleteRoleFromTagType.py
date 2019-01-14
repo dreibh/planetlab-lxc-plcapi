@@ -31,13 +31,13 @@ class DeleteRoleFromTagType(Method):
         # Get role
         roles = Roles(self.api, [role_id_or_name])
         if not roles:
-            raise PLCInvalidArgument, "Invalid role '%s'" % unicode(role_id_or_name)
+            raise PLCInvalidArgument("Invalid role '%s'" % str(role_id_or_name))
         role = roles[0]
 
         # Get subject tag type
         tag_types = TagTypes(self.api, [tag_type_id_or_tagname])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type"
+            raise PLCInvalidArgument("No such tag type")
         tag_type = tag_types[0]
 
         # Authenticated function
@@ -45,7 +45,7 @@ class DeleteRoleFromTagType(Method):
 
         # Only admins 
         if 'admin' not in self.caller['roles']: 
-            raise PLCInvalidArgument, "Not allowed to revoke that role"
+            raise PLCInvalidArgument("Not allowed to revoke that role")
 
         if role['role_id'] in tag_type['role_ids']:
             tag_type.remove_role(role)

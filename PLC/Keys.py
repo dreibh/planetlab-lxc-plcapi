@@ -29,7 +29,7 @@ class Key(Row):
     def validate_key_type(self, key_type):
         key_types = [row['key_type'] for row in KeyTypes(self.api)]
         if key_type not in key_types:
-            raise PLCInvalidArgument, "Invalid key type"
+            raise PLCInvalidArgument("Invalid key type")
         return key_type
 
     def validate_key(self, key):
@@ -39,7 +39,7 @@ class Key(Row):
                                      " AND is_blacklisted IS True",
                                      locals())
         if rows:
-            raise PLCInvalidArgument, "Key is blacklisted and cannot be used"
+            raise PLCInvalidArgument("Key is blacklisted and cannot be used")
 
         return key
 
@@ -63,7 +63,7 @@ class Key(Row):
 
             good_ssh_key = r'^.*(?:ssh-dss|ssh-rsa)[ ]+[A-Za-z0-9+/=]+(?: .*)?$'
             if not re.match(good_ssh_key, key, re.IGNORECASE):
-                raise PLCInvalidArgument, "Invalid SSH version 2 public key"
+                raise PLCInvalidArgument("Invalid SSH version 2 public key")
 
     def blacklist(self, commit = True):
         """
@@ -108,12 +108,12 @@ class Keys(Table):
               ", ".join(self.columns)
 
         if key_filter is not None:
-            if isinstance(key_filter, (list, tuple, set, int, long)):
+            if isinstance(key_filter, (list, tuple, set, int)):
                 key_filter = Filter(Key.fields, {'key_id': key_filter})
             elif isinstance(key_filter, dict):
                 key_filter = Filter(Key.fields, key_filter)
             else:
-                raise PLCInvalidArgument, "Wrong key filter %r"%key_filter
+                raise PLCInvalidArgument("Wrong key filter %r"%key_filter)
             sql += " AND (%s) %s" % key_filter.sql(api)
 
         self.selectall(sql)

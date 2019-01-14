@@ -1,3 +1,4 @@
+# pylint: disable=c0111, c0103
 #
 # PLCAPI XML-RPC and SOAP interfaces
 #
@@ -7,13 +8,12 @@
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
 
-from __future__ import print_function
+
 
 import os
-import string
 import json
 
-import xmlrpclib
+import xmlrpc.client
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -21,20 +21,20 @@ import xmlrpclib
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
+invalid_codepoints = list(range(0x0, 0x8)) + [0xB, 0xC] + list(range(0xE, 0x1F))
 # broke with f24, somehow we get a unicode
 # as an incoming string to be translated
 str_xml_escape_table = \
-    string.maketrans("".join((chr(x) for x in invalid_codepoints)),
-                     "?" * len(invalid_codepoints))
+    str.maketrans("".join((chr(x) for x in invalid_codepoints)),
+                  "?" * len(invalid_codepoints))
 # loosely inspired from
 # http://stackoverflow.com/questions/1324067/
 # how-do-i-get-str-translate-to-work-with-unicode-strings
 unicode_xml_escape_table = \
-    {invalid: u"?" for invalid in invalid_codepoints}
+    {invalid: "?" for invalid in invalid_codepoints}
 
 
-def xmlrpclib_escape(s, replace=string.replace):
+def xmlrpclib_escape(s, replace=str.replace):
     """
     xmlrpclib does not handle invalid 7-bit control characters. This
     function augments xmlrpclib.escape, which by default only replaces
@@ -54,17 +54,17 @@ def xmlrpclib_escape(s, replace=string.replace):
 
 
 def test_xmlrpclib_escape():
-    inputs = [
+    incomings = [
         # full ASCII
         "".join((chr(x) for x in range(128))),
         # likewise but as a unicode string up to 256
-        u"".join((unichr(x) for x in range(256))),
+        "".join((chr(x) for x in range(256))),
         ]
-    for input in inputs:
+    for incoming in incomings:
         print("==================== xmlrpclib_escape INPUT")
-        print(type(input), '->', input)
+        print(type(incoming), '->', incoming)
         print("==================== xmlrpclib_escape OUTPUT")
-        print(xmlrpclib_escape(input))
+        print(xmlrpclib_escape(incoming))
 
 
 def xmlrpclib_dump(self, value, write):
@@ -80,7 +80,7 @@ def xmlrpclib_dump(self, value, write):
 
     # Use our escape function
     args = [self, value, write]
-    if isinstance(value, (str, unicode)):
+    if isinstance(value, str):
         args.append(xmlrpclib_escape)
 
     try:
@@ -88,7 +88,7 @@ def xmlrpclib_dump(self, value, write):
         f = self.dispatch[type(value)]
     except KeyError:
         # Try for an isinstance() match
-        for Type, f in self.dispatch.iteritems():
+        for Type, f in self.dispatch.items():
             if isinstance(value, Type):
                 f(*args)
                 return
@@ -98,13 +98,12 @@ def xmlrpclib_dump(self, value, write):
 
 
 # You can't hide from me!
-xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
+xmlrpc.client.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 # SOAP support is optional
 try:
     import SOAPpy
     from SOAPpy.Parser import parseSOAPRPC
-    from SOAPpy.Types import faultType
     from SOAPpy.NS import NS
     from SOAPpy.SOAPBuilder import buildSOAP
 except ImportError:
@@ -141,7 +140,7 @@ class PLCAPI:
             for method in getattr(import_deep(fullpath), "methods"):
                 other_methods_map[method] = fullpath
 
-    all_methods = native_methods + other_methods_map.keys()
+    all_methods = native_methods + list(other_methods_map.keys())
 
     def __init__(self, config="/etc/planetlab/plc_config",
                  encoding="utf-8"):
@@ -221,9 +220,8 @@ class PLCAPI:
 
         # Parse request into method name and arguments
         try:
-            interface = xmlrpclib
-            (args, method) = xmlrpclib.loads(data)
-            methodresponse = True
+            interface = xmlrpc.client
+            (args, method) = xmlrpc.client.loads(data)
         except Exception as exc:
             if SOAPpy is not None:
                 interface = SOAPpy
@@ -239,7 +237,7 @@ class PLCAPI:
             result = self.call(source, method, *args)
         except PLCFault as fault:
             # Handle expected faults
-            if interface == xmlrpclib:
+            if interface == xmlrpc.client:
                 result = fault
                 methodresponse = None
             elif interface == SOAPpy:
@@ -249,11 +247,11 @@ class PLCAPI:
                                   % (fault.faultCode, fault.faultString))
 
         # Return result
-        if interface == xmlrpclib:
+        if interface == xmlrpc.client:
             if not isinstance(result, PLCFault):
                 result = (result,)
-            data = xmlrpclib.dumps(result, methodresponse=True,
-                                   encoding=self.encoding, allow_none=1)
+            data = xmlrpc.client.dumps(result, methodresponse=True,
+                                       encoding=self.encoding, allow_none=1)
         elif interface == SOAPpy:
             data = buildSOAP(
                 kw={'%sResponse' % method: {'Result': result}},

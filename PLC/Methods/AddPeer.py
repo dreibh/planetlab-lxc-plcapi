@@ -7,7 +7,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Auth import Auth
 from PLC.Peers import Peer, Peers
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['peername', 'peer_url', 'key', 'cacert', 'shortname', 'hrn_root']
 
 class AddPeer(Method):
@@ -19,7 +19,7 @@ class AddPeer(Method):
 
     roles = ['admin']
 
-    peer_fields = dict(filter(can_update, Peer.fields.items()))
+    peer_fields = dict(list(filter(can_update, list(Peer.fields.items()))))
 
     accepts = [
         Auth(),

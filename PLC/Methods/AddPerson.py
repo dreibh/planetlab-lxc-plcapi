@@ -46,11 +46,11 @@ class AddPerson(Method):
         # type checking
         native = Row.check_fields(native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot add Person with column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot add Person with column(s) %r"%rejected)
 
         missing=[ r for r in required if r not in native ]
         if missing:
-            raise PLCInvalidArgument, "Missing mandatory arguments %s to AddPerson"%missing
+            raise PLCInvalidArgument("Missing mandatory arguments %s to AddPerson"%missing)
 
         # handle native fields
         native['enabled'] = False
@@ -58,11 +58,11 @@ class AddPerson(Method):
         person.sync()
 
         # handle tags
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             tag_types = TagTypes(self.api,{'tagname':tagname})
             if not tag_types:
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             tag_type = tag_types[0] 
             person_tags=PersonTags(self.api,{'tagname':tagname,'person_id':person['person_id']})
             if not person_tags:

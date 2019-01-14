@@ -25,7 +25,7 @@ class DeleteAddressType(Method):
     def call(self, auth, address_type_id_or_name):
         address_types = AddressTypes(self.api, [address_type_id_or_name])
         if not address_types:
-            raise PLCInvalidArgument, "No such address type"
+            raise PLCInvalidArgument("No such address type")
         address_type = address_types[0]
         address_type.delete()
         self.event_objects = {'AddressType': [address_type['address_type_id']]}

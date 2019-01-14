@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # PLCAPI configuration store. Supports XML-based configuration file
 # format exported by MyPLC.
@@ -29,11 +28,11 @@ class Config:
     def __init__(self, file = "/etc/planetlab/plc_config"):
         # Load plc_config
         try:
-            execfile(file, self.__dict__)
+            exec(compile(open(file).read(), file, 'exec'), self.__dict__)
         except:
             # Try myplc directory
             try:
-                execfile(myplc + os.sep + "plc_config", self.__dict__)
+                exec(compile(open(myplc + os.sep + "plc_config").read(), myplc + os.sep + "plc_config", 'exec'), self.__dict__)
             except:
                 raise PLCAPIError("Could not find plc_config in " + \
                                   file + ", " + \
@@ -64,8 +63,8 @@ class XMLConfig:
                                   file + ", " + \
                                   myplc + os.sep + "plc_config.xml")
 
-        for (category, variablelist) in cfg.variables().values():
-            for variable in variablelist.values():
+        for (category, variablelist) in list(cfg.variables().values()):
+            for variable in list(variablelist.values()):
                 # Try to cast each variable to an appropriate Python
                 # type.
                 if variable['type'] == "int":
@@ -91,4 +90,4 @@ class XMLConfig:
 if __name__ == '__main__':
     import pprint
     pprint = pprint.PrettyPrinter()
-    pprint.pprint(Config().__dict__.items())
+    pprint.pprint(list(Config().__dict__.items()))

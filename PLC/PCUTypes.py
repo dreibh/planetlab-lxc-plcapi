@@ -5,8 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
-
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Table import Row, Table
@@ -32,13 +30,13 @@ class PCUType(Row):
     def validate_model(self, model):
         # Make sure name is not blank
         if not len(model):
-            raise PLCInvalidArgument, "Model must be specified"
+            raise PLCInvalidArgument("Model must be specified")
 
         # Make sure boot state does not alredy exist
         conflicts = PCUTypes(self.api, [model])
         for pcu_type in conflicts:
             if 'pcu_type_id' not in self or self['pcu_type_id'] != pcu_type['pcu_type_id']:
-                raise PLCInvalidArgument, "Model already in use"
+                raise PLCInvalidArgument("Model already in use")
 
         return model
 
@@ -52,7 +50,7 @@ class PCUTypes(Table):
         # Remove pcu_protocol_types from query since its not really a field
         # in the db. We will add it later
         if columns == None:
-            columns = PCUType.fields.keys()
+            columns = list(PCUType.fields.keys())
         if 'pcu_protocol_types' in columns:
             removed_fields = ['pcu_protocol_types']
             columns.remove('pcu_protocol_types')
@@ -67,21 +65,21 @@ class PCUTypes(Table):
         if pcu_type_filter is not None:
             if isinstance(pcu_type_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), pcu_type_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), pcu_type_filter)
+                ints = [x for x in pcu_type_filter if isinstance(x, int)]
+                strs = [x for x in pcu_type_filter if isinstance(x, str)]
                 pcu_type_filter = Filter(PCUType.fields, {'pcu_type_id': ints, 'model': strs})
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "OR")
             elif isinstance(pcu_type_filter, dict):
                 pcu_type_filter = Filter(PCUType.fields, pcu_type_filter)
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
-            elif isinstance (pcu_type_filter, StringTypes):
+            elif isinstance (pcu_type_filter, str):
                 pcu_type_filter = Filter(PCUType.fields, {'model':pcu_type_filter})
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
             elif isinstance (pcu_type_filter, int):
                 pcu_type_filter = Filter(PCUType.fields, {'pcu_type_id':pcu_type_filter})
                 sql += " AND (%s) %s" % pcu_type_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong pcu_type filter %r"%pcu_type_filter
+                raise PLCInvalidArgument("Wrong pcu_type filter %r"%pcu_type_filter)
 
 
         self.selectall(sql)

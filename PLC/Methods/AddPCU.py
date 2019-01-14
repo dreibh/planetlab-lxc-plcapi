@@ -5,7 +5,7 @@ from PLC.PCUs import PCU, PCUs
 from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['ip', 'hostname', 'protocol',
               'username', 'password',
               'model', 'notes']
@@ -23,7 +23,7 @@ class AddPCU(Method):
 
     roles = ['admin', 'pi', 'tech']
 
-    pcu_fields = dict(filter(can_update, PCU.fields.items()))
+    pcu_fields = dict(list(filter(can_update, list(PCU.fields.items()))))
 
     accepts = [
         Auth(),
@@ -36,17 +36,17 @@ class AddPCU(Method):
 
 
     def call(self, auth, site_id_or_login_base, pcu_fields):
-        pcu_fields = dict(filter(can_update, pcu_fields.items()))
+        pcu_fields = dict(list(filter(can_update, list(pcu_fields.items()))))
 
         # Get associated site details
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
         site = sites[0]
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to add a PCU to that site"
+                raise PLCPermissionDenied("Not allowed to add a PCU to that site")
 
         pcu = PCU(self.api, pcu_fields)
         pcu['site_id'] = site['site_id']

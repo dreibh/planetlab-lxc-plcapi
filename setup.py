@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Setup script for PLCAPI
 #
@@ -16,9 +16,9 @@ setup(packages = ['PLC', 'PLC/Methods', 'PLC/Methods/system', 'PLC/Accessors'],
         # package for mod_python and mod_wsgi, defer choice to myplc
         ('apache', ['apache/ModPython.py', 'apache/__init__.py', 'apache/plc.wsgi']),
         ('php', ['php/plc_api.php']),
-        ('migrations', 
+        ('migrations',
          ['migrations/README.txt',
-          'migrations/extract-views.py'] 
+          'migrations/extract-views.py']
          + glob('migrations/[0-9][0-9][0-9]*')),
         ('extensions', ['extensions/README.txt']),
         ])

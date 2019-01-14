@@ -1,9 +1,8 @@
 import os
 import sys
 import pprint
-from types import StringTypes
-from email.MIMEText import MIMEText
-from email.Header import Header
+from email.mime.text import MIMEText
+from email.header import Header
 from smtplib import SMTP
 
 from PLC.Logger import logger
@@ -96,4 +95,4 @@ def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
     s.close()
 
     if rejected:
-        raise PLCAPIError, "Error sending message to " + ", ".join(rejected.keys())
+        raise PLCAPIError("Error sending message to " + ", ".join(list(rejected.keys())))

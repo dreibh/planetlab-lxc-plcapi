@@ -27,11 +27,11 @@ class ReportRunlevel(Method):
         if not isinstance(self.caller, Node):
             # check admin
             if 'admin' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not allowed to update node run_level"
+                raise PLCPermissionDenied("Not allowed to update node run_level")
 
             nodes = Nodes(self.api, [node_id_or_hostname])
             if not nodes:
-                raise PLCInvalidArgument, "No such node"
+                raise PLCInvalidArgument("No such node")
         else:
             nodes  = [self.caller]
 
@@ -56,6 +56,6 @@ class ReportRunlevel(Method):
             message="run level " + node['hostname'] + ":"
             if 'run_level' in report_fields:
                 message += str(former_level) + "->" + report_fields['run_level']
-            message += ", ".join(  [ k + "->" + v for (k,v) in report_fields.items() if k not in ['run_level'] ] )
+            message += ", ".join(  [ k + "->" + v for (k,v) in list(report_fields.items()) if k not in ['run_level'] ] )
 
         return 1

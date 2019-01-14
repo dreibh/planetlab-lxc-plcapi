@@ -27,7 +27,7 @@ class DeleteBootState(Method):
     def call(self, auth, name):
         boot_states = BootStates(self.api, [name])
         if not boot_states:
-            raise PLCInvalidArgument, "No such boot state"
+            raise PLCInvalidArgument("No such boot state")
         boot_state = boot_states[0]
 
         boot_state.delete()

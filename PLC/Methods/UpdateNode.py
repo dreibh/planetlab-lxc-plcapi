@@ -48,7 +48,7 @@ class UpdateNode(Method):
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot update Node column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot update Node column(s) %r"%rejected)
 
         # Authenticated function
         assert self.caller is not None
@@ -56,26 +56,26 @@ class UpdateNode(Method):
         # Remove admin only fields
         if 'admin' not in self.caller['roles']:
             for key in admin_only:
-                if native.has_key(key):
+                if key in native:
                     del native[key]
 
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+            raise PLCInvalidArgument("No such node %r"%node_id_or_hostname)
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node %r"%node_id_or_hostname
+            raise PLCInvalidArgument("Not a local node %r"%node_id_or_hostname)
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
+                raise PLCPermissionDenied("Not allowed to delete nodes from specified site")
 
         # Make requested associations
-        for (k,v) in related.iteritems():
+        for (k,v) in related.items():
             node.associate(auth, k,v)
 
         node.update(native)
@@ -92,11 +92,11 @@ class UpdateNode(Method):
             login_base = site['login_base']
             tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             tag_types = TagTypes(self.api,{'tagname':tagname})
             if not tag_types:
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             tag_type = tag_types[0]
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:
@@ -117,8 +117,8 @@ class UpdateNode(Method):
             self.message = 'Node %s updated'%node['hostname']
         else:
             self.message = 'Node %d updated'%node['node_id']
-        self.message += " [%s]." % (", ".join(node_fields.keys()),)
-        if 'boot_state' in node_fields.keys():
+        self.message += " [%s]." % (", ".join(list(node_fields.keys())),)
+        if 'boot_state' in list(node_fields.keys()):
             self.message += ' boot_state updated to %s' % node_fields['boot_state']
 
         return 1

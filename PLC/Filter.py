@@ -1,7 +1,6 @@
 #
 # Thierry Parmentelat - INRIA
 #
-from types import StringTypes
 import time
 
 from PLC.Faults import *
@@ -70,9 +69,9 @@ class Filter(Parameter, dict):
     * similarly the two special keys below allow to change the semantics of multi-keys filters
       * '-AND' : select rows that match ALL the criteria (default)
       * '-OR'  : select rows that match ANY criteria
-      The value attached to these keys is ignored. 
+      The value attached to these keys is ignored.
       Please note however that because a Filter is a dict, you cannot provide two criteria on a given key.
-      
+
 
     Here are a few realistic examples
 
@@ -104,7 +103,7 @@ class Filter(Parameter, dict):
         # either a value or a list of values for each of the specified
         # fields.
         self.fields = dict ( [ ( field, Mixed (expected, [expected]))
-                                 for (field,expected) in fields.iteritems() ] )
+                                 for (field,expected) in fields.items() ] )
 
         # Null filter means no filter
         Parameter.__init__(self, self.fields, doc = doc, nullok = True)
@@ -114,10 +113,10 @@ class Filter(Parameter, dict):
         Returns a SQL conditional that represents this filter.
         """
 
-        if self.has_key('-AND'):
+        if '-AND' in self:
             del self['-AND']
             join_with='AND'
-        if self.has_key('-OR'):
+        if '-OR' in self:
             del self['-OR']
             join_with='OR'
 
@@ -135,7 +134,7 @@ class Filter(Parameter, dict):
         sorts = []
         clips = []
 
-        for field, value in self.iteritems():
+        for field, value in self.items():
             # handle negation, numeric comparisons
             # simple, 1-depth only mechanism
 
@@ -146,7 +145,7 @@ class Filter(Parameter, dict):
                        '&' : False, '|' : False,
                        }
             def check_modifiers(field):
-                if field[0] in modifiers.keys():
+                if field[0] in list(modifiers.keys()):
                     modifiers[field[0]] = True
                     field = field[1:]
                     return check_modifiers(field)
@@ -156,7 +155,7 @@ class Filter(Parameter, dict):
             # filter on fields
             if not modifiers['-']:
                 if field not in self.fields:
-                    raise PLCInvalidArgument, "Invalid filter field '%s'" % field
+                    raise PLCInvalidArgument("Invalid filter field '%s'" % field)
 
                 # handling array fileds always as compound values
                 if modifiers['&'] or modifiers['|']:
@@ -167,7 +166,7 @@ class Filter(Parameter, dict):
                     if value is None:
                         operator = "IS"
                         value = "NULL"
-                    elif isinstance(value, StringTypes) and \
+                    elif isinstance(value, str) and \
                             (value.find("*") > -1 or value.find("%") > -1):
                         operator = "ILIKE"
                         # insert *** in pattern instead of either * or %
@@ -212,7 +211,7 @@ class Filter(Parameter, dict):
                             else:
                                 vals[base_op] = [val]
                         subclauses = []
-                        for operator in vals.keys():
+                        for operator in list(vals.keys()):
                             if operator == '=':
                                 if modifiers['&']:
                                     subclauses.append("(%s @> ARRAY[%s])" % (field, ",".join(vals[operator])))
@@ -238,7 +237,7 @@ class Filter(Parameter, dict):
             # sorting and clipping
             else:
                 if field not in ('SORT','OFFSET','LIMIT'):
-                    raise PLCInvalidArgument, "Invalid filter, unknown sort and clip field %r"%field
+                    raise PLCInvalidArgument("Invalid filter, unknown sort and clip field %r"%field)
                 # sorting
                 if field == 'SORT':
                     if not isinstance(value,(list,tuple,set)):
@@ -251,7 +250,7 @@ class Filter(Parameter, dict):
                             field = field[1:]
                             order = 'DESC'
                         if field not in self.fields:
-                            raise PLCInvalidArgument, "Invalid field %r in SORT filter"%field
+                            raise PLCInvalidArgument("Invalid field %r in SORT filter"%field)
                         sorts.append("%s %s"%(field,order))
                 # clipping
                 elif field == 'OFFSET':

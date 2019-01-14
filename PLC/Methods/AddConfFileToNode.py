@@ -28,17 +28,17 @@ class AddConfFileToNode(Method):
         # Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
-            raise PLCInvalidArgument, "No such configuration file"
+            raise PLCInvalidArgument("No such configuration file")
         conf_file = conf_files[0]
 
         # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument("Not a local node")
 
         # Link configuration file to node
         if node['node_id'] not in conf_file['node_ids']:

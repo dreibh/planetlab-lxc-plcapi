@@ -32,16 +32,16 @@ class AddNodeToPCU(Method):
          # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument("Not a local node")
 
         # Get PCU
         pcus = PCUs(self.api, [pcu_id])
         if not pcus:
-            raise PLCInvalidArgument, "No such PCU"
+            raise PLCInvalidArgument("No such PCU")
         pcu = pcus[0]
 
         if 'admin' not in self.caller['roles']:
@@ -52,17 +52,17 @@ class AddNodeToPCU(Method):
                     ok = True
                     break
             if not ok:
-                raise PLCPermissionDenied, "Not allowed to update that PCU"
+                raise PLCPermissionDenied("Not allowed to update that PCU")
 
         # Add node to PCU
         if node['node_id'] in pcu['node_ids']:
-            raise PLCInvalidArgument, "Node already controlled by PCU"
+            raise PLCInvalidArgument("Node already controlled by PCU")
 
         if node['site_id'] != pcu['site_id']:
-            raise PLCInvalidArgument, "Node is at a different site than this PCU"
+            raise PLCInvalidArgument("Node is at a different site than this PCU")
 
         if port in pcu['ports']:
-            raise PLCInvalidArgument, "PCU port already in use"
+            raise PLCInvalidArgument("PCU port already in use")
 
         pcu.add_node(node, port)
 

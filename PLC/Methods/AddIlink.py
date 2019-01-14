@@ -41,14 +41,14 @@ class AddIlink(Method):
 
         src_if = Interfaces (self.api, [src_if_id],['interface_id'])
         if not src_if:
-            raise PLCInvalidArgument, "No such source interface %r"%src_if_id
+            raise PLCInvalidArgument("No such source interface %r"%src_if_id)
         dst_if = Interfaces (self.api, [dst_if_id],['interface_id'])
         if not dst_if:
-            raise PLCInvalidArgument, "No such destination interface %r"%dst_if_id
+            raise PLCInvalidArgument("No such destination interface %r"%dst_if_id)
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "AddIlink: No such tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("AddIlink: No such tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # checks for existence - with the same type
@@ -59,20 +59,20 @@ class AddIlink(Method):
 
         if len(conflicts) :
             ilink=conflicts[0]
-            raise PLCInvalidArgument, "Ilink (%s,%d,%d) already exists and has value %r"\
-                %(tag_type['name'],src_if_id,dst_if_id,ilink['value'])
+            raise PLCInvalidArgument("Ilink (%s,%d,%d) already exists and has value %r"\
+                %(tag_type['name'],src_if_id,dst_if_id,ilink['value']))
 
         # check authorizations
         if 'admin' in self.caller['roles']:
             pass
         elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
+            raise PLCPermissionDenied("%s, forbidden tag %s"%(self.name,tag_type['tagname']))
         elif AuthorizeHelpers.interface_belongs_to_person (self.api, src_if, self.caller):
             pass
         elif src_if_id != dst_if_id and AuthorizeHelpers.interface_belongs_to_person (self.api, dst_if, self.caller):
             pass
         else:
-            raise PLCPermissionDenied, "%s: you must one either the src or dst interface"%self.name
+            raise PLCPermissionDenied("%s: you must one either the src or dst interface"%self.name)
             
         ilink = Ilink(self.api)
         ilink['tag_type_id'] = tag_type['tag_type_id']

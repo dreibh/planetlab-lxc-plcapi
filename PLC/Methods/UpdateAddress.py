@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.Addresses import Address, Addresses
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['line1', 'line2', 'line3',
               'city', 'state', 'postalcode', 'country']
 
@@ -20,7 +20,7 @@ class UpdateAddress(Method):
 
     roles = ['admin', 'pi']
 
-    address_fields = dict(filter(can_update, Address.fields.items()))
+    address_fields = dict(list(filter(can_update, list(Address.fields.items()))))
 
     accepts = [
         Auth(),
@@ -31,17 +31,17 @@ class UpdateAddress(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, address_id, address_fields):
-        address_fields = dict(filter(can_update, address_fields.items()))
+        address_fields = dict(list(filter(can_update, list(address_fields.items()))))
 
         # Get associated address details
         addresses = Addresses(self.api, [address_id])
         if not addresses:
-            raise PLCInvalidArgument, "No such address"
+            raise PLCInvalidArgument("No such address")
         address = addresses[0]
 
         if 'admin' not in self.caller['roles']:
             if address['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Address must be associated with one of your sites"
+                raise PLCPermissionDenied("Address must be associated with one of your sites")
 
         address.update(address_fields)
         address.sync()
@@ -49,6 +49,6 @@ class UpdateAddress(Method):
         # Logging variables
         self.event_objects = {'Address': [address['address_id']]}
         self.message = 'Address %d updated: %s' % \
-                (address['address_id'], ", ".join(address_fields.keys()))
+                (address['address_id'], ", ".join(list(address_fields.keys())))
 
         return 1

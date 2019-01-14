@@ -30,7 +30,7 @@ class DeleteLeases(Method):
         # Get associated lease details
         leases = Leases(self.api, lease_ids)
         if len(leases) != len(lease_ids):
-            raise PLCInvalidArgument, "Could not find all leases %r"%lease_ids
+            raise PLCInvalidArgument("Could not find all leases %r"%lease_ids)
 
         # fetch related slices
         slices = Slices(self.api, [ lease['slice_id'] for lease in leases],['slice_id','person_ids'])
@@ -42,13 +42,13 @@ class DeleteLeases(Method):
             if 'admin' not in self.caller['roles']:
                 slice=slice_map[lease['slice_id']]
                 # check slices only once
-                if not slice.has_key('verified'):
+                if 'verified' not in slice:
                     if self.caller['person_id'] in slice['person_ids']:
                         pass
                     elif 'pi' not in self.caller['roles']:
-                        raise PLCPermissionDenied, "Not a member of slice %r"%slice['name']
+                        raise PLCPermissionDenied("Not a member of slice %r"%slice['name'])
                     elif slice['site_id'] not in self.caller['site_ids']:
-                        raise PLCPermissionDenied, "Slice %r not associated with any of your sites"%slice['name']
+                        raise PLCPermissionDenied("Slice %r not associated with any of your sites"%slice['name'])
                 slice['verified']=True
 
             lease.delete()

@@ -46,12 +46,12 @@ class AddNode(Method):
         # type checking
         native = Row.check_fields(native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot add Node with column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot add Node with column(s) %r"%rejected)
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
 
         site = sites[0]
 
@@ -63,7 +63,7 @@ class AddNode(Method):
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
                 assert self.caller['person_id'] not in site['person_ids']
-                raise PLCPermissionDenied, "Not allowed to add nodes to specified site"
+                raise PLCPermissionDenied("Not allowed to add nodes to specified site")
             else:
                 assert self.caller['person_id'] in site['person_ids']
 
@@ -76,11 +76,11 @@ class AddNode(Method):
         login_base = site['login_base']
         tags['hrn'] = hostname_to_hrn(root_auth, login_base, node['hostname'])
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             tag_types = TagTypes(self.api,{'tagname':tagname})
             if not tag_types:
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             tag_type = tag_types[0] 
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:

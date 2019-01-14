@@ -36,7 +36,7 @@ class ResolveSlices(Method):
     def call(self, auth, slice_filter = None):
 
         # Must query at least slice_id (see below)
-        return_fields = self.applicable_fields.keys()
+        return_fields = list(self.applicable_fields.keys())
         # pass expires=0
         slices = Slices(self.api, slice_filter, return_fields, 0)
         return slices

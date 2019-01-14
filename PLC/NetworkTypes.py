@@ -25,12 +25,12 @@ class NetworkType(Row):
     def validate_type(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Network type must be specified"
+            raise PLCInvalidArgument("Network type must be specified")
 
         # Make sure network type does not alredy exist
         conflicts = NetworkTypes(self.api, [name])
         if conflicts:
-            raise PLCInvalidArgument, "Network type name already in use"
+            raise PLCInvalidArgument("Network type name already in use")
 
         return name
 

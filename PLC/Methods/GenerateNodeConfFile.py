@@ -35,17 +35,17 @@ class GenerateNodeConfFile(Method):
         # Get node information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument("Not a local node")
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to generate a configuration file for that node"
+                raise PLCPermissionDenied("Not allowed to generate a configuration file for that node")
 
         # Get interfaces for this node
         primary = None
@@ -55,20 +55,20 @@ class GenerateNodeConfFile(Method):
                 primary = interface
                 break
         if primary is None:
-            raise PLCInvalidArgument, "No primary network configured"
+            raise PLCInvalidArgument("No primary network configured")
 
         # Split hostname into host and domain parts
         parts = node['hostname'].split(".", 1)
         if len(parts) < 2:
-            raise PLCInvalidArgument, "Node hostname is invalid"
+            raise PLCInvalidArgument("Node hostname is invalid")
         host = parts[0]
         domain = parts[1]
 
         if regenerate_node_key:
             # Generate 32 random bytes
-            bytes = random.sample(xrange(0, 256), 32)
+            int8s = random.sample(range(0, 256), 32)
             # Base64 encode their string representation
-            node['key'] = base64.b64encode("".join(map(chr, bytes)))
+            node['key'] = base64.b64encode(bytes(int8s)).decode()
             # XXX Boot Manager cannot handle = in the key
             node['key'] = node['key'].replace("=", "")
             # Save it

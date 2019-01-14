@@ -83,13 +83,13 @@ class FileLock:
             if (time.time() - os.stat(self.fpath).st_ctime) > self.expire:
                 try:
                     os.unlink(self.fpath)
-                except Exception, e:
+                except Exception as e:
                     message('FileLock.lock({}) : {}'.format(self.fpath, e))
                     return False
         try:
             self.fd = open(self.fpath, 'w')
             fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except IOError, e:
+        except IOError as e:
             message('FileLock.lock({}) : {}'.format(self.fpath, e))
             return False
         return True
@@ -98,7 +98,7 @@ class FileLock:
         try:
             fcntl.flock(self.fd, fcntl.LOCK_UN | fcntl.LOCK_NB)
             self.fd.close()
-        except IOError, e:
+        except IOError as e:
             message('FileLock.unlock({}) : {}'.format(self.fpath, e))
 
 
@@ -163,14 +163,14 @@ class RefreshPeer(Method):
         file_lock = FileLock("/tmp/refresh-peer-{peername}.lock"
                              .format(peername=peername))
         if not file_lock.lock():
-            raise Exception, "Another instance of RefreshPeer is running."
+            raise Exception("Another instance of RefreshPeer is running.")
         try:
             ret_val = self.real_call(auth, peer_id_or_peername)
-        except Exception, e:
+        except Exception as e:
             file_lock.unlock()
             logger.exception("RefreshPeer caught exception - BEG")
             message("RefreshPeer caught exception - END")
-            raise Exception, e
+            raise Exception(e)
         file_lock.unlock()
         return ret_val
 
@@ -178,7 +178,7 @@ class RefreshPeer(Method):
         # Get peer
         peers = Peers(self.api, [peer_id_or_peername])
         if not peers:
-            raise PLCInvalidArgument, "No such peer '{}'".format(unicode(peer_id_or_peername))
+            raise PLCInvalidArgument("No such peer '{}'".format(str(peer_id_or_peername)))
         peer = peers[0]
         peer_id = peer['peer_id']
         peername = peer['peername']
@@ -281,7 +281,7 @@ class RefreshPeer(Method):
             synced = {}
 
             # Delete stale objects
-            for peer_object_id, object in objects.iteritems():
+            for peer_object_id, object in objects.items():
                 if peer_object_id not in peer_objects:
                     object.delete(commit=commit_mode)
                     message("{} {} {} deleted"
@@ -330,7 +330,7 @@ class RefreshPeer(Method):
                     return True
 
             # Add/update new/existing objects
-            for peer_object_id, peer_object in peer_objects.iteritems():
+            for peer_object_id, peer_object in peer_objects.items():
                 peer_object_name = ""
                 if secondary_key:
                     peer_object_name = "({})".format(peer_object[secondary_key])
@@ -381,7 +381,7 @@ class RefreshPeer(Method):
                                             id=peer_object_id, mode=commit_mode))
                     try:
                         object.sync(commit=commit_mode)
-                    except PLCInvalidArgument, err:
+                    except PLCInvalidArgument as err:
                         # XXX Log an event instead of printing to logfile
                         # skip if validation fails
                         message("Warning: {peername} Skipping invalid {classname} ({err})\n{object}"
@@ -426,7 +426,7 @@ class RefreshPeer(Method):
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Sites']:
-            columns = peer_tables['Sites'][0].keys()
+            columns = list(peer_tables['Sites'][0].keys())
             columns = intersect(columns, Site.fields)
         else:
             columns = None
@@ -441,7 +441,7 @@ class RefreshPeer(Method):
         peer_sites = sync(old_peer_sites, sites_at_peer, Site,
                           ignore(columns, RefreshPeer.ignore_site_fields))
 
-        for peer_site_id, site in peer_sites.iteritems():
+        for peer_site_id, site in peer_sites.items():
             # Bind any newly cached sites to peer
             if peer_site_id not in old_peer_sites:
                 peer.add_site(site, peer_site_id, commit=commit_mode)
@@ -466,7 +466,7 @@ class RefreshPeer(Method):
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Keys']:
-            columns = peer_tables['Keys'][0].keys()
+            columns = list(peer_tables['Keys'][0].keys())
             columns = intersect(columns, Key.fields)
         else:
             columns = None
@@ -478,7 +478,7 @@ class RefreshPeer(Method):
                              for key in peer_tables['Keys']])
 
         # Fix up key_type references
-        for peer_key_id, key in keys_at_peer.items():
+        for peer_key_id, key in list(keys_at_peer.items()):
             if key['key_type'] not in key_types:
                 # XXX Log an event instead of printing to logfile
                 message("Warning: Skipping invalid {peername} key {key}"
@@ -489,7 +489,7 @@ class RefreshPeer(Method):
         # Synchronize new set (still keyed on foreign key_id)
         peer_keys = sync(old_peer_keys, keys_at_peer, Key,
                          ignore(columns, RefreshPeer.ignore_key_fields))
-        for peer_key_id, key in peer_keys.iteritems():
+        for peer_key_id, key in peer_keys.items():
             # Bind any newly cached keys to peer
             if peer_key_id not in old_peer_keys:
                 peer.add_key(key, peer_key_id, commit=commit_mode)
@@ -508,7 +508,7 @@ class RefreshPeer(Method):
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Persons']:
-            columns = peer_tables['Persons'][0].keys()
+            columns = list(peer_tables['Persons'][0].keys())
             columns = intersect(columns, Person.fields)
         else:
             columns = None
@@ -533,9 +533,9 @@ class RefreshPeer(Method):
 
         # transcoder : retrieve a local key_id from a peer_key_id
         key_transcoder = dict([(key['key_id'], peer_key_id)
-                               for peer_key_id, key in peer_keys.iteritems()])
+                               for peer_key_id, key in peer_keys.items()])
 
-        for peer_person_id, person in peer_persons.iteritems():
+        for peer_person_id, person in peer_persons.items():
             # Bind any newly cached users to peer
             if peer_person_id not in old_peer_persons:
                 peer.add_person(person, peer_person_id, commit=commit_mode)
@@ -590,7 +590,7 @@ class RefreshPeer(Method):
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Nodes']:
-            columns = peer_tables['Nodes'][0].keys()
+            columns = list(peer_tables['Nodes'][0].keys())
             columns = intersect(columns, Node.fields)
         else:
             columns = Node.fields
@@ -602,7 +602,7 @@ class RefreshPeer(Method):
                               for node in peer_tables['Nodes']])
 
         # Fix up site_id and boot_states references
-        for peer_node_id, node in nodes_at_peer.items():
+        for peer_node_id, node in list(nodes_at_peer.items()):
             errors = []
             if node['site_id'] not in peer_sites:
                 errors.append("invalid (or disabled) site {}".format(node['site_id']))
@@ -622,7 +622,7 @@ class RefreshPeer(Method):
         peer_nodes = sync(old_peer_nodes, nodes_at_peer, Node,
                           ignore(columns, RefreshPeer.ignore_node_fields))
 
-        for peer_node_id, node in peer_nodes.iteritems():
+        for peer_node_id, node in peer_nodes.items():
             # Bind any newly cached foreign nodes to peer
             if peer_node_id not in old_peer_nodes:
                 peer.add_node(node, peer_node_id, commit=commit_mode)
@@ -669,7 +669,7 @@ class RefreshPeer(Method):
 
         # Compare only the columns returned by the GetPeerData() call
         if peer_tables['Slices']:
-            columns = peer_tables['Slices'][0].keys()
+            columns = list(peer_tables['Slices'][0].keys())
             columns = intersect(columns, Slice.fields)
         else:
             columns = None
@@ -681,7 +681,7 @@ class RefreshPeer(Method):
                                for slice in peer_tables['Slices']])
 
         # Fix up site_id, instantiation, and creator_person_id references
-        for peer_slice_id, slice in slices_at_peer.items():
+        for peer_slice_id, slice in list(slices_at_peer.items()):
             errors = []
             if slice['site_id'] not in peer_sites:
                 errors.append("invalid site {}".format(slice['site_id']))
@@ -710,11 +710,11 @@ class RefreshPeer(Method):
         message('(7) Dealing with Nodes in Slices')
         # transcoder : retrieve a local node_id from a peer_node_id
         node_transcoder = dict([(node['node_id'], peer_node_id)
-                                for peer_node_id, node in peer_nodes.iteritems()])
+                                for peer_node_id, node in peer_nodes.items()])
         person_transcoder = dict([(person['person_id'], peer_person_id)
-                                  for peer_person_id, person in peer_persons.iteritems()])
+                                  for peer_person_id, person in peer_persons.items()])
 
-        for peer_slice_id, slice in peer_slices.iteritems():
+        for peer_slice_id, slice in peer_slices.items():
             # Bind any newly cached foreign slices to peer
             if peer_slice_id not in old_peer_slices:
                 peer.add_slice(slice, peer_slice_id, commit=commit_mode)
@@ -764,7 +764,7 @@ class RefreshPeer(Method):
             # The one-line map/filter style is nicer but ineffective here
             old_slice_person_ids = []
             for person_id in slice['person_ids']:
-                if not person_transcoder.has_key(person_id):
+                if person_id not in person_transcoder:
                     message('WARNING : person_id {person_id} in {slicename} not transcodable (1) - skipped'
                             .format(person_id=person_id, slicename=slice['name']))
                 elif person_transcoder[person_id] not in peer_persons:
@@ -806,7 +806,7 @@ class RefreshPeer(Method):
 
         message('(8) Dealing with Persons in Sites')
 
-        for peer_site_id, site in peer_sites.iteritems():
+        for peer_site_id, site in peer_sites.items():
             # Site as viewed by peer
             peer_site = sites_at_peer[peer_site_id]
 
@@ -845,7 +845,7 @@ class RefreshPeer(Method):
 
         roles = Roles(self.api)
         roles_dict = dict([(role['role_id'], role) for role in roles])
-        for peer_person_id, person in peer_persons.iteritems():
+        for peer_person_id, person in peer_persons.items():
             # Person as viewed by peer
             peer_person = persons_at_peer[peer_person_id]
 

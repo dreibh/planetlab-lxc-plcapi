@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 import re
 
 from PLC.Faults import *
@@ -94,25 +93,25 @@ class Node(Row):
     def validate_hostname(self, hostname):
         hostname = hostname.lower()
         if not valid_hostname(hostname):
-            raise PLCInvalidArgument, "Invalid hostname"
+            raise PLCInvalidArgument("Invalid hostname")
 
         conflicts = Nodes(self.api, [hostname])
         for node in conflicts:
             if 'node_id' not in self or self['node_id'] != node['node_id']:
-                raise PLCInvalidArgument, "Hostname already in use"
+                raise PLCInvalidArgument("Hostname already in use")
 
         return hostname
 
     def validate_node_type(self, node_type):
         node_types = [row['node_type'] for row in NodeTypes(self.api)]
         if node_type not in node_types:
-            raise PLCInvalidArgument, "Invalid node type %r"%node_type
+            raise PLCInvalidArgument("Invalid node type %r"%node_type)
         return node_type
 
     def validate_boot_state(self, boot_state):
         boot_states = [row['boot_state'] for row in BootStates(self.api)]
         if boot_state not in boot_states:
-            raise PLCInvalidArgument, "Invalid boot state %r"%boot_state
+            raise PLCInvalidArgument("Invalid boot state %r"%boot_state)
         return boot_state
 
     validate_date_created = Row.validate_timestamp
@@ -164,10 +163,10 @@ class Node(Row):
         from PLC.Methods.AddNodeTag import AddNodeTag
         from PLC.Methods.UpdateNodeTag import UpdateNodeTag
         shell = Shell()
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             node_tags=NodeTags(self.api,{'tagname':tagname,'node_id':node['node_id']})
             if not node_tags:
                 AddNodeTag(self.api).__call__(shell.auth,node['node_id'],tagname,value)
@@ -234,7 +233,7 @@ class Node(Row):
 
         if slice_names:
             slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
-            slice_ids += slices.keys()
+            slice_ids += list(slices.keys())
 
         if self['slice_ids'] != slice_ids:
             from PLC.Methods.AddSliceToNodes import AddSliceToNodes
@@ -263,7 +262,7 @@ class Node(Row):
 
         if slice_names:
             slices = Slices(self.api, slice_names, ['slice_id']).dict('slice_id')
-            slice_ids += slices.keys()
+            slice_ids += list(slices.keys())
 
         if self['slice_ids_whitelist'] != slice_ids:
             from PLC.Methods.AddSliceToNodesWhitelist import AddSliceToNodesWhitelist
@@ -319,26 +318,26 @@ class Nodes(Table):
                                                 Node.primary_key)
 
         sql = "SELECT %s FROM %s WHERE deleted IS False" % \
-              (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+              (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
 
         if node_filter is not None:
             if isinstance(node_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), node_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), node_filter)
+                ints = [x for x in node_filter if isinstance(x, int)]
+                strs = [x for x in node_filter if isinstance(x, str)]
                 node_filter = Filter(Node.fields, {'node_id': ints, 'hostname': strs})
                 sql += " AND (%s) %s" % node_filter.sql(api, "OR")
             elif isinstance(node_filter, dict):
-                allowed_fields=dict(Node.fields.items()+Node.tags.items())
+                allowed_fields=dict(list(Node.fields.items())+list(Node.tags.items()))
                 node_filter = Filter(allowed_fields, node_filter)
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
-            elif isinstance (node_filter, StringTypes):
+            elif isinstance (node_filter, str):
                 node_filter = Filter(Node.fields, {'hostname':node_filter})
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
-            elif isinstance (node_filter, (int, long)):
+            elif isinstance (node_filter, int):
                 node_filter = Filter(Node.fields, {'node_id':node_filter})
                 sql += " AND (%s) %s" % node_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong node filter %r"%node_filter
+                raise PLCInvalidArgument("Wrong node filter %r"%node_filter)
 
         self.selectall(sql)

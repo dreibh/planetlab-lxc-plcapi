@@ -27,7 +27,7 @@ class DeleteNodeType(Method):
     def call(self, auth, name):
         node_types = NodeTypes(self.api, [name])
         if not node_types:
-            raise PLCInvalidArgument, "No such node type"
+            raise PLCInvalidArgument("No such node type")
         node_type = node_types[0]
 
         node_type.delete()

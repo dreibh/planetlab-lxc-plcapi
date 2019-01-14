@@ -4,25 +4,21 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-import xmlrpclib
-from types import *
+#import xmlrpc.client
 import textwrap
-import os
 import time
 import pprint
-
-from types import StringTypes
 
 from PLC.Faults import *
 from PLC.Parameter import Parameter, Mixed, python_type, xmlrpc_type
 from PLC.Auth import Auth
-from PLC.Debug import profile
+#from PLC.Debug import profile
 from PLC.Events import Event, Events
 from PLC.Nodes import Node, Nodes
 from PLC.Persons import Person, Persons
 
 # we inherit object because we use new-style classes for legacy methods
-class Method (object):
+class Method:
     """
     Base class for all PLCAPI functions. At a minimum, all PLCAPI
     functions must define:
@@ -59,18 +55,18 @@ class Method (object):
 
         return True
 
-    def __init__(self, api,caller=None):
+    def __init__(self, api, caller=None):
         self.name = self.__class__.__name__
         self.api = api
 
-        if caller: 
+        if caller:
             # let a method call another one by propagating its caller
-            self.caller=caller
+            self.caller = caller
         else:
             # Auth may set this to a Person instance (if an anonymous
             # method, will remain None).
             self.caller = None
-        
+
 
         # API may set this to a (addr, port) tuple if known
         self.source = None
@@ -86,7 +82,7 @@ class Method (object):
 
             # legacy code cannot be type-checked, due to the way Method.args() works
             # as of 5.0-rc16 we don't use skip_type_check anymore
-            if not hasattr(self,"skip_type_check"):
+            if not hasattr(self, "skip_type_check"):
                 (min_args, max_args, defaults) = self.args()
 
                 # Check that the right number of arguments were passed in
@@ -104,7 +100,7 @@ class Method (object):
 
             return result
 
-        except PLCFault, fault:
+        except PLCFault as fault:
 
             caller = ""
             if isinstance(self.caller, Person):
@@ -151,13 +147,14 @@ class Method (object):
                     newargs.append(arg)
                     continue
                 # what type of auth this is
-                if arg.has_key('AuthMethod'):
-                    auth_methods = ['session', 'password', 'capability', 'gpg', 'hmac','anonymous']
+                if 'AuthMethod' in arg:
+                    auth_methods = ['session', 'password', 'capability',
+                                    'gpg', 'hmac', 'anonymous']
                     auth_method = arg['AuthMethod']
                     if auth_method in auth_methods:
                         event['auth_type'] = auth_method
                 for password in 'AuthString', 'session', 'password':
-                    if arg.has_key(password):
+                    if password in arg:
                         arg = arg.copy()
                         arg[password] = "Removed by API"
                 newargs.append(arg)
@@ -173,12 +170,12 @@ class Method (object):
         elif isinstance(self.caller, Node):
             event['node_id'] = self.caller['node_id']
 
-        event.sync(commit = False)
+        event.sync(commit=False)
 
         if hasattr(self, 'event_objects') and isinstance(self.event_objects, dict):
             for key in self.event_objects.keys():
                 for object_id in self.event_objects[key]:
-                    event.add_object(key, object_id, commit = False)
+                    event.add_object(key, object_id, commit=False)
 
 
         # Set the message for this event
@@ -190,7 +187,7 @@ class Method (object):
         # Commit
         event.sync()
 
-    def help(self, indent = "  "):
+    def help(self, indent="  "):
         """
         Text documentation for the method.
         """
@@ -230,9 +227,10 @@ class Method (object):
 
             # Print parameter documentation right below type
             if isinstance(param, Parameter):
-                wrapper = textwrap.TextWrapper(width = 70,
-                                               initial_indent = " " * param_offset,
-                                               subsequent_indent = " " * param_offset)
+                wrapper = textwrap.TextWrapper(
+                    width=70,
+                    initial_indent=" " * param_offset,
+                    subsequent_indent = " " * param_offset)
                 text += "\n".join(wrapper.wrap(param.doc)) + "\n"
                 param = param.type
 
@@ -240,7 +238,7 @@ class Method (object):
 
             # Indent struct fields and mixed types
             if isinstance(param, dict):
-                for name, subparam in param.iteritems():
+                for name, subparam in param.items():
                     text += param_text(name, subparam, indent + step, step)
             elif isinstance(param, Mixed):
                 for subparam in param:
@@ -273,8 +271,8 @@ class Method (object):
         """
 
         # Inspect call. Remove self from the argument list.
-        max_args = self.call.func_code.co_varnames[1:self.call.func_code.co_argcount]
-        defaults = self.call.func_defaults
+        max_args = self.call.__code__.co_varnames[1:self.call.__code__.co_argcount]
+        defaults = self.call.__defaults__
         if defaults is None:
             defaults = ()
 
@@ -300,14 +298,16 @@ class Method (object):
         """
 
         # If any of a number of types is acceptable
-        if isinstance(expected, Mixed):
+        # try them one by one, if one succeeds then it's fine
+        if expected and isinstance(expected, Mixed):
+            to_raise = None
             for item in expected:
                 try:
                     self.type_check(name, value, item, args)
                     return
-                except PLCInvalidArgument, fault:
-                    pass
-            raise fault
+                except PLCInvalidArgument as fault:
+                    to_raise = fault
+            raise to_raise
 
         # If an authentication structure is expected, save it and
         # authenticate after basic type checking is done.
@@ -335,12 +335,12 @@ class Method (object):
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.
-        if expected_type in StringTypes and isinstance(value, StringTypes):
+        if expected_type is str and isinstance(value, str):
             pass
 
         # Integers and long integers are also special types. Accept
         # either int or long types if an int or long is expected.
-        elif expected_type in (IntType, LongType) and isinstance(value, (IntType, LongType)):
+        elif expected_type is int and isinstance(value, int):
             pass
 
         elif not isinstance(value, expected_type):
@@ -350,23 +350,23 @@ class Method (object):
                                      name)
 
         # If a minimum or maximum (length, value) has been specified
-        if expected_type in StringTypes:
+        if expected_type is str:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
-                raise PLCInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+                raise PLCInvalidArgument("%s must be at least %d bytes long" % (name, min))
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
-                raise PLCInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+                raise PLCInvalidArgument("%s must be at most %d bytes long" % (name, max))
         elif expected_type in (list, tuple, set):
             if min is not None and len(value) < min:
-                raise PLCInvalidArgument, "%s must contain at least %d items" % (name, min)
+                raise PLCInvalidArgument("%s must contain at least %d items" % (name, min))
             if max is not None and len(value) > max:
-                raise PLCInvalidArgument, "%s must contain at most %d items" % (name, max)
+                raise PLCInvalidArgument("%s must contain at most %d items" % (name, max))
         else:
             if min is not None and value < min:
-                raise PLCInvalidArgument, "%s must be > %s" % (name, str(min))
+                raise PLCInvalidArgument("%s must be > %s" % (name, str(min)))
             if max is not None and value > max:
-                raise PLCInvalidArgument, "%s must be < %s" % (name, str(max))
+                raise PLCInvalidArgument("%s must be < %s" % (name, str(max)))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple, set)):
@@ -380,13 +380,13 @@ class Method (object):
         # If a struct with particular (or required) types of items is
         # expected.
         elif isinstance(expected, dict):
-            for key in value.keys():
+            for key in list(value.keys()):
                 if key in expected:
                     self.type_check(name + "['%s']" % key, value[key], expected[key], args)
-            for key, subparam in expected.iteritems():
+            for key, subparam in expected.items():
                 if isinstance(subparam, Parameter) and \
                    subparam.optional is not None and \
-                   not subparam.optional and key not in value.keys():
+                   not subparam.optional and key not in list(value.keys()):
                     raise PLCInvalidArgument("'%s' not specified" % key, name)
 
         if auth is not None:

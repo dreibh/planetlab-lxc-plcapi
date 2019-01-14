@@ -25,7 +25,7 @@ class DeleteMessage(Method):
         # Get message information
         messages = Messages(self.api, [message_id])
         if not messages:
-            raise PLCInvalidArgument, "No such message"
+            raise PLCInvalidArgument("No such message")
         message = messages[0]
 
         message.delete()

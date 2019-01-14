@@ -1,4 +1,3 @@
-from types import StringTypes
 import time
 import re
 
@@ -63,19 +62,19 @@ class Slice(Row):
         good_name = r'^[a-z0-9\.]+_[a-zA-Z0-9_\.]+$'
         if not name or \
            not re.match(good_name, name):
-            raise PLCInvalidArgument, "Invalid slice name"
+            raise PLCInvalidArgument("Invalid slice name")
 
         conflicts = Slices(self.api, [name])
         for slice in conflicts:
             if 'slice_id' not in self or self['slice_id'] != slice['slice_id']:
-                raise PLCInvalidArgument, "Slice name already in use, %s"%name
+                raise PLCInvalidArgument("Slice name already in use, %s"%name)
 
         return name
 
     def validate_instantiation(self, instantiation):
         instantiations = [row['instantiation'] for row in SliceInstantiations(self.api)]
         if instantiation not in instantiations:
-            raise PLCInvalidArgument, "No such instantiation state"
+            raise PLCInvalidArgument("No such instantiation state")
 
         return instantiation
 
@@ -111,7 +110,7 @@ class Slice(Row):
         # Translate emails into person_ids
         if emails:
             persons = Persons(self.api, emails, ['person_id']).dict('person_id')
-            person_ids += persons.keys()
+            person_ids += list(persons.keys())
 
         # Add new ids, remove stale ids
         if self['person_ids'] != person_ids:
@@ -142,7 +141,7 @@ class Slice(Row):
         # Translate hostnames into node_ids
         if hostnames:
             nodes = Nodes(self.api, hostnames, ['node_id']).dict('node_id')
-            node_ids += nodes.keys()
+            node_ids += list(nodes.keys())
 
         # Add new ids, remove stale ids
         if self['node_ids'] != node_ids:
@@ -183,8 +182,8 @@ class Slice(Row):
             from PLC.Methods.AddSliceTag import AddSliceTag
             from PLC.Methods.UpdateSliceTag import UpdateSliceTag
 
-            added_attributes = filter(lambda x: 'slice_tag_id' not in x, attributes)
-            updated_attributes = filter(lambda x: 'slice_tag_id' in x, attributes)
+            added_attributes = [x for x in attributes if 'slice_tag_id' not in x]
+            updated_attributes = [x for x in attributes if 'slice_tag_id' in x]
 
             for added_attribute in added_attributes:
                 if 'tag_type' in added_attribute:
@@ -192,12 +191,12 @@ class Slice(Row):
                 elif 'tag_type_id' in added_attribute:
                     type = added_attribute['tag_type_id']
                 else:
-                    raise PLCInvalidArgument, "Must specify tag_type or tag_type_id"
+                    raise PLCInvalidArgument("Must specify tag_type or tag_type_id")
 
                 if 'value' in added_attribute:
                     value = added_attribute['value']
                 else:
-                    raise PLCInvalidArgument, "Must specify a value"
+                    raise PLCInvalidArgument("Must specify a value")
 
                 if 'node_id' in added_attribute:
                     node_id = added_attribute['node_id']
@@ -213,7 +212,7 @@ class Slice(Row):
             for updated_attribute in updated_attributes:
                 attribute_id = updated_attribute.pop('slice_tag_id')
                 if attribute_id not in self['slice_tag_ids']:
-                    raise PLCInvalidArgument, "Attribute doesnt belong to this slice"
+                    raise PLCInvalidArgument("Attribute doesnt belong to this slice")
                 else:
                     UpdateSliceTag.__call__(UpdateSliceTag(self.api), auth, attribute_id, updated_attribute)
 
@@ -264,7 +263,7 @@ class Slices(Table):
                                                 Slice.primary_key)
 
         sql = "SELECT %s FROM %s WHERE is_deleted IS False" % \
-              (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+              (", ".join(list(self.columns.keys())+list(self.tag_columns.keys())),view)
 
         if expires is not None:
             if expires >= 0:
@@ -276,21 +275,21 @@ class Slices(Table):
         if slice_filter is not None:
             if isinstance(slice_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), slice_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), slice_filter)
+                ints = [x for x in slice_filter if isinstance(x, int)]
+                strs = [x for x in slice_filter if isinstance(x, str)]
                 slice_filter = Filter(Slice.fields, {'slice_id': ints, 'name': strs})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "OR")
             elif isinstance(slice_filter, dict):
-                allowed_fields=dict(Slice.fields.items()+Slice.tags.items())
+                allowed_fields=dict(list(Slice.fields.items())+list(Slice.tags.items()))
                 slice_filter = Filter(allowed_fields, slice_filter)
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
-            elif isinstance (slice_filter, StringTypes):
+            elif isinstance (slice_filter, str):
                 slice_filter = Filter(Slice.fields, {'name':slice_filter})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
-            elif isinstance (slice_filter, (int, long)):
+            elif isinstance (slice_filter, int):
                 slice_filter = Filter(Slice.fields, {'slice_id':slice_filter})
                 sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong slice filter %r"%slice_filter
+                raise PLCInvalidArgument("Wrong slice filter %r"%slice_filter)
 
         self.selectall(sql)

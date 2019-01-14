@@ -40,12 +40,12 @@ class AddPersonTag(Method):
     def call(self, auth, person_id, tag_type_id_or_name, value):
         persons = Persons(self.api, [person_id])
         if not persons:
-            raise PLCInvalidArgument, "No such person %r"%person_id
+            raise PLCInvalidArgument("No such person %r"%person_id)
         person = persons[0]
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("No such tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # checks for existence - does not allow several different settings
@@ -53,8 +53,8 @@ class AddPersonTag(Method):
                                           'tag_type_id':tag_type['tag_type_id']})
 
         if len(conflicts) :
-            raise PLCInvalidArgument, "Person %d (%s) already has setting %d"% \
-                (person['person_id'],person['email'], tag_type['tag_type_id'])
+            raise PLCInvalidArgument("Person %d (%s) already has setting %d"% \
+                (person['person_id'],person['email'], tag_type['tag_type_id']))
 
         # check authorizations
         person.caller_may_write_tag (self.api,self.caller,tag_type)

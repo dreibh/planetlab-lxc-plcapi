@@ -7,7 +7,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.TagTypes import TagType, TagTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['tagname', 'description', 'category']
 
 class UpdateTagType(Method):
@@ -20,7 +20,7 @@ class UpdateTagType(Method):
 
     roles = ['admin']
 
-    tag_type_fields = dict(filter(can_update, TagType.fields.items()))
+    tag_type_fields = dict(list(filter(can_update, list(TagType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -33,17 +33,17 @@ class UpdateTagType(Method):
 
     def call(self, auth, tag_type_id_or_name, tag_type_fields):
         
-        accepted_type_fields = dict(filter(can_update, tag_type_fields.items()))
+        accepted_type_fields = dict(list(filter(can_update, list(tag_type_fields.items()))))
         rejected_keys = [ k for k in tag_type_fields if k not in accepted_type_fields ]
         if rejected_keys:
             error="Cannot update TagType column(s) %r"%rejected_keys
             if 'roles' in rejected_keys or 'role_ids' in rejected_keys:
                 error += " see AddRoleToTagType DeleteRoleFromTagType"
-            raise PLCInvalidArgument, error
+            raise PLCInvalidArgument(error)
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type"
+            raise PLCInvalidArgument("No such tag type")
         tag_type = tag_types[0]
 
         tag_type.update(accepted_type_fields)

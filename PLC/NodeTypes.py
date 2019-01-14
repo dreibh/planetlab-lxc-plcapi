@@ -23,12 +23,12 @@ class NodeType(Row):
     def validate_node_type(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Node type must be specified"
+            raise PLCInvalidArgument("Node type must be specified")
 
         # Make sure node type does not alredy exist
         conflicts = NodeTypes(self.api, [name])
         if conflicts:
-            raise PLCInvalidArgument, "Node type name already in use"
+            raise PLCInvalidArgument("Node type name already in use")
 
         return name
 

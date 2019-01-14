@@ -34,7 +34,7 @@ class DeletePersonTag(Method):
     def call(self, auth, person_tag_id):
         person_tags = PersonTags(self.api, [person_tag_id])
         if not person_tags:
-            raise PLCInvalidArgument, "No such person tag %r"%person_tag_id
+            raise PLCInvalidArgument("No such person tag %r"%person_tag_id)
         person_tag = person_tags[0]
 
         tag_type_id = person_tag['tag_type_id']
@@ -42,7 +42,7 @@ class DeletePersonTag(Method):
 
         persons = Persons (self.api, person_tag['person_id'])
         if not persons:
-            raise PLCInvalidArgument, "No such person %d"%person_tag['person_id']
+            raise PLCInvalidArgument("No such person %d"%person_tag['person_id'])
         person=persons[0]
 
         # check authorizations

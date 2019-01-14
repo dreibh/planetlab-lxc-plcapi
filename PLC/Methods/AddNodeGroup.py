@@ -7,7 +7,7 @@ from PLC.NodeGroups import NodeGroup, NodeGroups
 from PLC.TagTypes import TagType, TagTypes
 from PLC.NodeTags import NodeTag, NodeTags
 
-can_update = lambda (field, value): field in NodeGroup.fields.keys() and field != NodeGroup.primary_field
+can_update = lambda field_value: field_value[0] in list(NodeGroup.fields.keys()) and field_value[0] != NodeGroup.primary_field
 
 class AddNodeGroup(Method):
     """
@@ -19,7 +19,7 @@ class AddNodeGroup(Method):
 
     roles = ['admin']
 
-    nodegroup_fields = dict(filter(can_update, NodeGroup.fields.items()))
+    nodegroup_fields = dict(list(filter(can_update, list(NodeGroup.fields.items()))))
 
     accepts = [
         Auth(),
@@ -36,7 +36,7 @@ class AddNodeGroup(Method):
         # locate tag type
         tag_types = TagTypes (self.api,[tag_type_id_or_tagname])
         if not(tag_types):
-            raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_tagname
+            raise PLCInvalidArgument("No such tag type %r"%tag_type_id_or_tagname)
         tag_type=tag_types[0]
 
         nodegroup_fields = { 'groupname' : groupname,

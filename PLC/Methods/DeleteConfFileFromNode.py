@@ -28,13 +28,13 @@ class DeleteConfFileFromNode(Method):
         # Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
-            raise PLCInvalidArgument, "No such configuration file"
+            raise PLCInvalidArgument("No such configuration file")
         conf_file = conf_files[0]
 
         # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
         node = nodes[0]
 
         # Link configuration file to node

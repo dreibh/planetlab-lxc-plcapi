@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Generates a DocBook section documenting all PLCAPI methods on
 # stdout.
@@ -7,35 +7,37 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
+# dec 2018
+# going for python3; xml.dom.minidom has changed a lot
+# working around the changes in a rather quick & dirty way
+
 import xml.dom.minidom
-from xml.dom.minidom import Element, Text
-import codecs
+from xml.dom.minidom import Element, parseString
 
 from PLC.Parameter import Parameter, Mixed, xmlrpc_type, python_type
 
-# xml.dom.minidom.Text.writexml adds surrounding whitespace to textual
-# data when pretty-printing. Override this behavior.
-class TrimText(Text):
-    """text"""
-    def __init__(self, text = None):
-        self.data = unicode(text)
+# can no longer create elements out of a document
+dom = parseString('<dummydoc/>')
 
-    def writexml(self, writer, indent="", addindent="", newl=""):
-        Text.writexml(self, writer, "", "", "")
+def text_node(text):
+    global dom
+    return dom.createTextNode(text)
 
-class TrimTextElement(Element):
+class TextElement(Element):
     """<tagName>text</tagName>"""
     def __init__(self, tagName, text = None):
         Element.__init__(self, tagName)
         if text is not None:
-            self.appendChild(TrimText(text))
+            self.appendChild(text_node(text))
 
     def writexml(self, writer, indent="", addindent="", newl=""):
         writer.write(indent)
         Element.writexml(self, writer, "", "", "")
         writer.write(newl)
 
-class simpleElement(TrimTextElement): pass
+class simpleElement(TextElement):
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
 
 class paraElement(simpleElement):
     """<para>text</para>"""
@@ -71,42 +73,45 @@ class paramElement(Element):
         # <listitem>
         Element.__init__(self, 'listitem')
 
-        description = Element('para')
+        global dom
+        description = dom.createElement('para')
 
         if name:
             description.appendChild(simpleElement('parameter', name))
-            description.appendChild(TrimText(": "))
+            description.appendChild(text_node(": "))
 
-        description.appendChild(TrimText(param_type(param)))
+        description.appendChild(text_node(param_type(param)))
 
         if isinstance(param, (list, tuple, set)) and len(param) == 1:
             param = param[0]
 
         if isinstance(param, Parameter):
-            description.appendChild(TrimText(", " + param.doc))
+            description.appendChild(text_node(", " + param.doc))
             param = param.type
 
         self.appendChild(description)
 
         if isinstance(param, dict):
-            itemizedlist = Element('itemizedlist')
+            itemizedlist = dom.createElement('itemizedlist')
             self.appendChild(itemizedlist)
-            for name, subparam in param.iteritems():
+            for name, subparam in param.items():
                 itemizedlist.appendChild(paramElement(name, subparam))
 
         elif isinstance(param, (list, tuple, set)) and len(param):
-            itemizedlist = Element('itemizedlist')
+            itemizedlist = dom.createElement('itemizedlist')
             self.appendChild(itemizedlist)
             for subparam in param:
                 itemizedlist.appendChild(paramElement(None, subparam))
 
 class DocBook:
-    
-    def __init__ (self,functions_list):
+
+    def __init__ (self, functions_list):
         self.functions_list = functions_list
 
     def Process (self):
-        
+
+        global dom
+
         for func in self.functions_list:
             method = func.name
 
@@ -115,7 +120,9 @@ class DocBook:
 
             (min_args, max_args, defaults) = func.args()
 
-            section = Element('section')
+            # with python3 it looks like an element can't be sfa_created
+            # outside of a document
+            section = dom.createElement('section')
             section.setAttribute('id', func.name)
             section.appendChild(simpleElement('title', func.name))
 
@@ -144,8 +151,8 @@ class DocBook:
             section.appendChild(params)
 
             section.appendChild(paraElement('Returns:'))
-            returns = Element('itemizedlist')
+            returns = dom.createElement('itemizedlist')
             returns.appendChild(paramElement(None, func.returns))
             section.appendChild(returns)
 
-            print section.toprettyxml(encoding = "UTF-8")
+            print(section.toxml())

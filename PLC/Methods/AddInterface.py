@@ -55,12 +55,12 @@ class AddInterface(Method):
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot add Interface with column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot add Interface with column(s) %r"%rejected)
 
         # Check if node exists
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id_or_hostname
+            raise PLCInvalidArgument("No such node %r"%node_id_or_hostname)
         node = nodes[0]
 
         # Authenticated function
@@ -70,7 +70,7 @@ class AddInterface(Method):
         # member of the site where the node exists.
         if 'admin' not in self.caller['roles']:
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to add an interface to the specified node"
+                raise PLCPermissionDenied("Not allowed to add an interface to the specified node")
 
         # Add interface
         interface = Interface(self.api, native)
@@ -85,10 +85,10 @@ class AddInterface(Method):
                                'Interface' : [interface['interface_id']] }
         self.message = "Interface %d added" % interface['interface_id']
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             interface_tags=InterfaceTags(self.api,{'tagname':tagname,'interface_id':interface['interface_id']})
             if not interface_tags:
                 AddInterfaceTag(self.api).__call__(auth,interface['interface_id'],tagname,value)

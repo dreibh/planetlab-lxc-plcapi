@@ -36,6 +36,6 @@ class GetKeys(Method):
         # If we are not admin, make sure to only return our own keys
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
-            keys = filter(lambda key: key['key_id'] in self.caller['key_ids'], keys)
+            keys = [key for key in keys if key['key_id'] in self.caller['key_ids']]
 
         return keys

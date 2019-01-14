@@ -30,14 +30,14 @@ class DeleteNodeFromPCU(Method):
          # Get node
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
 
         node = nodes[0]
 
         # Get PCU
         pcus = PCUs(self.api, [pcu_id])
         if not pcus:
-            raise PLCInvalidArgument, "No such PCU"
+            raise PLCInvalidArgument("No such PCU")
 
         pcu = pcus[0]
 
@@ -49,7 +49,7 @@ class DeleteNodeFromPCU(Method):
                     ok = True
                     break
             if not ok:
-                raise PLCPermissionDenied, "Not allowed to update that PCU"
+                raise PLCPermissionDenied("Not allowed to update that PCU")
 
         # Removed node from PCU
 

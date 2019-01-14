@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.PCUProtocolTypes import PCUProtocolType, PCUProtocolTypes
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['pcu_type_id', 'port', 'protocol', 'supported']
 
 class UpdatePCUProtocolType(Method):
@@ -17,7 +17,7 @@ class UpdatePCUProtocolType(Method):
 
     roles = ['admin']
 
-    protocol_type_fields = dict(filter(can_update, PCUProtocolType.fields.items()))
+    protocol_type_fields = dict(list(filter(can_update, list(PCUProtocolType.fields.items()))))
 
     accepts = [
         Auth(),
@@ -28,11 +28,11 @@ class UpdatePCUProtocolType(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, protocol_type_id, protocol_type_fields):
-        protocol_type_fields = dict(filter(can_update, protocol_type_fields.items()))
+        protocol_type_fields = dict(list(filter(can_update, list(protocol_type_fields.items()))))
 
         protocol_types = PCUProtocolTypes(self.api, [protocol_type_id])
         if not protocol_types:
-            raise PLCInvalidArgument, "No such pcu protocol type"
+            raise PLCInvalidArgument("No such pcu protocol type")
 
         protocol_type = protocol_types[0]
         protocol_type.update(protocol_type_fields)

@@ -6,7 +6,7 @@ from PLC.Auth import Auth
 
 from PLC.Methods.AddSiteTag import AddSiteTag
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['name', 'abbreviated_name', 'login_base',
               'is_public', 'latitude', 'longitude', 'url',
               'max_slices', 'max_slivers', 'enabled', 'ext_consortium_id']
@@ -22,7 +22,7 @@ class AddSite(Method):
 
     roles = ['admin']
 
-    site_fields = dict(filter(can_update, Site.fields.items()))
+    site_fields = dict(list(filter(can_update, list(Site.fields.items()))))
 
     accepts = [
         Auth(),
@@ -32,7 +32,7 @@ class AddSite(Method):
     returns = Parameter(int, 'New site_id (> 0) if successful')
 
     def call(self, auth, site_fields):
-        site_fields = dict(filter(can_update, site_fields.items()))
+        site_fields = dict(list(filter(can_update, list(site_fields.items()))))
         site = Site(self.api, site_fields)
         site.sync()
 

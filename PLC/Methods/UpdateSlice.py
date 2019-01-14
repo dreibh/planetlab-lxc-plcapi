@@ -55,15 +55,15 @@ class UpdateSlice(Method):
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot update Slice column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot update Slice column(s) %r"%rejected)
 
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
+            raise PLCInvalidArgument("No such slice %r"%slice_id_or_name)
         slice = slices[0]
 
         if slice['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local slice"
+            raise PLCInvalidArgument("Not a local slice")
 
         # Authenticated function
         assert self.caller is not None
@@ -72,9 +72,9 @@ class UpdateSlice(Method):
             if self.caller['person_id'] in slice['person_ids']:
                 pass
             elif 'pi' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not a member of the specified slice"
+                raise PLCPermissionDenied("Not a member of the specified slice")
             elif slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
+                raise PLCPermissionDenied("Specified slice not associated with any of your sites")
 
         # Renewing
         renewing=False
@@ -84,43 +84,43 @@ class UpdateSlice(Method):
             site = sites[0]
 
             if site['max_slices'] <= 0:
-                raise PLCInvalidArgument, "Slice creation and renewal have been disabled for the site"
+                raise PLCInvalidArgument("Slice creation and renewal have been disabled for the site")
 
             # Maximum expiration date is 8 weeks from now
             # XXX Make this configurable
             max_expires = time.time() + (8 * 7 * 24 * 60 * 60)
 
             if 'admin' not in self.caller['roles'] and slice_fields['expires'] > max_expires:
-                raise PLCInvalidArgument, "Cannot renew a slice beyond 8 weeks from now"
+                raise PLCInvalidArgument("Cannot renew a slice beyond 8 weeks from now")
 
             # XXX Make this a configurable policy
             if slice['description'] is None or not slice['description'].strip():
                 if 'description' not in slice_fields or slice_fields['description'] is None or \
                    not slice_fields['description'].strip():
-                    raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
+                    raise PLCInvalidArgument("Cannot renew a slice with an empty description or URL")
 
             if slice['url'] is None or not slice['url'].strip():
                 if 'url' not in slice_fields or slice_fields['url'] is None or \
                    not slice_fields['url'].strip():
-                    raise PLCInvalidArgument, "Cannot renew a slice with an empty description or URL"
+                    raise PLCInvalidArgument("Cannot renew a slice with an empty description or URL")
             renewing=True
 
         if 'max_nodes' in slice_fields and slice_fields['max_nodes'] != slice['max_nodes']:
             if 'admin' not in self.caller['roles'] and \
                'pi' not in self.caller['roles']:
-                raise PLCInvalidArgument, "Only admins and PIs may update max_nodes"
+                raise PLCInvalidArgument("Only admins and PIs may update max_nodes")
 
         # Make requested associations
-        for (k,v) in related.iteritems():
+        for (k,v) in related.items():
             slice.associate(auth,k,v)
 
         slice.update(slice_fields)
         slice.sync(commit=True)
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             slice_tags=SliceTags(self.api,{'tagname':tagname,'slice_id':slice['slice_id']})
             if not slice_tags:
                 AddSliceTag(self.api).__call__(auth,slice['slice_id'],tagname,value)

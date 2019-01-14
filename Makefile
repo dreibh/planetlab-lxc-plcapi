@@ -18,13 +18,13 @@ bindir := /usr/bin
 
 PWD := $(shell pwd)
 
-all: 
-	python setup.py build
+all:
+	python3 setup.py build
 
 install: install-python install-phpxmlrpc
 
 install-python:
-	python setup.py install \
+	python3 setup.py install \
 	    --install-purelib=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-scripts=$(DESTDIR)/$(datadir)/plc_api \
 	    --install-data=$(DESTDIR)/$(datadir)/plc_api
@@ -35,9 +35,9 @@ install-phpxmlrpc:
 	mkdir -p $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 	rsync --exclude .git -ai php/phpxmlrpc/ $(DESTDIR)/$(datadir)/plc_api/php/phpxmlrpc/
 
-clean: 
+clean:
 	find . -name '*.pyc' | xargs rm -f
-	python setup.py clean && rm -rf build
+	python3 setup.py clean && rm -rf build
 
 index:
 	echo "This step is obsolete"
@@ -73,9 +73,9 @@ endif
 endif
 
 LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' --exclude Accessors_site.py
-RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
+RSYNC_EXCLUDES		:= --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
-RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
+RSYNC			:= rsync -ai $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
 sync:
 ifeq (,$(SSHURL))
@@ -88,8 +88,7 @@ else
 	+$(RSYNC) db-config.d/ $(SSHURL)/etc/planetlab/db-config.d/
 	+$(RSYNC) plc.d/ $(SSHURL)/etc/plc.d/
 	+$(RSYNC) apache/plc.wsgi $(SSHURL)/usr/share/plc_api/apache/
-	$(SSHCOMMAND) /etc/plc.d/httpd stop
-	$(SSHCOMMAND) /etc/plc.d/httpd start
+	$(SSHCOMMAND) systemctl restart plc
 endif
 
 #################### convenience, for debugging only
@@ -101,4 +100,3 @@ endif
 +%: varname=$(subst +,,$@)
 +%:
 	@echo "$($(varname))"
-

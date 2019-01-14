@@ -1,4 +1,3 @@
-from types import StringTypes, IntType, LongType
 import time
 import calendar
 
@@ -58,11 +57,11 @@ class Row(dict):
         # Warn about mandatory fields
         mandatory_fields = self.api.db.fields(self.table_name, notnull = True, hasdef = False)
         for field in mandatory_fields:
-            if not self.has_key(field) or self[field] is None:
-                raise PLCInvalidArgument, field + " must be specified and cannot be unset in class %s"%self.__class__.__name__
+            if field not in self or self[field] is None:
+                raise PLCInvalidArgument(field + " must be specified and cannot be unset in class %s"%self.__class__.__name__)
 
         # Validate values before committing
-        for key, value in self.iteritems():
+        for key, value in self.items():
             if value is not None and hasattr(self, 'validate_' + key):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)
@@ -74,12 +73,12 @@ class Row(dict):
         """
 
         if isinstance(items, (list, tuple, set)):
-            ints = filter(lambda x: isinstance(x, (int, long)), items)
-            strs = filter(lambda x: isinstance(x, StringTypes), items)
-            dicts = filter(lambda x: isinstance(x, dict), items)
+            ints = [x for x in items if isinstance(x, int)]
+            strs = [x for x in items if isinstance(x, str)]
+            dicts = [x for x in items if isinstance(x, dict)]
             return (ints, strs, dicts)
         else:
-            raise PLCInvalidArgument, "Can only separate list types"
+            raise PLCInvalidArgument("Can only separate list types")
 
 
     def associate(self, *args):
@@ -89,12 +88,12 @@ class Row(dict):
         """
 
         if len(args) < 3:
-            raise PLCInvalidArgumentCount, "auth, field, value must be specified"
+            raise PLCInvalidArgumentCount("auth, field, value must be specified")
         elif hasattr(self, 'associate_' + args[1]):
             associate = getattr(self, 'associate_'+args[1])
             associate(*args)
         else:
-            raise PLCInvalidArguemnt, "No such associate function associate_%s" % args[1]
+            raise PLCInvalidArguemnt("No such associate function associate_%s" % args[1])
 
     def validate_timestamp (self, timestamp):
         return Timestamp.sql_validate(timestamp)
@@ -126,7 +125,7 @@ class Row(dict):
                            obj.primary_key: obj[obj.primary_key]}
 
             params = []
-            for name, value in columns.iteritems():
+            for name, value in columns.items():
                 params.append(self.api.db.param(name, value))
 
             self.api.db.do("INSERT INTO %s (%s) VALUES(%s)" % \
@@ -197,7 +196,7 @@ class Row(dict):
             obj = self
 
         db_fields = self.api.db.fields(self.table_name)
-        return dict ( [ (key, value) for (key, value) in obj.items()
+        return dict ( [ (key, value) for (key, value) in list(obj.items())
                         if key in db_fields and
                         Row.is_writable(key, value, self.fields) ] )
 
@@ -207,7 +206,7 @@ class Row(dict):
         """
         if obj is None: obj=self
 
-        return dict ( [ (key,value) for (key,value) in obj.iteritems()
+        return dict ( [ (key,value) for (key,value) in obj.items()
                         if key in self.tags and Row.is_writable(key,value,self.tags) ] )
 
     # takes as input a list of columns, sort native fields from tags
@@ -227,7 +226,7 @@ class Row(dict):
     @staticmethod
     def accepted_fields (update_columns, fields_dict, exclude=False):
         result={}
-        for (k,v) in fields_dict.iteritems():
+        for (k,v) in fields_dict.items():
             if (not exclude and k in update_columns) or (exclude and k not in update_columns):
                 result[k]=v
         return result
@@ -240,7 +239,7 @@ class Row(dict):
 # avoid the simple, but silent, version
 #        return dict ([ (k,v) for (k,v) in user_dict.items() if k in accepted_fields ])
         result={}
-        for (k,v) in user_dict.items():
+        for (k,v) in list(user_dict.items()):
             if k in accepted_fields: result[k]=v
             else: raise PLCInvalidArgument ('Trying to set/change unaccepted key %s'%k)
         return result
@@ -253,11 +252,11 @@ class Row(dict):
         result=[]
         for x in dicts: result.append({})
         rejected={}
-        for (field,value) in fields.iteritems():
+        for (field,value) in fields.items():
             found=False
             for i in range(len(dicts)):
                 candidate_dict=dicts[i]
-                if field in candidate_dict.keys():
+                if field in list(candidate_dict.keys()):
                     result[i][field]=value
                     found=True
                     break
@@ -280,7 +279,7 @@ class Row(dict):
         """
 
         if not cls.view_tags_name:
-            raise Exception, 'WARNING: class %s needs to set view_tags_name'%cls.__name__
+            raise Exception('WARNING: class %s needs to set view_tags_name'%cls.__name__)
 
         table_name=cls.table_name
         primary_key=cls.primary_key
@@ -298,7 +297,7 @@ class Row(dict):
     @classmethod
     def tagvalue_views_create (cls,api):
         if not cls.tags: return
-        for tagname in cls.tags.keys():
+        for tagname in list(cls.tags.keys()):
             api.db.do(cls.tagvalue_view_create_sql (tagname))
         api.db.commit()
 
@@ -328,24 +327,24 @@ class Row(dict):
         db_fields = self.db_fields()
 
         # Parameterize for safety
-        keys = db_fields.keys()
-        values = [self.api.db.param(key, value) for (key, value) in db_fields.items()]
+        keys = list(db_fields.keys())
+        values = [self.api.db.param(key, value) for (key, value) in list(db_fields.items())]
 
         # If the primary key (usually an auto-incrementing serial
         # identifier) has not been specified, or the primary key is the
         # only field in the table, or insert has been forced.
-        if not self.has_key(self.primary_key) or \
+        if self.primary_key not in self or \
            keys == [self.primary_key] or \
            insert is True:
 
             # If primary key id is a serial int and it isnt included, get next id
-            if self.fields[self.primary_key].type in (IntType, LongType) and \
-               self.primary_key not in self:
+            if (self.fields[self.primary_key].type is int
+                    and self.primary_key not in self):
                 pk_id = self.api.db.next_id(self.table_name, self.primary_key)
                 self[self.primary_key] = pk_id
                 db_fields[self.primary_key] = pk_id
-                keys = db_fields.keys()
-                values = [self.api.db.param(key, value) for (key, value) in db_fields.items()]
+                keys = list(db_fields.keys())
+                values = [self.api.db.param(key, value) for (key, value) in list(db_fields.items())]
             # Insert new row
             sql = "INSERT INTO %s (%s) VALUES (%s)" % \
                   (self.table_name, ", ".join(keys), ", ".join(values))
@@ -356,7 +355,7 @@ class Row(dict):
                   .format(self.table_name,
                           ", ".join(columns),
                           self.primary_key,
-                          self.api.db.param(self.primary_key, self[self.primary_key]))                                               
+                          self.api.db.param(self.primary_key, self[self.primary_key]))
 
         self.api.db.do(sql, db_fields)
 
@@ -403,9 +402,9 @@ class Table(list):
         else:
             (columns,tag_columns,rejected) = classobj.parse_columns(columns)
             if not columns and not tag_columns:
-                raise PLCInvalidArgument, "No valid return fields specified for class %s"%classobj.__name__
+                raise PLCInvalidArgument("No valid return fields specified for class %s"%classobj.__name__)
             if rejected:
-                raise PLCInvalidArgument, "unknown column(s) specified %r in %s"%(rejected,classobj.__name__)
+                raise PLCInvalidArgument("unknown column(s) specified %r in %s"%(rejected,classobj.__name__))
 
         self.columns = columns
         self.tag_columns = tag_columns

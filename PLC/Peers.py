@@ -3,9 +3,8 @@
 #
 
 import re
-from types import StringTypes
 import traceback
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import PLC.Auth
 from PLC.Logger import logger
@@ -50,12 +49,12 @@ class Peer(Row):
 
     def validate_peername(self, peername):
         if not len(peername):
-            raise PLCInvalidArgument, "Peer name must be specified"
+            raise PLCInvalidArgument("Peer name must be specified")
 
         conflicts = Peers(self.api, [peername])
         for peer in conflicts:
             if 'peer_id' not in self or self['peer_id'] != peer['peer_id']:
-                raise PLCInvalidArgument, "Peer name already in use"
+                raise PLCInvalidArgument("Peer name already in use")
 
         return peername
 
@@ -66,9 +65,9 @@ class Peer(Row):
 
         (scheme, netloc, path, params, query, fragment) = urlparse(url)
         if scheme != "https":
-            raise PLCInvalidArgument, "Peer URL scheme must be https"
+            raise PLCInvalidArgument("Peer URL scheme must be https")
         if path[-1] != '/':
-            raise PLCInvalidArgument, "Peer URL should end with /"
+            raise PLCInvalidArgument("Peer URL should end with /")
 
         return url
 
@@ -218,9 +217,9 @@ class Peer(Row):
         Connect to this peer via XML-RPC.
         """
 
-        import xmlrpclib
+        import xmlrpc.client
         from PLC.PyCurl import PyCurlTransport
-        self.server = xmlrpclib.ServerProxy(self['peer_url'],
+        self.server = xmlrpc.client.ServerProxy(self['peer_url'],
                                             PyCurlTransport(self['peer_url'], self['cacert']),
                                             allow_none = 1, **kwds)
 
@@ -265,16 +264,16 @@ class Peer(Row):
             if api_function.accepts and \
                (isinstance(api_function.accepts[0], PLC.Auth.Auth) or \
                 (isinstance(api_function.accepts[0], Mixed) and \
-                 filter(lambda param: isinstance(param, Auth), api_function.accepts[0]))):
+                 [param for param in api_function.accepts[0] if isinstance(param, Auth)])):
                 function = getattr(self.server, methodname)
                 return self.add_auth(function, methodname)
-        except Exception, err:
+        except Exception as err:
             pass
 
         if hasattr(self, attr):
             return getattr(self, attr)
         else:
-            raise AttributeError, "type object 'Peer' has no attribute '%s'" % attr
+            raise AttributeError("type object 'Peer' has no attribute '%s'" % attr)
 
 class Peers (Table):
     """
@@ -290,20 +289,20 @@ class Peers (Table):
         if peer_filter is not None:
             if isinstance(peer_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), peer_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), peer_filter)
+                ints = [x for x in peer_filter if isinstance(x, int)]
+                strs = [x for x in peer_filter if isinstance(x, str)]
                 peer_filter = Filter(Peer.fields, {'peer_id': ints, 'peername': strs})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "OR")
             elif isinstance(peer_filter, dict):
                 peer_filter = Filter(Peer.fields, peer_filter)
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
-            elif isinstance(peer_filter, (int, long)):
+            elif isinstance(peer_filter, int):
                 peer_filter = Filter(Peer.fields, {'peer_id': peer_filter})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
-            elif isinstance(peer_filter, StringTypes):
+            elif isinstance(peer_filter, str):
                 peer_filter = Filter(Peer.fields, {'peername': peer_filter})
                 sql += " AND (%s) %s" % peer_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong peer filter %r"%peer_filter
+                raise PLCInvalidArgument("Wrong peer filter %r"%peer_filter)
 
         self.selectall(sql)

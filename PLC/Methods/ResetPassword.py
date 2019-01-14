@@ -1,9 +1,7 @@
 import random
 import base64
 import time
-import urllib
-
-from types import StringTypes
+import urllib.request, urllib.parse, urllib.error
 
 from PLC.Logger import logger
 from PLC.Faults import *
@@ -44,38 +42,38 @@ class ResetPassword(Method):
     def call(self, auth, person_id_or_email, verification_key = None, verification_expires = None):
         # Get account information
         # we need to search in local objects only
-        if isinstance (person_id_or_email,StringTypes):
-            filter={'email':person_id_or_email}
+        if isinstance (person_id_or_email, str):
+            filter = {'email': person_id_or_email}
         else:
-            filter={'person_id':person_id_or_email}
+            filter = {'person_id': person_id_or_email}
         filter['peer_id']=None
         persons = Persons(self.api, filter)
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         if not person['enabled']:
-            raise PLCInvalidArgument, "Account must be enabled"
+            raise PLCInvalidArgument("Account must be enabled")
 
         # Be paranoid and deny password resets for admins
         if 'admin' in person['roles']:
-            raise PLCInvalidArgument, "Cannot reset admin passwords"
+            raise PLCInvalidArgument("Cannot reset admin passwords")
 
         # Generate 32 random bytes
-        bytes = random.sample(xrange(0, 256), 32)
+        int8s = random.sample(range(0, 256), 32)
         # Base64 encode their string representation
-        random_key = base64.b64encode("".join(map(chr, bytes)))
+        random_key = base64.b64encode(bytes(int8s)).decode()
 
         if verification_key is not None:
             if person['verification_key'] is None or \
                person['verification_expires'] is None or \
                person['verification_expires'] < time.time():
-                raise PLCPermissionDenied, "Verification key has expired"
+                raise PLCPermissionDenied("Verification key has expired")
             elif person['verification_key'] != verification_key:
-                raise PLCPermissionDenied, "Verification key incorrect"
+                raise PLCPermissionDenied("Verification key incorrect")
             else:
                 # Reset password to random string
                 person['password'] = random_key
@@ -88,7 +86,7 @@ class ResetPassword(Method):
             # Only allow one reset at a time
             if person['verification_expires'] is not None and \
                person['verification_expires'] > time.time():
-                raise PLCPermissionDenied, "Password reset request already pending"
+                raise PLCPermissionDenied("Password reset request already pending")
 
             if verification_expires is None:
                 verification_expires = int(time.time() + (24 * 60 * 60))
@@ -110,7 +108,7 @@ class ResetPassword(Method):
                       'PLC_WWW_SSL_PORT': self.api.config.PLC_WWW_SSL_PORT,
                       'person_id': person['person_id'],
                       # Will be used in a URL, so must quote appropriately
-                      'verification_key': urllib.quote_plus(random_key),
+                      'verification_key': urllib.parse.quote_plus(random_key),
                       'password': random_key,
                       'email': person['email']}
 

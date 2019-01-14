@@ -62,7 +62,7 @@ class PrettyXMLGenerator(XMLGenerator):
             self.ignorableWhitespace("".join(self.indents))
 
         self.write('<' + name)
-        for (name, value) in attrs.items():
+        for (name, value) in list(attrs.items()):
             self.write(' %s=%s' % (name, quoteattr(value)))
         self.write('/>')
 
@@ -84,15 +84,15 @@ class SliceGetTicket(GetSliceTicket):
     def call(self, auth, slice_id_or_name):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument("No such slice")
         slice = slices[0]
 
         # Allow peers to obtain tickets for their own slices
         if slice['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local slice"
+            raise PLCInvalidArgument("Not a local slice")
 
         if slice['instantiation'] != 'delegated':
-            raise PLCInvalidArgument, "Not in delegated state"
+            raise PLCInvalidArgument("Not in delegated state")
 
         nodes = Nodes(self.api, slice['node_ids']).dict()
         persons = Persons(self.api, slice['person_ids']).dict()
@@ -109,39 +109,39 @@ class SliceGetTicket(GetSliceTicket):
         # <slice name="site_slice" id="12345" expiry="1138712648">
         xml.startElement('slice',
                          {'id': str(slice['slice_id']),
-                          'name': unicode(slice['name']),
-                          'expiry': unicode(int(slice['expires']))})
+                          'name': str(slice['name']),
+                          'expiry': str(int(slice['expires']))})
 
         # <nodes>
         xml.startElement('nodes', {})
         for node_id in slice['node_ids']:
-            if not nodes.has_key(node_id):
+            if node_id not in nodes:
                 continue
             node = nodes[node_id]
             # <node id="12345" hostname="node.site.domain"/>
             xml.simpleElement('node',
                               {'id': str(node['node_id']),
-                               'hostname': unicode(node['hostname'])})
+                               'hostname': str(node['hostname'])})
         # </nodes>
         xml.endElement('nodes')
 
         # <users>
         xml.startElement('users', {})
         for person_id in slice['person_ids']:
-            if not persons.has_key(person_id):
+            if person_id not in persons:
                 continue
             user = persons[person_id]
             # <user person_id="12345" email="user@site.domain"/>
             xml.simpleElement('user',
-                              {'person_id': unicode(user['person_id']),
-                               'email': unicode(user['email'])})
+                              {'person_id': str(user['person_id']),
+                               'email': str(user['email'])})
         # </users>
         xml.endElement('users')
 
         # <rspec>
         xml.startElement('rspec', {})
         for slice_tag_id in slice['slice_tag_ids']:
-            if not slice_tags.has_key(slice_tag_id):
+            if slice_tag_id not in slice_tags:
                 continue
             slice_tag = slice_tags[slice_tag_id]
 
@@ -187,15 +187,15 @@ class SliceGetTicket(GetSliceTicket):
                 type = "string"
 
             # <resource name="tag_type">
-            xml.startElement('resource', {'name': unicode(attribute_name)})
+            xml.startElement('resource', {'name': str(attribute_name)})
 
             # <value name="element_name" type="element_type">
             xml.startElement('value',
-                             {'name': unicode(value_name),
+                             {'name': str(value_name),
                               'type': type},
                              newl = False)
             # element value
-            xml.characters(unicode(value))
+            xml.characters(str(value))
             # </value>
             xml.endElement('value', indent = False)
 
@@ -228,7 +228,7 @@ class SliceGetTicket(GetSliceTicket):
 
         if not hasattr(self.api.config, 'PLC_API_TICKET_KEY') or \
            not os.path.exists(self.api.config.PLC_API_TICKET_KEY):
-            raise PLCAPIError, "Slice ticket signing key not found"
+            raise PLCAPIError("Slice ticket signing key not found")
 
         ticket.flush()
 
@@ -244,6 +244,6 @@ class SliceGetTicket(GetSliceTicket):
         ticket.close()
 
         if rc:
-            raise PLCAPIError, err
+            raise PLCAPIError(err)
 
         return signed_ticket

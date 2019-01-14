@@ -43,8 +43,8 @@ class UnBindObjectFromPeer(Method):
         # invoke e.g. Nodes ({'node_id':node_id})
         objs=class_obj(self.api,{id_name:object_id})
         if len(objs) != 1:
-            raise PLCInvalidArgument,"Cannot locate object, type=%s id=%d"%\
-                (type,object_id)
+            raise PLCInvalidArgument("Cannot locate object, type=%s id=%d"%\
+                (type,object_id))
         return objs[0]
 
 
@@ -52,11 +52,11 @@ class UnBindObjectFromPeer(Method):
 
         object_type = object_type.lower()
         if object_type not in self.known_types:
-            raise PLCInvalidArgument, 'Unrecognized object type %s'%object_type
+            raise PLCInvalidArgument('Unrecognized object type %s'%object_type)
 
         peers=Peers(self.api,{'shortname':shortname.upper()})
         if len(peers) !=1:
-            raise PLCInvalidArgument, 'No such peer with shortname %s'%shortname
+            raise PLCInvalidArgument('No such peer with shortname %s'%shortname)
 
         peer=peers[0]
         object = self.locate_object (object_type, object_id)

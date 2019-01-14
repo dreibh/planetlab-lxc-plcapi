@@ -1,5 +1,5 @@
 # -*-python-*-
-#################### slice tag types
+# slice tag types
 default_boot_states = [
     'boot',
     'failboot',
@@ -14,9 +14,8 @@ for state in default_boot_states:
     if state not in current_boot_states:
         AddBootState(state)
 
-# TODO: Delete old boot states. 
-if False:# NOTE: Only set to true if all federating peers have the new default boot states above.
+# TODO: Delete old boot states.
+if False:  # NOTE: Only set to true if all federating peers have the new default boot states above.
     for state in current_boot_states:
         if state not in default_boot_states:
             DeleteBootState(state)
-    

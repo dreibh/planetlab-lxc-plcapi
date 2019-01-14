@@ -29,19 +29,19 @@ class DeleteSliceFromNodes(Method):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice"
+            raise PLCInvalidArgument("No such slice")
         slice = slices[0]
 
         if slice['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local slice"
+            raise PLCInvalidArgument("Not a local slice")
 
         if 'admin' not in self.caller['roles']:
             if self.caller['person_id'] in slice['person_ids']:
                 pass
             elif 'pi' not in self.caller['roles']:
-                raise PLCPermissionDenied, "Not a member of the specified slice"
+                raise PLCPermissionDenied("Not a member of the specified slice")
             elif slice['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Specified slice not associated with any of your sites"
+                raise PLCPermissionDenied("Specified slice not associated with any of your sites")
 
         # Remove slice from all nodes found
 
@@ -49,7 +49,7 @@ class DeleteSliceFromNodes(Method):
         nodes = Nodes(self.api, node_id_or_hostname_list)
         for node in nodes:
             if slice['peer_id'] is not None and node['peer_id'] is not None:
-                raise PLCPermissionDenied, "Not allowed to remove peer slice from peer node"
+                raise PLCPermissionDenied("Not allowed to remove peer slice from peer node")
             if slice['slice_id'] in node['slice_ids']:
                 slice.remove_node(node, commit = False)
 

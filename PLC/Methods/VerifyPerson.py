@@ -1,7 +1,7 @@
 import random
 import base64
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from PLC.Logger import logger
 from PLC.Faults import *
@@ -46,14 +46,14 @@ class VerifyPerson(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account %r"%person_id_or_email
+            raise PLCInvalidArgument("No such account %r"%person_id_or_email)
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account %r"%person_id_or_email
+            raise PLCInvalidArgument("Not a local account %r"%person_id_or_email)
 
         if person['enabled']:
-            raise PLCInvalidArgument, "Account %r must be new (disabled)"%person_id_or_email
+            raise PLCInvalidArgument("Account %r must be new (disabled)"%person_id_or_email)
 
         # Get the primary site name
         person_sites = Sites(self.api, person['site_ids'])
@@ -63,9 +63,9 @@ class VerifyPerson(Method):
             site_name = "No Site"
 
         # Generate 32 random bytes
-        bytes = random.sample(xrange(0, 256), 32)
+        int8s = random.sample(range(0, 256), 32)
         # Base64 encode their string representation
-        random_key = base64.b64encode("".join(map(chr, bytes)))
+        random_key = base64.b64encode(bytes(int8s)).decode()
 
         if verification_key is None or \
         (verification_key is not None and person['verification_expires'] and \
@@ -73,7 +73,7 @@ class VerifyPerson(Method):
             # Only allow one verification at a time
             if person['verification_expires'] is not None and \
                person['verification_expires'] > time.time():
-                raise PLCPermissionDenied, "Verification request already pending"
+                raise PLCPermissionDenied("Verification request already pending")
 
             if verification_expires is None:
                 verification_expires = int(time.time() + (24 * 60 * 60))
@@ -92,9 +92,9 @@ class VerifyPerson(Method):
         elif verification_key is not None:
             if person['verification_key'] is None or \
                person['verification_expires'] is None:
-                raise PLCPermissionDenied, "Invalid Verification key"
+                raise PLCPermissionDenied("Invalid Verification key")
             elif person['verification_key'] != verification_key:
-                raise PLCPermissionDenied, "Verification key incorrect"
+                raise PLCPermissionDenied("Verification key incorrect")
             else:
                 person['verification_key'] = None
                 person['verification_expires'] = None
@@ -105,7 +105,7 @@ class VerifyPerson(Method):
                 for site in person_sites:
                     person_ids.update(site['person_ids'])
                 persons = Persons(self.api, person_ids)
-                pis = filter(lambda person: 'pi' in person['roles'] and person['enabled'], persons)
+                pis = [person for person in persons if 'pi' in person['roles'] and person['enabled']]
 
                 # Send e-mail to PI(s) and copy the user
                 To = [("%s %s" % (pi['first_name'], pi['last_name']), pi['email']) for pi in pis]
@@ -130,7 +130,7 @@ class VerifyPerson(Method):
                       'PLC_WWW_SSL_PORT': self.api.config.PLC_WWW_SSL_PORT,
                       'person_id': person['person_id'],
                       # Will be used in a URL, so must quote appropriately
-                      'verification_key': urllib.quote_plus(random_key),
+                      'verification_key': urllib.parse.quote_plus(random_key),
                       'site_name': site_name,
                       'first_name': person['first_name'],
                       'last_name': person['last_name'],
@@ -151,6 +151,6 @@ class VerifyPerson(Method):
 
         if verification_key is not None and person['verification_expires'] and \
         person['verification_expires'] < time.time():
-            raise PLCPermissionDenied, "Verification key has expired. Another email has been sent."
+            raise PLCPermissionDenied("Verification key has expired. Another email has been sent.")
 
         return 1

@@ -5,7 +5,6 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import StringTypes
 from PLC.Faults import *
 from PLC.Parameter import Parameter
 from PLC.Filter import Filter
@@ -35,7 +34,7 @@ class InitScript(Row):
         conflicts = InitScripts(self.api, [name])
         for initscript in conflicts:
             if 'initscript_id' not in self or self['initscript_id'] != initscript['initscript_id']:
-                raise PLCInvalidArgument, "Initscript name already in use"
+                raise PLCInvalidArgument("Initscript name already in use")
 
         return name
 
@@ -54,20 +53,20 @@ class InitScripts(Table):
         if initscript_filter is not None:
             if isinstance(initscript_filter, (list, tuple, set)):
                 # Separate the list into integers and strings
-                ints = filter(lambda x: isinstance(x, (int, long)), initscript_filter)
-                strs = filter(lambda x: isinstance(x, StringTypes), initscript_filter)
+                ints = [x for x in initscript_filter if isinstance(x, int)]
+                strs = [x for x in initscript_filter if isinstance(x, str)]
                 initscript_filter = Filter(InitScript.fields, {'initscript_id': ints, 'name': strs })
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "OR")
             elif isinstance(initscript_filter, dict):
                 initscript_filter = Filter(InitScript.fields, initscript_filter)
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
-            elif isinstance(initscript_filter, (int, long)):
+            elif isinstance(initscript_filter, int):
                 initscript_filter = Filter(InitScript.fields, {'initscript_id': initscript_filter})
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
-            elif isinstance(initscript_filter, StringTypes):
+            elif isinstance(initscript_filter, str):
                 initscript_filter = Filter(InitScript.fields, {'name': initscript_filter})
                 sql += " AND (%s) %s" % initscript_filter.sql(api, "AND")
             else:
-                raise PLCInvalidArgument, "Wrong initscript filter %r"%initscript_filter
+                raise PLCInvalidArgument("Wrong initscript filter %r"%initscript_filter)
 
         self.selectall(sql)

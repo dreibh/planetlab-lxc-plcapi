@@ -7,13 +7,13 @@
 # Copyright (C) 2004-2006 The Trustees of Princeton University
 #
 
-import xmlrpclib
+import xmlrpc.client
 
-class PLCFault(xmlrpclib.Fault):
+class PLCFault(xmlrpc.client.Fault):
     def __init__(self, faultCode, faultString, extra = None):
         if extra:
             faultString += ": " + extra
-        xmlrpclib.Fault.__init__(self, faultCode, faultString)
+        xmlrpc.client.Fault.__init__(self, faultCode, faultString)
 
 class PLCInvalidAPIMethod(PLCFault):
     def __init__(self, method, role = None, extra = None):

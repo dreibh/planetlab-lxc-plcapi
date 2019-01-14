@@ -28,11 +28,11 @@ class DeleteNode(Method):
         # Get account information
         nodes = Nodes(self.api, [node_id_or_hostname])
         if not nodes:
-            raise PLCInvalidArgument, "No such node"
+            raise PLCInvalidArgument("No such node")
         node = nodes[0]
 
         if node['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local node"
+            raise PLCInvalidArgument("Not a local node")
 
         # If we are not an admin, make sure that the caller is a
         # member of the site at which the node is located.
@@ -41,7 +41,7 @@ class DeleteNode(Method):
             assert self.caller is not None
 
             if node['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Not allowed to delete nodes from specified site"
+                raise PLCPermissionDenied("Not allowed to delete nodes from specified site")
 
         node_id=node['node_id']
         site_id=node['site_id']

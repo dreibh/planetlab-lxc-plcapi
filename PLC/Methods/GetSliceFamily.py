@@ -33,7 +33,7 @@ class GetSliceFamily(Method):
         # Get slice information
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
+            raise PLCInvalidArgument("No such slice %r"%slice_id_or_name)
         slice = slices[0]
         slice_id = slice['slice_id']
 

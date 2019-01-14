@@ -31,11 +31,11 @@ class SetPersonPrimarySite(Method):
         # Get account information
         persons = Persons(self.api, [person_id_or_email])
         if not persons:
-            raise PLCInvalidArgument, "No such account"
+            raise PLCInvalidArgument("No such account")
         person = persons[0]
 
         if person['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local account"
+            raise PLCInvalidArgument("Not a local account")
 
         # Authenticated function
         assert self.caller is not None
@@ -43,19 +43,19 @@ class SetPersonPrimarySite(Method):
         # Non-admins can only update their own primary site
         if 'admin' not in self.caller['roles'] and \
            self.caller['person_id'] != person['person_id']:
-            raise PLCPermissionDenied, "Not allowed to update specified account"
+            raise PLCPermissionDenied("Not allowed to update specified account")
 
         # Get site information
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
         site = sites[0]
 
         if site['peer_id'] is not None:
-            raise PLCInvalidArgument, "Not a local site"
+            raise PLCInvalidArgument("Not a local site")
 
         if site['site_id'] not in person['site_ids']:
-            raise PLCInvalidArgument, "Not a member of the specified site"
+            raise PLCInvalidArgument("Not a member of the specified site")
 
         person.set_primary_site(site)
 

@@ -25,12 +25,12 @@ class KeyType(Row):
     def validate_key_type(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Key type must be specified"
+            raise PLCInvalidArgument("Key type must be specified")
 
         # Make sure key type does not alredy exist
         conflicts = KeyTypes(self.api, [name])
         if conflicts:
-            raise PLCInvalidArgument, "Key type name already in use"
+            raise PLCInvalidArgument("Key type name already in use")
 
         return name
 

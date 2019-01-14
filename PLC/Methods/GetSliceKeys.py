@@ -64,9 +64,9 @@ class GetSliceKeys(Method):
                 slice_filter = valid_slice_ids
 
         if return_fields:
-            slice_return_fields = filter(lambda field: field in slice_fields, return_fields)
-            person_return_fields = filter(lambda field: field in person_fields, return_fields)
-            key_return_fields = filter(lambda field: field in key_fields, return_fields)
+            slice_return_fields = [field for field in return_fields if field in slice_fields]
+            person_return_fields = [field for field in return_fields if field in person_fields]
+            key_return_fields = [field for field in return_fields if field in key_fields]
         else:
             slice_return_fields = slice_fields
             person_return_fields = person_fields
@@ -83,13 +83,13 @@ class GetSliceKeys(Method):
 
         # Get the slices
         all_slices = Slices(self.api, slice_filter, slice_return_fields).dict('slice_id')
-        slice_ids = all_slices.keys()
-        slices = all_slices.values()
+        slice_ids = list(all_slices.keys())
+        slices = list(all_slices.values())
 
         # Filter out slices that are not viewable
         if isinstance(self.caller, Person) and \
            'admin' not in self.caller['roles']:
-            slices = filter(lambda slice: slice['slice_id'] in valid_slice_ids, slices)
+            slices = [slice for slice in slices if slice['slice_id'] in valid_slice_ids]
 
         # Get the persons
         person_ids = set()
@@ -97,8 +97,8 @@ class GetSliceKeys(Method):
             person_ids.update(slice['person_ids'])
 
         all_persons = Persons(self.api, list(person_ids), person_return_fields).dict('person_id')
-        person_ids = all_persons.keys()
-        persons = all_persons.values()
+        person_ids = list(all_persons.keys())
+        persons = list(all_persons.values())
 
         # Get the keys
         key_ids = set()
@@ -106,8 +106,8 @@ class GetSliceKeys(Method):
             key_ids.update(person['key_ids'])
 
         all_keys = Keys(self.api, list(key_ids), key_return_fields).dict('key_id')
-        key_ids = all_keys.keys()
-        keys = all_keys.values()
+        key_ids = list(all_keys.keys())
+        keys = list(all_keys.values())
 
         # Create slice_keys list
         slice_keys = []
@@ -125,9 +125,9 @@ class GetSliceKeys(Method):
                     continue
                 for key_id in person['key_ids']:
                     key = all_keys[key_id]
-                    slice_key.update(dict(filter(lambda (k, v): k in slice_fields, slice.items())))
-                    slice_key.update(dict(filter(lambda (k, v): k in person_fields, person.items())))
-                    slice_key.update(dict(filter(lambda (k, v): k in key_fields, key.items())))
+                    slice_key.update(dict([k_v for k_v in list(slice.items()) if k_v[0] in slice_fields]))
+                    slice_key.update(dict([k_v1 for k_v1 in list(person.items()) if k_v1[0] in person_fields]))
+                    slice_key.update(dict([k_v2 for k_v2 in list(key.items()) if k_v2[0] in key_fields]))
                     slice_keys.append(slice_key.copy())
 
         return slice_keys

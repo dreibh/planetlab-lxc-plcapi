@@ -30,13 +30,13 @@ class AddConfFileToNodeGroup(Method):
         # Get configuration file
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
-            raise PLCInvalidArgument, "No such configuration file"
+            raise PLCInvalidArgument("No such configuration file")
         conf_file = conf_files[0]
 
         # Get node
         nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
         if not nodegroups:
-            raise PLCInvalidArgument, "No such node group"
+            raise PLCInvalidArgument("No such node group")
         nodegroup = nodegroups[0]
 
         # Link configuration file to node

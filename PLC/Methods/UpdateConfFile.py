@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.ConfFiles import ConfFile, ConfFiles
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field not in \
+can_update = lambda field_value: field_value[0] not in \
              ['conf_file_id', 'node_ids', 'nodegroup_ids']
 
 class UpdateConfFile(Method):
@@ -17,7 +17,7 @@ class UpdateConfFile(Method):
 
     roles = ['admin']
 
-    conf_file_fields = dict(filter(can_update, ConfFile.fields.items()))
+    conf_file_fields = dict(list(filter(can_update, list(ConfFile.fields.items()))))
 
     accepts = [
         Auth(),
@@ -28,11 +28,11 @@ class UpdateConfFile(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, conf_file_id, conf_file_fields):
-        conf_file_fields = dict(filter(can_update, conf_file_fields.items()))
+        conf_file_fields = dict(list(filter(can_update, list(conf_file_fields.items()))))
 
         conf_files = ConfFiles(self.api, [conf_file_id])
         if not conf_files:
-            raise PLCInvalidArgument, "No such configuration file"
+            raise PLCInvalidArgument("No such configuration file")
 
         conf_file = conf_files[0]
         conf_file.update(conf_file_fields)

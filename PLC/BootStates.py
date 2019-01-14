@@ -25,12 +25,12 @@ class BootState(Row):
     def validate_boot_state(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Boot state must be specified"
+            raise PLCInvalidArgument("Boot state must be specified")
 
         # Make sure boot state does not already exist
         conflicts = BootStates(self.api, [name])
         if conflicts:
-            raise PLCInvalidArgument, "Boot state name already in use"
+            raise PLCInvalidArgument("Boot state name already in use")
 
         return name
 

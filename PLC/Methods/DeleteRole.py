@@ -29,7 +29,7 @@ class DeleteRole(Method):
     def call(self, auth, role_id_or_name):
         roles = Roles(self.api, [role_id_or_name])
         if not roles:
-            raise PLCInvalidArgument, "No such role"
+            raise PLCInvalidArgument("No such role")
         role = roles[0]
 
         role.delete()

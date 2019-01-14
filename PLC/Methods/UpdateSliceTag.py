@@ -43,7 +43,7 @@ class UpdateSliceTag(Method):
     def call(self, auth, slice_tag_id, value):
         slice_tags = SliceTags(self.api, [slice_tag_id])
         if not slice_tags:
-            raise PLCInvalidArgument, "No such slice attribute"
+            raise PLCInvalidArgument("No such slice attribute")
         slice_tag = slice_tags[0]
 
         tag_type_id = slice_tag['tag_type_id']
@@ -51,7 +51,7 @@ class UpdateSliceTag(Method):
 
         slices = Slices(self.api, [slice_tag['slice_id']])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %d"%slice_tag['slice_id']
+            raise PLCInvalidArgument("No such slice %d"%slice_tag['slice_id'])
         slice = slices[0]
 
         assert slice_tag['slice_tag_id'] in slice['slice_tag_ids']
@@ -64,9 +64,9 @@ class UpdateSliceTag(Method):
         if slice_tag['tagname'] in ['initscript']:
             initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
             if not initscripts:
-                raise PLCInvalidArgument, "No such plc initscript"
+                raise PLCInvalidArgument("No such plc initscript")
 
-        slice_tag['value'] = unicode(value)
+        slice_tag['value'] = str(value)
         slice_tag.sync()
         self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}
         return 1

@@ -25,7 +25,7 @@ class DeleteInitScript(Method):
     def call(self, auth, initscript_id_or_name):
         initscripts = InitScripts(self.api, [initscript_id_or_name])
         if not initscripts:
-            raise PLCInvalidArgument, "No such initscript"
+            raise PLCInvalidArgument("No such initscript")
 
         initscript = initscripts[0]
         initscript.delete()

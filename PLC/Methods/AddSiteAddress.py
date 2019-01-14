@@ -5,7 +5,7 @@ from PLC.Addresses import Address, Addresses
 from PLC.Auth import Auth
 from PLC.Sites import Site, Sites
 
-can_update = lambda (field, value): field in \
+can_update = lambda field_value: field_value[0] in \
              ['line1', 'line2', 'line3',
               'city', 'state', 'postalcode', 'country']
 
@@ -21,7 +21,7 @@ class AddSiteAddress(Method):
 
     roles = ['admin', 'pi']
 
-    address_fields = dict(filter(can_update, Address.fields.items()))
+    address_fields = dict(list(filter(can_update, list(Address.fields.items()))))
 
     accepts = [
         Auth(),
@@ -33,17 +33,17 @@ class AddSiteAddress(Method):
     returns = Parameter(int, 'New address_id (> 0) if successful')
 
     def call(self, auth, site_id_or_login_base, address_fields):
-        address_fields = dict(filter(can_update, address_fields.items()))
+        address_fields = dict(list(filter(can_update, list(address_fields.items()))))
 
         # Get associated site details
         sites = Sites(self.api, [site_id_or_login_base])
         if not sites:
-            raise PLCInvalidArgument, "No such site"
+            raise PLCInvalidArgument("No such site")
         site = sites[0]
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Address must be associated with one of your sites"
+                raise PLCPermissionDenied("Address must be associated with one of your sites")
 
         address = Address(self.api, address_fields)
         address.sync(commit = False)

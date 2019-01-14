@@ -44,7 +44,7 @@ class BootGetNodeDetails(Method):
             for network in details['networks']:
                 for field in network:
                     if network[field] is None:
-                        if isinstance(network[field], (int, long)):
+                        if isinstance(network[field], int):
                             network[field] = -1
                         else:
                             network[field] = ""

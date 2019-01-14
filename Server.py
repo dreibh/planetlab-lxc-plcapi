@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Simple standalone HTTP server for testing PLCAPI
 #
@@ -10,14 +10,14 @@ import os
 import sys
 import getopt
 import traceback
-import BaseHTTPServer
+import http.server
 
 # Append PLC to the system path
 sys.path.append(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 from PLC.API import PLCAPI
 
-class PLCAPIRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class PLCAPIRequestHandler(http.server.BaseHTTPRequestHandler):
     """
     Simple standalone HTTP request handler for testing PLCAPI.
     """
@@ -40,7 +40,7 @@ class PLCAPIRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.flush()
             self.connection.shutdown(1)
 
-        except Exception, e:
+        except Exception as e:
             # Log error
             sys.stderr.write(traceback.format_exc())
             sys.stderr.flush()
@@ -58,7 +58,7 @@ class PLCAPIRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 </body></html>
 """)        
         
-class PLCAPIServer(BaseHTTPServer.HTTPServer):
+class PLCAPIServer(http.server.HTTPServer):
     """
     Simple standalone HTTP server for testing PLCAPI.
     """
@@ -66,7 +66,7 @@ class PLCAPIServer(BaseHTTPServer.HTTPServer):
     def __init__(self, addr, config):
         self.api = PLCAPI(config)
         self.allow_reuse_address = 1
-        BaseHTTPServer.HTTPServer.__init__(self, addr, PLCAPIRequestHandler)
+        http.server.HTTPServer.__init__(self, addr, PLCAPIRequestHandler)
 
 # Defaults
 addr = "0.0.0.0"
@@ -74,18 +74,18 @@ port = 8000
 config = "/etc/planetlab/plc_config"
 
 def usage():
-    print "Usage: %s [OPTION]..." % sys.argv[0]
-    print "Options:"
-    print "     -p PORT, --port=PORT    TCP port number to listen on (default: %d)" % port
-    print "     -f FILE, --config=FILE  PLC configuration file (default: %s)" % config
-    print "     -h, --help              This message"
+    print("Usage: %s [OPTION]..." % sys.argv[0])
+    print("Options:")
+    print("     -p PORT, --port=PORT    TCP port number to listen on (default: %d)" % port)
+    print("     -f FILE, --config=FILE  PLC configuration file (default: %s)" % config)
+    print("     -h, --help              This message")
     sys.exit(1)
 
 # Get options
 try:
     (opts, argv) = getopt.getopt(sys.argv[1:], "p:f:h", ["port=", "config=", "help"])
-except getopt.GetoptError, err:
-    print "Error: " + err.msg
+except getopt.GetoptError as err:
+    print("Error: " + err.msg)
     usage()
 
 for (opt, optval) in opts:

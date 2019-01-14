@@ -4,7 +4,7 @@ from PLC.Parameter import Parameter, Mixed
 from PLC.InitScripts import InitScript, InitScripts
 from PLC.Auth import Auth
 
-can_update = lambda (field, value): field not in \
+can_update = lambda field_value: field_value[0] not in \
              ['initscript_id']
 
 class UpdateInitScript(Method):
@@ -17,7 +17,7 @@ class UpdateInitScript(Method):
 
     roles = ['admin']
 
-    initscript_fields = dict(filter(can_update, InitScript.fields.items()))
+    initscript_fields = dict(list(filter(can_update, list(InitScript.fields.items()))))
 
     accepts = [
         Auth(),
@@ -28,11 +28,11 @@ class UpdateInitScript(Method):
     returns = Parameter(int, '1 if successful')
 
     def call(self, auth, initscript_id, initscript_fields):
-        initscript_fields = dict(filter(can_update, initscript_fields.items()))
+        initscript_fields = dict(list(filter(can_update, list(initscript_fields.items()))))
 
         initscripts = InitScripts(self.api, [initscript_id])
         if not initscripts:
-            raise PLCInvalidArgument, "No such initscript"
+            raise PLCInvalidArgument("No such initscript")
 
         initscript = initscripts[0]
         initscript.update(initscript_fields)

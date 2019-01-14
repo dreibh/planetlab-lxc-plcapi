@@ -1,5 +1,5 @@
 import sys
-import xmlrpclib
+import xmlrpc.client
 
 from PLC.Parameter import Parameter, Mixed
 from PLC.Method import Method
@@ -42,13 +42,13 @@ class multicall(Method):
                 params = call['params']
                 if name == 'system.multicall':
                     errmsg = "Recursive system.multicall forbidden"
-                    raise xmlrpclib.Fault(REQUEST_REFUSED_ERROR, errmsg)
+                    raise xmlrpc.client.Fault(REQUEST_REFUSED_ERROR, errmsg)
                 result = [self.api.call(self.source, name, *params)]
-            except xmlrpclib.Fault, fault:
+            except xmlrpc.client.Fault as fault:
                 result = {'faultCode': fault.faultCode,
                           'faultString': fault.faultString}
             except:
-                errmsg = "%s:%s" % (sys.exc_type, sys.exc_value)
+                errmsg = "%s:%s" % (sys.exc_info()[0], sys.exc_info()[1])
                 result = {'faultCode': 1, 'faultString': errmsg}
             results.append(result)
         return results

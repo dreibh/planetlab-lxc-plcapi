@@ -56,12 +56,12 @@ class AddSliceTag(Method):
     def call(self, auth, slice_id_or_name, tag_type_id_or_name, value, node_id_or_hostname = None, nodegroup_id_or_name = None):
         slices = Slices(self.api, [slice_id_or_name])
         if not slices:
-            raise PLCInvalidArgument, "No such slice %r"%slice_id_or_name
+            raise PLCInvalidArgument("No such slice %r"%slice_id_or_name)
         slice = slices[0]
 
         tag_types = TagTypes(self.api, [tag_type_id_or_name])
         if not tag_types:
-            raise PLCInvalidArgument, "No such tag type %r"%tag_type_id_or_name
+            raise PLCInvalidArgument("No such tag type %r"%tag_type_id_or_name)
         tag_type = tag_types[0]
 
         # check authorizations
@@ -71,12 +71,12 @@ class AddSliceTag(Method):
         if tag_type['tagname'] in ['initscript']:
             initscripts = InitScripts(self.api, {'enabled': True, 'name': value})
             if not initscripts:
-                raise PLCInvalidArgument, "No such plc initscript %r"%value
+                raise PLCInvalidArgument("No such plc initscript %r"%value)
 
         slice_tag = SliceTag(self.api)
         slice_tag['slice_id'] = slice['slice_id']
         slice_tag['tag_type_id'] = tag_type['tag_type_id']
-        slice_tag['value'] = unicode(value)
+        slice_tag['value'] = str(value)
 
         # Sliver attribute if node is specified
         if node_id_or_hostname is not None or isinstance(self.caller, Node):
@@ -88,28 +88,28 @@ class AddSliceTag(Method):
             if node_id_or_hostname is not None:
                 nodes = Nodes(self.api, [node_id_or_hostname])
                 if not nodes:
-                    raise PLCInvalidArgument, "No such node"
+                    raise PLCInvalidArgument("No such node")
                 node = nodes[0]
-                if node_id <> None and node_id <> node['node_id']:
-                    raise PLCPermissionDenied, "Not allowed to set another node's sliver attribute"
+                if node_id != None and node_id != node['node_id']:
+                    raise PLCPermissionDenied("Not allowed to set another node's sliver attribute")
                 else:
                     node_id = node['node_id']
 
             system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
-            system_slice_ids = system_slice_tags.keys()
+            system_slice_ids = list(system_slice_tags.keys())
             if slice['slice_id'] not in system_slice_ids and node_id not in slice['node_ids']:
-                raise PLCInvalidArgument, "AddSliceTag: slice %s not on specified node %s nor is it a system slice (%r)"%\
-                    (slice['name'],node['hostname'],system_slice_ids)
+                raise PLCInvalidArgument("AddSliceTag: slice %s not on specified node %s nor is it a system slice (%r)"%\
+                    (slice['name'],node['hostname'],system_slice_ids))
             slice_tag['node_id'] = node['node_id']
 
         # Sliver attribute shared accross nodes if nodegroup is sepcified
         if nodegroup_id_or_name is not None:
             if isinstance(self.caller, Node):
-                raise PLCPermissionDenied, "Not allowed to set nodegroup slice attributes"
+                raise PLCPermissionDenied("Not allowed to set nodegroup slice attributes")
 
             nodegroups = NodeGroups(self.api, [nodegroup_id_or_name])
             if not nodegroups:
-                raise PLCInvalidArgument, "No such nodegroup %r"%nodegroup_id_or_name
+                raise PLCInvalidArgument("No such nodegroup %r"%nodegroup_id_or_name)
             nodegroup = nodegroups[0]
 
             slice_tag['nodegroup_id'] = nodegroup['nodegroup_id']
@@ -126,11 +126,11 @@ class AddSliceTag(Method):
             if 'node_id' in slice_tag and slice_tag['node_id'] is not None and slice_tag_check['node_id'] is None:
                 continue
             if 'node_id' in slice_tag and slice_tag['node_id'] == slice_tag_check['node_id']:
-                raise PLCInvalidArgument, "Sliver attribute already exists"
+                raise PLCInvalidArgument("Sliver attribute already exists")
             if 'nodegroup_id' in slice_tag and slice_tag['nodegroup_id'] == slice_tag_check['nodegroup_id']:
-                raise PLCInvalidArgument, "Slice attribute already exists for this nodegroup"
+                raise PLCInvalidArgument("Slice attribute already exists for this nodegroup")
             if node_id_or_hostname is None and nodegroup_id_or_name is None:
-                raise PLCInvalidArgument, "Slice attribute already exists"
+                raise PLCInvalidArgument("Slice attribute already exists")
 
         slice_tag.sync()
         self.event_objects = {'SliceTag': [slice_tag['slice_tag_id']]}

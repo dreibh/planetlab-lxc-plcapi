@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Interactive shell for testing PLCAPI
 #
@@ -32,7 +32,8 @@ parser.add_option("-s", "--session", help = "API session key")
 parser.add_option("-u", "--user", help = "API user name")
 parser.add_option("-p", "--password", help = "API password")
 parser.add_option("-r", "--role", help = "API role")
-parser.add_option("-x", "--xmlrpc", action = "store_true", default = False, help = "Use XML-RPC interface")
+parser.add_option("-x", "--xmlrpc", action = "store_true",
+                  default = False, help = "Use XML-RPC interface")
 # pass this to the invoked shell if any
 parser.add_option("--help", action = "store_true", dest="help", default=False,
                   help = "show this help message and exit")
@@ -40,14 +41,14 @@ parser.add_option("--help", action = "store_true", dest="help", default=False,
 
 if not args and options.help:
     parser.print_help()
-    sys.exit(1)    
+    sys.exit(1)
 
 # If user is specified but password is not
 if options.user is not None and options.password is None:
     try:
         options.password = getpass()
     except (EOFError, KeyboardInterrupt):
-        print
+        print()
         sys.exit(0)
 
 # Initialize a single global instance (scripts may re-initialize
@@ -63,16 +64,16 @@ try:
     auth = shell.auth
     api = shell.api
     config = shell.config
-except Exception, err:
-    print "Error:", err
-    print
+except Exception as err:
+    print("Error:", err)
+    print()
     parser.print_help()
     sys.exit(1)
 
-# If called by a script 
+# If called by a script
 if args:
     if not os.path.exists(args[0]):
-        print 'File %s not found'%args[0]
+        print('File %s not found'%args[0])
         parser.print_help()
         sys.exit(1)
     else:
@@ -82,39 +83,42 @@ if args:
         # use args as sys.argv for the next shell, so our own options get removed for the next script
         sys.argv = args
         script = sys.argv[0]
-        # Add of script to sys.path 
+        # Add of script to sys.path
         path = os.path.dirname(os.path.abspath(script))
         sys.path.append(path)
-        execfile(script)
+        with open(script) as feed:
+            exec(feed.read())
 
 # Otherwise, run an interactive shell environment
 else:
     if shell.server is None:
-        print "PlanetLab Central Direct API Access"
+        print("PlanetLab Central Direct API Access")
         prompt = ""
     elif shell.auth['AuthMethod'] == "anonymous":
         prompt = "[anonymous]"
-        print "Connected anonymously"
+        print("Connected anonymously")
     elif shell.auth['AuthMethod'] == "session":
         # XXX No way to tell node and user sessions apart from the
         # client point of view.
         prompt = "[%s]" % gethostname()
-        print "%s connected using session authentication" % gethostname()
+        print("%s connected using session authentication" % gethostname())
     else:
         prompt = "[%s]" % shell.auth['Username']
-        print "%s connected using %s authentication" % \
-              (shell.auth['Username'], shell.auth['AuthMethod'])
+        print("%s connected using %s authentication" % \
+              (shell.auth['Username'], shell.auth['AuthMethod']))
 
     # Readline and tab completion support
     import atexit
     import readline
     import rlcompleter
 
-    print 'Type "system.listMethods()" or "help(method)" for more information.'
+    print('Type "system.listMethods()" or "help(method)" for more information.')
     # Load command history
     history_path = os.path.join(os.environ["HOME"], ".plcapi_history")
     try:
-        file(history_path, 'a').close()
+        # check directory: pretend to open
+        with open(history_path, 'a') as check:
+            pass
         readline.read_history_file(history_path)
         atexit.register(readline.write_history_file, history_path)
     except IOError:
@@ -133,11 +137,11 @@ else:
                         sep = ">>> "
                     else:
                         sep = "... "
-                    line = raw_input(prompt + sep)
+                    line = input(prompt + sep)
                 # Ctrl-C
                 except KeyboardInterrupt:
                     command = ""
-                    print
+                    print()
                     break
 
                 # Build up multi-line command
@@ -161,13 +165,13 @@ else:
                     # Try evaluating as an expression and printing the result
                     result = eval(command)
                     if result is not None:
-                        print result
+                        print(result)
                 except SyntaxError:
                     # Fall back to executing as a statement
-                    exec command
-            except Exception, err:
+                    exec(command)
+            except Exception as err:
                 print_exc()
 
     except EOFError:
-        print
+        print()
         pass

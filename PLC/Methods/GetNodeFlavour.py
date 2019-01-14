@@ -87,7 +87,7 @@ class GetNodeFlavour(Method):
         # Get node information
         nodes = Nodes(self.api, [node_id_or_name])
         if not nodes:
-            raise PLCInvalidArgument, "No such node %r"%node_id_or_name
+            raise PLCInvalidArgument("No such node %r"%node_id_or_name)
         node = nodes[0]
         node_id = node['node_id']
 

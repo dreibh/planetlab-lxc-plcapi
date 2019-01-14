@@ -17,15 +17,15 @@ def sanitize_memcached_key(key, max_length=250):
 def _args_to_unicode(args, kwargs):
     key = ""
     if args:
-        key += unicode(args)
+        key += str(args)
     if kwargs:
-        key += unicode(kwargs)
+        key += str(kwargs)
     return key
 
 
 def _func_type(func):
     """ returns if callable is a function, method or a classmethod """
-    argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
+    argnames = func.__code__.co_varnames[:func.__code__.co_argcount]
     if len(argnames) > 0:
         if argnames[0] == 'self':
             return 'method'

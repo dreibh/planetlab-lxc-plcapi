@@ -6,7 +6,6 @@
 import time
 import calendar
 
-from types import StringTypes
 from PLC.Faults import *
 from PLC.Filter import Filter
 from PLC.Parameter import Parameter, Mixed
@@ -83,7 +82,7 @@ class LeaseFilter (Filter):
 
     # hooks for the local fields
     def sql_alive(self, alive):
-        if isinstance(alive, int) or isinstance(alive, StringTypes):
+        if isinstance(alive, int) or isinstance(alive, str):
             # the lease is alive at that time if from <= alive <= until
             alive = LeaseFilter.quote(alive)
             return LeaseFilter.sql_time_in_range(alive, 't_from', 't_until')
@@ -97,7 +96,7 @@ class LeaseFilter (Filter):
                                      .format(alive))
 
     def sql_clip(self, clip):
-        if isinstance(clip, int) or isinstance(clip, StringTypes):
+        if isinstance(clip, int) or isinstance(clip, str):
             start = LeaseFilter.quote(clip)
             return LeaseFilter.sql_timeslot_after('t_from', 't_until', start)
         elif isinstance(clip, tuple):
@@ -109,7 +108,7 @@ class LeaseFilter (Filter):
             raise PLCInvalidArgument("LeaseFilter: clip field {}"
                                      .format(clip))
 
-    # the whole key to implementing day is to compute today's beginning 
+    # the whole key to implementing day is to compute today's beginning
     def today_start(self):
         # a struct_time
         st = time.localtime()
@@ -129,13 +128,13 @@ class LeaseFilter (Filter):
             else:
                 self['clip'] = (today, today + nb_days * 24 * 3600)
             del self['day']
-                
+
         # preserve locally what belongs to us, hide it from the superclass
         # self.local is a dict    local_key : user_value
         # self.negation is a dict  local_key : string
         self.local = {}
         self.negation = {}
-        for (k, v) in LeaseFilter.local_fields.items():
+        for (k, v) in list(LeaseFilter.local_fields.items()):
             if k in self:
                 self.local[k] = self[k]
                 del self[k]
@@ -146,7 +145,7 @@ class LeaseFilter (Filter):
                 self.negation[k] = "NOT "
         # run the generic filtering code
         (where_part, clip_part) = Filter.sql(self, api, join_with)
-        for (k, v) in self.local.items():
+        for (k, v) in list(self.local.items()):
             try:
                 # locate hook function associated with key
                 method = LeaseFilter.__dict__['sql_' + k]
@@ -154,7 +153,7 @@ class LeaseFilter (Filter):
                               .format(self.join_with,
                                       self.negation[k],
                                       method(self, self.local[k]))
-            except Exception, e:
+            except Exception as e:
                 raise PLCInvalidArgument(
                     "LeaseFilter: something wrong with filter"
                     "key {}, val was {} -- {}".format(k, v, e))

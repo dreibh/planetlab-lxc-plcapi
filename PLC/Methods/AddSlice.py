@@ -53,7 +53,7 @@ class AddSlice(Method):
         # type checking
         native = Row.check_fields (native, self.accepted_fields)
         if rejected:
-            raise PLCInvalidArgument, "Cannot add Slice with column(s) %r"%rejected
+            raise PLCInvalidArgument("Cannot add Slice with column(s) %r"%rejected)
 
         # Authenticated function
         assert self.caller is not None
@@ -66,26 +66,25 @@ class AddSlice(Method):
         good_name = r'^[a-z0-9\.]+_[a-zA-Z0-9_\.]+$'
         if not name or \
            not re.match(good_name, name):
-            raise PLCInvalidArgument, "Invalid slice name"
+            raise PLCInvalidArgument("Invalid slice name")
 
         # Get associated site details
         login_base = name.split("_")[0]
         sites = Sites(self.api, [login_base])
         if not sites:
-            raise PLCInvalidArgument, "Invalid slice prefix %s in %s"%(login_base,name)
+            raise PLCInvalidArgument("Invalid slice prefix %s in %s"%(login_base,name))
         site = sites[0]
 
         if 'admin' not in self.caller['roles']:
             if site['site_id'] not in self.caller['site_ids']:
-                raise PLCPermissionDenied, "Slice prefix %s must match one of your sites' login_base"%login_base
+                raise PLCPermissionDenied("Slice prefix %s must match one of your sites' login_base"%login_base)
 
         if len(site['slice_ids']) >= site['max_slices']:
-            raise PLCInvalidArgument, \
-                "Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
+            raise PLCInvalidArgument("Site %s has reached (%d) its maximum allowable slice count (%d)"%(site['name'],
                                                                                    len(site['slice_ids']),
-                                                                                   site['max_slices'])
+                                                                                   site['max_slices']))
         if not site['enabled']:
-            raise PLCInvalidArgument, "Site %s is disabled and can cannot create slices" % (site['name'])
+            raise PLCInvalidArgument("Site %s is disabled and can cannot create slices" % (site['name']))
 
         slice = Slice(self.api, native)
         slice['creator_person_id'] = self.caller['person_id']
@@ -96,10 +95,10 @@ class AddSlice(Method):
         root_auth = self.api.config.PLC_HRN_ROOT
         tags['hrn'] = '.'.join([root_auth, login_base, name.split("_")[1]])
 
-        for (tagname,value) in tags.iteritems():
+        for (tagname,value) in tags.items():
             # the tagtype instance is assumed to exist, just check that
             if not TagTypes(self.api,{'tagname':tagname}):
-                raise PLCInvalidArgument,"No such TagType %s"%tagname
+                raise PLCInvalidArgument("No such TagType %s"%tagname)
             slice_tags=SliceTags(self.api,{'tagname':tagname,'slice_id':slice['slice_id']})
             if not slice_tags:
                 AddSliceTag(self.api).__call__(auth,slice['slice_id'],tagname,value)

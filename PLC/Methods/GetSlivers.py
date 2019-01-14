@@ -22,9 +22,10 @@ from PLC.Methods.GetSliceFamily import GetSliceFamily
 from PLC.PersonTags import PersonTag,PersonTags
 
 from PLC.Accessors.Accessors_standard import *
+from functools import reduce
 
 # XXX used to check if slice expiration time is sane
-MAXINT =  2L**31-1
+MAXINT =  2**31-1
 
 # slice_filter essentially contains the slice_ids for the relevant slices (on the node + system & delegated slices)
 def get_slivers(api, caller, auth, slice_filter, node = None):
@@ -43,7 +44,7 @@ def get_slivers(api, caller, auth, slice_filter, node = None):
 
     # Build up list of keys
     key_ids = set()
-    for person in all_persons.values():
+    for person in list(all_persons.values()):
         key_ids.update(person['key_ids'])
 
     # Get user account keys
@@ -132,11 +133,11 @@ def get_slivers(api, caller, auth, slice_filter, node = None):
 def sanitize_for_pickle (obj):
     if (isinstance(obj, dict)):
         parent = dict(obj)
-        for k in parent.keys(): parent[k] = sanitize_for_pickle (parent[k])
+        for k in list(parent.keys()): parent[k] = sanitize_for_pickle (parent[k])
         return parent
     elif (isinstance(obj, list)):
         parent = list(obj)
-        parent = map(sanitize_for_pickle, parent)
+        parent = list(map(sanitize_for_pickle, parent))
         return parent
     else:
         return obj
@@ -218,22 +219,22 @@ class GetSlivers(Method):
             if isinstance(self.caller, Node):
                 node = self.caller
             else:
-                raise PLCInvalidArgument, "'node_id_or_hostname' not specified"
+                raise PLCInvalidArgument("'node_id_or_hostname' not specified")
         else:
             nodes = Nodes(self.api, [node_id_or_hostname])
             if not nodes:
-                raise PLCInvalidArgument, "No such node"
+                raise PLCInvalidArgument("No such node")
             node = nodes[0]
 
             if node['peer_id'] is not None:
-                raise PLCInvalidArgument, "Not a local node"
+                raise PLCInvalidArgument("Not a local node")
 
         # Get interface information
         interfaces = Interfaces(self.api, node['interface_ids'])
 
         # Get node group information
         nodegroups = NodeGroups(self.api, node['nodegroup_ids']).dict('groupname')
-        groups = nodegroups.keys()
+        groups = list(nodegroups.keys())
 
         # Get all (enabled) configuration files
         all_conf_files = ConfFiles(self.api, {'enabled': True}).dict()
@@ -242,7 +243,7 @@ class GetSlivers(Method):
         # Global configuration files are the default. If multiple
         # entries for the same global configuration file exist, it is
         # undefined which one takes precedence.
-        for conf_file in all_conf_files.values():
+        for conf_file in list(all_conf_files.values()):
             if not conf_file['node_ids'] and not conf_file['nodegroup_ids']:
                 conf_files[conf_file['dest']] = conf_file
 
@@ -250,7 +251,7 @@ class GetSlivers(Method):
         # ones. If a node belongs to multiple node groups for which
         # the same configuration file is defined, it is undefined
         # which one takes precedence.
-        for nodegroup in nodegroups.values():
+        for nodegroup in list(nodegroups.values()):
             for conf_file_id in nodegroup['conf_file_ids']:
                 if conf_file_id in all_conf_files:
                     conf_file = all_conf_files[conf_file_id]
@@ -268,12 +269,12 @@ class GetSlivers(Method):
 
         # Get system slices
         system_slice_tags = SliceTags(self.api, {'tagname': 'system', 'value': '1'}).dict('slice_id')
-        system_slice_ids = system_slice_tags.keys()
+        system_slice_ids = list(system_slice_tags.keys())
 
         # Get nm-controller slices
         # xxx Thierry: should these really be exposed regardless of their mapping to nodes ?
         controller_and_delegated_slices = Slices(self.api, {'instantiation': ['nm-controller', 'delegated']}, ['slice_id']).dict('slice_id')
-        controller_and_delegated_slice_ids = controller_and_delegated_slices.keys()
+        controller_and_delegated_slice_ids = list(controller_and_delegated_slices.keys())
         slice_ids = system_slice_ids + controller_and_delegated_slice_ids + node['slice_ids']
 
         slivers = get_slivers(self.api, self.caller, auth, slice_ids, node)
@@ -295,8 +296,8 @@ class GetSlivers(Method):
            site = Sites (api,site_id_or_name,['person_ids'])[0]
            all_site_persons = site['person_ids']
            all_site_person_tags = PersonTags(self.api,{'person_id':all_site_persons,'tagname':'isrootonsite'},['value','person_id'])
-           site_root_person_tags = filter(lambda r:r['value']=='true',all_site_person_tags)
-           site_root_person_ids = map(lambda r:r['person_id'],site_root_person_tags)
+           site_root_person_tags = [r for r in all_site_person_tags if r['value']=='true']
+           site_root_person_ids = [r['person_id'] for r in site_root_person_tags]
            key_ids = reduce (reduce_flatten_list,
                              [ p['key_ids'] for p in \
                                    Persons(api,{ 'person_id':site_root_person_ids,
@@ -341,7 +342,7 @@ class GetSlivers(Method):
         # XMPP config for omf federation
         try:
             if not self.api.config.PLC_OMF_ENABLED:
-                raise Exception,"OMF not enabled"
+                raise Exception("OMF not enabled")
             xmpp={'server':self.api.config.PLC_OMF_XMPP_SERVER}
         except:
             xmpp={'server':None}
@@ -370,7 +371,7 @@ class GetSlivers(Method):
             'hostname': node['hostname'],
             'interfaces': interfaces,
             'groups': groups,
-            'conf_files': conf_files.values(),
+            'conf_files': list(conf_files.values()),
             'initscripts': initscripts,
             'slivers': slivers,
             'accounts': accounts,

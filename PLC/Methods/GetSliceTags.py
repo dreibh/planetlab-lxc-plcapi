@@ -81,9 +81,7 @@ class GetSliceTags(Method):
         # Filter out slice attributes that are not viewable
 #        if isinstance(self.caller, Person) and \
 #           'admin' not in self.caller['roles']:
-#            slice_tags = filter(lambda slice_tag: \
-#                                      slice_tag['slice_tag_id'] in valid_slice_tag_ids,
-#                                      slice_tags)
+#            slice_tags = [slice_tag for slice_tag in slice_tags if slice_tag['slice_tag_id'] in valid_slice_tag_ids]
 
         # Remove slice_tag_id if not specified
         if added_fields:

@@ -5,7 +5,6 @@
 # natively marshalled over xmlrpc
 #
 
-from types import StringTypes
 import time, calendar
 import datetime
 
@@ -15,7 +14,7 @@ from PLC.Parameter import Parameter, Mixed
 # a dummy class mostly used as a namespace
 class Timestamp:
 
-    debug=False
+    debug = False
 #    debug=True
 
     # this is how we expose times to SQL
@@ -59,12 +58,13 @@ class Timestamp:
         Returns a GMT timestamp string suitable to feed SQL.
         """
 
-        if not timezone: output_format = Timestamp.sql_format
-        else:            output_format = Timestamp.sql_format_utc
+        output_format = (Timestamp.sql_format_utc if timezone
+                         else Timestamp.sql_format)
 
-        if Timestamp.debug: print 'sql_validate, in:',input,
-        if isinstance(input, StringTypes):
-            sql=''
+        if Timestamp.debug:
+            print('sql_validate, in:', input, end=' ')
+        if isinstance(input, str):
+            sql = ''
             # calendar.timegm() is the inverse of time.gmtime()
             for time_format in Timestamp.input_formats:
                 try:
@@ -72,23 +72,24 @@ class Timestamp:
                     sql = time.strftime(output_format, time.gmtime(timestamp))
                     break
                 # wrong format: ignore
-                except ValueError: pass
+                except ValueError:
+                    pass
             # could not parse it
             if not sql:
-                raise PLCInvalidArgument, "Cannot parse timestamp %r - not in any of %r formats"%(input,Timestamp.input_formats)
-        elif isinstance (input,(int,long,float)):
+                raise PLCInvalidArgument("Cannot parse timestamp %r - not in any of %r formats"%(input,Timestamp.input_formats))
+        elif isinstance(input, (int, float)):
             try:
-                timestamp = long(input)
+                timestamp = int(input)
                 sql = time.strftime(output_format, time.gmtime(timestamp))
-            except Exception,e:
-                raise PLCInvalidArgument, "Timestamp %r not recognized -- %r"%(input,e)
+            except Exception as e:
+                raise PLCInvalidArgument("Timestamp %r not recognized -- %r"%(input,e))
         else:
-            raise PLCInvalidArgument, "Timestamp %r - unsupported type %r"%(input,type(input))
+            raise PLCInvalidArgument("Timestamp %r - unsupported type %r"%(input,type(input)))
 
         if check_future and input < time.time():
-            raise PLCInvalidArgument, "'%s' not in the future" % sql
+            raise PLCInvalidArgument("'%s' not in the future" % sql)
 
-        if Timestamp.debug: print 'sql_validate, out:',sql
+        if Timestamp.debug: print('sql_validate, out:',sql)
         return sql
 
     @staticmethod
@@ -98,7 +99,7 @@ class Timestamp:
 
 
     @staticmethod
-    def cast_long (input):
+    def cast_long(input):
         """
         Translates input timestamp as a unix timestamp.
 
@@ -106,23 +107,27 @@ class Timestamp:
         00:00:00 GMT), a string (in one of the supported input formats above).
 
         """
-        if Timestamp.debug: print 'cast_long, in:',input,
-        if isinstance(input, StringTypes):
-            timestamp=0
+        if Timestamp.debug:
+            print('cast_long, in:', input, end=' ')
+        if isinstance(input, str):
+            timestamp = 0
             for time_format in Timestamp.input_formats:
                 try:
-                    result=calendar.timegm(time.strptime(input, time_format))
-                    if Timestamp.debug: print 'out:',result
+                    result = calendar.timegm(time.strptime(input, time_format))
+                    if Timestamp.debug:
+                        print('out:', result)
                     return result
                 # wrong format: ignore
-                except ValueError: pass
-            raise PLCInvalidArgument, "Cannot parse timestamp %r - not in any of %r formats"%(input,Timestamp.input_formats)
-        elif isinstance (input,(int,long,float)):
-            result=long(input)
-            if Timestamp.debug: print 'out:',result
+                except ValueError:
+                    pass
+            raise PLCInvalidArgument("Cannot parse timestamp %r - not in any of %r formats"%(input, Timestamp.input_formats))
+        elif isinstance(input, (int, float)):
+            result = int(input)
+            if Timestamp.debug:
+                print('out:',result)
             return result
         else:
-            raise PLCInvalidArgument, "Timestamp %r - unsupported type %r"%(input,type(input))
+            raise PLCInvalidArgument("Timestamp %r - unsupported type %r"%(input,type(input)))
 
 
 # utility for displaying durations
@@ -136,11 +141,13 @@ class Duration:
     @staticmethod
     def to_string(duration):
         result=[]
-        left=duration
-        (days,left) = divmod(left,Duration.DAY)
-        if days:    result.append("%d d)"%td.days)
-        (hours,left) = divmod (left,Duration.HOUR)
-        if hours:   result.append("%d h"%hours)
+        left = duration
+        (days, left) = divmod(left, Duration.DAY)
+        if days:
+            result.append("%d d)"%td.days)
+        (hours, left) = divmod (left, Duration.HOUR)
+        if hours:
+            result.append("%d h"%hours)
         (minutes, seconds) = divmod (left, Duration.MINUTE)
         if minutes: result.append("%d m"%minutes)
         if seconds: result.append("%d s"%seconds)
@@ -151,6 +158,6 @@ class Duration:
     def validate (duration):
         # support seconds only for now, works for int/long/str
         try:
-            return long (duration)
+            return int(duration)
         except:
-            raise PLCInvalidArgument, "Could not parse duration %r"%duration
+            raise PLCInvalidArgument("Could not parse duration %r"%duration)

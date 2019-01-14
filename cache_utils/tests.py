@@ -51,7 +51,7 @@ class FuncInfoTest(TestCase):
 
 class SanitizeTest(TestCase):
     def test_sanitize_keys(self):
-        key = u"12345678901234567890123456789012345678901234567890"
+        key = "12345678901234567890123456789012345678901234567890"
         self.assertTrue(len(key) >= 40)
         key = sanitize_memcached_key(key, 40)
         self.assertTrue(len(key) <= 40)
@@ -132,19 +132,19 @@ class DecoratorTest(ClearMemcachedTest):
         @cached(60, group='test-group')
         def my_func(params=""):
             self._x = self._x + 1
-            return u"%d%s" % (self._x, params)
+            return "%d%s" % (self._x, params)
 
         self.assertEqual(my_func(), "1")
         self.assertEqual(my_func(), "1")
 
-        self.assertEqual(my_func("x"), u"2x")
-        self.assertEqual(my_func("x"), u"2x")
+        self.assertEqual(my_func("x"), "2x")
+        self.assertEqual(my_func("x"), "2x")
 
-        self.assertEqual(my_func(u"Василий"), u"3Василий")
-        self.assertEqual(my_func(u"Василий"), u"3Василий")
+        self.assertEqual(my_func("Василий"), "3Василий")
+        self.assertEqual(my_func("Василий"), "3Василий")
 
-        self.assertEqual(my_func(u"й"*240), u"4"+u"й"*240)
-        self.assertEqual(my_func(u"й"*240), u"4"+u"й"*240)
+        self.assertEqual(my_func("й"*240), "4"+"й"*240)
+        self.assertEqual(my_func("й"*240), "4"+"й"*240)
 
-        self.assertEqual(my_func(u"Ы"*500), u"5"+u"Ы"*500)
-        self.assertEqual(my_func(u"Ы"*500), u"5"+u"Ы"*500)
+        self.assertEqual(my_func("Ы"*500), "5"+"Ы"*500)
+        self.assertEqual(my_func("Ы"*500), "5"+"Ы"*500)

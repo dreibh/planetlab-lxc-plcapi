@@ -37,12 +37,12 @@ class Ilinks(Table):
               ", ".join(self.columns)
 
         if ilink_filter is not None:
-            if isinstance(ilink_filter, (list, tuple, set, int, long)):
+            if isinstance(ilink_filter, (list, tuple, set, int)):
                 ilink_filter = Filter(Ilink.fields, {'ilink_id': ilink_filter})
             elif isinstance(ilink_filter, dict):
                 ilink_filter = Filter(Ilink.fields, ilink_filter)
             else:
-                raise PLCInvalidArgument, "Wrong ilink filter %r"%ilink_filter
+                raise PLCInvalidArgument("Wrong ilink filter %r"%ilink_filter)
             sql += " AND (%s) %s" % ilink_filter.sql(api)
 
 

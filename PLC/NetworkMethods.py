@@ -25,12 +25,12 @@ class NetworkMethod(Row):
     def validate_method(self, name):
         # Make sure name is not blank
         if not len(name):
-            raise PLCInvalidArgument, "Network method must be specified"
+            raise PLCInvalidArgument("Network method must be specified")
 
         # Make sure network method does not alredy exist
         conflicts = NetworkMethods(self.api, [name])
         if conflicts:
-            raise PLCInvalidArgument, "Network method name already in use"
+            raise PLCInvalidArgument("Network method name already in use")
 
         return name
 

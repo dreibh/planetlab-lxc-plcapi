@@ -41,7 +41,7 @@ class DeleteIlink(Method):
     def call(self, auth, ilink_id):
         ilinks = Ilinks(self.api, [ilink_id])
         if not ilinks:
-            raise PLCInvalidArgument, "No such ilink %r"%ilink_id
+            raise PLCInvalidArgument("No such ilink %r"%ilink_id)
         ilink = ilinks[0]
 
         src_if=Interfaces(self.api,ilink['src_interface_id'])[0]
@@ -54,13 +54,13 @@ class DeleteIlink(Method):
         if 'admin' in self.caller['roles']:
             pass
         elif not AuthorizeHelpers.caller_may_access_tag_type (self.api, self.caller, tag_type):
-            raise PLCPermissionDenied, "%s, forbidden tag %s"%(self.name,tag_type['tagname'])
+            raise PLCPermissionDenied("%s, forbidden tag %s"%(self.name,tag_type['tagname']))
         elif AuthorizeHelpers.interface_belongs_to_person (self.api, src_if, self.caller):
             pass
         elif src_if_id != dst_if_id and AuthorizeHelpers.interface_belongs_to_person (self.api, dst_if, self.caller):
             pass
         else:
-            raise PLCPermissionDenied, "%s: you must own either the src or dst interface"%self.name
+            raise PLCPermissionDenied("%s: you must own either the src or dst interface"%self.name)
             
         ilink.delete()
         self.object_ids = [ilink['src_interface_id'],ilink['dst_interface_id']]
