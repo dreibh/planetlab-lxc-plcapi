@@ -53,7 +53,7 @@ class Lease(Row):
         if round_up:
             timestamp += (granularity-1)
         # round down
-        timestamp = (timestamp/granularity) * granularity
+        timestamp = (timestamp // granularity) * granularity
         # return a SQL string
         return Timestamp.sql_validate_utc(timestamp)
 
