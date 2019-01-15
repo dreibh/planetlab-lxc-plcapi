@@ -22,6 +22,7 @@
  * If the package is not found the php module XML-RPC is used if available
  *
  */
+
 if (file_exists(__DIR__ . '/phpxmlrpc/src/Autoloader.php')) {
     include_once __DIR__ . '/phpxmlrpc/src/Autoloader.php';
     PhpXmlRpc\Autoloader::register();
@@ -29,8 +30,8 @@ if (file_exists(__DIR__ . '/phpxmlrpc/src/Autoloader.php')) {
 
 require_once 'plc_config.php';
 
-class PLCAPI
-{
+class PLCAPI {
+
   var $auth;
   var $server;
   var $port;
@@ -41,11 +42,10 @@ class PLCAPI
   var $multicall;
 
   function PLCAPI($auth = NULL,
-		  $server = PLC_API_HOST,
-		  $port = PLC_API_PORT,
-		  $path = PLC_API_PATH,
-		  $cainfo = NULL)
-  {
+                  $server = PLC_API_HOST,
+                  $port = PLC_API_PORT,
+                  $path = PLC_API_PATH,
+                  $cainfo = NULL) {
     $this->auth = $auth;
     $this->server = $server;
     $this->port = $port;
@@ -86,8 +86,7 @@ class PLCAPI
     return $msg;
   }
 
-  function error_log($error_msg, $backtrace_level = 1)
-  {
+  function error_log($error_msg, $backtrace_level = 1) {
     $backtrace = debug_backtrace();
     $file = $backtrace[$backtrace_level]['file'];
     $line = $backtrace[$backtrace_level]['line'];
@@ -104,8 +103,7 @@ class PLCAPI
     }
   }
 
-  function error()
-  {
+  function error() {
     if (empty($this->trace)) {
       return NULL;
     } else {
@@ -114,22 +112,19 @@ class PLCAPI
     }
   }
 
-  function trace()
-  {
+  function trace() {
     return $this->trace;
   }
 
-  function microtime_float()
-  {
+  function microtime_float() {
     list($usec, $sec) = explode(" ", microtime());
     return ((float) $usec + (float) $sec);
   }
 
-  function call($method, $args = NULL)
-  {
+  function call($method, $args = NULL) {
     if ($this->multicall) {
       $this->calls[] = array ('methodName' => $method,
-				'params' => $args);
+                                'params' => $args);
       return NULL;
     } else {
       return $this->internal_call($method, $args, 3);
@@ -179,8 +174,7 @@ class PLCAPI
       }
   }
 
-    function internal_call($method, $args = NULL, $backtrace_level = 2)
-    {
+    function internal_call($method, $args = NULL, $backtrace_level = 2) {
         if (class_exists('PhpXmlRpc\\PhpXmlRpc')) {
             return $this->internal_call_phpxmlrpc($method, $args, $backtrace_level);
         } else {
@@ -191,13 +185,12 @@ class PLCAPI
   /*
    * the new internal call, will use PhpXmlRpc
    */
-  function internal_call_phpxmlrpc($method, $args = NULL, $backtrace_level = 2)
-  {
+  function internal_call_phpxmlrpc($method, $args = NULL, $backtrace_level = 2) {
 //
-//      echo '<pre>';
-//      var_dump($method);
-//      var_dump($args);
-//      echo '</pre>';
+    //      echo '<pre>';
+    //      var_dump($method);
+    //      var_dump($args);
+    //      echo '</pre>';
 
       PhpXmlRpc\PhpXmlRpc::$xmlrpc_null_extension = true;
 
@@ -238,15 +231,14 @@ class PLCAPI
   /*
    * The original internal call that uses php XML-RPC
    */
-  function internal_call_xmlrpc($method, $args = NULL, $backtrace_level = 2)
-  {
+  function internal_call_xmlrpc($method, $args = NULL, $backtrace_level = 2) {
     $curl = curl_init();
 
     // Verify peer certificate if talking over SSL
     if ($this->port == 443) {
       curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 2);
       if (!empty($this->cainfo)) {
-	curl_setopt($curl, CURLOPT_CAINFO, $this->cainfo);
+        curl_setopt($curl, CURLOPT_CAINFO, $this->cainfo);
       } elseif (defined('PLC_API_CA_SSL_CRT')) {
         curl_setopt($curl, CURLOPT_CAINFO, PLC_API_CA_SSL_CRT);
       }
@@ -287,7 +279,7 @@ class PLCAPI
       if (is_array($ret) && xmlrpc_is_fault($ret)) {
         $this->error_log('Fault Code ' . $ret['faultCode'] . ': ' .
                          $ret['faultString'], $backtrace_level, true);
-	$ret = NULL;
+        $ret = NULL;
       }
     }
 
@@ -303,8 +295,7 @@ class PLCAPI
     return $ret;
   }
 
-  function begin()
-  {
+  function begin() {
     if (!empty($this->calls)) {
       $this->error_log ('Warning: multicall already in progress');
     }
@@ -312,13 +303,12 @@ class PLCAPI
     $this->multicall = true;
   }
 
-  function xmlrpc_is_fault($arr)
-    {
+  function xmlrpc_is_fault($arr) {
         // check if xmlrpc_is_fault exists
         return is_array($arr) && array_key_exists('faultCode', $arr) && array_key_exists('faultString', $arr);
     }
-  function commit()
-  {
+
+  function commit() {
     if (!empty ($this->calls)) {
       $ret = array();
       $results = $this->internal_call('system.multicall', array ($this->calls));
@@ -328,15 +318,15 @@ class PLCAPI
             $this->error_log('Fault Code ' . $result['faultCode'] . ': ' .
                              $result['faultString'], 1, true);
             $ret[] = NULL;
-	    // Thierry - march 30 2007 
-	    // using $adm->error() is broken with begin/commit style 
-	    // this is because error() uses last item in trace and checks for ['errors']
-	    // when using begin/commit we do run internal_call BUT internal_call checks for 
-	    // multicall's result globally, not individual results, so ['errors'] comes empty
-	    // I considered hacking internal_call 
-	    // to *NOT* maintain this->trace at all when invoked with multicall
-	    // but it is too complex to get all values right
-	    // so let's go for the hacky way, and just record individual errors at the right place
+            // Thierry - march 30 2007
+            // using $adm->error() is broken with begin/commit style
+            // this is because error() uses last item in trace and checks for ['errors']
+            // when using begin/commit we do run internal_call BUT internal_call checks for
+            // multicall's result globally, not individual results, so ['errors'] comes empty
+            // I considered hacking internal_call
+            // to *NOT* maintain this->trace at all when invoked with multicall
+            // but it is too complex to get all values right
+            // so let's go for the hacky way, and just record individual errors at the right place
             $this->trace[count($this->trace)-1]['errors'][] = end($this->errors);
           } else {
             $ret[] = $result[0];
@@ -359,8 +349,7 @@ class PLCAPI
   // PLCAPI Methods
   //
 
-  function __call($name, $args)
-  {
+  function __call($name, $args) {
      array_unshift($args, $this->auth);
      return $this->call($name, $args);
   }
@@ -369,7 +358,7 @@ class PLCAPI
 global $adm;
 
 $adm = new PLCAPI(array('AuthMethod' => "capability",
-			'Username' => PLC_API_MAINTENANCE_USER,
-			'AuthString' => PLC_API_MAINTENANCE_PASSWORD));
+                        'Username' => PLC_API_MAINTENANCE_USER,
+                        'AuthString' => PLC_API_MAINTENANCE_PASSWORD));
 
 ?>
