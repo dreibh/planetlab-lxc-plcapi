@@ -3,10 +3,12 @@
 #
 # Utilities for filtering on leases
 
-import time
-import calendar
+# w0622: we keep on using 'filter' as a variable name
+# pylint: disable=c0111, c0103, w0622
 
-from PLC.Faults import *
+import time
+
+from PLC.Faults import *                         # pylint: disable=w0401, w0614
 from PLC.Filter import Filter
 from PLC.Parameter import Parameter, Mixed
 from PLC.Timestamp import Timestamp
@@ -14,7 +16,7 @@ from PLC.Timestamp import Timestamp
 # supersede the generic Filter class to support time intersection
 
 
-class LeaseFilter (Filter):
+class LeaseFilter(Filter):
 
     # general notes on input parameters
     # int_timestamp: number of seconds since the epoch
@@ -24,45 +26,48 @@ class LeaseFilter (Filter):
 
     local_fields = {
         'alive': Mixed(
-            Parameter(
-                int,  "int_timestamp: leases alive at that time"),
-            Parameter(
-                str,  "str_timestamp: leases alive at that time"),
-            Parameter(
-                tuple, "timeslot: the leases alive during this timeslot")),
+            Parameter(int, "int_timestamp: leases alive at that time"),
+            Parameter(str, "str_timestamp: leases alive at that time"),
+            Parameter(tuple, "timeslot: the leases alive during this timeslot")),
         'clip':  Mixed(
-            Parameter(
-                int,  "int_timestamp: leases alive after that time"),
-            Parameter(
-                str,  "str_timestamp: leases alive after at that time"),
-            Parameter(
-                tuple, "timeslot: the leases alive during this timeslot")),
+            Parameter(int, "int_timestamp: leases alive after that time"),
+            Parameter(str, "str_timestamp: leases alive after that time"),
+            Parameter(tuple, "timeslot: the leases alive during this timeslot")),
         ########## macros
         # {'day' : 0} : all leases from today and on
         # {'day' : 1} : all leases today (localtime at the myplc)
         # {'day' : 2} : all leases today and tomorrow (localtime at the myplc)
         # etc..
-        'day': Parameter(int, "clip on a number of days from today and on;"
-                         " 0 means no limit in the future"),
+        'day': Parameter(
+            int,
+            "clip on a number of days from today and on;"
+            " 0 means no limit in the future"),
     }
 
-    def __init__(self, fields={}, filter={},
+    def __init__(self, fields=None, filter=None,
                  doc="Lease filter -- adds the 'alive' and 'clip'"
                  "capabilities for filtering on leases"):
+        if fields is None:
+            fields = {}
+        if filter is None:
+            filter = {}
         Filter.__init__(self, fields, filter, doc)
         self.fields.update(LeaseFilter.local_fields)
 
     # canonical type
     @staticmethod
-    def quote(timestamp): return Timestamp.cast_long(timestamp)
+    def quote(timestamp):
+        return Timestamp.cast_long(timestamp)
 
     # basic SQL utilities
     @staticmethod
     def sql_time_intersect(f1, u1, f2, u2):
         # either f2 is in [f1,u1], or u2 is in [f1,u1], or f2<=f1<=u1<=u2
-        return ("(({f1} <= {f2}) AND ({f2} <= {u1})) " +
-                "OR (({f1} <= {u2}) AND ({u2} <= {u1})) " +
-                "OR (({f2}<={f1}) AND ({u1}<={u2}))").format(**locals())
+        return (
+            "(({f1} <= {f2}) AND ({f2} <= {u1})) "
+            "OR (({f1} <= {u2}) AND ({u2} <= {u1})) "
+            "OR (({f2}<={f1}) AND ({u1}<={u2}))"
+            .format(f1=f1, u1=u1, f2=f2, u2=u2))
 
     @staticmethod
     def time_in_range(timestamp, f1, u1):
@@ -72,17 +77,18 @@ class LeaseFilter (Filter):
     @staticmethod
     def sql_time_in_range(timestamp, f1, u1):
         # is timestamp in [f1, u1]
-        return "(({f1} <= {timestamp}) AND ({timestamp} <= {u1}))"\
-            .format(**locals())
+        return (
+            "(({f1} <= {timestamp}) AND ({timestamp} <= {u1}))"
+            .format(timestamp=timestamp, f1=f1, u1=u1))
 
     @staticmethod
     def sql_timeslot_after(f1, u1, mark):
         # is the lease alive after mark, i.e. u1 >= mark
-        return "({u1} >= {mark})".format(**locals())
+        return "({u1} >= {mark})".format(u1=u1, mark=mark)
 
     # hooks for the local fields
     def sql_alive(self, alive):
-        if isinstance(alive, int) or isinstance(alive, str):
+        if isinstance(alive, (int, str)):
             # the lease is alive at that time if from <= alive <= until
             alive = LeaseFilter.quote(alive)
             return LeaseFilter.sql_time_in_range(alive, 't_from', 't_until')

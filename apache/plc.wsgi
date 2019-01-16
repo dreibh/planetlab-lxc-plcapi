@@ -16,7 +16,7 @@ def application(environ, start_response):
     try:
         status = '200 OK'
         if environ.get('REQUEST_METHOD') != 'POST':
-            content_type = 'text/html'
+            content_type = 'text/html; charset=utf-8'
             output = """
 <html><head>
 <title>PLCAPI WSGI XML-RPC/SOAP Interface</title>
@@ -33,7 +33,7 @@ def application(environ, start_response):
             # object within different threads!
             api = PLCAPI()
             api.environ = environ
-            content_type = 'text/xml'
+            content_type = 'text/xml; charset=utf-8'
             ip = environ.get('REMOTE_ADDR')
             port = environ.get('REMOTE_PORT')
             output = api.handle((ip,port),  environ.get('wsgi.input').read())
@@ -42,14 +42,14 @@ def application(environ, start_response):
             api.db.close()
     except Exception as err:
         status = '500 Internal Server Error'
-        content_type = 'text/html'
+        content_type = 'text/html; charset=utf-8'
         output = 'Internal Server Error'
         logger.exception("INTERNAL ERROR !!")
 
     # Write response
+    # with python3 wsgi expects a bytes object here
+    output = output.encode()
     response_headers = [('Content-type', '%s' % content_type),
                        ('Content-Length', str(len(output)))]
     start_response(status, response_headers)
-    # with python3 wsgi expects a bytes object here
-    output = output.encode()
     return [output]

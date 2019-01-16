@@ -81,7 +81,7 @@ class UpdateLeases(Method):
                 # check slices only once
                 if 'verified' not in slice:
                     if self.caller['person_id'] in slice['person_ids']:
-                        pass
+                        slice['verified'] = True
                     elif 'pi' not in self.caller['roles']:
                         raise PLCPermissionDenied(
                             "Not a member of slice {}".format(slice['name']))
@@ -89,7 +89,6 @@ class UpdateLeases(Method):
                         raise PLCPermissionDenied(
                             "Slice {} not associated with any of your sites"
                             .format(slice['name']))
-            slice['verified'] = True
 
             try:
                 # we've ruled out already the case where all 3 (from, to,

@@ -44,12 +44,11 @@ class DeleteLeases(Method):
                 # check slices only once
                 if 'verified' not in slice:
                     if self.caller['person_id'] in slice['person_ids']:
-                        pass
+                        slice['verified']=True
                     elif 'pi' not in self.caller['roles']:
                         raise PLCPermissionDenied("Not a member of slice %r"%slice['name'])
                     elif slice['site_id'] not in self.caller['site_ids']:
                         raise PLCPermissionDenied("Slice %r not associated with any of your sites"%slice['name'])
-                slice['verified']=True
 
             lease.delete()
 
