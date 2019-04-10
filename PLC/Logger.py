@@ -11,6 +11,12 @@ import logging.config
 global_filename = "/var/log/plcapi.log"
 if 'PLCAPILOG' in os.environ:
     global_filename = os.environ['PLCAPILOG']
+else:
+    try:
+        with open(global_filename, 'a') as just_checking:
+            pass
+    except OSError:
+        global_filename = "/tmp/plcapi.log"
 
 plcapi_logging_config = {
     'version': 1,
