@@ -68,7 +68,12 @@ class PostgreSQL:
             x = x.decode('utf-8')
 
         if isinstance(x, str):
-            x = x.replace("\\", "\\\\").replace("'", "''")
+        # don't double quote backslahes, this causes failure
+        # with e.g. the SFA code when it tries to spot slices
+        # created from fed4fire, which to my knowledge is the only
+        # place where a backslash is useful
+        #    x = x.replace("\\", "\\\\")
+            x = x.replace("'", "''")
             x = f"'{x}'"
         elif isinstance(x, (int, float)):
             pass
