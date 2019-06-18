@@ -32,7 +32,7 @@ def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
                 api.config.PLC_MAIL_SUPPORT_ADDRESS)
 
     # Create a MIME-encoded UTF-8 message
-    msg = MIMEText(Body.encode(api.encoding), _charset = api.encoding)
+    msg = MIMEText(Body)
 
     # Unicode subject headers are automatically encoded correctly
     msg['Subject'] = Subject
@@ -57,12 +57,8 @@ def sendmail(api, To, Subject, Body, From = None, Cc = None, Bcc = None):
         for addr in addresses:
             if isinstance(addr, tuple):
                 (name, addr) = addr
-                try:
-                    name = name.encode('ascii')
-                    header.append('%s <%s>' % (name, addr))
-                except:
-                    h = Header(name, charset = api.encoding, header_name = header_name)
-                    header.append('"%s" <%s>' % (h.encode(), addr))
+                h = Header(name, charset = api.encoding, header_name = header_name)
+                header.append('"%s" <%s>' % (h, addr))
             else:
                 header.append(addr)
             addrs.append(addr)
