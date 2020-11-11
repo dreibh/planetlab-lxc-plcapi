@@ -34,7 +34,7 @@ Requires: python3-pycurl
 # used in GPG.py as a replacement to PyXML's Canonicalize
 Requires: python3-lxml
 # for the RebootNodeWithPCU method
-Requires: pcucontrol >= 1.0-6
+#Requires: pcucontrol >= 1.0-6
 # for memcache
 Requires: memcached python3-memcached
 
