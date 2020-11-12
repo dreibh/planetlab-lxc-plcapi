@@ -14,7 +14,7 @@ CREATE TABLE leases (
 -- xxx for testing
 --    CONSTRAINT future CHECK (t_from > CURRENT_TIMESTAMP),
     CONSTRAINT start_before_end CHECK (t_until > t_from)
-) WITH OIDS;
+);
 
 --
 -- hook to check for overlapping time slots on a given node_id
