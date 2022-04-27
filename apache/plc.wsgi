@@ -23,6 +23,7 @@ def application(environ, start_response):
 </head><body>
 <h1>PLCAPI WSGI XML-RPC/SOAP Interface</h1>
 <p>Please use XML-RPC or SOAP to access the PLCAPI.</p>
+<p>At the very least you need to use a POST method.</p>
 </body></html>
 """
         else:
@@ -37,6 +38,14 @@ def application(environ, start_response):
             ip = environ.get('REMOTE_ADDR')
             port = environ.get('REMOTE_PORT')
             output = api.handle((ip,port),  environ.get('wsgi.input').read())
+# uncomment for debug
+#            try:
+#                with open("/tmp/dbgplc.log", "a") as f:
+#                    print(f"{ip=} {port=}\n"
+#                          f"{output=}",
+#                          file=f)
+#            except Exception as exc:
+#                pass
             # Shut down database connection, otherwise up to MaxClients DB
             # connections will remain open.
             api.db.close()
