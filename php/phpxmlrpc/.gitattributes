@@ -1,0 +1,13 @@
+*.inc	diff=php
+
+demo/ export-ignore
+doc/ export-ignore
+extras/ export-ignore
+
+.github/ export-ignore
+tests/ export-ignore
+.editorconfig export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+pakefile.php export-ignore
+phpunit.xml.dist export-ignore

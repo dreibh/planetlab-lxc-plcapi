@@ -1,9 +1,7 @@
-<html>
+<?php require_once __DIR__ . "/client/_prepend.php"; ?><html lang="en">
 <head><title>xmlrpc</title></head>
 <body>
 <?php
-
-include_once __DIR__ . "/../vendor/autoload.php";
 
 $req = new PhpXmlRpc\Request('examples.getStateName');
 
@@ -86,10 +84,10 @@ print "Or in UTC, that is " . PhpXmlRpc\Helper\Date::iso8601Encode($t, 1) . "\n"
 $tb = PhpXmlRpc\Helper\Date::iso8601Decode($date);
 print "That is to say $date --> $tb\n";
 print "Which comes out at " . PhpXmlRpc\Helper\Date::iso8601Encode($tb) . "\n";
-print "Which was the time in UTC at " . PhpXmlRpc\Helper\Date::iso8601Encode($date, 1) . "\n";
+print "Which was the time in UTC at " . PhpXmlRpc\Helper\Date::iso8601Encode($tb, 1) . "\n";
 
 print "</pre>\n";
 
 ?>
 </body>
-</html>
+</html><?php require_once __DIR__ . "/client/_append.php"; ?>
