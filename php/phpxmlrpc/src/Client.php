@@ -1026,7 +1026,11 @@ class Client
             }
             // whether to verify cert's common name (CN); 0 for no, 1 to verify that it exists, and 2 to verify that
             // it matches the hostname used
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->verifyhost);
+            // php8 no longer supports 1
+            $verifyhost = $this->verifyhost;
+            if ($verifyhost === 1)
+               $verifyhost = 2;
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $verifyhost);
             // allow usage of different SSL versions
             curl_setopt($curl, CURLOPT_SSLVERSION, $sslVersion);
         }
