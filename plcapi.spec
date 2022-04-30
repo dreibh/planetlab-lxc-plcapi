@@ -1,5 +1,5 @@
 %define name plcapi
-%define version 7.0
+%define version 7.1
 %define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
@@ -133,6 +133,13 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Apr 30 2022 Thierry Parmentelat <thierry.parmentelat@inria.fr> - plcapi-7.1-0
+- for php8 in f35:
+- * the phpxmlrpc layer has been upgraded to recent 4.6.1 that is php8-ready
+- * classes to use __construct() to define a constructor
+- * curl_setopt with verifyhost being 1 is no longer allowed
+- also other older changes related to pgsql 12
+
 * Mon Jan 07 2019 Thierry Parmentelat <thierry.parmentelat@inria.fr> - plcapi-7.0-0
 - based on python3, runs on f27 and f29
 - removed dependency to aspects, and so to rate limits
