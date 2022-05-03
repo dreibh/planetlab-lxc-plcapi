@@ -3,7 +3,7 @@
  * Makefile for phpxmlrpc library.
  * To be used with the Pake tool: https://github.com/indeyets/pake/wiki
  *
- * @copyright (c) 2015 G. Giunta
+ * @copyright (c) 2015-2021 G. Giunta
  *
  * @todo !important allow user to specify location of docbook xslt instead of the one installed via composer
  */
@@ -40,6 +40,11 @@ class Builder
     public static function workspaceDir()
     {
         return self::buildDir().'/workspace';
+    }
+
+    public static function toolsDir()
+    {
+        return self::buildDir().'/tools';
     }
 
     /// most likely things will break if this one is moved outside of BuildDir
@@ -104,7 +109,6 @@ class Builder
      */
     public static function applyXslt($inFile, $xssFile, $outFileOrDir)
     {
-
         if (!file_exists($inFile)) {
             throw new \Exception("File $inFile cannot be found");
         }
@@ -205,6 +209,7 @@ function run_getopts($task=null, $args=array(), $cliOpts=array())
 
 /**
  * Downloads source code in the build workspace directory, optionally checking out the given branch/tag
+ * @todo allow using current installation as source, bypassing git clone in workspace - at least for doc generation
  */
 function run_init($task=null, $args=array(), $cliOpts=array())
 {
@@ -252,16 +257,20 @@ function run_clean_doc()
  */
 function run_doc($task=null, $args=array(), $cliOpts=array())
 {
+    // in
+    $srcDir = Builder::workspaceDir();
+    // out
     $docDir = Builder::workspaceDir().'/doc';
 
     // API docs
 
     // from phpdoc comments using phpdocumentor
-    //$cmd = Builder::tool('php');
-    //pake_sh("$cmd vendor/phpdocumentor/phpdocumentor/bin/phpdoc run -d ".Builder::workspaceDir().'/src'." -t ".Builder::workspaceDir().'/doc/api --title PHP-XMLRPC');
+    $cmd = Builder::tool('php');
+    pake_sh("$cmd " . Builder::toolsDir(). "/vendor/bin/phpdoc run --cache-folder ".Builder::buildDir()."/.phpdoc -d ".$srcDir.'/src'." -t ".$docDir.'/api --title PHP-XMLRPC');
 
     // from phpdoc comments using Sami
-    $samiConfig = <<<EOT
+    // deprecated on 2021/12, as Sami is abandonware
+    /*$samiConfig = <<<EOT
 <?php
     \$iterator = Symfony\Component\Finder\Finder::create()
       ->files()
@@ -278,18 +287,18 @@ function run_doc($task=null, $args=array(), $cliOpts=array())
 EOT;
     file_put_contents('build/sami_config.php', $samiConfig);
     $cmd = Builder::tool('php');
-    pake_sh("$cmd vendor/sami/sami/sami.php update -vvv build/sami_config.php");
+    pake_sh("$cmd " . Builder::toolsDir(). "/vendor/bin/sami.php update -vvv build/sami_config.php");*/
 
     // User Manual
 
     // html (single file) from asciidoc
     $cmd = Builder::tool('asciidoctor');
-    pake_sh("$cmd -d book $docDir/manual/phpxmlrpc_manual.adoc");
+    pake_sh("$cmd -d book -o $docDir/manual/phpxmlrpc_manual.html $srcDir/doc/manual/phpxmlrpc_manual.adoc");
 
     // then docbook from asciidoc
     /// @todo create phpxmlrpc_manual.xml with the good version number
     /// @todo create phpxmlrpc_manual.xml with the date set to the one of last commit (or today?)
-    pake_sh("$cmd -d book -b docbook $docDir/manual/phpxmlrpc_manual.adoc");
+    pake_sh("$cmd -d book -b docbook -o $docDir/manual/phpxmlrpc_manual.xml $srcDir/doc/manual/phpxmlrpc_manual.adoc");
 
     # Other tools for docbook...
     #
@@ -299,7 +308,7 @@ EOT;
     # convertdoc command for xmlmind xxe editor
     #	convertdoc docb.toHTML xmlrpc_php.xml -u out
     #
-    # saxon + xerces xml parser + saxon extensions + xslthl: adds a little syntax highligting
+    # saxon + xerces xml parser + saxon extensions + xslthl: adds a little syntax highlighting
     # (bold and italics only, no color) for php source examples...
     #	java \
     #	-classpath c:\programmi\saxon\saxon.jar\;c:\programmi\saxon\xslthl.jar\;c:\programmi\xerces\xercesImpl.jar\;C:\htdocs\xmlrpc_cvs\docbook-xsl\extensions\saxon65.jar \

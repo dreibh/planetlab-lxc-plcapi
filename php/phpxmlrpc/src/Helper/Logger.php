@@ -2,12 +2,16 @@
 
 namespace PhpXmlRpc\Helper;
 
+/**
+ * @todo implement an interface
+ * @todo make constructor private to force users to go through `instance()` ?
+ */
 class Logger
 {
     protected static $instance = null;
 
     /**
-     * This class is singleton, so that later we can move to DI patterns.
+     * This class can be used as singleton, so that later we can move to DI patterns.
      *
      * @return Logger
      */
@@ -28,7 +32,7 @@ class Logger
      * @param string $message
      * @param string $encoding
      */
-    public function debugMessage($message, $encoding=null)
+    public function debugMessage($message, $encoding = null)
     {
         // US-ASCII is a warning for PHP and a fatal for HHVM
         if ($encoding == 'US-ASCII') {
@@ -36,7 +40,14 @@ class Logger
         }
 
         if (PHP_SAPI != 'cli') {
-            $flags = ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE;
+            $flags = ENT_COMPAT;
+            // avoid warnings on php < 5.4...
+            if (defined('ENT_HTML401')) {
+                $flags =  $flags | ENT_HTML401;
+            }
+            if (defined('ENT_SUBSTITUTE')) {
+                $flags =  $flags | ENT_SUBSTITUTE;
+            }
             if ($encoding != null) {
                 print "<PRE>\n".htmlentities($message, $flags, $encoding)."\n</PRE>";
             } else {
@@ -48,5 +59,14 @@ class Logger
 
         // let the user see this now in case there's a time out later...
         flush();
+    }
+
+    /**
+     * Writes a message to the error log
+     * @param string $message
+     */
+    public function errorLog($message)
+    {
+        error_log($message);
     }
 }

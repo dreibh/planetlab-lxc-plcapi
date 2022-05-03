@@ -2,23 +2,24 @@
 
 namespace PhpXmlRpc;
 
-use PhpXmlRpc\Helper\XMLParser;
 use PhpXmlRpc\Helper\Charset;
+use PhpXmlRpc\Helper\Logger;
+use PhpXmlRpc\Helper\XMLParser;
 
 /**
  * Allows effortless implementation of XML-RPC servers
  */
 class Server
 {
-    /**
-     * Array defining php functions exposed as xmlrpc methods by this server.
-     */
-    protected $dmap = array();
+    protected static $logger;
+    protected static $parser;
+    protected static $charsetEncoder;
 
     /**
      * Defines how functions in dmap will be invoked: either using an xmlrpc request object
      * or plain php values.
      * Valid strings are 'xmlrpcvals', 'phpvals' or 'epivals'
+     * @todo create class constants for these
      */
     public $functions_parameters_type = 'xmlrpcvals';
 
@@ -79,21 +80,73 @@ class Server
     public $response_charset_encoding = '';
 
     /**
-     * Storage for internal debug info.
-     */
-    protected $debug_info = '';
-
-    /**
      * Extra data passed at runtime to method handling functions. Used only by EPI layer
      */
     public $user_data = null;
+
+    /**
+     * Array defining php functions exposed as xmlrpc methods by this server.
+     * @var array[] $dmap
+     */
+    protected $dmap = array();
+
+    /**
+     * Storage for internal debug info.
+     */
+    protected $debug_info = '';
 
     protected static $_xmlrpc_debuginfo = '';
     protected static $_xmlrpcs_occurred_errors = '';
     protected static $_xmlrpcs_prev_ehandler = '';
 
+    public function getLogger()
+    {
+        if (self::$logger === null) {
+            self::$logger = Logger::instance();
+        }
+        return self::$logger;
+    }
+
+    public static function setLogger($logger)
+    {
+        self::$logger = $logger;
+    }
+
+    public function getParser()
+    {
+        if (self::$parser === null) {
+            self::$parser = new XMLParser();
+        }
+        return self::$parser;
+    }
+
+    public static function setParser($parser)
+    {
+        self::$parser = $parser;
+    }
+
+    public function getCharsetEncoder()
+    {
+        if (self::$charsetEncoder === null) {
+            self::$charsetEncoder = Charset::instance();
+        }
+        return self::$charsetEncoder;
+    }
+
+    public function setCharsetEncoder($charsetEncoder)
+    {
+        self::$charsetEncoder = $charsetEncoder;
+    }
+
     /**
-     * @param array $dispatchMap the dispatch map with definition of exposed services
+     * @param array[] $dispatchMap the dispatch map with definition of exposed services
+     *                             Array keys are the names of the method names.
+     *                             Each array value is an array with the following members:
+     *                             - function (callable)
+     *                             - docstring (optional)
+     *                             - signature (array, optional)
+     *                             - signature_docs (array, optional)
+     *                             - parameters_type (string, optional)
      * @param boolean $serviceNow set to false to prevent the server from running upon construction
      */
     public function __construct($dispatchMap = null, $serviceNow = true)
@@ -142,19 +195,24 @@ class Server
     }
 
     /**
-     * Add a string to the debug info that can be later serialized by the server
-     * as part of the response message.
-     * Note that for best compatibility, the debug string should be encoded using
-     * the PhpXmlRpc::$xmlrpc_internalencoding character set.
+     * Add a string to the debug info that can be later serialized by the server as part of the response message.
+     * Note that for best compatibility, the debug string should be encoded using the PhpXmlRpc::$xmlrpc_internalencoding
+     * character set.
      *
      * @param string $msg
-     * @access public
      */
     public static function xmlrpc_debugmsg($msg)
     {
         static::$_xmlrpc_debuginfo .= $msg . "\n";
     }
 
+    /**
+     * Add a string to the debug info that will be later serialized by the server as part of the response message
+     * (base64 encoded, only when debug level >= 2)
+     *
+     * character set.
+     * @param string $msg
+     */
     public static function error_occurred($msg)
     {
         static::$_xmlrpcs_occurred_errors .= $msg . "\n";
@@ -179,7 +237,7 @@ class Server
             $out .= "<!-- SERVER DEBUG INFO (BASE64 ENCODED):\n" . base64_encode($this->debug_info) . "\n-->\n";
         }
         if (static::$_xmlrpc_debuginfo != '') {
-            $out .= "<!-- DEBUG INFO:\n" . Charset::instance()->encodeEntities(str_replace('--', '_-', static::$_xmlrpc_debuginfo), PhpXmlRpc::$xmlrpc_internalencoding, $charsetEncoding) . "\n-->\n";
+            $out .= "<!-- DEBUG INFO:\n" . $this->getCharsetEncoder()->encodeEntities(str_replace('--', '_-', static::$_xmlrpc_debuginfo), PhpXmlRpc::$xmlrpc_internalencoding, $charsetEncoding) . "\n-->\n";
             // NB: a better solution MIGHT be to use CDATA, but we need to insert it
             // into return payload AFTER the beginning tag
             //$out .= "<![CDATA[ DEBUG INFO:\n\n" . str_replace(']]>', ']_]_>', static::$_xmlrpc_debuginfo) . "\n]]>\n";
@@ -217,10 +275,12 @@ class Server
         if (!$r) {
             // this actually executes the request
             $r = $this->parseRequest($data, $reqCharset);
-        }
 
-        // save full body of request into response, for more debugging usages
-        $r->raw_data = $rawData;
+            // save full body of request into response, for more debugging usages.
+            // Note that this is the _request_ data, not the response's own data, unlike what happens client-side
+            /// @todo try to move this injection to the resp. constructor or use a non-deprecated access method
+            $r->raw_data = $rawData;
+        }
 
         if ($this->debug > 2 && static::$_xmlrpcs_occurred_errors) {
             $this->debugmsg("+++PROCESSING ERRORS AND WARNINGS+++\n" .
@@ -232,8 +292,7 @@ class Server
             $payload = $payload . $this->serializeDebug($respCharset);
         }
 
-        // G. Giunta 2006-01-27: do not create response serialization if it has
-        // already happened. Helps building json magic
+        // Do not create response serialization if it has already happened. Helps building json magic
         if (empty($r->payload)) {
             $r->serialize($respCharset);
         }
@@ -254,6 +313,7 @@ class Server
             // http compression of output: only
             // if we can do it, and we want to do it, and client asked us to,
             // and php ini settings do not force it already
+            /// @todo check separately for gzencode and gzcompress functions, in case of polyfills
             $phpNoSelfCompress = !ini_get('zlib.output_compression') && (ini_get('output_handler') != 'ob_gzhandler');
             if ($this->compress_response && function_exists('gzencode') && $respEncoding != ''
                 && $phpNoSelfCompress
@@ -269,13 +329,15 @@ class Server
                 }
             }
 
-            // do not output content-length header if php is compressing output for us:
-            // it will mess up measurements
+            // Do not output content-length header if php is compressing output for us:
+            // it will mess up measurements.
+            // Note that Apache/mod_php will add (and even alter!) the Content-Length header on its own, but only for
+            // responses up to 8000 bytes
             if ($phpNoSelfCompress) {
                 header('Content-Length: ' . (int)strlen($payload));
             }
         } else {
-            error_log('XML-RPC: ' . __METHOD__ . ': http headers already sent before response is fully generated. Check for php warning or error messages');
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': http headers already sent before response is fully generated. Check for php warning or error messages');
         }
 
         print $payload;
@@ -288,10 +350,16 @@ class Server
      * Add a method to the dispatch map.
      *
      * @param string $methodName the name with which the method will be made available
-     * @param string $function the php function that will get invoked
-     * @param array $sig the array of valid method signatures
+     * @param callable $function the php function that will get invoked
+     * @param array[] $sig the array of valid method signatures.
+     *                     Each element is one signature: an array of strings with at least one element
+     *                     First element = type of returned value. Elements 2..N = types of parameters 1..N
      * @param string $doc method documentation
-     * @param array $sigDoc the array of valid method signatures docs (one string per param, one for return type)
+     * @param array[] $sigDoc the array of valid method signatures docs, following the format of $sig but with
+     *                        descriptions instead of types (one string for return type, one per param)
+     *
+     * @todo raise a warning if the user tries to register a 'system.' method
+     * @todo allow setting parameters_type
      */
     public function add_to_map($methodName, $function, $sig = null, $doc = false, $sigDoc = false)
     {
@@ -313,7 +381,7 @@ class Server
      * @param array|Request $in array of either xmlrpc value objects or xmlrpc type definitions
      * @param array $sigs array of known signatures to match against
      *
-     * @return array
+     * @return array int, string
      */
     protected function verifySignature($in, $sigs)
     {
@@ -362,14 +430,14 @@ class Server
     /**
      * Parse http headers received along with xmlrpc request. If needed, inflate request.
      *
-     * @return mixed Response|null on success or an error Response
+     * @return Response|null null on success or an error Response
      */
     protected function parseRequestHeaders(&$data, &$reqEncoding, &$respEncoding, &$respCompression)
     {
         // check if $_SERVER is populated: it might have been disabled via ini file
         // (this is true even when in CLI mode)
         if (count($_SERVER) == 0) {
-            error_log('XML-RPC: ' . __METHOD__ . ': cannot parse request headers as $_SERVER is not populated');
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': cannot parse request headers as $_SERVER is not populated');
         }
 
         if ($this->debug > 1) {
@@ -387,6 +455,8 @@ class Server
             $contentEncoding = '';
         }
 
+        $rawData = $data;
+
         // check if request body has been compressed and decompress it
         if ($contentEncoding != '' && strlen($data)) {
             if ($contentEncoding == 'deflate' || $contentEncoding == 'gzip') {
@@ -403,12 +473,16 @@ class Server
                             $this->debugmsg("+++INFLATED REQUEST+++[" . strlen($data) . " chars]+++\n" . $data . "\n+++END+++");
                         }
                     } else {
-                        $r = new Response(0, PhpXmlRpc::$xmlrpcerr['server_decompress_fail'], PhpXmlRpc::$xmlrpcstr['server_decompress_fail']);
+                        $r = new Response(0, PhpXmlRpc::$xmlrpcerr['server_decompress_fail'],
+                            PhpXmlRpc::$xmlrpcstr['server_decompress_fail'], '', array('raw_data' => $rawData)
+                        );
 
                         return $r;
                     }
                 } else {
-                    $r = new Response(0, PhpXmlRpc::$xmlrpcerr['server_cannot_decompress'], PhpXmlRpc::$xmlrpcstr['server_cannot_decompress']);
+                    $r = new Response(0, PhpXmlRpc::$xmlrpcerr['server_cannot_decompress'],
+                        PhpXmlRpc::$xmlrpcstr['server_cannot_decompress'], '', array('raw_data' => $rawData)
+                    );
 
                     return $r;
                 }
@@ -453,7 +527,7 @@ class Server
         $reqEncoding = XMLParser::guessEncoding(isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '',
             $data);
 
-        return;
+        return null;
     }
 
     /**
@@ -466,14 +540,20 @@ class Server
      * @return Response
      *
      * @throws \Exception in case the executed method does throw an exception (and depending on server configuration)
+     *
+     * @internal this function will become protected in the future
+     * @todo either rename this function or move the 'execute' part out of it...
      */
     public function parseRequest($data, $reqEncoding = '')
     {
         // decompose incoming XML into request structure
 
         if ($reqEncoding != '') {
-            // Since parsing will fail if charset is not specified in the xml prologue,
-            // the encoding is not UTF8 and there are non-ascii chars in the text, we try to work round that...
+            // Since parsing will fail if
+            // - charset is not specified in the xml prologue,
+            // - the encoding is not UTF8 and
+            // - there are non-ascii chars in the text,
+            // we try to work round that...
             // The following code might be better for mb_string enabled installs, but
             // makes the lib about 200% slower...
             //if (!is_valid_charset($reqEncoding, array('UTF-8')))
@@ -484,56 +564,45 @@ class Server
                     if (extension_loaded('mbstring')) {
                         $data = mb_convert_encoding($data, 'UTF-8', $reqEncoding);
                     } else {
-                        error_log('XML-RPC: ' . __METHOD__ . ': invalid charset encoding of received request: ' . $reqEncoding);
+                        $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': invalid charset encoding of received request: ' . $reqEncoding);
                     }
                 }
             }
         }
 
-        $parser = xml_parser_create();
-        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, true);
-        // G. Giunta 2005/02/13: PHP internally uses ISO-8859-1, so we have to tell
-        // the xml parser to give us back data in the expected charset
-        // What if internal encoding is not in one of the 3 allowed?
-        // we use the broadest one, ie. utf8
+        // PHP internally might use ISO-8859-1, so we have to tell the xml parser to give us back data in the expected charset.
+        // What if internal encoding is not in one of the 3 allowed? We use the broadest one, ie. utf8
         // This allows to send data which is native in various charset,
         // by extending xmlrpc_encode_entities() and setting xmlrpc_internalencoding
         if (!in_array(PhpXmlRpc::$xmlrpc_internalencoding, array('UTF-8', 'ISO-8859-1', 'US-ASCII'))) {
-            xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
+            /// @todo emit a warning
+            $options = array(XML_OPTION_TARGET_ENCODING => 'UTF-8');
         } else {
-            xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, PhpXmlRpc::$xmlrpc_internalencoding);
+            $options = array(XML_OPTION_TARGET_ENCODING => PhpXmlRpc::$xmlrpc_internalencoding);
         }
 
-        $xmlRpcParser = new XMLParser();
-        xml_set_object($parser, $xmlRpcParser);
-
-        if ($this->functions_parameters_type != 'xmlrpcvals') {
-            xml_set_element_handler($parser, 'xmlrpc_se', 'xmlrpc_ee_fast');
-        } else {
-            xml_set_element_handler($parser, 'xmlrpc_se', 'xmlrpc_ee');
-        }
-        xml_set_character_data_handler($parser, 'xmlrpc_cd');
-        xml_set_default_handler($parser, 'xmlrpc_dh');
-        if (!xml_parse($parser, $data, 1)) {
-            // return XML error as a faultCode
+        $xmlRpcParser = $this->getParser();
+        $xmlRpcParser->parse($data, $this->functions_parameters_type, XMLParser::ACCEPT_REQUEST, $options);
+        if ($xmlRpcParser->_xh['isf'] > 2) {
+            // (BC) we return XML error as a faultCode
+            preg_match('/^XML error ([0-9]+)/', $xmlRpcParser->_xh['isf_reason'], $matches);
             $r = new Response(0,
-                PhpXmlRpc::$xmlrpcerrxml + xml_get_error_code($parser),
-                sprintf('XML error: %s at line %d, column %d',
-                    xml_error_string(xml_get_error_code($parser)),
-                    xml_get_current_line_number($parser), xml_get_current_column_number($parser)));
-            xml_parser_free($parser);
+                PhpXmlRpc::$xmlrpcerrxml + $matches[1],
+                $xmlRpcParser->_xh['isf_reason']);
         } elseif ($xmlRpcParser->_xh['isf']) {
-            xml_parser_free($parser);
             $r = new Response(0,
                 PhpXmlRpc::$xmlrpcerr['invalid_request'],
                 PhpXmlRpc::$xmlrpcstr['invalid_request'] . ' ' . $xmlRpcParser->_xh['isf_reason']);
         } else {
-            xml_parser_free($parser);
             // small layering violation in favor of speed and memory usage:
             // we should allow the 'execute' method handle this, but in the
             // most common scenario (xmlrpc values type server with some methods
             // registered as phpvals) that would mean a useless encode+decode pass
-            if ($this->functions_parameters_type != 'xmlrpcvals' || (isset($this->dmap[$xmlRpcParser->_xh['method']]['parameters_type']) && ($this->dmap[$xmlRpcParser->_xh['method']]['parameters_type'] == 'phpvals'))) {
+            if ($this->functions_parameters_type != 'xmlrpcvals' ||
+                (isset($this->dmap[$xmlRpcParser->_xh['method']]['parameters_type']) &&
+                    ($this->dmap[$xmlRpcParser->_xh['method']]['parameters_type'] != 'xmlrpcvals')
+                )
+            ) {
                 if ($this->debug > 1) {
                     $this->debugmsg("\n+++PARSED+++\n" . var_export($xmlRpcParser->_xh['params'], true) . "\n+++END+++");
                 }
@@ -559,9 +628,9 @@ class Server
     /**
      * Execute a method invoked by the client, checking parameters used.
      *
-     * @param mixed $req either a Request obj or a method name
-     * @param array $params array with method parameters as php types (if m is method name only)
-     * @param array $paramTypes array with xmlrpc types of method parameters (if m is method name only)
+     * @param Request|string $req either a Request obj or a method name
+     * @param mixed[] $params array with method parameters as php types (only if m is method name)
+     * @param string[] $paramTypes array with xmlrpc types of method parameters (only if m is method name)
      *
      * @return Response
      *
@@ -577,7 +646,7 @@ class Server
         } else {
             $methName = $req;
         }
-        $sysCall = $this->allow_system_funcs && (strpos($methName, "system.") === 0);
+        $sysCall = $this->isSyscall($methName);
         $dmap = $sysCall ? $this->getSystemDispatchMap() : $this->dmap;
 
         if (!isset($dmap[$methName]['function'])) {
@@ -625,7 +694,7 @@ class Server
 
         // verify that function to be invoked is in fact callable
         if (!is_callable($func)) {
-            error_log("XML-RPC: " . __METHOD__ . ": function '$funcName' registered as method handler is not callable");
+            $this->getLogger()->errorLog("XML-RPC: " . __METHOD__ . ": function '$funcName' registered as method handler is not callable");
             return new Response(
                 0,
                 PhpXmlRpc::$xmlrpcerr['server_error'],
@@ -648,7 +717,7 @@ class Server
                     $r = call_user_func($func, $req);
                 }
                 if (!is_a($r, 'PhpXmlRpc\Response')) {
-                    error_log("XML-RPC: " . __METHOD__ . ": function '$funcName' registered as method handler does not return an xmlrpc response object but a " . gettype($r));
+                    $this->getLogger()->errorLog("XML-RPC: " . __METHOD__ . ": function '$funcName' registered as method handler does not return an xmlrpc response object but a " . gettype($r));
                     if (is_a($r, 'PhpXmlRpc\Value')) {
                         $r = new Response($r);
                     } else {
@@ -669,7 +738,7 @@ class Server
                     if ($this->functions_parameters_type == 'epivals') {
                         $r = call_user_func_array($func, array($methName, $params, $this->user_data));
                         // mimic EPI behaviour: if we get an array that looks like an error, make it
-                        // an eror response
+                        // an error response
                         if (is_array($r) && array_key_exists('faultCode', $r) && array_key_exists('faultString', $r)) {
                             $r = new Response(0, (integer)$r['faultCode'], (string)$r['faultString']);
                         } else {
@@ -703,7 +772,6 @@ class Server
                         }
                     }
                     throw $e;
-                    break;
                 case 1:
                     $r = new Response(0, $e->getCode(), $e->getMessage());
                     break;
@@ -747,13 +815,32 @@ class Server
         }
     }
 
-    /* Functions that implement system.XXX methods of xmlrpc servers */
+    /**
+     * @param string $methName
+     * @return bool
+     */
+    protected function isSyscall($methName)
+    {
+        return (strpos($methName, "system.") === 0);
+    }
 
     /**
-     * @return array
+     * @return array[]
+     */
+    public function getDispatchMap()
+    {
+        return $this->dmap;
+    }
+
+    /**
+     * @return array[]
      */
     public function getSystemDispatchMap()
     {
+        if (!$this->allow_system_funcs) {
+            return array();
+        }
+
         return array(
             'system.listMethods' => array(
                 'function' => 'PhpXmlRpc\Server::_xmlrpcs_listMethods',
@@ -784,14 +871,16 @@ class Server
             'system.getCapabilities' => array(
                 'function' => 'PhpXmlRpc\Server::_xmlrpcs_getCapabilities',
                 'signature' => array(array(Value::$xmlrpcStruct)),
-                'docstring' => 'This method lists all the capabilites that the XML-RPC server has: the (more or less standard) extensions to the xmlrpc spec that it adheres to',
+                'docstring' => 'This method lists all the capabilities that the XML-RPC server has: the (more or less standard) extensions to the xmlrpc spec that it adheres to',
                 'signature_docs' => array(array('list of capabilities, described as structs with a version number and url for the spec')),
             ),
         );
     }
 
+    /* Functions that implement system.XXX methods of xmlrpc servers */
+
     /**
-     * @return array
+     * @return array[]
      */
     public function getCapabilities()
     {
@@ -825,27 +914,40 @@ class Server
         return $outAr;
     }
 
+    /**
+     * @param Server $server
+     * @param Request $req
+     * @return Response
+     */
     public static function _xmlrpcs_getCapabilities($server, $req = null)
     {
         $encoder = new Encoder();
         return new Response($encoder->encode($server->getCapabilities()));
     }
 
-    public static function _xmlrpcs_listMethods($server, $req = null) // if called in plain php values mode, second param is missing
+    /**
+     * @param Server $server
+     * @param Request $req if called in plain php values mode, second param is missing
+     * @return Response
+     */
+    public static function _xmlrpcs_listMethods($server, $req = null)
     {
         $outAr = array();
         foreach ($server->dmap as $key => $val) {
             $outAr[] = new Value($key, 'string');
         }
-        if ($server->allow_system_funcs) {
-            foreach ($server->getSystemDispatchMap() as $key => $val) {
-                $outAr[] = new Value($key, 'string');
-            }
+        foreach ($server->getSystemDispatchMap() as $key => $val) {
+            $outAr[] = new Value($key, 'string');
         }
 
         return new Response(new Value($outAr, 'array'));
     }
 
+    /**
+     * @param Server $server
+     * @param Request $req
+     * @return Response
+     */
     public static function _xmlrpcs_methodSignature($server, $req)
     {
         // let accept as parameter both an xmlrpc value or string
@@ -855,7 +957,7 @@ class Server
         } else {
             $methName = $req;
         }
-        if (strpos($methName, "system.") === 0) {
+        if ($server->isSyscall($methName)) {
             $dmap = $server->getSystemDispatchMap();
         } else {
             $dmap = $server->dmap;
@@ -883,6 +985,11 @@ class Server
         return $r;
     }
 
+    /**
+     * @param Server $server
+     * @param Request $req
+     * @return Response
+     */
     public static function _xmlrpcs_methodHelp($server, $req)
     {
         // let accept as parameter both an xmlrpc value or string
@@ -892,14 +999,14 @@ class Server
         } else {
             $methName = $req;
         }
-        if (strpos($methName, "system.") === 0) {
+        if ($server->isSyscall($methName)) {
             $dmap = $server->getSystemDispatchMap();
         } else {
             $dmap = $server->dmap;
         }
         if (isset($dmap[$methName])) {
             if (isset($dmap[$methName]['docstring'])) {
-                $r = new Response(new Value($dmap[$methName]['docstring']), 'string');
+                $r = new Response(new Value($dmap[$methName]['docstring'], 'string'));
             } else {
                 $r = new Response(new Value('', 'string'));
             }
@@ -926,6 +1033,11 @@ class Server
         return new Value($struct, 'struct');
     }
 
+    /**
+     * @param Server $server
+     * @param Value $call
+     * @return Value
+     */
     public static function _xmlrpcs_multicall_do_call($server, $call)
     {
         if ($call->kindOf() != 'struct') {
@@ -969,6 +1081,11 @@ class Server
         return new Value(array($result->value()), 'array');
     }
 
+    /**
+     * @param Server $server
+     * @param Value $call
+     * @return Value
+     */
     public static function _xmlrpcs_multicall_do_call_phpvals($server, $call)
     {
         if (!is_array($call)) {
@@ -990,13 +1107,17 @@ class Server
             return static::_xmlrpcs_multicall_error('notarray');
         }
 
-        // this is a real dirty and simplistic hack, since we might have received a
+        // this is a simplistic hack, since we might have received
         // base64 or datetime values, but they will be listed as strings here...
-        $numParams = count($call['params']);
         $pt = array();
         $wrapper = new Wrapper();
         foreach ($call['params'] as $val) {
-            $pt[] = $wrapper->php2XmlrpcType(gettype($val));
+            // support EPI-encoded base64 and datetime values
+            if ($val instanceof \stdClass && isset($val->xmlrpc_type)) {
+                $pt[] = $val->xmlrpc_type == 'datetime' ? Value::$xmlrpcDateTime : $val->xmlrpc_type;
+            } else {
+                $pt[] = $wrapper->php2XmlrpcType(gettype($val));
+            }
         }
 
         $result = $server->execute($call['methodName'], $call['params'], $pt);
@@ -1008,6 +1129,11 @@ class Server
         return new Value(array($result->value()), 'array');
     }
 
+    /**
+     * @param Server $server
+     * @param Request|array $req
+     * @return Response
+     */
     public static function _xmlrpcs_multicall($server, $req)
     {
         $result = array();
@@ -1052,7 +1178,10 @@ class Server
             // The previous error handler was the default: all we should do is log error
             // to the default error log (if level high enough)
             if (ini_get('log_errors') && (intval(ini_get('error_reporting')) & $errCode)) {
-                error_log($errString);
+                if (self::$logger === null) {
+                    self::$logger = Logger::instance();
+                }
+                self::$logger->errorLog($errString);
             }
         } else {
             // Pass control on to previous error handler, trying to avoid loops...

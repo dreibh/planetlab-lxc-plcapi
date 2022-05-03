@@ -1,11 +1,13 @@
 <?php
 /**
  * @author Gaetano Giunta
- * @copyright (C) 2006-2015 G. Giunta
+ * @copyright (C) 2006-2021 G. Giunta
  * @license code licensed under the BSD License: see file license.txt
  */
 
 namespace PhpXmlRpc;
+
+use PhpXmlRpc\Helper\Logger;
 
 /**
  * PHP-XMLRPC "wrapper" class - generate stubs to transparently access xmlrpc methods as php functions and vice-versa.
@@ -14,11 +16,28 @@ namespace PhpXmlRpc;
  * @todo use some better templating system for code generation?
  * @todo implement method wrapping with preservation of php objs in calls
  * @todo when wrapping methods without obj rebuilding, use return_type = 'phpvals' (faster)
+ * @todo add support for 'epivals' mode
+ * @todo allow setting custom namespace for generated wrapping code
  */
 class Wrapper
 {
     /// used to hold a reference to object instances whose methods get wrapped by wrapPhpFunction(), in 'create source' mode
     public static $objHolder = array();
+
+    protected static $logger;
+
+    public function getLogger()
+    {
+        if (self::$logger === null) {
+            self::$logger = Logger::instance();
+        }
+        return self::$logger;
+    }
+
+    public static function setLogger($logger)
+    {
+        self::$logger = $logger;
+    }
 
     /**
      * Given a string defining a php type or phpxmlrpc type (loosely defined: strings
@@ -26,12 +45,14 @@ class Wrapper
      * Notes:
      * - for php 'resource' types returns empty string, since resources cannot be serialized;
      * - for php class names returns 'struct', since php objects can be serialized as xmlrpc structs
-     * - for php arrays always return array, even though arrays sometimes serialize as json structs
+     * - for php arrays always return array, even though arrays sometimes serialize as structs...
      * - for 'void' and 'null' returns 'undefined'
      *
      * @param string $phpType
      *
      * @return string
+     *
+     * @todo support notation `something[]` as 'array'
      */
     public function php2XmlrpcType($phpType)
     {
@@ -51,6 +72,7 @@ class Wrapper
             case 'true':
                 return Value::$xmlrpcBoolean;
             case Value::$xmlrpcArray: // 'array':
+            case 'array[]';
                 return Value::$xmlrpcArray;
             case 'object':
             case Value::$xmlrpcStruct: // 'struct'
@@ -61,6 +83,9 @@ class Wrapper
                 return '';
             default:
                 if (class_exists($phpType)) {
+                    if (is_a($phpType, 'DateTimeInterface')) {
+                        return Value::$xmlrpcDateTime;
+                    }
                     return Value::$xmlrpcStruct;
                 } else {
                     // unknown: might be any 'extended' xmlrpc type
@@ -110,7 +135,7 @@ class Wrapper
      * Since php is a typeless language, to infer types of input and output parameters,
      * it relies on parsing the javadoc-style comment block associated with the given
      * function. Usage of xmlrpc native types (such as datetime.dateTime.iso8601 and base64)
-     * in the @param tag is also allowed, if you need the php function to receive/send
+     * in the '@param' tag is also allowed, if you need the php function to receive/send
      * data in that particular format (note that base64 encoding/decoding is transparently
      * carried out by the lib, while datetime vals are passed around as strings)
      *
@@ -158,7 +183,7 @@ class Wrapper
         }
         if (is_array($callable)) {
             if (count($callable) < 2 || (!is_string($callable[0]) && !is_object($callable[0]))) {
-                error_log('XML-RPC: ' . __METHOD__ . ': syntax for function to be wrapped is wrong');
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': syntax for function to be wrapped is wrong');
                 return false;
             }
             if (is_string($callable[0])) {
@@ -170,7 +195,7 @@ class Wrapper
         } else if ($callable instanceof \Closure) {
             // we do not support creating code which wraps closures, as php does not allow to serialize them
             if (!$buildIt) {
-                error_log('XML-RPC: ' . __METHOD__ . ': a closure can not be wrapped in generated source code');
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': a closure can not be wrapped in generated source code');
                 return false;
             }
 
@@ -182,7 +207,7 @@ class Wrapper
         }
 
         if (!$exists) {
-            error_log('XML-RPC: ' . __METHOD__ . ': function to be wrapped is not defined: ' . $plainFuncName);
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': function to be wrapped is not defined: ' . $plainFuncName);
             return false;
         }
 
@@ -226,23 +251,23 @@ class Wrapper
         if (is_array($callable)) {
             $func = new \ReflectionMethod($callable[0], $callable[1]);
             if ($func->isPrivate()) {
-                error_log('XML-RPC: ' . __METHOD__ . ': method to be wrapped is private: ' . $plainFuncName);
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': method to be wrapped is private: ' . $plainFuncName);
                 return false;
             }
             if ($func->isProtected()) {
-                error_log('XML-RPC: ' . __METHOD__ . ': method to be wrapped is protected: ' . $plainFuncName);
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': method to be wrapped is protected: ' . $plainFuncName);
                 return false;
             }
             if ($func->isConstructor()) {
-                error_log('XML-RPC: ' . __METHOD__ . ': method to be wrapped is the constructor: ' . $plainFuncName);
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': method to be wrapped is the constructor: ' . $plainFuncName);
                 return false;
             }
             if ($func->isDestructor()) {
-                error_log('XML-RPC: ' . __METHOD__ . ': method to be wrapped is the destructor: ' . $plainFuncName);
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': method to be wrapped is the destructor: ' . $plainFuncName);
                 return false;
             }
             if ($func->isAbstract()) {
-                error_log('XML-RPC: ' . __METHOD__ . ': method to be wrapped is abstract: ' . $plainFuncName);
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': method to be wrapped is abstract: ' . $plainFuncName);
                 return false;
             }
             /// @todo add more checks for static vs. nonstatic?
@@ -252,7 +277,7 @@ class Wrapper
         if ($func->isInternal()) {
             // Note: from PHP 5.1.0 onward, we will possibly be able to use invokeargs
             // instead of getparameters to fully reflect internal php functions ?
-            error_log('XML-RPC: ' . __METHOD__ . ': function to be wrapped is internal: ' . $plainFuncName);
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': function to be wrapped is internal: ' . $plainFuncName);
             return false;
         }
 
@@ -396,11 +421,15 @@ class Wrapper
      * @param $callable
      * @param array $extraOptions
      * @param string $plainFuncName
-     * @param string $funcDesc
+     * @param array $funcDesc
      * @return \Closure
      */
     protected function buildWrapFunctionClosure($callable, $extraOptions, $plainFuncName, $funcDesc)
     {
+        /**
+         * @param Request $req
+         * @return mixed
+         */
         $function = function($req) use($callable, $extraOptions, $funcDesc)
         {
             $nameSpace = '\\PhpXmlRpc\\';
@@ -552,7 +581,7 @@ class Wrapper
         }
 
         // since we are building source code for later use, if we are given an object instance,
-        // we go out of our way and store a pointer to it in a static class var var...
+        // we go out of our way and store a pointer to it in a static class var...
         if (is_array($callable) && is_object($callable[0])) {
             self::$objHolder[$newFuncName] = $callable[0];
             $innerCode .= "\$obj = PhpXmlRpc\\Wrapper::\$objHolder['$newFuncName'];\n";
@@ -593,15 +622,14 @@ class Wrapper
      * @param array $extraOptions see the docs for wrapPhpMethod for basic options, plus
      *                            - string method_type    'static', 'nonstatic', 'all' and 'auto' (default); the latter will switch between static and non-static depending on whether $className is a class name or object instance
      *                            - string method_filter  a regexp used to filter methods to wrap based on their names
-     *                            - string prefix         used for the names of the xmlrpc methods created
-     *
+     *                            - string prefix         used for the names of the xmlrpc methods created.
+     *                            - string replace_class_name use to completely replace the class name with the prefix in the generated method names. e.g. instead of \Some\Namespace\Class.method use prefixmethod
      * @return array|false false on failure
      */
     public function wrapPhpClass($className, $extraOptions = array())
     {
         $methodFilter = isset($extraOptions['method_filter']) ? $extraOptions['method_filter'] : '';
         $methodType = isset($extraOptions['method_type']) ? $extraOptions['method_type'] : 'auto';
-        $prefix = isset($extraOptions['prefix']) ? $extraOptions['prefix'] : '';
 
         $results = array();
         $mList = get_class_methods($className);
@@ -613,13 +641,9 @@ class Wrapper
                         (!$func->isStatic() && ($methodType == 'all' || $methodType == 'nonstatic' || ($methodType == 'auto' && is_object($className))))
                     ) {
                         $methodWrap = $this->wrapPhpFunction(array($className, $mName), '', $extraOptions);
+
                         if ($methodWrap) {
-                            if (is_object($className)) {
-                                $realClassName = get_class($className);
-                            }else {
-                                $realClassName = $className;
-                            }
-                            $results[$prefix."$realClassName.$mName"] = $methodWrap;
+                            $results[$this->generateMethodNameForClassMethod($className, $mName, $extraOptions)] = $methodWrap;
                         }
                     }
                 }
@@ -627,6 +651,26 @@ class Wrapper
         }
 
         return $results;
+    }
+
+    /**
+     * @param string|object $className
+     * @param string $classMethod
+     * @param array $extraOptions
+     * @return string
+     */
+    protected function generateMethodNameForClassMethod($className, $classMethod, $extraOptions = array())
+    {
+        if (isset($extraOptions['replace_class_name']) && $extraOptions['replace_class_name']) {
+            return (isset($extraOptions['prefix']) ?  $extraOptions['prefix'] : '') . $classMethod;
+        }
+
+        if (is_object($className)) {
+            $realClassName = get_class($className);
+        } else {
+            $realClassName = $className;
+        }
+        return (isset($extraOptions['prefix']) ?  $extraOptions['prefix'] : '') . "$realClassName.$classMethod";
     }
 
     /**
@@ -672,7 +716,7 @@ class Wrapper
      *                            - bool    debug               set it to 1 or 2 to see debug results of querying server for method synopsis
      *                            - int     simple_client_copy  set it to 1 to have a lightweight copy of the $client object made in the generated code (only used when return_source = true)
      *
-     * @return \closure|array|false false on failure, closure by default and array for return_source = true
+     * @return \closure|string[]|false false on failure, closure by default and array for return_source = true
      */
     public function wrapXmlrpcMethod($client, $methodName, $extraOptions = array())
     {
@@ -704,7 +748,6 @@ class Wrapper
 
             return $results;
         }
-
     }
 
     /**
@@ -731,7 +774,7 @@ class Wrapper
         $client->setDebug($debug);
         $response = $client->send($req, $timeout, $protocol);
         if ($response->faultCode()) {
-            error_log('XML-RPC: ' . __METHOD__ . ': could not retrieve method signature from remote server for method ' . $methodName);
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': could not retrieve method signature from remote server for method ' . $methodName);
             return false;
         }
 
@@ -742,7 +785,7 @@ class Wrapper
         }
 
         if (!is_array($mSig) || count($mSig) <= $sigNum) {
-            error_log('XML-RPC: ' . __METHOD__ . ': could not retrieve method signature nr.' . $sigNum . ' from remote server for method ' . $methodName);
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': could not retrieve method signature nr.' . $sigNum . ' from remote server for method ' . $methodName);
             return false;
         }
 
@@ -785,7 +828,7 @@ class Wrapper
      * @param Client $client
      * @param string $methodName
      * @param array $extraOptions
-     * @param string $mSig
+     * @param array $mSig
      * @return \Closure
      *
      * @todo should we allow usage of parameter simple_client_copy to mean 'do not clone' in this case?
@@ -879,7 +922,7 @@ class Wrapper
      * @param string $newFuncName
      * @param array $mSig
      * @param string $mDesc
-     * @return array
+     * @return string[] keys: source, docstring
      */
     public function buildWrapMethodSource($client, $methodName, array $extraOptions, $newFuncName, $mSig, $mDesc='')
     {
@@ -947,7 +990,7 @@ class Wrapper
             $mDesc .= "* @param int \$debug when 1 (or 2) will enable debugging of the underlying {$prefix} call (defaults to 0)\n";
         }
         $plist = implode(', ', $plist);
-        $mDesc .= '* @return ' . $this->xmlrpc2PhpType($mSig[0]) . " (or an {$namespace}Response obj instance if call fails)\n*/\n";
+        $mDesc .= '* @return {$namespace}Response|' . $this->xmlrpc2PhpType($mSig[0]) . " (an {$namespace}Response obj instance if call fails)\n*/\n";
 
         $innerCode .= "\$res = \${$this_}client->send(\$req, $timeout, '$protocol');\n";
         if ($decodeFault) {
@@ -986,7 +1029,7 @@ class Wrapper
      *              - string prefix
      *              - bool   simple_client_copy set it to true to avoid copying all properties of $client into the copy made in the new class
      *
-     * @return mixed false on error, the name of the created class if all ok or an array with code, class name and comments (if the appropriatevoption is set in extra_options)
+     * @return mixed false on error, the name of the created class if all ok or an array with code, class name and comments (if the appropriate option is set in extra_options)
      */
     public function wrapXmlrpcServer($client, $extraOptions = array())
     {
@@ -1007,7 +1050,7 @@ class Wrapper
         $req = new $reqClass('system.listMethods');
         $response = $client->send($req, $timeout, $protocol);
         if ($response->faultCode()) {
-            error_log('XML-RPC: ' . __METHOD__ . ': could not retrieve method list from remote server');
+            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': could not retrieve method list from remote server');
 
             return false;
         } else {
@@ -1017,7 +1060,7 @@ class Wrapper
                 $mList = $decoder->decode($mList);
             }
             if (!is_array($mList) || !count($mList)) {
-                error_log('XML-RPC: ' . __METHOD__ . ': could not retrieve meaningful method list from remote server');
+                $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': could not retrieve meaningful method list from remote server');
 
                 return false;
             } else {
@@ -1059,7 +1102,7 @@ class Wrapper
                             }
                             $source .= $methodWrap['source'] . "\n";
                         } else {
-                            error_log('XML-RPC: ' . __METHOD__ . ': will not create class method to wrap remote method ' . $mName);
+                            $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': will not create class method to wrap remote method ' . $mName);
                         }
                     }
                 }
@@ -1070,7 +1113,7 @@ class Wrapper
                     if ($allOK) {
                         return $xmlrpcClassName;
                     } else {
-                        error_log('XML-RPC: ' . __METHOD__ . ': could not create class ' . $xmlrpcClassName . ' to wrap remote server ' . $client->server);
+                        $this->getLogger()->errorLog('XML-RPC: ' . __METHOD__ . ': could not create class ' . $xmlrpcClassName . ' to wrap remote server ' . $client->server);
                         return false;
                     }
                 } else {
@@ -1100,7 +1143,12 @@ class Wrapper
         // (this provides for future expansion or subclassing of client obj)
         if ($verbatimClientCopy) {
             foreach ($client as $fld => $val) {
-                if ($fld != 'debug' && $fld != 'return_type') {
+                /// @todo in php 8.0, curl handles became objects, but they have no __set_state, thus var_export will
+                ///        fail for xmlrpc_curl_handle. So we disabled copying it.
+                ///        We should examine in depth if this change can have side effects - at first sight if the
+                ///        client's curl handle is not set, all curl options are (re)set on each http call, so there
+                ///        should be no loss of state...
+                if ($fld != 'debug' && $fld != 'return_type' && $fld != 'xmlrpc_curl_handle') {
                     $val = var_export($val, true);
                     $code .= "\$client->$fld = $val;\n";
                 }

@@ -3,14 +3,14 @@
  * XMLRPC server acting as proxy for requests to other servers
  * (useful e.g. for ajax-originated calls that can only connect back to
  * the originating server).
+ * For an example of a transparent reverse-proxy, see the ReverseProxy class in package phpxmlrpc/extras
  *
  * @author Gaetano Giunta
- * @copyright (C) 2006-2015 G. Giunta
+ * @copyright (C) 2006-2021 G. Giunta
  * @license code licensed under the BSD License: see file license.txt
  */
 
-include_once __DIR__ . "/../../src/Autoloader.php";
-PhpXmlRpc\Autoloader::register();
+require_once __DIR__ . "/_prepend.php";
 
 /**
  * Forward an xmlrpc request to another server, and return to client the response received.
@@ -58,9 +58,9 @@ function forward_request($req)
 
     // build call for remote server
     /// @todo find a way to forward client info (such as IP) to server, either
-    /// - as xml comments in the payload, or
-    /// - using std http header conventions, such as X-forwarded-for...
-    $reqMethod = $encoder->decode($req->getParam(1));
+    ///       - as xml comments in the payload, or
+    ///       - using std http header conventions, such as X-forwarded-for...
+    $reqMethod = $req->getParam(1)->scalarval();
     $pars = $req->getParam(2);
     $req = new PhpXmlRpc\Request($reqMethod);
     foreach ($pars as $par) {
@@ -74,6 +74,8 @@ function forward_request($req)
 }
 
 // run the server
+// NB: take care not to output anything else after this call, as it will mess up the responses and it will be hard to
+// debug. In case you have to do so, at least re-emit a correct Content-Length http header (requires output buffering)
 $server = new PhpXmlRpc\Server(
     array(
         'xmlrpcproxy.call' => array(
@@ -86,3 +88,5 @@ $server = new PhpXmlRpc\Server(
         ),
     )
 );
+
+require_once __DIR__ . "/_append.php";

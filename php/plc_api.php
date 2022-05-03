@@ -41,11 +41,11 @@ class PLCAPI {
     var $calls;
     var $multicall;
 
-    function PLCAPI($auth = NULL,
-                    $server = PLC_API_HOST,
-                    $port = PLC_API_PORT,
-                    $path = PLC_API_PATH,
-                    $cainfo = NULL) {
+    function __construct($auth = NULL,
+                         $server = PLC_API_HOST,
+                         $port = PLC_API_PORT,
+                         $path = PLC_API_PATH,
+                         $cainfo = NULL) {
         $this->auth = $auth;
         $this->server = $server;
         $this->port = $port;

@@ -23,7 +23,7 @@ SET client_encoding = 'UNICODE';
 CREATE TABLE plc_db_version (
     version integer NOT NULL,
     subversion integer NOT NULL DEFAULT 0
-) WITH OIDS;
+);
 
 -- the migration scripts do not use the major 'version' number
 -- so 5.0 sets subversion at 100
@@ -55,7 +55,7 @@ CREATE AGGREGATE array_accum (
 CREATE TABLE roles (
     role_id integer PRIMARY KEY,			-- Role identifier
     name text UNIQUE NOT NULL				-- Role symbolic name
-) WITH OIDS;
+);
 INSERT INTO roles (role_id, name) VALUES (10, 'admin');
 INSERT INTO roles (role_id, name) VALUES (20, 'pi');
 INSERT INTO roles (role_id, name) VALUES (30, 'user');
@@ -73,7 +73,7 @@ CREATE TABLE tag_types (
 -- starting with subversion 104, a tag type has a SET OF roles attached to it
     min_role_id integer REFERENCES roles DEFAULT 10,	-- set minimal role required
     category text NOT NULL DEFAULT 'general'		-- Free text for grouping tags together
-) WITH OIDS;
+);
 
 --------------------------------------------------------------------------------
 -- Accounts
@@ -102,7 +102,7 @@ CREATE TABLE persons (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-) WITH OIDS;
+);
 CREATE INDEX persons_email_idx ON persons (email);
 
 --------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ CREATE TABLE person_tag (
     person_id integer REFERENCES persons NOT NULL,	-- person id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
     value text						-- value attached
-) WITH OIDS;
+);
 
 CREATE OR REPLACE VIEW person_tags AS
 SELECT person_id,
@@ -162,7 +162,7 @@ CREATE TABLE sites (
     -- Timestamps
     date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-) WITH OIDS;
+);
 CREATE INDEX sites_login_base_idx ON sites (login_base);
 
 -- Account site membership
@@ -204,7 +204,7 @@ CREATE TABLE site_tag (
     site_id integer REFERENCES sites NOT NULL,		-- site id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
     value text						-- value attached
-) WITH OIDS;
+);
 
 CREATE OR REPLACE VIEW site_tags AS
 SELECT site_id,
@@ -235,7 +235,7 @@ CREATE TABLE address_types (
     address_type_id serial PRIMARY KEY,			-- Address type identifier
     name text UNIQUE NOT NULL,				-- Address type
     description text					-- Address type description
-) WITH OIDS;
+);
 
 -- Multi-rows insertion "insert .. values (row1), (row2)" is not supported by pgsql-8.1
 -- 'Billing' Used to be 'Site'
@@ -253,14 +253,14 @@ CREATE TABLE addresses (
     state text NOT NULL,				-- State or province
     postalcode text NOT NULL,				-- Postal code
     country text NOT NULL				-- Country
-) WITH OIDS;
+);
 
 -- Each mailing address can be one of several types
 CREATE TABLE address_address_type (
     address_id integer REFERENCES addresses NOT NULL,		-- Address identifier
     address_type_id integer REFERENCES address_types NOT NULL,	-- Address type
     PRIMARY KEY (address_id, address_type_id)
-) WITH OIDS;
+);
 CREATE INDEX address_address_type_address_id_idx ON address_address_type (address_id);
 CREATE INDEX address_address_type_address_type_id_idx ON address_address_type (address_type_id);
 
@@ -276,7 +276,7 @@ CREATE TABLE site_address (
     site_id integer REFERENCES sites NOT NULL,		-- Site identifier
     address_id integer REFERENCES addresses NOT NULL,	-- Address identifier
     PRIMARY KEY (site_id, address_id)
-) WITH OIDS;
+);
 CREATE INDEX site_address_site_id_idx ON site_address (site_id);
 CREATE INDEX site_address_address_id_idx ON site_address (address_id);
 
@@ -293,7 +293,7 @@ GROUP BY site_id;
 -- Valid key types
 CREATE TABLE key_types (
     key_type text PRIMARY KEY				-- Key type
-) WITH OIDS;
+);
 INSERT INTO key_types (key_type) VALUES ('ssh');
 
 -- Authentication keys
@@ -302,13 +302,13 @@ CREATE TABLE keys (
     key_type text REFERENCES key_types NOT NULL,	-- Key type
     key text NOT NULL, -- Key material
     is_blacklisted boolean NOT NULL DEFAULT false	-- Has been blacklisted
-) WITH OIDS;
+);
 
 -- Account authentication key(s)
 CREATE TABLE person_key (
     key_id integer REFERENCES keys PRIMARY KEY,		-- Key identifier
     person_id integer REFERENCES persons NOT NULL	-- Account identifier
-) WITH OIDS;
+);
 CREATE INDEX person_key_person_id_idx ON person_key (person_id);
 
 CREATE OR REPLACE VIEW person_keys AS
@@ -325,7 +325,7 @@ CREATE TABLE person_role (
     person_id integer REFERENCES persons NOT NULL,	-- Account identifier
     role_id integer REFERENCES roles NOT NULL,		-- Role identifier
     PRIMARY KEY (person_id, role_id)
-) WITH OIDS;
+);
 CREATE INDEX person_role_person_id_idx ON person_role (person_id);
 
 -- Account roles
@@ -344,7 +344,7 @@ GROUP BY person_id;
 -- Valid node boot states (Nodes.py expect max length to be 20)
 CREATE TABLE boot_states (
     boot_state text PRIMARY KEY
-) WITH OIDS;
+);
 INSERT INTO boot_states (boot_state) VALUES ('boot');
 INSERT INTO boot_states (boot_state) VALUES ('safeboot');
 INSERT INTO boot_states (boot_state) VALUES ('reinstall');
@@ -352,7 +352,7 @@ INSERT INTO boot_states (boot_state) VALUES ('disabled');
 
 CREATE TABLE run_levels  (
     run_level text PRIMARY KEY
-) WITH OIDS;
+);
 INSERT INTO run_levels  (run_level) VALUES ('boot');
 INSERT INTO run_levels  (run_level) VALUES ('safeboot');
 INSERT INTO run_levels  (run_level) VALUES ('failboot');
@@ -361,7 +361,7 @@ INSERT INTO run_levels  (run_level) VALUES ('reinstall');
 -- Known node types (Nodes.py expect max length to be 20)
 CREATE TABLE node_types (
     node_type text PRIMARY KEY
-) WITH OIDS;
+);
 INSERT INTO node_types (node_type) VALUES ('regular');
 -- old dummynet stuff, to be removed
 INSERT INTO node_types (node_type) VALUES ('dummynet');
@@ -395,7 +395,7 @@ CREATE TABLE nodes (
     last_pcu_reboot timestamp without time zone,
     last_pcu_confirmation timestamp without time zone,
     last_contact timestamp without time zone 	
-) WITH OIDS;
+);
 CREATE INDEX nodes_hostname_idx ON nodes (hostname);
 CREATE INDEX nodes_site_id_idx ON nodes (site_id);
 
@@ -416,7 +416,7 @@ CREATE TABLE node_tag (
     node_id integer REFERENCES nodes NOT NULL,		-- node id
     tag_type_id integer REFERENCES tag_types,		-- tag type id
     value text						-- value attached
-) WITH OIDS;
+);
 
 --------------------------------------------------------------------------------
 -- (network) interfaces
@@ -425,13 +425,13 @@ CREATE TABLE node_tag (
 -- Valid network addressing schemes
 CREATE TABLE network_types (
     type text PRIMARY KEY -- Addressing scheme
-) WITH OIDS;
+);
 INSERT INTO network_types (type) VALUES ('ipv4');
 
 -- Valid network configuration methods
 CREATE TABLE network_methods (
     method text PRIMARY KEY -- Configuration method
-) WITH OIDS;
+);
 
 INSERT INTO network_methods (method) VALUES ('static');
 INSERT INTO network_methods (method) VALUES ('dhcp');
@@ -461,7 +461,7 @@ CREATE TABLE interfaces (
     bwlimit integer,					-- Bandwidth limit in bps
     hostname text,					-- Hostname of this interface
     last_updated timestamp without time zone -- When the interface was last updated
-) WITH OIDS;
+);
 CREATE INDEX interfaces_node_id_idx ON interfaces (node_id);
 
 -- Ordered by primary interface first
@@ -486,7 +486,7 @@ CREATE TABLE interface_tag (
     interface_id integer REFERENCES interfaces NOT NULL,-- the interface this applies to
     tag_type_id integer REFERENCES tag_types NOT NULL,	-- the setting type
     value text						-- value attached
-) WITH OIDS;
+);
 
 CREATE OR REPLACE VIEW interface_tags AS 
 SELECT interface_id,
@@ -539,7 +539,7 @@ CREATE TABLE ilink (
        src_interface_id integer REFERENCES interfaces not NULL,	-- id of src interface
        dst_interface_id integer REFERENCES interfaces NOT NULL, -- id of dst interface
        value text						-- optional value on the link
-) WITH OIDS;
+);
 
 CREATE OR REPLACE VIEW view_ilinks AS
 SELECT * FROM tag_types 
@@ -561,7 +561,7 @@ CREATE TABLE nodegroups (
     tag_type_id integer REFERENCES tag_types,	-- node is in nodegroup if it has this tag defined
     -- can be null, make management faster & easier
     value text					-- with this value attached
-) WITH OIDS;
+);
 
 -- xxx - first rough implem. similar to former semantics but might be slow
 CREATE OR REPLACE VIEW nodegroup_node AS
@@ -603,7 +603,7 @@ CREATE TABLE conf_files (
     error_cmd text,					-- Shell command to execute if any error occurs
     ignore_cmd_errors bool NOT NULL DEFAULT false,	-- Install file anyway even if an error occurs
     always_update bool NOT NULL DEFAULT false		-- Always attempt to install file even if unchanged
-) WITH OIDS;
+);
 
 CREATE TABLE conf_file_node (
     conf_file_id integer REFERENCES conf_files NOT NULL,	-- Configuration file identifier
@@ -668,7 +668,7 @@ CREATE TABLE pcus (
     model text,						-- Model, e.g. BayTech or iPal
     last_updated timestamp without time zone,
     notes text						-- Random notes
-) WITH OIDS;
+);
 CREATE INDEX pcus_site_id_idx ON pcus (site_id);
 
 CREATE OR REPLACE VIEW site_pcus AS
@@ -707,7 +707,7 @@ GROUP BY pcu_id;
 
 CREATE TABLE slice_instantiations (
     instantiation text PRIMARY KEY
-) WITH OIDS;
+);
 INSERT INTO slice_instantiations (instantiation) VALUES ('not-instantiated');	-- Placeholder slice
 INSERT INTO slice_instantiations (instantiation) VALUES ('plc-instantiated');	-- Instantiated by Node Manager
 INSERT INTO slice_instantiations (instantiation) VALUES ('delegated');		-- Manually instantiated
@@ -733,7 +733,7 @@ CREATE TABLE slices (
         DEFAULT CURRENT_TIMESTAMP + '2 weeks', 
 
     is_deleted boolean NOT NULL DEFAULT false
-) WITH OIDS;
+);
 CREATE INDEX slices_site_id_idx ON slices (site_id);
 CREATE INDEX slices_name_idx ON slices (name);
 
@@ -742,7 +742,7 @@ CREATE TABLE slice_node (
     slice_id integer REFERENCES slices NOT NULL,	-- Slice identifier
     node_id integer REFERENCES nodes NOT NULL,		-- Node identifier
     PRIMARY KEY (slice_id, node_id)
-) WITH OIDS;
+);
 CREATE INDEX slice_node_slice_id_idx ON slice_node (slice_id);
 CREATE INDEX slice_node_node_id_idx ON slice_node (node_id);
 
@@ -777,7 +777,7 @@ CREATE TABLE slice_person (
     slice_id integer REFERENCES slices NOT NULL,	-- Slice identifier
     person_id integer REFERENCES persons NOT NULL,	-- Account identifier
     PRIMARY KEY (slice_id, person_id)
-) WITH OIDS;
+);
 CREATE INDEX slice_person_slice_id_idx ON slice_person (slice_id);
 CREATE INDEX slice_person_person_id_idx ON slice_person (person_id);
 
@@ -803,7 +803,7 @@ CREATE TABLE node_slice_whitelist (
     node_id integer REFERENCES nodes NOT NULL,		-- Node id of whitelist
     slice_id integer REFERENCES slices NOT NULL,	-- Slice id thats allowd on this node
     PRIMARY KEY (node_id, slice_id)
-) WITH OIDS;
+);
 CREATE INDEX node_slice_whitelist_node_id_idx ON node_slice_whitelist (node_id);
 CREATE INDEX node_slice_whitelist_slice_id_idx ON node_slice_whitelist (slice_id);
 
@@ -826,7 +826,7 @@ CREATE TABLE slice_tag (
     nodegroup_id integer REFERENCES nodegroups,		-- Node group attribute if set
     tag_type_id integer REFERENCES tag_types NOT NULL,	-- Attribute type identifier
     value text
-) WITH OIDS;
+);
 CREATE INDEX slice_tag_slice_id_idx ON slice_tag (slice_id);
 CREATE INDEX slice_tag_node_id_idx ON slice_tag (node_id);
 CREATE INDEX slice_tag_nodegroup_id_idx ON slice_tag (nodegroup_id);
@@ -842,7 +842,7 @@ CREATE TABLE initscripts (
     enabled bool NOT NULL DEFAULT true,			-- Initscript is active
     script text NOT NULL,				-- Initscript code
     UNIQUE (name)
-) WITH OIDS;
+);
 CREATE INDEX initscripts_name_idx ON initscripts (name);
 
 
@@ -860,7 +860,7 @@ CREATE TABLE peers (
     shortname text,					-- abbreviated name for displaying foreign objects
     hrn_root text,					-- root for this peer domain
     deleted boolean NOT NULL DEFAULT false
-) WITH OIDS;
+);
 CREATE INDEX peers_peername_idx ON peers (peername) WHERE deleted IS false;
 CREATE INDEX peers_shortname_idx ON peers (shortname) WHERE deleted IS false;
 
@@ -870,7 +870,7 @@ CREATE TABLE peer_site (
     peer_id integer REFERENCES peers NOT NULL,		-- Peer identifier
     peer_site_id integer NOT NULL,			-- Foreign site identifier at peer
     UNIQUE (peer_id, peer_site_id)			-- The same foreign site should not be cached twice
-) WITH OIDS;
+);
 CREATE INDEX peer_site_peer_id_idx ON peers (peer_id);
 
 CREATE OR REPLACE VIEW peer_sites AS
@@ -885,7 +885,7 @@ CREATE TABLE peer_person (
     peer_id integer REFERENCES peers NOT NULL,		-- Peer identifier
     peer_person_id integer NOT NULL,			-- Foreign user identifier at peer
     UNIQUE (peer_id, peer_person_id)			-- The same foreign user should not be cached twice
-) WITH OIDS;
+);
 CREATE INDEX peer_person_peer_id_idx ON peer_person (peer_id);
 
 CREATE OR REPLACE VIEW peer_persons AS
@@ -900,7 +900,7 @@ CREATE TABLE peer_key (
     peer_id integer REFERENCES peers NOT NULL,		-- Peer identifier
     peer_key_id integer NOT NULL,			-- Foreign key identifier at peer
     UNIQUE (peer_id, peer_key_id)			-- The same foreign key should not be cached twice
-) WITH OIDS;
+);
 CREATE INDEX peer_key_peer_id_idx ON peer_key (peer_id);
 
 CREATE OR REPLACE VIEW peer_keys AS
@@ -915,7 +915,7 @@ CREATE TABLE peer_node (
     peer_id integer REFERENCES peers NOT NULL,		-- Peer identifier
     peer_node_id integer NOT NULL,			-- Foreign node identifier
     UNIQUE (peer_id, peer_node_id)			-- The same foreign node should not be cached twice
-) WITH OIDS;
+);
 CREATE INDEX peer_node_peer_id_idx ON peer_node (peer_id);
 
 CREATE OR REPLACE VIEW peer_nodes AS
@@ -930,7 +930,7 @@ CREATE TABLE peer_slice (
     peer_id integer REFERENCES peers NOT NULL,		-- Peer identifier
     peer_slice_id integer NOT NULL,			-- Slice identifier at peer
     UNIQUE (peer_id, peer_slice_id)			-- The same foreign slice should not be cached twice
-) WITH OIDS;
+);
 CREATE INDEX peer_slice_peer_id_idx ON peer_slice (peer_id);
 
 CREATE OR REPLACE VIEW peer_slices AS
@@ -948,7 +948,7 @@ GROUP BY peer_id;
 CREATE TABLE sessions (
     session_id text PRIMARY KEY,			-- Session identifier
     expires timestamp without time zone
-) WITH OIDS;
+);
 
 -- People can have multiple sessions
 CREATE TABLE person_session (
@@ -956,7 +956,7 @@ CREATE TABLE person_session (
     session_id text REFERENCES sessions NOT NULL,	-- Session identifier
     PRIMARY KEY (person_id, session_id),
     UNIQUE (session_id)					-- Sessions are unique
-) WITH OIDS;
+);
 CREATE INDEX person_session_person_id_idx ON person_session (person_id);
 
 -- Nodes can have only one session
@@ -965,7 +965,7 @@ CREATE TABLE node_session (
     session_id text REFERENCES sessions NOT NULL,	-- Session identifier
     UNIQUE (node_id),					-- Nodes can have only one session
     UNIQUE (session_id)					-- Sessions are unique
-) WITH OIDS;
+);
 
 -------------------------------------------------------------------------------
 -- PCU Types
@@ -974,7 +974,7 @@ CREATE TABLE pcu_types (
     pcu_type_id serial PRIMARY KEY,
     model text NOT NULL ,				-- PCU model name
     name text						-- Full PCU model name
-) WITH OIDS;
+);
 CREATE INDEX pcu_types_model_idx ON pcu_types (model);
 
 CREATE TABLE pcu_protocol_type (
@@ -983,7 +983,7 @@ CREATE TABLE pcu_protocol_type (
     port integer NOT NULL,                              -- PCU port
     protocol text NOT NULL,                             -- Protocol
     supported boolean NOT NULL DEFAULT True             -- Does PLC support
-) WITH OIDS;
+);
 CREATE INDEX pcu_protocol_type_pcu_type_id ON pcu_protocol_type (pcu_type_id);
 
 
@@ -1002,7 +1002,7 @@ CREATE TABLE messages (
     subject text,					-- Message summary
     template text,					-- Message template
     enabled bool NOT NULL DEFAULT true			-- Whether message is enabled
-) WITH OIDS;
+);
 
 --------------------------------------------------------------------------------
 -- Events
@@ -1021,14 +1021,14 @@ CREATE TABLE events (
     runtime float DEFAULT 0,				-- Event run time
     time timestamp without time zone NOT NULL		-- Event timestamp
         DEFAULT CURRENT_TIMESTAMP
-) WITH OIDS;
+);
 
 -- Database object(s) that may have been affected by a particular event
 CREATE TABLE event_object (
     event_id integer REFERENCES events NOT NULL,	-- Event identifier
     object_id integer NOT NULL,				-- Object identifier
     object_type text NOT NULL Default 'Unknown'		-- What type of object is this event affecting
-) WITH OIDS;
+);
 CREATE INDEX event_object_event_id_idx ON event_object (event_id);
 CREATE INDEX event_object_object_id_idx ON event_object (object_id);
 CREATE INDEX event_object_object_type_idx ON event_object (object_type);
